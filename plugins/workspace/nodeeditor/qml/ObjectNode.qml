@@ -13,6 +13,8 @@ Qan.NodeItem{
     width: 370
     height: wrapper.height
     
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property string label: ''
     property var properties: []
     property var propertiesOpened: []
@@ -52,14 +54,14 @@ Qan.NodeItem{
         if ( !addContainer )
             return
 
-        addContainer.activeIndex = 0
-        addContainer.propertyModel.setFilter(name)
-        if (addContainer.propertyModel.rowCount() !== 1) return
+        addContainer.activeIndex = 1
+        addContainer.model.setFilter(name)
+        if (addContainer.model.rowCount() !== 1) return
 
-        var type = addContainer.propertyModel.data(addContainer.propertyModel.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
+        var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
 
         var ppos = codeHandler.addProperty(
-            addContainer.propertyModel.addPosition, addContainer.objectType, type, name, true
+            addContainer.model.addPosition, addContainer.objectType, type, name, true
         )
 
         var ef = codeHandler.openNestedConnection(
@@ -166,7 +168,7 @@ Qan.NodeItem{
                         root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
-                            var paletteList = paletteControls.createPaletteListView(wrapper)
+                            var paletteList = paletteControls.createPaletteListView(wrapper, paletteStyle.selectableListView)
                             paletteList.forceActiveFocus()
                             paletteList.model = palettes
 
@@ -182,10 +184,10 @@ Qan.NodeItem{
                                 paletteList.model = null
                                 var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                                var paletteBox = paletteControls.addPalette(palette,
-                                                                            editingFragment,
-                                                                            editor,
-                                                                            paletteContainer)
+                                var paletteBox = paletteControls.openPalette(palette,
+                                                                             editingFragment,
+                                                                             editor,
+                                                                             paletteContainer)
                                 if (paletteBox) paletteBox.moveEnabledSet = false
 
 

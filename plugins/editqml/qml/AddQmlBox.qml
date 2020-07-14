@@ -44,29 +44,17 @@ Rectangle{
 
     onObjectsOnlyChanged: {
         if (objectsOnly)
-            activeIndex = 1
+            activeIndex = 2
     }
 
     property int activeIndex : 0
     property bool idChecked: true
     onActiveIndexChanged: {
         searchInput.text = ''
-        root.addContainer.propertyModel.setFilter('')
-        root.addContainer.itemModel.setFilter('')
-        root.addContainer.eventModel.setFilter('')
-        root.addContainer.functionModel.setFilter('')
-        if (activeIndex === 1) idChecked = true
+        root.addContainer.model.setFilter('')
+        if (activeIndex === 2) idChecked = true
+        root.addContainer.model.setCategoryFilter(activeIndex)
     }
-
-    property ListView activeList : {
-        switch(activeIndex){
-            case 0: return propertyList
-            case 1: return itemList
-            case 2: return eventList
-            case 3: return functionList
-        }
-    }
-
 
     function assignFocus(){
         searchInput.forceActiveFocus()
@@ -76,41 +64,41 @@ Rectangle{
     property var accept : function(type, data){ }
 
     function getCompletion(){
-        if ( root.activeList.currentItem ){
-            return root.activeList.currentItem.completion
+        if ( listView.currentItem ){
+            return listView.currentItem.completion
         }
         return ""
     }
 
     function highlightNext(){
-        if ( root.activeList.currentIndex + 1 <  root.activeList.count ){
-            root.activeList.currentIndex++;
+        if ( listView.currentIndex + 1 <  listView.count ){
+            listView.currentIndex++;
         } else {
-            root.activeList.currentIndex = 0;
+            listView.currentIndex = 0;
         }
     }
     function highlightPrev(){
-        if ( root.activeList.currentIndex > 0 ){
-            root.activeList.currentIndex--;
+        if ( listView.currentIndex > 0 ){
+            listView.currentIndex--;
         } else {
-            root.activeList.currentIndex = root.activeList.count - 1;
+            listView.currentIndex = listView.count - 1;
         }
     }
 
     function highlightNextPage(){
-        var noItems = Math.floor(root.activeList.height / 25)
-        if ( root.activeList.currentIndex + noItems < root.activeList.count ){
-            root.activeList.currentIndex += noItems;
+        var noItems = Math.floor(listView.height / 25)
+        if ( listView.currentIndex + noItems < listView.count ){
+            listView.currentIndex += noItems;
         } else {
-            root.activeList.currentIndex = root.activeList.count - 1;
+            listView.currentIndex = listView.count - 1;
         }
     }
     function highlightPrevPage(){
-        var noItems = Math.floor(root.activeList.height / 25)
-        if ( root.activeList.currentIndex - noItems >= 0 ){
-            root.activeList.currentIndex -= noItems;
+        var noItems = Math.floor(listView.height / 25)
+        if ( listView.currentIndex - noItems >= 0 ){
+            listView.currentIndex -= noItems;
         } else {
-            root.activeList.currentIndex = 0;
+            listView.currentIndex = 0;
         }
     }
 
@@ -129,13 +117,37 @@ Rectangle{
             if (!addContainer) return ""
             var result;
             switch (activeIndex) {
-                case 0: result = "Properties"; break;
-                case 1: result = "Items"; break;
-                case 2: result = "Events"; break;
-                case 2: result = "Functions"; break;
+                case 0: result = "All"; break;
+                case 1: result = "Properties"; break;
+                case 2: result = "Items"; break;
+                case 3: result = "Events"; break;
+                case 4: result = "Functions"; break;
             }
 
             result = result + " for "  + addContainer.objectType
+        }
+    }
+
+    TextButton{
+        visible: !objectsOnly
+        anchors.top: parent.top
+        anchors.topMargin: 3
+        anchors.right: parent.right
+        anchors.rightMargin: {
+            if (objectsOnly) return 0
+            return 215+ (isForNode? 71: 0)
+        }
+        text: 'All'
+        height: 22
+        width: 70
+        fontPixelSize: 12
+        backgroundColor: isActive ? "#061a29" : "#111"
+        fontFamily: "Open Sans, sans-serif"
+        radius: 5
+
+        property bool isActive : activeIndex === 0
+        onClicked : {
+            root.activeIndex = 0
         }
     }
 
@@ -156,9 +168,9 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 0
+        property bool isActive : activeIndex === 1
         onClicked : {
-            root.activeIndex = 0
+            root.activeIndex = 1
         }
     }
 
@@ -179,10 +191,10 @@ Rectangle{
         radius: 5
 
         backgroundColor: isActive ? "#061a29" : "#111"
-        property bool isActive : activeIndex === 1
+        property bool isActive : activeIndex === 2
 
         onClicked : {
-            root.activeIndex = 1
+            root.activeIndex = 2
         }
     }
 
@@ -203,9 +215,9 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 2
+        property bool isActive : activeIndex === 3
         onClicked : {
-            root.activeIndex = 2
+            root.activeIndex = 3
         }
     }
 
@@ -226,16 +238,16 @@ Rectangle{
         fontFamily: "Open Sans, sans-serif"
         radius: 5
 
-        property bool isActive : activeIndex === 3
+        property bool isActive : activeIndex === 4
         onClicked : {
-            root.activeIndex = 3
+            root.activeIndex = 4
         }
     }
 
 
     Item {
         id: idInputItem
-        visible: activeIndex === 1
+        visible: activeIndex === 2
         height: 30
         width: parent.width
         anchors.top: parent.top
@@ -306,11 +318,11 @@ Rectangle{
                 selectByMouse: true
 
                 text: {
-                    if (!itemList || !itemList.currentItem) return text
+                    if (!listView || !listView.currentItem) return text
 
                     if (!userInput)
                     {
-                        var id = itemList.currentItem.code
+                        var id = listView.currentItem.code
                         var result = id[0].toLowerCase() + id.substring(1)
                         var index = 1
                         if (codeQmlHandler)
@@ -392,15 +404,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                if ( root.activeIndex === 0 ){
-                    root.addContainer.propertyModel.setFilter(text)
-                } else if ( root.activeIndex === 1 ){
-                    root.addContainer.itemModel.setFilter(text)
-                } else if ( root.activeIndex === 2 ) {
-                    root.addContainer.eventModel.setFilter(text)
-                } else if (root.activeIndex === 3) {
-                    root.addContainer.functionModel.setFilter(text)
-                }
+                root.addContainer.model.setFilter(text)
             }
 
             MouseArea{
@@ -425,17 +429,7 @@ Rectangle{
                 }
             }
             Keys.onReturnPressed: {
-                if ( root.activeIndex === 0 ){
-                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                } else if ( root.activeIndex === 1 ){
-                    var result = itemList.currentItem.code
-                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                    root.accept(itemList.currentItem.importSpace, result)
-                } else if ( root.activeIndex === 2 ){
-                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                } else if (root.activeIndex === 3){
-                    root.accept(eventList.currentItem.type, propertyList.currentItem.code)
-                }
+                acceptSelection()
             }
             Keys.onEscapePressed: {
                 root.cancel()
@@ -443,17 +437,36 @@ Rectangle{
         }
     }
 
+    function acceptSelection(){
+        var selector = root.activeIndex === 0 ? listView.currentItem.category : root.activeIndex
+
+        if ( selector === 1 ){
+            root.activeIndex = 1
+            root.accept(listView.currentItem.type, listView.currentItem.code)
+        } else if (selector === 2){
+            root.activeIndex = 2
+            var result = listView.currentItem.code
+            if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+            root.accept(listView.currentItem.importSpace, result)
+        } else if (selector === 3){
+            root.activeIndex = 3
+            root.accept(listView.currentItem.type, listView.currentItem.code)
+        } else if (selector === 4){
+            root.activeIndex = 4
+            root.accept(listView.currentItem.type, listView.currentItem.code)
+        }
+    }
+
     Item{
-        id: propertiesContainer
+        id: container
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 0
 
         ScrollView{
             anchors.top : parent.top
             anchors.left: parent.left
 
-            height : root.height - propertiesContainer.anchors.topMargin
+            height : root.height - container.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -466,7 +479,7 @@ Rectangle{
                         anchors.fill: parent
                     }
                 }
-                scrollBarBackground: Item{
+                scrollBarBackground: Item {
                     implicitWidth: 10
                     implicitHeight: 10
                     Rectangle{
@@ -481,15 +494,14 @@ Rectangle{
             }
 
             ListView{
-                id : propertyCategoryList
+                id : categoryList
                 anchors.fill: parent
                 anchors.rightMargin: 2
                 anchors.bottomMargin: 5
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-
-                model: root.addContainer ? root.addContainer.propertyModel.types() : null
+                model: root.addContainer ? root.addContainer.model.types() : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -500,7 +512,7 @@ Rectangle{
                 delegate: Component{
 
                     Rectangle{
-                        width : propertyCategoryList.width
+                        width : categoryList.width
                         height : 25
                         color : ListView.isCurrentItem ? root.selectionColor : "transparent"
                         Text{
@@ -520,11 +532,22 @@ Rectangle{
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                propertyCategoryList.currentIndex = index
-                                if ( modelData === 'All' )
-                                    root.addContainer.propertyModel.setTypeFilter('')
-                                else
-                                    root.addContainer.propertyModel.setTypeFilter(modelData)
+                                categoryList.currentIndex = index
+                                if ( modelData === 'All' ) {
+                                    if (root.activeIndex === 2){
+                                        root.addContainer.model.setImportFilter('')
+                                    } else {
+                                        root.addContainer.model.setTypeFilter('')
+                                    }
+                                }
+                                else {
+                                    if (root.activeIndex === 2) {
+                                        root.addContainer.model.setImportFilter(modelData)
+                                    } else {
+                                        root.addContainer.model.setTypeFilter(modelData)
+                                    }
+
+                                }
                             }
                         }
                     }
@@ -536,7 +559,7 @@ Rectangle{
             anchors.top : parent.top
             anchors.right: parent.right
 
-            height : root.height - propertiesContainer.anchors.topMargin
+            height : root.height - container.anchors.topMargin
             width: root.width / 2
 
             style: ScrollViewStyle {
@@ -564,14 +587,14 @@ Rectangle{
             }
 
             ListView{
-                id : propertyList
+                id : listView
                 anchors.fill: parent
                 anchors.rightMargin: 2
                 anchors.bottomMargin: 5
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.propertyModel : null
+                model: root.addContainer ? root.addContainer.model : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0
@@ -580,13 +603,13 @@ Rectangle{
                 highlightMoveDuration: 100
 
                 delegate: Component{
-
                     Rectangle{
                         property string objectType : model.objectType
                         property string type : model.type
                         property string code: model.code
+                        property int category: model.category
 
-                        width : propertyList.width
+                        width : listView.width
                         height : 25
                         color : ListView.isCurrentItem ? root.selectionColor : "transparent"
                         Text{
@@ -606,20 +629,10 @@ Rectangle{
                         MouseArea{
                             anchors.fill: parent
                             onClicked: {
-                                propertyList.currentIndex = index
+                                listView.currentIndex = index
                             }
                             onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                } else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
+                                acceptSelection()
                             }
                         }
                     }
@@ -627,561 +640,6 @@ Rectangle{
 
             }
         }
-    }
-
-    Item{
-        id: itemsContainer
-        anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 1
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.left: parent.left
-
-            height : root.height - itemsContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : itemsCategoryList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer ? root.addContainer.itemModel.importSpaces() : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        width : itemsCategoryList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: modelData
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                itemsCategoryList.currentIndex = index
-                                if ( modelData === 'All' )
-                                    root.addContainer.itemModel.setImportFilter('')
-                                else
-                                    root.addContainer.itemModel.setImportFilter(modelData)
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.right: parent.right
-
-            height : root.height - itemsContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : itemList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer ? root.addContainer.itemModel : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        property string code: model.code
-
-                        width : itemList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.label
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                itemList.currentIndex = index
-                            }
-                            onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                } else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-    }
-
-    Item {
-        id: eventsContainer
-        anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 2
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.left: parent.left
-
-            height : root.height - propertiesContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : eventsCategoryList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-
-                model: root.addContainer ? root.addContainer.eventModel.types() : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        width : eventsCategoryList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: modelData
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                eventsCategoryList.currentIndex = index
-                                if ( modelData === 'All' )
-                                    root.addContainer.eventModel.setTypeFilter('')
-                                else
-                                    root.addContainer.eventModel.setTypeFilter(modelData)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.right: parent.right
-
-            height : root.height - eventsContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : eventList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer ? root.addContainer.eventModel : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        property string code: model.code
-
-                        width : eventList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.label
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                eventList.currentIndex = index
-                            }
-                            onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                }  else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
-    }
-
-    Item {
-        id: functionsContainer
-        anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
-        visible: root.activeIndex === 3
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.left: parent.left
-
-            height : root.height - functionsContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : functionsCategoryList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-
-                model: root.addContainer ? root.addContainer.functionModel.types() : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        width : functionsCategoryList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: modelData
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                functionsCategoryList.currentIndex = index
-                                if ( modelData === 'All' )
-                                    root.addContainer.functionModel.setTypeFilter('')
-                                else
-                                    root.addContainer.functionModel.setTypeFilter(modelData)
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.right: parent.right
-
-            height : root.height - functionsContainer.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-            ListView{
-                id : functionList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer ? root.addContainer.functionModel : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        property string code: model.code
-
-                        width : functionList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.label
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                eventList.currentIndex = index
-                            }
-                            onDoubleClicked: {
-                                if ( root.activeIndex === 0 ){
-                                    root.accept(propertyList.currentItem.type, propertyList.currentItem.code)
-                                } else if (root.activeIndex === 1){
-                                    var result = itemList.currentItem.code
-                                    if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-                                    root.accept(itemList.currentItem.importSpace, result)
-                                }  else if (root.activeIndex === 2){
-                                    root.accept(eventList.currentItem.type, eventList.currentItem.code)
-                                } else if (root.activeIndex === 3){
-                                    root.accept(functionList.currentItem.type, functionList.currentItem.code)
-                                }
-                            }
-                        }
-                    }
-                }
-
-            }
-        }
-
     }
 
     Keys.onEscapePressed: {

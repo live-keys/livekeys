@@ -62,6 +62,7 @@
 #include <QQmlComponent>
 #include <QStringList>
 #include <QWaitCondition>
+#include <queue>
 
 namespace lv{
 
@@ -2213,7 +2214,22 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
             if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
                 if (ppref.canAt()){
-                    toRemove.append(ppref.at(bc->listIndex()));
+                    QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                    // create correct order for list reference
+                    QObjectList ordered;
+                    for (auto child: parent->children())
+                    {
+                        bool found = false;
+                        for (int i = 0; i < ppref.count(); ++i)
+                            if (child == ppref.at(i)){
+                                found = true;
+                                break;
+                            }
+                        if (found) ordered.push_back(child);
+                    }
+
+                    toRemove.append(ordered[bc->listIndex()]);
                 }
             }
         }
@@ -2288,20 +2304,33 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
 
     lpl->setPosition(declaration->position());
     if ( unrepeated ){
-        for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-            QmlEditFragment* edit = *it;
-            if ( edit->declaration()->position() < declaration->position() ){
+        std::queue<QmlEditFragment*> q;
+        for ( auto it = m_edits.rbegin(); it != m_edits.rend(); ++it ){
+            q.push(*it);
+        }
+
+        QmlEditFragment* found = nullptr;
+        while (!q.empty() && !found){
+            QmlEditFragment* curr = q.front(); q.pop();
+            if (declaration->position() == curr->position()){
+                found = curr;
                 break;
-            } else if ( edit->declaration()->position() == declaration->position()  ){
+            }
+            if (declaration->position() < curr->position() + curr->declaration()->length() && declaration->position() > curr->position())
+            {
+                while (!q.empty()) q.pop();
+                for (auto fr: curr->childFragments()) q.push(fr);
+            }
+        }
 
-                for ( auto it = edit->begin(); it != edit->end(); ++it ){
-                    CodePalette* loadedPalette = *it;
+        if (found){
+            for ( auto it = found->begin(); it != found->end(); ++it ){
+                CodePalette* loadedPalette = *it;
 
-                    for ( int i = 0; i < lpl->size(); ++i ){
-                        PaletteLoader* loader = lpl->loaderAt(i);
-                        if ( PaletteContainer::palettePath(loader) == loadedPalette->path() ){
-                            lpl->remove(loader);
-                        }
+                for ( int i = 0; i < lpl->size(); ++i ){
+                    PaletteLoader* loader = lpl->loaderAt(i);
+                    if ( PaletteContainer::palettePath(loader) == loadedPalette->path() ){
+                        lpl->remove(loader);
                     }
                 }
             }
@@ -2900,24 +2929,26 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                     auto name = method.name;
                     name = QString("on") + name[0].toUpper() + name.mid(1);
 
-                    addContainer->eventModel()->addItem(QmlSuggestionModel::ItemData(
+                    addContainer->model()->addItem(QmlSuggestionModel::ItemData(
                         name,
                         ti->prefereredType().name(),
                         "method",
                         "",
                         ti->exportType().join() + "." + name,
-                        name
+                        name,
+                        QmlSuggestionModel::ItemData::Event
                     ));
                 } else {
                     auto name = method.name;
 
-                    addContainer->functionModel()->addItem(QmlSuggestionModel::ItemData(
+                    addContainer->model()->addItem(QmlSuggestionModel::ItemData(
                         name,
                         ti->prefereredType().name(),
                         "method",
                         "",
                         ti->exportType().join() + "." + name,
-                        name
+                        name,
+                        QmlSuggestionModel::ItemData::Function
                     ));
 
                 }
@@ -2926,14 +2957,15 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             for ( int i = 0; i < ti->totalProperties(); ++i ){
                 QString propertyName = ti->propertyAt(i).name;
                 if ( !propertyName.startsWith("__") ){
-                    addContainer->propertyModel()->addItem(
+                    addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             propertyName,
                             ti->prefereredType().name(),
                             ti->propertyAt(i).typeName.name(),
                             "", 
                             ti->exportType().join() + "." + propertyName,
-                            propertyName
+                            propertyName,
+                            QmlSuggestionModel::ItemData::Property
                         )
                     );
                 }
@@ -2944,21 +2976,20 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
                 if (propertyName != "ObjectName"){
                     propertyName = "on" + propertyName + "Changed";
-                    addContainer->eventModel()->addItem(
+                    addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             propertyName,
                             ti->prefereredType().name(),
                             "method",
                             "",
                             "", //TODO: Find library path
-                            propertyName
+                            propertyName,
+                            QmlSuggestionModel::ItemData::Event
                         )
                     );
                 }
             }
-            addContainer->propertyModel()->updateFilters();
-            addContainer->eventModel()->updateFilters();
-            addContainer->functionModel()->updateFilters();
+            addContainer->model()->updateFilters();
 
         }
     }
@@ -2973,14 +3004,15 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
 
     foreach( const QString& e, exports ){
         if ( e != scope.document->componentName() ){
-            addContainer->itemModel()->addItem(
+            addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     e,
                     "",
                     "",
                     "implicit",
                     scope.document->path(),
-                    e
+                    e,
+                    QmlSuggestionModel::ItemData::Object
                 )
             );
         }
@@ -2993,14 +3025,15 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
             defaultExports = defaultLib->listExports();
         }
         for( const QString& de: defaultExports ){
-            addContainer->itemModel()->addItem(
+            addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     de,
                     "",
                     "",
                     "QtQml",
                     "QtQml",
-                    de)
+                    de,
+                    QmlSuggestionModel::ItemData::Object)
             );
         }
     }
@@ -3027,21 +3060,22 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                 }
 
                 for ( const QString& exp: libexports ){
-                    addContainer->itemModel()->addItem(
+                    addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             exp,
                             "",
                             "",
                             imp.uri(),
                             imp.uri(),
-                            exp)
+                            exp,
+                            QmlSuggestionModel::ItemData::Object)
                     );
                 }
             }
         }
     }
 
-    addContainer->itemModel()->updateFilters();
+    addContainer->model()->updateFilters();
 
     return addContainer;
 }
@@ -3363,7 +3397,23 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
 
             if ( p.propertyTypeCategory() == QQmlProperty::List ){
                 QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
-                QObject* obat = ppref.at(bc->listIndex());
+
+                QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                // create correct order for list reference
+                QObjectList ordered;
+                for (auto child: parent->children())
+                {
+                    bool found = false;
+                    for (int i = 0; i < ppref.count(); ++i)
+                        if (child == ppref.at(i)){
+                            found = true;
+                            break;
+                        }
+                    if (found) ordered.push_back(child);
+                }
+
+                QObject* obat = ordered[bc->listIndex()];
 
                 QQmlProperty assignmentProperty(obat);
                 if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){

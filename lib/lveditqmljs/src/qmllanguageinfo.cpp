@@ -308,7 +308,8 @@ bool QmlTypeInfo::isObject(const QString &typeString){
     if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
          typeString == "int" || typeString == "list" || typeString == "real" ||
          typeString == "color" || typeString == "QColor" ||
-         typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
+         typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" ||
+         typeString == "uint")
         return false;
     return true;
 }
@@ -472,6 +473,8 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
             typeName = "quaternion";
         } else if (typeName == "QVector2D" || typeName == "QVector3D" || typeName == "QVector4D"){
             typeName = "vector" + typeName[7] + "d";
+        } else if (typeName == "uint"){
+            typeName = "int";
         }
 
         qpi.typeName = QmlTypeReference(QmlTypeReference::Qml, typeName);

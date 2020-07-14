@@ -121,7 +121,7 @@ public slots:
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
 
-    void signalPropertyAdded(lv::QmlEditFragment* ef);
+    void signalPropertyAdded(lv::QmlEditFragment* ef, bool expandDefault = true);
     void signalObjectAdded(lv::QmlEditFragment* ef, QPointF p = QPointF());
     void incrementRefCount();
     void decrementRefCount();
@@ -140,7 +140,7 @@ signals:
     void paletteListEmpty();
 
     void objectAdded(lv::QmlEditFragment* obj, QPointF cursorCoords);
-    void propertyAdded(lv::QmlEditFragment* ef);
+    void propertyAdded(lv::QmlEditFragment* ef, bool expandDefault);
 
     void refCountChanged();
 
