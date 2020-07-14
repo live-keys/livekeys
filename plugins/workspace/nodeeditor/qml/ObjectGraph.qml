@@ -202,7 +202,7 @@ Rectangle{
 
         addBoxItem.accept = function(type, data){
             var opos = documentHandler.codeHandler.addItem(
-                addBoxItem.addContainer.itemModel.addPosition, addBoxItem.addContainer.objectType, data
+                addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
             )
             documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
             var ef = documentHandler.codeHandler.openNestedConnection(

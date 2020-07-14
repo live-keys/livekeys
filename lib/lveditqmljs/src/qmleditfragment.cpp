@@ -260,7 +260,7 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
         palette->setValueFromBinding(inputChannel->property().read());
     } else {
         QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
-        QObject* parent = ppref.object();
+        QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
 
         // create correct order for list reference
         QObjectList ordered;
@@ -413,9 +413,9 @@ QVariantMap QmlEditFragment::objectInfo()
     return m_objectInfo;
 }
 
-void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef)
+void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, bool expandDefault)
 {
-    emit propertyAdded(ef);
+    emit propertyAdded(ef, expandDefault);
 }
 
 void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoords)

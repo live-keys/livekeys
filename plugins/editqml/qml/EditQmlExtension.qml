@@ -89,10 +89,7 @@ LiveExtension{
 
 
 
-            var paletteBox = globals.paletteControls.addPalette(palette,
-                                                                ef,
-                                                                editor,
-                                                                paletteGroup)
+            var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteGroup)
             palette.item.x = 5
             palette.item.y = 7
             if (paletteBox){
@@ -108,87 +105,55 @@ LiveExtension{
 
     function shapePalette(editor, palettes, index){
         var codeHandler = editor.documentHandler.codeHandler
-
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
-
         var ef = codeHandler.openConnection(palettes.position())
-        var forAnObject = codeHandler.isForAnObject(ef)
-        var forImports = false
-
-        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
-
-        if (ef.location === QmlEditFragment.Imports){
-            palette.item.model = codeHandler.importsModel()
-            palette.item.editor = editor.editor
-            forImports = true
-        }
 
         if (!ef){
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette of a non-running program"
-            console.error("Error: Can't shape palette of a non-running program")
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
+            console.error("Error: Can't shape palette")
             return
         }
 
-        ef.incrementRefCount()
+        var forAnObject = ef.location === QmlEditFragment.Object
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
+
+        var objectContainer = null
+
         var paletteBoxGroup = editorBox ? editorBox.child : null
-
         if ( paletteBoxGroup === null ){
-            editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
-            var objectContainer = null
-
             if (forAnObject){
-                objectContainer = root.globals.paletteControls.createObjectContainer(lk.layers.editor.environment.content)
-                objectContainer.editor = editor
-                objectContainer.editingFragment = ef
-                objectContainer.title = ef.typeName()
+                objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                paletteBoxGroup = objectContainer.paletteGroup
+                editorBox = objectContainer.parent
+            } else {
+                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+                paletteBoxGroup = ef.visualParent
             }
-
-            paletteBoxGroup = globals.paletteControls.createPaletteGroup(forAnObject ? objectContainer.groupsContainer : lk.layers.editor.environment.content)
-            paletteBoxGroup.editingFragment = ef
-            ef.visualParent = paletteBoxGroup
-
-            paletteBoxGroup.codeHandler = codeHandler
-
-            if (forAnObject)
-                objectContainer.paletteGroup = paletteBoxGroup;
-
-            editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-
-            editorBox.color = globals.paletteStyle.backgroundColor
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
-
-            if (forAnObject){
-                if ( palette && !palette.item ){
-                    objectContainer.expandOptions(palette)
-                }
-                objectContainer.expand()
-
-            }
+        } else {
+            var p = paletteBoxGroup
+            while (p && p.objectName !== "objectContainer") p = p.parent
+            objectContainer = p
         }
 
-        if ( palette || !forAnObject ){
+        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
+        var forImports = ef.location === QmlEditFragment.Imports
 
-            var paletteBox = globals.paletteControls.addPalette(palette,
-                                                                ef,
-                                                                editor,
-                                                                paletteBoxGroup)
+        if (palette){
+            if (forImports){
+                palette.item.model = codeHandler.importsModel()
+                palette.item.editor = editor.editor
+            }
+            if (forAnObject && !palette.item ){
+                objectContainer.expandOptions(palette)
+            }
 
+            var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
             if (paletteBox) paletteBox.moveEnabledSet = false
-
-
         }
 
         codeHandler.frameEdit(editorBox, ef)
-        if (forImports) editor.editor.importsShaped = true
 
-        if (forAnObject){
-            var rootPos = codeHandler.findRootPosition()
-            if (ef.position() === rootPos)
-                editor.editor.rootShaped = true
-        }
+        if (forImports) editor.editor.importsShaped = true
+        ef.incrementRefCount()
     }
 
     function loadPalette(editor, palettes, index){
@@ -213,21 +178,11 @@ LiveExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-            paletteBoxGroup = globals.paletteControls.createPaletteGroup(lk.layers.editor.environment.content)
-            editorBox.setChild(paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteBoxGroup.editingFragment = ef
-            paletteBoxGroup.codeHandler = codeHandler
-            ef.visualParent = paletteBoxGroup
-            editorBox.color = "black"
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
+            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+            paletteBoxGroup = ef.visualParent
         }
 
-        var paletteBox = globals.paletteControls.addPalette(palette,
-                                                            ef,
-                                                            editor,
-                                                            paletteBoxGroup)
+        var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
 
 
         palette.item.x = 5
@@ -254,7 +209,7 @@ LiveExtension{
             } else {
                 //Palette list box
 
-                var palList      = globals.paletteControls.createPaletteListView()
+                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(
                     palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
                 )
@@ -267,11 +222,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                     root.loadPalette(editor, palettes, index)
                 })
@@ -300,7 +257,7 @@ LiveExtension{
                 root.shapePalette(editor, palettes, 0)
             } else {
                 //Palette list box
-                var palList      = globals.paletteControls.createPaletteListView()
+                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model    = palettes
@@ -311,11 +268,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                     root.shapePalette(editor, palettes, index)
                 })
@@ -394,15 +353,15 @@ LiveExtension{
     }
 
     function addProperty(){
-        add(0)
-    }
-
-    function addObject(){
         add(1)
     }
 
-    function addEvent(){
+    function addObject(){
         add(2)
+    }
+
+    function addEvent(){
+        add(3)
     }
 
     function add(activeIndex){
@@ -432,17 +391,17 @@ LiveExtension{
                 addBox.destroy()
             }
             addBoxItem.accept = function(type, data){
-                if ( addBoxItem.activeIndex === 0 ){
+                if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
-                    )
-                } else if ( addBoxItem.activeIndex === 1 ){
-                    activePane.documentHandler.codeHandler.addItem(
-                        addContainer.itemModel.addPosition, addContainer.objectType, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 2 ){
+                    activePane.documentHandler.codeHandler.addItem(
+                        addContainer.model.addPosition, addContainer.objectType, data
+                    )
+                } else if ( addBoxItem.activeIndex === 3 ){
                     activePane.documentHandler.codeHandler.addEvent(
-                        addContainer.itemModel.addPosition, addContainer.objectType, type, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data
                     )
                 }
                 addBox.destroy()
@@ -471,7 +430,7 @@ LiveExtension{
                 ef.incrementRefCount()
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
-                var palList      = globals.paletteControls.createPaletteListView()
+                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model = palettes
@@ -482,11 +441,13 @@ LiveExtension{
                 palList.cancelled.connect(function(){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
                 })
                 palList.paletteSelected.connect(function(index){
                     palList.focus = false
                     editor.editor.forceFocus()
+                    palList.destroy()
                     palListBox.destroy()
 
                     var ef = codeHandler.openConnection(palettes.position())
