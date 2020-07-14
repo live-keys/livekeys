@@ -251,13 +251,5 @@ ApplicationWindow{
                 }
             }
         }
-
-        MouseArea {
-            anchors.fill: parent
-            onClicked: {
-                lk.layers.workspace.panes.initializeStartupBox()
-            }
-        }
     }
-
 }

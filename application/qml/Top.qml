@@ -72,6 +72,24 @@ Rectangle {
         }
     }
 
+    MouseArea{
+        id: logoFunction
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: parent.top
+        width: 30
+        height: parent.height
+        hoverEnabled: true
+        onClicked: {
+            lk.layers.workspace.panes.initializeStartupBox()
+        }
+        Workspace.Tooltip{
+            mouseOver: logoFunction.containsMouse
+            text: "Livekeys: Show startup screen"
+        }
+    }
+
+
     Item{
         anchors.left: parent.left
         anchors.leftMargin: 130

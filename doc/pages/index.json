@@ -97,6 +97,14 @@
     ],
     {"__extra": [
         ["../../plugins/squareone/tutorials/workspace/workspacetutorial.md", "squareone/tutorials/workspace"],
-        ["../../plugins/squareone/tutorials/firstapplication/firstapplication.md", "squareone/tutorials/firstapplication"]
+        ["../../plugins/squareone/tutorials/firstapplication/firstapplication.md", "squareone/tutorials/firstapplication"],
+        ["../../plugins/lcvcore/samples/coloradjustments/coloradjustments.md", "lcvcore/samples/coloradjustments"],
+        ["../../plugins/lcvcore/samples/drawing/drawing.md", "lcvcore/samples/drawing"],
+        ["../../plugins/lcvcore/samples/imagetransformations/imagetransformations.md", "lcvcore/samples/imagetransformations"],
+        ["../../plugins/lcvcore/samples/videocoloradjustments/videocoloradjustments.md", "lcvcore/samples/videocoloradjustments"],
+        ["../../plugins/lcvcore/samples/videotimeline/videotimeline.md", "lcvcore/samples/videotimeline"],
+        ["../../plugins/base/baseqml/samples/linkingexecutables/linkingexecutables.md", "base/samples/linkingexecutables"],
+        ["../../plugins/fs/fsqml/samples/fileexplorer/fileexplorer.md", "fs/samples/fileexplorer"],
+        ["../../plugins/fs/fsqml/samples/readingfiles/readingfiles.md", "fs/samples/readingfiles"]
     ]}
 ]

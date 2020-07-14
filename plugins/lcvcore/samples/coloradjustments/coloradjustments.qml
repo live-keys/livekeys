@@ -12,7 +12,7 @@ Grid{
 
     Levels{
         id: levels
-        input: imageFile.output.cloneMat()
+        input: imageFile.output
     }
 
     HueSaturationLightness{
