@@ -95,7 +95,7 @@ CodePalette{
             minimumValue: 0
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
-                adjustmentBox.bandc.contrast = value
+                adjustmentBox.bandc.contrast = value.toFixed(2)
                 if ( !isBindingChange() ){
                     extension.writeProperties({
                         'contrast' : adjustmentBox.bandc.contrast
@@ -126,7 +126,7 @@ CodePalette{
             anchors.topMargin: 30
             width: 35
             height: 22
-            text: contrastSlider.value
+            text: contrastSlider.value.toFixed(2)
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
         }
 

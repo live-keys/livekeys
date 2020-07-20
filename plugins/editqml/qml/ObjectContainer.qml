@@ -185,9 +185,9 @@ Item{
         }
 
         function expand(){
-
+            compact = false
             paletteControls.openEmptyNestedObjects(root)
-            paletteControls.openNestedProperties(root, true)
+            paletteControls.openDefaults(root)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)
@@ -195,7 +195,6 @@ Item{
                 objectContainer.title = objectContainer.title + "#" + id
 
             container.sortChildren()
-            compact = false
         }
 
         function collapse(){
@@ -236,7 +235,7 @@ Item{
             ignoreUnknownSignals: true
             onObjectAdded: {
                 if (compact) expand()
-                else objectContainer.addObjectFragmentToContainer(obj)
+                else addObjectFragmentToContainer(obj)
                 container.sortChildren()
             }
             onPropertyAdded: {

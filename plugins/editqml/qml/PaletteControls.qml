@@ -176,11 +176,13 @@ QtObject{
             container.editingFragment.valuePosition() +
             container.editingFragment.valueLength() - 1
 
-        var addContainer = codeHandler.getAddOptions(position)
+        var addContainer = codeHandler.getAddOptions(position, isForNode)
         if ( !addContainer )
             return
 
         var addBoxItem = createAddQmlBox()
+
+        if (!addBoxItem) return
         addBoxItem.addContainer = addContainer
         addBoxItem.codeQmlHandler = codeHandler
         addBoxItem.isForNode = isForNode

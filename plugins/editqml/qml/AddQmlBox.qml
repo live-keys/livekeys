@@ -102,145 +102,120 @@ Rectangle{
         }
     }
 
-    Text{
+    Item {
+        id: header
+        height: title.height + buttonsContainer.height
         anchors.top: parent.top
-        anchors.topMargin: 5
-        anchors.left: parent.left
-        anchors.leftMargin: 5
 
-        color : "#efefef"
-        font.family: "Open Sans, sans-serif"
-        font.pixelSize: 12
-        font.weight: Font.Normal
+        Text{
+            id: title
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            height: 25
+            width: parent.width
+            color : "#efefef"
+            font.family: "Open Sans, sans-serif"
+            font.pixelSize: 12
+            font.weight: Font.Normal
 
-        text: {
-            if (!addContainer) return ""
-            var result;
-            switch (activeIndex) {
-                case 0: result = "All"; break;
-                case 1: result = "Properties"; break;
-                case 2: result = "Items"; break;
-                case 3: result = "Events"; break;
-                case 4: result = "Functions"; break;
+            text: {
+                if (!addContainer) return ""
+                var result;
+                switch (activeIndex) {
+                    case 0: result = "All"; break;
+                    case 1: result = "Properties"; break;
+                    case 2: result = "Items"; break;
+                    case 3: result = "Events"; break;
+                    case 4: result = "Functions"; break;
+                }
+
+                result = result + " for "  + addContainer.objectType
+            }
+        }
+
+        Row {
+            id: buttonsContainer
+            anchors.top: title.bottom
+            height: 30
+            TextButton{
+                visible: !objectsOnly
+                text: 'All'
+                height: 22
+                width: 70
+                fontPixelSize: 12
+                backgroundColor: isActive ? "#061a29" : "#111"
+                fontFamily: "Open Sans, sans-serif"
+                radius: 5
+
+                property bool isActive : activeIndex === 0
+                onClicked : {
+                    root.activeIndex = 0
+                }
             }
 
-            result = result + " for "  + addContainer.objectType
-        }
-    }
+            TextButton{
+                visible: !objectsOnly
+                text: 'Property'
+                height: 22
+                width: 70
+                fontPixelSize: 12
+                backgroundColor: isActive ? "#061a29" : "#111"
+                fontFamily: "Open Sans, sans-serif"
+                radius: 5
 
-    TextButton{
-        visible: !objectsOnly
-        anchors.top: parent.top
-        anchors.topMargin: 3
-        anchors.right: parent.right
-        anchors.rightMargin: {
-            if (objectsOnly) return 0
-            return 215+ (isForNode? 71: 0)
-        }
-        text: 'All'
-        height: 22
-        width: 70
-        fontPixelSize: 12
-        backgroundColor: isActive ? "#061a29" : "#111"
-        fontFamily: "Open Sans, sans-serif"
-        radius: 5
+                property bool isActive : activeIndex === 1
+                onClicked : {
+                    root.activeIndex = 1
+                }
+            }
 
-        property bool isActive : activeIndex === 0
-        onClicked : {
-            root.activeIndex = 0
-        }
-    }
+            TextButton{
+                text: 'Object'
+                height: 22
+                width: 70
+                fontPixelSize: 12
+                fontFamily: "Open Sans, sans-serif"
+                radius: 5
 
-    TextButton{
-        visible: !objectsOnly
-        anchors.top: parent.top
-        anchors.topMargin: 3
-        anchors.right: parent.right
-        anchors.rightMargin: {
-            if (objectsOnly) return 0
-            return 144+ (isForNode? 71: 0)
-        }
-        text: 'Property'
-        height: 22
-        width: 70
-        fontPixelSize: 12
-        backgroundColor: isActive ? "#061a29" : "#111"
-        fontFamily: "Open Sans, sans-serif"
-        radius: 5
+                backgroundColor: isActive ? "#061a29" : "#111"
+                property bool isActive : activeIndex === 2
 
-        property bool isActive : activeIndex === 1
-        onClicked : {
-            root.activeIndex = 1
-        }
-    }
+                onClicked : {
+                    root.activeIndex = 2
+                }
+            }
 
-    TextButton{
-        anchors.top: parent.top
-        anchors.topMargin: 3
-        anchors.right: parent.right
-        anchors.rightMargin: {
-            if (objectsOnly) return 0
-            return 73+ (isForNode? 71: 0)
-        }
+            TextButton{
+                visible: !objectsOnly
+                text: 'Event'
+                height: 22
+                width: 70
+                fontPixelSize: 12
+                backgroundColor: isActive ? "#061a29" : "#111"
+                fontFamily: "Open Sans, sans-serif"
+                radius: 5
 
-        text: 'Object'
-        height: 22
-        width: 70
-        fontPixelSize: 12
-        fontFamily: "Open Sans, sans-serif"
-        radius: 5
+                property bool isActive : activeIndex === 3
+                onClicked : {
+                    root.activeIndex = 3
+                }
+            }
 
-        backgroundColor: isActive ? "#061a29" : "#111"
-        property bool isActive : activeIndex === 2
+            TextButton{
+                visible: isForNode && !objectsOnly
+                text: 'Function'
+                height: 22
+                width: 70
+                fontPixelSize: 12
+                backgroundColor: isActive ? "#061a29" : "#111"
+                fontFamily: "Open Sans, sans-serif"
+                radius: 5
 
-        onClicked : {
-            root.activeIndex = 2
-        }
-    }
-
-    TextButton{
-        visible: !objectsOnly
-        anchors.top: parent.top
-        anchors.topMargin: 3
-        anchors.right: parent.right
-        anchors.rightMargin: {
-            if (objectsOnly) return 0
-            return 2+ (isForNode? 71: 0)
-        }
-        text: 'Event'
-        height: 22
-        width: 70
-        fontPixelSize: 12
-        backgroundColor: isActive ? "#061a29" : "#111"
-        fontFamily: "Open Sans, sans-serif"
-        radius: 5
-
-        property bool isActive : activeIndex === 3
-        onClicked : {
-            root.activeIndex = 3
-        }
-    }
-
-    TextButton{
-        anchors.top: parent.top
-        visible: isForNode && !objectsOnly
-        anchors.topMargin: 3
-        anchors.right: parent.right
-        anchors.rightMargin: {
-            if (objectsOnly) return 0
-            return 2
-        }
-        text: 'Function'
-        height: 22
-        width: 70
-        fontPixelSize: 12
-        backgroundColor: isActive ? "#061a29" : "#111"
-        fontFamily: "Open Sans, sans-serif"
-        radius: 5
-
-        property bool isActive : activeIndex === 4
-        onClicked : {
-            root.activeIndex = 4
+                property bool isActive : activeIndex === 4
+                onClicked : {
+                    root.activeIndex = 4
+                }
+            }
         }
     }
 
@@ -251,7 +226,7 @@ Rectangle{
         height: 30
         width: parent.width
         anchors.top: parent.top
-        anchors.topMargin: 25
+        anchors.topMargin: header.height
 
         Rectangle {
             x: 15
@@ -374,7 +349,7 @@ Rectangle{
     Rectangle{
         id: searchInputBox
         anchors.top: parent.top
-        anchors.topMargin: idInputItem && idInputItem.visible? 55 : 25
+        anchors.topMargin: idInputItem && idInputItem.visible? header.height + 30 : header.height
         anchors.left: parent.left
         anchors.leftMargin: 1
         width: parent.width - 1
@@ -399,6 +374,12 @@ Rectangle{
             font.family: "Open Sans, Courier"
             font.pixelSize: 12
             font.weight: Font.Light
+
+            onActiveFocusChanged: {
+                if (!activeFocus){
+                    root.cancel()
+                }
+            }
 
             selectByMouse: true
 
@@ -438,29 +419,32 @@ Rectangle{
     }
 
     function acceptSelection(){
+        if (!listView.currentItem) {
+            root.cancel()
+            return
+        }
+
         var selector = root.activeIndex === 0 ? listView.currentItem.category : root.activeIndex
 
-        if ( selector === 1 ){
-            root.activeIndex = 1
-            root.accept(listView.currentItem.type, listView.currentItem.code)
-        } else if (selector === 2){
+        var type = listView.currentItem.type
+        var code = listView.currentItem.code
+        var importSpace = listView.currentItem.importSpace
+
+        if (selector === 2){
             root.activeIndex = 2
-            var result = listView.currentItem.code
+            var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-            root.accept(listView.currentItem.importSpace, result)
-        } else if (selector === 3){
-            root.activeIndex = 3
-            root.accept(listView.currentItem.type, listView.currentItem.code)
-        } else if (selector === 4){
-            root.activeIndex = 4
-            root.accept(listView.currentItem.type, listView.currentItem.code)
+            root.accept(importSpace, result)
+        } else {
+            root.activeIndex = selector
+            root.accept(type, code)
         }
     }
 
     Item{
         id: container
         anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible? 85 : 55
+        anchors.topMargin: idInputItem && idInputItem.visible? header.height + 60 : header.height + 30
 
         ScrollView{
             anchors.top : parent.top

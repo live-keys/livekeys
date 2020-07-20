@@ -4,7 +4,7 @@ import live 1.0
 import editor 1.0
 import editor.private 1.0
 
-Item{
+Rectangle{
     id: paletteContainer
     width: child ? child.width + child.x  + (compact ? compactHeaderWidth: 0): 0
     height: child ? child.height + (compact ? 4 : normalHeaderHeight) : 0
@@ -12,7 +12,7 @@ Item{
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
-    property int compactHeaderWidth: 40
+    property int compactHeaderWidth: rightButtons.width + 7
     property int normalHeaderHeight: 35
 
     property bool compact: true
@@ -20,6 +20,8 @@ Item{
 
     property Item child : null
     property QtObject palette : null
+
+    color: "black"
 
     property string name : ''
     property string type : ''
@@ -246,15 +248,18 @@ Item{
 
         Item{
             id: paletteConnectionButton
+            anchors.top: parent.top
             anchors.right: parent.right
-            anchors.rightMargin: 40
+            anchors.rightMargin: 50
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
+            width: 11
+            height: 11
             visible: !compact
 
             Image{
+                width: parent.width; height: parent.height
                 anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
                 source: "qrc:/images/palette-connections.png"
             }
             MouseArea{
@@ -272,10 +277,10 @@ Item{
         id: rightButtons
         color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
         width: rightButtons.makeVertical ? 20 : 35
-        height: child ? child.height: 24
+        height: compact && child ? child.height : 24
         radius: 2
 
-        property bool makeVertical: height > 48 && compact
+        property bool makeVertical: child && child.height > 48 && compact
 
         anchors.top: parent.top
         anchors.topMargin: 2
