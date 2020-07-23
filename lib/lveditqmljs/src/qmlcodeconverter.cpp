@@ -278,6 +278,12 @@ QString QmlCodeConverter::buildCode(const QJSValue &value){
             }
         }
 
+        QString text = value.toString();
+        if (text.length() > 6 && text.left(6) == "QSizeF"){
+            return "'" + value.property("width").toString() + "x" + value.property("height").toString() + "'";
+        }
+
+
         QString result = "{";
         bool first = true;
         QJSValueIterator it(value);

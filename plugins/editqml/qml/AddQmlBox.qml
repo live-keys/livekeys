@@ -54,6 +54,11 @@ Rectangle{
         root.addContainer.model.setFilter('')
         if (activeIndex === 2) idChecked = true
         root.addContainer.model.setCategoryFilter(activeIndex)
+        root.addContainer.model.setImportFilter('')
+        root.addContainer.model.setTypeFilter('')
+        categoryList.currentIndex = 0
+        listView.currentIndex = 0
+
     }
 
     function assignFocus(){
@@ -485,7 +490,9 @@ Rectangle{
                 anchors.topMargin: 0
                 visible: true
                 opacity: root.opacity
-                model: root.addContainer ? root.addContainer.model.types() : null
+                model: root.addContainer
+                       ? (activeIndex === 2 ? root.addContainer.model.importSpaces() : root.addContainer.model.types())
+                       : null
 
                 currentIndex: 0
                 onCountChanged: currentIndex = 0

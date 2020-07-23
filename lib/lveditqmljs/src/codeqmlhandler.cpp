@@ -3422,6 +3422,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
                         "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
                         "property " << assignmentProperty.name();
                     if ( assignmentList.canAppend() ){
+                        result->setParent(obat);
                         assignmentList.append(result);
                         return;
                     }

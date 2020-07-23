@@ -93,7 +93,8 @@ QStringList QmlSuggestionModel::importSpaces() const
 {
     QSet<QString> cat;
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
-        cat.insert(it->importSpace);
+        if (!it->importSpace.isEmpty())
+            cat.insert(it->importSpace);
     }
 
     QStringList res;
@@ -107,7 +108,8 @@ QStringList QmlSuggestionModel::importSpaces() const
 QStringList QmlSuggestionModel::types() const{
     QSet<QString> types;
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
-        types.insert(it->objectType);
+        if (!it->objectType.isEmpty())
+            types.insert(it->objectType);
     }
 
     QStringList res;

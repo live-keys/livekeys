@@ -2,6 +2,7 @@
     "name": "editor",
     "package" : ".",
     "palettes" : {
+        "palettes/BooleanPalette.qml" : "qml/bool",
         "palettes/EditPalette.qml" : "edit/qml",
         "palettes/ConnectionPalette.qml": "qml/property",
         "palettes/TriggerPalette.qml": "qml/slot",
@@ -13,6 +14,7 @@
         "palettes/PathPalette.qml": "qml/string",
         "palettes/TextPalette.qml": "qml/string",
         "palettes/ImportsPalette.qml": "qml/import",
+        "palettes/SizePalette.qml" : "qml/size",
         "palettes/NodePalette.qml": "qml/Object",
         "palettes/RectangleSizePalette.json" : "qml/QtQuick#Rectangle"
     }

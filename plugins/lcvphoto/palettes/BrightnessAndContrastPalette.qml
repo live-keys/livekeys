@@ -32,7 +32,7 @@ CodePalette{
     item: Item{
         id: adjustmentBox
         width: 280
-        height: 68
+        height: 55
 
         property BrightnessAndContrast bandc: null
 

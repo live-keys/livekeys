@@ -88,7 +88,19 @@ Pane{
                 corner: Rectangle{color: root.backgroundColor}
             }
 
-            children : root.objectContainer ? [root.objectContainer] : []
+            flickableItem.contentHeight: root.objectContainer ? root.objectContainer.height: 0
+            flickableItem.contentWidth: root.objectContainer ? root.objectContainer.width : 0
+
+            Flickable {
+                Item {
+                    width: root.objectContainer ? root.objectContainer.width : 0
+                    height: root.objectContainer ? root.objectContainer.height: 0
+
+                    children : root.objectContainer ? [root.objectContainer] : []
+
+                }
+            }
+
         }
     }
 
