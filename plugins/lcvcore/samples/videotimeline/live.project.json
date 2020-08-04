@@ -1,0 +1,10 @@
+{
+    "layout" : [
+        "v",[
+            "h",
+            {"size":[300,250],"type":"documentation", "state" : {"document" : "videotimeline.doc.html"}},
+            {"size":[400,250],"type":"editor"},
+            {"size":[250,250],"type":"viewer"}
+        ]
+    ]
+}
