@@ -26,12 +26,6 @@
                 "description" : "An example showing how to add color adjustments."
             },
             {
-                "label" : "Video player",
-                "link" : "samples/videoplayer",
-                "category" : "video-processing",
-                "description" : "A simple video player."
-            },
-            {
                 "label" : "Video color adjustments",
                 "link" : "samples/videocoloradjustments",
                 "category" : "video-processing",
@@ -42,12 +36,6 @@
                 "link" : "samples/videotimeline",
                 "category" : "video-processing",
                 "description" : "Video timeline."
-            },
-            {
-                "label" : "Webcam view",
-                "link" : "samples/webcamview",
-                "category" : "video-processing",
-                "description" : "Color adjustments pipeline applied to a video."
             }
         ]
     }

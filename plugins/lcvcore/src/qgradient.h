@@ -8,16 +8,19 @@
 
 class QWritableMat;
 
-class QGradient : public QObject
-{
+class QGradient : public QObject{
+
     Q_OBJECT
+
 public:
     explicit QGradient(QObject *parent = nullptr);
 
 signals:
 
 public slots:
+
     void draw(QWritableMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2);
+
 private:
     const double Gamma = 0.43;
 
