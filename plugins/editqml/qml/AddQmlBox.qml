@@ -48,7 +48,7 @@ Rectangle{
     }
 
     property int activeIndex : 0
-    property bool idChecked: true
+    property bool idChecked: false
     onActiveIndexChanged: {
         searchInput.text = ''
         root.addContainer.model.setFilter('')
@@ -436,9 +436,10 @@ Rectangle{
         var importSpace = listView.currentItem.importSpace
 
         if (selector === 2){
-            root.activeIndex = 2
             var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
+            root.activeIndex = 2
+
             root.accept(importSpace, result)
         } else {
             root.activeIndex = selector
