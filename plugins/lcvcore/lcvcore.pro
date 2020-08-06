@@ -64,6 +64,7 @@ DISTFILES += \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.qml \
     palettes/VideoDecoderViewPalette.json \
+    palettes/VideoPlayerPalette.qml \
     qml/BlankImage.qml \
     qml/ColorHistogramView.qml \
     qml/Crop.qml \

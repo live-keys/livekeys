@@ -283,6 +283,25 @@ QString QmlCodeConverter::buildCode(const QJSValue &value){
             return "'" + value.property("width").toString() + "x" + value.property("height").toString() + "'";
         }
 
+        if (value.hasOwnProperty("length")){
+            // isArray isn't registering is for some reason
+            QJSValueIterator it(value);
+            QString result = "[";
+            bool first = true;
+            while ( it.hasNext() ){
+                it.next();
+                if ( it.name() != "length" ){
+                    if ( first ){
+                        first = false;
+                    } else {
+                        result += ",";
+                    }
+                    result += buildCode(it.value());
+                }
+            }
+            result += "]";
+            return result;
+        }
 
         QString result = "{";
         bool first = true;

@@ -183,9 +183,4 @@ CodePalette{
             extension.write(palette.value)
         }
     }
-
-    onInit: {
-        intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
-    }
 }

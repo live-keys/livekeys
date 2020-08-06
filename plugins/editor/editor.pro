@@ -62,6 +62,7 @@ DISTFILES += \
     palettes/PathPalette.qml \
     palettes/RectangleSizePalette.json \
     palettes/SizePalette.qml \
+    palettes/StringListPalette.qml \
     palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \

@@ -9,6 +9,7 @@
         "palettes/IntPalette.qml": "qml/int",
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
         "palettes/DoublePalette.qml": "qml/double",
+        "palettes/StringListPalette.qml": "qml/QStringList",
         "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color",
         "palettes/PathPalette.qml": "qml/string",

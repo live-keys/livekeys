@@ -24,11 +24,7 @@ Rectangle{
     width : 100
     color: '#000d18'
 
-    property Item videoCapture : Item{
-        property bool paused : true
-        property int totalFrames : 0
-        property int currentFrame : 0
-    }
+    property var videoCapture : null
 
     signal playPauseTriggered(bool paused)
     signal seekTriggered(int currentFrame)
@@ -74,14 +70,15 @@ Rectangle{
         color  : "#0d1a2a"
         Rectangle{
             height : parent.height
-            width : root.videoCapture ? root.videoCapture.totalFrames > 0 ?
-                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0 : 0
+            width : root.videoCapture && root.videoCapture.totalFrames > 0 ?
+                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0
             color : "#aeaeae"
         }
 
         MouseArea{
             anchors.fill : parent
             onClicked : {
+                if (!root.videoCapture) return
                 root.videoCapture.seekTo(mouse.x * (root.videoCapture.totalFrames / parent.width))
                 root.seekTriggered(mouse.x * (root.videoCapture.totalFrames / parent.width))
             }
