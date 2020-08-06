@@ -9,7 +9,6 @@ CodePalette{
     id: palette
     type : "qml/QStringList"
 
-    property var strings: []
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
@@ -45,6 +44,13 @@ CodePalette{
 
             boundsBehavior : Flickable.StopAtBounds
             highlightMoveDuration: 100
+
+            function modelToArray(){
+                var result = []
+                for (var i = 0; i < itemList.model.count; ++i)
+                    result.push(itemList.model.get(i).value)
+                return result
+            }
 
             delegate: Component{
 
@@ -89,8 +95,7 @@ CodePalette{
 
                                 var idx = model.index
                                 itemList.model.remove(idx)
-                                strings.splice(idx,1)
-                                extension.write(strings)
+                                extension.write(itemList.modelToArray())
                             }
                         }
                     }
@@ -147,8 +152,7 @@ CodePalette{
                     anchors.fill: parent
                     onClicked: {
                         argsContainer.model.append({'value': inputBox.text})
-                        strings.push(inputBox.text)
-                        extension.write(strings)
+                        extension.write(itemList.modelToArray())
                         inputBox.text = ""
                     }
                 }
@@ -159,14 +163,12 @@ CodePalette{
 
     onExtensionChanged: {
         extension.whenBinding = function(){
-            extension.write(strings)
+            extension.write(itemList.modelToArray())
         }
     }
 
     onInit: {
         for (var i=0; i<value.length; ++i)
             argsContainer.model.append({'value': value[i]})
-
-        strings = value
     }
 }
