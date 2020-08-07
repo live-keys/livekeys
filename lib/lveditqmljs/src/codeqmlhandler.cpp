@@ -2873,7 +2873,7 @@ void CodeQmlHandler::cancelEdit(){
  *
  * Returns an lv::QmlAddContainer for all the options
  */
-QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
+QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctions){
     Q_D(CodeQmlHandler);
     if ( !m_document || !m_target )
         return nullptr;
@@ -2938,7 +2938,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                         name,
                         QmlSuggestionModel::ItemData::Event
                     ));
-                } else {
+                } else if (includeFunctions) {
                     auto name = method.name;
 
                     addContainer->model()->addItem(QmlSuggestionModel::ItemData(
@@ -3422,6 +3422,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
                         "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
                         "property " << assignmentProperty.name();
                     if ( assignmentList.canAppend() ){
+                        result->setParent(obat);
                         assignmentList.append(result);
                         return;
                     }

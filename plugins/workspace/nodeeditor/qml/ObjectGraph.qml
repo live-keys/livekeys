@@ -186,6 +186,7 @@ Rectangle{
 
     onDoubleClicked: {
         var addBoxItem = paletteControls.createAddQmlBox()
+        if (!addBoxItem) return
         var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
 
@@ -210,11 +211,12 @@ Rectangle{
             )
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
-
+            addBoxItem.destroy()
             addBox.destroy()
         }
 
         addBoxItem.cancel = function(){
+            addBoxItem.destroy()
             addBox.destroy()
         }
 

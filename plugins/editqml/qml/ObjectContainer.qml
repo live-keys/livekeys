@@ -16,7 +16,7 @@ Item{
         {
             var child = groupsContainer.children[i]
             if (child.objectName === "objectContainer"){ // objectContainer
-                if (child.contentWidth + 20 > max) max = child.contentWidth + 20
+                if (child.contentWidth + 30 > max) max = child.contentWidth + 30
             } else if (child.objectName === "propertyContainer" && child.isAnObject){ // propertyContainer
                 if (child.childObjectContainer &&
                     child.childObjectContainer.contentWidth + 140 > max)
@@ -185,9 +185,9 @@ Item{
         }
 
         function expand(){
-
+            compact = false
             paletteControls.openEmptyNestedObjects(root)
-            paletteControls.openNestedProperties(root, true)
+            paletteControls.openDefaults(root)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)
@@ -195,7 +195,6 @@ Item{
                 objectContainer.title = objectContainer.title + "#" + id
 
             container.sortChildren()
-            compact = false
         }
 
         function collapse(){
@@ -207,9 +206,15 @@ Item{
             for (var i=1; i < container.children.length; ++i)
                 container.children[i].destroy()
 
+            for (var i=0; i < container.children[0].children.length; ++i)
+            {
+                var child = container.children[0].children[i]
+                child.destroy()
+            }
+
             compact = true
 
-            propertiesOpened = []
+            propertiesOpened.length = 0
         }
 
         property Connections editingFragmentRemovals: Connections{
@@ -236,7 +241,7 @@ Item{
             ignoreUnknownSignals: true
             onObjectAdded: {
                 if (compact) expand()
-                else objectContainer.addObjectFragmentToContainer(obj)
+                else addObjectFragmentToContainer(obj)
                 container.sortChildren()
             }
             onPropertyAdded: {
@@ -258,7 +263,7 @@ Item{
             id: objectContainerTitleWrap
             y: topSpacing
             height: objectContainer.pane ? 0 : titleHeight
-            width: parent.width + 10
+            width: parent.width
 
             ObjectContainerTop{
                 id: objectContainerTitle
@@ -337,9 +342,20 @@ Item{
                     if (palettes.size() ){
                         var paletteList = paletteControls.createPaletteListView(null, objectContainer.paletteStyle.selectableListView)
 
-                        var coords = objectContainer.mapToItem(objectContainer.editor, 0, 0)
+                        var p = objectContainer.parent
+                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                            p = p.parent
+                        }
+
+                        var coords = objectContainerTitle.mapToItem(p, 0, 0)
+
                         var palListBox   = lk.layers.editor.environment.createEditorBox(
-                            paletteList, Qt.rect(coords.x + objectContainer.width - 153, coords.y - 22, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
+                            paletteList,
+                            Qt.rect(coords.x + objectContainerTitle.width - 168,
+                                    coords.y - 33 - (p.objectName === "objectPalette" ? 8 : 0),
+                                    0, 0),
+                            Qt.point(p.x, p.y),
+                            lk.layers.editor.environment.placement.top
                         )
                         palListBox.color = 'transparent'
                         paletteList.forceActiveFocus()
@@ -401,7 +417,7 @@ Item{
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
             spacing: 5
-            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 10
+            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 20
 
             onChildrenChanged: recalculateContentWidth()
 

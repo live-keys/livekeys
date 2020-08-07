@@ -53,8 +53,8 @@ EditorLayer{
                 id: editorBoxComponent
                 x: 0
                 y: visible ? 0 : 20
-                width: child ? child.width + 10: 0
-                height: child ? child.height + 10 : 0
+                width: child ? child.width : 0
+                height: child ? child.height : 0
                 visible: false
                 opacity: visible ? 1 : 0
                 objectName: "editorBox"

@@ -88,9 +88,15 @@ Item{
                         editingFragment.position(), true)
                     if (palettes.size() ){
                         var paletteList = paletteControls.createPaletteListView(null, paletteStyle.selectableListView)
-                        var coords = propertyContainer.mapToItem(propertyContainer.editor, 0, 0)
+
+                        var p = propertyContainer.parent
+                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                            p = p.parent
+                        }
+
+                        var coords = propertyContainer.mapToItem(p, 0, 0)
                         var palListBox   = lk.layers.editor.environment.createEditorBox(
-                            paletteList, Qt.rect(coords.x + 113, coords.y - 5, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
+                            paletteList, Qt.rect(coords.x + 110, coords.y - 12, 0, 0), Qt.point(p.x, p.y), lk.layers.editor.environment.placement.top
                         )
                         palListBox.color = 'transparent'
 

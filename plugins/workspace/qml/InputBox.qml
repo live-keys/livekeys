@@ -45,6 +45,8 @@ Rectangle {
     property alias font: textInput.font
     property string textHint : ''
 
+    property alias validator: textInput.validator
+
     signal keyPressed(var event)
 
     function selectAll(){

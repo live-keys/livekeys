@@ -37,7 +37,11 @@ CodePalette{
             width: 70
             height: 25
             style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
-            text: intSlider.value + (fractionalSlider.value === 0 ? '' : '.' + fractionalSlider.value)
+            text: {
+                var roundValue = intSlider.value + fractionalSlider.value
+                roundValue = roundValue.toFixed(2)
+                return roundValue
+            }
         }
 
         Slider{
@@ -51,7 +55,9 @@ CodePalette{
             minimumValue: 0
             value: 0
             onValueChanged: {
-                palette.value = intSlider.value + fractionalSlider.value
+                var roundValue = intSlider.value + fractionalSlider.value
+                roundValue = roundValue.toFixed(2)
+                palette.value = roundValue
                 if ( !palette.isBindingChange() )
                     extension.write(palette.value)
             }
@@ -86,8 +92,10 @@ CodePalette{
             minimumValue: 0
             value: 0
             onValueChanged: {
+                var roundValue = intSlider.value + fractionalSlider.value
+                roundValue = roundValue.toFixed(2)
                 if (fractionalSlider.value !== 1.0)
-                    palette.value = intSlider.value + fractionalSlider.value
+                    palette.value = roundValue
 
                 if ( !palette.isBindingChange() )
                     extension.write(palette.value)
@@ -179,7 +187,7 @@ CodePalette{
             down: function(){
                 if (intSlider.maximumValue === 0 && intSlider.minimumValue < -25)
                     intSlider.maximumValue = -25
-                else if (intSlider.maximumValue === 25 && intSlider.minimumValue < 0)
+                else if (intSlider.maximumValue === 25 && intSlider.minimumValue <= 0)
                     intSlider.maximumValue = 0
                 else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
                     intSlider.maximumValue = 2*intSlider.maximumValue

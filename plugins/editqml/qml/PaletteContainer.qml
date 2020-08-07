@@ -4,15 +4,15 @@ import live 1.0
 import editor 1.0
 import editor.private 1.0
 
-Item{
+Rectangle{
     id: paletteContainer
-    width: child ? child.width + child.x  + (compact ? compactHeaderWidth: 0): 0
+    width: child ? Math.max(compact? 0 : 200, child.width + 5 + (compact ? compactHeaderWidth: 0)): (compact? 0 : 200)
     height: child ? child.height + (compact ? 4 : normalHeaderHeight) : 0
     objectName: "paletteContainer"
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
-    property int compactHeaderWidth: 40
+    property int compactHeaderWidth: rightButtons.width + 7
     property int normalHeaderHeight: 35
 
     property bool compact: true
@@ -20,6 +20,8 @@ Item{
 
     property Item child : null
     property QtObject palette : null
+
+    color: "black"
 
     property string name : ''
     property string type : ''
@@ -62,7 +64,7 @@ Item{
                     ? child.height + 10
                     : normalHeaderHeight
         width: !compact && child
-                    ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width) + 10
+                    ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width)
                     : compactHeaderWidth
 
         visible: !compact
@@ -107,9 +109,15 @@ Item{
             if (palettes.size() ){
                 var paletteList = paletteControls.createPaletteListView(null, paletteContainer.paletteStyle.selectableListView)
 
-                var coords = paletteContainer.mapToItem(paletteContainer.editor, 0, 0)
+
+                var p = paletteContainer.parent
+                while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                    p = p.parent
+                }
+
+                var coords = paletteContainer.mapToItem(p, 0, 0)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(
-                    paletteList, Qt.rect(coords.x + 90, coords.y - 10, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
+                    paletteList, Qt.rect(coords.x + 84, coords.y - 20, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
                 )
                 palListBox.color = 'transparent'
 
@@ -246,15 +254,18 @@ Item{
 
         Item{
             id: paletteConnectionButton
+            anchors.top: parent.top
             anchors.right: parent.right
             anchors.rightMargin: 40
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
+            width: 11
+            height: 11
             visible: !compact
 
             Image{
+                width: parent.width; height: parent.height
                 anchors.centerIn: parent
+                fillMode: Image.PreserveAspectFit
                 source: "qrc:/images/palette-connections.png"
             }
             MouseArea{
@@ -272,10 +283,10 @@ Item{
         id: rightButtons
         color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
         width: rightButtons.makeVertical ? 20 : 35
-        height: child ? child.height: 24
+        height: compact && child ? child.height : 24
         radius: 2
 
-        property bool makeVertical: height > 48 && compact
+        property bool makeVertical: child && child.height > 48 && compact
 
         anchors.top: parent.top
         anchors.topMargin: 2

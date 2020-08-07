@@ -258,6 +258,8 @@ Theme{
                 height: parent.parent.height / 3
                 strokeWidth: 1
             }
+
+            onClicked: parent.clicked()
         }
 
         property Component save: RectangleButton{

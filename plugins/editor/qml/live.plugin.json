@@ -2,17 +2,20 @@
     "name": "editor",
     "package" : ".",
     "palettes" : {
+        "palettes/BooleanPalette.qml" : "qml/bool",
         "palettes/EditPalette.qml" : "edit/qml",
         "palettes/ConnectionPalette.qml": "qml/property",
         "palettes/TriggerPalette.qml": "qml/slot",
         "palettes/IntPalette.qml": "qml/int",
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
         "palettes/DoublePalette.qml": "qml/double",
+        "palettes/StringListPalette.qml": "qml/QStringList",
         "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color",
         "palettes/PathPalette.qml": "qml/string",
         "palettes/TextPalette.qml": "qml/string",
         "palettes/ImportsPalette.qml": "qml/import",
+        "palettes/SizePalette.qml" : "qml/size",
         "palettes/NodePalette.qml": "qml/Object",
         "palettes/RectangleSizePalette.json" : "qml/QtQuick#Rectangle"
     }

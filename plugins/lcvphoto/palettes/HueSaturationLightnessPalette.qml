@@ -31,7 +31,7 @@ CodePalette{
     item: Rectangle{
         id: adjustmentBox
         width: 280
-        height: 90
+        height: 75
         color: 'transparent'
 
         property QtObject hsl: null

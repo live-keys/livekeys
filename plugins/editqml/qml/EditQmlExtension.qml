@@ -179,6 +179,7 @@ LiveExtension{
 
         if ( paletteBoxGroup === null ){
             editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+            editorBox.color = "black"
             paletteBoxGroup = ef.visualParent
         }
 
@@ -377,6 +378,8 @@ LiveExtension{
             var rect = activePane.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
             var addBoxItem = globals.paletteControls.createAddQmlBox()
+            if (!addBoxItem) return
+
             addBoxItem.assignFocus()
             addBoxItem.addContainer = addContainer
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
@@ -388,6 +391,7 @@ LiveExtension{
             )
             addBox.color = 'transparent'
             addBoxItem.cancel = function(){
+                addBoxItem.destroy()
                 addBox.destroy()
             }
             addBoxItem.accept = function(type, data){
@@ -404,6 +408,7 @@ LiveExtension{
                         addContainer.model.addPosition, addContainer.objectType, type, data
                     )
                 }
+                addBoxItem.destroy()
                 addBox.destroy()
             }
 

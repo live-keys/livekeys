@@ -170,7 +170,7 @@ public slots:
 
     // Add Property Management
 
-    lv::QmlAddContainer* getAddOptions(int position);
+    lv::QmlAddContainer* getAddOptions(int position, bool includeFunctions = false);
     int addProperty(
         int position,
         const QString& object,
