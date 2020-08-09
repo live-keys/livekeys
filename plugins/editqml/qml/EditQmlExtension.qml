@@ -31,6 +31,11 @@ LiveExtension{
         }
 
         property PaletteControls paletteControls: PaletteControls{}
+
+        property alias rootPosition: root.rootPosition
+        function shapeRootObject(editor, codeHandler){
+            root.shapeRootObject(editor, codeHandler)
+        }
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()

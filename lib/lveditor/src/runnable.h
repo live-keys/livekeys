@@ -78,7 +78,7 @@ public slots:
     void _documentSaved();
 
     void setRunTrigger(int runTrigger);
-
+    void clearRoot();
 signals:
     void nameChanged();
     void runTriggerChanged();
