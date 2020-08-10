@@ -104,8 +104,9 @@ Rectangle{
                 text: qsTr("Add Video Track")
                 onTriggered: {
                     var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
+                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
 
-                    var objectComponent = Qt.createComponent(objectPath);
+                    var objectComponent = Qt.createComponent(objectPathUrl);
                     if ( objectComponent.status === Component.Error ){
                         throw linkError(new Error(objectComponent.errorString()), timelineArea)
                     }
@@ -122,8 +123,9 @@ Rectangle{
                 text: qsTr("Add Keyframe Track")
                 onTriggered: {
                     var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeTrackFactory.qml'
+                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
 
-                    var objectComponent = Qt.createComponent(objectPath);
+                    var objectComponent = Qt.createComponent(objectPathUrl);
                     if ( objectComponent.status === Component.Error ){
                         throw linkError(new Error(objectComponent.errorString()), timelineArea)
                     }

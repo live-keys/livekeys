@@ -1,4 +1,5 @@
 import QtQuick 2.3
+import fs 1.0 as Fs
 
 QtObject{
 
@@ -9,8 +10,9 @@ QtObject{
                 var timeline = track.timeline()
 
                 var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/ImageSegmentCreator.qml'
+                var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
 
-                var objectComponent = Qt.createComponent(objectPath);
+                var objectComponent = Qt.createComponent(objectPathUrl);
                 if ( objectComponent.status === Component.Error ){
                     throw linkError(new Error(objectComponent.errorString()), this)
                 }
@@ -52,8 +54,9 @@ QtObject{
             action : function(track){
                 var timeline = track.timeline()
                 var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoCaptureSegmentCreator.qml'
+                var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
 
-                var objectComponent = Qt.createComponent(objectPath);
+                var objectComponent = Qt.createComponent(objectPathUrl);
                 if ( objectComponent.status === Component.Error ){
                     throw linkError(new Error(objectComponent.errorString()), this)
                 }
