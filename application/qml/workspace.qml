@@ -585,6 +585,7 @@ Item{
 
         Item{
             id: runSpace
+            clip: true
             anchors.fill: parent
         }
 

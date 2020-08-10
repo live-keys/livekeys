@@ -45,11 +45,13 @@
 #include "videosurface.h"
 #include "videotrack.h"
 
+#include "live/timelinesettings.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
+#include <QMetaObject>
 
 
 static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
@@ -99,7 +101,13 @@ void LcvcorePlugin::registerTypes(const char *uri){
 
 }
 
-void LcvcorePlugin::initializeEngine(QQmlEngine *, const char *){
+void LcvcorePlugin::initializeEngine(QQmlEngine * engine, const char *){
+    if ( lv::ViewContext::instance().engine()->engine() == engine ){ // view plugin
+        lv::TimelineSettings* ts = lv::TimelineSettings::grabFrom(lv::ViewContext::instance().settings());
+        ts->addTrackType("lcvcore#VideoTrack", "Video", "lcvcore/VideoTrackFactory", true, "lcvcore/VideoTrackExtension");
+    }
+
+
     lv::ViewContext::instance().engine()->registerQmlTypeInfo<QMat>(
         &lv::ml::serialize<QMat>,
         &lv::ml::deserialize<QMat>,

@@ -1,7 +1,9 @@
 #include "timelineconfig.h"
+#include "track.h"
 
 #include "live/settings.h"
 #include "live/viewcontext.h"
+#include "live/viewengine.h"
 
 #include "live/visuallogqt.h"
 
@@ -39,6 +41,16 @@ QJSValue TimelineConfig::loaders() const{
         result.setProperty(it.key(), it.value());
     }
     return result;
+}
+
+QJSValue TimelineConfig::trackMenu(QObject *track){
+    Track* t = qobject_cast<Track*>(track);
+    if ( !t )
+        return QJSValue();
+
+    ViewEngine* ve = ViewEngine::grab(track);
+
+    return m_settings->trackMenu(t->typeReference(), ve);
 }
 
 }// namespace

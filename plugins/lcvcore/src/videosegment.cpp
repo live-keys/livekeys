@@ -35,7 +35,6 @@ void VideoSegment::serialize(QQmlEngine *engine, MLNode &node) const{
 
     node["file"] = m_file.toStdString();
     node["type"] = "VideoSegment";
-    node["factory"] = "lcvcore/VideoCaptureSegmentFactory.qml";
 }
 
 void VideoSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &node){
@@ -80,8 +79,7 @@ void VideoSegment::cursorExit(qint64){
     if ( !m_track || !m_track->surface() )
         return;
 
-    m_track->surface()->output()->cvMat()->setTo(cv::Scalar(0));
-    m_track->surface()->update();
+    m_track->surface()->resetSurface();
 }
 
 void VideoSegment::cursorNext(qint64 pos){

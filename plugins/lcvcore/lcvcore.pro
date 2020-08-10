@@ -70,12 +70,16 @@ DISTFILES += \
     qml/Draw.qml \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \
+    qml/ImageSegmentCreator.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
     qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
     qml/VideoCaptureSegmentFactory.qml \
     qml/VideoDecoderView.qml \
+    qml/VideoSurfaceFactory.qml \
+    qml/VideoTrackExtension.qml \
+    qml/VideoTrackFactory.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

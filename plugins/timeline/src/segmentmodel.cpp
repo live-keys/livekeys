@@ -316,6 +316,11 @@ void SegmentModel::clearSegments(){
     endDataChange();
 }
 
+int SegmentModel::firstIndex(qint64 position){
+    Q_D(SegmentModel);
+    return d->searchFirstIndex(position);
+}
+
 QPair<int, int> SegmentModel::indexesBetween(qint64 l1, qint64 l2){
     qint64 from = l1 > l2 ? l2 : l1;
     qint64 to = l1 > l2 ? l1 : l2;
@@ -349,6 +354,11 @@ QPair<int, int> SegmentModel::indexesBetween(qint64 l1, qint64 l2){
 
     return QPair<int, int>(fromIndex, index - 1);
 
+}
+
+int SegmentModel::segmentIndex(Segment *segment){
+    Q_D(SegmentModel);
+    return d->searchFirstIndex(segment->position());
 }
 
 Segment *SegmentModel::segmentThatWraps(qint64 position){

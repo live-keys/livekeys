@@ -2950,7 +2950,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
                             ti->prefereredType().name(),
                             "method",
                             "",
-                            "", //TODO: Find library path
+                            ti->exportType().join() + "." + propertyName,
                             propertyName
                         )
                     );

@@ -36,6 +36,8 @@ public:
     static QObject *deserialize(ViewEngine* engine, const MLNode &node);
 
 signals:
+    void trackAdded(Track* track);
+    void trackAboutToBeRemoved(Track* track);
 
 public slots:
     void appendTrack(Track *track);

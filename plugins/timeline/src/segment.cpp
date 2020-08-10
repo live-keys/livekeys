@@ -14,6 +14,7 @@ namespace lv{
 
 Segment::Segment(QObject *parent)
     : QObject(parent)
+    , m_track(nullptr)
     , m_position(0)
     , m_length(0)
     , m_maxStretchLeft(std::numeric_limits<unsigned int>::max())
@@ -34,9 +35,8 @@ Segment::~Segment(){
 }
 
 void Segment::setPosition(unsigned int arg){
-    SegmentModel* model = qobject_cast<SegmentModel*>(parent());
-    if (model){
-        model->setItemPosition(m_position, m_length, 0, arg);
+    if (m_track){
+        m_track->setSegmentPosition(this, arg);
     } else {
         setPosition(this, arg);
     }
@@ -44,15 +44,17 @@ void Segment::setPosition(unsigned int arg){
 
 
 void Segment::setLength(unsigned int arg){
-    SegmentModel* model = qobject_cast<SegmentModel*>(parent());
-    if (model){
-        model->setItemLength(m_position, m_length, 0, arg);
+    if (m_track){
+        m_track->setSegmentLength(this, arg);
     } else {
         setLength(this, arg);
     }
 }
 
-void Segment::assignTrack(Track*){}
+void Segment::assignTrack(Track* track){
+    m_track = track;
+}
+
 void Segment::cursorEnter(qint64){}
 void Segment::cursorNext(qint64){}
 void Segment::cursorMove(qint64){}
@@ -96,6 +98,10 @@ bool Segment::contains(qint64 position){
 
 bool Segment::isAsync() const{
     return m_isAsync;
+}
+
+Track *Segment::currentTrack() const{
+    return m_track;
 }
 
 void Segment::remove(){

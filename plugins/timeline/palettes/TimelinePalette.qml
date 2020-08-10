@@ -22,6 +22,35 @@ CodePalette{
             anchors.fill: parent
             focus : true
             timelineStyle: paletteStyle ? paletteStyle.timelineStyle : palette.defaultTimelineStyle
+
+            onSegmentDoubleClicked: {
+                if ( segment instanceof Keyframe ){
+                    var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeEditor.qml'
+
+                    var objectComponent = Qt.createComponent(objectPath);
+                    if ( objectComponent.status === Component.Error ){
+                        throw linkError(new Error(objectComponent.errorString()), timelineArea)
+                    }
+
+                    var coords = delegate.mapToItem(lk.layers.workspace.panes.container, 0, 0)
+
+                    var object = objectComponent.createObject()
+                    object.currentKeyframe = segment
+                    var overlay = lk.layers.window.dialogs.overlayBox(object)
+                    overlay.centerBox = false
+                    overlay.backgroundVisible = true
+                    overlay.box.visible = true
+                    overlay.boxX = coords.x
+                    overlay.boxY = coords.y
+
+                    object.inputBox.forceFocus()
+
+                    object.ready.connect(function(){
+                        overlay.closeBox()
+                        object.destroy()
+                    })
+                }
+            }
         }
 
         ResizeArea{

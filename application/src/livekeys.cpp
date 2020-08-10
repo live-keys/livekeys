@@ -500,7 +500,7 @@ void Livekeys::engineError(QJSValue error){
     vlog().e() <<  "Uncaught error: " + e.toString(
         QmlError::PrintMessage | QmlError::PrintLocation | QmlError::PrintStackTrace
     );
-    vlog().v() << e.toString(QmlError::PrintCStackTrace);
+    vlog().d() << e.toString(QmlError::PrintCStackTrace);
 }
 
 void Livekeys::projectChanged(const QString &path){

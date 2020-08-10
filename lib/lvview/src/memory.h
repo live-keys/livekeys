@@ -179,6 +179,7 @@ public:
 public slots:
     void reloc();
     void recycleSize(Shared* o, int size) const;
+    void logDeletion(QObject* object);
 
 private:
     static void clearSpaceUpTo( size_t size){

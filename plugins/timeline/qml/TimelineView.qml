@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import timeline 1.0
+import fs 1.0 as Fs
 import workspace 1.0 as Workspace
 
 Rectangle{
@@ -100,12 +101,53 @@ Rectangle{
         Menu{
             id: contextMenu
             MenuItem {
-                text: qsTr("Insert Track")
-                onTriggered: root.timeline.addTrack()
+                text: qsTr("Add Video Track")
+                onTriggered: {
+                    var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
+
+                    var objectComponent = Qt.createComponent(objectPath);
+                    if ( objectComponent.status === Component.Error ){
+                        throw linkError(new Error(objectComponent.errorString()), timelineArea)
+                    }
+
+                    var object = objectComponent.createObject();
+
+                    var videoTrack = object.create()
+                    videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+                    root.timeline.appendTrack(videoTrack)
+                }
+            }
+            MenuItem {
+                text: qsTr("Add Keyframe Track")
+                onTriggered: {
+                    var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeTrackFactory.qml'
+
+                    var objectComponent = Qt.createComponent(objectPath);
+                    if ( objectComponent.status === Component.Error ){
+                        throw linkError(new Error(objectComponent.errorString()), timelineArea)
+                    }
+
+                    var object = objectComponent.createObject();
+
+                    var keyframeTrack = object.create()
+                    keyframeTrack.name = 'Keyframe Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+                    root.timeline.appendTrack(keyframeTrack)
+                }
             }
             MenuItem {
                 text: qsTr("Save")
                 onTriggered: root.timeline.save()
+            }
+            MenuItem {
+                text: qsTr("Save As...")
+                onTriggered: {
+                    lk.layers.window.dialogs.saveFile({filters : "Json files (*.json)"}, function(path){
+                        var localFile = Fs.UrlInfo.toLocalFile(path)
+                        root.timeline.saveAs(localFile)
+                    })
+                }
             }
         }
     }
@@ -114,7 +156,7 @@ Rectangle{
     signal mouseLeave(int position)
     signal mouseDoubleClicked(int position, int trackIndex)
     signal segmentSelected(Track track, Segment segment)
-    signal segmentDoubleClicked(Track track, Segment segment)
+    signal segmentDoubleClicked(Track track, Segment segment, Item delegate)
 
     Rectangle{
         id: timelineOptionsContainer
@@ -339,7 +381,7 @@ Rectangle{
                         segmentDelegate: root.segmentDelegate
 
                         onSegmentDoubleClicked: {
-                            root.segmentDoubleClicked(track, segment)
+                            root.segmentDoubleClicked(track, segment, timelineRow)
                         }
                     }
 
