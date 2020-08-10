@@ -38,6 +38,6 @@ Item{
         id: timeline
         fps: 30
         contentLength: fps * 200
-        file: 'timeline.json'
+        file: project.path('videotimeline.json')
     }
 }
