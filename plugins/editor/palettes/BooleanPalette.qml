@@ -14,16 +14,17 @@ CodePalette {
     item: Rectangle{
         height: 24
         width: 24
-        border.color: "gray"
+        border.color: "#232b30"
         border.width: 1
         color: "transparent"
 
         Workspace.CheckMarkIcon{
             visible: checked
             anchors.centerIn: parent
-            width: 24
-            height: 24
-            strokeWidth: 1
+            width: 8
+            height: 8
+            strokeWidth: 2
+            color: "#9b9da0"
         }
 
         MouseArea {
