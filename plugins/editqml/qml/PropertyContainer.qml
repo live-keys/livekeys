@@ -49,12 +49,12 @@ Item{
         anchors.leftMargin: 25
         anchors.top: parent.top
         anchors.topMargin: 5 + topMarginParam
-        height: container.height
+        height: container.height > 30 ? container.height : 30
         width: 110
         color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.background : 'black'
         radius: 3
-        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 0
-        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : 'black'
+        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 1
+        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : '#232b30'
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 25
@@ -87,7 +87,19 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyContainer)
+                        var paletteList = paletteControls.createPaletteListView(null, paletteStyle.selectableListView)
+
+                        var p = propertyContainer.parent
+                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                            p = p.parent
+                        }
+
+                        var coords = propertyContainer.mapToItem(p, 0, 0)
+                        var palListBox   = lk.layers.editor.environment.createEditorBox(
+                            paletteList, Qt.rect(coords.x + 110, coords.y - 12, 0, 0), Qt.point(p.x, p.y), lk.layers.editor.environment.placement.top
+                        )
+                        palListBox.color = 'transparent'
+
                         paletteList.anchors.topMargin = 15 + topMarginParam
                         paletteList.width = 250
                         paletteList.forceActiveFocus()
@@ -96,6 +108,7 @@ Item{
                             paletteList.focus = false
                             paletteList.model = null
                             paletteList.destroy()
+                            palListBox.destroy()
                         }
                         paletteList.selectedHandler = function(index){
                             paletteList.focus = false
@@ -105,9 +118,10 @@ Item{
                                  propertyContainer.valueContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                                paletteControls.addPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
+                                paletteControls.openPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
                             }
                             paletteList.destroy()
+                            palListBox.destroy()
 
                         }
                     }

@@ -9,6 +9,8 @@ Item{
     id: propertyItem
     property string propertyName : ''
     
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property Item inPort : null
     property Item outPort : null
     property QtObject node : null
@@ -73,7 +75,7 @@ Item{
                         propertyItem.editingFragment.position(), true)
 
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyItem)
+                        var paletteList = paletteControls.createPaletteListView(propertyItem, paletteStyle.selectableListView)
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
 
@@ -93,10 +95,10 @@ Item{
                                  paletteContainer.objectName === 'paletteGroup' )
                             {
                                 var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
-                                var paletteBox = paletteControls.addPalette(palette,
-                                                                            editingFragment,
-                                                                            editor,
-                                                                            paletteContainer)
+                                var paletteBox = paletteControls.openPalette(palette,
+                                                                             editingFragment,
+                                                                             editor,
+                                                                             paletteContainer)
                                 if (paletteBox){
                                     paletteBox.moveEnabledSet = false
                                     paletteBox.width = Qt.binding(function(){ return paletteContainer.width })

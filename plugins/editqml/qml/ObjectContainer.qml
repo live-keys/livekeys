@@ -15,15 +15,15 @@ Item{
         for (var i=0; i<groupsContainer.children.length; ++i)
         {
             var child = groupsContainer.children[i]
-            if (child.objectName === "objectContainer"){
-                if (child.contentWidth + 20 > max) max = child.contentWidth + 20
-            } else if (child.objectName === "propertyContainer" && child.isAnObject){
+            if (child.objectName === "objectContainer"){ // objectContainer
+                if (child.contentWidth + 30 > max) max = child.contentWidth + 30
+            } else if (child.objectName === "propertyContainer" && child.isAnObject){ // propertyContainer
                 if (child.childObjectContainer &&
                     child.childObjectContainer.contentWidth + 140 > max)
                     max = child.childObjectContainer.contentWidth + 140
             } else {
-                if (child.width + 20 > max)
-                    max = child.width + 20
+                if (child.width > max) // paletteGroup
+                    max = child.width
             }
         }
 
@@ -49,6 +49,7 @@ Item{
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
     property alias propertiesOpened: objectContainer.propertiesOpened
+    property var sortChildren: groupsContainer.sortChildren
 
     property var parentObjectContainer: null
     property var isForProperty: false
@@ -88,7 +89,25 @@ Item{
         objectContainer.expandOptions(options)
     }
 
+    function addObjectFragmentToContainer(ef){
+        if (!ef) return
 
+        var childObjectContainer =
+                paletteControls.addChildObjectContainer(root, ef)
+
+        childObjectContainer.x = 20
+        childObjectContainer.y = 10
+
+        ef.incrementRefCount()
+
+        return childObjectContainer
+    }
+
+    function addPropertyFragmentToContainer(ef, expandDefault){
+        if (!ef) return
+
+        paletteControls.addPropertyContainer(root, ef, expandDefault)
+    }
 
     Item{
         id: objectContainer
@@ -110,10 +129,10 @@ Item{
 
         property var propertiesOpened: []
 
-        property PaletteStyle paletteStyle: lk.layers.workspace.extensions.editqml.paletteStyle
+        property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         width: container.width < 260 ? 300 : container.width
-        height: container.height < 10 || compact ? 40 : objectContainerTitleWrap.height + topSpacing + /*(paletteGroup ? paletteGroup.height : 0) +*/ container.height
+        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
@@ -123,23 +142,6 @@ Item{
             root.placeHolder.parent = null
         }
 
-        function addObjectFragmentToContainer(ef){
-            if (!ef) return
-
-            var childObjectContainer =
-                    paletteControls.addChildObjectContainer(root, ef)
-
-            childObjectContainer.x = 20
-            childObjectContainer.y = 10
-
-            ef.incrementRefCount()
-        }
-
-        function addPropertyFragmentToContainer(ef){
-            if (!ef) return
-
-            paletteControls.addPropertyContainer(root, ef)
-        }
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
@@ -167,7 +169,7 @@ Item{
                     )
 
                     if ( ef ){
-                        paletteControls.addPropertyContainer(root, ef, propPalette)
+                        paletteControls.addPropertyContainer(root, ef, true, propPalette)
                     }
                     else {
                         lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
@@ -183,16 +185,9 @@ Item{
         }
 
         function expand(){
-            var objects = editor.documentHandler.codeHandler.openNestedObjects(editingFragment)
-            for (var i=0; i < objects.length; ++i){
-                addObjectFragmentToContainer(objects[i])
-            }
-
-            var properties = editor.documentHandler.codeHandler.openNestedProperties(editingFragment)
-
-            for (var i=0; i < properties.length; ++i){
-                addPropertyFragmentToContainer(properties[i])
-            }
+            compact = false
+            paletteControls.openEmptyNestedObjects(root)
+            paletteControls.openDefaults(root)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)
@@ -200,7 +195,6 @@ Item{
                 objectContainer.title = objectContainer.title + "#" + id
 
             container.sortChildren()
-            compact = false
         }
 
         function collapse(){
@@ -212,9 +206,15 @@ Item{
             for (var i=1; i < container.children.length; ++i)
                 container.children[i].destroy()
 
+            for (var i=0; i < container.children[0].children.length; ++i)
+            {
+                var child = container.children[0].children[i]
+                child.destroy()
+            }
+
             compact = true
 
-            propertiesOpened = []
+            propertiesOpened.length = 0
         }
 
         property Connections editingFragmentRemovals: Connections{
@@ -241,7 +241,7 @@ Item{
             ignoreUnknownSignals: true
             onObjectAdded: {
                 if (compact) expand()
-                else objectContainer.addObjectFragmentToContainer(obj)
+                else addObjectFragmentToContainer(obj)
                 container.sortChildren()
             }
             onPropertyAdded: {
@@ -254,7 +254,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                else objectContainer.addPropertyFragmentToContainer(ef)
+                else addPropertyFragmentToContainer(ef, expandDefault)
                 container.sortChildren()
             }
         }
@@ -263,7 +263,7 @@ Item{
             id: objectContainerTitleWrap
             y: topSpacing
             height: objectContainer.pane ? 0 : titleHeight
-            width: parent.width + 10
+            width: parent.width
 
             ObjectContainerTop{
                 id: objectContainerTitle
@@ -340,7 +340,24 @@ Item{
 
                     var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(objectContainer)
+                        var paletteList = paletteControls.createPaletteListView(null, objectContainer.paletteStyle.selectableListView)
+
+                        var p = objectContainer.parent
+                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                            p = p.parent
+                        }
+
+                        var coords = objectContainerTitle.mapToItem(p, 0, 0)
+
+                        var palListBox   = lk.layers.editor.environment.createEditorBox(
+                            paletteList,
+                            Qt.rect(coords.x + objectContainerTitle.width - 168,
+                                    coords.y - 33 - (p.objectName === "objectPalette" ? 8 : 0),
+                                    0, 0),
+                            Qt.point(p.x, p.y),
+                            lk.layers.editor.environment.placement.top
+                        )
+                        palListBox.color = 'transparent'
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
                         paletteList.width = 250
@@ -349,6 +366,7 @@ Item{
                             paletteList.focus = false
                             paletteList.model = null
                             paletteList.destroy()
+                            palListBox.destroy()
                         }
                         paletteList.selectedHandler = function(index){
                             paletteList.focus = false
@@ -356,7 +374,7 @@ Item{
 
                             var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
 
-                            var paletteBox = paletteControls.addPalette(palette,
+                            var paletteBox = paletteControls.openPalette(palette,
                                                                         editingFragment,
                                                                         editor,
                                                                         paletteGroup,
@@ -364,6 +382,7 @@ Item{
 
                             if (paletteBox) paletteBox.moveEnabledSet = false
                             paletteList.destroy()
+                            palListBox.destroy()
 
                         }
                     }
@@ -398,7 +417,7 @@ Item{
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
             spacing: 5
-            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 10
+            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 20
 
             onChildrenChanged: recalculateContentWidth()
 

@@ -12,6 +12,7 @@ LineGrid::LineGrid(QQuickItem *parent)
     , m_thickness(1)
     , m_color(QColor("white"))
 {
+    setFlag(ItemHasContents, true);
 }
 
 void LineGrid::paint(QPainter *painter){

@@ -53,6 +53,7 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
+    palettes/BooleanPalette.qml \
     palettes/ConnectionPalette.qml \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
@@ -60,6 +61,8 @@ DISTFILES += \
     palettes/NodePalette.qml \
     palettes/PathPalette.qml \
     palettes/RectangleSizePalette.json \
+    palettes/SizePalette.qml \
+    palettes/StringListPalette.qml \
     palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \

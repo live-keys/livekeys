@@ -15,13 +15,21 @@ public:
     /// \private
     class ItemData{
     public:
+        enum Category {
+            Property = 1,
+            Object,
+            Event,
+            Function
+        };
+
         ItemData(
             const QString& plabel,
             const QString& pObjType,
             const QString& ptype,
             const QString& pimport,
             const QString& pdoc,
-            const QString& pcode
+            const QString& pcode,
+            const int cat
         );
 
         QString label;
@@ -30,6 +38,7 @@ public:
         QString importSpace;
         QString documentation;
         QString code;
+        int category;
     };
 
     enum Roles{
@@ -38,7 +47,8 @@ public:
         Type,
         ImportSpace,
         Documentation,
-        Code
+        Code,
+        Category
     };
 
     QmlSuggestionModel(int addPosition, QObject* parent = 0);
@@ -59,6 +69,7 @@ public slots:
     void setFilter(const QString& filter);
     void setImportFilter(const QString& importFilter);
     void setTypeFilter(const QString& typeFilter);
+    void setCategoryFilter(const int cat);
 
     QStringList importSpaces() const;
     QStringList types() const;
@@ -68,6 +79,7 @@ private:
     QString                 m_filter;
     QString                 m_importFilter;
     QString                 m_typeFilter;
+    int                     m_categoryFilter;
     QList<int>              m_filteredData;
     QHash<int, QByteArray>  m_roles;
     int                     m_addPosition;

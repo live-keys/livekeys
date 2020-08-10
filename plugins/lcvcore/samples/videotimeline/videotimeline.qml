@@ -38,6 +38,6 @@ Item{
         id: timeline
         fps: 30
         contentLength: fps * 200
-        file: '/Users/dinu/Desktop/asd.json'
+        file: 'timeline.json'
     }
 }

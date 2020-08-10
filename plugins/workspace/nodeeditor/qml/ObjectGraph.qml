@@ -186,6 +186,7 @@ Rectangle{
 
     onDoubleClicked: {
         var addBoxItem = paletteControls.createAddQmlBox()
+        if (!addBoxItem) return
         var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
 
@@ -202,7 +203,7 @@ Rectangle{
 
         addBoxItem.accept = function(type, data){
             var opos = documentHandler.codeHandler.addItem(
-                addBoxItem.addContainer.itemModel.addPosition, addBoxItem.addContainer.objectType, data
+                addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
             )
             documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
             var ef = documentHandler.codeHandler.openNestedConnection(
@@ -210,11 +211,12 @@ Rectangle{
             )
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
-
+            addBoxItem.destroy()
             addBox.destroy()
         }
 
         addBoxItem.cancel = function(){
+            addBoxItem.destroy()
             addBox.destroy()
         }
 
