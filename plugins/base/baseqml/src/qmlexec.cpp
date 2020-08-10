@@ -81,6 +81,8 @@ void QmlExec::run(){
         disconnect(m_process, &QProcess::readyRead, this, &QmlExec::__processRead);
     }
 
+    emit aboutToRun();
+
     m_process->setProgram(m_path);
     m_process->setArguments(m_args);
     m_process->start();
