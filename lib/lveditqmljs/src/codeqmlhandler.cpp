@@ -2906,6 +2906,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
         propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
         propertyPosition = ctx->propertyPosition();
     }
+    else propertyPosition = position;
 
     if ( propertyPosition == -1 )
         return nullptr;
@@ -3281,6 +3282,8 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
+
+    if (blockEnd == 0) blockEnd = m_target->characterCount() -1;
 
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);

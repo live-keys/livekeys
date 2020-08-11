@@ -20,6 +20,7 @@ import QtQuick.Controls.Styles 1.2
 import base 1.0
 import live 1.0
 import editor.private 1.0
+import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -62,7 +63,7 @@ Rectangle{
     }
 
     function assignFocus(){
-        searchInput.forceActiveFocus()
+        searchInput.textInput.forceActiveFocus()
     }
 
     property var cancel: function(){ }
@@ -142,81 +143,78 @@ Rectangle{
             id: buttonsContainer
             anchors.top: title.bottom
             height: 30
-            TextButton{
+
+            property QtObject buttonsStyle : QtObject{
+                property QtObject textStyle: Workspace.TextStyle{}
+                property QtObject hoverTextStyle: Workspace.TextStyle{}
+                property color backgroundColor: '#070b0f'
+                property color backgroundHoverColor: '#213355'
+                property color borderColor: 'black'
+                property color borderHoverColor: 'black'
+                property double borderThickness: 0
+                property double radius: 5
+            }
+
+            Workspace.TextButton{
                 visible: !objectsOnly
                 text: 'All'
                 height: 22
                 width: 70
-                fontPixelSize: 12
-                backgroundColor: isActive ? "#061a29" : "#111"
-                fontFamily: "Open Sans, sans-serif"
-                radius: 5
+                style: buttonsContainer.buttonsStyle
+                color: activeIndex === 0 ? "#061a29" : "#111"
 
-                property bool isActive : activeIndex === 0
                 onClicked : {
                     root.activeIndex = 0
                 }
             }
 
-            TextButton{
+            Workspace.TextButton{
                 visible: !objectsOnly
                 text: 'Property'
                 height: 22
                 width: 70
-                fontPixelSize: 12
-                backgroundColor: isActive ? "#061a29" : "#111"
-                fontFamily: "Open Sans, sans-serif"
-                radius: 5
+                style: buttonsContainer.buttonsStyle
+                color: activeIndex === 1 ? "#061a29" : "#111"
 
-                property bool isActive : activeIndex === 1
                 onClicked : {
                     root.activeIndex = 1
                 }
             }
 
-            TextButton{
+            Workspace.TextButton{
                 text: 'Object'
                 height: 22
                 width: 70
-                fontPixelSize: 12
-                fontFamily: "Open Sans, sans-serif"
-                radius: 5
 
-                backgroundColor: isActive ? "#061a29" : "#111"
-                property bool isActive : activeIndex === 2
+                style: buttonsContainer.buttonsStyle
+                color: activeIndex === 2 ? "#061a29" : "#111"
 
                 onClicked : {
                     root.activeIndex = 2
                 }
             }
 
-            TextButton{
+            Workspace.TextButton{
                 visible: !objectsOnly
                 text: 'Event'
                 height: 22
                 width: 70
-                fontPixelSize: 12
-                backgroundColor: isActive ? "#061a29" : "#111"
-                fontFamily: "Open Sans, sans-serif"
-                radius: 5
+                style: buttonsContainer.buttonsStyle
+                color: activeIndex === 3 ? "#061a29" : "#111"
 
-                property bool isActive : activeIndex === 3
                 onClicked : {
                     root.activeIndex = 3
                 }
             }
 
-            TextButton{
+            Workspace.TextButton{
                 visible: isForNode && !objectsOnly
                 text: 'Function'
                 height: 22
                 width: 70
-                fontPixelSize: 12
-                backgroundColor: isActive ? "#061a29" : "#111"
-                fontFamily: "Open Sans, sans-serif"
-                radius: 5
+                style: buttonsContainer.buttonsStyle
+                color: activeIndex === 4 ? "#061a29" : "#111"
 
-                property bool isActive : activeIndex === 4
                 onClicked : {
                     root.activeIndex = 4
                 }
@@ -271,31 +269,42 @@ Rectangle{
         Rectangle {
             x: 60
             y: 5
-            border.width: 1
-            border.color: "#0d1f2d"
             width: parent.width - 80
             height: 18
             anchors.right: parent.right
             anchors.rightMargin: 5
             color: "black"
-            TextInput{
-                id : idInput
-                property bool userInput: false
 
+            property QtObject idInputStyle : QtObject{
+                property QtObject textStyle: Workspace.TextStyle{
+                    font.family: "Open Sans, Courier"
+                    font.pixelSize: 14
+                    font.weight: Font.Light
+
+                    color : "#afafaf"
+                }
+                property QtObject hintTextStyle: Workspace.TextStyle{}
+                property color backgroundColor: '#070b0f'
+                property color borderColor: '#323232'
+                property double borderThickness: 1
+                property color textSelectionColor: '#3d4856'
+                property double radius: 3
+            }
+
+            Workspace.InputBox {
+
+                id : idInput
+
+                property bool userInput: false
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 8
                 anchors.right: parent.right
                 anchors.rightMargin: 8
 
+                style: parent.idInputStyle
+
                 width: parent.width > implicitWidth ? parent.width : implicitWidth
-
-                color : "#afafaf"
-                font.family: "Open Sans, Courier"
-                font.pixelSize: 14
-                font.weight: Font.Light
-
-                selectByMouse: true
 
                 text: {
                     if (!listView || !listView.currentItem) return text
@@ -362,10 +371,22 @@ Rectangle{
         color: "transparent"
         height: 28
 
-        border.color: "#0d1f2d"
-        border.width: 1
+        property QtObject searchInputStyle : QtObject{
+            property QtObject textStyle: Workspace.TextStyle{
+                color : "#afafaf"
+                font.family: "Open Sans, Courier"
+                font.pixelSize: 12
+                font.weight: Font.Light
+            }
+            property QtObject hintTextStyle: Workspace.TextStyle{}
+            property color backgroundColor: '#070b0f'
+            property color borderColor: '#323232'
+            property double borderThickness: 1
+            property color textSelectionColor: '#3d4856'
+            property double radius: 3
+        }
 
-        TextInput{
+        Workspace.InputBox {
             id : searchInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -375,18 +396,10 @@ Rectangle{
 
             width: parent.width > implicitWidth ? parent.width : implicitWidth
 
-            color : "#afafaf"
-            font.family: "Open Sans, Courier"
-            font.pixelSize: 12
-            font.weight: Font.Light
-
-            onActiveFocusChanged: {
-                if (!activeFocus){
-                    root.cancel()
-                }
+            onActiveFocusLost: {
+                root.cancel()
             }
-
-            selectByMouse: true
+            style: searchInputBox.searchInputStyle
 
             text: ""
             onTextChanged: {
@@ -452,109 +465,18 @@ Rectangle{
         anchors.fill: parent
         anchors.topMargin: idInputItem && idInputItem.visible? header.height + 60 : header.height + 30
 
-        ScrollView{
-            anchors.top : parent.top
-            anchors.left: parent.left
 
-            height : root.height - container.anchors.topMargin
-            width: root.width / 2
+        property QtObject listViewStyle: QtObject{
+            property QtObject labelStyle: Workspace.TextStyle{}
+            property color backgroundColor: "#03070a"
+            property color selectionBackgroundColor: "#091927"
 
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
+            property double radius: 0
+            property color borderColor: "#000"
+            property double borderWidth: 0
+            property double opacity: 0.95
 
-            ListView{
-                id : categoryList
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer
-                       ? (activeIndex === 2 ? root.addContainer.model.importSpaces() : root.addContainer.model.types())
-                       : null
-
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
-
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
-
-                delegate: Component{
-
-                    Rectangle{
-                        width : categoryList.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
-
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: modelData
-                        }
-
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                categoryList.currentIndex = index
-                                if ( modelData === 'All' ) {
-                                    if (root.activeIndex === 2){
-                                        root.addContainer.model.setImportFilter('')
-                                    } else {
-                                        root.addContainer.model.setTypeFilter('')
-                                    }
-                                }
-                                else {
-                                    if (root.activeIndex === 2) {
-                                        root.addContainer.model.setImportFilter(modelData)
-                                    } else {
-                                        root.addContainer.model.setTypeFilter(modelData)
-                                    }
-
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        ScrollView{
-            anchors.top : parent.top
-            anchors.right: parent.right
-
-            height : root.height - container.anchors.topMargin
-            width: root.width / 2
-
-            style: ScrollViewStyle {
+            property Component scrollStyle: ScrollViewStyle {
                 transientScrollBars: false
                 handle: Item {
                     implicitWidth: 10
@@ -578,54 +500,108 @@ Rectangle{
                 corner: Rectangle{color: root.color}
             }
 
-            ListView{
-                id : listView
-                anchors.fill: parent
-                anchors.rightMargin: 2
-                anchors.bottomMargin: 5
-                anchors.topMargin: 0
-                visible: true
-                opacity: root.opacity
-                model: root.addContainer ? root.addContainer.model : null
+        }
 
-                currentIndex: 0
-                onCountChanged: currentIndex = 0
+        Workspace.SelectableListView {
+            id: categoryList
+            anchors.top : parent.top
+            anchors.left: parent.left
 
-                boundsBehavior : Flickable.StopAtBounds
-                highlightMoveDuration: 100
+            height : root.height - container.anchors.topMargin
+            width: root.width / 2
 
-                delegate: Component{
-                    Rectangle{
-                        property string objectType : model.objectType
-                        property string type : model.type
-                        property string code: model.code
-                        property int category: model.category
+            model: root.addContainer
+                   ? (activeIndex === 2 ? root.addContainer.model.importSpaces() : root.addContainer.model.types())
+                   : null
+            style: container.listViewStyle
+            delegate: Component{
 
-                        width : listView.width
-                        height : 25
-                        color : ListView.isCurrentItem ? root.selectionColor : "transparent"
-                        Text{
-                            id: label
-                            anchors.left: parent.left
-                            anchors.leftMargin: 10
-                            anchors.verticalCenter: parent.verticalCenter
+                Rectangle{
+                    width : categoryList.width
 
-                            font.family: root.fontFamily
-                            font.pixelSize: root.fontSize
-                            font.weight: Font.Light
+                    height : 25
+                    color : ListView.isCurrentItem ? categoryList.style.selectionBackgroundColor : "transparent"
+                    Text{
+                        id: label
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
 
-                            color: "#fafafa"
-                            text: model.label
+                        font.family: root.fontFamily
+                        font.pixelSize: root.fontSize
+                        font.weight: Font.Light
+
+                        color: "#fafafa"
+                        text: modelData
+                    }
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            categoryList.currentIndex = index
+                            if ( modelData === 'All' ) {
+                                if (root.activeIndex === 2){
+                                    root.addContainer.model.setImportFilter('')
+                                } else {
+                                    root.addContainer.model.setTypeFilter('')
+                                }
+                            }
+                            else {
+                                if (root.activeIndex === 2) {
+                                    root.addContainer.model.setImportFilter(modelData)
+                                } else {
+                                    root.addContainer.model.setTypeFilter(modelData)
+                                }
+
+                            }
                         }
+                    }
+                }
+            }
+        }
 
-                        MouseArea{
-                            anchors.fill: parent
-                            onClicked: {
-                                listView.currentIndex = index
-                            }
-                            onDoubleClicked: {
-                                acceptSelection()
-                            }
+        Workspace.SelectableListView {
+            id: listView
+            anchors.top : parent.top
+            anchors.right: parent.right
+
+            height : root.height - container.anchors.topMargin
+            width: root.width / 2
+
+            model: root.addContainer ? root.addContainer.model : null
+            style: container.listViewStyle
+
+            delegate: Component{
+                Rectangle{
+                    property string objectType : model.objectType
+                    property string type : model.type
+                    property string code: model.code
+                    property int category: model.category
+
+                    width : listView.width
+                    height : 25
+                    color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                    Text{
+                        id: label
+                        anchors.left: parent.left
+                        anchors.leftMargin: 10
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        font.family: root.fontFamily
+                        font.pixelSize: root.fontSize
+                        font.weight: Font.Light
+
+                        color: "#fafafa"
+                        text: model.label
+                    }
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            listView.currentIndex = index
+                        }
+                        onDoubleClicked: {
+                            root.acceptSelection()
                         }
                     }
                 }
