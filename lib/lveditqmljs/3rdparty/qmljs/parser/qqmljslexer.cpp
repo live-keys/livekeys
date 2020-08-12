@@ -37,10 +37,10 @@
 **
 ****************************************************************************/
 
-#include "qmljslexer_p.h"
-#include "qmljsengine_p.h"
-#include "qmljsmemorypool_p.h"
-#include "qmljskeywords_p.h"
+#include "qqmljslexer_p.h"
+#include "qqmljsengine_p.h"
+#include "qqmljsmemorypool_p.h"
+#include "qqmljskeywords_p.h"
 
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qvarlengtharray.h>
@@ -85,10 +85,11 @@ static inline QChar convertUnicode(QChar c1, QChar c2, QChar c3, QChar c4)
 
 Lexer::Lexer(Engine *engine)
     : _engine(engine)
-    , _codePtr(0)
-    , _lastLinePtr(0)
-    , _tokenLinePtr(0)
-    , _tokenStartPtr(0)
+    , _codePtr(nullptr)
+    , _endPtr(nullptr)
+    , _lastLinePtr(nullptr)
+    , _tokenLinePtr(nullptr)
+    , _tokenStartPtr(nullptr)
     , _char(QLatin1Char('\n'))
     , _errorCode(NoError)
     , _currentLineNumber(0)
@@ -588,14 +589,14 @@ again:
             chars.append('\0');
 
             const char *begin = chars.constData();
-            const char *end = 0;
+            const char *end = nullptr;
             bool ok = false;
 
             _tokenValue = qstrtod(begin, &end, &ok);
 
             if (end - begin != chars.size() - 1) {
                 _errorCode = IllegalExponentIndicator;
-                _errorMessage = QCoreApplication::translate("QmlParser", "Illegal syntax for exponential number.");
+                _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal syntax for exponential number");
                 return T_ERROR;
             }
 
@@ -688,7 +689,7 @@ again:
                     if (qmlMode())
                         break;
                     _errorCode = IllegalCharacter;
-                    _errorMessage = QCoreApplication::translate("QmlParser", "Stray newline in string literal.");
+                    _errorMessage = QCoreApplication::translate("QQmlParser", "Stray newline in string literal");
                     return T_ERROR;
                 } else if (_char == QLatin1Char('\\')) {
                     break;
@@ -724,6 +725,11 @@ again:
                 return multilineStringLiteral ? T_MULTILINE_STRING_LITERAL : T_STRING_LITERAL;
             } else if (_char == QLatin1Char('\\')) {
                 scanChar();
+                if (_codePtr > _endPtr) {
+                    _errorCode = IllegalEscapeSequence;
+                    _errorMessage = QCoreApplication::translate("QQmlParser", "End of file reached at escape sequence");
+                    return T_ERROR;
+                }
 
                 QChar u;
 
@@ -734,7 +740,7 @@ again:
                     u = decodeUnicodeEscapeCharacter(&ok);
                     if (! ok) {
                         _errorCode = IllegalUnicodeEscapeSequence;
-                        _errorMessage = QCoreApplication::translate("QmlParser", "Illegal unicode escape sequence.");
+                        _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal unicode escape sequence");
                         return T_ERROR;
                     }
                 } break;
@@ -745,7 +751,7 @@ again:
                     u = decodeHexEscapeCharacter(&ok);
                     if (!ok) {
                         _errorCode = IllegalHexadecimalEscapeSequence;
-                        _errorMessage = QCoreApplication::translate("QmlParser", "Illegal hexadecimal escape sequence.");
+                        _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal hexadecimal escape sequence");
                         return T_ERROR;
                     }
                 } break;
@@ -767,7 +773,7 @@ again:
                         u = QLatin1Char('\0');
                         break;
                     }
-                    // fall through
+                    Q_FALLTHROUGH();
                 case '1':
                 case '2':
                 case '3':
@@ -778,7 +784,7 @@ again:
                 case '8':
                 case '9':
                     _errorCode = IllegalEscapeSequence;
-                    _errorMessage = QCoreApplication::translate("QmlParser", "Octal escape sequences are not allowed.");
+                    _errorMessage = QCoreApplication::translate("QQmlParser", "Octal escape sequences are not allowed");
                     return T_ERROR;
 
                 case '\r':
@@ -802,7 +808,7 @@ again:
         }
 
         _errorCode = UnclosedStringLiteral;
-        _errorMessage = QCoreApplication::translate("QmlParser", "Unclosed string at end of line.");
+        _errorMessage = QCoreApplication::translate("QQmlParser", "Unclosed string at end of line");
         return T_ERROR;
     }
     case '0':
@@ -826,7 +832,7 @@ again:
             c = decodeUnicodeEscapeCharacter(&ok);
             if (! ok) {
                 _errorCode = IllegalUnicodeEscapeSequence;
-                _errorMessage = QCoreApplication::translate("QmlParser", "Illegal unicode escape sequence.");
+                _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal unicode escape sequence");
                 return T_ERROR;
             }
         }
@@ -851,7 +857,7 @@ again:
                     c = decodeUnicodeEscapeCharacter(&ok);
                     if (! ok) {
                         _errorCode = IllegalUnicodeEscapeSequence;
-                        _errorMessage = QCoreApplication::translate("QmlParser", "Illegal unicode escape sequence.");
+                        _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal unicode escape sequence");
                         return T_ERROR;
                     }
                     if (isIdentifierPart(c))
@@ -909,12 +915,12 @@ int Lexer::scanNumber(QChar ch)
                 scanChar();
             }
             buf.append('\0');
-            _tokenValue = strtod(buf.constData(), 0);
+            _tokenValue = strtod(buf.constData(), nullptr);
             return T_NUMERIC_LITERAL;
         }
     } else if (_char.isDigit() && !qmlMode()) {
         _errorCode = IllegalCharacter;
-        _errorMessage = QCoreApplication::translate("QmlParser", "Decimal numbers cannot start with \"0\".");
+        _errorMessage = QCoreApplication::translate("QQmlParser", "Decimal numbers can't start with '0'");
         return T_ERROR;
     }
 
@@ -935,7 +941,7 @@ int Lexer::scanNumber(QChar ch)
 
         if (chars.size() < 3) {
             _errorCode = IllegalHexNumber;
-            _errorMessage = QCoreApplication::translate("QmlParser", "At least one hexadecimal digit is required after \"0%1\".").arg(ch);
+            _errorMessage = QCoreApplication::translate("QQmlParser", "At least one hexadecimal digit is required after '0%1'").arg(ch);
             return T_ERROR;
         }
 
@@ -995,7 +1001,7 @@ int Lexer::scanNumber(QChar ch)
         }
     }
 
-    if (chars.size() == 1) {
+    if (chars.length() == 1) {
         // if we ended up with a single digit, then it was a '0'
         _tokenValue = 0;
         return T_NUMERIC_LITERAL;
@@ -1004,14 +1010,14 @@ int Lexer::scanNumber(QChar ch)
     chars.append('\0');
 
     const char *begin = chars.constData();
-    const char *end = 0;
+    const char *end = nullptr;
     bool ok = false;
 
     _tokenValue = qstrtod(begin, &end, &ok);
 
     if (end - begin != chars.size() - 1) {
         _errorCode = IllegalExponentIndicator;
-        _errorMessage = QCoreApplication::translate("QmlParser", "Illegal syntax for exponential number.");
+        _errorMessage = QCoreApplication::translate("QQmlParser", "Illegal syntax for exponential number");
         return T_ERROR;
     }
 
@@ -1037,7 +1043,7 @@ bool Lexer::scanRegExp(RegExpBodyPrefix prefix)
             while (isIdentLetter(_char)) {
                 int flag = regExpFlagFromChar(_char);
                 if (flag == 0 || _patternFlags & flag) {
-                    _errorMessage = QCoreApplication::translate("QmlParser", "Invalid regular expression flag \"%0\".")
+                    _errorMessage = QCoreApplication::translate("QQmlParser", "Invalid regular expression flag '%0'")
                              .arg(QChar(_char));
                     return false;
                 }
@@ -1054,7 +1060,7 @@ bool Lexer::scanRegExp(RegExpBodyPrefix prefix)
             scanChar();
 
             if (_codePtr > _endPtr || isLineTerminator()) {
-                _errorMessage = QCoreApplication::translate("QmlParser", "Unterminated regular expression backslash sequence.");
+                _errorMessage = QCoreApplication::translate("QQmlParser", "Unterminated regular expression backslash sequence");
                 return false;
             }
 
@@ -1076,7 +1082,7 @@ bool Lexer::scanRegExp(RegExpBodyPrefix prefix)
                     scanChar();
 
                     if (_codePtr > _endPtr || isLineTerminator()) {
-                        _errorMessage = QCoreApplication::translate("QmlParser", "Unterminated regular expression backslash sequence.");
+                        _errorMessage = QCoreApplication::translate("QQmlParser", "Unterminated regular expression backslash sequence");
                         return false;
                     }
 
@@ -1089,7 +1095,7 @@ bool Lexer::scanRegExp(RegExpBodyPrefix prefix)
             }
 
             if (_char != QLatin1Char(']')) {
-                _errorMessage = QCoreApplication::translate("QmlParser", "Unterminated regular expression class.");
+                _errorMessage = QCoreApplication::translate("QQmlParser", "Unterminated regular expression class");
                 return false;
             }
 
@@ -1099,7 +1105,7 @@ bool Lexer::scanRegExp(RegExpBodyPrefix prefix)
 
         default:
             if (_codePtr > _endPtr || isLineTerminator()) {
-                _errorMessage = QCoreApplication::translate("QmlParser", "Unterminated regular expression literal.");
+                _errorMessage = QCoreApplication::translate("QQmlParser", "Unterminated regular expression literal");
                 return false;
             } else {
                 _tokenText += _char;
@@ -1231,49 +1237,49 @@ bool Lexer::canInsertAutomaticSemicolon(int token) const
 }
 
 static const int uriTokens[] = {
-    QmlJSGrammar::T_IDENTIFIER,
-    QmlJSGrammar::T_PROPERTY,
-    QmlJSGrammar::T_SIGNAL,
-    QmlJSGrammar::T_READONLY,
-    QmlJSGrammar::T_ON,
-    QmlJSGrammar::T_BREAK,
-    QmlJSGrammar::T_CASE,
-    QmlJSGrammar::T_CATCH,
-    QmlJSGrammar::T_CONTINUE,
-    QmlJSGrammar::T_DEFAULT,
-    QmlJSGrammar::T_DELETE,
-    QmlJSGrammar::T_DO,
-    QmlJSGrammar::T_ELSE,
-    QmlJSGrammar::T_FALSE,
-    QmlJSGrammar::T_FINALLY,
-    QmlJSGrammar::T_FOR,
-    QmlJSGrammar::T_FUNCTION,
-    QmlJSGrammar::T_IF,
-    QmlJSGrammar::T_IN,
-    QmlJSGrammar::T_INSTANCEOF,
-    QmlJSGrammar::T_NEW,
-    QmlJSGrammar::T_NULL,
-    QmlJSGrammar::T_RETURN,
-    QmlJSGrammar::T_SWITCH,
-    QmlJSGrammar::T_THIS,
-    QmlJSGrammar::T_THROW,
-    QmlJSGrammar::T_TRUE,
-    QmlJSGrammar::T_TRY,
-    QmlJSGrammar::T_TYPEOF,
-    QmlJSGrammar::T_VAR,
-    QmlJSGrammar::T_VOID,
-    QmlJSGrammar::T_WHILE,
-    QmlJSGrammar::T_CONST,
-    QmlJSGrammar::T_DEBUGGER,
-    QmlJSGrammar::T_RESERVED_WORD,
-    QmlJSGrammar::T_WITH,
+    QQmlJSGrammar::T_IDENTIFIER,
+    QQmlJSGrammar::T_PROPERTY,
+    QQmlJSGrammar::T_SIGNAL,
+    QQmlJSGrammar::T_READONLY,
+    QQmlJSGrammar::T_ON,
+    QQmlJSGrammar::T_BREAK,
+    QQmlJSGrammar::T_CASE,
+    QQmlJSGrammar::T_CATCH,
+    QQmlJSGrammar::T_CONTINUE,
+    QQmlJSGrammar::T_DEFAULT,
+    QQmlJSGrammar::T_DELETE,
+    QQmlJSGrammar::T_DO,
+    QQmlJSGrammar::T_ELSE,
+    QQmlJSGrammar::T_FALSE,
+    QQmlJSGrammar::T_FINALLY,
+    QQmlJSGrammar::T_FOR,
+    QQmlJSGrammar::T_FUNCTION,
+    QQmlJSGrammar::T_IF,
+    QQmlJSGrammar::T_IN,
+    QQmlJSGrammar::T_INSTANCEOF,
+    QQmlJSGrammar::T_NEW,
+    QQmlJSGrammar::T_NULL,
+    QQmlJSGrammar::T_RETURN,
+    QQmlJSGrammar::T_SWITCH,
+    QQmlJSGrammar::T_THIS,
+    QQmlJSGrammar::T_THROW,
+    QQmlJSGrammar::T_TRUE,
+    QQmlJSGrammar::T_TRY,
+    QQmlJSGrammar::T_TYPEOF,
+    QQmlJSGrammar::T_VAR,
+    QQmlJSGrammar::T_VOID,
+    QQmlJSGrammar::T_WHILE,
+    QQmlJSGrammar::T_CONST,
+    QQmlJSGrammar::T_DEBUGGER,
+    QQmlJSGrammar::T_RESERVED_WORD,
+    QQmlJSGrammar::T_WITH,
 
-    QmlJSGrammar::EOF_SYMBOL
+    QQmlJSGrammar::EOF_SYMBOL
 };
 static inline bool isUriToken(int token)
 {
     const int *current = uriTokens;
-    while (*current != QmlJSGrammar::EOF_SYMBOL) {
+    while (*current != QQmlJSGrammar::EOF_SYMBOL) {
         if (*current == token)
             return true;
         ++current;
@@ -1303,7 +1309,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
 
         if (! (directiveName == QLatin1String("pragma") ||
                directiveName == QLatin1String("import"))) {
-            error->message = QCoreApplication::translate("QmlParser", "Syntax error.");
+            error->message = QCoreApplication::translate("QQmlParser", "Syntax error");
             error->loc.startLine = tokenStartLine();
             error->loc.startColumn = tokenStartColumn();
             return false; // not a valid directive name
@@ -1313,7 +1319,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
         if (directiveName == QLatin1String("pragma")) {
             // .pragma library
             if (! (lex() == T_IDENTIFIER && tokenText() == QLatin1String("library"))) {
-                error->message = QCoreApplication::translate("QmlParser", "Syntax error.");
+                error->message = QCoreApplication::translate("QQmlParser", "Syntax error");
                 error->loc.startLine = tokenStartLine();
                 error->loc.startColumn = tokenStartColumn();
                 return false; // expected `library
@@ -1337,7 +1343,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
                 pathOrUri = tokenText();
 
                 if (!pathOrUri.endsWith(QLatin1String("js"))) {
-                    error->message = QCoreApplication::translate("QmlParser","Imported file must be a script.");
+                    error->message = QCoreApplication::translate("QQmlParser","Imported file must be a script");
                     error->loc.startLine = tokenStartLine();
                     error->loc.startColumn = tokenStartColumn();
                     return false;
@@ -1348,7 +1354,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
 
                 while (true) {
                     if (!isUriToken(_tokenKind)) {
-                        error->message = QCoreApplication::translate("QmlParser","Invalid module URI.");
+                        error->message = QCoreApplication::translate("QQmlParser","Invalid module URI");
                         error->loc.startLine = tokenStartLine();
                         error->loc.startColumn = tokenStartColumn();
                         return false;
@@ -1358,19 +1364,19 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
 
                     lex();
                     if (tokenStartLine() != lineNumber) {
-                        error->message = QCoreApplication::translate("QmlParser","Invalid module URI.");
+                        error->message = QCoreApplication::translate("QQmlParser","Invalid module URI");
                         error->loc.startLine = tokenStartLine();
                         error->loc.startColumn = tokenStartColumn();
                         return false;
                     }
-                    if (_tokenKind != QmlJSGrammar::T_DOT)
+                    if (_tokenKind != QQmlJSGrammar::T_DOT)
                         break;
 
                     pathOrUri.append(QLatin1Char('.'));
 
                     lex();
                     if (tokenStartLine() != lineNumber) {
-                        error->message = QCoreApplication::translate("QmlParser","Invalid module URI.");
+                        error->message = QCoreApplication::translate("QQmlParser","Invalid module URI");
                         error->loc.startLine = tokenStartLine();
                         error->loc.startColumn = tokenStartColumn();
                         return false;
@@ -1378,7 +1384,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
                 }
 
                 if (_tokenKind != T_NUMERIC_LITERAL) {
-                    error->message = QCoreApplication::translate("QmlParser","Module import requires a version.");
+                    error->message = QCoreApplication::translate("QQmlParser","Module import requires a version");
                     error->loc.startLine = tokenStartLine();
                     error->loc.startColumn = tokenStartColumn();
                     return false; // expected the module version number
@@ -1392,9 +1398,9 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
             //
             if (! (lex() == T_IDENTIFIER && tokenText() == QLatin1String("as") && tokenStartLine() == lineNumber)) {
                 if (fileImport)
-                    error->message = QCoreApplication::translate("QmlParser", "File import requires a qualifier.");
+                    error->message = QCoreApplication::translate("QQmlParser", "File import requires a qualifier");
                 else
-                    error->message = QCoreApplication::translate("QmlParser", "Module import requires a qualifier.");
+                    error->message = QCoreApplication::translate("QQmlParser", "Module import requires a qualifier");
                 if (tokenStartLine() != lineNumber) {
                     error->loc.startLine = lineNumber;
                     error->loc.startColumn = column;
@@ -1407,9 +1413,9 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
 
             if (lex() != T_IDENTIFIER || tokenStartLine() != lineNumber) {
                 if (fileImport)
-                    error->message = QCoreApplication::translate("QmlParser", "File import requires a qualifier.");
+                    error->message = QCoreApplication::translate("QQmlParser", "File import requires a qualifier");
                 else
-                    error->message = QCoreApplication::translate("QmlParser", "Module import requires a qualifier.");
+                    error->message = QCoreApplication::translate("QQmlParser", "Module import requires a qualifier");
                 error->loc.startLine = tokenStartLine();
                 error->loc.startColumn = tokenStartColumn();
                 return false; // expected module name
@@ -1417,7 +1423,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
 
             const QString module = tokenText();
             if (!module.at(0).isUpper()) {
-                error->message = QCoreApplication::translate("QmlParser","Invalid import qualifier.");
+                error->message = QCoreApplication::translate("QQmlParser","Invalid import qualifier");
                 error->loc.startLine = tokenStartLine();
                 error->loc.startColumn = tokenStartColumn();
                 return false;
@@ -1430,7 +1436,7 @@ bool Lexer::scanDirectives(Directives *directives, DiagnosticMessage *error)
         }
 
         if (tokenStartLine() != lineNumber) {
-            error->message = QCoreApplication::translate("QmlParser", "Syntax error.");
+            error->message = QCoreApplication::translate("QQmlParser", "Syntax error");
             error->loc.startLine = tokenStartLine();
             error->loc.startColumn = tokenStartColumn();
             return false; // the directives cannot span over multiple lines

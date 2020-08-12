@@ -32,7 +32,7 @@
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
 
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
 
 #include "live/documenthandler.h"

@@ -37,12 +37,17 @@
 **
 ****************************************************************************/
 
-#include "qmljsengine_p.h"
-#include "qmljsglobal_p.h"
+#include "qqmljsengine_p.h"
+#include "qqmljsglobal_p.h"
 
-#include <QtCore/qnumeric.h>
 #include <QtCore/qhash.h>
 #include <QtCore/qdebug.h>
+
+constexpr static inline double qt_qnan() noexcept{
+    Q_STATIC_ASSERT_X(std::numeric_limits<double>::has_quiet_NaN,
+        "platform has no definition for quiet NaN for type double");
+    return std::numeric_limits<double>::quiet_NaN();
+}
 
 QT_QML_BEGIN_NAMESPACE
 
@@ -62,7 +67,7 @@ static inline int toDigit(char c)
 double integerFromString(const char *buf, int size, int radix)
 {
     if (size == 0)
-        return qQNaN();
+        return qt_qnan();
 
     double sign = 1.0;
     int i = 0;
@@ -101,7 +106,7 @@ double integerFromString(const char *buf, int size, int radix)
         if (!qstrcmp(buf, "Infinity"))
             result = qInf();
         else
-            result = qQNaN();
+            result = qt_qnan();
     } else {
         result = 0;
         double multiplier = 1;
@@ -114,13 +119,13 @@ double integerFromString(const char *buf, int size, int radix)
 
 double integerFromString(const QString &str, int radix)
 {
-    QByteArray ba = str.trimmed().toLatin1();
+    QByteArray ba = QStringRef(&str).trimmed().toLatin1();
     return integerFromString(ba.constData(), ba.size(), radix);
 }
 
 
 Engine::Engine()
-    : _lexer(0), _directives(0)
+    : _lexer(nullptr), _directives(nullptr)
 { }
 
 Engine::~Engine()
@@ -160,6 +165,6 @@ QStringRef Engine::newStringRef(const QString &text)
 QStringRef Engine::newStringRef(const QChar *chars, int size)
 { return newStringRef(QString(chars, size)); }
 
-} // end of namespace QmlJS
+} // end of namespace QQmlJS
 
 QT_QML_END_NAMESPACE

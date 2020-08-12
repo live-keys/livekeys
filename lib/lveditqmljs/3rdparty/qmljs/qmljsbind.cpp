@@ -29,7 +29,7 @@
 ****************************************************************************/
 
 #include "qmljsbind.h"
-#include "parser/qmljsast_p.h"
+#include "parser/qqmljsast_p.h"
 #include "qmljsutils.h"
 #include "qmljsdocument.h"
 

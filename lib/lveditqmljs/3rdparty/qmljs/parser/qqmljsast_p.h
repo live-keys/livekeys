@@ -37,8 +37,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMLJSAST_P_H
-#define QMLJSAST_P_H
+#ifndef QQMLJSAST_P_H
+#define QQMLJSAST_P_H
 
 //
 //  W A R N I N G
@@ -51,15 +51,15 @@
 // We mean it.
 //
 
-#include "qmljsastvisitor_p.h"
-#include "qmljsglobal_p.h"
-#include "qmljsmemorypool_p.h"
+#include "qqmljsastvisitor_p.h"
+#include "qqmljsglobal_p.h"
+#include "qqmljsmemorypool_p.h"
 
 #include <QtCore/qstring.h>
 
 QT_QML_BEGIN_NAMESPACE
 
-#define QMLJS_DECLARE_AST_NODE(name) \
+#define QQMLJS_DECLARE_AST_NODE(name) \
   enum { K = Kind_##name };
 
 namespace QSOperator // ### rename
@@ -100,7 +100,8 @@ enum Op {
     Sub,
     URShift,
     InplaceURightShift,
-    InplaceXor
+    InplaceXor,
+    Invalid
 };
 
 } // namespace QSOperator
@@ -218,11 +219,12 @@ public:
         Kind_UiQualifiedPragmaId,
         Kind_UiScriptBinding,
         Kind_UiSourceElement,
-        Kind_UiHeaderItemList
+        Kind_UiHeaderItemList,
+        Kind_UiEnumDeclaration,
+        Kind_UiEnumMemberList
     };
 
-    inline Node()
-        : kind(Kind_Undefined) {}
+    inline Node() {}
 
     // NOTE: node destructors are never called,
     //       instead we block free the memory
@@ -245,7 +247,7 @@ public:
     virtual SourceLocation lastSourceLocation() const = 0;
 
 // attributes
-    int kind;
+    int kind = Kind_Undefined;
 };
 
 class QML_PARSER_EXPORT ExpressionNode: public Node
@@ -253,7 +255,7 @@ class QML_PARSER_EXPORT ExpressionNode: public Node
 public:
     ExpressionNode() {}
 
-    virtual ExpressionNode *expressionCast();
+    ExpressionNode *expressionCast() override;
 };
 
 class QML_PARSER_EXPORT Statement: public Node
@@ -261,24 +263,24 @@ class QML_PARSER_EXPORT Statement: public Node
 public:
     Statement() {}
 
-    virtual Statement *statementCast();
+    Statement *statementCast() override;
 };
 
 class QML_PARSER_EXPORT NestedExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NestedExpression)
+    QQMLJS_DECLARE_AST_NODE(NestedExpression)
 
     NestedExpression(ExpressionNode *expression)
         : expression(expression)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lparenToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rparenToken; }
 
 // attributes
@@ -290,16 +292,16 @@ public:
 class QML_PARSER_EXPORT ThisExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ThisExpression)
+    QQMLJS_DECLARE_AST_NODE(ThisExpression)
 
     ThisExpression() { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return thisToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return thisToken; }
 
 // attributes
@@ -309,17 +311,17 @@ public:
 class QML_PARSER_EXPORT IdentifierExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(IdentifierExpression)
+    QQMLJS_DECLARE_AST_NODE(IdentifierExpression)
 
     IdentifierExpression(const QStringRef &n):
         name (n) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return identifierToken; }
 
 // attributes
@@ -330,16 +332,16 @@ public:
 class QML_PARSER_EXPORT NullExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NullExpression)
+    QQMLJS_DECLARE_AST_NODE(NullExpression)
 
     NullExpression() { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return nullToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return nullToken; }
 
 // attributes
@@ -349,16 +351,16 @@ public:
 class QML_PARSER_EXPORT TrueLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(TrueLiteral)
+    QQMLJS_DECLARE_AST_NODE(TrueLiteral)
 
     TrueLiteral() { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return trueToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return trueToken; }
 
 // attributes
@@ -368,16 +370,16 @@ public:
 class QML_PARSER_EXPORT FalseLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FalseLiteral)
+    QQMLJS_DECLARE_AST_NODE(FalseLiteral)
 
     FalseLiteral() { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return falseToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return falseToken; }
 
 // attributes
@@ -387,17 +389,17 @@ public:
 class QML_PARSER_EXPORT NumericLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NumericLiteral)
+    QQMLJS_DECLARE_AST_NODE(NumericLiteral)
 
     NumericLiteral(double v):
         value(v) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return literalToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return literalToken; }
 
 // attributes:
@@ -408,17 +410,17 @@ public:
 class QML_PARSER_EXPORT StringLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(StringLiteral)
+    QQMLJS_DECLARE_AST_NODE(StringLiteral)
 
     StringLiteral(const QStringRef &v):
         value (v) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return literalToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return literalToken; }
 
 // attributes:
@@ -429,17 +431,17 @@ public:
 class QML_PARSER_EXPORT RegExpLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(RegExpLiteral)
+    QQMLJS_DECLARE_AST_NODE(RegExpLiteral)
 
     RegExpLiteral(const QStringRef &p, int f):
         pattern (p), flags (f) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return literalToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return literalToken; }
 
 // attributes:
@@ -451,26 +453,26 @@ public:
 class QML_PARSER_EXPORT ArrayLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ArrayLiteral)
+    QQMLJS_DECLARE_AST_NODE(ArrayLiteral)
 
     ArrayLiteral(Elision *e):
-        elements (0), elision (e)
+        elements (nullptr), elision (e)
         { kind = K; }
 
     ArrayLiteral(ElementList *elts):
-        elements (elts), elision (0)
+        elements (elts), elision (nullptr)
         { kind = K; }
 
     ArrayLiteral(ElementList *elts, Elision *e):
         elements (elts), elision (e)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lbracketToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbracketToken; }
 
 // attributes
@@ -484,24 +486,24 @@ public:
 class QML_PARSER_EXPORT ObjectLiteral: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ObjectLiteral)
+    QQMLJS_DECLARE_AST_NODE(ObjectLiteral)
 
-    ObjectLiteral():
-        properties (0) { kind = K; }
+    ObjectLiteral()
+        { kind = K; }
 
     ObjectLiteral(PropertyAssignmentList *plist):
         properties (plist) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lbraceToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
 // attributes
-    PropertyAssignmentList *properties;
+    PropertyAssignmentList *properties = nullptr;
     SourceLocation lbraceToken;
     SourceLocation rbraceToken;
 };
@@ -509,7 +511,7 @@ public:
 class QML_PARSER_EXPORT Elision: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Elision)
+    QQMLJS_DECLARE_AST_NODE(Elision)
 
     Elision():
         next (this) { kind = K; }
@@ -521,18 +523,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return commaToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : commaToken; }
 
     inline Elision *finish ()
     {
         Elision *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -544,7 +546,7 @@ public:
 class QML_PARSER_EXPORT ElementList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ElementList)
+    QQMLJS_DECLARE_AST_NODE(ElementList)
 
     ElementList(Elision *e, ExpressionNode *expr):
         elision (e), expression (expr), next (this)
@@ -561,20 +563,20 @@ public:
     inline ElementList *finish ()
     {
         ElementList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     {
         if (elision)
             return elision->firstSourceLocation();
         return expression->firstSourceLocation();
     }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (next)
             return next->lastSourceLocation();
@@ -591,14 +593,14 @@ public:
 class QML_PARSER_EXPORT PropertyName: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PropertyName)
+    QQMLJS_DECLARE_AST_NODE(PropertyName)
 
     PropertyName() { kind = K; }
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return propertyNameToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return propertyNameToken; }
 
     virtual QString asString() const = 0;
@@ -620,7 +622,7 @@ public:
 class QML_PARSER_EXPORT PropertyAssignmentList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PropertyAssignmentList)
+    QQMLJS_DECLARE_AST_NODE(PropertyAssignmentList)
 
     PropertyAssignmentList(PropertyAssignment *assignment)
         : assignment(assignment)
@@ -638,16 +640,16 @@ public:
     inline PropertyAssignmentList *finish ()
     {
         PropertyAssignmentList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return assignment->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : assignment->lastSourceLocation(); }
 
 // attributes
@@ -659,18 +661,18 @@ public:
 class QML_PARSER_EXPORT PropertyNameAndValue: public PropertyAssignment
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PropertyNameAndValue)
+    QQMLJS_DECLARE_AST_NODE(PropertyNameAndValue)
 
     PropertyNameAndValue(PropertyName *n, ExpressionNode *v)
         : PropertyAssignment(n), value(v)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return name->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return value->lastSourceLocation(); }
 
 // attributes
@@ -682,7 +684,7 @@ public:
 class QML_PARSER_EXPORT PropertyGetterSetter: public PropertyAssignment
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PropertyGetterSetter)
+    QQMLJS_DECLARE_AST_NODE(PropertyGetterSetter)
 
     enum Type {
         Getter,
@@ -690,19 +692,19 @@ public:
     };
 
     PropertyGetterSetter(PropertyName *n, FunctionBody *b)
-        : PropertyAssignment(n), type(Getter), formals(0), functionBody (b)
+        : PropertyAssignment(n), type(Getter), formals(nullptr), functionBody (b)
     { kind = K; }
 
     PropertyGetterSetter(PropertyName *n, FormalParameterList *f, FunctionBody *b)
         : PropertyAssignment(n), type(Setter), formals(f), functionBody (b)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return getSetToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
 // attributes
@@ -719,14 +721,14 @@ public:
 class QML_PARSER_EXPORT IdentifierPropertyName: public PropertyName
 {
 public:
-    QMLJS_DECLARE_AST_NODE(IdentifierPropertyName)
+    QQMLJS_DECLARE_AST_NODE(IdentifierPropertyName)
 
     IdentifierPropertyName(const QStringRef &n):
         id (n) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual QString asString() const { return id.toString(); }
+    QString asString() const override { return id.toString(); }
 
 // attributes
     QStringRef id;
@@ -735,14 +737,14 @@ public:
 class QML_PARSER_EXPORT StringLiteralPropertyName: public PropertyName
 {
 public:
-    QMLJS_DECLARE_AST_NODE(StringLiteralPropertyName)
+    QQMLJS_DECLARE_AST_NODE(StringLiteralPropertyName)
 
     StringLiteralPropertyName(const QStringRef &n):
         id (n) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual QString asString() const { return id.toString(); }
+    QString asString() const override { return id.toString(); }
 
 // attributes
     QStringRef id;
@@ -751,14 +753,14 @@ public:
 class QML_PARSER_EXPORT NumericLiteralPropertyName: public PropertyName
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NumericLiteralPropertyName)
+    QQMLJS_DECLARE_AST_NODE(NumericLiteralPropertyName)
 
     NumericLiteralPropertyName(double n):
         id (n) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual QString asString() const { return QString::number(id, 'g', 16); }
+    QString asString() const override { return QString::number(id, 'g', 16); }
 
 // attributes
     double id;
@@ -767,18 +769,18 @@ public:
 class QML_PARSER_EXPORT ArrayMemberExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ArrayMemberExpression)
+    QQMLJS_DECLARE_AST_NODE(ArrayMemberExpression)
 
     ArrayMemberExpression(ExpressionNode *b, ExpressionNode *e):
         base (b), expression (e)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return base->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbracketToken; }
 
 // attributes
@@ -791,18 +793,18 @@ public:
 class QML_PARSER_EXPORT FieldMemberExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FieldMemberExpression)
+    QQMLJS_DECLARE_AST_NODE(FieldMemberExpression)
 
     FieldMemberExpression(ExpressionNode *b, const QStringRef &n):
         base (b), name (n)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return base->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return identifierToken; }
 
     // attributes
@@ -815,18 +817,18 @@ public:
 class QML_PARSER_EXPORT NewMemberExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NewMemberExpression)
+    QQMLJS_DECLARE_AST_NODE(NewMemberExpression)
 
     NewMemberExpression(ExpressionNode *b, ArgumentList *a):
         base (b), arguments (a)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return newToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rparenToken; }
 
     // attributes
@@ -840,17 +842,17 @@ public:
 class QML_PARSER_EXPORT NewExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NewExpression)
+    QQMLJS_DECLARE_AST_NODE(NewExpression)
 
     NewExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return newToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -861,18 +863,18 @@ public:
 class QML_PARSER_EXPORT CallExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(CallExpression)
+    QQMLJS_DECLARE_AST_NODE(CallExpression)
 
     CallExpression(ExpressionNode *b, ArgumentList *a):
         base (b), arguments (a)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return base->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rparenToken; }
 
 // attributes
@@ -885,7 +887,7 @@ public:
 class QML_PARSER_EXPORT ArgumentList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ArgumentList)
+    QQMLJS_DECLARE_AST_NODE(ArgumentList)
 
     ArgumentList(ExpressionNode *e):
         expression (e), next (this)
@@ -899,12 +901,12 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return expression->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (next)
             return next->lastSourceLocation();
@@ -914,7 +916,7 @@ public:
     inline ArgumentList *finish ()
     {
         ArgumentList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -927,17 +929,17 @@ public:
 class QML_PARSER_EXPORT PostIncrementExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PostIncrementExpression)
+    QQMLJS_DECLARE_AST_NODE(PostIncrementExpression)
 
     PostIncrementExpression(ExpressionNode *b):
         base (b) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return base->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return incrementToken; }
 
 // attributes
@@ -948,17 +950,17 @@ public:
 class QML_PARSER_EXPORT PostDecrementExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PostDecrementExpression)
+    QQMLJS_DECLARE_AST_NODE(PostDecrementExpression)
 
     PostDecrementExpression(ExpressionNode *b):
         base (b) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return base->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return decrementToken; }
 
 // attributes
@@ -969,17 +971,17 @@ public:
 class QML_PARSER_EXPORT DeleteExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(DeleteExpression)
+    QQMLJS_DECLARE_AST_NODE(DeleteExpression)
 
     DeleteExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return deleteToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -990,17 +992,17 @@ public:
 class QML_PARSER_EXPORT VoidExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(VoidExpression)
+    QQMLJS_DECLARE_AST_NODE(VoidExpression)
 
     VoidExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return voidToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1011,17 +1013,17 @@ public:
 class QML_PARSER_EXPORT TypeOfExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(TypeOfExpression)
+    QQMLJS_DECLARE_AST_NODE(TypeOfExpression)
 
     TypeOfExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return typeofToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1032,17 +1034,17 @@ public:
 class QML_PARSER_EXPORT PreIncrementExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PreIncrementExpression)
+    QQMLJS_DECLARE_AST_NODE(PreIncrementExpression)
 
     PreIncrementExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return incrementToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1053,17 +1055,17 @@ public:
 class QML_PARSER_EXPORT PreDecrementExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(PreDecrementExpression)
+    QQMLJS_DECLARE_AST_NODE(PreDecrementExpression)
 
     PreDecrementExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return decrementToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1074,17 +1076,17 @@ public:
 class QML_PARSER_EXPORT UnaryPlusExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UnaryPlusExpression)
+    QQMLJS_DECLARE_AST_NODE(UnaryPlusExpression)
 
     UnaryPlusExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return plusToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1095,17 +1097,17 @@ public:
 class QML_PARSER_EXPORT UnaryMinusExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UnaryMinusExpression)
+    QQMLJS_DECLARE_AST_NODE(UnaryMinusExpression)
 
     UnaryMinusExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return minusToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1116,17 +1118,17 @@ public:
 class QML_PARSER_EXPORT TildeExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(TildeExpression)
+    QQMLJS_DECLARE_AST_NODE(TildeExpression)
 
     TildeExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return tildeToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1137,17 +1139,17 @@ public:
 class QML_PARSER_EXPORT NotExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(NotExpression)
+    QQMLJS_DECLARE_AST_NODE(NotExpression)
 
     NotExpression(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return notToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression->lastSourceLocation(); }
 
 // attributes
@@ -1158,20 +1160,20 @@ public:
 class QML_PARSER_EXPORT BinaryExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(BinaryExpression)
+    QQMLJS_DECLARE_AST_NODE(BinaryExpression)
 
     BinaryExpression(ExpressionNode *l, int o, ExpressionNode *r):
         left (l), op (o), right (r)
         { kind = K; }
 
-    virtual BinaryExpression *binaryExpressionCast();
+    BinaryExpression *binaryExpressionCast() override;
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return left->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return right->lastSourceLocation(); }
 
 // attributes
@@ -1184,18 +1186,18 @@ public:
 class QML_PARSER_EXPORT ConditionalExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ConditionalExpression)
+    QQMLJS_DECLARE_AST_NODE(ConditionalExpression)
 
     ConditionalExpression(ExpressionNode *e, ExpressionNode *t, ExpressionNode *f):
         expression (e), ok (t), ko (f)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return expression->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return ko->lastSourceLocation(); }
 
 // attributes
@@ -1209,17 +1211,17 @@ public:
 class QML_PARSER_EXPORT Expression: public ExpressionNode // ### rename
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Expression)
+    QQMLJS_DECLARE_AST_NODE(Expression)
 
     Expression(ExpressionNode *l, ExpressionNode *r):
         left (l), right (r) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return left->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return right->lastSourceLocation(); }
 
 // attributes
@@ -1231,17 +1233,17 @@ public:
 class QML_PARSER_EXPORT Block: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Block)
+    QQMLJS_DECLARE_AST_NODE(Block)
 
     Block(StatementList *slist):
         statements (slist) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lbraceToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
     // attributes
@@ -1253,7 +1255,7 @@ public:
 class QML_PARSER_EXPORT StatementList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(StatementList)
+    QQMLJS_DECLARE_AST_NODE(StatementList)
 
     StatementList(Statement *stmt):
         statement (stmt), next (this)
@@ -1267,18 +1269,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return statement->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : statement->lastSourceLocation(); }
 
     inline StatementList *finish ()
     {
         StatementList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -1290,18 +1292,18 @@ public:
 class QML_PARSER_EXPORT VariableStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(VariableStatement)
+    QQMLJS_DECLARE_AST_NODE(VariableStatement)
 
     VariableStatement(VariableDeclarationList *vlist):
         declarations (vlist)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return declarationKindToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1313,31 +1315,39 @@ public:
 class QML_PARSER_EXPORT VariableDeclaration: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(VariableDeclaration)
+    QQMLJS_DECLARE_AST_NODE(VariableDeclaration)
 
-    VariableDeclaration(const QStringRef &n, ExpressionNode *e):
-        name (n), expression (e), readOnly(false)
+    enum VariableScope {
+        FunctionScope,
+        BlockScope, // let
+        ReadOnlyBlockScope // const
+    };
+
+    VariableDeclaration(const QStringRef &n, ExpressionNode *e, VariableScope s):
+        name (n), expression (e), scope(s)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    bool isLexicallyScoped() const { return scope != FunctionScope; }
 
-    virtual SourceLocation firstSourceLocation() const
+    void accept0(Visitor *visitor) override;
+
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return expression ? expression->lastSourceLocation() : identifierToken; }
 
 // attributes
     QStringRef name;
     ExpressionNode *expression;
-    bool readOnly;
     SourceLocation identifierToken;
+    VariableScope scope;
 };
 
 class QML_PARSER_EXPORT VariableDeclarationList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(VariableDeclarationList)
+    QQMLJS_DECLARE_AST_NODE(VariableDeclarationList)
 
     VariableDeclarationList(VariableDeclaration *decl):
         declaration (decl), next (this)
@@ -1351,26 +1361,25 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return declaration->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (next)
             return next->lastSourceLocation();
         return declaration->lastSourceLocation();
     }
 
-    inline VariableDeclarationList *finish (bool readOnly)
+    inline VariableDeclarationList *finish(VariableDeclaration::VariableScope s)
     {
         VariableDeclarationList *front = next;
-        next = 0;
-        if (readOnly) {
-            VariableDeclarationList *vdl;
-            for (vdl = front; vdl != 0; vdl = vdl->next)
-                vdl->declaration->readOnly = true;
+        next = nullptr;
+        VariableDeclarationList *vdl;
+        for (vdl = front; vdl != nullptr; vdl = vdl->next) {
+            vdl->declaration->scope = s;
         }
         return front;
     }
@@ -1384,16 +1393,16 @@ public:
 class QML_PARSER_EXPORT EmptyStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(EmptyStatement)
+    QQMLJS_DECLARE_AST_NODE(EmptyStatement)
 
     EmptyStatement() { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return semicolonToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1403,17 +1412,17 @@ public:
 class QML_PARSER_EXPORT ExpressionStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ExpressionStatement)
+    QQMLJS_DECLARE_AST_NODE(ExpressionStatement)
 
     ExpressionStatement(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return expression->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1424,18 +1433,18 @@ public:
 class QML_PARSER_EXPORT IfStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(IfStatement)
+    QQMLJS_DECLARE_AST_NODE(IfStatement)
 
-    IfStatement(ExpressionNode *e, Statement *t, Statement *f = 0):
+    IfStatement(ExpressionNode *e, Statement *t, Statement *f = nullptr):
         expression (e), ok (t), ko (f)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return ifToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (ko)
             return ko->lastSourceLocation();
@@ -1456,18 +1465,18 @@ public:
 class QML_PARSER_EXPORT DoWhileStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(DoWhileStatement)
+    QQMLJS_DECLARE_AST_NODE(DoWhileStatement)
 
     DoWhileStatement(Statement *stmt, ExpressionNode *e):
         statement (stmt), expression (e)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return doToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1483,18 +1492,18 @@ public:
 class QML_PARSER_EXPORT WhileStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(WhileStatement)
+    QQMLJS_DECLARE_AST_NODE(WhileStatement)
 
     WhileStatement(ExpressionNode *e, Statement *stmt):
         expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return whileToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1508,18 +1517,18 @@ public:
 class QML_PARSER_EXPORT ForStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ForStatement)
+    QQMLJS_DECLARE_AST_NODE(ForStatement)
 
     ForStatement(ExpressionNode *i, ExpressionNode *c, ExpressionNode *e, Statement *stmt):
         initialiser (i), condition (c), expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return forToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1537,18 +1546,18 @@ public:
 class QML_PARSER_EXPORT LocalForStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(LocalForStatement)
+    QQMLJS_DECLARE_AST_NODE(LocalForStatement)
 
     LocalForStatement(VariableDeclarationList *vlist, ExpressionNode *c, ExpressionNode *e, Statement *stmt):
         declarations (vlist), condition (c), expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return forToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1567,18 +1576,18 @@ public:
 class QML_PARSER_EXPORT ForEachStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ForEachStatement)
+    QQMLJS_DECLARE_AST_NODE(ForEachStatement)
 
     ForEachStatement(ExpressionNode *i, ExpressionNode *e, Statement *stmt):
         initialiser (i), expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return forToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1594,18 +1603,18 @@ public:
 class QML_PARSER_EXPORT LocalForEachStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(LocalForEachStatement)
+    QQMLJS_DECLARE_AST_NODE(LocalForEachStatement)
 
     LocalForEachStatement(VariableDeclaration *v, ExpressionNode *e, Statement *stmt):
         declaration (v), expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return forToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1622,17 +1631,17 @@ public:
 class QML_PARSER_EXPORT ContinueStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ContinueStatement)
+    QQMLJS_DECLARE_AST_NODE(ContinueStatement)
 
     ContinueStatement(const QStringRef &l = QStringRef()):
         label (l) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return continueToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1645,17 +1654,17 @@ public:
 class QML_PARSER_EXPORT BreakStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(BreakStatement)
+    QQMLJS_DECLARE_AST_NODE(BreakStatement)
 
     BreakStatement(const QStringRef &l):
         label (l) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return breakToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
     // attributes
@@ -1668,17 +1677,17 @@ public:
 class QML_PARSER_EXPORT ReturnStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ReturnStatement)
+    QQMLJS_DECLARE_AST_NODE(ReturnStatement)
 
     ReturnStatement(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return returnToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -1690,18 +1699,18 @@ public:
 class QML_PARSER_EXPORT WithStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(WithStatement)
+    QQMLJS_DECLARE_AST_NODE(WithStatement)
 
     WithStatement(ExpressionNode *e, Statement *stmt):
         expression (e), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return withToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1715,18 +1724,18 @@ public:
 class QML_PARSER_EXPORT CaseBlock: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(CaseBlock)
+    QQMLJS_DECLARE_AST_NODE(CaseBlock)
 
-    CaseBlock(CaseClauses *c, DefaultClause *d = 0, CaseClauses *r = 0):
+    CaseBlock(CaseClauses *c, DefaultClause *d = nullptr, CaseClauses *r = nullptr):
         clauses (c), defaultClause (d), moreClauses (r)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lbraceToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
 // attributes
@@ -1740,18 +1749,18 @@ public:
 class QML_PARSER_EXPORT SwitchStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(SwitchStatement)
+    QQMLJS_DECLARE_AST_NODE(SwitchStatement)
 
     SwitchStatement(ExpressionNode *e, CaseBlock *b):
         expression (e), block (b)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return switchToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return block->rbraceToken; }
 
 // attributes
@@ -1765,18 +1774,18 @@ public:
 class QML_PARSER_EXPORT CaseClause: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(CaseClause)
+    QQMLJS_DECLARE_AST_NODE(CaseClause)
 
     CaseClause(ExpressionNode *e, StatementList *slist):
         expression (e), statements (slist)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return caseToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statements ? statements->lastSourceLocation() : colonToken; }
 
 // attributes
@@ -1789,7 +1798,7 @@ public:
 class QML_PARSER_EXPORT CaseClauses: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(CaseClauses)
+    QQMLJS_DECLARE_AST_NODE(CaseClauses)
 
     CaseClauses(CaseClause *c):
         clause (c), next (this)
@@ -1803,18 +1812,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return clause->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : clause->lastSourceLocation(); }
 
     inline CaseClauses *finish ()
     {
         CaseClauses *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -1826,18 +1835,18 @@ public:
 class QML_PARSER_EXPORT DefaultClause: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(DefaultClause)
+    QQMLJS_DECLARE_AST_NODE(DefaultClause)
 
     DefaultClause(StatementList *slist):
         statements (slist)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return defaultToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statements ? statements->lastSourceLocation() : colonToken; }
 
 // attributes
@@ -1849,18 +1858,18 @@ public:
 class QML_PARSER_EXPORT LabelledStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(LabelledStatement)
+    QQMLJS_DECLARE_AST_NODE(LabelledStatement)
 
     LabelledStatement(const QStringRef &l, Statement *stmt):
         label (l), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1873,17 +1882,17 @@ public:
 class QML_PARSER_EXPORT ThrowStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(ThrowStatement)
+    QQMLJS_DECLARE_AST_NODE(ThrowStatement)
 
     ThrowStatement(ExpressionNode *e):
         expression (e) { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return throwToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
     // attributes
@@ -1895,18 +1904,18 @@ public:
 class QML_PARSER_EXPORT Catch: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Catch)
+    QQMLJS_DECLARE_AST_NODE(Catch)
 
     Catch(const QStringRef &n, Block *stmt):
         name (n), statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return catchToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -1921,18 +1930,18 @@ public:
 class QML_PARSER_EXPORT Finally: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Finally)
+    QQMLJS_DECLARE_AST_NODE(Finally)
 
     Finally(Block *stmt):
         statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return finallyToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement ? statement->lastSourceLocation() : finallyToken; }
 
 // attributes
@@ -1943,26 +1952,26 @@ public:
 class QML_PARSER_EXPORT TryStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(TryStatement)
+    QQMLJS_DECLARE_AST_NODE(TryStatement)
 
     TryStatement(Statement *stmt, Catch *c, Finally *f):
         statement (stmt), catchExpression (c), finallyExpression (f)
         { kind = K; }
 
     TryStatement(Statement *stmt, Finally *f):
-        statement (stmt), catchExpression (0), finallyExpression (f)
+        statement (stmt), catchExpression (nullptr), finallyExpression (f)
         { kind = K; }
 
     TryStatement(Statement *stmt, Catch *c):
-        statement (stmt), catchExpression (c), finallyExpression (0)
+        statement (stmt), catchExpression (c), finallyExpression (nullptr)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return tryToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (finallyExpression)
             return finallyExpression->statement->rbraceToken;
@@ -1982,18 +1991,18 @@ public:
 class QML_PARSER_EXPORT FunctionExpression: public ExpressionNode
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FunctionExpression)
+    QQMLJS_DECLARE_AST_NODE(FunctionExpression)
 
     FunctionExpression(const QStringRef &n, FormalParameterList *f, FunctionBody *b):
         name (n), formals (f), body (b)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return functionToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
 // attributes
@@ -2011,19 +2020,19 @@ public:
 class QML_PARSER_EXPORT FunctionDeclaration: public FunctionExpression
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FunctionDeclaration)
+    QQMLJS_DECLARE_AST_NODE(FunctionDeclaration)
 
     FunctionDeclaration(const QStringRef &n, FormalParameterList *f, FunctionBody *b):
         FunctionExpression(n, f, b)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 };
 
 class QML_PARSER_EXPORT FormalParameterList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FormalParameterList)
+    QQMLJS_DECLARE_AST_NODE(FormalParameterList)
 
     FormalParameterList(const QStringRef &n):
         name (n), next (this)
@@ -2037,18 +2046,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : identifierToken; }
 
     inline FormalParameterList *finish ()
     {
         FormalParameterList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -2062,7 +2071,7 @@ public:
 class QML_PARSER_EXPORT SourceElement: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(SourceElement)
+    QQMLJS_DECLARE_AST_NODE(SourceElement)
 
     inline SourceElement()
         { kind = K; }
@@ -2071,7 +2080,7 @@ public:
 class QML_PARSER_EXPORT SourceElements: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(SourceElements)
+    QQMLJS_DECLARE_AST_NODE(SourceElements)
 
     SourceElements(SourceElement *elt):
         element (elt), next (this)
@@ -2085,18 +2094,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return element->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : element->lastSourceLocation(); }
 
     inline SourceElements *finish ()
     {
         SourceElements *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
@@ -2108,18 +2117,18 @@ public:
 class QML_PARSER_EXPORT FunctionBody: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FunctionBody)
+    QQMLJS_DECLARE_AST_NODE(FunctionBody)
 
     FunctionBody(SourceElements *elts):
         elements (elts)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return elements ? elements->firstSourceLocation() : SourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return elements ? elements->lastSourceLocation() : SourceLocation(); }
 
 // attributes
@@ -2129,18 +2138,18 @@ public:
 class QML_PARSER_EXPORT Program: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(Program)
+    QQMLJS_DECLARE_AST_NODE(Program)
 
     Program(SourceElements *elts):
         elements (elts)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return elements ? elements->firstSourceLocation() : SourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return elements ? elements->lastSourceLocation() : SourceLocation(); }
 
 // attributes
@@ -2150,18 +2159,18 @@ public:
 class QML_PARSER_EXPORT FunctionSourceElement: public SourceElement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(FunctionSourceElement)
+    QQMLJS_DECLARE_AST_NODE(FunctionSourceElement)
 
     FunctionSourceElement(FunctionDeclaration *f):
         declaration (f)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return declaration->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return declaration->lastSourceLocation(); }
 
 // attributes
@@ -2171,18 +2180,18 @@ public:
 class QML_PARSER_EXPORT StatementSourceElement: public SourceElement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(StatementSourceElement)
+    QQMLJS_DECLARE_AST_NODE(StatementSourceElement)
 
     StatementSourceElement(Statement *stmt):
         statement (stmt)
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return statement->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
 // attributes
@@ -2192,17 +2201,17 @@ public:
 class QML_PARSER_EXPORT DebuggerStatement: public Statement
 {
 public:
-    QMLJS_DECLARE_AST_NODE(DebuggerStatement)
+    QQMLJS_DECLARE_AST_NODE(DebuggerStatement)
 
     DebuggerStatement()
         { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return debuggerToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -2213,7 +2222,7 @@ public:
 class QML_PARSER_EXPORT UiQualifiedId: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiQualifiedId)
+    QQMLJS_DECLARE_AST_NODE(UiQualifiedId)
 
     UiQualifiedId(const QStringRef &name)
         : next(this), name(name)
@@ -2230,16 +2239,16 @@ public:
     UiQualifiedId *finish()
     {
         UiQualifiedId *head = next;
-        next = 0;
+        next = nullptr;
         return head;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : identifierToken; }
 
 // attributes
@@ -2251,22 +2260,22 @@ public:
 class QML_PARSER_EXPORT UiImport: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiImport)
+    QQMLJS_DECLARE_AST_NODE(UiImport)
 
     UiImport(const QStringRef &fileName)
-        : fileName(fileName), importUri(0)
+        : fileName(fileName), importUri(nullptr)
     { kind = K; }
 
     UiImport(UiQualifiedId *uri)
         : importUri(uri)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return importToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -2284,16 +2293,16 @@ public:
 class QML_PARSER_EXPORT UiObjectMember: public Node
 {
 public:
-    virtual SourceLocation firstSourceLocation() const = 0;
-    virtual SourceLocation lastSourceLocation() const = 0;
+    SourceLocation firstSourceLocation() const override = 0;
+    SourceLocation lastSourceLocation() const override = 0;
 
-    virtual UiObjectMember *uiObjectMemberCast();
+    UiObjectMember *uiObjectMemberCast() override;
 };
 
 class QML_PARSER_EXPORT UiObjectMemberList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiObjectMemberList)
+    QQMLJS_DECLARE_AST_NODE(UiObjectMemberList)
 
     UiObjectMemberList(UiObjectMember *member)
         : next(this), member(member)
@@ -2307,18 +2316,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return member->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : member->lastSourceLocation(); }
 
     UiObjectMemberList *finish()
     {
         UiObjectMemberList *head = next;
-        next = 0;
+        next = nullptr;
         return head;
     }
 
@@ -2330,7 +2339,7 @@ public:
 class QML_PARSER_EXPORT UiQualifiedPragmaId: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiQualifiedPragmaId)
+    QQMLJS_DECLARE_AST_NODE(UiQualifiedPragmaId)
 
     UiQualifiedPragmaId(const QStringRef &name)
         : next(this), name(name)
@@ -2347,16 +2356,16 @@ public:
     UiQualifiedPragmaId *finish()
     {
         UiQualifiedPragmaId *head = next;
-        next = 0;
+        next = nullptr;
         return head;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : identifierToken; }
 
 // attributes
@@ -2368,18 +2377,18 @@ public:
 class QML_PARSER_EXPORT UiPragma: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiPragma)
+    QQMLJS_DECLARE_AST_NODE(UiPragma)
 
     UiPragma(UiQualifiedPragmaId *type)
         : pragmaType(type)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return pragmaToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return semicolonToken; }
 
 // attributes
@@ -2391,7 +2400,7 @@ public:
 class QML_PARSER_EXPORT UiHeaderItemList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiHeaderItemList)
+    QQMLJS_DECLARE_AST_NODE(UiHeaderItemList)
 
     UiHeaderItemList(UiImport *import)
         : headerItem(import), next(this)
@@ -2420,16 +2429,16 @@ public:
     UiHeaderItemList *finish()
     {
         UiHeaderItemList *head = next;
-        next = 0;
+        next = nullptr;
         return head;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return headerItem->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : headerItem->lastSourceLocation(); }
 
 // attributes
@@ -2440,15 +2449,15 @@ public:
 class QML_PARSER_EXPORT UiProgram: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiProgram)
+    QQMLJS_DECLARE_AST_NODE(UiProgram)
 
     UiProgram(UiHeaderItemList *headers, UiObjectMemberList *members)
         : headers(headers), members(members)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     {
         if (headers)
             return headers->firstSourceLocation();
@@ -2457,7 +2466,7 @@ public:
         return SourceLocation();
     }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
         if (members)
             return members->lastSourceLocation();
@@ -2474,7 +2483,7 @@ public:
 class QML_PARSER_EXPORT UiArrayMemberList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiArrayMemberList)
+    QQMLJS_DECLARE_AST_NODE(UiArrayMemberList)
 
     UiArrayMemberList(UiObjectMember *member)
         : next(this), member(member)
@@ -2488,18 +2497,18 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return member->firstSourceLocation(); }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : member->lastSourceLocation(); }
 
     UiArrayMemberList *finish()
     {
         UiArrayMemberList *head = next;
-        next = 0;
+        next = nullptr;
         return head;
     }
 
@@ -2512,18 +2521,18 @@ public:
 class QML_PARSER_EXPORT UiObjectInitializer: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiObjectInitializer)
+    QQMLJS_DECLARE_AST_NODE(UiObjectInitializer)
 
     UiObjectInitializer(UiObjectMemberList *members)
         : members(members)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return lbraceToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbraceToken; }
 
 // attributes
@@ -2535,13 +2544,13 @@ public:
 class QML_PARSER_EXPORT UiParameterList: public Node
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiParameterList)
+    QQMLJS_DECLARE_AST_NODE(UiParameterList)
 
-    UiParameterList(const QStringRef &t, const QStringRef &n):
+    UiParameterList(UiQualifiedId *t, const QStringRef &n):
         type (t), name (n), next (this)
         { kind = K; }
 
-    UiParameterList(UiParameterList *previous, const QStringRef &t, const QStringRef &n):
+    UiParameterList(UiParameterList *previous, UiQualifiedId *t, const QStringRef &n):
         type (t), name (n)
     {
         kind = K;
@@ -2549,23 +2558,23 @@ public:
         previous->next = this;
     }
 
-    virtual void accept0(Visitor *);
+    void accept0(Visitor *) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return propertyTypeToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return next ? next->lastSourceLocation() : identifierToken; }
 
     inline UiParameterList *finish ()
     {
         UiParameterList *front = next;
-        next = 0;
+        next = nullptr;
         return front;
     }
 
 // attributes
-    QStringRef type;
+    UiQualifiedId *type;
     QStringRef name;
     UiParameterList *next;
     SourceLocation commaToken;
@@ -2576,22 +2585,22 @@ public:
 class QML_PARSER_EXPORT UiPublicMember: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiPublicMember)
+    QQMLJS_DECLARE_AST_NODE(UiPublicMember)
 
-    UiPublicMember(const QStringRef &memberType,
+    UiPublicMember(UiQualifiedId *memberType,
                    const QStringRef &name)
-        : type(Property), memberType(memberType), name(name), statement(0), binding(0), isDefaultMember(false), isReadonlyMember(false), parameters(0)
+        : type(Property), memberType(memberType), name(name), statement(nullptr), binding(nullptr), isDefaultMember(false), isReadonlyMember(false), parameters(nullptr)
     { kind = K; }
 
-    UiPublicMember(const QStringRef &memberType,
+    UiPublicMember(UiQualifiedId *memberType,
                    const QStringRef &name,
                    Statement *statement)
-        : type(Property), memberType(memberType), name(name), statement(statement), binding(0), isDefaultMember(false), isReadonlyMember(false), parameters(0)
+        : type(Property), memberType(memberType), name(name), statement(statement), binding(nullptr), isDefaultMember(false), isReadonlyMember(false), parameters(nullptr)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     {
       if (defaultToken.isValid())
         return defaultToken;
@@ -2601,7 +2610,7 @@ public:
       return propertyToken;
     }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
       if (binding)
           return binding->lastSourceLocation();
@@ -2614,7 +2623,7 @@ public:
 // attributes
     enum { Signal, Property } type;
     QStringRef typeModifier;
-    QStringRef memberType;
+    UiQualifiedId *memberType;
     QStringRef name;
     Statement *statement; // initialized with a JS expression
     UiObjectMember *binding; // initialized with a QML object or array.
@@ -2634,19 +2643,19 @@ public:
 class QML_PARSER_EXPORT UiObjectDefinition: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiObjectDefinition)
+    QQMLJS_DECLARE_AST_NODE(UiObjectDefinition)
 
     UiObjectDefinition(UiQualifiedId *qualifiedTypeNameId,
                        UiObjectInitializer *initializer)
         : qualifiedTypeNameId(qualifiedTypeNameId), initializer(initializer)
     { kind = K; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return qualifiedTypeNameId->identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return initializer->rbraceToken; }
 
 // attributes
@@ -2657,13 +2666,13 @@ public:
 class QML_PARSER_EXPORT UiSourceElement: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiSourceElement)
+    QQMLJS_DECLARE_AST_NODE(UiSourceElement)
 
     UiSourceElement(Node *sourceElement)
         : sourceElement(sourceElement)
     { kind = K; }
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     {
       if (FunctionDeclaration *funDecl = cast<FunctionDeclaration *>(sourceElement))
         return funDecl->firstSourceLocation();
@@ -2673,7 +2682,7 @@ public:
       return SourceLocation();
     }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     {
       if (FunctionDeclaration *funDecl = cast<FunctionDeclaration *>(sourceElement))
         return funDecl->lastSourceLocation();
@@ -2683,7 +2692,7 @@ public:
       return SourceLocation();
     }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
 
 // attributes
@@ -2693,7 +2702,7 @@ public:
 class QML_PARSER_EXPORT UiObjectBinding: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiObjectBinding)
+    QQMLJS_DECLARE_AST_NODE(UiObjectBinding)
 
     UiObjectBinding(UiQualifiedId *qualifiedId,
                     UiQualifiedId *qualifiedTypeNameId,
@@ -2704,7 +2713,7 @@ public:
           hasOnToken(false)
     { kind = K; }
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     {
         if (hasOnToken && qualifiedTypeNameId)
             return qualifiedTypeNameId->identifierToken;
@@ -2712,10 +2721,10 @@ public:
         return qualifiedId->identifierToken;
     }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return initializer->rbraceToken; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
 
 // attributes
@@ -2729,7 +2738,7 @@ public:
 class QML_PARSER_EXPORT UiScriptBinding: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiScriptBinding)
+    QQMLJS_DECLARE_AST_NODE(UiScriptBinding)
 
     UiScriptBinding(UiQualifiedId *qualifiedId,
                     Statement *statement)
@@ -2737,13 +2746,13 @@ public:
           statement(statement)
     { kind = K; }
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return qualifiedId->identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return statement->lastSourceLocation(); }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
 // attributes
     UiQualifiedId *qualifiedId;
@@ -2754,7 +2763,7 @@ public:
 class QML_PARSER_EXPORT UiArrayBinding: public UiObjectMember
 {
 public:
-    QMLJS_DECLARE_AST_NODE(UiArrayBinding)
+    QQMLJS_DECLARE_AST_NODE(UiArrayBinding)
 
     UiArrayBinding(UiQualifiedId *qualifiedId,
                    UiArrayMemberList *members)
@@ -2762,13 +2771,13 @@ public:
           members(members)
     { kind = K; }
 
-    virtual SourceLocation firstSourceLocation() const
+    SourceLocation firstSourceLocation() const override
     { return qualifiedId->identifierToken; }
 
-    virtual SourceLocation lastSourceLocation() const
+    SourceLocation lastSourceLocation() const override
     { return rbracketToken; }
 
-    virtual void accept0(Visitor *visitor);
+    void accept0(Visitor *visitor) override;
 
 // attributes
     UiQualifiedId *qualifiedId;
@@ -2776,6 +2785,81 @@ public:
     SourceLocation colonToken;
     SourceLocation lbracketToken;
     SourceLocation rbracketToken;
+};
+
+class QML_PARSER_EXPORT UiEnumMemberList: public Node
+{
+    QQMLJS_DECLARE_AST_NODE(UiEnumMemberList)
+public:
+    UiEnumMemberList(const QStringRef &member, double v = 0.0)
+        : next(this), member(member), value(v)
+    { kind = K; }
+
+    UiEnumMemberList(UiEnumMemberList *previous, const QStringRef &member)
+        : member(member)
+    {
+        kind = K;
+        next = previous->next;
+        previous->next = this;
+        value = previous->value + 1;
+    }
+
+    UiEnumMemberList(UiEnumMemberList *previous, const QStringRef &member, double v)
+        : member(member), value(v)
+    {
+        kind = K;
+        next = previous->next;
+        previous->next = this;
+    }
+
+    SourceLocation firstSourceLocation() const override
+    { return memberToken; }
+
+    SourceLocation lastSourceLocation() const override
+    { return next ? next->lastSourceLocation() :
+                    valueToken.isValid() ? valueToken : memberToken; }
+
+    void accept0(Visitor *visitor) override;
+
+    UiEnumMemberList *finish()
+    {
+        UiEnumMemberList *head = next;
+        next = nullptr;
+        return head;
+    }
+
+// attributes
+    UiEnumMemberList *next;
+    QStringRef member;
+    double value;
+    SourceLocation memberToken;
+    SourceLocation valueToken;
+};
+
+class QML_PARSER_EXPORT UiEnumDeclaration: public UiObjectMember
+{
+public:
+    QQMLJS_DECLARE_AST_NODE(UiEnumDeclaration)
+
+    UiEnumDeclaration(const QStringRef &name,
+                      UiEnumMemberList *members)
+        : name(name)
+        , members(members)
+    { kind = K; }
+
+    SourceLocation firstSourceLocation() const override
+    { return enumToken; }
+
+    SourceLocation lastSourceLocation() const override
+    { return rbraceToken; }
+
+    void accept0(Visitor *visitor) override;
+
+// attributes
+    SourceLocation enumToken;
+    SourceLocation rbraceToken;
+    QStringRef name;
+    UiEnumMemberList *members;
 };
 
 } } // namespace AST

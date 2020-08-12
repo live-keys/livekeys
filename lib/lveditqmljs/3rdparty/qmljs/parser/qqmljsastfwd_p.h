@@ -37,10 +37,10 @@
 **
 ****************************************************************************/
 
-#ifndef QMLJSASTFWD_P_H
-#define QMLJSASTFWD_P_H
+#ifndef QQMLJSAST_FWD_P_H
+#define QQMLJSAST_FWD_P_H
 
-#include "qmljsglobal_p.h"
+#include "qqmljsglobal_p.h"
 
 #include <QtCore/qglobal.h>
 
@@ -181,6 +181,8 @@ class UiArrayMemberList;
 class UiQualifiedId;
 class UiQualifiedPragmaId;
 class UiHeaderItemList;
+class UiEnumDeclaration;
+class UiEnumMemberList;
 
 } } // namespace AST
 

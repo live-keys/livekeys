@@ -17,11 +17,14 @@
 #include "live/qmlcompletioncontextfinder.h"
 
 #include "qmljs/qmljscompletioncontextfinder.h"
-#include <qmljs/parser/qmljsast_p.h>
+#include <qmljs/parser/qqmljsast_p.h>
 #include <qmljs/qmljsscanner.h>
 #include <qmljs/qmljsdocument.h>
 
 #include <QDebug>
+
+#include <QTextBlock>
+#include <QTextCursor>
 
 // ExpressionUnderCursor
 // ---------------------

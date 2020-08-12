@@ -37,8 +37,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMLJSLEXER_P_H
-#define QMLJSLEXER_P_H
+#ifndef QQMLJSLEXER_P_H
+#define QQMLJSLEXER_P_H
 
 //
 //  W A R N I N G
@@ -51,8 +51,8 @@
 // We mean it.
 //
 
-#include "qmljsglobal_p.h"
-#include "qmljsgrammar_p.h"
+#include "qqmljsglobal_p.h"
+#include "qqmljsgrammar_p.h"
 
 #include <QtCore/qstring.h>
 
@@ -89,7 +89,7 @@ public:
     }
 };
 
-class QML_PARSER_EXPORT Lexer: public QmlJSGrammar
+class QML_PARSER_EXPORT Lexer: public QQmlJSGrammar
 {
 public:
     enum {
@@ -99,7 +99,6 @@ public:
         T_CHAR = T_RESERVED_WORD,
         T_CLASS = T_RESERVED_WORD,
         T_DOUBLE = T_RESERVED_WORD,
-        T_ENUM = T_RESERVED_WORD,
         T_EXPORT = T_RESERVED_WORD,
         T_EXTENDS = T_RESERVED_WORD,
         T_FINAL = T_RESERVED_WORD,
@@ -249,8 +248,8 @@ private:
     bool _qmlMode;
 };
 
-} // end of namespace QmlJS
+} // end of namespace QQmlJS
 
 QT_QML_END_NAMESPACE
 
-#endif
+#endif // LEXER_H

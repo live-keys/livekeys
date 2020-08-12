@@ -31,6 +31,7 @@
 
 #include <QQmlContext>
 #include <QQmlProperty>
+#include <QFileInfo>
 #include <QQmlListReference>
 
 namespace lv{
