@@ -2352,7 +2352,7 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
     for ( auto it = edit->begin(); it != edit->end(); ++it ){
         CodePalette* loadedPalette = *it;
         if ( loadedPalette->path() == PaletteContainer::palettePath(paletteLoader) ){
-            return m_engine->newQObject(loadedPalette);
+            return QJSValue();
         }
     }
 
@@ -2411,6 +2411,14 @@ QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
     }
     if ( result.isEmpty() ){
         result = m_settings->defaultPalette(fragment->type());
+    }
+
+    for ( auto it = fragment->begin(); it != fragment->end(); ++it ){
+        CodePalette* loadedPalette = *it;
+        if (loadedPalette->name() == result){
+            result = "";
+            break;
+        }
     }
 
     return result;
@@ -2906,6 +2914,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
         propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
         propertyPosition = ctx->propertyPosition();
     }
+    else propertyPosition = position;
 
     if ( propertyPosition == -1 )
         return nullptr;
@@ -2933,7 +2942,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                         name,
                         ti->prefereredType().name(),
                         "method",
-                        "",
+                        "implicit",
                         ti->exportType().join() + "." + name,
                         name,
                         QmlSuggestionModel::ItemData::Event
@@ -2945,7 +2954,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                         name,
                         ti->prefereredType().name(),
                         "method",
-                        "",
+                        "implicit",
                         ti->exportType().join() + "." + name,
                         name,
                         QmlSuggestionModel::ItemData::Function
@@ -2962,7 +2971,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                             propertyName,
                             ti->prefereredType().name(),
                             ti->propertyAt(i).typeName.name(),
-                            "", 
+                            "implicit",
                             ti->exportType().join() + "." + propertyName,
                             propertyName,
                             QmlSuggestionModel::ItemData::Property
@@ -2981,8 +2990,8 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                             propertyName,
                             ti->prefereredType().name(),
                             "method",
-                            "",
-                            ti->exportType().join() + "." + propertyName,
+                            "implicit",
+                            "", //TODO: Find library path
                             propertyName,
                             QmlSuggestionModel::ItemData::Event
                         )
@@ -3007,7 +3016,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     e,
-                    "",
+                    "objects",
                     "",
                     "implicit",
                     scope.document->path(),
@@ -3028,7 +3037,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     de,
-                    "",
+                    "objects",
                     "",
                     "QtQml",
                     "QtQml",
@@ -3063,7 +3072,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                     addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             exp,
-                            "",
+                            "objects",
                             "",
                             imp.uri(),
                             imp.uri(),
@@ -3281,6 +3290,8 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
+
+    if (blockEnd == 0) blockEnd = m_target->characterCount() -1;
 
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);

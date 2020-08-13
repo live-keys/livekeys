@@ -55,7 +55,7 @@ CodePalette{
     }
 
     onInit: {
-        imagePaintView.image = value.input
+        imagePaintView.image = Qt.binding(function(){ return value.input})
     }
 
 }

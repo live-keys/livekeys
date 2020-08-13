@@ -51,13 +51,13 @@ CodePalette{
             saturation: hsl ? hsl.saturation : 100
             onSaturationChanged: {
                 if ( adjustmentBox.hsl )
-                    adjustmentBox.hsl.saturation = hue
+                    adjustmentBox.hsl.saturation = saturation
             }
 
             lightness: hsl ? hsl.lightness : 100
             onLightnessChanged: {
                 if ( adjustmentBox.hsl )
-                    adjustmentBox.hsl.lightness = hue
+                    adjustmentBox.hsl.lightness = lightness
             }
         }
 
@@ -70,8 +70,10 @@ CodePalette{
     onExtensionChanged: {
         extension.whenBinding = function(){
             extension.writeProperties({
-                'hue' : palette.value.brightness,
-                'contrast' : palette.value.contrast
+                'hue' : palette.value.hue,
+                'saturation' : palette.value.saturation,
+                'lightness': palette.value.lightness
+
             })
         }
     }

@@ -84,7 +84,6 @@ CodePalette{
             videoCapture : parent.videoDecoderView
             width: 290
             onSeekTriggered: {
-                console.log("onSeekTriggered")
                 extension.writeProperties({
                     'currentFrame' : videoCapture.currentFrame
                 })

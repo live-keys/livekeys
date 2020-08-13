@@ -40,7 +40,8 @@ Item{
                 !propertyContainer.parent.parent.parent) return
         var objectContainer = propertyContainer.parent.parent.parent
 
-        objectContainer.recalculateContentWidth()
+        if (objectContainer.objectName === "objectContainer")
+            objectContainer.recalculateContentWidth()
     }
 
     Rectangle{

@@ -19,6 +19,8 @@ Rectangle{
     border.color: style.borderColor
 
     property alias currentIndex: listView.currentIndex
+    property alias currentItem: listView.currentItem
+
 
     property QtObject defaultStyle: QtObject{
         property QtObject labelStyle: TextStyle{}
