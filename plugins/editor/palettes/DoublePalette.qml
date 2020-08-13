@@ -101,7 +101,7 @@ CodePalette{
                     extension.write(palette.value)
             }
             stepSize: 0.01
-            maximumValue: 1.0
+            maximumValue: 0.99
 
             style: SliderStyle{
                 groove: Rectangle {
@@ -134,10 +134,12 @@ CodePalette{
                     intSlider.minimumValue = 25
                 else if (intSlider.minimumValue === -25 && intSlider.maximumValue > 0)
                     intSlider.minimumValue = 0
-                else if (intSlider.minimumValue < 0 && intSlider.minimumValue / 2 < intSlider.maximumValue)
+                else if (intSlider.minimumValue < -25 && intSlider.minimumValue / 2 < intSlider.maximumValue)
                     intSlider.minimumValue = intSlider.minimumValue / 2
                 else if (intSlider.minimumValue > 0 && 2*intSlider.minimumValue < intSlider.maximumValue)
                     intSlider.minimumValue = 2*intSlider.minimumValue
+
+                if (intSlider.minimumValue > 25600) intSlider.minimumValue = 25600
 
                 if (intSlider.value < intSlider.minimumValue )
                     intSlider.value = intSlider.minimumValue
@@ -151,6 +153,9 @@ CodePalette{
                     intSlider.minimumValue = 2*intSlider.minimumValue
                 else if (intSlider.minimumValue > 0)
                     intSlider.minimumValue = intSlider.minimumValue / 2
+
+
+                if (intSlider.minimumValue < -25600) intSlider.minimumValue = -25600
 
                 if (intSlider.value < intSlider.minimumValue )
                     intSlider.value = intSlider.minimumValue
@@ -181,18 +186,24 @@ CodePalette{
                 else if (intSlider.maximumValue < 0)
                     intSlider.maximumValue = intSlider.maximumValue / 2
 
+
+                if (intSlider.maximumValue > 25600) intSlider.maximumValue = 25600
+
                 if (intSlider.value > intSlider.maximumValue)
                     intSlider.value = intSlider.maximumValue
             }
             down: function(){
                 if (intSlider.maximumValue === 0 && intSlider.minimumValue < -25)
                     intSlider.maximumValue = -25
-                else if (intSlider.maximumValue === 25 && intSlider.minimumValue <= 0)
+                else if (intSlider.maximumValue === 25 && intSlider.minimumValue < 0)
                     intSlider.maximumValue = 0
                 else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
                     intSlider.maximumValue = 2*intSlider.maximumValue
-                else if (intSlider.maximumValue > 0 && intSlider.maximumValue / 2 > intSlider.minimumValue)
+                else if (intSlider.maximumValue > 25 && intSlider.maximumValue / 2 > intSlider.minimumValue)
                     intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.maximumValue < -25600) intSlider.maximumValue = -25600
+
 
                 if (intSlider.value > intSlider.maximumValue)
                     intSlider.value = intSlider.maximumValue

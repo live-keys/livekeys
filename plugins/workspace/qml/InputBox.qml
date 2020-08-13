@@ -45,9 +45,12 @@ Rectangle {
     property alias font: textInput.font
     property string textHint : ''
 
+    property alias textInput: textInput
+
     property alias validator: textInput.validator
 
     signal keyPressed(var event)
+    signal activeFocusLost()
 
     function selectAll(){
         textInput.selectAll()
@@ -71,6 +74,11 @@ Rectangle {
             anchors.fill: parent
             acceptedButtons: Qt.NoButton
             cursorShape: Qt.IBeamCursor
+        }
+
+        onActiveFocusChanged: {
+            if (!activeFocus)
+                root.activeFocusLost()
         }
     }
 

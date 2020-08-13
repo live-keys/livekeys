@@ -195,8 +195,6 @@ LiveExtension{
         var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
 
 
-        palette.item.x = 5
-        palette.item.y = 7
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }

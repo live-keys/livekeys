@@ -132,7 +132,7 @@ Item{
         property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         width: container.width < 260 ? 300 : container.width
-        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height
+        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height + 3
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
