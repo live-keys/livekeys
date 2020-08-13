@@ -153,7 +153,7 @@ CodePalette{
             down: function(){
                 if (intSlider.maximumValue === 0 && intSlider.minimumValue < -25)
                     intSlider.maximumValue = -25
-                else if (intSlider.maximumValue === 25 && intSlider.minimumValue < 0)
+                else if (intSlider.maximumValue === 25 && intSlider.minimumValue <= 0)
                     intSlider.maximumValue = 0
                 else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
                     intSlider.maximumValue = 2*intSlider.maximumValue

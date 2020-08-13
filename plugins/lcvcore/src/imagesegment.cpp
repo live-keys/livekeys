@@ -68,8 +68,7 @@ void ImageSegment::cursorExit(qint64){
     if ( !m_track || !m_track->surface() || !m_image)
         return;
 
-    m_track->surface()->output()->cvMat()->setTo(cv::Scalar(0));
-    m_track->surface()->update();
+    m_track->surface()->resetSurface();
 }
 
 void ImageSegment::cursorNext(qint64 pos){

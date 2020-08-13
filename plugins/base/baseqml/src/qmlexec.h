@@ -15,10 +15,10 @@ class QmlExec : public QObject, public QQmlParserStatus{
     Q_OBJECT
     Q_ENUMS(ChannelMode)
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString     path     READ path WRITE setPath NOTIFY pathChanged)
-    Q_PROPERTY(QStringList args     READ args WRITE setArgs NOTIFY argsChanged)
-    Q_PROPERTY(ChannelMode mode     READ mode WRITE setMode NOTIFY modeChanged)
-    Q_PROPERTY(lv::QmlStream* input READ input   WRITE setInput   NOTIFY inChanged)
+    Q_PROPERTY(QString     path     READ path  WRITE setPath  NOTIFY pathChanged)
+    Q_PROPERTY(QStringList args     READ args  WRITE setArgs  NOTIFY argsChanged)
+    Q_PROPERTY(ChannelMode mode     READ mode  WRITE setMode  NOTIFY modeChanged)
+    Q_PROPERTY(lv::QmlStream* input READ input WRITE setInput NOTIFY inChanged)
     Q_PROPERTY(lv::QmlStream* out   READ out CONSTANT)
 
 public:
@@ -60,6 +60,7 @@ signals:
     void argsChanged();
     void modeChanged();
     void inChanged();
+    void aboutToRun();
 
 public slots:
     void __processRead();

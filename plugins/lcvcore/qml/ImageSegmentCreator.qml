@@ -12,7 +12,7 @@ Rectangle{
     signal segmentCreated(Segment segment)
     signal cancelled()
 
-    property Component segmentFactory : VideoSegment{
+    property Component segmentFactory : ImageSegment{
     }
 
     function createSegment(options, track){
@@ -24,7 +24,7 @@ Rectangle{
         anchors.topMargin: 14
         anchors.left: parent.left
         anchors.leftMargin: 14
-        text: 'Add video segment'
+        text: 'Add image segment'
         font.family: 'Open Sans, Arial, sans-serif'
         font.pixelSize: 12
         font.weight: Font.Normal

@@ -1,35 +1,43 @@
 import QtQuick 2.3
+import QtQuick.Controls 1.2
+import timeline 1.0
+import workspace 1.0
+import live 1.0
 import lcvcore 1.0
-import lcvphoto 1.0
 
-Grid{
-    id: grid
-
-    ImageFile{
-        id: imageFile
-        source: project.dir() + '/../../../../samples/_images/object_101_piano_query.jpg'
-    }
-
-    Levels{
-        id: levels
-        input: imageFile.output.cloneMat()
-    }
-
-    HueSaturationLightness{
-        id: hueSaturationLightness
-        input: levels.result
-        hue: 180
-        saturation: 100
-        lightness: 100
-    }
-
-    BrightnessAndContrast{
-        id: brightnessAndContrast
-        input: hueSaturationLightness.result
-    }
-
+Item{
+    anchors.fill: parent
+    
     ImageView{
-        image: brightnessAndContrast.result
+        width: 600
+        height: 400
+        image: {
+            if ( timeline.properties ){
+                return timeline.properties.videoSurface.image
+            }
+            return null   
+        }
+        anchors.horizontalCenter: parent.horizontalCenter
     }
-
+    
+    Rectangle{
+        x: keyframeValue.value
+        width: 100
+        height: 100
+        anchors.bottom: parent.bottom
+        color: '#1a3454'
+    }
+    
+    KeyframeValue{
+        id: keyframeValue
+        track: 'Track.2'
+        timeline: timeline
+    }
+    
+    Timeline{
+        id: timeline
+        fps: 30
+        contentLength: fps * 200
+        file: project.path('videotimeline.json')
+    }
 }

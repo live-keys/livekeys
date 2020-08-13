@@ -14,10 +14,16 @@ class VideoTrack : public Track{
 
 public:
     explicit VideoTrack(QObject *parent = nullptr);
-    virtual ~VideoTrack();
+    virtual ~VideoTrack() override;
 
     VideoSurface* surface() const;
     void setSurface(lv::VideoSurface* surface);
+
+    virtual void serialize(ViewEngine *engine, MLNode &node) const override;
+    virtual void deserialize(ViewEngine *engine, const MLNode &node) override;
+
+    virtual void timelineComplete() override;
+    virtual QString typeReference() const override;
 
 signals:
     void surfaceChanged(lv::VideoSurface* surface);
@@ -36,6 +42,10 @@ inline void VideoTrack::setSurface(VideoSurface *surface){
 
     m_surface = surface;
     emit surfaceChanged(m_surface);
+}
+
+inline QString VideoTrack::typeReference() const{
+    return "lcvcore#VideoTrack";
 }
 
 }// namespace

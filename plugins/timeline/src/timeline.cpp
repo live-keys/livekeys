@@ -1,16 +1,19 @@
 #include "timeline.h"
 #include "track.h"
 #include "segmentmodel.h"
+#include "timelineobjectproperty.h"
 
 #include "live/visuallogqt.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
 #include "live/exception.h"
+#include "live/shared.h"
 
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
 #include "live/mlnodetoqml.h"
 
+#include <QQmlPropertyMap>
 #include <QQmlEngine>
 #include <QFile>
 #include <QJSValue>
@@ -32,6 +35,7 @@ Timeline::Timeline(QObject *parent)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
     , m_headerModel(new TimelineHeaderModel(this))
+    , m_properties(nullptr)
 {
     m_timer.setSingleShot(false);
 
@@ -66,14 +70,6 @@ void Timeline::clearTracks(QQmlListProperty<QObject> *list){
     return reinterpret_cast<Timeline*>(list->data)->m_trackList->clearTracks();
 }
 
-Track *Timeline::addTrack(){
-    Track* track = new Track(this);
-    track->setName("Track #" + QString::number(m_trackList->totalTracks() + 1));
-    connect(track, &Track::cursorProcessed, this, &Timeline::__trackCursorProcessed);
-    appendTrack(track);
-    return track;
-}
-
 void Timeline::removeTrack(int index){
     m_trackList->removeTrack(index);
 }
@@ -103,8 +99,8 @@ QString Timeline::positionToLabel(qint64 frameNumber, bool shortZero){
     double hh = floor(mm / 60);
     double ff = frameNumber - (ss * m_fps);
 
-    QString res;
-    res.sprintf("%d:%d:%d.%d",
+
+    QString res = QString::asprintf("%d:%d:%d.%d",
         static_cast<int>(hh),
         static_cast<int>(mm),
         static_cast<int>(ss),
@@ -158,20 +154,23 @@ void Timeline::__trackCursorProcessed(Track* track, qint64 position){
     emit cursorPositionProcessed(position);
 }
 
-void Timeline::appendTrack(Track *track){
-    track->segmentModel()->setContentWidth(m_contentLength);
-    track->updateCursorPosition(m_cursorPosition);
+void Timeline::appendTrack(lv::Track *track){
+    connect(track, &Track::cursorProcessed, this, &Timeline::__trackCursorProcessed);
+    track->setParent(this);
     m_trackList->appendTrack(track);
+    track->setContentLength(m_contentLength);
+    track->updateCursorPosition(m_cursorPosition);
+    emit trackListChanged();
 }
 
 QQmlListProperty<QObject> lv::Timeline::tracks(){
     return QQmlListProperty<QObject>(
-            this,
-            this,
-            &Timeline::appendTrackToList,
-            &Timeline::trackCount,
-            &Timeline::trackAt,
-            &Timeline::clearTracks);
+        this,
+        this,
+        &Timeline::appendTrackToList,
+        &Timeline::trackCount,
+        &Timeline::trackAt,
+        &Timeline::clearTracks);
 }
 
 const QString &Timeline::file() const{
@@ -183,6 +182,32 @@ void Timeline::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
     node = MLNode(MLNode::Object);
     node["length"] = MLNode(static_cast<int>(timeline->m_contentLength));
     node["fps"] = MLNode(timeline->m_fps);
+
+
+    if ( timeline->m_properties ){
+
+        MLNode propertiesNode(MLNode::Object);
+
+        const QMetaObject* meta = timeline->m_properties->metaObject();
+        for ( int i = 0; i < meta->propertyCount(); i++ ){
+            QMetaProperty property = meta->property(i);
+            QByteArray name = property.name();
+            if ( name != "objectName" ){
+                QVariant value = property.read(timeline->m_properties);
+
+                TimelineObjectProperty* obj = dynamic_cast<TimelineObjectProperty*>(value.value<QObject*>());
+                if ( !obj )
+                    THROW_EXCEPTION(Exception, "Property is not of object type.", Exception::toCode("~QObject"));
+
+                MLNode propNode(MLNode::Object);
+                obj->serialize(engine, propNode);
+
+                propertiesNode[name.toStdString()] = propNode;
+            }
+        }
+
+        node["properties"] = propertiesNode;
+    }
 
     MLNode tracksNode;
     TrackListModel::serialize(engine, timeline->m_trackList, tracksNode);
@@ -199,16 +224,73 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
     timeline->m_trackList->clearTracks();
     timeline->setCursor(0);
     timeline->m_isRunning = false;
+
+    delete timeline->m_properties;
+    timeline->m_properties = nullptr;
     emit timeline->isRunningChanged();
 
     try{
         timeline->m_contentLength = node["length"].asInt();
         timeline->m_fps = node["fps"].asFloat();
 
+        if ( node.hasKey("properties") ){
+
+            QQmlPropertyMap* properties = new QQmlPropertyMap;
+            timeline->m_properties = properties;
+
+            MLNode propertiesNode = node["properties"];
+
+            for ( auto it = propertiesNode.begin(); it != propertiesNode.end(); ++it ){
+                std::string key = it.key();
+
+                QString factory = QString::fromStdString(it.value()["factory"].asString());
+
+                ViewEngine::ComponentResult::Ptr factoryComp = engine->createPluginObject(factory, nullptr);
+                if ( factoryComp->hasError() ){
+                    factoryComp->jsThrowError();
+                } else {
+
+                    QVariant result;
+                    QMetaObject::invokeMethod(factoryComp->object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
+
+                    TimelineObjectProperty* property = qobject_cast<TimelineObjectProperty*>(result.value<QObject*>());
+                    if ( !property )
+                        THROW_EXCEPTION(Exception, "Timeline: Failed to load property from file: " + key, Exception::toCode("~Timeline"));
+
+                    QQmlEngine::setObjectOwnership(property, QQmlEngine::CppOwnership);
+
+                    property->deserialize(engine, it.value());
+
+                    properties->insert(QString::fromStdString(key.c_str()), QVariant::fromValue(property));
+                }
+            }
+
+            emit timeline->propertiesChanged();
+
+        }
+
         const MLNode::ArrayType& tracks = node["tracks"].asArray();
+
         for ( auto it = tracks.begin(); it != tracks.end(); ++it ){
-            Track* track = timeline->addTrack();
-            Track::deserialize(track, engine, *it);
+            QString factory = QString::fromStdString((*it)["factory"].asString());
+
+            ViewEngine::ComponentResult::Ptr factoryComp = engine->createPluginObject(factory, nullptr);
+            if ( factoryComp->hasError() ){
+                factoryComp->jsThrowError();
+            } else {
+                QVariant result;
+                QMetaObject::invokeMethod(factoryComp->object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
+
+                Track* track = qobject_cast<Track*>(result.value<QObject*>());
+                if ( !track )
+                    THROW_EXCEPTION(Exception, "Timeline: Failed to load track from file: " + (*it)["name"].asString(), Exception::toCode("~Timeline"));
+
+                timeline->appendTrack(track);
+                track->setParent(timeline);
+                track->timelineComplete();
+                Track::deserialize(track, engine, *it);
+            }
+
         }
     } catch ( Exception& e ){
         engine->throwError(&e, timeline);
@@ -225,7 +307,16 @@ void Timeline::componentComplete(){
             return;
         }
         load();
+    } else {
+        for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
+            Track* track = m_trackList->trackAt(i);
+            track->timelineComplete();
+        }
     }
+}
+
+void Timeline::signalTrackNameChanged(Track *track){
+    emit trackNameChanged(track);
 }
 
 void Timeline::load(){
@@ -233,27 +324,29 @@ void Timeline::load(){
         return;
     }
 
+
     QFile file(m_file);
-    if ( !file.exists() )
+    if ( !file.exists() ){
+        THROW_QMLERROR(Exception, "Timeline: Failed to find file: " + m_file.toStdString(), Exception::toCode("~File"), this);
         return;
+    }
 
     if ( !file.open(QIODevice::ReadOnly) ){
-        Exception e = CREATE_EXCEPTION(Exception, "Failed to open file for reading: " + m_file.toStdString(), Exception::toCode("~Read"));
-        ViewContext::instance().engine()->throwError(&e, this);
+        THROW_QMLERROR(Exception, "Failed to open file for reading: " + m_file.toStdString(), Exception::toCode("~File"), this);
         return;
     }
 
     QByteArray content = file.readAll();
 
-    MLNode contentNode;
     try {
+        MLNode contentNode;
         ml::fromJson(content.data(), contentNode);
+        deserialize(this, ViewEngine::grab(this), contentNode);
     } catch (Exception& e) {
         ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
 
-    deserialize(this, ViewContext::instance().engine(), contentNode);
 }
 
 void Timeline::save(){
@@ -261,17 +354,30 @@ void Timeline::save(){
         return;
     }
 
-    //TODO: Pick lockedio if available
-    QFile file(m_file);
-    if( file.open(QIODevice::WriteOnly) ){
-        MLNode result;
-        serialize(ViewContext::instance().engine(), this, result);
+    try {
+        //TODO: Pick lockedio if available
+        QFile file(m_file);
+        if( file.open(QIODevice::WriteOnly) ){
+            MLNode result;
+            serialize(ViewContext::instance().engine(), this, result);
 
-        std::string resultData;
-        ml::toJson(result, resultData);
-        file.write(resultData.c_str());
-        file.close();
+            std::string resultData;
+            ml::toJson(result, resultData);
+            file.write(resultData.c_str());
+            file.close();
+        }
+    } catch (lv::Exception& e) {
+        QmlError(e, this).jsThrow();
     }
+}
+
+void Timeline::saveAs(const QString &path){
+    if ( m_file != path ){
+        m_file = path;
+        emit fileChanged();
+    }
+
+    save();
 }
 
 void Timeline::updateCursorPosition(qint64 position){
@@ -301,7 +407,7 @@ void Timeline::setContentLength(qint64 contentLength){
 
     for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
         Track* tr = m_trackList->trackAt(i);
-        tr->segmentModel()->setContentWidth(contentLength);
+        tr->setContentLength(contentLength);
     }
 
     m_contentLength = contentLength;

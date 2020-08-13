@@ -60,6 +60,8 @@ public:
     unsigned int maxStretchLeft() const;
     unsigned int maxStrechRight() const;
 
+    Track* currentTrack() const;
+
 public slots:
     void remove();
     lv::SegmentModel* segmentModel();
@@ -81,6 +83,8 @@ protected:
 private:
     static void setPosition(Segment* segment, unsigned int position);
     static void setLength(Segment* segment, unsigned int length);
+
+    Track*       m_track;
 
     unsigned int m_position;
     unsigned int m_length;

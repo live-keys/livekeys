@@ -54,6 +54,8 @@ void logJsValue(VisualLog& vl, const QJSValue& message){
             }
         }
         vl << "]";
+    } else if ( message.isCallable() ){
+        vl << message.toString();
     } else if ( message.isObject() ){
         if ( message.hasProperty("byteLength") ){ // ArrayBuffer
             vl << message.toString();

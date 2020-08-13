@@ -120,7 +120,7 @@ void QmlAct::exec(){
         m_workerThread->postWork(this, args, objectTransfer);
     } else {
         if ( m_run.isCallable() ){
-            QJSEngine* engine = m_run.engine();
+            QJSEngine* engine = ViewEngine::grab(this)->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());
@@ -129,7 +129,7 @@ void QmlAct::exec(){
             QJSValue r = m_run.call(currentArgs);
             setResult(r);
         } else if ( m_run.isArray() ){
-            QJSEngine* engine = m_run.engine();
+            QJSEngine* engine = ViewEngine::grab(this)->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());

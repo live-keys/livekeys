@@ -26,10 +26,10 @@ class Timeline : public QObject, public QQmlParserStatus{
     Q_PROPERTY(bool isRunning                   READ isRunning      NOTIFY isRunningChanged)
     Q_PROPERTY(double fps                       READ fps            WRITE setFps           NOTIFY fpsChanged)
     Q_PROPERTY(bool loop                        READ loop           WRITE setLoop          NOTIFY loopChanged)
-    Q_PROPERTY(QJSValue properties              READ properties     WRITE setProperties    NOTIFY propertiesChanged)
+    Q_PROPERTY(QObject* properties              READ properties     WRITE setProperties    NOTIFY propertiesChanged)
     Q_PROPERTY(QString file                     READ file           WRITE setFile          NOTIFY fileChanged)
     Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
-    Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      CONSTANT)
+    Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      NOTIFY trackListChanged)
     Q_PROPERTY(TimelineHeaderModel* headerModel READ headerModel    CONSTANT)
     Q_PROPERTY(QQmlListProperty<QObject> tracks READ tracks         CONSTANT)
     Q_CLASSINFO("DefaultProperty", "tracks")
@@ -55,8 +55,8 @@ public:
     bool loop() const;
     void setLoop(bool loop);
 
-    QJSValue properties() const;
-    void setProperties(QJSValue properties);
+    QObject* properties() const;
+    void setProperties(QObject* properties);
 
     static void appendTrackToList(QQmlListProperty<QObject>*, QObject*);
     static int trackCount(QQmlListProperty<QObject>*);
@@ -75,8 +75,10 @@ public:
     void classBegin() override{}
     void componentComplete() override;
 
+    void signalTrackNameChanged(Track* track);
+
 public slots:
-    lv::Track* addTrack();
+    void appendTrack(lv::Track* track);
     void removeTrack(int index);
 
     void start();
@@ -89,6 +91,7 @@ public slots:
 
     void load();
     void save();
+    void saveAs(const QString& path);
 
 signals:
     void contentLengthChanged();
@@ -99,9 +102,10 @@ signals:
     void loopChanged();
     void propertiesChanged();
     void fileChanged();
+    void trackListChanged();
+    void trackNameChanged(Track* track);
 
 private:
-    void appendTrack(Track* track);
     void updateCursorPosition(qint64 position);
 
     qint64 m_cursorPosition;
@@ -116,7 +120,7 @@ private:
     TrackListModel*      m_trackList;
     TimelineHeaderModel* m_headerModel;
     QTimer               m_timer;
-    QJSValue             m_properties;
+    QObject*             m_properties;
     QString              m_file;
 };
 
@@ -186,11 +190,11 @@ inline void Timeline::setLoop(bool loop){
     emit loopChanged();
 }
 
-inline QJSValue Timeline::properties() const{
+inline QObject *Timeline::properties() const{
     return m_properties;
 }
 
-inline void Timeline::setProperties(QJSValue properties){
+inline void Timeline::setProperties(QObject *properties){
     m_properties = properties;
     emit propertiesChanged();
 }

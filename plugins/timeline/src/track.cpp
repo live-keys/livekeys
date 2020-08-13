@@ -27,9 +27,10 @@ Track::Track(QObject *parent)
     : QObject(parent)
     , m_segmentModel(new SegmentModel(this))
     , m_cursorPosition(0)
+    , m_timelineReady(false)
     , m_activeSegment(nullptr)
 {
-    connect(m_segmentModel, &QAbstractRangeModel::itemsChanged, this, &Track::__segmentModelItemsChanged);
+    connect(m_segmentModel, &QAbstractRangeModel::itemsAboutToBeChanged, this, &Track::__segmentModelItemsChanged);
 }
 
 Track::~Track(){
@@ -109,6 +110,10 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
     return CursorOperation::Ready;
 }
 
+void Track::setContentLength(qint64 contentLength){
+    segmentModel()->setContentLength(contentLength);
+}
+
 void Track::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
     const Track* track = qobject_cast<const Track*>(o);
     track->serialize(engine, node);
@@ -134,47 +139,44 @@ void Track::serialize(ViewEngine *engine, MLNode &node) const{
     node["segments"] = segmentsNode;
 }
 
-void Track::deserialize(ViewEngine *engine, const MLNode &node){
+void Track::deserialize(ViewEngine *, const MLNode &node){
     segmentModel()->clearSegments();
     setName(QString::fromStdString(node["name"].asString()));
-
-    const MLNode::ArrayType& segments = node["segments"].asArray();
-    for ( auto it = segments.begin(); it != segments.end(); ++it ){
-        const MLNode& segmNode = *it;
-        if ( segmNode["type"].asString() == "Segment" ){
-            Segment* segment = new Segment;
-            segment->deserialize(this, engine->engine(), segmNode);
-            addSegment(segment);
-        } else {
-            ViewEngine::ComponentResult::Ptr segmentComp = engine->createPluginObject(QString::fromStdString(segmNode["factory"].asString()), nullptr);
-            if ( segmentComp->hasError() ){
-                segmentComp->jsThrowError();
-            } else {
-                Segment* segment = nullptr;
-
-                QVariant result;
-                QMetaObject::invokeMethod(segmentComp->object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
-
-                segment = qobject_cast<Segment*>(result.value<QObject*>());
-                if ( segment ){
-                    segment->deserialize(this, engine->engine(), segmNode);
-                    addSegment(segment);
-                }
-            }
-        }
-    }
 }
 
-QJSValue Track::timelineProperties() const{
+void Track::setSegmentPosition(Segment *segment, unsigned int position){
+    m_segmentModel->setItemPosition(segment->position(), segment->length(), 0, position);
+}
+
+void Track::setSegmentLength(Segment *segment, unsigned int length){
+    m_segmentModel->setItemLength(segment->position(), segment->length(), 0, length);
+}
+
+QString Track::typeReference() const{
+    return "";
+}
+
+QObject* Track::timelineProperties() const{
     Timeline* timeline = qobject_cast<Timeline*>(parent());
     if ( timeline )
         return timeline->properties();
-    return QJSValue();
+    return nullptr;
+}
+
+void Track::timelineComplete(){
+    m_timelineReady = true;
+    for ( int i = 0; i < m_segmentModel->totalSegments(); ++i ){
+        Segment* segm = m_segmentModel->segmentAt(i);
+        MLNode segmentNode;
+        segm->assignTrack(this);
+    }
 }
 
 bool Track::addSegment(Segment *segment){
     if ( m_segmentModel->addSegment(segment) ){
-        segment->assignTrack(this);
+        if ( m_timelineReady ){
+            segment->assignTrack(this);
+        }
         return true;
     }
     return false;
@@ -196,9 +198,29 @@ Timeline* Track::timeline(){
     return qobject_cast<Timeline*>(parent());
 }
 
-//TODO: Condition: If m_activeSegment gets removed (connect to the segmentModel)
-void Track::__segmentModelItemsChanged(qint64, qint64){
+void Track::__segmentModelItemsChanged(qint64 from, qint64 to){
+    if ( m_activeSegment ){
+        if ( m_activeSegment->position() < to && m_activeSegment->position() + m_activeSegment->length() > from ){
+            m_activeSegment = nullptr;
+        }
+    }
+}
 
+void Track::assignCursorPosition(qint64 position){
+    m_cursorPosition = position;
+}
+
+void Track::setName(const QString &name){
+    if (m_name == name)
+        return;
+
+    m_name = name;
+    emit nameChanged();
+
+    Timeline* t = timeline();
+    if ( t ){
+        t->signalTrackNameChanged(this);
+    }
 }
 
 }// namespace

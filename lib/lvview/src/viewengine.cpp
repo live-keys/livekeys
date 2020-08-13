@@ -545,7 +545,7 @@ ViewEngine *ViewEngine::grab(QObject *object){
     return nullptr;
 }
 
-lv::ViewEngine::ComponentResult::Ptr ViewEngine::createPluginObject(const QString &filePath, QObject *parent){
+ViewEngine::ComponentResult::Ptr ViewEngine::createPluginObject(const QString &filePath, QObject *parent){
     return createObject(QString::fromStdString(lv::ApplicationContext::instance().pluginPath()) + "/" + filePath, parent);
 }
 

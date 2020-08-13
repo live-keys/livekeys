@@ -8,13 +8,12 @@ import lcvcore 1.0
 Item{
     anchors.fill: parent
     
-    VideoSurface{
-        id: videoSurface
-        width: 500
+    ImageView{
+        width: 600
         height: 400
+        image: videoSurface.image
         anchors.horizontalCenter: parent.horizontalCenter
     }
-    
     
     Rectangle{
         x: track2.value
@@ -34,20 +33,20 @@ Item{
         focus : true
         timeline: Timeline{
             fps: 30
-            contentLength: 100 * fps
+            contentLength: fps * 200
+            properties: QtObject{
+                property VideoSurface videoSurface: VideoSurface{
+                    id: videoSurface
+                    imageWidth: 800
+                    imageHeight: 600
+                }
+            }
             VideoTrack{
                 name: "Track.1"
-                surface: videoSurface
                 
                 VideoSegment{
                     position: 75 
-                    length: 100
-                    file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
-                }
-    
-                VideoSegment{
-                    position: 50
-                    length: 100
+                    length: 100 
                     file : project.dir() + "/../../../samples/_videos/amherst-11_2754_3754.avi"
                 }
                 
@@ -57,30 +56,23 @@ Item{
                     file : project.dir() + "/../../../samples/_images/buildings_0246.jpg"
                 }
             }
-            NumberTrack{
+            KeyframeTrack{
                 id: track2
                 name: "Track.2"
                 
-                NumberAnimationSegment{
-                    id: numberAnimationSegment
-                    position: 200
-                    length: 50
-                    from: 0
-                    to: 50
+                Keyframe{
+                    position: 100
+                    value: 50
                     easing.type: Easing.InOutQuad;
                     easing.amplitude: 1.0; 
                     easing.period: 1.0 
                 }
-                
-                NumberAnimationSegment{
-                    id: numberAnimationSegment2
-                    position: 300
-                    length: 50
-                    from: 50
-                    to: 0
+                Keyframe{
+                    position: 150
+                    value: 150
                     easing.type: Easing.InOutQuad;
                     easing.amplitude: 1.0; 
-                    easing.period: 1.0
+                    easing.period: 1.0 
                 }
             }
         }

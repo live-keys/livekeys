@@ -34,6 +34,9 @@ OTHER_FILES += \
     $$PWD/qml/live.plugin.json
 
 DISTFILES += \
+    qml/KeyframeEditor.qml \
+    qml/KeyframeTrackExtension.qml \
+    qml/KeyframeTrackFactory.qml \
     qml/SegmentInsertMenu.qml \
     qml/SegmentView.qml
 

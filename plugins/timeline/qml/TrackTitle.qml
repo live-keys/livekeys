@@ -64,16 +64,23 @@ Item{
     Menu{
         id: contextMenu
         MenuItem {
-            text: qsTr("Add Segment...")
-            onTriggered: root.addSegment(root.trackIndex)
-        }
-        MenuItem {
-            text: qsTr("Insert Track")
-            onTriggered: timelineArea.timeline.addTrack()
-        }
-        MenuItem {
             text: qsTr("Remove Track")
             onTriggered: timelineArea.timeline.removeTrack(index)
+        }
+    }
+
+    Component.onCompleted: {
+        // load menu for this track type
+        var menuOptions = timelineArea.timeline.config.trackMenu(track)
+        if ( !menuOptions )
+            return
+
+        var tr = track
+
+        for ( var i = 0; i < menuOptions.length; ++i ){
+            var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
+            menuitem.enabled = menuOptions[i].enabled
+            menuitem.triggered.connect(menuOptions[i].action.bind(this, track))
         }
     }
 }

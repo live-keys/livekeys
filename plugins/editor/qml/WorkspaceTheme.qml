@@ -258,7 +258,6 @@ Theme{
                 height: parent.parent.height / 3
                 strokeWidth: 1
             }
-
             onClicked: parent.clicked()
         }
 
@@ -285,6 +284,7 @@ Theme{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-connections.png"
             }
+            onClicked: parent.clicked()
         }
 
         property Component penSize: RectangleButton{

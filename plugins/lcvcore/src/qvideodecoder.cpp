@@ -109,7 +109,6 @@ void QVideoDecoder::seekTo(int frame){
     if ( m_properties->currentFrame == frame )
         return;
 
-    m_properties->currentFrame = frame;
     if ( m_worker && frame != m_properties->currentFrame ){
         m_worker->seekTo(frame);
     }

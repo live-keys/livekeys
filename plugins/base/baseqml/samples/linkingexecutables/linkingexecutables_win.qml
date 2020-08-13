@@ -8,8 +8,8 @@ Item{
         path: "cmd.exe"
         args: ["/c", "dir", "/b", ".."]
         onReady: run()
-        onFinished:
-            wcexec.closeInput()
+        onAboutToRun: wcexec.run()
+        onFinished: wcexec.closeInput()
     }
 
     Exec{
@@ -17,7 +17,6 @@ Item{
         input: exec.out
         path: "powershell.exe"
         args : ["(@(While($l=(Read-Host).Trim()){$l}) -join(\"`n\")) | Measure-Object -Line"]
-        onReady: run()
     }
 
     StreamLog{

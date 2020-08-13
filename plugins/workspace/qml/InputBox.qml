@@ -55,6 +55,9 @@ Rectangle {
     function selectAll(){
         textInput.selectAll()
     }
+    function forceFocus(){
+        textInput.forceActiveFocus()
+    }
 
     TextInput{
         id : textInput
