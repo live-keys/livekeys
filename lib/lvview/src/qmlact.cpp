@@ -119,8 +119,13 @@ void QmlAct::exec(){
 
         m_workerThread->postWork(this, args, objectTransfer);
     } else {
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( !ve ){
+            qWarning("Act: Failed to capture view engine for %s.", metaObject()->className());
+            return;
+        }
         if ( m_run.isCallable() ){
-            QJSEngine* engine = ViewEngine::grab(this)->engine();
+            QJSEngine* engine = ve->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());
@@ -129,7 +134,7 @@ void QmlAct::exec(){
             QJSValue r = m_run.call(currentArgs);
             setResult(r);
         } else if ( m_run.isArray() ){
-            QJSEngine* engine = ViewEngine::grab(this)->engine();
+            QJSEngine* engine = ve->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());

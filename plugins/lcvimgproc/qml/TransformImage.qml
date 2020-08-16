@@ -1,6 +1,4 @@
 import QtQuick 2.3
-import lcvcore 1.0 as Cv
-import lcvimgproc 1.0 as Img
 import base 1.0
 
 Act{

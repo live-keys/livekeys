@@ -223,6 +223,8 @@ QMat *QMatOp::reloc(QMat *m){
 }
 
 QMat *QMatOp::crop(QMat *m, const QRect &region){
+    if (!m)
+        return nullptr;
     QMat* r = new QMat;
     m->internal()(toRect(region)).copyTo(r->internal());
     return r;

@@ -6,10 +6,13 @@ Rectangle{
 
     property QtObject defaultStyle: QtObject{
        property color background: "#33333333"
-       property color borderColor: "#666"
+       property color borderColor: "#395997"
        property double borderWidth: 2
     }
     property QtObject style: defaultStyle
+
+    signal wheel(var wheel)
+    signal regionModified()
 
     MouseArea {
        anchors.fill: parent
@@ -19,8 +22,18 @@ Rectangle{
        drag.maximumX: parent.parent.width - parent.width
        drag.maximumY: parent.parent.height - parent.height
        drag.smoothed: true
+       onMouseXChanged: {
+           if ( drag.active )
+               root.regionModified()
+       }
+       onMouseYChanged: {
+           if ( drag.active )
+               root.regionModified()
+       }
+
        cursorShape: Qt.SizeAllCursor
        onDoubleClicked: parent.destroy()
+       onWheel: root.wheel(wheel)
     }
 
     Rectangle {
@@ -50,6 +63,8 @@ Rectangle{
 
                    if ( root.width < 1 )
                        root.width = 1
+
+                   root.regionModified()
                 }
             }
         }
@@ -76,6 +91,8 @@ Rectangle{
                     }
                     if ( root.width < 1 )
                        root.width = 1
+
+                    root.regionModified()
                 }
             }
         }
@@ -108,6 +125,8 @@ Rectangle{
 
                   if ( root.height < 1 )
                       root.height = 1
+
+                  root.regionModified()
                }
             }
         }
@@ -135,6 +154,8 @@ Rectangle{
                    }
                    if ( root.height < 1 )
                       root.height = 1
+
+                   root.regionModified()
                }
            }
         }

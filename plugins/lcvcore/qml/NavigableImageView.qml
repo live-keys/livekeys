@@ -12,12 +12,27 @@ Item{
     width: image && image.dimensions().width < maxWidth ? image.dimensions().width : maxWidth
     height: image && image.dimensions().height < maxHeight ? image.dimensions().height : maxHeight
 
+    property alias imageView: imageView
+    property alias mouseControl: mouseControl
+
     property Mat image: null
     property double scale: 1.0
 
     signal clicked(var event)
     signal pressed(var event)
     signal positionChanged(var event)
+
+    function setScale(scale, position){
+        if ( scale > root.scale ){
+            root.scale = scale
+            if ( position ){
+                scrollView.flickableItem.contentX += position.x - (root.width / 2)
+                scrollView.flickableItem.contentY += position.y
+            }
+        } else {
+            root.scale = scale
+        }
+    }
 
     function autoScale(){
         if ( !image )
@@ -86,7 +101,9 @@ Item{
 
 
     MouseArea{
+        id: mouseControl
         anchors.fill: parent
+
         onClicked: {
             var x = mouse.x / root.scale + scrollView.flickableItem.contentX / root.scale
             var y = mouse.y / root.scale + scrollView.flickableItem.contentY / root.scale
@@ -118,12 +135,10 @@ Item{
                 var y = wheel.y
 
                 if (wheel.angleDelta.y > 0){
-                    root.scale += (0.05 * delta)
-                    scrollView.flickableItem.contentX += x - (root.width / 2)
-                    scrollView.flickableItem.contentY += y
+                    root.setScale(root.scale + (0.05 * delta), {x : x, y : y})
                 } else {
                     if ( root.scale > (0.05 * delta) ){
-                        root.scale -= (0.05 * delta)
+                        root.setScale(root.scale - (0.05 * delta), null)
                     }
                 }
                 wheel.accepted = true
