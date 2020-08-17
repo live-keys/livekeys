@@ -510,9 +510,23 @@ Rectangle{
             height : root.height - container.anchors.topMargin
             width: root.width / 2
 
-            model: root.addContainer
-                   ? (activeIndex === 2 ? root.addContainer.model.importSpaces() : root.addContainer.model.types())
-                   : null
+            model: {
+                if (!root.addContainer) return null
+                var types = root.addContainer.model.types()
+                var importSpaces = root.addContainer.model.importSpaces()
+
+                if (activeIndex === 0){
+                    for (var i=1; i < types.length; ++i)
+                        types[i] = "c  " + types[i]
+
+                    importSpaces.splice(0,1)
+                    for (var i=0; i < importSpaces.length; ++i)
+                        importSpaces[i] = "{  " + importSpaces[i]
+
+                    return types.concat(importSpaces)
+                }
+                return (activeIndex === 2 ? importSpaces : types)
+            }
             style: container.listViewStyle
             delegate: Component{
 
@@ -539,6 +553,23 @@ Rectangle{
                         anchors.fill: parent
                         onClicked: {
                             categoryList.currentIndex = index
+                            if (root.activeIndex === 0){
+                                var selector = modelData[0]
+                                var text = modelData.substring(3)
+
+                                if (selector ===  'A') { // All
+                                    root.addContainer.model.setImportFilter('')
+                                    root.addContainer.model.setTypeFilter('')
+                                } else if (selector === '{'){
+                                    root.addContainer.model.setImportFilter(text)
+                                    root.addContainer.model.setTypeFilter('')
+                                } else {
+                                    root.addContainer.model.setImportFilter('')
+                                    root.addContainer.model.setTypeFilter(text)
+                                }
+
+                                return
+                            }
                             if ( modelData === 'All' ) {
                                 if (root.activeIndex === 2){
                                     root.addContainer.model.setImportFilter('')

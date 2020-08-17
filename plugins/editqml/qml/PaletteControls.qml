@@ -142,6 +142,9 @@ QtObject{
         var paletteBoxGroup = createPaletteGroup(childObjectContainer.groupsContainer)
         paletteBoxGroup.editingFragment = ef
         paletteBoxGroup.codeHandler = parentObjectContainer.editor.documentHandler.codeHandler
+
+        paletteBoxGroup.leftPadding = 7
+        paletteBoxGroup.topPadding = 7
         ef.visualParent = paletteBoxGroup
         childObjectContainer.paletteGroup = paletteBoxGroup
 
@@ -364,8 +367,7 @@ QtObject{
         var objectContainer = createObjectContainer(lk.layers.editor.environment.content)
         objectContainer.editor = editor
         objectContainer.editingFragment = ef
-        objectContainer.title = ef.typeName()
-
+        objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
         var paletteBoxGroup = createPaletteGroup(objectContainer.groupsContainer)
         paletteBoxGroup.editingFragment = ef
         ef.visualParent = paletteBoxGroup

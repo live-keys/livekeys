@@ -131,6 +131,8 @@ LiveExtension{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
             } else {

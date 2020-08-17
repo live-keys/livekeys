@@ -1128,6 +1128,36 @@ QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
     return ef->nestedObjectsInfo();
 }
 
+QString CodeQmlHandler::getFragmentId(QmlEditFragment *ef)
+{
+    Q_D(CodeQmlHandler);
+
+    QList<QObject*> fragments;
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+    QmlScopeSnap scope = d->snapScope();
+
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(ef->position());
+
+    QString id;
+    if ( currentOb ){
+        for (int k = 0; k < currentOb->properties.size(); ++k)
+        {
+            auto prop = currentOb->properties[k];
+            if (prop->name().size() == 1 && prop->name()[0] == "id"){
+                auto docString = m_document->contentString();
+                id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
+                break;
+            }
+        }
+    }
+
+    ef->setObjectId(id);
+    return id;
+}
+
 QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
 {
     QJSValue result = m_engine->newObject();
@@ -3016,7 +3046,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     e,
-                    "objects",
+                    "",
                     "",
                     "implicit",
                     scope.document->path(),
@@ -3037,7 +3067,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     de,
-                    "objects",
+                    "",
                     "",
                     "QtQml",
                     "QtQml",
@@ -3072,7 +3102,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                     addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             exp,
-                            "objects",
+                            "",
                             "",
                             imp.uri(),
                             imp.uri(),
