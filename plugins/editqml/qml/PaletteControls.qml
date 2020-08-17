@@ -145,9 +145,6 @@ QtObject{
         ef.visualParent = paletteBoxGroup
         childObjectContainer.paletteGroup = paletteBoxGroup
 
-        paletteBoxGroup.x = 5
-        paletteBoxGroup.y = 10
-
         if (propertyContainer)
             propertyContainer.valueContainer = childObjectContainer
         if ( propPalette ){
@@ -194,11 +191,11 @@ QtObject{
         // capture y
         var octit = container
         var octY = 0
-        while ( octit && octit.objectName !== 'editorBox' ){
+        while ( octit && (octit.objectName !== 'editorBox' && octit.objectName !== 'objectPalette')){
             octY += octit.y
             octit = octit.parent
         }
-        if ( octit.objectName === 'editorBox' ){
+        if ( octit && (octit.objectName === 'editorBox' || octit.objectName === 'objectPalette')){
             octY += octit.y
         }
 
@@ -372,6 +369,9 @@ QtObject{
         var paletteBoxGroup = createPaletteGroup(objectContainer.groupsContainer)
         paletteBoxGroup.editingFragment = ef
         ef.visualParent = paletteBoxGroup
+
+        paletteBoxGroup.leftPadding = 7
+        paletteBoxGroup.topPadding = 7
 
         paletteBoxGroup.codeHandler = codeHandler
         objectContainer.paletteGroup = paletteBoxGroup

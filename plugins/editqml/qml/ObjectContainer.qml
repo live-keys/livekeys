@@ -132,7 +132,7 @@ Item{
         property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         width: container.width < 260 ? 300 : container.width
-        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height
+        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height + 3
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
@@ -279,7 +279,18 @@ Item{
                         collapse()
                 }
                 onErase: {
+                    var rootDeleted = (editingFragment.position() === editor.documentHandler.codeHandler.findRootPosition())
                     editor.documentHandler.codeHandler.deleteObject(editingFragment)
+
+                    if (rootDeleted) {
+                        editor.editor.rootShaped = false
+
+                        editor.editor.addRootButton.visible = true
+                        editor.editor.addRootButton.callback = function(rootPosition){
+                            lk.layers.workspace.extensions.editqml.rootPosition = rootPosition
+                            lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler)
+                        }
+                    }
                 }
                 onToggleConnections: {
                     if ( paletteConnection.model ){

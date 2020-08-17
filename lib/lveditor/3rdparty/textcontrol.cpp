@@ -1018,19 +1018,20 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
         while (i != blockText.length() && std::isspace(blockText.at(i).toLatin1()))
             i++;
 
+        QTextCursor::MoveMode moveMode = (e->modifiers() & Qt::ShiftModifier) ? QTextCursor::KeepAnchor : QTextCursor::MoveAnchor;
         int cursorPos = cursor.position() - cursor.block().position();
         if (i == blockText.length() || cursorPos <= i)
         {
             // move to beginning
-            cursor.movePosition(QTextCursor::StartOfBlock);
+            cursor.movePosition(QTextCursor::StartOfBlock, moveMode);
         }
         else
         {
-            // move to first non-space position
-            for (int k = 0; k < cursorPos - i; k++)
-                cursor.movePosition(QTextCursor::PreviousCharacter);
+            cursor.movePosition(QTextCursor::PreviousCharacter, moveMode, cursorPos - i);
         }
-
+        if (moveMode){
+            selectionChanged();
+        }
         goto accept;
     }
 

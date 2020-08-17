@@ -298,6 +298,7 @@ Theme{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-connections.png"
             }
+            onClicked: parent.clicked()
         }
 
         property Component penSize: RectangleButton{

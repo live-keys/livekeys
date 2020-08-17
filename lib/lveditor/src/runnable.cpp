@@ -72,6 +72,8 @@ Runnable::~Runnable(){
     m_project->removeExcludedRunTriggers(m_activations);
 
     if ( m_viewRoot ){
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
         m_viewRoot->setParent(nullptr);
         auto item = qobject_cast<QQuickItem*>(m_viewRoot);
         if (item)
@@ -109,6 +111,8 @@ void Runnable::run(){
 
                     m_viewContext = ctx;
                     m_viewRoot = obj;
+                    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -149,6 +153,8 @@ void Runnable::run(){
 
                     m_viewContext = ctx;
                     m_viewRoot = obj;
+                    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -174,6 +180,8 @@ void Runnable::run(){
         emptyRunSpace();
 
         m_viewRoot = obj;
+        connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
         obj->setParent(m_runSpace);
 
         QQuickItem* appRootItem = qobject_cast<QQuickItem*>(obj);
@@ -303,6 +311,14 @@ void Runnable::setRunTrigger(int runTrigger){
     emit runTriggerChanged();
 }
 
+void Runnable::clearRoot()
+{
+    if (m_viewRoot != sender()) return;
+    m_viewRoot = nullptr;
+    m_viewContext->deleteLater();
+    m_viewContext = nullptr;
+}
+
 void Runnable::runLv(){
     //TODO
 }
@@ -346,7 +362,10 @@ void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
 
 void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQmlContext* context){
     if ( ref == this ){
+        if (m_viewRoot)
+            disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewRoot    = object;
+        connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewContext = context;
         emit objectReady(object);
     }
@@ -365,6 +384,7 @@ void Runnable::emptyRunSpace(){
         if ( appRootItem ){
             appRootItem->setParentItem(nullptr);
         }
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewRoot->setParent(nullptr);
         m_viewRoot->deleteLater();
         m_viewRoot = nullptr;

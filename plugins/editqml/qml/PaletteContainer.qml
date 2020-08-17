@@ -7,7 +7,7 @@ import editor.private 1.0
 Rectangle{
     id: paletteContainer
     width: child ? Math.max(compact? 0 : 200, child.width + 5 + (compact ? compactHeaderWidth: 0)): (compact? 0 : 200)
-    height: child ? child.height + (compact ? 4 : normalHeaderHeight) : 0
+    height: child ? child.height + (compact ? 0 : normalHeaderHeight) +5 : 0
     objectName: "paletteContainer"
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
@@ -61,7 +61,7 @@ Rectangle{
     Rectangle{
         id: paletteBoxHeader
         height: compact && child
-                    ? child.height + 10
+                    ? child.height
                     : normalHeaderHeight
         width: !compact && child
                     ? (paletteContainer.parent ? paletteContainer.parent.width : paletteContainer.width)
@@ -260,7 +260,10 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 11
             height: 11
-            visible: !compact
+            visible: {
+                var dontShow = paletteContainer.parent && paletteContainer.parent.parent && paletteContainer.parent.parent.objectName !== "editorBox"
+                return !compact && !dontShow
+            }
 
             Image{
                 width: parent.width; height: parent.height
@@ -346,8 +349,7 @@ Rectangle{
 
     Item{
         id: paletteChild
-        anchors.top: compact? parent.top : paletteBoxHeader.top
-        anchors.topMargin: compact? 0 : paletteBoxHeader.height
+        anchors.top: compact? parent.top : paletteBoxHeader.bottom
         anchors.left: parent.left
         width: parent.child ? parent.child.width: 0
         height: parent.child ? parent.child.height: 0

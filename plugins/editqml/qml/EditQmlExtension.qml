@@ -31,6 +31,15 @@ LiveExtension{
         }
 
         property PaletteControls paletteControls: PaletteControls{}
+
+        property alias rootPosition: root.rootPosition
+        function shapeRootObject(editor, codeHandler){
+            root.shapeRootObject(editor, codeHandler)
+        }
+
+        function add(activeIndex, objectsOnly){
+            root.add(activeIndex, objectsOnly)
+        }
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
@@ -186,8 +195,6 @@ LiveExtension{
         var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
 
 
-        palette.item.x = 5
-        palette.item.y = 7
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }
@@ -365,7 +372,7 @@ LiveExtension{
         add(3)
     }
 
-    function add(activeIndex){
+    function add(activeIndex, objectsOnly){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -385,6 +392,7 @@ LiveExtension{
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
+            addBoxItem.objectsOnly = objectsOnly ? objectsOnly : false
 
             var addBox = lk.layers.editor.environment.createEditorBox(
                 addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom

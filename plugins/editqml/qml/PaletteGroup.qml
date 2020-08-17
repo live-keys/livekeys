@@ -1,8 +1,10 @@
-import QtQuick 2.0
+import QtQuick 2.7
 
 Column{
     id: paletteGroup
     spacing: 3
+    leftPadding: 0
+    topPadding: 0
     objectName: "paletteGroup"
 
     property QtObject editingFragment : null
@@ -54,7 +56,7 @@ Column{
                     maxWidth = children[i].width
             }
         }
-        return maxWidth
+        return maxWidth + (maxWidth > 0 ? paletteGroup.leftPadding : 0)
     }
     height: {
         var totalHeight = 0;
@@ -63,9 +65,7 @@ Column{
                 totalHeight += children[i].height
             }
         }
-        if ( children.length > 1 )
-            return totalHeight + (children.length - 1) * spacing
-        else
-            return totalHeight
+        var result = totalHeight + (children.length - 1) * spacing
+        return result + (result > 0 ? paletteGroup.topPadding : 0)
     }
 }
