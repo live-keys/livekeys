@@ -260,6 +260,20 @@ Theme{
             }
             onClicked: parent.clicked()
         }
+        property Component cancel: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.formButtonStyle
+
+            content: XIcon{
+                anchors.centerIn: parent
+                width: parent.parent.width / 3
+                height: parent.parent.height / 3
+                strokeWidth: 1
+            }
+            onClicked: parent.clicked()
+        }
 
         property Component save: RectangleButton{
             width: parent ? parent.width : 20

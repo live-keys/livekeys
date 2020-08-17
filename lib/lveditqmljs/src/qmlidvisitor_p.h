@@ -18,7 +18,7 @@
 #define LVQMLIDVISITOR_H
 
 #include "qmljs/qmljsinterpreter.h"
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsdescribevalue.h"
 #include "live/documentqmlobject.h"
 #include "qmllanguageinfo_p.h"
@@ -78,7 +78,7 @@ public:
             m_parent = value;
             return true;
         } else if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
-            type = (vr->ast() != nullptr) ? vr->ast()->memberType.toString() : QString("object");
+            type = (vr->ast() != nullptr) ? vr->ast()->memberType->name.toString() : QString("object");
         } else if ( const QmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
             type = "function";
             QmlFunctionInfo mf;

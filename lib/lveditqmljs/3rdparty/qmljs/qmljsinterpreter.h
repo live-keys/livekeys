@@ -34,7 +34,7 @@
 #include <qmljs/qmljs_global.h>
 #include <qmljs/qmljsconstants.h>
 #include <qmljs/qmljsimportdependencies.h>
-#include <qmljs/parser/qmljsastfwd_p.h>
+#include <qmljs/parser/qqmljsastfwd_p.h>
 
 #include <languageutils/fakemetaobject.h>
 

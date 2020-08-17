@@ -576,6 +576,7 @@ Rectangle{
                                 } else {
                                     root.addContainer.model.setTypeFilter('')
                                 }
+
                             }
                             else {
                                 if (root.activeIndex === 2) {

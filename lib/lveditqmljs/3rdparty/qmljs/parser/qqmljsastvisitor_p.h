@@ -37,8 +37,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMLJSASTVISITOR_P_H
-#define QMLJSASTVISITOR_P_H
+#ifndef QQMLJSASTVISITOR_P_H
+#define QQMLJSASTVISITOR_P_H
 
 //
 //  W A R N I N G
@@ -51,8 +51,8 @@
 // We mean it.
 //
 
-#include "qmljsastfwd_p.h"
-#include "qmljsglobal_p.h"
+#include "qqmljsastfwd_p.h"
+#include "qqmljsglobal_p.h"
 
 QT_QML_BEGIN_NAMESPACE
 
@@ -84,6 +84,8 @@ public:
     virtual bool visit(UiArrayMemberList *) { return true; }
     virtual bool visit(UiQualifiedId *) { return true; }
     virtual bool visit(UiQualifiedPragmaId *) { return true; }
+    virtual bool visit(UiEnumDeclaration *) { return true; }
+    virtual bool visit(UiEnumMemberList *) { return true; }
 
     virtual void endVisit(UiProgram *) {}
     virtual void endVisit(UiImport *) {}
@@ -101,8 +103,10 @@ public:
     virtual void endVisit(UiArrayMemberList *) {}
     virtual void endVisit(UiQualifiedId *) {}
     virtual void endVisit(UiQualifiedPragmaId *) {}
+    virtual void endVisit(UiEnumDeclaration *) {}
+    virtual void endVisit(UiEnumMemberList *) { }
 
-    // QmlJS
+    // QQmlJS
     virtual bool visit(ThisExpression *) { return true; }
     virtual void endVisit(ThisExpression *) {}
 
@@ -336,4 +340,4 @@ public:
 
 QT_QML_END_NAMESPACE
 
-#endif
+#endif // QQMLJSASTVISITOR_P_H

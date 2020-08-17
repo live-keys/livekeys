@@ -32,7 +32,7 @@
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
 
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
 
 #include "live/documenthandler.h"
@@ -3046,7 +3046,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     e,
-                    "",
+                    "objects",
                     "",
                     "implicit",
                     scope.document->path(),
@@ -3067,7 +3067,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     de,
-                    "",
+                    "objects",
                     "",
                     "QtQml",
                     "QtQml",
@@ -3102,7 +3102,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                     addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             exp,
-                            "",
+                            "objects",
                             "",
                             imp.uri(),
                             imp.uri(),

@@ -37,9 +37,9 @@
 **
 ****************************************************************************/
 
-#include "qmljsast_p.h"
+#include "qqmljsast_p.h"
 
-#include "qmljsastvisitor_p.h"
+#include "qqmljsastvisitor_p.h"
 
 QT_QML_BEGIN_NAMESPACE
 
@@ -61,22 +61,22 @@ void Node::accept(Node *node, Visitor *visitor)
 
 ExpressionNode *Node::expressionCast()
 {
-    return 0;
+    return nullptr;
 }
 
 BinaryExpression *Node::binaryExpressionCast()
 {
-    return 0;
+    return nullptr;
 }
 
 Statement *Node::statementCast()
 {
-    return 0;
+    return nullptr;
 }
 
 UiObjectMember *Node::uiObjectMemberCast()
 {
-    return 0;
+    return nullptr;
 }
 
 ExpressionNode *ExpressionNode::expressionCast()
@@ -967,7 +967,24 @@ void UiSourceElement::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-} } // namespace QmlJS::AST
+void UiEnumDeclaration::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(members, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void UiEnumMemberList::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+    }
+
+    visitor->endVisit(this);
+}
+
+} } // namespace QQmlJS::AST
 
 QT_QML_END_NAMESPACE
 

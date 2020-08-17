@@ -63,11 +63,13 @@ DISTFILES += \
     palettes/DrawPalette.qml \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.qml \
+    palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoPlayerPalette.qml \
     qml/BlankImage.qml \
     qml/ColorHistogramView.qml \
     qml/Crop.qml \
+    qml/CropTool.qml \
     qml/Draw.qml \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \

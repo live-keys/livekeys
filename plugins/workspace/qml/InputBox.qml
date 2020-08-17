@@ -43,6 +43,7 @@ Rectangle {
 
     property alias text : textInput.text
     property alias font: textInput.font
+    property alias inputActiveFocus: textInput.activeFocus
     property string textHint : ''
 
     property alias textInput: textInput

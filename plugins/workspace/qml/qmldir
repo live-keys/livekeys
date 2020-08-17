@@ -14,6 +14,11 @@ LabelOnRectangle   1.0 LabelOnRectangle.qml
 InputBox           1.0 InputBox.qml
 PathInputBox       1.0 PathInputBox.qml
 CheckMarkIcon      1.0 CheckMarkIcon.qml
+ResizeIcon         1.0 ResizeIcon.qml
+RotateIcon         1.0 RotateIcon.qml
+CropIcon           1.0 CropIcon.qml
+XIcon              1.0 XIcon.qml
+TwoWayArrowIcon    1.0 TwoWayArrowIcon.qml
 RectangleButton    1.0 RectangleButton.qml
 NumberLabel        1.0 NumberLabel.qml
 PaneMenu           1.0 PaneMenu.qml
@@ -23,3 +28,7 @@ ColorPicker        1.0 ColorPicker.qml
 PenSizeIcon        1.0 PenSizeIcon.qml
 RectangleSelection 1.0 RectangleSelection.qml
 Tooltip            1.0 Tooltip.qml
+Tool               1.0 Tool.qml
+Toolbar            1.0 Toolbar.qml
+Toolbox            1.0 Toolbox.qml
+ToolButton         1.0 ToolButton.qml

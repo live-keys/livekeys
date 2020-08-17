@@ -12,7 +12,12 @@ Grid{
     }
 
     TransformImage{
+        id: transformImage
         input: imageFile.output
+    }
+    
+    ImageView{
+        image: transformImage.result
     }
 
 }

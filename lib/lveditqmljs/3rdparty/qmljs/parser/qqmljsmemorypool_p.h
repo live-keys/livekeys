@@ -37,8 +37,8 @@
 **
 ****************************************************************************/
 
-#ifndef QMLJSMEMORYPOOL_P_H
-#define QMLJSMEMORYPOOL_P_H
+#ifndef QQMLJSMEMORYPOOL_P_H
+#define QQMLJSMEMORYPOOL_P_H
 
 //
 //  W A R N I N G
@@ -51,7 +51,7 @@
 // We mean it.
 //
 
-#include "qmljsglobal_p.h"
+#include "qqmljsglobal_p.h"
 
 #include <QtCore/qglobal.h>
 #include <QtCore/qshareddata.h>
@@ -71,13 +71,7 @@ class QML_PARSER_EXPORT MemoryPool : public QSharedData
     void operator =(const MemoryPool &other);
 
 public:
-    MemoryPool()
-        : _blocks(0),
-          _allocatedBlocks(0),
-          _blockCount(-1),
-          _ptr(0),
-          _end(0)
-    { }
+    MemoryPool() {}
 
     ~MemoryPool()
     {
@@ -94,7 +88,7 @@ public:
     inline void *allocate(size_t size)
     {
         size = (size + 7) & ~7;
-        if (_ptr && (_ptr + size < _end)) {
+        if (Q_LIKELY(_ptr && (_ptr + size < _end))) {
             void *addr = _ptr;
             _ptr += size;
             return addr;
@@ -105,13 +99,13 @@ public:
     void reset()
     {
         _blockCount = -1;
-        _ptr = _end = 0;
+        _ptr = _end = nullptr;
     }
 
     template <typename Tp> Tp *New() { return new (this->allocate(sizeof(Tp))) Tp(); }
 
 private:
-    void *allocate_helper(size_t size)
+    Q_NEVER_INLINE void *allocate_helper(size_t size)
     {
         Q_ASSERT(size < BLOCK_SIZE);
 
@@ -122,15 +116,18 @@ private:
                 _allocatedBlocks *= 2;
 
             _blocks = (char **) realloc(_blocks, sizeof(char *) * _allocatedBlocks);
+            Q_CHECK_PTR(_blocks);
 
             for (int index = _blockCount; index < _allocatedBlocks; ++index)
-                _blocks[index] = 0;
+                _blocks[index] = nullptr;
         }
 
         char *&block = _blocks[_blockCount];
 
-        if (! block)
+        if (! block) {
             block = (char *) malloc(BLOCK_SIZE);
+            Q_CHECK_PTR(block);
+        }
 
         _ptr = block;
         _end = _ptr + BLOCK_SIZE;
@@ -141,11 +138,11 @@ private:
     }
 
 private:
-    char **_blocks;
-    int _allocatedBlocks;
-    int _blockCount;
-    char *_ptr;
-    char *_end;
+    char **_blocks = nullptr;
+    int _allocatedBlocks = 0;
+    int _blockCount = -1;
+    char *_ptr = nullptr;
+    char *_end = nullptr;
 
     enum
     {
@@ -168,7 +165,7 @@ public:
     void operator delete(void *, MemoryPool *) {}
 };
 
-} // namespace QmlJS
+} // namespace QQmlJS
 
 QT_QML_END_NAMESPACE
 

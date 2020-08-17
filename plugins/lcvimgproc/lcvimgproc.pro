@@ -46,11 +46,14 @@ OTHER_FILES *= \
     qml/qmldir \
     qml/plugins.qmltypes \
     doc/*.md \
-    samples/*.qml
+    samples/*.qml \
+    qml/palettes/*.qml
 
 DISTFILES += \
     qml/Resize.qml \
+    qml/ResizeTool.qml \
     qml/Rotate.qml \
+    qml/RotateTool.qml \
     qml/Scale.qml \
     qml/live.package.json \
     qml/live.plugin.json

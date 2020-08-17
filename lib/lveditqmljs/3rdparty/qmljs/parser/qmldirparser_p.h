@@ -46,7 +46,7 @@
 #include <QtCore/QHash>
 #include <QtCore/QDebug>
 
-#include "qmljsengine_p.h"
+#include "qqmljsengine_p.h"
 
 QT_BEGIN_NAMESPACE
 
