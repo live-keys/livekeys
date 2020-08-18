@@ -200,6 +200,7 @@ public slots:
 
     void aboutToDelete();
     QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
+    QString getFragmentId(lv::QmlEditFragment* ef);
 signals:
     void numberOfConnectionsChanged();
     void stoppedProcessing();

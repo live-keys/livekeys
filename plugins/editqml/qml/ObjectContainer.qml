@@ -206,12 +206,6 @@ Item{
             for (var i=1; i < container.children.length; ++i)
                 container.children[i].destroy()
 
-            for (var i=0; i < container.children[0].children.length; ++i)
-            {
-                var child = container.children[0].children[i]
-                child.destroy()
-            }
-
             compact = true
 
             propertiesOpened.length = 0
@@ -242,6 +236,14 @@ Item{
             onObjectAdded: {
                 if (compact) expand()
                 else addObjectFragmentToContainer(obj)
+
+                var child = container.children[container.children.length-1]
+                var codeHandler = objectContainer.editor.documentHandler.codeHandler
+                var id = codeHandler.getFragmentId(child.editingFragment)
+                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
+
+                paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
+
                 container.sortChildren()
             }
             onPropertyAdded: {
