@@ -63,6 +63,8 @@ public:
 
     Type type() const;
 
+    QQmlContext* createContext();
+
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
     void engineObjectReady(QObject* object, const QUrl& file, QObject* ref, QQmlContext* context);
@@ -90,7 +92,6 @@ private:
     void runLv();
 
     QObject *createObject(const QByteArray& code, const QUrl& file, QQmlContext* context);
-    QQmlContext* createContext();
     void emptyRunSpace();
 
     QString               m_name;
