@@ -3388,15 +3388,18 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-int CodeQmlHandler::insertItemAtDocumentEnd(QObject*)
+int CodeQmlHandler::insertRootItem(const QString &qmlType)
 {
     Q_D(CodeQmlHandler);
     d->syncObjects(m_document);
 
+    QmlTypeReference qtr = QmlTypeReference::split(qmlType);
+
+    // add the root via code
+
     int insertionPosition = m_target->characterCount()-1;
 
-    QString insertionText = "\nItem{\n    id: item\n}\n";
-
+    QString insertionText = "\n" + qtr.name() + "{\n    id: item\n}\n";
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
     cs.setPosition(insertionPosition);
@@ -3408,6 +3411,29 @@ int CodeQmlHandler::insertItemAtDocumentEnd(QObject*)
     updateScope();
 
     d->syncObjects(m_document);
+
+    QObject* newRoot = QmlCodeConverter::create(
+        d->documentInfo(), qtr.name() + "{}", "temp"
+    );
+    if ( !newRoot )
+        return -1;
+
+    Project* project = d->projectHandler->project();
+    Runnable* r = project->runnables()->runnableAt(m_document->file()->path());
+
+    if ( !r )
+        return -1;
+
+    QQmlContext* ctx = r->createContext();
+    newRoot->setParent(r->runSpace());
+
+    QQuickItem* newRootItem = qobject_cast<QQuickItem*>(newRoot);
+    QQuickItem* runSpaceItem = qobject_cast<QQuickItem*>(r->runSpace());
+    if ( newRootItem && runSpaceItem ){
+        newRootItem->setParentItem(runSpaceItem);
+    }
+
+    r->engineObjectReady(newRoot, QUrl(), r, ctx);
 
     return insertionPosition + 2;
 }

@@ -35,7 +35,7 @@ class QmlFileReader : public QObject, public QQmlParserStatus{
 
 public:
     explicit QmlFileReader(QObject *parent = nullptr);
-    virtual ~QmlFileReader();
+    virtual ~QmlFileReader() override;
 
     const QByteArray& data() const;
 

@@ -600,11 +600,8 @@ bool DocumentQmlInfo::parse(const QString &source){
     foreach( const QmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
         DocumentQmlInfo::Message::Severity severity = DocumentQmlInfo::Message::Hint;
         switch( message.kind ){
-        case QmlJS::Severity::Hint: severity = DocumentQmlInfo::Message::Hint; break;
-        case QmlJS::Severity::MaybeWarning: severity = DocumentQmlInfo::Message::MaybeWarning; break;
-        case QmlJS::Severity::Warning: severity = DocumentQmlInfo::Message::Warning; break;
-        case QmlJS::Severity::MaybeError: severity = DocumentQmlInfo::Message::MaybeError; break;
-        case QmlJS::Severity::Error: severity = DocumentQmlInfo::Message::Error; break;
+        case QmlJS::DiagnosticMessage::Error: severity = DocumentQmlInfo::Message::Error; break;
+        case QmlJS::DiagnosticMessage::Warning: severity = DocumentQmlInfo::Message::Warning; break;
         }
 
         d->messages.append(
