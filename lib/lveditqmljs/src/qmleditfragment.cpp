@@ -198,10 +198,24 @@ void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
 
 void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
     for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){
+
         if ( *it == edit ){
             edit->emitRemoval();
-            m_childFragments.erase(it);
+
+            for ( auto nextIt = it + 1; nextIt != m_childFragments.end(); ++nextIt ){
+                QmlEditFragment* nextFrag = *nextIt;
+                const QList<QmlBindingChannel::Ptr> &chs = nextFrag->bindingSpan()->channels();
+
+                for ( QmlBindingChannel::Ptr channel : chs ){
+                    if ( channel->listIndex() > -1 ){
+                        QQmlProperty pp = channel->property();
+                        channel->updateConnection(pp, channel->listIndex() - 1);
+                    }
+                }
+            }
+
             edit->deleteLater();
+            m_childFragments.erase(it);
             return;
         }
     }
@@ -273,7 +287,8 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
                     found = true;
                     break;
                 }
-            if (found) ordered.push_back(child);
+            if (found)
+                ordered.push_back(child);
         }
 
         palette->setValueFromBinding(QVariant::fromValue(ordered[inputChannel->listIndex()]));

@@ -2208,6 +2208,7 @@ void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
 void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     QList<QObject*> toRemove;
     QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->channels();
+
     for ( auto it = channels.begin(); it != channels.end(); ++it ){
         const QmlBindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -2226,7 +2227,8 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
                                 found = true;
                                 break;
                             }
-                        if (found) ordered.push_back(child);
+                        if (found)
+                            ordered.push_back(child);
                     }
 
                     toRemove.append(ordered[bc->listIndex()]);
@@ -2244,8 +2246,9 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     m_document->insert(pos, len, "");
     m_document->removeEditingState(ProjectDocument::Runtime);
 
-    for ( QObject* o : toRemove )
+    for ( QObject* o : toRemove ){
         o->deleteLater();
+    }
 }
 
 QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &propertyName){
