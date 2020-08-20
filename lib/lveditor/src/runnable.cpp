@@ -9,6 +9,9 @@
 #include "live/projectfile.h"
 #include "live/projectdocumentmodel.h"
 
+#include <QQmlProperty>
+#include <QQmlListReference>
+
 #include <QFileInfo>
 #include <QQmlComponent>
 #include <QQuickItem>
@@ -365,6 +368,16 @@ void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQ
         if (m_viewRoot)
             disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewRoot    = object;
+
+        QQuickItem* rootItem = qobject_cast<QQuickItem*>(m_runSpace);
+        if ( rootItem ){
+            QQmlProperty pp(rootItem);
+            QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+            if ( ppref.canAppend() ){
+                ppref.append(object);
+            }
+        }
+
         connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewContext = context;
         emit objectReady(object);

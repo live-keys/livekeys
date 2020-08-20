@@ -9,6 +9,7 @@ QtObject{
     property color paletteHeaderColor: '#333'
     property color sectionLabelColor: '#686868'
     property color sectionHeaderBackgroundColor: '#777'
+    property color sectionHeaderFocusBackgroundColor: '#888'
     property QtObject colorScheme: QtObject{}
 
     property Component scrollStyle: Component{
@@ -122,3 +123,4 @@ QtObject{
     property QtObject timelineStyle: QtObject{}
 
 }
+

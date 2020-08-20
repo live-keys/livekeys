@@ -111,6 +111,7 @@ Item{
 
     Item{
         id: objectContainer
+        objectName: "objectContainerFrame"
 
         property string title: "Object"
 
@@ -130,6 +131,14 @@ Item{
         property var propertiesOpened: []
 
         property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
+        Keys.onPressed: {
+            var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
+            if ( command ){
+                lk.layers.workspace.commands.execute(command)
+            }
+            event.accepted = true
+        }
 
         width: container.width < 260 ? 300 : container.width
         height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height + 3
@@ -271,7 +280,12 @@ Item{
                 id: objectContainerTitle
                 anchors.fill: parent
                 compact: objectContainer.compact
-                color: objectContainer.pane ? objectContainer.pane.topColor : objectContainer.paletteStyle.sectionHeaderBackgroundColor//'#062945'
+                color: {
+                    return objectContainer.pane ? objectContainer.pane.topColor
+                                                : objectContainer.activeFocus
+                                                  ? objectContainer.paletteStyle.sectionHeaderFocusBackgroundColor
+                                                  : objectContainer.paletteStyle.sectionHeaderBackgroundColor
+                }
                 isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
                 onToggleCompact: {
@@ -302,6 +316,10 @@ Item{
                         paletteConnection.model = editingFragment.bindingModel(editor.documentHandler.codeHandler)
                     }
                 }
+                onAssignFocus: {
+                    lk.layers.workspace.panes.activateItem(objectContainer, objectContainer.editor)
+                }
+
                 onRebuild : {
                     editingFragment.rebuild()
                 }

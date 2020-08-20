@@ -26,6 +26,8 @@
 
 namespace lv{
 
+class ViewEngine;
+
 class LV_EDITOR_EXPORT KeyMap : public QObject{
 
     Q_OBJECT
@@ -59,6 +61,9 @@ public:
 
         bool       isDefault;
         QString    command;
+        QString    whenActivePane;
+        QString    whenActiveItem;
+        QString    whenExpression;
     };
 
     /** Indicates which OS is in use, with matching keyboard */
@@ -77,13 +82,14 @@ public:
     ~KeyMap();
 
     QString locateCommand(KeyCode key);
-    void store(KeyCode key, const QString& command, bool isDefault = true);
-    void store(const QString& keydescription, const QString& command, bool isDefault = true);
+    QList<StoredCommand> locateCommands(KeyCode key);
+    void store(KeyCode key, const QString& command, QJSValue when = QJSValue(), bool isDefault = true);
+    void store(const QString& keydescription, const QString& command, QJSValue when = QJSValue(), bool isDefault = true);
     void store(const QJSValue &keyObject, bool isDefault = true);
-    void store(quint32 os, quint32 key, quint32 localModifer, const QString& command, bool isDefault = true);
+    void store(quint32 os, quint32 key, quint32 localModifer, const QString& command, QJSValue when = QJSValue(), bool isDefault = true);
 
     /** Exposes the command mp */
-    QMap<KeyCode, StoredCommand>& commandMap() { return m_commandMap; }
+    QMap<KeyCode, QList<StoredCommand> >& commandMap() { return m_commandMap; }
     QString getKeyCodeDescription(KeyCode kc);
 
 public slots:
@@ -106,8 +112,9 @@ private:
     QPair<quint32, quint32> splitKeyCode(KeyCode kc);
 
 
-    QMap<KeyCode, StoredCommand> m_commandMap;
-    QString m_path;
+    QMap<KeyCode, QList<StoredCommand> > m_commandMap;
+    QString     m_path;
+    ViewEngine* m_engine;
 };
 
 }// namespace

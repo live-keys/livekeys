@@ -16,6 +16,10 @@
 
 #include "keymap.h"
 #include "live/mlnodetojson.h"
+#include "live/visuallogqt.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
+
 #include <QFile>
 #include <QDir>
 #include <QJSValue>
@@ -102,8 +106,11 @@ std::map<QString, quint32> KeyMap::keysForStrings = {
 /** Default constructor */
 KeyMap::KeyMap(const QString &settingsPath, QObject *parent)
     : QObject(parent)
+    , m_engine(nullptr)
 {
-    m_path = QDir::cleanPath(settingsPath + "/keymap.json");
+    m_engine = ViewContext::instance().engine();
+
+    m_path   = QDir::cleanPath(settingsPath + "/keymap.json");
     readFile();
 }
 
@@ -114,10 +121,55 @@ KeyMap::~KeyMap(){
 /** Returns the command paired with the given key */
 QString KeyMap::locateCommand(KeyMap::KeyCode key){
     auto it = m_commandMap.find(key);
-    if ( it != m_commandMap.end() )
-        return it->command;
 
+    if ( it != m_commandMap.end() ){
+        QObject* panes = parent()->property("panes").value<QObject*>();
+        QObject* activePane = nullptr;
+        QObject* activeItem = nullptr;
+        QString activePaneType;
+        QString activeItemType;
+
+        if ( panes ){
+            activePane = panes->property("activePane").value<QObject*>();
+            activeItem = panes->property("activeItem").value<QObject*>();
+
+            activePaneType = activePane ? activePane->property("paneType").toString() : "";
+            activeItemType = activeItem ? activeItem->property("objectName").toString() : "";
+        }
+
+        QList<KeyMap::StoredCommand>& commandList = it.value();
+        for ( auto cit = commandList.begin(); cit != commandList.end(); ++cit ){
+            KeyMap::StoredCommand& cmd = *cit;
+            if ( !cmd.whenActivePane.isEmpty() ){
+                if ( cmd.whenActivePane != activePaneType )
+                    continue;
+            }
+            if ( !cmd.whenActiveItem.isEmpty() ){
+                if ( cmd.whenActiveItem != activeItemType )
+                    continue;
+            }
+            if ( !cmd.whenExpression.isEmpty() ){
+                QJSValue val = m_engine->engine()->evaluate("function(activePane, activeItem){ return " + cmd.whenExpression + ";}");
+                if ( val.isCallable() ){
+                    QJSValue result = val.call(QJSValueList() << m_engine->engine()->newQObject(activePane) << m_engine->engine()->newQObject(activeItem));
+                    if ( !result.isBool() || result.toBool() == false )
+                        continue;
+                } else {
+                    continue;
+                }
+            }
+            return cmd.command;
+        }
+    }
     return "";
+}
+
+QList<KeyMap::StoredCommand> KeyMap::locateCommands(KeyMap::KeyCode key){
+    auto it = m_commandMap.find(key);
+    if ( it != m_commandMap.end() ){
+        return *it;
+    }
+    return QList<KeyMap::StoredCommand>();
 }
 
 
@@ -126,19 +178,56 @@ QString KeyMap::locateCommand(KeyMap::KeyCode key){
  *
  * The main store function which eventually gets called by all the other variants.
  */
-void KeyMap::store(KeyMap::KeyCode key, const QString &command, bool isDefault){
-    if ( isDefault && !locateCommand(key).isEmpty() )
-        return;
+void KeyMap::store(KeyMap::KeyCode key, const QString &command, QJSValue when, bool isDefault){
+    auto it = m_commandMap.find(key);
+    QString whenActivePane = "";
+    QString whenActiveItem = "";
+    QString whenExpression = "";
 
-    m_commandMap[key] = StoredCommand(command, isDefault);
+    if ( when.isObject() ){
+        whenActivePane = when.hasProperty("activePane") ? when.property("activePane").toString() : "";
+        whenActiveItem = when.hasProperty("activeItem") ? when.property("activeItem").toString() : "";
+        whenExpression = when.hasProperty("expression") ? when.property("expression").toString() : "";
+    }
+
+    if ( it == m_commandMap.end() ){
+        KeyMap::StoredCommand storedCommand(command, isDefault);
+        storedCommand.whenActivePane = whenActivePane;
+        storedCommand.whenActiveItem = whenActiveItem;
+        storedCommand.whenExpression = whenExpression;
+        QList<KeyMap::StoredCommand> commandList;
+        commandList.append(storedCommand);
+
+        m_commandMap[key] = commandList;
+
+    } else {
+        QList<KeyMap::StoredCommand>& commandList = it.value();
+        for ( auto cit = commandList.begin(); cit != commandList.end(); ++cit ){
+            KeyMap::StoredCommand& cmd = *cit;
+            if ( cmd.whenActiveItem == whenActiveItem &&
+                 cmd.whenActivePane == whenActivePane &&
+                 cmd.whenExpression == whenExpression )
+            {
+                commandList.erase(cit);
+                break;
+            }
+        }
+
+        KeyMap::StoredCommand storedCommand(command, isDefault);
+        storedCommand.whenActivePane = whenActivePane;
+        storedCommand.whenActiveItem = whenActiveItem;
+        storedCommand.whenExpression = whenExpression;
+        commandList.prepend(storedCommand);
+    }
+
     emit keymapChanged();
 }
 
 /** Store function which pairs the key (given by a description) with a given command */
-void KeyMap::store(const QString &keydescription, const QString &command, bool isDefault){
+void KeyMap::store(const QString &keydescription, const QString &command, QJSValue when, bool isDefault){
     QPair<int, KeyMap::KeyCode> pkc = composeKeyCode(keydescription);
     if ( pkc.first == 0 || pkc.first == KeyMap::KEYBOARD_OS ){
-        store(pkc.second, command, isDefault);
+        store(pkc.second, command, when, isDefault);
     }
 }
 
@@ -148,16 +237,35 @@ void KeyMap::store(const QJSValue &keyObject, bool isDefault){
     QJSValueIterator vit(keyObject);
     while( vit.hasNext() ){
         vit.next();
-        store(vit.name(), vit.value().toString(), isDefault);
+
+        QJSValue when;
+        if ( vit.value().isObject() ){
+            when = m_engine->engine()->newObject();
+
+            QString command = vit.value().property("command").toString();
+            if ( vit.value().hasProperty("whenPane") ){
+                when.setProperty("activePane", vit.value().property("whenPane"));
+            }
+            if ( vit.value().hasProperty("whenItem") ){
+                when.setProperty("activeItem", vit.value().property("whenItem"));
+            }
+            if ( vit.value().hasProperty("when") ){
+                when.setProperty("expression", vit.value().property("when"));
+            }
+
+            store(vit.name(), command, when, isDefault);
+        } else {
+            store(vit.name(), vit.value().toString(), when, isDefault);
+        }
     }
 }
 
 /** Store command under the key given by its components */
-void KeyMap::store(quint32 os, quint32 key, quint32 modifier, const QString &command, bool isDefault){
+void KeyMap::store(quint32 os, quint32 key, quint32 modifier, const QString &command, QJSValue when, bool isDefault){
     if ( os != 0 && os != KEYBOARD_OS )
         return;
 
-    store((KeyCode)modifier << 32 | key, command, isDefault);
+    store((KeyCode)modifier << 32 | key, command, when, isDefault);
 }
 
 /** Locate command for a key given by its components */
@@ -208,7 +316,7 @@ void KeyMap::readFile(){
         ml::fromJson(fileContents.data(), n);
         if ( n.type() == MLNode::Object ){
             for ( auto it = n.begin(); it != n.end(); ++it ){
-                store(QString::fromStdString(it.key()), QString::fromStdString(it.value().asString()), false);
+                store(QString::fromStdString(it.key()), QString::fromStdString(it.value().asString()), QJSValue(), false);
             }
         }
     }
@@ -246,7 +354,7 @@ QString KeyMap::stringFromModifier(const quint32 &modifier) const
 
 quint32 KeyMap::keyFromString(const QString &key) const {
     quint32 result = keysForStrings[key];
-    if (result == 0 && key.size() == 1) result = key.at(0).toLower().unicode();
+    if (result == 0 && key.size() == 1) result = key.at(0).toUpper().unicode();
 
     return result;
 }

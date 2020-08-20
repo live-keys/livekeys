@@ -14,6 +14,7 @@ LiveExtension{
             paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
             paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor
             sectionHeaderBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlay : sectionHeaderBackgroundColor
+            sectionHeaderFocusBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlayDominant : sectionHeaderFocusBackgroundColor
             labelStyle: currentTheme ? currentTheme.inputLabelStyle : labelStyle
             monoInputStyle: currentTheme ? currentTheme.monoInputStyle : monoInputStyle
             inputStyle: currentTheme ? currentTheme.inputStyle : inputStyle
@@ -21,7 +22,7 @@ LiveExtension{
             propertyLabelStyle: QtObject{
                 property color background: currentTheme ? currentTheme.colorScheme.middleground : propertyLabelStyle.background
                 property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
-                property double borderThickness: currentTheme ? currentTheme.inputBorderWidth : propertyLabelStyle.borderThickness
+                property double borderThickness: currentTheme ? currentTheme.inputStyle.borderThickness : propertyLabelStyle.borderThickness
             }
             scrollStyle: currentTheme ? currentTheme.scrollStyle : scrollStyle
             buttons: currentTheme ? currentTheme.buttons : buttons
@@ -491,6 +492,14 @@ LiveExtension{
         }
     }
 
+    function objectContainerAdd(){
+        var activePane = lk.layers.workspace.panes.activePane
+        var activeItem = lk.layers.workspace.panes.activeItem
+        if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false)
+        }
+    }
+
     commands : {
         "edit" :  [edit, "Edit Property Under Cursor"],
         "palette" : [palette, "Pallete for Property Under Cursor"],
@@ -501,13 +510,15 @@ LiveExtension{
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
         'shape' : [shape, "Shape This Property Into a Palette"],
-        'shape_all' : [shapeAll, "Shape all the code"]
+        'shape_all' : [shapeAll, "Shape all the code"],
+        'object_container_add' : [objectContainerAdd, "EditQml - Object Container: Open add menu."]
     }
 
     keyBindings : {
         "alt+a" : "editqml.palette",
         "alt+z" : "editqml.add",
-        "alt+x" : "editqml.shape"
+        "alt+x" : "editqml.shape",
+        "alt+s" : { command: "editqml.object_container_add", whenPane: "editor", whenItem: "objectContainerFrame" }
     }
 
     interceptMenu : function(item){

@@ -115,14 +115,10 @@ Theme{
 
     // Forms
 
-    property color inputColor: '#3f444d'
-    property color inputBorderColor: '#fff'
-    property int   inputBorderWidth: 1
-
-    property QtObject inputLabelStyle: QtObject{
-        property color background: colorScheme.middleground
-        property double radius: 3
-        property QtObject textStyle: TextStyle{
+    property QtObject inputLabelStyle: LabelOnRectangleStyle{
+        background: colorScheme.middleground
+        radius: 3
+        textStyle: TextStyle{
             color: colorScheme.foregroundFaded
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -133,8 +129,8 @@ Theme{
         }
     }
 
-    property QtObject inputStyle: QtObject{
-        property QtObject textStyle: TextStyle{
+    property QtObject inputStyle: InputBoxStyle{
+        textStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -143,8 +139,8 @@ Theme{
                 pixelSize: 11
             })
         }
-        property double radius: 2
-        property QtObject hintTextStyle: TextStyle{
+        radius: 2
+        hintTextStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -153,15 +149,15 @@ Theme{
                 pixelSize: 11
             })
         }
-        property color backgroundColor: colorScheme.middleground
-        property color borderColor: colorScheme.backgroundBorder
-        property double borderThickness: 1
-        property color textSelectionColor: colorScheme.textSelection
+        backgroundColor: colorScheme.middleground
+        borderColor: colorScheme.backgroundBorder
+        borderThickness: 1
+        textSelectionColor: colorScheme.textSelection
     }
 
 
-    property QtObject monoInputStyle: QtObject{
-        property QtObject textStyle: TextStyle{
+    property QtObject monoInputStyle: InputBoxStyle{
+        textStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
@@ -170,8 +166,8 @@ Theme{
                 pixelSize: 11
             })
         }
-        property double radius: 3
-        property QtObject hintTextStyle: TextStyle{
+        radius: 3
+        hintTextStyle: TextStyle{
             color: 'white'
             font : Qt.font({
                 family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
@@ -180,15 +176,15 @@ Theme{
                 pixelSize: 11
             })
         }
-        property color backgroundColor: colorScheme.background
-        property color borderColor: colorScheme.backgroundBorder
-        property double borderThickness: 1
-        property color textSelectionColor: colorScheme.textSelection
+        backgroundColor: colorScheme.background
+        borderColor: colorScheme.backgroundBorder
+        borderThickness: 1
+        textSelectionColor: colorScheme.textSelection
     }
 
 
-    property QtObject formButtonStyle : QtObject{
-        property QtObject textStyle: TextStyle{
+    property QtObject formButtonStyle : TextButtonStyle{
+        textStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -197,7 +193,7 @@ Theme{
                 pixelSize: 11
             })
         }
-        property QtObject hoverTextStyle: TextStyle{
+        hoverTextStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -206,40 +202,22 @@ Theme{
                 pixelSize: 11
             })
         }
-        property color backgroundColor: colorScheme.middlegroundOverlayDominant
-        property color backgroundHoverColor: Qt.lighter(colorScheme.middlegroundOverlayDominant, 1.2)
-        property color borderColor: colorScheme.middlegroundOverlayDominantBorder
-        property color borderHoverColor: colorScheme.middlegroundOverlayDominantBorder
-        property double borderThickness: 1
-        property double radius: 3
+        backgroundColor: colorScheme.middlegroundOverlayDominant
+        backgroundHoverColor: Qt.lighter(colorScheme.middlegroundOverlayDominant, 1.2)
+        borderColor: colorScheme.middlegroundOverlayDominantBorder
+        borderHoverColor: colorScheme.middlegroundOverlayDominantBorder
+        borderThickness: 1
+        radius: 3
     }
 
 
-    property QtObject iconButtonStyle : QtObject{
-        property QtObject textStyle: TextStyle{
-            color: colorScheme.foreground
-            font : Qt.font({
-                family: 'Open Sans, sans-serif',
-                weight: Font.Normal,
-                italic: false,
-                pixelSize: 11
-            })
-        }
-        property QtObject hoverTextStyle: TextStyle{
-            color: colorScheme.foreground
-            font : Qt.font({
-                family: 'Open Sans, sans-serif',
-                weight: Font.Normal,
-                italic: false,
-                pixelSize: 11
-            })
-        }
-        property color backgroundColor: 'transparent'
-        property color backgroundHoverColor: 'transparent'
-        property color borderColor: 'transparent'
-        property color borderHoverColor: root.colorScheme.middlegroundOverlayDominantBorder
-        property double borderThickness: 1
-        property double radius: 3
+    property QtObject iconButtonStyle : RectangleButtonStyle{
+        backgroundColor: 'transparent'
+        backgroundHoverColor: 'transparent'
+        borderColor: 'transparent'
+        borderHoverColor: root.colorScheme.middlegroundOverlayDominantBorder
+        borderThickness: 1
+        radius: 3
     }
 
     // Buttons
@@ -336,8 +314,8 @@ Theme{
 
     // Lists
 
-    property QtObject selectableListView: QtObject{
-        property QtObject labelStyle: TextStyle{
+    property QtObject selectableListView: SelectableListViewStyle{
+        labelStyle: TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -346,13 +324,13 @@ Theme{
                 pixelSize: 11
             })
         }
-        property color backgroundColor: colorScheme.background
-        property color selectionBackgroundColor: colorScheme.middlegroundOverlayDominant
-        property double radius: 2
-        property color borderColor: colorScheme.middlegroundOverlayDominant
-        property double borderWidth: 1
-        property double opacity: 0.95
-        property Component scrollStyle: root.scrollStyle
+        backgroundColor: colorScheme.background
+        selectionBackgroundColor: colorScheme.middlegroundOverlayDominant
+        radius: 2
+        borderColor: colorScheme.middlegroundOverlayDominant
+        borderWidth: 1
+        opacity: 0.95
+        scrollStyle: root.scrollStyle
     }
 
     // Node Editor
