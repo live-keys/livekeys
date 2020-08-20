@@ -38,7 +38,7 @@
 
 #include "qmljsdialect.h"
 #include "parser/qmldirparser_p.h"
-#include "parser/qmljsastfwd_p.h"
+#include "parser/qqmljsastfwd_p.h"
 #include "qmljs/qmljs_global.h"
 #include "qmljsconstants.h"
 #include "qmljsimportdependencies.h"

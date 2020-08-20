@@ -359,6 +359,10 @@ WorkspaceControl{
                     }
                 }
             }
+        } else if (fragment === 'logo'){
+            highlight = createHighlight(state)
+            highlight.boxX = 5
+            highlight.boxY = -10
         }
     }
 

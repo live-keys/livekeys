@@ -32,8 +32,8 @@
 #include "qmljsbind.h"
 #include "qmljsconstants.h"
 #include "qmljsimportdependencies.h"
-#include <qmljs/parser/qmljslexer_p.h>
-#include <qmljs/parser/qmljsparser_p.h>
+#include <qmljs/parser/qqmljslexer_p.h>
+#include <qmljs/parser/qqmljsparser_p.h>
 
 #include <utils/qtcassert.h>
 
@@ -278,13 +278,13 @@ bool Document::parse_helper(int startToken)
     _engine->setDirectives(&collectDirectives);
 
     switch (startToken) {
-    case QmlJSGrammar::T_FEED_UI_PROGRAM:
+    case QQmlJSGrammar::T_FEED_UI_PROGRAM:
         _parsedCorrectly = parser.parse();
         break;
-    case QmlJSGrammar::T_FEED_JS_PROGRAM:
+    case QQmlJSGrammar::T_FEED_JS_PROGRAM:
         _parsedCorrectly = parser.parseProgram();
         break;
-    case QmlJSGrammar::T_FEED_JS_EXPRESSION:
+    case QQmlJSGrammar::T_FEED_JS_EXPRESSION:
         _parsedCorrectly = parser.parseExpression();
         break;
     default:
@@ -309,17 +309,17 @@ bool Document::parse()
 
 bool Document::parseQml()
 {
-    return parse_helper(QmlJSGrammar::T_FEED_UI_PROGRAM);
+    return parse_helper(QQmlJSGrammar::T_FEED_UI_PROGRAM);
 }
 
 bool Document::parseJavaScript()
 {
-    return parse_helper(QmlJSGrammar::T_FEED_JS_PROGRAM);
+    return parse_helper(QQmlJSGrammar::T_FEED_JS_PROGRAM);
 }
 
 bool Document::parseExpression()
 {
-    return parse_helper(QmlJSGrammar::T_FEED_JS_EXPRESSION);
+    return parse_helper(QQmlJSGrammar::T_FEED_JS_EXPRESSION);
 }
 
 Bind *Document::bind() const

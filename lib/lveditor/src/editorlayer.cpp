@@ -36,7 +36,7 @@ EditorLayer::EditorLayer(QObject *parent)
         keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt, "editor.saveFileAs");
         keymap->store(0, Qt::Key_W,           lv::KeyMap::CONTROL_OR_COMMAND, "editor.closeFile");
         keymap->store(0, Qt::Key_E,           lv::KeyMap::CONTROL_OR_COMMAND, "editor.toggleSize");
-        keymap->store(0, Qt::Key_Backslash,   lv::KeyMap::CONTROL_OR_COMMAND, "editor.toggleComment");
+        keymap->store(0, Qt::Key_Slash,       lv::KeyMap::CONTROL_OR_COMMAND, "editor.toggleComment");
         keymap->store(lv::KeyMap::Linux,    Qt::Key_Space, lv::KeyMap::Control, "editor.assistCompletion");
         keymap->store(lv::KeyMap::Windows,  Qt::Key_Space, lv::KeyMap::Control, "editor.assistCompletion");
         keymap->store(lv::KeyMap::Mac,      Qt::Key_Space, lv::KeyMap::Alt,     "editor.assistCompletion");

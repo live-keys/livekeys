@@ -21,44 +21,8 @@ Rectangle{
     property alias currentIndex: listView.currentIndex
     property alias currentItem: listView.currentItem
 
-
-    property QtObject defaultStyle: QtObject{
-        property QtObject labelStyle: TextStyle{}
-        property color backgroundColor: "#03070a"
-        property color selectionBackgroundColor: "#091927"
-
-        property double radius: 0
-        property color borderColor: "#000"
-        property double borderWidth: 0
-        property double opacity: 0.95
-
-        property Component scrollStyle: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#1f2227"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: root.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Item{}
-            corner: Rectangle{color: root.color}
-        }
-    }
-
+    property QtObject defaultStyle: SelectableListViewStyle{}
     property QtObject style: defaultStyle
-
 
     signal triggered(int index)
     signal cancelled()

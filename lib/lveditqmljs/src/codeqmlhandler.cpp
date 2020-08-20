@@ -32,7 +32,7 @@
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
 
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
 
 #include "live/documenthandler.h"
@@ -1126,6 +1126,36 @@ void CodeQmlHandler::aboutToDelete()
 QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
 {
     return ef->nestedObjectsInfo();
+}
+
+QString CodeQmlHandler::getFragmentId(QmlEditFragment *ef)
+{
+    Q_D(CodeQmlHandler);
+
+    QList<QObject*> fragments;
+
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+    QmlScopeSnap scope = d->snapScope();
+
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(ef->position());
+
+    QString id;
+    if ( currentOb ){
+        for (int k = 0; k < currentOb->properties.size(); ++k)
+        {
+            auto prop = currentOb->properties[k];
+            if (prop->name().size() == 1 && prop->name()[0] == "id"){
+                auto docString = m_document->contentString();
+                id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
+                break;
+            }
+        }
+    }
+
+    ef->setObjectId(id);
+    return id;
 }
 
 QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
@@ -2945,7 +2975,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                         name,
                         ti->prefereredType().name(),
                         "method",
-                        "implicit",
+                        "",
                         ti->exportType().join() + "." + name,
                         name,
                         QmlSuggestionModel::ItemData::Event
@@ -2957,7 +2987,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                         name,
                         ti->prefereredType().name(),
                         "method",
-                        "implicit",
+                        "",
                         ti->exportType().join() + "." + name,
                         name,
                         QmlSuggestionModel::ItemData::Function
@@ -2974,7 +3004,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                             propertyName,
                             ti->prefereredType().name(),
                             ti->propertyAt(i).typeName.name(),
-                            "implicit",
+                            "",
                             ti->exportType().join() + "." + propertyName,
                             propertyName,
                             QmlSuggestionModel::ItemData::Property
@@ -2993,7 +3023,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                             propertyName,
                             ti->prefereredType().name(),
                             "method",
-                            "implicit",
+                            "",
                             "", //TODO: Find library path
                             propertyName,
                             QmlSuggestionModel::ItemData::Event
@@ -3019,7 +3049,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     e,
-                    "objects",
+                    "",
                     "",
                     "implicit",
                     scope.document->path(),
@@ -3040,7 +3070,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             addContainer->model()->addItem(
                 QmlSuggestionModel::ItemData(
                     de,
-                    "objects",
+                    "",
                     "",
                     "QtQml",
                     "QtQml",
@@ -3075,7 +3105,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                     addContainer->model()->addItem(
                         QmlSuggestionModel::ItemData(
                             exp,
-                            "objects",
+                            "",
                             "",
                             imp.uri(),
                             imp.uri(),
@@ -3361,15 +3391,18 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-int CodeQmlHandler::insertItemAtDocumentEnd(QObject*)
+int CodeQmlHandler::insertRootItem(const QString &qmlType)
 {
     Q_D(CodeQmlHandler);
     d->syncObjects(m_document);
 
+    QmlTypeReference qtr = QmlTypeReference::split(qmlType);
+
+    // add the root via code
+
     int insertionPosition = m_target->characterCount()-1;
 
-    QString insertionText = "\nItem{\n    id: item\n}\n";
-
+    QString insertionText = "\n" + qtr.name() + "{\n    id: item\n}\n";
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
     cs.setPosition(insertionPosition);
@@ -3381,6 +3414,29 @@ int CodeQmlHandler::insertItemAtDocumentEnd(QObject*)
     updateScope();
 
     d->syncObjects(m_document);
+
+    QObject* newRoot = QmlCodeConverter::create(
+        d->documentInfo(), qtr.name() + "{}", "temp"
+    );
+    if ( !newRoot )
+        return -1;
+
+    Project* project = d->projectHandler->project();
+    Runnable* r = project->runnables()->runnableAt(m_document->file()->path());
+
+    if ( !r )
+        return -1;
+
+    QQmlContext* ctx = r->createContext();
+    newRoot->setParent(r->runSpace());
+
+    QQuickItem* newRootItem = qobject_cast<QQuickItem*>(newRoot);
+    QQuickItem* runSpaceItem = qobject_cast<QQuickItem*>(r->runSpace());
+    if ( newRootItem && runSpaceItem ){
+        newRootItem->setParentItem(runSpaceItem);
+    }
+
+    r->engineObjectReady(newRoot, QUrl(), r, ctx);
 
     return insertionPosition + 2;
 }

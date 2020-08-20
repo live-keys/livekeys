@@ -1,4 +1,7 @@
 {
     "name" : "lcvimgproc",
-    "package" : "."
+    "package" : ".",
+    "palettes" : {
+        "palettes/TransformPalette.qml" : "qml/lcvimgproc#TransformImage",
+    }
 }

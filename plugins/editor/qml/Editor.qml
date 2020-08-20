@@ -504,8 +504,7 @@ Rectangle{
         visible: false
         property var callback: null
         onClicked: {
-            var rootPosition = documentHandler.codeHandler.insertItemAtDocumentEnd()
-            project.run()
+            var rootPosition = documentHandler.codeHandler.insertRootItem("qml/QtQml#QtObject")
             if (callback) callback(rootPosition)
             visible = false
         }

@@ -15,6 +15,9 @@ TextSearch::~TextSearch(){
 }
 
 void TextSearch::process(){
+    if ( (m_text.isEmpty() || m_value.isEmpty()) && m_output.isEmpty() )
+        return;
+
     m_output.clear();
 
     QList<int> lineIndexes;

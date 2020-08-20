@@ -17,8 +17,8 @@
 #include "live/documentqmlvalueobjects.h"
 
 #include "qmljs/qmljsdocument.h"
-#include "qmljs/parser/qmljsastvisitor_p.h"
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsastvisitor_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 
 namespace lv{
 
@@ -576,7 +576,7 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
  */
 QString DocumentQmlValueObjects::RangeProperty::type() const{
     if ( ast->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
-        return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType.toString();
+        return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType->name.toString();
     }
     return "";
 }

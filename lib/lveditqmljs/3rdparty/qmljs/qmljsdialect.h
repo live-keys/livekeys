@@ -128,7 +128,7 @@ private:
 };
 
 
-//QMLJS_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
+//qqmljs_EXPORT QDebug operator << (QDebug &dbg, const PathAndLanguage &pathAndLanguage);
 
 //class QMLJS_EXPORT PathsAndLanguages
 //{

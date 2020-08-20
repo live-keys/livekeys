@@ -178,7 +178,7 @@ public slots:
         const QString& name,
         bool assignDefault = false);
     int addItem(int position, const QString& object, const QString& type);
-    int insertItemAtDocumentEnd(QObject* currentApp = nullptr);
+    int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
     void updateRuntimeBindings();
@@ -200,6 +200,7 @@ public slots:
 
     void aboutToDelete();
     QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
+    QString getFragmentId(lv::QmlEditFragment* ef);
 signals:
     void numberOfConnectionsChanged();
     void stoppedProcessing();

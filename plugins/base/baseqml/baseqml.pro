@@ -47,8 +47,11 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 
 DISTFILES += \
+    qml/ConvertToInt.qml \
     qml/JsonDecoder.qml \
     qml/JsonEncoder.qml \
+    qml/TextClip.qml \
+    qml/TextLineAtPosition.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/plugins.qmltypes \
