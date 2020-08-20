@@ -27,6 +27,7 @@
 
 namespace lv{
 
+class ViewEngine;
 class Commands : public QObject{
 
     Q_OBJECT
@@ -46,8 +47,8 @@ public:
     friend class CommandsModel;
 
 public:
-    explicit Commands(QObject *parent = 0);
-    ~Commands();
+    explicit Commands(QObject *parent = nullptr);
+    ~Commands() override;
 
     QString dump();
     CommandsModel* model() { return m_model; }
@@ -65,7 +66,8 @@ private:
     QStringList getCommandChain(QObject *object);
 
     QHash<QString, Node*> m_commands;
-    CommandsModel* m_model;
+    CommandsModel*        m_model;
+    ViewEngine*           m_engine;
 };
 
 }// namespace

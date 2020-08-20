@@ -14,10 +14,16 @@ Rectangle{
     signal erase()
     signal rebuild()
     signal toggleConnections()
+    signal assignFocus()
     signal addPalette()
     signal compose()
     signal paletteToPane()
     signal close()
+
+    MouseArea{
+        anchors.fill: parent
+        onClicked: objectContainerTitle.assignFocus()
+    }
 
     Item{
         anchors.left: parent.left

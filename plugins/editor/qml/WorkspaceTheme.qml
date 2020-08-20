@@ -115,10 +115,6 @@ Theme{
 
     // Forms
 
-    property color inputColor: '#3f444d'
-    property color inputBorderColor: '#fff'
-    property int   inputBorderWidth: 1
-
     property QtObject inputLabelStyle: QtObject{
         property color background: colorScheme.middleground
         property double radius: 3

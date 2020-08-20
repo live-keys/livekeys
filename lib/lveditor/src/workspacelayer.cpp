@@ -40,7 +40,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_projectEnvironment(nullptr)
     , m_panes(nullptr)
     , m_viewRoot(nullptr)
-    , m_commands(new Commands)
+    , m_commands(new Commands(this))
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
@@ -57,7 +57,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 
     Settings* settings = ViewContext::instance().settings();
 
-    m_keymap = new KeyMap(settings->path());
+    m_keymap = new KeyMap(settings->path(), this);
     settings->addConfigFile("keymap", m_keymap);
     m_commands->setModel(new CommandsModel(m_commands, m_keymap));
 
