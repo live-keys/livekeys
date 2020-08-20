@@ -10,11 +10,7 @@ Rectangle{
 
     property alias label: label
 
-    property QtObject defaultStyle: QtObject{
-        property color background: '#666'
-        property double radius: 3
-        property QtObject textStyle: TextStyle{}
-    }
+    property QtObject defaultStyle: LabelOnRectangleStyle{}
     property QtObject style: defaultStyle
 
     property int margins: 0
