@@ -73,6 +73,7 @@ DISTFILES += \
     qml/Draw.qml \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \
+    qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
@@ -80,7 +81,9 @@ DISTFILES += \
     qml/VideoCaptureSegmentCreator.qml \
     qml/VideoCaptureSegmentFactory.qml \
     qml/VideoDecoderView.qml \
+    qml/VideoSurfaceCreator.qml \
     qml/VideoSurfaceFactory.qml \
+    qml/VideoSurfaceView.qml \
     qml/VideoTrackExtension.qml \
     qml/VideoTrackFactory.qml \
     qml/live.package.json \

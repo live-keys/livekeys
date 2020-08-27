@@ -8,16 +8,10 @@ import lcvcore 1.0
 Item{
     anchors.fill: parent
     
-    ImageView{
+    VideoSurfaceView{
         width: 600
         height: 400
-        image: {
-            if ( timeline.properties ){
-                return timeline.properties.videoSurface.image
-            }
-            return null   
-        }
-        anchors.horizontalCenter: parent.horizontalCenter
+        timeline: timeline
     }
     
     Rectangle{

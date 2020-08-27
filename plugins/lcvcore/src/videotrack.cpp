@@ -2,6 +2,8 @@
 #include "videosegment.h"
 #include "imagesegment.h"
 
+#include <QQmlPropertyMap>
+
 namespace lv{
 
 VideoTrack::VideoTrack(QObject *parent)
