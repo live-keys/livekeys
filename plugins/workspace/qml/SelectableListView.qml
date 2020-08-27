@@ -93,7 +93,29 @@ Rectangle{
         height : root.height
         width: root.width
 
-        style: root.style.scrollStyle
+        style:  ScrollViewStyle {
+            transientScrollBars: false
+            handle: Item {
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle {
+                    color: root.style.scrollbarColor
+                    anchors.fill: parent
+                }
+            }
+            scrollBarBackground: Item{
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle{
+                    anchors.fill: parent
+                    color: 'transparent'
+                }
+            }
+            decrementControl: null
+            incrementControl: null
+            frame: Item{}
+            corner: Rectangle{color: 'transparent'}
+        }
 
         ListView{
             id : listView
