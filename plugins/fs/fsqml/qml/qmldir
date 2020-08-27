@@ -3,5 +3,7 @@ plugin fs
 
 depends QtQuick 2.3
 
-ResponsiveFolderView 1.0 ResponsiveFolderView.qml
 FileLineReader       1.0 FileLineReader.qml
+SelectableFolderView 1.0 SelectableFolderView.qml
+VisualFileSelector   1.0 VisualFileSelector.qml
+ExtensionPass        1.0 ExtensionPass.qml
