@@ -22,6 +22,8 @@ RotateIcon              1.0 RotateIcon.qml
 CropIcon                1.0 CropIcon.qml
 XIcon                   1.0 XIcon.qml
 TwoWayArrowIcon         1.0 TwoWayArrowIcon.qml
+FolderIcon              1.0 FolderIcon.qml
+FileIcon                1.0 FileIcon.qml
 RectangleButton         1.0 RectangleButton.qml
 RectangleButtonStyle    1.0 RectangleButtonStyle.qml
 NumberLabel             1.0 NumberLabel.qml
