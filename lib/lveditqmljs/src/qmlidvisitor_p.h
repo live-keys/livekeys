@@ -78,7 +78,12 @@ public:
             m_parent = value;
             return true;
         } else if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
-            type = (vr->ast() != nullptr) ? vr->ast()->memberType->name.toString() : QString("object");
+            if ( vr->ast()->memberType->next ){
+                type = (vr->ast() != nullptr) ? (vr->ast()->memberType->name.toString() + "." + vr->ast()->memberType->next->name.toString()) : QString("object");
+            } else {
+                type = (vr->ast() != nullptr) ? vr->ast()->memberType->name.toString() : QString("object");
+            }
+
         } else if ( const QmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
             type = "function";
             QmlFunctionInfo mf;
