@@ -214,6 +214,13 @@ void QmlTypeInfo::appendProperty(const QmlPropertyInfo &prop){
     m_properties.append(prop);
 }
 
+void QmlTypeInfo::updateProperty(int index, const QmlPropertyInfo &prop){
+    if ( index >= m_properties.size() )
+        return;
+
+    m_properties[index] = prop;
+}
+
 int QmlTypeInfo::totalFunctions() const{
     return m_methods.size();
 }
