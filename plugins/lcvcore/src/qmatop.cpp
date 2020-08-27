@@ -2,6 +2,7 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/qmlerror.h"
 
 #include "opencv2/imgproc.hpp"
 
@@ -233,6 +234,106 @@ QMat *QMatOp::crop(QMat *m, const QRect &region){
 QMat *QMatOp::flip(QMat *m, int direction){
     QMat* r = new QMat;
     cv::flip(m->internal(), r->internal(), direction);
+    return r;
+}
+
+QJSValue QMatOp::split(QMat *m){
+    if (!m)
+        return QJSValue();
+
+    std::vector<cv::Mat> channels;
+    cv::split(m->data(), channels);
+
+    quint32 channelsSize = static_cast<quint32>(channels.size());
+
+    lv::ViewEngine* engine = lv::ViewEngine::grab(this);
+    QJSValue result = engine->engine()->newArray(channelsSize);
+
+    for ( quint32 i = 0; i < channelsSize; ++i ){
+        QMat* current = new QMat;
+        *current->cvMat() = channels[i];
+        result.setProperty(i, engine->engine()->newQObject(current));
+    }
+    return result;
+}
+
+QMat *QMatOp::merge(const QJSValue &matArray){
+    std::vector<cv::Mat> channels;
+    QJSValueIterator it(matArray);
+    while ( it.hasNext() ){
+        it.next();
+        if ( it.name() != "length" ){
+            QMat* m = qobject_cast<QMat*>(it.value().toQObject());
+            if (m){
+                channels.push_back(m->data());
+            }
+        }
+    }
+
+    QMat* r = new QMat;
+    cv::merge(channels, *r->cvMat());
+    return r;
+}
+
+QMat *QMatOp::spreadByLinearInterpolation(QJSValue reference, QJSValue spread){
+    std::vector<double> referenceVector;
+    QJSValueIterator it(reference);
+    while ( it.hasNext() ){
+        it.next();
+        if ( it.name() != "length" )
+            referenceVector.push_back(it.value().toNumber());
+    }
+
+    std::vector<double> spreadVector;
+    QJSValueIterator it2(spread);
+    while ( it2.hasNext() ){
+        it2.next();
+        if ( it2.name() != "length" )
+            spreadVector.push_back(it2.value().toNumber());
+    }
+
+    if ( referenceVector.size() != spreadVector.size() ){
+        THROW_QMLERROR(lv::Exception, "MatOp: reference and spread must be the same size.", lv::Exception::toCode("~ArraySize"), this);
+        return nullptr;
+    }
+
+    QMat* r = new QMat(new cv::Mat(1, 256, CV_8U));
+    uchar* lut = r->cvMat()->ptr();
+
+    for(int i = 0; i< 256; i++){
+        int j = 0;
+        double xval = static_cast<double>(i);
+        while(xval > referenceVector[static_cast<size_t>(j)]){
+            j++;
+        }
+        if(xval == referenceVector[static_cast<size_t>(j)]){
+            lut[i] = spreadVector[static_cast<size_t>(j)];
+            continue;
+        }
+        double slope    = static_cast<double>(spreadVector[j] - spreadVector[j - 1]) / static_cast<double>(referenceVector[j] - referenceVector[j-1]);
+        double constant = spreadVector[j] - slope * referenceVector[j];
+        lut[i] = slope * xval + constant;
+    }
+
+    return r;
+}
+
+QMat *QMatOp::lut(QMat *m, QMat *lut){
+    if ( !m || !lut )
+        return nullptr;
+
+    QMat* r = new QMat;
+
+    try {
+        cv::LUT(m->data(), lut->data(), *r->cvMat());
+        cv::min(r->data(), 255, *r->cvMat());
+        cv::max(r->data(), 0, *r->cvMat());
+    } catch (cv::Exception& e) {
+        THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
+        delete r;
+        return nullptr;
+    }
+
     return r;
 }
 

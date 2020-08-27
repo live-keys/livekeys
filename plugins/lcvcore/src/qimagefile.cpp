@@ -75,7 +75,7 @@ void QImageFile::setMonitor(bool monitor){
     } else if ( m_watcher ){
         disconnect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(systemFileChanged(QString)));
         m_watcher->deleteLater();
-        m_watcher = 0;
+        m_watcher = nullptr;
     }
 
     emit monitorChanged();
