@@ -3391,18 +3391,27 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-int CodeQmlHandler::insertRootItem(const QString &qmlType)
+int CodeQmlHandler::insertRootItem(const QString &name)
 {
     Q_D(CodeQmlHandler);
     d->syncObjects(m_document);
 
-    QmlTypeReference qtr = QmlTypeReference::split(qmlType);
-
     // add the root via code
+
+    QString type; QString id;
+    if (name.contains('#'))
+    {
+        auto spl = name.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = name;
 
     int insertionPosition = m_target->characterCount()-1;
 
-    QString insertionText = "\n" + qtr.name() + "{\n    id: item\n}\n";
+    QString insertionText = "\n" + type + "{\n";
+    if (id != "") insertionText += "    id: " + id;
+    insertionText += "\n}\n";
+
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
     cs.setPosition(insertionPosition);
@@ -3416,7 +3425,7 @@ int CodeQmlHandler::insertRootItem(const QString &qmlType)
     d->syncObjects(m_document);
 
     QObject* newRoot = QmlCodeConverter::create(
-        d->documentInfo(), qtr.name() + "{}", "temp"
+        d->documentInfo(), type + "{}", "temp"
     );
     if ( !newRoot )
         return -1;

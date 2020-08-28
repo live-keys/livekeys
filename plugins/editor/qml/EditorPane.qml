@@ -47,6 +47,12 @@ Pane{
 
     property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
 
+    onCodeOnlyChanged: {
+        if (codeOnly){
+            editor.addRootButton.visible = false
+        }
+    }
+
     paneType: 'editor'
     paneState : { return {} }
     paneInitialize : function(s){
@@ -275,7 +281,6 @@ Pane{
                             editor.importsShaped = false
                             editor.rootShaped = false
                         }
-                        // close all fragments
                     } else {
                         lk.layers.workspace.commands.execute("editqml.shape_all")
                         // shape all

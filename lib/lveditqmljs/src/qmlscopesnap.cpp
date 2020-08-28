@@ -463,12 +463,6 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
         const QmlTypeInfo::Ptr& currentType = *it;
         QmlPropertyInfo prop = currentType->propertyAt(propertyName);
         if ( prop.isValid() ){
-            QmlScopeSnap::PropertyReference prr(
-                            prop,
-                            prop.typeName.language() == QmlTypeReference::Cpp,
-                            prop.isPointer ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path()) : QmlInheritanceInfo(),
-                            contextTypePath
-                        );
             return QmlScopeSnap::PropertyReference(
                 prop,
                 prop.typeName.language() == QmlTypeReference::Cpp,

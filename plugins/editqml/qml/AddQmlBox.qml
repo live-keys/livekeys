@@ -31,7 +31,8 @@ Rectangle{
     opacity: 0.95
     objectName: "addQmlBox"
 
-    property color selectionColor: "#091927"
+
+    property PaletteStyle style: PaletteStyle{}
 
     property QtObject addContainer : null
 
@@ -42,6 +43,8 @@ Rectangle{
 
     property bool isForNode: false
     property bool objectsOnly: false
+
+    border.color: (style && style.colorScheme && style.colorScheme.middlegroundBorder) ? style.colorScheme.middlegroundBorder : "#222"
 
     onObjectsOnlyChanged: {
         if (objectsOnly)
@@ -144,15 +147,10 @@ Rectangle{
             anchors.top: title.bottom
             height: 30
 
-            property QtObject buttonsStyle : QtObject{
-                property QtObject textStyle: Workspace.TextStyle{}
-                property QtObject hoverTextStyle: Workspace.TextStyle{}
-                property color backgroundColor: '#070b0f'
-                property color backgroundHoverColor: '#213355'
-                property color borderColor: 'black'
-                property color borderHoverColor: 'black'
-                property double borderThickness: 0
-                property double radius: 5
+            property var buttonsStyle: {
+                var copy = root.style.buttonStyle
+                copy.backgroundColor = "#111"
+                return copy
             }
 
             Workspace.TextButton{
@@ -161,7 +159,7 @@ Rectangle{
                 height: 22
                 width: 70
                 style: buttonsContainer.buttonsStyle
-                color: activeIndex === 0 ? "#061a29" : "#111"
+                color: activeIndex === 0 ? style.backgroundHoverColor : style.backgroundColor
 
                 onClicked : {
                     root.activeIndex = 0
@@ -174,7 +172,7 @@ Rectangle{
                 height: 22
                 width: 70
                 style: buttonsContainer.buttonsStyle
-                color: activeIndex === 1 ? "#061a29" : "#111"
+                color: activeIndex === 1 ? style.backgroundHoverColor : style.backgroundColor
 
                 onClicked : {
                     root.activeIndex = 1
@@ -187,7 +185,7 @@ Rectangle{
                 width: 70
 
                 style: buttonsContainer.buttonsStyle
-                color: activeIndex === 2 ? "#061a29" : "#111"
+                color: activeIndex === 2 ? style.backgroundHoverColor : style.backgroundColor
 
                 onClicked : {
                     root.activeIndex = 2
@@ -200,7 +198,7 @@ Rectangle{
                 height: 22
                 width: 70
                 style: buttonsContainer.buttonsStyle
-                color: activeIndex === 3 ? "#061a29" : "#111"
+                color: activeIndex === 3 ? style.backgroundHoverColor : style.backgroundColor
 
                 onClicked : {
                     root.activeIndex = 3
@@ -213,7 +211,7 @@ Rectangle{
                 height: 22
                 width: 70
                 style: buttonsContainer.buttonsStyle
-                color: activeIndex === 4 ? "#061a29" : "#111"
+                color: activeIndex === 4 ? style.backgroundHoverColor : style.backgroundColor
 
                 onClicked : {
                     root.activeIndex = 4
@@ -269,27 +267,11 @@ Rectangle{
         Rectangle {
             x: 60
             y: 5
-            width: parent.width - 80
+            width: parent.width - 70
             height: 18
             anchors.right: parent.right
-            anchors.rightMargin: 5
+            anchors.rightMargin: 0
             color: "black"
-
-            property QtObject idInputStyle : QtObject{
-                property QtObject textStyle: Workspace.TextStyle{
-                    font.family: "Open Sans, Courier"
-                    font.pixelSize: 14
-                    font.weight: Font.Light
-
-                    color : "#afafaf"
-                }
-                property QtObject hintTextStyle: Workspace.TextStyle{}
-                property color backgroundColor: '#070b0f'
-                property color borderColor: '#323232'
-                property double borderThickness: 1
-                property color textSelectionColor: '#3d4856'
-                property double radius: 3
-            }
 
             Workspace.InputBox {
 
@@ -301,10 +283,9 @@ Rectangle{
                 anchors.leftMargin: 8
                 anchors.right: parent.right
                 anchors.rightMargin: 8
+                style: root.style.inputStyle
 
-                style: parent.idInputStyle
-
-                width: parent.width > implicitWidth ? parent.width : implicitWidth
+                width: (parent.width > implicitWidth ? parent.width : implicitWidth)
 
                 text: {
                     if (!listView || !listView.currentItem) return text
@@ -371,21 +352,6 @@ Rectangle{
         color: "transparent"
         height: 28
 
-        property QtObject searchInputStyle : QtObject{
-            property QtObject textStyle: Workspace.TextStyle{
-                color : "#afafaf"
-                font.family: "Open Sans, Courier"
-                font.pixelSize: 12
-                font.weight: Font.Light
-            }
-            property QtObject hintTextStyle: Workspace.TextStyle{}
-            property color backgroundColor: '#070b0f'
-            property color borderColor: '#323232'
-            property double borderThickness: 1
-            property color textSelectionColor: '#3d4856'
-            property double radius: 3
-        }
-
         Workspace.InputBox {
             id : searchInput
             anchors.verticalCenter: parent.verticalCenter
@@ -395,11 +361,11 @@ Rectangle{
             anchors.rightMargin: 8
 
             width: parent.width > implicitWidth ? parent.width : implicitWidth
+            style: root.style.inputStyle
 
             onActiveFocusLost: {
                 root.cancel()
             }
-            style: searchInputBox.searchInputStyle
 
             text: ""
             onTextChanged: {
@@ -466,42 +432,6 @@ Rectangle{
         anchors.topMargin: idInputItem && idInputItem.visible? header.height + 60 : header.height + 30
 
 
-        property QtObject listViewStyle: QtObject{
-            property QtObject labelStyle: Workspace.TextStyle{}
-            property color backgroundColor: "#03070a"
-            property color selectionBackgroundColor: "#091927"
-
-            property double radius: 0
-            property color borderColor: "#000"
-            property double borderWidth: 0
-            property double opacity: 0.95
-
-            property Component scrollStyle: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: root.color}
-            }
-
-        }
-
         Workspace.SelectableListView {
             id: categoryList
             anchors.top : parent.top
@@ -527,14 +457,13 @@ Rectangle{
                 }
                 return (activeIndex === 2 ? importSpaces : types)
             }
-            style: container.listViewStyle
             delegate: Component{
 
                 Rectangle{
                     width : categoryList.width
 
                     height : 25
-                    color : ListView.isCurrentItem ? categoryList.style.selectionBackgroundColor : "transparent"
+                    color : ListView.isCurrentItem ? style.selectableListView.selectionBackgroundColor : "transparent"
                     Text{
                         id: label
                         anchors.left: parent.left
@@ -601,7 +530,6 @@ Rectangle{
             width: root.width / 2
 
             model: root.addContainer ? root.addContainer.model : null
-            style: container.listViewStyle
 
             delegate: Component{
                 Rectangle{
@@ -612,7 +540,7 @@ Rectangle{
 
                     width : listView.width
                     height : 25
-                    color : ListView.isCurrentItem ? root.selectionColor : "transparent"
+                    color : ListView.isCurrentItem ? style.selectableListView.selectionBackgroundColor : "transparent"
                     Text{
                         id: label
                         anchors.left: parent.left

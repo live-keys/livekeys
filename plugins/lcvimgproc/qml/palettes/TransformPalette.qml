@@ -70,6 +70,45 @@ CodePalette{
         property Component cancelButton: paletteStyle ? paletteStyle.buttons.cancel : palette.defaultStyle.cancelButton
     }
 
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    function addTransformation(name){
+        var oc = palette.item
+        while (oc && oc.objectName !== "objectContainer")
+        {
+            oc = oc.parent
+        }
+
+        if (oc){ // inside shaping
+
+            var position =
+                oc.editingFragment.valuePosition() +
+                oc.editingFragment.valueLength() - 1
+            paletteControls.addItem(oc, position, "TransformImage", name, false)
+
+            var cont = oc.groupsContainer
+            return cont.children[cont.children.length - 1]
+
+        } else { // inside palette
+
+            var p = palette.item
+            while (p && p.objectName !== "paletteGroup")
+            {
+                p = p.parent
+            }
+            var ef = p.editingFragment
+            while (p && p.objectName !== "editorType")
+            {
+                p = p.parent
+            }
+            var codeHandler = p.documentHandler.codeHandler
+            var position = ef.valuePosition() + ef.valueLength() - 1
+
+            var ef = paletteControls.addItemToRuntime(codeHandler, ef, position, "TransformImage", name)
+            return ef
+        }
+    }
+
     item: Item{
         id: paletteItem
         width: 500
@@ -113,6 +152,13 @@ CodePalette{
                     property Component cropImageFactory : Cv.Crop{}
 
                     onApply: {
+//                        var crop = addTransformation("Crop")
+//                        if (crop.editingFragment){ //objectContainer
+//                            paletteControls.addPropertyByName(crop, "region")
+//                            crop.expand()
+//                        } else {
+//
+//                        }
                         var crop = cropImageFactory.createObject(paletteItem.transformImage)
                         crop.region = Qt.rect(x, y, width, height)
                         paletteItem.transformImage.transformations.push(crop)

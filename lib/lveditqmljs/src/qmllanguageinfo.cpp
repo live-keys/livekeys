@@ -309,7 +309,7 @@ bool QmlTypeInfo::isObject(const QString &typeString){
          typeString == "int" || typeString == "list" || typeString == "real" ||
          typeString == "color" || typeString == "QColor" ||
          typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" ||
-         typeString == "uint" || typeString == "size" || typeString == "QStringList")
+         typeString == "uint" || typeString == "size" || typeString == "QStringList" || typeString == "QSize")
         return false;
     return true;
 }
@@ -331,6 +331,10 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
             return QmlTypeReference(QmlTypeReference::Qml, "url");
         else if ( cppPrimitive.name() == "QString")
             return QmlTypeReference(QmlTypeReference::Qml, "string");
+        else if ( cppPrimitive.name() == "QSize")
+            return QmlTypeReference(QmlTypeReference::Qml, "size");
+        else if ( cppPrimitive.name() == "QPoint" || cppPrimitive.name() == "QPointF" )
+            return QmlTypeReference(QmlTypeReference::Qml, "point");
     }
     return cppPrimitive;
 }
@@ -354,7 +358,7 @@ QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
     else if ( typeString == "size" || typeString == "QSize" )
         return "\"0x0\"";
     else if ( typeString == "rect" || typeString == "QRect" )
-        return "\50,50,100x100\"";
+        return "\"0,0,0x0\"";
     else if ( typeString == "var" )
         return "undefined";
     else
