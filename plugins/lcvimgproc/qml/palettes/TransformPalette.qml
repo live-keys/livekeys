@@ -63,7 +63,6 @@ CodePalette{
         property real boxRadius: 3
         property color toolIconColor: paletteStyle ? paletteStyle.colorScheme.foregroundFaded : palette.defaultStyle.toolIconColor
         property color toolIconHighlightBackground: paletteStyle ? paletteStyle.colorScheme.middlegroundOverlayDominant : palette.defaultStyle.toolIconHighlightBackground
-        property Component scrollStyle: paletteStyle ? paletteStyle.scrollStyle : palette.defaultStyle.scrollStyle
         property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : palette.defaultStyle.labelStyle
         property Component saveButton: paletteStyle ? paletteStyle.buttons.save : palette.defaultStyle.saveButton
         property Component applyButton: paletteStyle ? paletteStyle.buttons.apply : palette.defaultStyle.applyButton

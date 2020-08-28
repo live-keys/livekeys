@@ -1,7 +1,7 @@
 # Image Transformations
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeImageTransformations.qml}
 
 In this sample, we can add a series of image transformations using a single
 transformations object. The object will create a pipeline through

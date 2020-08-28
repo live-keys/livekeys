@@ -36,6 +36,11 @@ LiveExtension{
         function add(activeIndex, objectsOnly, forRoot){
             root.add(activeIndex, objectsOnly, forRoot)
         }
+
+        function shapeRootObject(editor, codeHandler, callback){
+            root.shapeRootObject(editor, codeHandler, callback)
+        }
+        property alias rootPosition: root.rootPosition
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
@@ -127,6 +132,7 @@ LiveExtension{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                objectContainer.expand()
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
                 paletteBoxGroup = objectContainer.paletteGroup
@@ -288,15 +294,19 @@ LiveExtension{
         }
     }
 
-    function shapeRootObject(editor, codeHandler){
+    function shapeRootObject(editor, codeHandler, callback){
         var paletteRoot = codeHandler.findPalettes(rootPosition, true)
         if (paletteRoot){
-            root.shapePalette(editor, paletteRoot, 0)
-            editor.editor.rootShaped = true
+            if (callback) callback()
+            else {
+                root.shapePalette(editor, paletteRoot, 0)
+                editor.editor.rootShaped = true
+            }
         }
         else {
             editor.startLoadingMode()
             var shapeTrigger = shapeAllTrigger.createObject()
+            shapeTrigger.callback = callback
             shapeTrigger.target = codeHandler
             shapeTrigger.editor = editor
         }
@@ -337,17 +347,22 @@ LiveExtension{
             id: shapeTrigger
             target: null
             property var editor: null
+            property var callback: null
             ignoreUnknownSignals: true
             onStoppedProcessing: {
                 if (rootPosition === -1) return
                 var codeHandler = editor.documentHandler.codeHandler
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
-                    root.shapePalette(editor, paletteRoot, 0)
+                    if (!callback){
+                        root.shapePalette(editor, paletteRoot, 0)
+                        editor.editor.rootShaped = true
+                    } else {
+                        callback()
+                    }
                     editor.stopLoadingMode()
                     rootPosition = -1
 
-                    editor.editor.rootShaped = true
                     shapeTrigger.destroy()
                 }
             }
