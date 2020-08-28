@@ -37,7 +37,7 @@ signals:
     void fileChanged();
 
 private:
-    VideoTrack*       m_track;
+    VideoTrack*       m_videoTrack;
     QString           m_file;
     QMat*             m_image;
 };

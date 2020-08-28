@@ -43,7 +43,7 @@ signals:
     void fileChanged();
 
 private:
-    VideoTrack*       m_track;
+    VideoTrack*       m_videoTrack;
     QString           m_file;
     cv::VideoCapture* m_capture;
 };

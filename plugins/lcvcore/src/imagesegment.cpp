@@ -21,7 +21,7 @@ namespace lv{
 
 ImageSegment::ImageSegment(QObject *parent)
     : Segment(parent)
-    , m_track(nullptr)
+    , m_videoTrack(nullptr)
     , m_image(new QMat)
 {
 }
@@ -80,35 +80,36 @@ void ImageSegment::assignTrack(Track *track){
         lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
-    m_track = nt;
+    m_videoTrack = nt;
+    Segment::assignTrack(track);
 }
 
 void ImageSegment::cursorEnter(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 void ImageSegment::cursorExit(qint64){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->resetSurface();
+    m_videoTrack->surface()->resetSurface();
 }
 
 void ImageSegment::cursorNext(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 void ImageSegment::cursorMove(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 }// namespace
