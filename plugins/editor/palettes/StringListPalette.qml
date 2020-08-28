@@ -12,13 +12,15 @@ CodePalette{
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
+    property bool valueDirty: false
+
     item: Item{
 
         id: argsContainer
         visible: true
         objectName: "argsContainer"
         width: 220
-        height: itemList.height + addArg.height + 5
+        height: itemList.height + addArg.height + updateButton.height + 10
 
         property alias model: itemList.model
         property bool addImportVisible: true
@@ -31,8 +33,8 @@ CodePalette{
             height: model ? (model.count  * 25) : 50
 
             anchors.rightMargin: 2
-            anchors.bottomMargin: 5
             anchors.topMargin: 0
+            anchors.bottomMargin: updateButton.height + 10
             visible: true
             property var fontSize: 12
             property var fontFamily: "Open Sans, sans-serif"
@@ -92,18 +94,14 @@ CodePalette{
                         MouseArea {
                             anchors.fill: parent
                             onClicked: {
-
                                 var idx = model.index
                                 itemList.model.remove(idx)
-                                extension.write(itemList.modelToArray())
+                                palette.valueDirty = true
                             }
                         }
                     }
                 }
-
-
             }
-
         }
 
         Item{
@@ -113,7 +111,7 @@ CodePalette{
             height : visible ? 20 : 0
 
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
+            anchors.bottomMargin: updateButton.height + 10
 
             Workspace.InputBox{
                 id: inputBox
@@ -152,13 +150,33 @@ CodePalette{
                     anchors.fill: parent
                     onClicked: {
                         argsContainer.model.append({'value': inputBox.text})
-                        extension.write(itemList.modelToArray())
                         inputBox.text = ""
+                        palette.valueDirty = true
                     }
                 }
             }
         }
 
+        Workspace.TextButton{
+            id: updateButton
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 10
+            anchors.bottomMargin: 0
+            anchors.bottom: parent.bottom
+            height: visible ? 20 : 0
+            width: 50
+            style: palette.paletteStyle ? palette.paletteStyle.buttonStyle : defaultStyle
+            visible: palette.valueDirty
+
+            text: "Update"
+            onClicked: {
+                var modelArray = itemList.modelToArray()
+                palette.value = modelArray
+                extension.write(modelArray)
+                palette.valueDirty = false
+            }
+        }
     }
 
     onExtensionChanged: {
@@ -168,7 +186,8 @@ CodePalette{
     }
 
     onInit: {
-        for (var i=0; i<value.length; ++i)
+        argsContainer.model.clear()
+        for (var i = 0; i < value.length; ++i)
             argsContainer.model.append({'value': value[i]})
     }
 }

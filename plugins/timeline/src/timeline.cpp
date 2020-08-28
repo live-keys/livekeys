@@ -35,7 +35,7 @@ Timeline::Timeline(QObject *parent)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
     , m_headerModel(new TimelineHeaderModel(this))
-    , m_properties(nullptr)
+    , m_properties(new QQmlPropertyMap(this))
 {
     m_timer.setSingleShot(false);
 
@@ -197,7 +197,7 @@ void Timeline::serialize(ViewEngine *engine, const QObject *o, MLNode &node){
 
                 TimelineObjectProperty* obj = dynamic_cast<TimelineObjectProperty*>(value.value<QObject*>());
                 if ( !obj )
-                    THROW_EXCEPTION(Exception, "Property is not of object type.", Exception::toCode("~QObject"));
+                    THROW_EXCEPTION(Exception, "Property is not of object type: " + name.toStdString(), Exception::toCode("~QObject"));
 
                 MLNode propNode(MLNode::Object);
                 obj->serialize(engine, propNode);
@@ -233,10 +233,10 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
         timeline->m_contentLength = node["length"].asInt();
         timeline->m_fps = node["fps"].asFloat();
 
-        if ( node.hasKey("properties") ){
+        QQmlPropertyMap* properties = new QQmlPropertyMap;
+        timeline->m_properties = properties;
 
-            QQmlPropertyMap* properties = new QQmlPropertyMap;
-            timeline->m_properties = properties;
+        if ( node.hasKey("properties") ){
 
             MLNode propertiesNode = node["properties"];
 

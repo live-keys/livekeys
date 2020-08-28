@@ -24,7 +24,7 @@ LiveExtension{
                 property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
                 property double borderThickness: currentTheme ? currentTheme.inputStyle.borderThickness : propertyLabelStyle.borderThickness
             }
-            scrollStyle: currentTheme ? currentTheme.scrollStyle : scrollStyle
+            scrollbarColor: currentTheme ? currentTheme.colorScheme.scrollbarColor : scrollbarColor
             buttons: currentTheme ? currentTheme.buttons : buttons
             nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
             selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView

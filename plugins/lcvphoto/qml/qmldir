@@ -9,3 +9,5 @@ FastNlMeansDenoising_         1.0 FastNlMeansDenoising_.qml
 Levels                        1.0 Levels.qml
 BrightnessAndContrast         1.0 BrightnessAndContrast.qml
 HueSaturationLightness        1.0 HueSaturationLightness.qml
+Sepia                         1.0 Sepia.qml
+Temperature                   1.0 Temperature.qml

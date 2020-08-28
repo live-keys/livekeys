@@ -31,6 +31,7 @@ Theme{
         property color foreground: '#fff'
 
         property color textSelection: '#0b273f'
+        property color scrollbarColor: '#1f2227'
     }
 
     // Icons
@@ -330,7 +331,7 @@ Theme{
         borderColor: colorScheme.middlegroundOverlayDominant
         borderWidth: 1
         opacity: 0.95
-        scrollStyle: root.scrollStyle
+        scrollbarColor: colorScheme.scrollbarColor
     }
 
     // Node Editor

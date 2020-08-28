@@ -15,29 +15,5 @@ QtObject{
     property double borderWidth: 0
     property double opacity: 0.95
 
-    property color scrollBarColor: "#1f2227"
-
-    property Component scrollStyle: ScrollViewStyle{
-        transientScrollBars: false
-        handle: Item {
-            implicitWidth: 10
-            implicitHeight: 10
-            Rectangle {
-                color: root.scrollBarColor
-                anchors.fill: parent
-            }
-        }
-        scrollBarBackground: Item{
-            implicitWidth: 10
-            implicitHeight: 10
-            Rectangle{
-                anchors.fill: parent
-                color: root.backgroundColor
-            }
-        }
-        decrementControl: null
-        incrementControl: null
-        frame: Item{}
-        corner: Rectangle{color: root.backgroundColor}
-    }
+    property color scrollbarColor: "#1f2227"
 }

@@ -52,6 +52,7 @@ OTHER_FILES *= \
 DISTFILES += \
     qml/Resize.qml \
     qml/ResizeTool.qml \
+    qml/ResizeWithAspect.qml \
     qml/Rotate.qml \
     qml/RotateTool.qml \
     qml/Scale.qml \

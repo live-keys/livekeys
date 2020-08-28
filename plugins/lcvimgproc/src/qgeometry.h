@@ -30,6 +30,7 @@ public slots:
     QMat* scale(QMat* input, double fx, double fy, int interpolation);
     QMat* resizeBy(QMat* input, QJSValue ob, int interpolation);
     QMat* rotate(QMat* input, double degrees);
+    QMat* transform(QMat* input, QMat* m);
 
     QMat* getPerspectiveTransform(QVariantList src, QVariantList dst);
     QVariantList applyPerspectiveTransform(QVariantList points, QMat* warp);
