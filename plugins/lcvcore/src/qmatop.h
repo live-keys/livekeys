@@ -48,6 +48,12 @@ public slots:
     QMat* crop(QMat* m, const QRect& region);
     QMat* flip(QMat* m, int direction);
 
+    QJSValue split(QMat* m);
+    QMat* merge(const QJSValue& matArray);
+
+    QMat* spreadByLinearInterpolation(QJSValue reference, QJSValue spread);
+    QMat* lut(QMat* m, QMat* lut);
+
     QMatrix4x4 to4x4Matrix(QMat* m);
     QVariantList toArray(QMat* m);
 

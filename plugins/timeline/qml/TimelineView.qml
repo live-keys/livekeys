@@ -102,7 +102,8 @@ Rectangle{
             id: contextMenu
             MenuItem {
                 text: qsTr("Add Video Track")
-                onTriggered: {
+
+                function addTrack(){
                     var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
                     var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
 
@@ -117,6 +118,36 @@ Rectangle{
                     videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
 
                     root.timeline.appendTrack(videoTrack)
+                }
+
+                onTriggered: {
+                    if ( !root.timeline.properties.videoSurface ){
+
+                        var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoSurfaceCreator.qml'
+                        var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+                        var objectComponent = Qt.createComponent(objectPathUrl);
+                        if ( objectComponent.status === Component.Error ){
+                            throw linkError(new Error(objectComponent.errorString()), this)
+                        }
+
+                        var object = objectComponent.createObject();
+                        var overlay = lk.layers.window.dialogs.overlayBox(object)
+
+
+                        object.surfaceCreated.connect(function(videoSurface){
+                            root.timeline.properties.videoSurface = videoSurface
+                            addTrack()
+                            overlay.closeBox()
+                        })
+
+                        object.cancelled.connect(function(){
+                            overlay.closeBox()
+                            return
+                        })
+                    } else {
+                        addTrack()
+                    }
                 }
             }
             MenuItem {

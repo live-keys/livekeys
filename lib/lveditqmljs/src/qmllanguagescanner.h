@@ -66,6 +66,8 @@ private:
     void scanQmlDirForExports(const QmlDirParser& dir, const QmlLibraryInfo::Ptr& lib);
     void scanPathForExports(const QString& path, const QmlLibraryInfo::Ptr& lib);
 
+    void updateLibraryUnknownTypes(const QmlLibraryInfo::Ptr& lib);
+
     void insertNewLibrary(const QmlLibraryInfo::Ptr& lib);
 
     QMutex                           m_queueMutex;

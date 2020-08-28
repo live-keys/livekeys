@@ -10,6 +10,9 @@ QMatIO::QMatIO(QObject *parent)
 }
 
 QMat *QMatIO::read(const QString &path, int isColor){
+    if ( path.isEmpty() )
+        return nullptr;
+
     cv::Mat image = cv::imread(path.toStdString(), isColor);
 
     QMat* m = new QMat;

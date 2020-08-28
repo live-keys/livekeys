@@ -1,5 +1,8 @@
 {
     "name": "fs",
     "package" : ".",
-    "libraryModules" : ["lvfs"]
+    "libraryModules" : ["lvfs"],
+    "palettes" : {
+        "palettes/VisualFileSelectorPalette.qml" : "qml/fs#VisualFileSelector"
+    }
 }

@@ -133,7 +133,12 @@ void QmlLanguageScanner::processQueue(){
             }
 
         } else if ( lib->status() == QmlLibraryInfo::NoPrototypeLink ){
-
+            updateLibraryUnknownTypes(lib);
+            lib->setStatus(QmlLibraryInfo::Done);
+            queue.append(lib);
+            if ( m_updateListener ){
+                m_updateListener(lib, queue.size());
+            }
         }
     }
 
@@ -366,7 +371,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
         return nullptr;
 
     QList<DocumentQmlInfo::Import> imports = documentInfo->imports();
-    QStringList dependencies;
+    QList<QPair<QString, QString> > dependencies;
 
     foreach( const DocumentQmlInfo::Import import, imports ){
         if (import.importType() == DocumentQmlInfo::Import::Directory){
@@ -380,7 +385,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
                 insertNewLibrary(lib);
             }
             lib->addDependency(import.uri());
-            dependencies.append(import.uri());
+            dependencies.append(qMakePair(import.uri(), import.as()));
         }
         if (import.importType() == DocumentQmlInfo::Import::Library) {
             if ( !m_libraries.contains(import.uri()) ){
@@ -393,7 +398,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
                 insertNewLibrary(depLib);
             }
             lib->addDependency(import.uri());
-            dependencies.append(import.uri());
+            dependencies.append(qMakePair(import.uri(), import.as()));
         }
     }
 
@@ -452,6 +457,50 @@ void QmlLanguageScanner::scanPathForExports(const QString &path, const QmlLibrar
         QmlTypeInfo::Ptr fileType = scanObjectFile(lib, info.filePath(), info.baseName(), fileContent);
         if ( fileType ){
             lib->addType(fileType);
+        }
+    }
+}
+
+void QmlLanguageScanner::updateLibraryUnknownTypes(const QmlLibraryInfo::Ptr &lib){
+
+    const QMap<QString, QmlTypeInfo::Ptr>& exp = lib->exports();
+
+    for ( auto it = exp.begin(); it != exp.end(); ++it ){
+        QmlTypeInfo::Ptr ti = it.value();
+        if ( ti->document().isValid() ){
+            for ( int i = 0; i < ti->totalProperties(); ++i ){
+
+                if ( ti->propertyAt(i).typeName.language() == QmlTypeReference::Unknown ){
+
+                    QString importAs = "";
+                    QString lookedUpType = ti->propertyAt(i).typeName.name();
+
+
+                    int splitIndex = lookedUpType.indexOf('.');
+                    if ( splitIndex != -1 ){
+                        importAs = lookedUpType.mid(0, splitIndex);
+                        lookedUpType = lookedUpType.mid(splitIndex + 1);
+                    }
+
+                    const QList<QPair<QString, QString> > dependencies = ti->document().dependencies;
+                    for ( auto depIt = dependencies.begin(); depIt != dependencies.end(); ++depIt ){
+                        if ( depIt->second == importAs ){
+                            QmlLibraryInfo::Ptr lib = m_libraries[depIt->first];
+                            if ( lib ){
+                                for ( auto typeIt = lib->exports().begin(); typeIt != lib->exports().end(); ++typeIt ){
+                                    if ( typeIt.value()->exportType().name() == lookedUpType ){
+
+                                        QmlPropertyInfo newProp = ti->propertyAt(i);
+                                        newProp.typeName = typeIt.value()->exportType();
+                                        ti->updateProperty(i, newProp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 }
