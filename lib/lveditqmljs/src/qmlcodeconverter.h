@@ -43,6 +43,7 @@ public slots:
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
     QVariant parse();
+    QString readContents();
     void updateBindings();
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     bool bindExpression(const QString& expression);

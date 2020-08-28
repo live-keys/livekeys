@@ -1364,7 +1364,8 @@ QJSValue CodeQmlHandler::editingFragments(){
 
 void CodeQmlHandler::toggleComment(int position, int length)
 {
-    if ( !m_document ) return;
+    if ( !m_document )
+        return;
 
     Q_D(CodeQmlHandler);
 
