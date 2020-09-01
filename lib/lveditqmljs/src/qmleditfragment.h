@@ -133,6 +133,7 @@ public slots:
     Location location() const;
 
     void write(const QString& code);
+
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
