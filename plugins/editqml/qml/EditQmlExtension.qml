@@ -167,6 +167,8 @@ WorkspaceExtension{
 
         if (forImports) editor.editor.importsShaped = true
         ef.incrementRefCount()
+
+        return objectContainer ? objectContainer : palette
     }
 
     function loadPalette(editor, palettes, index){
@@ -299,7 +301,12 @@ WorkspaceExtension{
         if (paletteRoot){
             if (callback) callback()
             else {
-                root.shapePalette(editor, paletteRoot, 0)
+                var oc = root.shapePalette(editor, paletteRoot, 0)
+                console.log(oc)
+                oc.contentWidth = Qt.binding(function(){
+                    return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                })
+
                 editor.editor.rootShaped = true
             }
         }
@@ -331,7 +338,17 @@ WorkspaceExtension{
         if (imports.rowCount() > 0){
             var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
             var paletteImports = codeHandler.findPalettes(importsPosition, true)
-            if (paletteImports) root.shapePalette(editor, paletteImports, 0)
+            if (paletteImports) {
+                var pc = root.shapePalette(editor, paletteImports, 0)
+
+                console.log(pc.item.parent)
+                console.log(pc.item.parent.parent)
+
+                pc.item.width = Qt.binding(function(){
+                    var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
+                    return editorSize > 280 ? editorSize : 280
+                })
+            }
         }
         rootPosition = codeHandler.findRootPosition()
 

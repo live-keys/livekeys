@@ -29,6 +29,7 @@ Rectangle{
 
     property alias internalActiveFocus : textEdit.activeFocus
     property alias internalFocus: textEdit.focus
+    property alias lineSurfaceWidth: lineSurface.width
 
     function forceFocus(){
         textEdit.forceActiveFocus()

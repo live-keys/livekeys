@@ -6,12 +6,14 @@ import editor.private 1.0
 
 Rectangle{
     id: paletteContainer
-    width: child ? Math.max(compact? 0 : 200, child.width + 5 + (compact ? compactHeaderWidth: 0)): (compact? 0 : 200)
+    width: (child && child.width > minimumWidth ? child.width : minimumWidth) + headerWidth
     height: child ? child.height + (compact ? 0 : normalHeaderHeight) +5 : 0
     objectName: "paletteContainer"
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
+    property double minimumWidth: compact ? 0 : 200
+    property double headerWidth: compact ? compactHeaderWidth + 5 : 0
     property int compactHeaderWidth: rightButtons.width + 7
     property int normalHeaderHeight: 35
 
