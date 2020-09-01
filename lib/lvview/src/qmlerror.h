@@ -52,7 +52,6 @@ public:
     int lineNumber() const;
     QString functionName() const;
 
-
     QString toString(int options = QmlError::PrintMessage | QmlError::PrintLocation) const;
 
     void jsThrow();

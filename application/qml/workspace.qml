@@ -17,6 +17,7 @@
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
+import QtQuick.Controls.Styles 1.2
 import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
@@ -44,6 +45,7 @@ Item{
         property Item activePane : null
         property Item activeItem : null
         property Item container : mainSplit
+        property Menu contextMenu: contextMenu
 
         property var openWindows : []
 
@@ -343,6 +345,15 @@ Item{
             return null
         }
 
+        function openContextMenu(item, pane){
+            if ( !item )
+                item = activeItem
+            if ( !pane )
+                pane = activePane
+
+            var res = lk.layers.workspace.interceptMenu(pane, item)
+            contextMenu.show(res)
+        }
     }
 
     property QtObject projectEnvironment : ProjectEnvironment{
@@ -376,8 +387,6 @@ Item{
         onLayerReady: {
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
-                    'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
-                    'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
                     'toggleNavigation' : [root.toggleNavigation, "Toggle Navigation"],
 //                    'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
 //                    'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
@@ -692,6 +701,32 @@ Item{
             if ( !parent  )
                 header.isLogWindowDirty = true
         }
+    }
+
+    Menu{
+        id: contextMenu
+        style: ContextMenuStyle{}
+
+        function clearItems(){
+            while ( items.length ){
+                removeItem(contextMenu.items[0])
+            }
+        }
+
+        function show(model){
+            for ( var i = 0; i < model.length; ++i ){
+                var menuitem = insertItem(i, model[i].name)
+                menuitem.enabled = model[i].enabled
+                menuitem.triggered.connect(model[i].action)
+                menuitem.shortcut = model[i].shortcut ? model[i].shortcut : ''
+            }
+            contextMenu.popup()
+        }
+
+        onAboutToHide: {
+            clearItems()
+        }
+
     }
 
 }

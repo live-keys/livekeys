@@ -31,11 +31,16 @@
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
 #include "qmlbindingspanmodel.h"
+#include "qmltokenizer_p.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
 
 namespace lv{
+
+static QObject* qmlTokenizerProvider(QQmlEngine* engine, QJSEngine*){
+    return new QmlTokenizer(engine);
+}
 
 /**
  * \class lv::ProjectQmlExtension
@@ -158,6 +163,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
         uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
+
+    qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
 }
 
 /**

@@ -60,7 +60,7 @@ public:
     lv::StartupModel* samples() const;
 
 public slots:
-    QJSValue interceptMenu(QJSValue context);
+    QJSValue interceptMenu(QJSValue pane, QJSValue item);
     QJSValue interceptFile(const QString& path, int mode);
     void addPane(QQuickItem* pane, QQuickWindow* window, const QVariantList& position);
     void removePane(QQuickItem* pane);

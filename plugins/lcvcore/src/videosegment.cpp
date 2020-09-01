@@ -20,7 +20,7 @@ namespace lv{
 
 VideoSegment::VideoSegment(QObject *parent)
     : Segment(parent)
-    , m_track(nullptr)
+    , m_videoTrack(nullptr)
     , m_capture(new cv::VideoCapture)
 {
 }
@@ -74,11 +74,12 @@ void VideoSegment::assignTrack(Track *track){
         lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
-    m_track = nt;
+    m_videoTrack = nt;
+    Segment::assignTrack(track);
 }
 
 void VideoSegment::cursorEnter(qint64 pos){
-    if ( !m_track || !m_track->surface() )
+    if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
     if ( pos == 0 ){
@@ -86,7 +87,7 @@ void VideoSegment::cursorEnter(qint64 pos){
             cv::Mat* frame = new cv::Mat;
             m_capture->retrieve(*frame);
             QMat* mat = new QMat(frame);
-            m_track->surface()->updateSurface(position() + pos, mat);
+            m_videoTrack->surface()->updateSurface(position() + pos, mat);
         }
     } else {
         m_capture->set(cv::CAP_PROP_POS_FRAMES, pos);
@@ -94,32 +95,32 @@ void VideoSegment::cursorEnter(qint64 pos){
             cv::Mat* frame = new cv::Mat;
             m_capture->retrieve(*frame);
             QMat* mat = new QMat(frame);
-            m_track->surface()->updateSurface(position() + pos, mat);
+            m_videoTrack->surface()->updateSurface(position() + pos, mat);
         }
     }
 }
 
 void VideoSegment::cursorExit(qint64){
-    if ( !m_track || !m_track->surface() )
+    if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
-    m_track->surface()->resetSurface();
+    m_videoTrack->surface()->resetSurface();
 }
 
 void VideoSegment::cursorNext(qint64 pos){
-    if ( !m_track || !m_track->surface() )
+    if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
     if ( m_capture->grab() ){
         cv::Mat* frame = new cv::Mat;
         m_capture->retrieve(*frame);
         QMat* mat = new QMat(frame);
-        m_track->surface()->updateSurface(position() + pos, mat);
+        m_videoTrack->surface()->updateSurface(position() + pos, mat);
     }
 }
 
 void VideoSegment::cursorMove(qint64 pos){
-    if ( !m_track || !m_track->surface() )
+    if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
     m_capture->set(cv::CAP_PROP_POS_FRAMES, pos);
@@ -128,7 +129,7 @@ void VideoSegment::cursorMove(qint64 pos){
         cv::Mat* frame = new cv::Mat;
         m_capture->retrieve(*frame);
         QMat* mat = new QMat(frame);
-        m_track->surface()->updateSurface(position() + pos, mat);
+        m_videoTrack->surface()->updateSurface(position() + pos, mat);
     }
 }
 

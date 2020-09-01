@@ -65,6 +65,9 @@ QmlError::~QmlError(){
 
 
 void QmlError::initializeFromException(const Exception &e, QObject *object){
+    if ( !m_engine )
+        return;
+
     m_error = m_engine->engine()->newErrorObject(QJSValue::GenericError, QString::fromStdString(e.message()));
     m_error.setProperty("code", static_cast<double>(e.code()));
 
@@ -219,7 +222,7 @@ QmlError QmlError::join(const QList<QmlError> &errors){
 
     const QmlError& first = errors.first();
 
-    QmlError result(first.m_engine, first.message(), first.code(), first.object());
+    QmlError result(first.m_engine, first.message(), static_cast<qint64>(first.code()), first.object());
     if ( first.hasLocation() ){
         result.assignLocation(result.fileName(), result.lineNumber(), result.functionName());
     }
@@ -229,10 +232,10 @@ QmlError QmlError::join(const QList<QmlError> &errors){
     result.m_error.setProperty("cStackTrace", first.m_error.property("cStackTrace"));
 
     if ( errors.size() > 1 ){
-        QJSValue extra = result.m_engine->engine()->newArray(errors.size() - 1);
+        QJSValue extra = result.m_engine->engine()->newArray(static_cast<quint32>(errors.size() - 1));
         result.m_error.setProperty("extra", extra);
         for ( int i = 1; i < errors.size(); ++i ){
-            extra.setProperty(i - 1, errors[i].value());
+            extra.setProperty(static_cast<quint32>(i - 1), errors[i].value());
         }
     }
 
@@ -243,7 +246,7 @@ void QmlError::jsThrow(){
     if ( m_engine ){
         m_engine->throwError(*this);
     } else {
-        qWarning("QmlError: Attempting to throw a null error.");
+        qWarning("QmlError: Attempting to throw a null error (Or engine not assigned).");
     }
 }
 

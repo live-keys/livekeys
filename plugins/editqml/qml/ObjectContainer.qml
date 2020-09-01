@@ -30,8 +30,8 @@ Item{
         if (max < 300)
             max = 300
 
-        if (max !== contentWidth){
-            contentWidth = max
+        if (max !== containerContentWidth){
+            containerContentWidth = max
         }
     }
 
@@ -41,6 +41,8 @@ Item{
         }
     }
 
+    property double containerContentWidth : 0
+    property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.editor.lineSurfaceWidth - 50 : 0
 
     property alias editingFragment : objectContainer.editingFragment
     property alias editor : objectContainer.editor
@@ -59,7 +61,7 @@ Item{
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
 
-    property int contentWidth: 0
+    property int contentWidth: containerContentWidth
 
     property Rectangle placeHolder : Rectangle{
         height: 30

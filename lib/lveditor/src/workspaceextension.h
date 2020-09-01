@@ -13,7 +13,7 @@ class LV_EDITOR_EXPORT WorkspaceExtension : public QObject{
     Q_PROPERTY(QObject* globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)
     Q_PROPERTY(QJSValue interceptFile     READ interceptFile     WRITE setInterceptFile     NOTIFY interceptFileChanged)
     Q_PROPERTY(QJSValue interceptLanguage READ interceptLanguage WRITE setInterceptLanguage NOTIFY interceptLanguageChanged)
-    Q_PROPERTY(QJSValue interceptMenu     READ interceptMenu     WRITE setInterceptMenu     NOTIFY interceptMenuChanged)
+    Q_PROPERTY(QJSValue menuInterceptors  READ menuInterceptors  WRITE setMenuInterceptors     NOTIFY menuInterceptorsChanged)
     Q_PROPERTY(QJSValue panes             READ panes             WRITE setPanes             NOTIFY panesChanged)
     Q_PROPERTY(QJSValue commands          READ commands          WRITE setCommands          NOTIFY commandsChanged)
     Q_PROPERTY(QJSValue keyBindings       READ keyBindings       WRITE setKeyBindings       NOTIFY keyBindingsChanged)
@@ -34,7 +34,7 @@ public:
     /** Returns key bindings */
     QJSValue keyBindings() const{ return m_keybindings; }
     /** Returns the menu interceptor */
-    QJSValue interceptMenu() const{ return m_interceptMenu; }
+    QJSValue menuInterceptors() const{ return m_menuInterceptors; }
     /** Returns the file interceptor */
     QJSValue interceptFile() const{ return m_interceptFile; }
     /** Returns the panes */
@@ -47,7 +47,7 @@ public:
     void setCommands(QJSValue commands);
     void setConfiguration(QJSValue configuration);
     void setKeyBindings(QJSValue keybindings);
-    void setInterceptMenu(QJSValue interceptMenu);
+    void setMenuInterceptors(QJSValue menuInterceptors);
     void setInterceptFile(QJSValue interceptFile);
     void setPanes(QJSValue panes);
     void setThemes(QJSValue themes);
@@ -64,8 +64,8 @@ public:
     bool hasLanguageInterceptor() const;
     QObject* callLanguageInterceptor(const QJSValueList& values);
 
-    bool hasMenuInterceptor() const;
-    QJSValue callMenuInterceptor(const QJSValueList& values);
+    bool hasMenuInterceptors() const;
+    QJSValue callMenuInterceptors(const QJSValueList& values);
 
 signals:
     /** Signals that globals changed */
@@ -79,7 +79,7 @@ signals:
     /** Signals that key bindings changed */
     void keyBindingsChanged();
     /** Signals that menu interceptor changed */
-    void interceptMenuChanged();
+    void menuInterceptorsChanged();
     /** Signals that the file interceptor changed */
     void interceptFileChanged();
     /** Signals that the panes property has changed */
@@ -96,7 +96,7 @@ private:
     QJSValue m_commands;
     QJSValue m_configuration;
     QJSValue m_keybindings;
-    QJSValue m_interceptMenu;
+    QJSValue m_menuInterceptors;
     QJSValue m_interceptFile;
     QJSValue m_panes;
     QJSValue m_themes;
@@ -145,9 +145,9 @@ inline void WorkspaceExtension::setInterceptFile(QJSValue interceptFile){
 }
 
 /** Set given intercept menu */
-inline void WorkspaceExtension::setInterceptMenu(QJSValue interceptMenu){
-    m_interceptMenu = interceptMenu;
-    emit interceptMenuChanged();
+inline void WorkspaceExtension::setMenuInterceptors(QJSValue interceptors){
+    m_menuInterceptors = interceptors;
+    emit menuInterceptorsChanged();
 }
 
 /** Sets the panes */

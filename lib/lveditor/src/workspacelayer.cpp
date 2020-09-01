@@ -40,7 +40,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_projectEnvironment(nullptr)
     , m_panes(nullptr)
     , m_viewRoot(nullptr)
-    , m_commands(new Commands(this))
+    , m_commands(nullptr)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
@@ -51,6 +51,9 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_tooltipTimer(new QTimer)
     , m_tooltip(nullptr)
 {
+    m_engine = ViewContext::instance().engine();
+    m_commands = new Commands(m_engine, this);
+
     m_tooltipTimer->setInterval(500);
     m_tooltipTimer->setSingleShot(true);
     connect(m_tooltipTimer, &QTimer::timeout, this, &WorkspaceLayer::__tooltipTimeout);
@@ -64,7 +67,6 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     m_extensions = new Extensions(lv::ViewContext::instance().engine(), settings->path());
     settings->addConfigFile("extensions", m_extensions);
 
-    m_engine = lv::ViewContext::instance().engine();
     QQmlEngine* engine = m_engine->engine();
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
     m_project = qobject_cast<lv::Project*>(probject);
@@ -112,8 +114,10 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
-        m_commands->add(le, le->commands());
-        m_keymap->store(le->keyBindings());
+        if ( le->commands().isObject() )
+            m_commands->add(le, le->commands());
+        if ( le->keyBindings().isObject() )
+            m_keymap->store(le->keyBindings());
 
         QJSValue themesArray = le->themes();
 
@@ -213,25 +217,52 @@ StartupModel *WorkspaceLayer::samples() const
     return m_samples;
 }
 
-QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
-    QJSValueList interceptorArgs;
-    interceptorArgs << context;
+QJSValue WorkspaceLayer::interceptMenu(QJSValue pane, QJSValue item){
+    QObject* paneObject = pane.toQObject();
+    QObject* itemObject = item.toQObject();
+
+    QString paneType = paneObject ? paneObject->property("paneType").toString() : "";
+    QString itemType = itemObject ? itemObject->property("objectName").toString() : "";
 
     QJSValueList result;
 
+    QJSValueList interceptorArgs;
+    interceptorArgs << pane << item;
+
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
-        if ( le->hasMenuInterceptor() ){
-            QJSValue v = le->callMenuInterceptor(interceptorArgs);
-            if ( v.isArray() ){
-                QJSValueIterator vit(v);
-                while ( vit.hasNext() ){
-                    vit.next();
-                    if ( vit.name() != "length" ){
-                        result << vit.value();
+        if ( le->hasMenuInterceptors() ){
+            QJSValue im = le->menuInterceptors();
+            QJSValueIterator imIt(im);
+            while ( imIt.next() ){
+                if ( imIt.name() != "length" ){
+                    QJSValue menuConfig = imIt.value();
+
+                    QString whenActivePane = menuConfig.hasProperty("whenPane") ? menuConfig.property("whenPane").toString() : "";
+                    QString whenActiveItem = menuConfig.hasProperty("whenItem") ? menuConfig.property("whenItem").toString() : "";
+
+                    if ( !whenActivePane.isEmpty() ){
+                        if ( whenActivePane != paneType )
+                            continue;
+                    }
+                    if ( !whenActiveItem.isEmpty() ){
+                        if ( whenActiveItem != itemType )
+                            continue;
+                    }
+
+                    QJSValue model = menuConfig.property("intercept").call(interceptorArgs);
+                    if ( model.isArray() ){
+                        QJSValueIterator modelit(model);
+                        while ( modelit.hasNext() ){
+                            modelit.next();
+                            if ( modelit.name() != "length" ){
+                                result << modelit.value();
+                            }
+                        }
                     }
                 }
             }
+
         }
     }
 
@@ -492,7 +523,6 @@ void WorkspaceLayer::loadConfigurations(){
 
     for ( auto it = extensionArray.begin(); it != extensionArray.end(); ++it ){
         MLNode currentExt = *it;
-
         bool isEnabled = currentExt["enabled"].asBool();
         if ( isEnabled ){
             std::string packageName = currentExt["package"].asString();
@@ -592,7 +622,7 @@ WorkspaceExtension *WorkspaceLayer::loadPackageExtension(const Package::Ptr &pac
 
     WorkspaceExtension* le = qobject_cast<WorkspaceExtension*>(component.create());
     if ( !le ){
-        THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to LiveExtension type in: " + path, 3);
+        THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to WorkspaceExtension type in: " + path, 3);
     }
 
     le->setIdentifiers(package->name(), path);

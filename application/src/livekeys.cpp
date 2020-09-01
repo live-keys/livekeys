@@ -418,6 +418,11 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "editqml"},
                      {"enabled", true},
                      {"component", "EditQmlExtension.qml"}
+                 },
+                 {
+                     {"package", "workspace"},
+                     {"enabled", true},
+                     {"component", "WorkspaceControlsExtension.qml"}
                  }/*,
                  {
                      {"package", "editlv"},

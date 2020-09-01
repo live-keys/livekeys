@@ -18,6 +18,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import editqml 1.0 as QmlEdit
 import live 1.0
 import workspace 1.0 as Workspace
 
@@ -144,6 +145,28 @@ CodePalette{
     }
 
     onInit: {
+        var contents = extension.readContents()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.dot &&
+                 tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                isBindingExpression = false
+            } else {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            }
+        }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
         input.forceActiveFocus()
     }
 

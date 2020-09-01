@@ -1,7 +1,7 @@
 #include "workspaceextension.h"
 
 /**
- * \class lv::LiveExtension
+ * \class lv::WorkspaceExtension
  * \brief The class within Qml to be used when we want to add an extension
  * \ingroup lvview
  */
@@ -10,6 +10,7 @@ namespace lv{
 /** Default contructor */
 WorkspaceExtension::WorkspaceExtension(QObject *parent)
     : QObject(parent)
+    , m_globals(nullptr)
 {
 }
 
@@ -46,13 +47,13 @@ QObject *WorkspaceExtension::callLanguageInterceptor(const QJSValueList& values)
 }
 
 /** Shows if we have a menu interceptor */
-bool WorkspaceExtension::hasMenuInterceptor() const{
-    return m_interceptMenu.isCallable();
+bool WorkspaceExtension::hasMenuInterceptors() const{
+    return m_menuInterceptors.isArray();
 }
 
 /** Calls the menu interceptor on the given set of values */
-QJSValue WorkspaceExtension::callMenuInterceptor(const QJSValueList &values){
-    QJSValue result = m_interceptMenu.call(values);
+QJSValue WorkspaceExtension::callMenuInterceptors(const QJSValueList &values){
+    QJSValue result = m_menuInterceptors.call(values);
     if ( result.isError() ){
         qWarning("Menu Intercept Error: %s", qPrintable(result.toString()));
         return QJSValue();

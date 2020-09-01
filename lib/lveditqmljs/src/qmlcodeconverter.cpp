@@ -164,6 +164,10 @@ QVariant QmlCodeConverter::parse(){
     }
 }
 
+QString QmlCodeConverter::readContents(){
+    return m_edit->readValueText();
+}
+
 void QmlCodeConverter::updateBindings(){
     if ( m_edit->bindingPalette() ){
         m_whenBinding.call();

@@ -14,6 +14,8 @@ Rectangle{
     height: 700
     clip: true
 
+    objectName: "objectGraph"
+
     color: root.style.backgroundColor
     radius: root.style.radius
     border.width: root.style.borderWidth
@@ -52,7 +54,37 @@ Rectangle{
             property double radius: 5
             property QtObject textStyle: Workspace.TextStyle{}
         }
+    }
 
+    function activateFocus(){
+        if ( activeFocus )
+            return
+
+        if ( lk.layers.workspace ){
+
+            var p = root
+            while ( p && !p.paneType ){
+                p = p.parent
+            }
+
+            if( p ){
+                lk.layers.workspace.panes.activateItem(root, p)
+            } else {
+                root.forceActiveFocus()
+            }
+        } else {
+            root.forceActiveFocus()
+        }
+    }
+
+    Keys.onPressed: {
+        if ( lk.layers.workspace ){
+            var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
+            if ( command ){
+                lk.layers.workspace.commands.execute(command)
+            }
+            event.accepted = true
+        }
     }
 
     property QtObject style: defaultStyle
@@ -165,24 +197,18 @@ Rectangle{
     }
 
     onEdgeClicked: {
+        root.activateFocus()
         if (selectedEdge){
-            selectedEdge.item.color = '#6a6a6a'
+            selectedEdge.item.color = '#3f444d'
         }
         selectedEdge = edge
-        edge.item.color = '#ff0000'
+        edge.item.color = '#dbdede'
     }
 
     onNodeClicked: {
         if (selectedEdge)
             selectedEdge.item.color = '#6a6a6a'
         selectedEdge = null
-    }
-
-    Keys.onDeletePressed: {
-        if (selectedEdge){
-            graph.removeEdge(selectedEdge)
-            selectedEdge = null
-        }
     }
 
     onDoubleClicked: {
@@ -250,6 +276,8 @@ Rectangle{
 
     function removeEdge(edge){
         graph.removeEdge(edge)
+        if ( edge === selectedEdge )
+            selectedEdge = null
     }
 
 
