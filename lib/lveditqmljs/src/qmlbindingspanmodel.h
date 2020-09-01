@@ -35,10 +35,12 @@ public:
 
     int inputPathIndex() const;
 
+
 signals:
     void inputPathIndexChanged(int index);
 
 public slots:
+    void commit(const QVariant& value);
     void connectPathAtIndex(int index);
 
 private:

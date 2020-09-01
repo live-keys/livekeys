@@ -156,17 +156,22 @@ CodePalette{
                         var valueToAssign = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
 
                         if (crop.editingFragment){ //objectContainer
-                            paletteControls.addPropertyByName(crop, "region", valueToAssign)
+                            var regionEf = paletteControls.addPropertyByName(crop, "region", valueToAssign)
+                            regionEf.bindingModel(null).commit(Qt.rect(x, y, width, height))
+
                             crop.expand()
                         } else {
-                            if (!crop) return
+                            if (!crop)
+                                return
                             var codeHandler = crop.visualParent.documentHandler.codeHandler
                             paletteControls.addPropertyByFragment(crop, codeHandler, "region", valueToAssign)
                         }
 
+                        paletteItem.transformImage.exec()
+
                         //fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
                         //paletteItem.transformImage.exec()
-                        //toolbox.activateTool(null)
+                        toolbox.activateTool(null)
 //                        var crop = cropImageFactory.createObject(paletteItem.transformImage)
 //                        crop.region = Qt.rect(x, y, width, height)
 //                        paletteItem.transformImage.transformations.push(crop)
