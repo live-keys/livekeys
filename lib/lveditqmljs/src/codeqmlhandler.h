@@ -176,7 +176,8 @@ public slots:
         const QString& object,
         const QString& type,
         const QString& name,
-        bool assignDefault = false);
+        bool assignDefault = false,
+        QString valueToAssign = QString());
     int addItem(int position, const QString& object, const QString& type);
     int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);

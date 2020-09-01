@@ -103,8 +103,9 @@ CodePalette{
             var codeHandler = p.documentHandler.codeHandler
             var position = ef.valuePosition() + ef.valueLength() - 1
 
-            var ef = paletteControls.addItemToRuntime(codeHandler, ef, position, "TransformImage", name)
-            return ef
+            var childEf = paletteControls.addItemToRuntime(codeHandler, ef, position, "TransformImage", name)
+            childEf.visualParent = p
+            return childEf
         }
     }
 
@@ -151,18 +152,26 @@ CodePalette{
                     property Component cropImageFactory : Cv.Crop{}
 
                     onApply: {
-//                        var crop = addTransformation("Crop")
-//                        if (crop.editingFragment){ //objectContainer
-//                            paletteControls.addPropertyByName(crop, "region")
-//                            crop.expand()
-//                        } else {
-//
-//                        }
-                        var crop = cropImageFactory.createObject(paletteItem.transformImage)
-                        crop.region = Qt.rect(x, y, width, height)
-                        paletteItem.transformImage.transformations.push(crop)
-                        paletteItem.transformImage.exec()
-                        toolbox.activateTool(null)
+                        var crop = addTransformation("Crop")
+                        var valueToAssign = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
+
+                        if (crop.editingFragment){ //objectContainer
+                            paletteControls.addPropertyByName(crop, "region", valueToAssign)
+                            crop.expand()
+                        } else {
+                            if (!crop) return
+                            var codeHandler = crop.visualParent.documentHandler.codeHandler
+                            paletteControls.addPropertyByFragment(crop, codeHandler, "region", valueToAssign)
+                        }
+
+                        //fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
+                        //paletteItem.transformImage.exec()
+                        //toolbox.activateTool(null)
+//                        var crop = cropImageFactory.createObject(paletteItem.transformImage)
+//                        crop.region = Qt.rect(x, y, width, height)
+//                        paletteItem.transformImage.transformations.push(crop)
+//                        paletteItem.transformImage.exec()
+//                        toolbox.activateTool(null)
                     }
 
                     onCancel: toolbox.activateTool(null)

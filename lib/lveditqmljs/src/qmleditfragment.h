@@ -78,7 +78,6 @@ public:
 
     QmlDeclaration::Ptr declaration() const;
 
-    void write(const QString& code);
     QString readValueText() const;
 
     void updatePaletteValue(CodePalette* palette);
@@ -132,6 +131,8 @@ public slots:
     QString objectId();
 
     Location location() const;
+
+    void write(const QString& code);
 signals:
     void visualParentChanged();
     void connectionChanged(int index);

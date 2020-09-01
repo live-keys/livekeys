@@ -31,6 +31,7 @@ QtObject{
 
     }
 
+    property bool instructionsShaping: false
     /////////////////// FACTORY FUNCTIONS
 
     function createAddQmlBox(parent, style){
@@ -430,6 +431,7 @@ QtObject{
     }
 
     function shapeAtPositionWithInstructions(editor, position, instructions){
+        instructionsShaping = true
         var codeHandler = editor.documentHandler.codeHandler
         var ef = codeHandler.openConnection(position)
 
@@ -440,6 +442,7 @@ QtObject{
         ef.incrementRefCount()
         codeHandler.frameEdit(objectContainer.parent, ef)
         shapeContainerWithInstructions(objectContainer, editor, instructions)
+        instructionsShaping = false
     }
 
     function shapeContainerWithInstructions(objectContainer, editor, instructions){
@@ -536,7 +539,7 @@ QtObject{
         ef.incrementRefCount()
     }
 
-    function addPropertyByName(objectContainer, name){
+    function addPropertyByName(objectContainer, name, valueToAssign){
         for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
             if (objectContainer.propertiesOpened[i] === name){
                 return
@@ -544,9 +547,13 @@ QtObject{
         }
 
         var codeHandler = objectContainer.editor.documentHandler.codeHandler
-        var position = objectContainer.editingFragment.valuePosition() +
-                       objectContainer.editingFragment.valueLength() - 1
+        return addPropertyByFragment(objectContainer.editingFragment, codeHandler, name, valueToAssign)
+    }
 
+    function addPropertyByFragment(ef, codeHandler, name, valueToAssign){
+
+        var position = ef.valuePosition() +
+                       ef.valueLength() - 1
 
         var addContainer = codeHandler.getAddOptions(position)
         if ( !addContainer )
@@ -555,23 +562,23 @@ QtObject{
         addContainer.model.setCategoryFilter(1)
         addContainer.model.setFilter(name)
 
-        if (addContainer.model.rowCount() !== 1) return
+        if (addContainer.model.rowCount() === 0) return
 
         var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
 
         var ppos = codeHandler.addProperty(
-            addContainer.model.addPosition, addContainer.objectType, type, name, true
+            addContainer.model.addPosition, addContainer.objectType, type, name, true, valueToAssign
         )
 
-        var ef = codeHandler.openNestedConnection(
-            objectContainer.editingFragment, ppos, project.appRoot()
+        var propEf = codeHandler.openNestedConnection(
+            ef, ppos, project.appRoot()
         )
 
-        if (ef) {
-            objectContainer.editingFragment.signalPropertyAdded(ef, false)
+        if (propEf) {
+            ef.signalPropertyAdded(propEf, false)
         }
 
-        return ef
+        return propEf
     }
 
     function openEmptyNestedObjects(objectContainer){
