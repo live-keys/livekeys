@@ -2,7 +2,7 @@ import QtQuick 2.3
 import editor 1.0
 import editlv 1.0
 
-LiveExtension{
+WorkspaceExtension{
     id: root
 
     globals : LanguageLvExtension{}

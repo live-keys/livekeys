@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "commands.h"
+#include "workspacelayer.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
 #include "live/viewengine.h"
@@ -24,8 +25,9 @@
 
 namespace lv{
 
-Commands::Commands(QObject *parent)
+Commands::Commands(ViewEngine *engine, QObject *parent)
     : QObject(parent)
+    , m_engine(engine)
 {
 }
 
@@ -49,9 +51,11 @@ void Commands::setModel(CommandsModel *m)
     connect(m_model, &CommandsModel::modelChanged, this, &Commands::modelChanged);
 }
 
-
 QString Commands::add(QObject *object, const QJSValue &commands){
-    if ( object == 0 || object->objectName() == "" ){
+    if ( !m_engine )
+        THROW_EXCEPTION(lv::Exception, "Engine not assigned.", Exception::toCode("~Engine"));
+
+    if ( object == nullptr || object->objectName() == "" ){
         QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot add commands for unnamed objects.", Exception::toCode("~Commands")), this).jsThrow();
         return "";
     }
@@ -160,7 +164,7 @@ void Commands::removeCommandsFor(QObject *object){
 
 QStringList Commands::getCommandChain(QObject *object){
     QStringList commandChain;
-    while( object != 0 ){
+    while( object != nullptr ){
         if ( object->objectName() != "" )
             commandChain.prepend(object->objectName());
         object = object->parent();
@@ -170,6 +174,9 @@ QStringList Commands::getCommandChain(QObject *object){
 }
 
 void Commands::execute(const QString &command){
+    if ( !m_engine )
+        THROW_EXCEPTION(lv::Exception, "Engine not assigned.", Exception::toCode("~Engine"));
+
     auto it = m_commands.find(command);
     if ( it != m_commands.end() ){
         QJSValue r = it.value()->function.call();

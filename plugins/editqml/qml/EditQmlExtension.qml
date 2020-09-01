@@ -2,7 +2,7 @@ import QtQuick 2.3
 import editor 1.0
 import editqml 1.0
 
-LiveExtension{
+WorkspaceExtension{
     id: root
 
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
@@ -521,57 +521,64 @@ LiveExtension{
         "alt+s" : { command: "editqml.object_container_add", whenPane: "editor", whenItem: "objectContainerFrame" }
     }
 
-    interceptMenu : function(item){
-        if ( item.objectName === 'editorType' && item.document ){
+    menuInterceptors : [
+        {
+            whenPane: 'editor',
+            whenItem: 'editorType',
+            intercept: function(pane, item){
 
-            if ( canBeQml(item.document) ){
+                if ( item.document ){
 
-                var codeHandler = item.documentHandler.codeHandler
-                var cursorInfo = codeHandler.cursorInfo(
-                    item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
-                );
+                    if ( canBeQml(item.document) ){
 
-                return [
-                    {
-                        name : "Edit",
-                        action : root.commands['edit'][0],
-                        enabled : cursorInfo.canEdit
-                    }, {
-                        name : "Palette",
-                        action : root.commands['palette'][0],
-                        enabled : cursorInfo.canAdjust
-                    }, {
-                        name : "Shape",
-                        action : root.commands['shape'][0],
-                        enabled : cursorInfo.canShape
-                    }, {
-                        name : "Bind",
-                        action : root.commands['bind'][0],
-                        enabled : cursorInfo.canBind
-                    }, {
-                        name : "Unbind",
-                        action : root.commands['unbind'][0],
-                        enabled : cursorInfo.canUnbind
-                    }, {
-                        name : "Add Property",
-                        action : root.commands['add_property'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Object",
-                        action : root.commands['add_object'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Event",
-                        action : root.commands['add_event'][0],
-                        enabled : true
-                    }, {
-                        name: "Shape all",
-                        action: root.commands['shape_all'][0],
-                        enabled: true
+                        var codeHandler = item.documentHandler.codeHandler
+                        var cursorInfo = codeHandler.cursorInfo(
+                            item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
+                        );
+
+                        return [
+                            {
+                                name : "Edit",
+                                action : root.commands['edit'][0],
+                                enabled : cursorInfo.canEdit
+                            }, {
+                                name : "Palette",
+                                action : root.commands['palette'][0],
+                                enabled : cursorInfo.canAdjust
+                            }, {
+                                name : "Shape",
+                                action : root.commands['shape'][0],
+                                enabled : cursorInfo.canShape
+                            }, {
+                                name : "Bind",
+                                action : root.commands['bind'][0],
+                                enabled : cursorInfo.canBind
+                            }, {
+                                name : "Unbind",
+                                action : root.commands['unbind'][0],
+                                enabled : cursorInfo.canUnbind
+                            }, {
+                                name : "Add Property",
+                                action : root.commands['add_property'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Object",
+                                action : root.commands['add_object'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Event",
+                                action : root.commands['add_event'][0],
+                                enabled : true
+                            }, {
+                                name: "Shape all",
+                                action: root.commands['shape_all'][0],
+                                enabled: true
+                            }
+                        ]
                     }
-                ]
+                }
+                return null
             }
         }
-        return null
-    }
+    ]
 }

@@ -47,7 +47,7 @@ public:
     friend class CommandsModel;
 
 public:
-    explicit Commands(QObject *parent = nullptr);
+    explicit Commands(ViewEngine* engine, QObject *parent = nullptr);
     ~Commands() override;
 
     QString dump();
