@@ -33,8 +33,10 @@ QtObject{
 
     /////////////////// FACTORY FUNCTIONS
 
-    function createAddQmlBox(parent){
-        return factories.addQmlBox.createObject(parent)
+    function createAddQmlBox(parent, style){
+        var aqb = factories.addQmlBox.createObject(parent)
+        if (style) aqb.style = style
+        return aqb
     }
 
     function createPaletteGroup(parent){
@@ -169,7 +171,36 @@ QtObject{
         return childObjectContainer
     }
 
-    function compose(container, isForNode){
+
+    function addItemToRuntime(codeHandler, ef, insPosition, parentType, type){
+        var opos = codeHandler.addItem(
+                    insPosition,
+                    parentType,
+                    type)
+
+        codeHandler.addItemToRuntime(ef, type, project.appRoot())
+
+
+        var res = codeHandler.openNestedConnection(
+            ef, opos, project.appRoot()
+        )
+
+        return res
+    }
+
+    function addItem(container, insPosition, parentType, type, isForNode){
+        var codeHandler = container.editor.documentHandler.codeHandler
+
+        var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
+
+        if (ef){
+            if (!isForNode && container.compact) container.expand()
+            else container.editingFragment.signalObjectAdded(ef)
+            if (!isForNode && container.compact) container.sortChildren()
+        }
+    }
+
+    function compose(container, isForNode, style){
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var position =
@@ -180,7 +211,7 @@ QtObject{
         if ( !addContainer )
             return
 
-        var addBoxItem = createAddQmlBox()
+        var addBoxItem = createAddQmlBox(null, style ? style: null)
 
         if (!addBoxItem) return
         addBoxItem.addContainer = addContainer
@@ -254,24 +285,7 @@ QtObject{
 
             } else if ( addBoxItem.activeIndex === 2 ){ // object
 
-                var opos = codeHandler.addItem(
-                            addContainer.model.addPosition,
-                            addContainer.objectType,
-                            data)
-
-                codeHandler.addItemToRuntime(container.editingFragment, data, project.appRoot())
-
-                if (!isForNode && container.compact) container.expand()
-
-                var ef = codeHandler.openNestedConnection(
-                    container.editingFragment, opos, project.appRoot()
-                )
-
-                if (ef){
-                    container.editingFragment.signalObjectAdded(ef)
-                    if (!isForNode && container.compact) container.sortChildren()
-                }
-
+                addItem(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
 
             } else if ( addBoxItem.activeIndex === 3 ){ // event
 
@@ -387,7 +401,6 @@ QtObject{
         editorBox.border.width = 1
         editorBox.border.color = "#141c25"
 
-        objectContainer.expand()
 
         var rootPos = codeHandler.findRootPosition()
         if (ef.position() === rootPos)
@@ -425,17 +438,16 @@ QtObject{
         var objectContainer = createObjectContainerForFragment(editor, ef)
 
         ef.incrementRefCount()
-        codeHandler.frameEdit(editorBox, ef)
-
+        codeHandler.frameEdit(objectContainer.parent, ef)
         shapeContainerWithInstructions(objectContainer, editor, instructions)
     }
 
     function shapeContainerWithInstructions(objectContainer, editor, instructions){
 
         if (instructions['type'] !== objectContainer.editingFragment.typeName()) return
-        objectContainer.compact = false
+        var containers = openEmptyNestedObjects(objectContainer)
 
-        var containers = openBlankChildContainers(objectContainer, editor)
+        var hasChildren = false
 
         if ('palettes' in instructions){
             var palettes = instructions['palettes']
@@ -446,14 +458,18 @@ QtObject{
                               editor,
                               objectContainer.groupsContainer.children[0],
                               objectContainer)
+
+                if (!hasChildren) hasChildren = true
             }
         }
 
         if ('children' in instructions){
             var children = instructions['children']
             if (children.length === containers.length){
-                for (var i = 0; i < containers.length; ++i)
+                for (var i = 0; i < containers.length; ++i){
                     shapeContainerWithInstructions(containers[i], editor, children[i])
+                    if (!hasChildren) hasChildren = true
+                }
             }
         }
 
@@ -462,9 +478,14 @@ QtObject{
             for (var i = 0; i < properties.length; ++i){
                 var property = properties[i]
                 openPropertyInContainer(objectContainer, property)
+                if (!hasChildren) hasChildren = true
             }
         }
 
+        if (hasChildren) {
+            objectContainer.compact = false
+            objectContainer.sortChildren()
+        }
     }
 
     function openPropertyInContainer(objectContainer, property){
@@ -493,7 +514,7 @@ QtObject{
 
             var childObjectContainer = ef.visualParent.parent.parent.parent
             if ('instructions' in property)
-                expand(childObjectContainer, childObjectContainer.editor, property['instructions'])
+                shapeContainerWithInstructions(childObjectContainer, childObjectContainer.editor, property['instructions'])
         }
 
         if ('palettes' in property){

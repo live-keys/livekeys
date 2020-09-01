@@ -463,9 +463,8 @@ Rectangle{
         visible: false
         property var callback: null
         onClicked: {
-            var rootPosition = documentHandler.codeHandler.insertRootItem("qml/QtQml#QtObject")
-            if (callback) callback(rootPosition)
             visible = false
+            lk.layers.workspace.extensions.editqml.add(2, true, true)
         }
     }
 

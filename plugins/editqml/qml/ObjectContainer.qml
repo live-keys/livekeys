@@ -54,6 +54,7 @@ Item{
     property var parentObjectContainer: null
     property var isForProperty: false
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteStyle: lk? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
@@ -300,12 +301,7 @@ Item{
 
                     if (rootDeleted) {
                         editor.editor.rootShaped = false
-
                         editor.editor.addRootButton.visible = true
-                        editor.editor.addRootButton.callback = function(rootPosition){
-                            lk.layers.workspace.extensions.editqml.rootPosition = rootPosition
-                            lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler)
-                        }
                     }
                 }
                 onToggleConnections: {
@@ -419,7 +415,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false)
+                    paletteControls.compose(objectContainer, false, root.paletteStyle)
                 }
             }
         }

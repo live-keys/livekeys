@@ -60,17 +60,11 @@ Qan.NodeItem{
 
         var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
 
-        var ppos = codeHandler.addProperty(
-            addContainer.model.addPosition, addContainer.objectType, type, name, true
-        )
-
-        var ef = codeHandler.openNestedConnection(
-            editingFragment, ppos, project.appRoot()
-        )
-
-        if (ef) {
-            editingFragment.signalPropertyAdded(ef)
+        for (var i=0; i < propertiesOpened.length; ++i){
+            if (!propertiesOpened[i].toString().localeCompare(name)) return
         }
+
+        addSubobject(nodeParent, name, 2, null)
     }
 
     property QtObject defaultStyle : QtObject{
@@ -145,7 +139,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true)
+                        paletteControls.compose(root, true, root.paletteStyle)
                     }
                 }
             }
