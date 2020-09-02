@@ -1,7 +1,7 @@
 # Drawing pipeline
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeDrawing.qml}
 
 This sample shows a processing pipeline for drawing.
 

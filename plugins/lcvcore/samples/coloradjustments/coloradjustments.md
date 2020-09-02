@@ -1,7 +1,7 @@
 # Color Adjustments
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeColorAdjustments.qml}
 
 This sample has a pipeline set up to process the colors of an image:
 

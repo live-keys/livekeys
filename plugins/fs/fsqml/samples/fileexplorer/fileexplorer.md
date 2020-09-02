@@ -1,7 +1,7 @@
 # File Explorer
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeFileExplorer.qml}
 
 This sample shows how you can apply different image filters at once, by simply
 passing over a set of files.

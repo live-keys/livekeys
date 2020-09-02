@@ -11,7 +11,7 @@ QGeometry::QGeometry(QObject *parent)
 }
 
 QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
-    if ( !input )
+    if ( !input || size.width() == 0)
         return nullptr;
     QMat* m = new QMat;
     cv::resize(input->internal(), m->internal(), cv::Size(size.width(), size.height()), 0, 0, interpolation);

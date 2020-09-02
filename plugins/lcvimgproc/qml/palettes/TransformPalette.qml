@@ -149,34 +149,25 @@ CodePalette{
                     applyButton: palette.style.applyButton
                     cancelButton: palette.style.cancelButton
 
-                    property Component cropImageFactory : Cv.Crop{}
-
                     onApply: {
                         var crop = addTransformation("Crop")
                         var valueToAssign = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
 
+                        var fragment = null
                         if (crop.editingFragment){ //objectContainer
-                            var regionEf = paletteControls.addPropertyByName(crop, "region", valueToAssign)
-                            regionEf.bindingModel(null).commit(Qt.rect(x, y, width, height))
-
+                            fragment = paletteControls.addPropertyByName(crop, "region")
                             crop.expand()
                         } else {
                             if (!crop)
                                 return
                             var codeHandler = crop.visualParent.documentHandler.codeHandler
-                            paletteControls.addPropertyByFragment(crop, codeHandler, "region", valueToAssign)
+                            fragment = paletteControls.addPropertyByFragment(crop, codeHandler, "region")
                         }
 
+                        fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
+                        fragment.bindingModel(null).commit(Qt.rect(x, y, width, height))
                         paletteItem.transformImage.exec()
-
-                        //fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
-                        //paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
-//                        var crop = cropImageFactory.createObject(paletteItem.transformImage)
-//                        crop.region = Qt.rect(x, y, width, height)
-//                        paletteItem.transformImage.transformations.push(crop)
-//                        paletteItem.transformImage.exec()
-//                        toolbox.activateTool(null)
                     }
 
                     onCancel: toolbox.activateTool(null)
@@ -220,12 +211,21 @@ CodePalette{
                         }
                     }
 
-                    property Component resizeImageFactory : Img.Resize{}
-
                     onApply: {
-                        var resize = resizeImageFactory.createObject(paletteItem.transformImage)
-                        resize.size = Qt.size(width, height)
-                        paletteItem.transformImage.transformations.push(resize)
+                        var resize = addTransformation("Resize")
+
+                        var fragment = null
+                        if (resize.editingFragment){
+                            fragment = paletteControls.addPropertyByName(resize, "size")
+                            resize.expand()
+                        } else {
+                            if (!resize)
+                                return
+                            var codeHandler = resize.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
+                        }
+                        fragment.write('"' + Math.round(width) + "x" + Math.round(height) + '"')
+                        fragment.bindingModel(null).commit(Qt.size(width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -257,12 +257,22 @@ CodePalette{
                     applyButton: palette.style.applyButton
                     cancelButton: palette.style.cancelButton
 
-                    property Component rotateImageFactory : Img.Rotate{}
-
                     onApply: {
-                        var rotation = rotateImageFactory.createObject(paletteItem.transformImage)
-                        rotation.degrees = -angle
-                        paletteItem.transformImage.transformations.push(rotation)
+
+                        var rotate = addTransformation("Rotate")
+
+                        var fragment = null
+                        if (rotate.editingFragment){
+                            fragment = paletteControls.addPropertyByName(rotate, "degrees")
+                            rotate.expand()
+                        } else {
+                            if (!rotate)
+                                return
+                            var codeHandler = rotate.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(rotate, codeHandler, "degrees")
+                        }
+                        fragment.write(-angle)
+                        fragment.bindingModel(null).commit(-angle)
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }

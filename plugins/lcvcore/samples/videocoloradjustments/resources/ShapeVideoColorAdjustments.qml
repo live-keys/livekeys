@@ -7,35 +7,31 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
-
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
-                rootPosition, 
+                rootPosition,
                 {
                     "type": "Grid",
                     "children": [
                         {
-                            "type": "ImageFile",
+                            "type": "VideoDecoderView",
                             "properties": [
                                 {
-                                    "name": "source",
+                                    "name": "file",
                                     "palettes": ["PathPalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "TransformImage",
-                            "palettes": ["TransformPalette"],
+                            "type": "Levels",
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QtObject",
-                                        "palettes": [
-                                            "ConnectionPalette"
-                                        ]
+                                        "type": "Mat",
+                                        "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
@@ -48,16 +44,13 @@ WorkspaceControl{
                                     "isAnObject": true,
                                     "instructions": {
                                         "type": "Mat",
-                                        "palettes": [
-                                            "ConnectionPalette"
-                                        ]
+                                        "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         }
                     ]
                 }
-                
                 )
         })
     }

@@ -138,6 +138,51 @@ Module {
         }
     }
     Component {
+        name: "lv::Keyframe"
+        prototype: "lv::Segment"
+        exports: ["timeline/Keyframe 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "easing"; type: "QEasingCurve" }
+        Property { name: "value"; type: "double" }
+        Signal { name: "toChanged" }
+        Method { name: "resetCurve" }
+    }
+    Component {
+        name: "lv::KeyframeTrack"
+        defaultProperty: "segments"
+        prototype: "lv::Track"
+        exports: ["timeline/KeyframeTrack 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "value"; type: "double" }
+        Signal {
+            name: "valueChanged"
+            Parameter { name: "value"; type: "double" }
+        }
+        Method {
+            name: "__updateKeyframes"
+            Parameter { name: "from"; type: "qlonglong" }
+            Parameter { name: "to"; type: "qlonglong" }
+        }
+    }
+    Component {
+        name: "lv::KeyframeValue"
+        prototype: "QObject"
+        exports: ["timeline/KeyframeValue 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "timeline"; type: "lv::Timeline"; isPointer: true }
+        Property { name: "track"; type: "QString" }
+        Property { name: "value"; type: "double"; isReadonly: true }
+        Method { name: "__readValue" }
+        Method {
+            name: "__trackAdded"
+            Parameter { name: "track"; type: "Track"; isPointer: true }
+        }
+        Method {
+            name: "__trackAboutToBeRemoved"
+            Parameter { name: "track"; type: "Track"; isPointer: true }
+        }
+    }
+    Component {
         name: "lv::Segment"
         prototype: "QObject"
         exports: ["timeline/Segment 1.0"]
@@ -187,7 +232,7 @@ Module {
         Property { name: "isRunning"; type: "bool"; isReadonly: true }
         Property { name: "fps"; type: "double" }
         Property { name: "loop"; type: "bool" }
-        Property { name: "properties"; type: "QJSValue" }
+        Property { name: "properties"; type: "QObject"; isPointer: true }
         Property { name: "file"; type: "QString" }
         Property { name: "config"; type: "lv::TimelineConfig"; isReadonly: true; isPointer: true }
         Property { name: "trackList"; type: "lv::TrackListModel"; isReadonly: true; isPointer: true }
@@ -201,7 +246,14 @@ Module {
             name: "cursorPositionProcessed"
             Parameter { name: "position"; type: "qlonglong" }
         }
-        Method { name: "addTrack"; type: "lv::Track*" }
+        Signal {
+            name: "trackNameChanged"
+            Parameter { name: "track"; type: "Track"; isPointer: true }
+        }
+        Method {
+            name: "appendTrack"
+            Parameter { name: "track"; type: "lv::Track"; isPointer: true }
+        }
         Method {
             name: "removeTrack"
             Parameter { name: "index"; type: "int" }
@@ -227,6 +279,10 @@ Module {
         }
         Method { name: "load" }
         Method { name: "save" }
+        Method {
+            name: "saveAs"
+            Parameter { name: "path"; type: "QString" }
+        }
     }
     Component {
         name: "lv::TimelineConfig"
@@ -239,6 +295,11 @@ Module {
             Parameter { name: "path"; type: "QString" }
         }
         Method { name: "loaders"; type: "QJSValue" }
+        Method {
+            name: "trackMenu"
+            type: "QJSValue"
+            Parameter { name: "track"; type: "QObject"; isPointer: true }
+        }
     }
     Component {
         name: "lv::TimelineHeaderModel"
@@ -294,6 +355,14 @@ Module {
         exports: ["timeline/TrackListModel 1.0"]
         isCreatable: false
         exportMetaObjectRevisions: [0]
+        Signal {
+            name: "trackAdded"
+            Parameter { name: "track"; type: "Track"; isPointer: true }
+        }
+        Signal {
+            name: "trackAboutToBeRemoved"
+            Parameter { name: "track"; type: "Track"; isPointer: true }
+        }
         Method {
             name: "appendTrack"
             Parameter { name: "track"; type: "Track"; isPointer: true }

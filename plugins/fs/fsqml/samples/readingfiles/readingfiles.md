@@ -1,7 +1,7 @@
 # Reading Files
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeReadingFiles.qml}
 
 This sample searches for a portion of text in a file, then displays the line
 containing that portion of text.
