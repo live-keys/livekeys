@@ -539,7 +539,7 @@ QtObject{
         ef.incrementRefCount()
     }
 
-    function addPropertyByName(objectContainer, name, valueToAssign){
+    function addPropertyByName(objectContainer, name){
         for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
             if (objectContainer.propertiesOpened[i] === name){
                 return
@@ -547,10 +547,10 @@ QtObject{
         }
 
         var codeHandler = objectContainer.editor.documentHandler.codeHandler
-        return addPropertyByFragment(objectContainer.editingFragment, codeHandler, name, valueToAssign)
+        return addPropertyByFragment(objectContainer.editingFragment, codeHandler, name)
     }
 
-    function addPropertyByFragment(ef, codeHandler, name, valueToAssign){
+    function addPropertyByFragment(ef, codeHandler, name){
 
         var position = ef.valuePosition() +
                        ef.valueLength() - 1
@@ -567,7 +567,7 @@ QtObject{
         var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
 
         var ppos = codeHandler.addProperty(
-            addContainer.model.addPosition, addContainer.objectType, type, name, true, valueToAssign
+            addContainer.model.addPosition, addContainer.objectType, type, name, true
         )
 
         var propEf = codeHandler.openNestedConnection(

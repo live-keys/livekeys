@@ -3131,8 +3131,7 @@ int CodeQmlHandler::addProperty(
         const QString &object,
         const QString &type,
         const QString &name,
-        bool assignDefault,
-        QString valueToAssign)
+        bool assignDefault)
 {
     Q_D(CodeQmlHandler);
 
@@ -3184,7 +3183,7 @@ int CodeQmlHandler::addProperty(
 
     if ( tbStart == tbEnd ){ // inline object declaration
         insertionPosition = blockEnd;
-        insertionText = "; " + name + ": " + (assignDefault ? (valueToAssign != "" ? valueToAssign : QmlTypeInfo::typeDefaultValue(type)) : "");
+        insertionText = "; " + name + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "");
         cursorPosition = insertionPosition + name.size() + 4;
     } else { // multiline object declaration
         QString indent = getBlockIndent(tbStart);
@@ -3201,7 +3200,7 @@ int CodeQmlHandler::addProperty(
             tbIt = tbIt.previous();
         }
 
-        insertionText = indent + (found ? "" : "    ")+ name + ": " + (assignDefault ? (valueToAssign != "" ? valueToAssign : QmlTypeInfo::typeDefaultValue(type)) : "") + "\n";
+        insertionText = indent + (found ? "" : "    ")+ name + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "") + "\n";
         cursorPosition = insertionPosition + indent.size() + (found ? 0:4) + name.size() + 2;
     }
 
