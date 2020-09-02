@@ -198,6 +198,7 @@ Item{
 
         function expand(){
             compact = false
+            if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
             paletteControls.openDefaults(root)
 
@@ -268,7 +269,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                else addPropertyFragmentToContainer(ef, expandDefault)
+                addPropertyFragmentToContainer(ef, expandDefault)
                 container.sortChildren()
             }
         }

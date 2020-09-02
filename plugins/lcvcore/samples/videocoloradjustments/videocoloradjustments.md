@@ -1,7 +1,7 @@
 # Video Color Adjustments
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeVideoColorAdjustments.qml}
 
 This sample has a pipeline set up to process the colors of video frames. It uses the same
 components as the (Color Adjustments)[color_adjustments] sample, where an image instead

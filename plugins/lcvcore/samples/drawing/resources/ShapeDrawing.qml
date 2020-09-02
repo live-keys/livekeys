@@ -16,41 +16,45 @@ WorkspaceControl{
                     "type": "Grid",
                     "children": [
                         {
-                            "type": "ImageFile",
+                            "type": "BlankImage",
                             "properties": [
                                 {
-                                    "name": "source",
-                                    "palettes": ["PathPalette"]
+                                    "name": "size",
+                                    "palettes": ["SizePalette"]
+                                },
+                                {
+                                    "name": "fill",
+                                    "palettes": ["ColorPalette"]
+                                },
+                                {
+                                    "name": "channels",
+                                    "palettes": ["IntPalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "TransformImage",
-                            "palettes": ["TransformPalette"],
+                            "type": "Draw",
+                            "palettes": ["DrawPalette"],
+                            "properties": [
+                                {
+                                    "name": "input",
+                                    "isAnObject": true,
+                                    "instructions": {
+                                        "type": "Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "type": "ColorHistogramView",
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
                                         "type": "QtObject",
-                                        "palettes": [
-                                            "ConnectionPalette"
-                                        ]
-                                    }
-                                }
-                            ]
-                        },
-                        {
-                            "type": "ImageView",
-                            "properties": [
-                                {
-                                    "name": "image",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": [
-                                            "ConnectionPalette"
-                                        ]
+                                        "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]

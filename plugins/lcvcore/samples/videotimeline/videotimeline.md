@@ -1,7 +1,7 @@
 # Video Timeline
 
 {using:resources}
-{livekeysInit:open/resources/ShapeSwitch.qml}
+{livekeysInit:open/resources/ShapeVideoTimeline.qml}
 
 Timelines are components used in Livekeys to manage chronological events. They are highly
 customizable, and can be combined with other components or pipelines to automate different

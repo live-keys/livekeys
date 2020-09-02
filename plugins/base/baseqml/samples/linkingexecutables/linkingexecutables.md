@@ -1,7 +1,7 @@
 # Linking Executables
 
 {using:resources}
-{livekeysInit:open/resources/ShapeWinSwitch.qml}
+{livekeysInit:open/resources/ShapeLinkingExecutablesWin.qml}
 
 This example shows how Livekeys can run external applications and scripts.
 

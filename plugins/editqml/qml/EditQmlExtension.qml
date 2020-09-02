@@ -302,7 +302,6 @@ WorkspaceExtension{
             if (callback) callback()
             else {
                 var oc = root.shapePalette(editor, paletteRoot, 0)
-                console.log(oc)
                 oc.contentWidth = Qt.binding(function(){
                     return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                 })
@@ -340,10 +339,6 @@ WorkspaceExtension{
             var paletteImports = codeHandler.findPalettes(importsPosition, true)
             if (paletteImports) {
                 var pc = root.shapePalette(editor, paletteImports, 0)
-
-                console.log(pc.item.parent)
-                console.log(pc.item.parent.parent)
-
                 pc.item.width = Qt.binding(function(){
                     var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
                     return editorSize > 280 ? editorSize : 280
