@@ -26,70 +26,19 @@ WorkspaceControl{
                         },
                         {
                             "type": "Levels",
-                            "palettes": ["LevelsPalette"],
-                            "properties": [
-                                {
-                                    "name": "input",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                }
-                            ]
+                            "palettes": ["LevelsPalette"]
+                            
                         },
                         {
                             "type": "HueSaturationLightness",
-                            "palettes": ["HueSaturationLightnessPalette"],
-                            "properties": [
-                                {
-                                    "name": "input",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                },
-                                {
-                                    "name": "hue",
-                                    "palettes": ["IntPalette"]
-                                },
-                                {
-                                    "name": "saturation",
-                                    "palettes": ["IntPalette"]
-                                },
-                                {
-                                    "name": "lightness",
-                                    "palettes": ["IntPalette"]
-                                }
-                            ]
+                            "palettes": ["HueSaturationLightnessPalette"]
                         },
                         {
                             "type": "BrightnessAndContrast",
-                            "palettes": ["BrightnessAndContrastPalette"],
-                            "properties": [
-                                {
-                                    "name": "input",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                }
-                            ]
+                            "palettes": ["BrightnessAndContrastPalette"]
                         },
                         {
-                            "type": "ImageView",
-                            "properties": [
-                                {
-                                    "name": "image",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                }
-                            ]
+                            "type": "ImageView"
                         }
                     ]
                 }

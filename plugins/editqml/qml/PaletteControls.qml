@@ -349,7 +349,7 @@ QtObject{
         propertyContainer.editingFragment = ef
 
         if ( codeHandler.isForAnObject(ef)){
-            addChildObjectContainer(objectContainer, ef, true, propertyContainer, propPalette)
+            addChildObjectContainer(objectContainer, ef, !instructionsShaping, propertyContainer, propPalette)
         } else {
             propertyContainer.valueContainer = createPaletteGroup()
             ef.visualParent = propertyContainer.valueContainer

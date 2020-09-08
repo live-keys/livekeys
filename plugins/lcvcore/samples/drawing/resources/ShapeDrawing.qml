@@ -25,10 +25,6 @@ WorkspaceControl{
                                 {
                                     "name": "fill",
                                     "palettes": ["ColorPalette"]
-                                },
-                                {
-                                    "name": "channels",
-                                    "palettes": ["IntPalette"]
                                 }
                             ]
                         },

@@ -25,16 +25,15 @@ WorkspaceControl{
                         },
                         {
                             "type": "Levels",
-                            "properties": [
-                                {
-                                    "name": "input",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                }
-                            ]
+                            "palettes": ["LevelsPalette"]
+                        },
+                        {
+                            "type": "HueSaturationLightness",
+                            "palettes": ["HueSaturationLightnessPalette"]
+                        },
+                        {
+                            "type": "BrightnessAndContrast",
+                            "palettes": ["BrightnessAndContrastPalette"]
                         },
                         {
                             "type": "ImageView",
@@ -44,7 +43,7 @@ WorkspaceControl{
                                     "isAnObject": true,
                                     "instructions": {
                                         "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
+                                        "palettes": ["ImagePalette"]
                                     }
                                 }
                             ]

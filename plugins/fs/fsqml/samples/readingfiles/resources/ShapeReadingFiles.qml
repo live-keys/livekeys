@@ -19,7 +19,7 @@ WorkspaceControl{
                             "type": "FileReader",
                             "properties": [
                                 {
-                                    "name": "source",
+                                    "name": "file",
                                     "palettes": ["PathPalette"]
                                 }
                             ]
@@ -57,10 +57,6 @@ WorkspaceControl{
                         {
                             "type": "ConvertToInt",
                             "properties": [
-                                {
-                                    "name": "nanValue",
-                                    "palettes": ["IntPalette"]
-                                },
                                 {
                                     "name": "input",
                                     "palettes": ["ConnectionPalette"]

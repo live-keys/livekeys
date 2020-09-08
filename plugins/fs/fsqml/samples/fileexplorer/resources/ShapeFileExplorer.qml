@@ -13,12 +13,6 @@ WorkspaceControl{
                 rootPosition, 
                 {
                     "type": "Grid",
-                    "properties": [
-                        {
-                            "name": "columns",
-                            "palettes": ["IntPalette"]
-                        }
-                    ],
                     "children": [
                         {
                             "type": "VisualFileSelector",
@@ -56,14 +50,6 @@ WorkspaceControl{
                                         "type": "Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
@@ -124,14 +110,6 @@ WorkspaceControl{
                                         "type": "Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
@@ -145,14 +123,6 @@ WorkspaceControl{
                                         "type": "Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
@@ -166,14 +136,6 @@ WorkspaceControl{
                                         "type": "Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         }

@@ -18,19 +18,11 @@ WorkspaceControl{
                             "type": "VideoSurfaceView",
                             "properties": [
                                 {
-                                    "name": "width",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "height",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
                                     "name": "timeline",
                                     "isAnObject": true,
                                     "instructions": {
                                         "type": "Timeline",
-                                        "palettes": ["TimelinePalette"]
+                                        "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
@@ -39,20 +31,8 @@ WorkspaceControl{
                             "type": "Rectangle",
                             "properties": [
                                 {
-                                    "name": "width",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "height",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
                                     "name": "x",
                                     "palettes": ["ConnectionPalette"]
-                                },
-                                {
-                                    "name": "color",
-                                    "palettes": ["ColorPalette"]
                                 }
                                 
                             ]
@@ -68,11 +48,8 @@ WorkspaceControl{
                         },
                         {
                             "type": "Timeline",
+                            "palettes": ["TimelinePalette"],
                             "properties": [
-                                {
-                                    "name": "fps",
-                                    "palettes": ["DoublePalette"]
-                                },
                                 {
                                     "name": "file",
                                     "palettes": ["PathPalette"]
