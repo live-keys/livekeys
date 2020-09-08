@@ -13,10 +13,10 @@ WorkspaceControl{
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "BlankImage",
+                            "type": "qml/lcvcore#BlankImage",
                             "properties": [
                                 {
                                     "name": "size",
@@ -29,27 +29,27 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Draw",
+                            "type": "qml/lcvcore#Draw",
                             "palettes": ["DrawPalette"],
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "ColorHistogramView",
+                            "type": "qml/lcvcore#ColorHistogramView",
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QtObject",
+                                        "type": "u/QtObject",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }

@@ -12,11 +12,11 @@ WorkspaceControl{
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Item",
+                    "type": "qml/QtQuick#Item",
                     "palettes": ["NodePalette"],
                     "children": [
                         {
-                            "type": "FileReader",
+                            "type": "qml/fs#FileReader",
                             "properties": [
                                 {
                                     "name": "file",
@@ -25,7 +25,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TextSearch",
+                            "type": "qml/editor#TextSearch",
                             "properties": [
                                 {
                                     "name": "text",
@@ -38,13 +38,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "IndexSelector",
+                            "type": "qml/base#IndexSelector",
                             "properties": [
                                 {
                                     "name": "list",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QJSValue",
+                                        "type": "u/QJSValue",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
@@ -55,7 +55,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "ConvertToInt",
+                            "type": "qml/base#ConvertToInt",
                             "properties": [
                                 {
                                     "name": "input",
@@ -64,7 +64,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TextLineAtPosition",
+                            "type": "qml/base#TextLineAtPosition",
                             "properties": [
                                 {
                                     "name": "position",
@@ -77,7 +77,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TextClip",
+                            "type": "qml/base#TextClip",
                             "properties": [
                                 {
                                     "name": "text",
@@ -90,7 +90,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Text",
+                            "type": "qml/QtQuick#Text",
                             "properties": [
                                 {
                                     "name": "text",

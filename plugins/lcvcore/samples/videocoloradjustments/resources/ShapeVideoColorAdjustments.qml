@@ -12,10 +12,10 @@ WorkspaceControl{
                 editor, 
                 rootPosition,
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "VideoDecoderView",
+                            "type": "qml/lcvcore#VideoDecoderView",
                             "properties": [
                                 {
                                     "name": "file",
@@ -24,25 +24,25 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Levels",
+                            "type": "qml/lcvphoto#Levels",
                             "palettes": ["LevelsPalette"]
                         },
                         {
-                            "type": "HueSaturationLightness",
+                            "type": "qml/lcvphoto#HueSaturationLightness",
                             "palettes": ["HueSaturationLightnessPalette"]
                         },
                         {
-                            "type": "BrightnessAndContrast",
+                            "type": "qml/lcvphoto#BrightnessAndContrast",
                             "palettes": ["BrightnessAndContrastPalette"]
                         },
                         {
-                            "type": "ImageView",
+                            "type": "qml/lcvcore#ImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ImagePalette"]
                                     }
                                 }

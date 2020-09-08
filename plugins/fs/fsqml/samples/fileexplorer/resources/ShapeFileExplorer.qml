@@ -12,14 +12,14 @@ WorkspaceControl{
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "VisualFileSelector",
+                            "type": "qml/fs#VisualFileSelector",
                             "palettes": ["VisualFileSelectorPalette"]
                         },
                         {
-                            "type": "ExtensionPass",
+                            "type": "qml/fs#ExtensionPass",
                             "properties": [
                                 {
                                     "name": "file",
@@ -32,7 +32,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "ImageRead",
+                            "type": "qml/lcvcore#ImageRead",
                             "properties": [
                                 {
                                     "name": "file",
@@ -41,56 +41,39 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "Sepia",
+                            "type": "qml/lcvphoto#Sepia",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
                             ]
                         },
                         {
-                            "type": "Temperature",
+                            "type": "qml/lcvphoto#Temperature",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
-                                        "palettes": ["ConnectionPalette"]
-                                    }
-                                },
-                                {
-                                    "name": "value",
-                                    "palettes": ["DoublePalette"]
-                                }
-                            ]
-                        },
-                        {
-                            "type": "Temperature",
-                            "properties": [
-                                {
-                                    "name": "image",
-                                    "isAnObject": true,
-                                    "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
@@ -101,39 +84,56 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvphoto#Temperature",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                },
+                                {
+                                    "name": "value",
+                                    "palettes": ["DoublePalette"]
+                                }
+                            ]
+                        },
+                        {
+                            "type": "qml/lcvcore#NavigableImageView",
+                            "properties": [
+                                {
+                                    "name": "image",
+                                    "isAnObject": true,
+                                    "instructions": {
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }

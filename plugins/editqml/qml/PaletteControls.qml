@@ -447,7 +447,7 @@ QtObject{
 
     function shapeContainerWithInstructions(objectContainer, editor, instructions){
 
-        if (instructions['type'] !== objectContainer.editingFragment.typeName()) return
+        if (instructions['type'] !== objectContainer.editingFragment.type()) return
         var containers = openEmptyNestedObjects(objectContainer)
 
         var hasChildren = false

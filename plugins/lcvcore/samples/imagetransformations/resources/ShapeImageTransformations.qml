@@ -13,10 +13,10 @@ WorkspaceControl{
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "ImageFile",
+                            "type": "qml/lcvcore#ImageFile",
                             "properties": [
                                 {
                                     "name": "source",
@@ -25,14 +25,14 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TransformImage",
+                            "type": "qml/lcvimgproc#TransformImage",
                             "palettes": ["TransformPalette"],
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QtObject",
+                                        "type": "u/QtObject",
                                         "palettes": [
                                             "ConnectionPalette"
                                         ]
@@ -41,13 +41,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "ImageView",
+                            "type": "qml/lcvcore#ImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": [
                                             "ConnectionPalette"
                                         ]

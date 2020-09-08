@@ -13,10 +13,10 @@ WorkspaceControl{
                 rootPosition, 
                 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "ImageFile",
+                            "type": "qml/lcvcore#ImageFile",
                             "properties": [
                                 {
                                     "name": "source",
@@ -25,20 +25,20 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Levels",
+                            "type": "qml/lcvphoto#Levels",
                             "palettes": ["LevelsPalette"]
                             
                         },
                         {
-                            "type": "HueSaturationLightness",
+                            "type": "qml/lcvphoto#HueSaturationLightness",
                             "palettes": ["HueSaturationLightnessPalette"]
                         },
                         {
-                            "type": "BrightnessAndContrast",
+                            "type": "qml/lcvphoto#BrightnessAndContrast",
                             "palettes": ["BrightnessAndContrastPalette"]
                         },
                         {
-                            "type": "ImageView"
+                            "type": "qml/lcvcore#ImageView"
                         }
                     ]
                 }

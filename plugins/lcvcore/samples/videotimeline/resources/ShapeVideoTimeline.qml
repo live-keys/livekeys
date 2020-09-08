@@ -12,23 +12,23 @@ WorkspaceControl{
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Item",
+                    "type": "qml/QtQuick#Item",
                     "children": [
                         {
-                            "type": "VideoSurfaceView",
+                            "type": "qml/lcvcore#VideoSurfaceView",
                             "properties": [
                                 {
                                     "name": "timeline",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Timeline",
+                                        "type": "qml/timeline#Timeline",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "Rectangle",
+                            "type": "qml/QtQuick#Rectangle",
                             "properties": [
                                 {
                                     "name": "x",
@@ -38,7 +38,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "KeyframeValue",
+                            "type": "qml/timeline#KeyframeValue",
                             "properties": [
                                 {
                                     "name": "track",
@@ -47,7 +47,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Timeline",
+                            "type": "qml/timeline#Timeline",
                             "palettes": ["TimelinePalette"],
                             "properties": [
                                 {
