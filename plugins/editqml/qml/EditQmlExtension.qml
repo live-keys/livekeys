@@ -40,6 +40,10 @@ WorkspaceExtension{
         function shapeRootObject(editor, codeHandler, callback){
             root.shapeRootObject(editor, codeHandler, callback)
         }
+
+        function shapeImports(editor, codeHandler){
+            root.shapeImports(editor, codeHandler)
+        }
         property alias rootPosition: root.rootPosition
     }
     interceptLanguage : function(document, handler, ext){
@@ -132,6 +136,12 @@ WorkspaceExtension{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+                    objectContainer.contentWidth = Qt.binding(function(){
+                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                                ? objectContainer.containerContentWidth
+                                : objectContainer.editorContentWidth
+                    })
                 objectContainer.expand()
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
@@ -296,6 +306,21 @@ WorkspaceExtension{
         }
     }
 
+    function shapeImports(editor, codeHandler){
+        var imports = codeHandler.importsModel()
+        if (imports.rowCount() > 0){
+            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
+            var paletteImports = codeHandler.findPalettes(importsPosition, true)
+            if (paletteImports) {
+                var pc = root.shapePalette(editor, paletteImports, 0)
+                pc.item.width = Qt.binding(function(){
+                    var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
+                    return editorSize > 280 ? editorSize : 280
+                })
+            }
+        }
+    }
+
     function shapeRootObject(editor, codeHandler, callback){
         var paletteRoot = codeHandler.findPalettes(rootPosition, true)
         if (paletteRoot){
@@ -333,18 +358,7 @@ WorkspaceExtension{
             return
         }
 
-        var imports = codeHandler.importsModel()
-        if (imports.rowCount() > 0){
-            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-            var paletteImports = codeHandler.findPalettes(importsPosition, true)
-            if (paletteImports) {
-                var pc = root.shapePalette(editor, paletteImports, 0)
-                pc.item.width = Qt.binding(function(){
-                    var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
-                    return editorSize > 280 ? editorSize : 280
-                })
-            }
-        }
+        shapeImports(editor, codeHandler)
         rootPosition = codeHandler.findRootPosition()
 
         if ( rootPosition >= 0){
@@ -367,7 +381,10 @@ WorkspaceExtension{
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
                     if (!callback){
-                        root.shapePalette(editor, paletteRoot, 0)
+                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        oc.contentWidth = Qt.binding(function(){
+                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                        })
                         editor.editor.rootShaped = true
                     } else {
                         callback()

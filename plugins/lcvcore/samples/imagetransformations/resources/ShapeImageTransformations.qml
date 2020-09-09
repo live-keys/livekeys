@@ -7,16 +7,16 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
-
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "ImageFile",
+                            "type": "qml/lcvcore#ImageFile",
                             "properties": [
                                 {
                                     "name": "source",
@@ -25,14 +25,14 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TransformImage",
+                            "type": "qml/lcvimgproc#TransformImage",
                             "palettes": ["TransformPalette"],
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QtObject",
+                                        "type": "u/QtObject",
                                         "palettes": [
                                             "ConnectionPalette"
                                         ]
@@ -41,13 +41,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "ImageView",
+                            "type": "qml/lcvcore#ImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": [
                                             "ConnectionPalette"
                                         ]

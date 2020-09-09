@@ -349,7 +349,7 @@ QtObject{
         propertyContainer.editingFragment = ef
 
         if ( codeHandler.isForAnObject(ef)){
-            addChildObjectContainer(objectContainer, ef, true, propertyContainer, propPalette)
+            addChildObjectContainer(objectContainer, ef, !instructionsShaping, propertyContainer, propPalette)
         } else {
             propertyContainer.valueContainer = createPaletteGroup()
             ef.visualParent = propertyContainer.valueContainer
@@ -438,6 +438,12 @@ QtObject{
         if (!ef) return
 
         var objectContainer = createObjectContainerForFragment(editor, ef)
+        if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+            objectContainer.contentWidth = Qt.binding(function(){
+                return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                        ? objectContainer.containerContentWidth
+                        : objectContainer.editorContentWidth
+            })
 
         ef.incrementRefCount()
         codeHandler.frameEdit(objectContainer.parent, ef)
@@ -447,7 +453,7 @@ QtObject{
 
     function shapeContainerWithInstructions(objectContainer, editor, instructions){
 
-        if (instructions['type'] !== objectContainer.editingFragment.typeName()) return
+        if (instructions['type'] !== objectContainer.editingFragment.type()) return
         var containers = openEmptyNestedObjects(objectContainer)
 
         var hasChildren = false

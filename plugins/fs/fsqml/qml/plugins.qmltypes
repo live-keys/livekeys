@@ -158,7 +158,7 @@ Module {
         prototype: "QObject"
         exports: ["fs/FileReader 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "source"; type: "QString" }
+        Property { name: "file"; type: "QString" }
         Property { name: "monitor"; type: "bool" }
         Property { name: "data"; type: "QByteArray"; isReadonly: true }
         Signal {
@@ -166,8 +166,8 @@ Module {
             Parameter { name: "data"; type: "QByteArray" }
         }
         Signal {
-            name: "sourceChanged"
-            Parameter { name: "source"; type: "QString" }
+            name: "fileChanged"
+            Parameter { name: "file"; type: "QString" }
         }
         Method {
             name: "asString"

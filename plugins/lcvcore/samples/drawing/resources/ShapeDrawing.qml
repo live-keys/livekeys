@@ -7,16 +7,16 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
-
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "BlankImage",
+                            "type": "qml/lcvcore#BlankImage",
                             "properties": [
                                 {
                                     "name": "size",
@@ -25,35 +25,31 @@ WorkspaceControl{
                                 {
                                     "name": "fill",
                                     "palettes": ["ColorPalette"]
-                                },
-                                {
-                                    "name": "channels",
-                                    "palettes": ["IntPalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "Draw",
+                            "type": "qml/lcvcore#Draw",
                             "palettes": ["DrawPalette"],
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "ColorHistogramView",
+                            "type": "qml/lcvcore#ColorHistogramView",
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QtObject",
+                                        "type": "u/QtObject",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }

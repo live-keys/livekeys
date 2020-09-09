@@ -7,6 +7,7 @@
         "palettes/ConnectionPalette.qml": "qml/property",
         "palettes/TriggerPalette.qml": "qml/slot",
         "palettes/IntPalette.qml": "qml/int",
+        "palettes/IntInputPalette.qml": "qml/int",
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
         "palettes/DoublePalette.qml": "qml/double",
         "palettes/StringListPalette.qml": ["qml/QStringList", "qml/var"],

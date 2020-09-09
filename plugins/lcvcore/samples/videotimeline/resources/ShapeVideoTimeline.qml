@@ -7,58 +7,39 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Item",
+                    "type": "qml/QtQuick#Item",
                     "children": [
                         {
-                            "type": "VideoSurfaceView",
+                            "type": "qml/lcvcore#VideoSurfaceView",
                             "properties": [
-                                {
-                                    "name": "width",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "height",
-                                    "palettes": ["DoublePalette"]
-                                },
                                 {
                                     "name": "timeline",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Timeline",
-                                        "palettes": ["TimelinePalette"]
+                                        "type": "qml/timeline#Timeline",
+                                        "palettes": ["ConnectionPalette"]
                                     }
                                 }
                             ]
                         },
                         {
-                            "type": "Rectangle",
+                            "type": "qml/QtQuick#Rectangle",
                             "properties": [
-                                {
-                                    "name": "width",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "height",
-                                    "palettes": ["DoublePalette"]
-                                },
                                 {
                                     "name": "x",
                                     "palettes": ["ConnectionPalette"]
-                                },
-                                {
-                                    "name": "color",
-                                    "palettes": ["ColorPalette"]
                                 }
                                 
                             ]
                         },
                         {
-                            "type": "KeyframeValue",
+                            "type": "qml/timeline#KeyframeValue",
                             "properties": [
                                 {
                                     "name": "track",
@@ -67,12 +48,9 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Timeline",
+                            "type": "qml/timeline#Timeline",
+                            "palettes": ["TimelinePalette"],
                             "properties": [
-                                {
-                                    "name": "fps",
-                                    "palettes": ["DoublePalette"]
-                                },
                                 {
                                     "name": "file",
                                     "palettes": ["PathPalette"]

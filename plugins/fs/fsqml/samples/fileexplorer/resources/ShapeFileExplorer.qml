@@ -7,25 +7,20 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Grid",
-                    "properties": [
-                        {
-                            "name": "columns",
-                            "palettes": ["IntPalette"]
-                        }
-                    ],
+                    "type": "qml/QtQuick#Grid",
                     "children": [
                         {
-                            "type": "VisualFileSelector",
+                            "type": "qml/fs#VisualFileSelector",
                             "palettes": ["VisualFileSelectorPalette"]
                         },
                         {
-                            "type": "ExtensionPass",
+                            "type": "qml/fs#ExtensionPass",
                             "properties": [
                                 {
                                     "name": "file",
@@ -38,7 +33,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "ImageRead",
+                            "type": "qml/lcvcore#ImageRead",
                             "properties": [
                                 {
                                     "name": "file",
@@ -47,47 +42,39 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "Sepia",
+                            "type": "qml/lcvphoto#Sepia",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
                             ]
                         },
                         {
-                            "type": "Temperature",
+                            "type": "qml/lcvphoto#Temperature",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
@@ -98,13 +85,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Temperature",
+                            "type": "qml/lcvphoto#Temperature",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
@@ -115,65 +102,41 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "NavigableImageView",
+                            "type": "qml/lcvcore#NavigableImageView",
                             "properties": [
                                 {
                                     "name": "image",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Mat",
+                                        "type": "qml/lcvcore#Mat",
                                         "palettes": ["ConnectionPalette"]
                                     }
-                                },
-                                {
-                                    "name": "maxWidth",
-                                    "palettes": ["DoublePalette"]
-                                },
-                                {
-                                    "name": "maxHeight",
-                                    "palettes": ["DoublePalette"]
                                 }
                             ]
                         }

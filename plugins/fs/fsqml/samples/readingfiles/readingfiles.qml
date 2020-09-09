@@ -7,7 +7,7 @@ Item{
 
     FileReader{
         id: fileReader
-        source: project.path('readingfiles.txt')
+        file: project.path('readingfiles.txt')
     }
 
     TextSearch{

@@ -285,6 +285,11 @@ Rectangle{
                 anchors.rightMargin: 8
                 style: root.style.inputStyle
 
+                onActiveFocusLost: {
+                    if (!searchInput.inputActiveFocus && !idInput.inputActiveFocus)
+                        root.cancel()
+                }
+
                 width: (parent.width > implicitWidth ? parent.width : implicitWidth)
 
                 text: {
@@ -364,7 +369,8 @@ Rectangle{
             style: root.style.inputStyle
 
             onActiveFocusLost: {
-                root.cancel()
+                if (!searchInput.inputActiveFocus && !idInput.inputActiveFocus)
+                    root.cancel()
             }
 
             text: ""
@@ -572,6 +578,12 @@ Rectangle{
 
     Keys.onEscapePressed: {
         root.cancel()
+    }
+
+    MouseArea {
+        id: mouseArea
+        anchors.fill: parent
+        z: -1
     }
 
 }

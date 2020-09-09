@@ -7,25 +7,26 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
                 rootPosition, 
                 {
-                    "type": "Item",
+                    "type": "qml/QtQuick#Item",
                     "palettes": ["NodePalette"],
                     "children": [
                         {
-                            "type": "FileReader",
+                            "type": "qml/fs#FileReader",
                             "properties": [
                                 {
-                                    "name": "source",
+                                    "name": "file",
                                     "palettes": ["PathPalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "TextSearch",
+                            "type": "qml/editor#TextSearch",
                             "properties": [
                                 {
                                     "name": "text",
@@ -38,29 +39,25 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "IndexSelector",
+                            "type": "qml/base#IndexSelector",
                             "properties": [
                                 {
                                     "name": "list",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "QJSValue",
+                                        "type": "u/QJSValue",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
                                 {
                                     "name": "index",
-                                    "palettes": ["IntPalette"]
+                                    "palettes": ["IntInputPalette"]
                                 }
                             ]
                         },
                         {
-                            "type": "ConvertToInt",
+                            "type": "qml/base#ConvertToInt",
                             "properties": [
-                                {
-                                    "name": "nanValue",
-                                    "palettes": ["IntPalette"]
-                                },
                                 {
                                     "name": "input",
                                     "palettes": ["ConnectionPalette"]
@@ -68,7 +65,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TextLineAtPosition",
+                            "type": "qml/base#TextLineAtPosition",
                             "properties": [
                                 {
                                     "name": "position",
@@ -81,7 +78,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "TextClip",
+                            "type": "qml/base#TextClip",
                             "properties": [
                                 {
                                     "name": "text",
@@ -94,7 +91,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Text",
+                            "type": "qml/QtQuick#Text",
                             "properties": [
                                 {
                                     "name": "text",
