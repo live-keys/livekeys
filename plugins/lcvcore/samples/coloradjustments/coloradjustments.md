@@ -3,7 +3,6 @@
 {using:resources}
 {livekeysInit:open/resources/ShapeColorAdjustments.qml}
 
-
 This sample has a pipeline set up to process the colors of an image:
 
  * The image is first [loaded]({livekeys-hover:livekeys://open/resources/ColorAdjustmentsHighlight.qml#loading;livekeys://open/resources/ColorAdjustmentsRemoveHighlight.qml#loading}) from a file
