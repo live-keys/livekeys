@@ -136,6 +136,12 @@ WorkspaceExtension{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+                    objectContainer.contentWidth = Qt.binding(function(){
+                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                                ? objectContainer.containerContentWidth
+                                : objectContainer.editorContentWidth
+                    })
                 objectContainer.expand()
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
@@ -375,7 +381,10 @@ WorkspaceExtension{
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
                     if (!callback){
-                        root.shapePalette(editor, paletteRoot, 0)
+                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        oc.contentWidth = Qt.binding(function(){
+                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                        })
                         editor.editor.rootShaped = true
                     } else {
                         callback()

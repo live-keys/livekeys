@@ -438,6 +438,12 @@ QtObject{
         if (!ef) return
 
         var objectContainer = createObjectContainerForFragment(editor, ef)
+        if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+            objectContainer.contentWidth = Qt.binding(function(){
+                return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                        ? objectContainer.containerContentWidth
+                        : objectContainer.editorContentWidth
+            })
 
         ef.incrementRefCount()
         codeHandler.frameEdit(objectContainer.parent, ef)

@@ -51,7 +51,7 @@ WorkspaceControl{
                                 },
                                 {
                                     "name": "index",
-                                    "palettes": ["IntPalette"]
+                                    "palettes": ["IntInputPalette"]
                                 }
                             ]
                         },

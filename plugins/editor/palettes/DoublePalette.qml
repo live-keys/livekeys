@@ -62,7 +62,7 @@ CodePalette{
                     extension.write(palette.value)
             }
             stepSize: 1.0
-            maximumValue: 200
+            maximumValue: 25
 
             style: SliderStyle{
                 groove: Rectangle {
@@ -221,6 +221,23 @@ CodePalette{
     }
 
     onInit: {
+        if (value < intSlider.minimumValue || value > intSlider.maximumValue){
+            if (value > 0){
+                while (intSlider.maximumValue < value){
+                    intSlider.minimumValue = intSlider.maximumValue
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                }
+            } else if (value < 0){
+                intSlider.minimumValue = -25
+                intSlider.maximumValue = 0
+                while (intSlider.minimumValue > value){
+                    intSlider.maximumValue = intSlider.minimumValue
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                }
+            }
+        }
+
         intSlider.value = Math.floor(value)
         fractionalSlider.value = value - intSlider.value
     }
