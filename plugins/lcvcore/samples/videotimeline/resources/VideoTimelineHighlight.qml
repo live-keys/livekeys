@@ -54,7 +54,8 @@ WorkspaceControl{
                             if ( palette.name === 'TimelinePalette' ){
                                 var coords = palette.item.mapToItem(editor, 0, 0)
                                 var editorCoords = editorPane.mapGlobalPosition()
-
+                                editor.makePositionVisible(coords.y + editorCoords.y + yOffset - 80)                            
+                                coords = palette.item.mapToItem(editor, 0, 0)
                                 highlight = createHighlight(state)
 
                                 highlight.boxX = coords.x + editorCoords.x + xOffset
@@ -128,6 +129,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 32 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 25
                             highlight.boxY = coords.y + editorCoords.y + 32
@@ -158,6 +161,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 32 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 25
                             highlight.boxY = coords.y + editorCoords.y + 32
@@ -213,7 +218,8 @@ WorkspaceControl{
                                         if ( palette.name === 'PathPalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
-
+                                            editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            
+                                            coords = palette.item.mapToItem(editor, 0, 0)
                                             highlight = createHighlight(state)
 
                                             highlight.boxX = coords.x + editorCoords.x - 15

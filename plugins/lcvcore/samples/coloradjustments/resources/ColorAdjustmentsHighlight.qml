@@ -8,6 +8,13 @@ WorkspaceControl{
     property Component highlightFactory : Highlighter{}
 
     function createHighlight(state){
+        // clear multiple highlights
+        if ( state.currentHighlight ){
+        for ( var i = 0; i < state.currentHighlight.length; ++i ){
+            state.currentHighlight[i].destroy()
+        }
+            state.currentHighlight = null
+        }
         var ob = lk.layers.window.dialogs.overlayBox(highlightFactory.createObject())
         ob.centerBox = false
         ob.backgroundVisible = false
@@ -43,6 +50,8 @@ WorkspaceControl{
 
                         var coords = objectContainer.mapToItem(editor, 0, 0)
                         var editorCoords = editorPane.mapGlobalPosition()
+                        editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                        coords = objectContainer.mapToItem(editor, 0, 0)
                         highlight = createHighlight(state)
                         highlight.boxX = coords.x + editorCoords.x + 20 + xOffset
                         highlight.boxY = coords.y + editorCoords.y + 33
