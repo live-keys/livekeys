@@ -141,37 +141,19 @@ WorkspaceControl{
                 }
             }
         } else if ( fragment === 'videosurfaceview'){
-            var editorPane = lk.layers.workspace.panes.focusPane('editor')
-            if ( !editorPane )
+            var viewerPane = lk.layers.workspace.panes.focusPane('viewer')
+            if ( !viewerPane )
                 return
 
-            var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var editingFragments = codeHandler.editingFragments()
-
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
-                if ( itemEdit.type() === 'qml/QtQuick#Item' ){
-                    var childFragments = itemEdit.getChildFragments()
-                    for ( var j = 0; j < childFragments.length; ++j ){
-                        var kfv = childFragments[j]
-                        if ( kfv.type() === 'qml/lcvcore#VideoSurfaceView' ){
-                            var objectContainer = kfv.visualParent.parent.parent.parent
-
-                            var coords = objectContainer.mapToItem(editor, 0, 0)
-                            var editorCoords = editorPane.mapGlobalPosition()
-                            editor.makePositionVisible(coords.y + editorCoords.y + 32 - 80)                            
-                            coords = objectContainer.mapToItem(editor, 0, 0)
-                            highlight = createHighlight(state)
-                            highlight.boxX = coords.x + editorCoords.x + 25
-                            highlight.boxY = coords.y + editorCoords.y + 32
-                            highlight.box.width = 150
-                            highlight.box.height = 35
-                        }
-                    }
-                }
-            }
+            var coords = viewerPane.mapGlobalPosition()
+            highlight = createHighlight(state)
+            highlight.boxX = coords.x
+            highlight.boxY = coords.y 
+            highlight.box.width = 600
+            highlight.box.height = 400
+            highlight.box.border.width = 5
+            highlight.box.border.color = highlight.box.color
+            highlight.box.color = 'transparent'
         } else if ( fragment === 'blue-rectangle' ){
             var viewerPane = lk.layers.workspace.panes.focusPane('viewer')
             if ( !viewerPane )
