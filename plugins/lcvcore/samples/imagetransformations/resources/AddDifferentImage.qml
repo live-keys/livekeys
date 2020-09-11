@@ -33,7 +33,7 @@ WorkspaceControl{
                                 for ( var pi = 0; pi < palettes.length; ++pi ){
                                     var palette = palettes[pi]
                                     if ( palette.name === 'PathPalette' ){
-                                        palette.value = project.path('../../../../samples/_images/clock-train-small.jpg')
+                                        palette.value = project.path('../../../../samples/_images/buildings_0246.jpg')
                                     }
                                 }
                             }
