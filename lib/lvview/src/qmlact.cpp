@@ -165,4 +165,22 @@ void QmlAct::setRun(QJSValue run){
     emit runChanged();
 }
 
+void QmlAct::setReturns(QString returns){
+    if (m_returns == returns)
+        return;
+
+    if ( m_isComponentComplete ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set run method after component is complete.", Exception::toCode("~ActFnConfig"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
+    if ( returns == "qml/object" ){
+        m_result = QJSValue(QJSValue::NullValue);
+    }
+
+    m_returns = returns;
+    emit returnsChanged(m_returns);
+}
+
 }// namespace

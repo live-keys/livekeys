@@ -8,6 +8,7 @@ Act{
     property var channels: undefined
     property var lightness: undefined
 
+    returns: "qml/object"
     run: [Photo.Adjustments, 'levels']
     args: ["$input", "$lightness", "$channels"]
 }
