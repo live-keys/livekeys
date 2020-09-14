@@ -60,6 +60,7 @@ ProjectQmlScope::ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine 
     connect(this, &ProjectQmlScope::__processQueue, m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
     connect(m_scanTimer, &QTimer::timeout,          m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
     connect(m_scanMonitor, &QmlLanguageScanMonitor::libraryUpdates, this, &ProjectQmlScope::__libraryUpdates);
+    connect(m_scanMonitor, &QmlLanguageScanMonitor::scannerQueueCleared, this, &ProjectQmlScope::libraryScanQueueCleared);
 
     m_scanTimer->start();
     m_monitorThread->start();
@@ -248,7 +249,6 @@ void ProjectQmlScope::resetLibrariesInPath(const QString &path){
     for( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
         if ( it.key().startsWith(path) ){
             it.value()->setStatus(QmlLibraryInfo::NotScanned);
-            //HERE
         }
     }
     m_libraryMutex.unlock();
@@ -256,7 +256,7 @@ void ProjectQmlScope::resetLibrariesInPath(const QString &path){
 
 void ProjectQmlScope::resetLibrary(const QString &path){
     m_libraryMutex.lock();
-    if ( m_libraries.contains(path) ){ //HERE
+    if ( m_libraries.contains(path) ){
         m_libraries[path]->setStatus(QmlLibraryInfo::NotScanned);
     }
     m_libraryMutex.unlock();

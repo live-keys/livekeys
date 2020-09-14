@@ -34,7 +34,7 @@ CodePalette{
         width: 280
         height: 55
 
-        property BrightnessAndContrast bandc: null
+        property QtObject bandc: null
 
         Slider{
             id: brightnessSlider

@@ -22,6 +22,22 @@
 
 namespace lv{
 
+/**
+  \brief lv::QmlLanguageScanner::QmlLanguageScanner
+
+  Language scanner stores everything to be scanned in a queue. You can query the size
+  of the queue via the function lv::QmlLanugageScanner::plannedQueueSize
+
+  To consume the planned queue, you will need to run lv::QmlLanguageScanner::processQueue function.
+  The function will scan each library in the queue, and scan all of its dependencies as well.
+
+  Capturing the scanned libraries is achieved via callbacks. There are 2 main callbacks to use:
+
+   * lv::QmlLanguageScanner::onLibraryUpdate : sent whenever a library has been updated
+   * lv::QmlLanguageScanner::onQueueFinished: sent whenever the assigned queue has finished
+
+ */
+
 QmlLanguageScanner::QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList &importPaths, QObject *parent)
     : QObject(parent)
     , m_defaultImportPaths(importPaths)
@@ -53,16 +69,15 @@ QmlLanguageScanner::~QmlLanguageScanner(){
   */
 void QmlLanguageScanner::processQueue(){
     m_isProcessing = true;
-    emit isProcessingChanged(true);
 
     QLinkedList<QmlLibraryInfo::Ptr> queue;
 
-    m_queueMutex.lock();
-    for ( auto it = m_queue.begin(); it != m_queue.end(); ++it ){
+    m_plannedQueueMutex.lock();
+    for ( auto it = m_plannedQueue.begin(); it != m_plannedQueue.end(); ++it ){
         queue.append(*it);
     }
-    m_queue.clear();
-    m_queueMutex.unlock();
+    m_plannedQueue.clear();
+    m_plannedQueueMutex.unlock();
 
     while ( !queue.isEmpty() && !m_stopRequest ){
         QmlLibraryInfo::Ptr lib = queue.front();
@@ -135,18 +150,17 @@ void QmlLanguageScanner::processQueue(){
         } else if ( lib->status() == QmlLibraryInfo::NoPrototypeLink ){
             updateLibraryUnknownTypes(lib);
             lib->setStatus(QmlLibraryInfo::Done);
-            queue.append(lib);
             if ( m_updateListener ){
                 m_updateListener(lib, queue.size());
             }
         }
     }
 
-    if ( m_queueFinished )
+    if ( m_queueFinished ){
         m_queueFinished();
+    }
 
     m_isProcessing = false;
-    emit isProcessingChanged(false);
 }
 
 void QmlLanguageScanner::scanDocument(const QString &path, const QString &content, CodeQmlHandler *handler){
@@ -195,17 +209,25 @@ void QmlLanguageScanner::scanDocument(const QString &path, const QString &conten
 }
 
 void QmlLanguageScanner::queueLibrary(const QmlLibraryInfo::Ptr &lib){
-    m_queueMutex.lock();
+    m_plannedQueueMutex.lock();
 
     QmlLibraryInfo::Ptr copy = QmlLibraryInfo::create(lib->uri());
     copy->setPath(lib->path());
-    m_queue.append(copy);
+    m_plannedQueue.append(copy);
 
-    m_queueMutex.unlock();
+    m_plannedQueueMutex.unlock();
 }
 
 void QmlLanguageScanner::onMessage(std::function<void(int, const QString &)> listener){
     m_messageListener = listener;
+}
+
+int QmlLanguageScanner::plannedQueueSize(){
+    int result = 0;
+    m_plannedQueueMutex.lock();
+    result = m_plannedQueue.size();
+    m_plannedQueueMutex.unlock();
+    return result;
 }
 
 /// In qml some libraries do not have a plugins.qmlinfo file since their

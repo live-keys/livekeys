@@ -9,8 +9,8 @@ WorkspaceControl{
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
-                editor, 
-                rootPosition, 
+                editor,
+                rootPosition,
                 {
                     "type": "Item",
                     "children": [

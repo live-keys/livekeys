@@ -9,6 +9,7 @@ Act{
     property int saturation: 100
     property int lightness: 100
 
+    returns: "qml/object"
     run: [Photo.Adjustments, 'hueSaturationLightness']
     args: ["$input", "$hue", "$saturation", "$lightness"]
 }
