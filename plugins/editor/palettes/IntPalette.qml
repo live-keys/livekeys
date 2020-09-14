@@ -72,6 +72,8 @@ CodePalette{
                     color: '#9b9da0'
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: intSlider.activeFocus
         }
 
         Workspace.NumberLabel{
@@ -83,7 +85,7 @@ CodePalette{
 
             width: 50
             height: 25
-
+            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
             up: function(){
@@ -131,6 +133,7 @@ CodePalette{
 
             width: 50
             height: 25
+            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus
 
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
