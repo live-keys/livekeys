@@ -104,6 +104,7 @@ public slots:
 
 signals:
     void __processQueue();
+    void libraryScanQueueCleared();
 
 private:
     ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);

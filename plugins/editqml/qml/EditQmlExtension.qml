@@ -321,20 +321,31 @@ WorkspaceExtension{
         }
     }
 
-    function shapeRootObject(editor, codeHandler, callback){
-        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-        if (paletteRoot){
-            if (callback) callback()
-            else {
-                var oc = root.shapePalette(editor, paletteRoot, 0)
-                oc.contentWidth = Qt.binding(function(){
-                    return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
-                })
 
-                editor.editor.rootShaped = true
+
+
+    function shapeRootObject(editor, codeHandler, callback){
+
+        if ( codeHandler.areImportsScanned() ){
+            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+            if (paletteRoot){
+                if ( paletteRoot ){
+                    if (callback)
+                        callback()
+                    else {
+                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        oc.contentWidth = Qt.binding(function(){
+                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                        })
+
+                        editor.editor.rootShaped = true
+                    }
+                }
+            } else {
+                throw linkError(new Error("Failed to shape root object."), this)
             }
-        }
-        else {
+
+        } else {
             editor.startLoadingMode()
             var shapeTrigger = shapeAllTrigger.createObject()
             shapeTrigger.callback = callback
@@ -375,7 +386,7 @@ WorkspaceExtension{
             property var editor: null
             property var callback: null
             ignoreUnknownSignals: true
-            onStoppedProcessing: {
+            onImportsScanned: {
                 if (rootPosition === -1) return
                 var codeHandler = editor.documentHandler.codeHandler
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)

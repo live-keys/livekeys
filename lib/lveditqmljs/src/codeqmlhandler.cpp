@@ -81,7 +81,6 @@ public:
         m_documentInfo = DocumentQmlInfo::createAndParse("", "");
     }
 
-    ProjectQmlExtension*  projectHandler;
 
     QmlScopeSnap snapScope() const{
         return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), m_documentInfo);
@@ -134,6 +133,8 @@ public:
     const DocumentQmlInfo::Ptr documentInfo() const{
         return m_documentInfo;
     }
+
+    ProjectQmlExtension*  projectHandler;
 
 private:
     DocumentQmlInfo::Ptr         m_documentInfo;
@@ -307,9 +308,8 @@ CodeQmlHandler::CodeQmlHandler(
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
-
-    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::scannerProcessingChanged,
-            this, &CodeQmlHandler::processingChanged);
+    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::libraryScanQueueCleared,
+            this, &CodeQmlHandler::__whenLibraryScanQueueCleared);
 
     setDocument(document);
 }
@@ -2312,6 +2312,7 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     cursor.setPosition(position);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+
     bool inImports = isInImports(position);
     if ( properties.isEmpty() && !inImports )
         return nullptr;
@@ -3580,10 +3581,20 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
     m_newScope = true;
 }
 
-void CodeQmlHandler::processingChanged(bool value)
-{
-    if (!value)
-        emit stoppedProcessing();
+void CodeQmlHandler::__whenLibraryScanQueueCleared(){
+    emit importsScanned();
+}
+
+bool CodeQmlHandler::areImportsScanned(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
+    QmlScopeSnap scope = d->snapScope();
+    return scope.areDocumentLibrariesReady();
+}
+
+void CodeQmlHandler::syncParse(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
 }
 
 /**
@@ -3605,7 +3616,6 @@ void CodeQmlHandler::suggestionsForImport(
         const QmlCompletionContext& context,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-
     foreach (const QString& importPath, m_engine->importPathList()){
         suggestionsForRecursiveImport(0, importPath, context.expressionPath(), suggestions);
     }
