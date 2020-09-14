@@ -50,6 +50,11 @@ Rectangle{
         }
     }
 
+    function makePositionVisible(y){
+        if (y < 0 || y > root.height - 30)
+            flick.flickableItem.contentY = Math.min(flick.flickableItem.contentY + y, Math.max(0,flick.flickableItem.contentHeight - root.height))
+    }
+
     function saveAs(){
         lk.layers.window.dialogs.saveFile(
             { filters: [ "Qml files (*.qml)", "All files (*)" ] },

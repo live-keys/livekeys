@@ -51,6 +51,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 20
                             highlight.boxY = coords.y + editorCoords.y + 33
@@ -82,6 +84,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 20
                             highlight.boxY = coords.y + editorCoords.y + 33
@@ -113,6 +117,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 115 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 7
                             highlight.boxY = coords.y + editorCoords.y + 115
@@ -144,6 +150,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 140 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 7
                             highlight.boxY = coords.y + editorCoords.y + 140
@@ -175,6 +183,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 25
                             highlight.boxY = coords.y + editorCoords.y + 33

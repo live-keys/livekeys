@@ -9,6 +9,7 @@ Grid{
 
     VisualFileSelector{
         id: visualFileSelector
+        workingDirectory: project.dir() + '../../../../../samples/_images/'
     }
     
     ExtensionPass{

@@ -50,6 +50,8 @@ WorkspaceControl{
 
                         var coords = objectContainer.mapToItem(editor, 0, 0)
                         var editorCoords = editorPane.mapGlobalPosition()
+                        editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                        coords = objectContainer.mapToItem(editor, 0, 0)
                         highlight = createHighlight(state)
                         highlight.boxX = coords.x + editorCoords.x + 20 + xOffset
                         highlight.boxY = coords.y + editorCoords.y + 33
@@ -88,6 +90,8 @@ WorkspaceControl{
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
+                            editor.makePositionVisible(coords.y + editorCoords.y + 65 - 80)                            
+                            coords = objectContainer.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 10
                             highlight.boxY = coords.y + editorCoords.y + 65
@@ -132,7 +136,8 @@ WorkspaceControl{
                                         if ( palette.name === 'ImagePalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
-
+                                            editor.makePositionVisible(coords.y + editorCoords.y + 27 - 80)                            
+                                            coords = palette.item.mapToItem(editor, 0, 0)
                                             highlight = createHighlight(state)
                                             highlight.boxX = coords.x + editorCoords.x + 27
                                             highlight.boxY = coords.y + editorCoords.y + 27

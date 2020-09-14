@@ -51,6 +51,8 @@ WorkspaceControl{
 
                         var coords = objectContainer.mapToItem(editor, 0, 0)
                         var editorCoords = editorPane.mapGlobalPosition()
+                        editor.makePositionVisible(coords.y + editorCoords.y + 33 - 80)                            
+                        coords = objectContainer.mapToItem(editor, 0, 0)
                         highlight = createHighlight(state)
                         highlight.boxX = coords.x + editorCoords.x + 30 + xOffset
                         highlight.boxY = coords.y + editorCoords.y + 33
@@ -85,7 +87,8 @@ WorkspaceControl{
                         if ( palette.name === 'NodePalette' ){
                             var coords = palette.item.mapToItem(editor, 0, 0)
                             var editorCoords = editorPane.mapGlobalPosition()
-
+                            editor.makePositionVisible(coords.y + editorCoords.y + 30 - 80)                            
+                            coords = palette.item.mapToItem(editor, 0, 0)
                             highlight = createHighlight(state)
 
                             highlight.boxX = coords.x + editorCoords.x
@@ -132,7 +135,8 @@ WorkspaceControl{
                                         if ( palette.name === 'TextPalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
-
+                                            editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            
+                                            coords = palette.item.mapToItem(editor, 0, 0)
                                             highlight = createHighlight(state)
 
                                             highlight.boxX = coords.x + editorCoords.x - 10
@@ -177,7 +181,8 @@ WorkspaceControl{
                                         if ( palette.name === 'ConnectionPalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
-
+                                            editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            
+                                            coords = palette.item.mapToItem(editor, 0, 0)
                                             highlight = createHighlight(state)
 
                                             highlight.boxX = coords.x + editorCoords.x - 10
@@ -229,7 +234,8 @@ WorkspaceControl{
                                         if ( palette.name === 'ConnectionPalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
-
+                                            editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            
+                                            coords = palette.item.mapToItem(editor, 0, 0)
                                             highlight = createHighlight(state)
 
                                             highlight.boxX = coords.x + editorCoords.x - 10
