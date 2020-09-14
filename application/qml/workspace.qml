@@ -45,7 +45,7 @@ Item{
         property Item activePane : null
         property Item activeItem : null
         property Item container : mainSplit
-        property Menu contextMenu: contextMenu
+        property ContextMenu contextMenu: contextMenu
 
         property var openWindows : []
 
@@ -703,30 +703,8 @@ Item{
         }
     }
 
-    Menu{
+    ContextMenu {
         id: contextMenu
-        style: ContextMenuStyle{}
-
-        function clearItems(){
-            while ( items.length ){
-                removeItem(contextMenu.items[0])
-            }
-        }
-
-        function show(model){
-            for ( var i = 0; i < model.length; ++i ){
-                var menuitem = insertItem(i, model[i].name)
-                menuitem.enabled = model[i].enabled
-                menuitem.triggered.connect(model[i].action)
-                menuitem.shortcut = model[i].shortcut ? model[i].shortcut : ''
-            }
-            contextMenu.popup()
-        }
-
-        onAboutToHide: {
-            clearItems()
-        }
-
     }
 
 }
