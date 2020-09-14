@@ -30,7 +30,7 @@ CodePalette{
     item: LevelsSliders{
         id: levelsSliders
 
-        property Levels levels: null
+        property QtObject levels: null
         onLevelsChanged: {
             if ( levels ){
                 input = levels.input
