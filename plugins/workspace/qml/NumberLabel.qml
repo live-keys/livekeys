@@ -63,8 +63,11 @@ LabelOnRectangle{
 
     MouseArea {
         anchors.fill: parent
-        onWheel: {
-            if (!wheelEnabled) return
+        onWheel: {            
+            if (!wheelEnabled) {
+                wheel.accepted = false
+                return
+            }
             if (wheel.angleDelta.y > 0 && up) up()
             if (wheel.angleDelta.y < 0 && down) down()
         }
