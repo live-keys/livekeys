@@ -16,6 +16,7 @@ HEADERS += \
     $$PWD/qthreshold.h \
     $$PWD/lcvimgproc_plugin.h \
     $$PWD/qgetperspectivetransform.h \
+    $$PWD/qtransformimage.h \
     $$PWD/qwarpperspective.h \
     $$PWD/qcachedwarpperspective.h \
     $$PWD/qdraw.h \
@@ -40,6 +41,7 @@ SOURCES += \
     $$PWD/qstructuringelement.cpp \
     $$PWD/qthreshold.cpp \
     $$PWD/qgetperspectivetransform.cpp \
+    $$PWD/qtransformimage.cpp \
     $$PWD/qwarpperspective.cpp \
     $$PWD/qcachedwarpperspective.cpp \
     $$PWD/qdraw.cpp \

@@ -5,7 +5,6 @@ depends QtQuick 2.3
 depends lcvcore 1.0
 
 PanAndZoom       1.0 PanAndZoom.qml
-TransformImage   1.0 TransformImage.qml
 Resize           1.0 Resize.qml
 ResizeWithAspect 1.0 ResizeWithAspect.qml
 Scale            1.0 Scale.qml

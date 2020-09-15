@@ -387,7 +387,10 @@ WorkspaceExtension{
             property var callback: null
             ignoreUnknownSignals: true
             onImportsScanned: {
-                if (rootPosition === -1) return
+                if (rootPosition === -1){
+                    editor.stopLoadingMode()
+                    return
+                }
                 var codeHandler = editor.documentHandler.codeHandler
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
@@ -400,11 +403,14 @@ WorkspaceExtension{
                     } else {
                         callback()
                     }
-                    editor.stopLoadingMode()
                     rootPosition = -1
 
                     shapeTrigger.destroy()
+                } else {
+                    throw linkError(new Error("Failed to shape root object. Unknown type."), this)
                 }
+
+                editor.stopLoadingMode()
             }
         }
     }
