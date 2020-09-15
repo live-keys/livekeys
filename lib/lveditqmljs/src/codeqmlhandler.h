@@ -109,6 +109,7 @@ public:
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
+    void parseDocument(QJSValue callback);
     void syncParse();
 
     QList<int> languageFeatures() const;
@@ -277,6 +278,7 @@ private:
     QmlCompletionContextFinder* m_completionContextFinder;
 
     ProjectDocument*       m_document;
+    QList<QJSValue>        m_callbacks;
 
     bool                   m_newScope;
     QTimer                 m_scopeTimer;

@@ -77,6 +77,8 @@ public:
         : m_documentParseSync(false)
         , m_documentBackgroundParseSync(false)
         , m_documentValueObjectsSync(false)
+        , m_documentUpdatedFromBackground(false)
+        , m_documentIsScanning(false)
     {
         m_documentInfo = DocumentQmlInfo::createAndParse("", "");
     }
@@ -107,32 +109,33 @@ public:
     }
 
     void assignDocumentFromBackgroundSync(const DocumentQmlInfo::Ptr& document){
+        m_documentIsScanning = false;
         if ( !m_documentParseSync ){
             m_documentInfo = document;
             if ( m_documentBackgroundParseSync ){
                 m_documentParseSync        = true;
                 m_documentValueObjectsSync = false;
+                m_documentUpdatedFromBackground = true;
             }
         }
     }
 
     void documentQueuedForScanning(){
+        m_documentIsScanning          = true;
         m_documentBackgroundParseSync = true;
     }
 
     void documentChanged(){
-        m_documentParseSync           = false;
-        m_documentBackgroundParseSync = false;
-        m_documentValueObjectsSync    = false;
+        m_documentParseSync             = false;
+        m_documentBackgroundParseSync   = false;
+        m_documentValueObjectsSync      = false;
+        m_documentUpdatedFromBackground = false;
     }
 
-    const DocumentQmlValueObjects::Ptr& documentObjects() const{
-        return m_documentObjects;
-    }
-
-    const DocumentQmlInfo::Ptr documentInfo() const{
-        return m_documentInfo;
-    }
+    const DocumentQmlValueObjects::Ptr& documentObjects() const{ return m_documentObjects; }
+    const DocumentQmlInfo::Ptr documentInfo() const{ return m_documentInfo;}
+    bool wasDocumentUpdatedFromBackground() const{ return m_documentUpdatedFromBackground; }
+    bool isDocumentBeingScanned() const{ return m_documentIsScanning; }
 
     ProjectQmlExtension*  projectHandler;
 
@@ -143,6 +146,8 @@ private:
     bool                  m_documentParseSync;
     bool                  m_documentBackgroundParseSync;
     bool                  m_documentValueObjectsSync;
+    bool                  m_documentIsScanning;
+    bool                  m_documentUpdatedFromBackground;
 };
 
 namespace qmlhandler_helpers{
@@ -605,7 +610,7 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
  */
 void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
+    if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
@@ -3579,6 +3584,15 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
 
     d->assignDocumentFromBackgroundSync(documentInfo);
     m_newScope = true;
+
+    QJSValueList args;
+    args << d->wasDocumentUpdatedFromBackground();
+
+    for ( QJSValue cb : m_callbacks ){
+        cb.call(args);
+    }
+
+    m_callbacks.clear();
 }
 
 void CodeQmlHandler::__whenLibraryScanQueueCleared(){
@@ -3590,6 +3604,19 @@ bool CodeQmlHandler::areImportsScanned(){
     d->syncParse(m_document);
     QmlScopeSnap scope = d->snapScope();
     return scope.areDocumentLibrariesReady();
+}
+
+void CodeQmlHandler::parseDocument(QJSValue callback){
+    Q_D(CodeQmlHandler);
+    if ( d->wasDocumentUpdatedFromBackground() ){
+        callback.call(QJSValueList() << true);
+    } else {
+        m_callbacks.append(callback);
+        if ( d->isDocumentBeingScanned() ){
+            d->documentQueuedForScanning();
+            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+        }
+    }
 }
 
 void CodeQmlHandler::syncParse(){
