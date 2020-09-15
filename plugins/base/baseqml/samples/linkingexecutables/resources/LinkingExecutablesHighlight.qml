@@ -201,8 +201,8 @@ WorkspaceControl{
 
                                     highlight.boxX = coords.x + editorCoords.x - 10
                                     highlight.boxY = coords.y + editorCoords.y + 25
-                                    highlight.box.width = 240
-                                    highlight.box.height = 140
+                                    highlight.box.width = palette.item.width + 20
+                                    highlight.box.height = palette.item.height + 10
                                     highlight.box.border.width = 5
                                     highlight.box.border.color = highlight.box.color
                                     highlight.box.color = 'transparent'
