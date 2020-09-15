@@ -6,7 +6,6 @@
         "palettes/DrawPalette.qml" : "qml/lcvcore#Draw",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
         "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",
-        "palettes/ImageFilePalette.qml" : "qml/lcvcore#ImageFile",
         "palettes/VideoDecoderViewPalette.json" : "qml/lcvcore#VideoDecoderView",
         "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView"
     }
