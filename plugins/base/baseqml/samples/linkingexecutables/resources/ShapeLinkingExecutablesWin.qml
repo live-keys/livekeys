@@ -1,10 +1,19 @@
 import QtQuick 2.9
 import editor 1.0
 import editqml 1.0
+import base 1.0 as B
 
 WorkspaceControl{
     run: function(workspace){
-        var editor = lk.layers.workspace.panes.focusPane('editor')
+        var editor = lk.layers.workspace.panes.focusPane('editor')    
+        
+        if ( B.Script.environment.os.platform === 'win32' ){
+            var winPath = project.path('linkingexecutables_win.qml')
+            var document = project.openTextFile(winPath)
+            editor.document = document
+            project.setActive(winPath)
+        }
+         
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
