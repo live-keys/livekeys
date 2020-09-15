@@ -76,6 +76,8 @@ CodePalette{
                     color: '#9b9da0'
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: intSlider.activeFocus
         }
 
         Slider{
@@ -115,6 +117,8 @@ CodePalette{
                     rotation: Triangle.Top
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: fractionalSlider.activeFocus
         }
 
         Workspace.NumberLabel{
@@ -161,6 +165,8 @@ CodePalette{
                     intSlider.value = intSlider.minimumValue
             }
             text: intSlider.minimumValue
+            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
+
         }
 
 
@@ -210,6 +216,7 @@ CodePalette{
             }
 
             text: intSlider.maximumValue
+            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
         }
 
     }

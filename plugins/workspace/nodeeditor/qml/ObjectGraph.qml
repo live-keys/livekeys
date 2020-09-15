@@ -358,7 +358,7 @@ Rectangle{
     Qan.GraphView {
         id: graphView
         anchors.fill: parent
-        navigable   : true
+        navigable   : root.activeFocus
         gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
@@ -389,6 +389,15 @@ Rectangle{
         }
     }  // Qan.GraphView
     
+    MouseArea {
+        id: ma
+        enabled: !root.activeFocus
+        anchors.fill: parent
+        onClicked: {
+            root.activateFocus()
+        }
+    }
+
     ResizeArea{
         minimumHeight: 200
         minimumWidth: 400

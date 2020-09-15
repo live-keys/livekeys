@@ -7,15 +7,17 @@ WorkspaceControl{
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor,
                 rootPosition,
                 {
-                    "type": "Item",
+                    "type": "qml/QtQuick#Item",
+                    "palettes": ["NodePalette"],
                     "children": [
                         {
-                            "type": "Exec",
+                            "type": "qml/base#Exec",
                             "properties": [
                                 {
                                     "name": "path",
@@ -28,13 +30,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "Exec",
+                            "type": "qml/base#Exec",
                             "properties": [
                                 {
                                     "name": "input",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Stream",
+                                        "type": "qml/base#Stream",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 },
@@ -49,13 +51,13 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "StreamLog",
+                            "type": "qml/base#StreamLog",
                             "properties": [
                                 {
                                     "name": "stream",
                                     "isAnObject": true,
                                     "instructions": {
-                                        "type": "Stream",
+                                        "type": "qml/base#Stream",
                                         "palettes": ["ConnectionPalette"]
                                     }
                                 }

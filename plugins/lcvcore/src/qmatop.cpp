@@ -227,7 +227,15 @@ QMat *QMatOp::crop(QMat *m, const QRect &region){
     if (!m)
         return nullptr;
     QMat* r = new QMat;
-    m->internal()(toRect(region)).copyTo(r->internal());
+
+    QMat* copy = createFill(QSize(region.x()+region.width(), region.y() + region.height()), m->internal().type(), m->internal().channels(), QColor("white"));
+
+    cv::Range rowRange(0, qMin(m->internal().size().height, copy->internal().size().height));
+    cv::Range colRange(0, qMin(m->internal().size().width, copy->internal().size().width));
+
+    if (rowRange.size() == 0 || colRange.size() == 0) return r;
+    m->internal()(rowRange, colRange).copyTo(copy->internal()(rowRange, colRange));
+    copy->internal()(toRect(region)).copyTo(r->internal());
     return r;
 }
 
