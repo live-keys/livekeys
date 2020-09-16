@@ -109,8 +109,10 @@ public:
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
-    void parseDocument(QJSValue callback);
-    void syncParse();
+
+    void onDocumentParse(QJSValue callback);
+    void onImportsScanned(QJSValue callback);
+    void removeSyncImportsListeners();
 
     QList<int> languageFeatures() const;
     void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
@@ -278,7 +280,9 @@ private:
     QmlCompletionContextFinder* m_completionContextFinder;
 
     ProjectDocument*       m_document;
-    QList<QJSValue>        m_callbacks;
+
+    QLinkedList<QJSValue>  m_documentParseListeners;
+    QLinkedList<QJSValue>  m_importsScannedListeners;
 
     bool                   m_newScope;
     QTimer                 m_scopeTimer;

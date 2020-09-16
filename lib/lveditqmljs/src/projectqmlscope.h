@@ -97,6 +97,7 @@ public:
 
     QString toString();
 
+    QmlLanguageScanMonitor* languageScanMonitor();
     QmlLanguageScanner* languageScanner();
 
 public slots:
@@ -142,6 +143,10 @@ inline void ProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
 /// \brief Returns the default libraries
 inline const QList<QString> &ProjectQmlScope::defaultLibraries() const{
     return m_defaultLibraries;
+}
+
+inline QmlLanguageScanMonitor *ProjectQmlScope::languageScanMonitor(){
+    return m_scanMonitor;
 }
 
 }// namespace

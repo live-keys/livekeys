@@ -326,7 +326,17 @@ WorkspaceExtension{
 
     function shapeRootObject(editor, codeHandler, callback){
 
-        if ( codeHandler.areImportsScanned() ){
+        editor.startLoadingMode()
+
+        codeHandler.removeSyncImportsListeners()
+        codeHandler.onImportsScanned(function(){
+
+            editor.stopLoadingMode()
+
+            if (rootPosition === -1){
+                return
+            }
+
             var paletteRoot = codeHandler.findPalettes(rootPosition, true)
             if (paletteRoot){
                 if ( paletteRoot ){
@@ -344,14 +354,8 @@ WorkspaceExtension{
             } else {
                 throw linkError(new Error("Failed to shape root object."), this)
             }
+        })
 
-        } else {
-            editor.startLoadingMode()
-            var shapeTrigger = shapeAllTrigger.createObject()
-            shapeTrigger.callback = callback
-            shapeTrigger.target = codeHandler
-            shapeTrigger.editor = editor
-        }
     }
 
     function shapeAll(){
