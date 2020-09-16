@@ -85,7 +85,7 @@ Rectangle {
         }
         Workspace.Tooltip{
             mouseOver: logoFunction.containsMouse
-            text: "Livekeys: Show startup screen"
+            text: "Livekeys: Startup screen"
         }
     }
 

@@ -56,6 +56,7 @@ ProjectQmlScope::ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine 
     m_scanTimer->setSingleShot(false);
 
     m_scanMonitor->moveToThread(m_monitorThread);
+    m_scanMonitor->languageScanner()->moveToThread(m_monitorThread);
 
     connect(this, &ProjectQmlScope::__processQueue, m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
     connect(m_scanTimer, &QTimer::timeout,          m_scanMonitor, &QmlLanguageScanMonitor::processQueue);

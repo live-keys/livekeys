@@ -388,7 +388,7 @@ Rectangle{
             }
         }
     }  // Qan.GraphView
-    
+
     MouseArea {
         id: ma
         enabled: !root.activeFocus

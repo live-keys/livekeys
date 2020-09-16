@@ -77,6 +77,8 @@ public:
         : m_documentParseSync(false)
         , m_documentBackgroundParseSync(false)
         , m_documentValueObjectsSync(false)
+        , m_documentIsScanning(false)
+        , m_documentUpdatedFromBackground(false)
     {
         m_documentInfo = DocumentQmlInfo::createAndParse("", "");
     }
@@ -107,32 +109,36 @@ public:
     }
 
     void assignDocumentFromBackgroundSync(const DocumentQmlInfo::Ptr& document){
+        m_documentIsScanning = false;
         if ( !m_documentParseSync ){
             m_documentInfo = document;
             if ( m_documentBackgroundParseSync ){
                 m_documentParseSync        = true;
                 m_documentValueObjectsSync = false;
+                m_documentUpdatedFromBackground = true;
             }
+        }
+        if ( m_documentBackgroundParseSync ){
+            m_documentUpdatedFromBackground = true;
         }
     }
 
     void documentQueuedForScanning(){
+        m_documentIsScanning          = true;
         m_documentBackgroundParseSync = true;
     }
 
     void documentChanged(){
-        m_documentParseSync           = false;
-        m_documentBackgroundParseSync = false;
-        m_documentValueObjectsSync    = false;
+        m_documentParseSync             = false;
+        m_documentBackgroundParseSync   = false;
+        m_documentValueObjectsSync      = false;
+        m_documentUpdatedFromBackground = false;
     }
 
-    const DocumentQmlValueObjects::Ptr& documentObjects() const{
-        return m_documentObjects;
-    }
-
-    const DocumentQmlInfo::Ptr documentInfo() const{
-        return m_documentInfo;
-    }
+    const DocumentQmlValueObjects::Ptr& documentObjects() const{ return m_documentObjects; }
+    const DocumentQmlInfo::Ptr documentInfo() const{ return m_documentInfo;}
+    bool wasDocumentUpdatedFromBackground() const{ return m_documentUpdatedFromBackground; }
+    bool isDocumentBeingScanned() const{ return m_documentIsScanning; }
 
     ProjectQmlExtension*  projectHandler;
 
@@ -143,6 +149,8 @@ private:
     bool                  m_documentParseSync;
     bool                  m_documentBackgroundParseSync;
     bool                  m_documentValueObjectsSync;
+    bool                  m_documentIsScanning;
+    bool                  m_documentUpdatedFromBackground;
 };
 
 namespace qmlhandler_helpers{
@@ -605,7 +613,7 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
  */
 void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
+    if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
@@ -3579,9 +3587,33 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
 
     d->assignDocumentFromBackgroundSync(documentInfo);
     m_newScope = true;
+
+    QJSValueList args;
+    args << d->wasDocumentUpdatedFromBackground();
+
+    QLinkedList<QJSValue> callbacks = m_documentParseListeners;
+    m_documentParseListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    }
 }
 
 void CodeQmlHandler::__whenLibraryScanQueueCleared(){
+    QLinkedList<QJSValue> callbacks = m_importsScannedListeners;
+    m_importsScannedListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    }
     emit importsScanned();
 }
 
@@ -3592,9 +3624,33 @@ bool CodeQmlHandler::areImportsScanned(){
     return scope.areDocumentLibrariesReady();
 }
 
-void CodeQmlHandler::syncParse(){
+void CodeQmlHandler::onDocumentParse(QJSValue callback){
     Q_D(CodeQmlHandler);
-    d->syncParse(m_document);
+    if ( d->wasDocumentUpdatedFromBackground() ){
+        callback.call(QJSValueList() << true);
+    } else {
+        m_documentParseListeners.append(callback);
+        if ( !d->isDocumentBeingScanned() ){
+            d->documentQueuedForScanning();
+            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+        }
+    }
+}
+
+void CodeQmlHandler::onImportsScanned(QJSValue callback){
+    if ( areImportsScanned() ){
+        QJSValue res = callback.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    } else {
+        m_importsScannedListeners.append(callback);
+    }
+}
+
+void CodeQmlHandler::removeSyncImportsListeners(){
+    m_importsScannedListeners.clear();
 }
 
 /**
