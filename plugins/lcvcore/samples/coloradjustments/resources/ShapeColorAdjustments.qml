@@ -27,19 +27,59 @@ WorkspaceControl{
                         },
                         {
                             "type": "qml/lcvphoto#Levels",
-                            "palettes": ["LevelsPalette"]
+                            "palettes": ["LevelsPalette"],
+                            "properties": [
+                                {
+                                    "name": "input",
+                                    "isAnObject": true,
+                                    "instructions" : {
+                                        "type": "qml/lcvcore#Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                }
+                            ]
                             
                         },
                         {
                             "type": "qml/lcvphoto#HueSaturationLightness",
-                            "palettes": ["HueSaturationLightnessPalette"]
+                            "palettes": ["HueSaturationLightnessPalette"],
+                            "properties": [
+                                {
+                                    "name": "input",
+                                    "isAnObject": true,
+                                    "instructions" : {
+                                        "type": "qml/lcvcore#Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                }
+                            ]
                         },
                         {
                             "type": "qml/lcvphoto#BrightnessAndContrast",
-                            "palettes": ["BrightnessAndContrastPalette"]
+                            "palettes": ["BrightnessAndContrastPalette"],
+                            "properties": [
+                                {
+                                    "name": "input",
+                                    "isAnObject": true,
+                                    "instructions" : {
+                                        "type": "qml/lcvcore#Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                }
+                            ]
                         },
                         {
-                            "type": "qml/lcvcore#ImageView"
+                            "type": "qml/lcvcore#ImageView",
+                            "properties": [
+                                {
+                                    "name": "image",
+                                    "isAnObject": true,
+                                    "instructions" : {
+                                        "type": "qml/lcvcore#Mat",
+                                        "palettes": ["ConnectionPalette"]
+                                    }
+                                }
+                            ]
                         }
                     ]
                 }
