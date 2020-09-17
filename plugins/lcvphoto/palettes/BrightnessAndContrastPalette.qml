@@ -95,11 +95,13 @@ CodePalette{
             minimumValue: 0
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
-                adjustmentBox.bandc.contrast = value.toFixed(2)
-                if ( !isBindingChange() ){
-                    extension.writeProperties({
-                        'contrast' : adjustmentBox.bandc.contrast
-                    })
+                if ( adjustmentBox.bandc ){
+                    adjustmentBox.bandc.contrast = value.toFixed(2)
+                    if ( !isBindingChange() ){
+                        extension.writeProperties({
+                            'contrast' : adjustmentBox.bandc.contrast
+                        })
+                    }
                 }
             }
             stepSize: 0.01
