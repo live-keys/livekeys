@@ -20,6 +20,8 @@
 #include <QQmlEngine>
 #include "live/memory.h"
 #include "live/visuallog.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 
 /**
  *\class QMat
@@ -144,17 +146,10 @@ QMat* QMat::m_nullMat = nullptr;
  */
 QMat*QMat::nullMat(){
     if ( !m_nullMat ){
-        m_nullMat = new QMat;
-        atexit(&QMat::cleanUp);
+        m_nullMat = new QMat(lv::ViewContext::instance().engine());
+        Shared::ownCpp(m_nullMat);
     }
     return m_nullMat;
-}
-
-/**
- *\brief Internal method used to clean up the null matrix.
- */
-void QMat::cleanUp(){
-    delete m_nullMat;
 }
 
 cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
