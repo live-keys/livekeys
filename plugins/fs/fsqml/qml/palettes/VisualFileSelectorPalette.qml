@@ -23,7 +23,12 @@ CodePalette{
         Fs.SelectableFolderView{
             id: selectableFolderView
             anchors.fill: parent
-            cwd: parent.visualFileSelector ? parent.visualFileSelector.workingDirectory : ''
+            cwd: {
+                if (!parent.visualFileSelector) return
+                if (!Fs.Path.exists(parent.visualFileSelector.workingDirectory))
+                    return project.dir()
+                return parent.visualFileSelector.workingDirectory
+            }
             style: palette.paletteStyle ? palette.paletteStyle.selectableListView : defaultStyle
             iconColor: palette.paletteStyle ? palette.paletteStyle.sectionHeaderFocusBackgroundColor : defaultStyle
             onItemSelected: {

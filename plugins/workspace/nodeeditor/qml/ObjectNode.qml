@@ -26,6 +26,7 @@ Qan.NodeItem{
     property string id: ""
     property var documentHandler: null
     property var editor: null
+    property var objectGraph: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
@@ -65,6 +66,10 @@ Qan.NodeItem{
         }
 
         addSubobject(nodeParent, name, 2, null)
+    }
+
+    onSelectedChanged: {
+        objectGraph.numOfSelectedNodes += selected ? 1 : -1
     }
 
     property QtObject defaultStyle : QtObject{

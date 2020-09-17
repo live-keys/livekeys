@@ -119,6 +119,7 @@ Rectangle{
         }
     }
 
+    property var isInteractive: root.activeFocus || selectedEdge || (numOfSelectedNodes > 0)
     property var connections: []
     property Component propertyDelegate : ObjectNodeProperty{
         style: root.style.propertyDelegateStyle
@@ -138,6 +139,7 @@ Rectangle{
     property int inOutPort : 3
     
     property var selectedEdge: null
+    property var numOfSelectedNodes: 0
 
     signal userEdgeInserted(QtObject edge)
     signal nodeClicked(QtObject node)
@@ -220,7 +222,6 @@ Rectangle{
         addBoxItem.addContainer = addOptions
 
         addBoxItem.objectsOnly = true
-        addBoxItem.assignFocus()
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
         var cursorCoords = Qt.point(pos.x, pos.y + 30)
@@ -246,6 +247,8 @@ Rectangle{
             addBoxItem.destroy()
             addBox.destroy()
         }
+
+        addBoxItem.assignFocus()
 
     }
 
@@ -283,6 +286,9 @@ Rectangle{
 
     function removeObjectNode(node){
         --palette.numOfObjects
+        if (node.item.selected)
+            --numOfSelectedNodes
+
         graph.removeNode(node)
     }
     
@@ -299,6 +305,7 @@ Rectangle{
 
         node.item.documentHandler = documentHandler
         node.item.editor = editor
+        node.item.objectGraph = root
 
         var idx = label.indexOf('#')
         if (idx !== -1){
@@ -358,7 +365,7 @@ Rectangle{
     Qan.GraphView {
         id: graphView
         anchors.fill: parent
-        navigable   : root.activeFocus
+        navigable   : root.isInteractive
         gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
@@ -391,8 +398,13 @@ Rectangle{
 
     MouseArea {
         id: ma
-        enabled: !root.activeFocus
+        visible: !root.isInteractive
+        enabled: !root.isInteractive
         anchors.fill: parent
+        acceptedButtons: Qt.LeftButton
+        onWheel: {
+            wheel.accepted = false
+        }
         onClicked: {
             root.activateFocus()
         }

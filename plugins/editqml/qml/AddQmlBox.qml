@@ -66,7 +66,7 @@ Rectangle{
     }
 
     function assignFocus(){
-        searchInput.textInput.forceActiveFocus()
+        searchInput.forceFocus()
     }
 
     property var cancel: function(){ }

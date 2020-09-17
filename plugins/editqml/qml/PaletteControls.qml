@@ -404,9 +404,12 @@ QtObject{
 
 
         var rootPos = codeHandler.findRootPosition()
-        if (ef.position() === rootPos)
+        if (ef.position() === rootPos){
+            objectContainer.contentWidth = Qt.binding(function(){
+                return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
+            })
             editor.editor.rootShaped = true
-
+        }
         return objectContainer
     }
 

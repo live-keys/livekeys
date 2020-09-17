@@ -85,7 +85,7 @@ CodePalette{
 
             width: 50
             height: 25
-            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus
+            wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
             up: function(){
@@ -133,7 +133,7 @@ CodePalette{
 
             width: 50
             height: 25
-            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus
+            wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
 
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 

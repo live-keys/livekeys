@@ -38,8 +38,6 @@ Rectangle {
     property alias inputActiveFocus: textInput.activeFocus
     property string textHint : ''
 
-    property alias textInput: textInput
-
     property alias validator: textInput.validator
 
     signal keyPressed(var event)

@@ -233,11 +233,14 @@ Item{
                 var p = root.parent
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
+                    container.children[0].destroy()
+                    root.destroy()
                     p.destroy()
                 } else { // if this is nested
                     //TODO: Check if this is nested within a property container
                     if ( objectContainer.pane )
                         objectContainer.closeAsPane()
+                    container.children[0].destroy()
                     root.destroy()
                 }
             }
