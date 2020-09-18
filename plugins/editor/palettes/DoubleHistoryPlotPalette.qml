@@ -6,10 +6,21 @@ CodePalette{
     id: palette
     type: "qml/double"
 
+    property color lineColor: '#141b20'
+
     item: Rectangle{
         width: 300
         height: 200
         color: 'transparent'
+        border.width: 1
+        border.color: palette.lineColor
+
+        LineGrid{
+            color: palette.lineColor
+            anchors.fill: parent
+            colSpacing: parent.width / 12
+            rowSpacing: parent.height / 8
+        }
 
         ValueHistory{
             id: valueHistory
