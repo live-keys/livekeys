@@ -93,7 +93,7 @@ qan::NodeStyle* Connector::style() noexcept
 /* Connector Configuration *///------------------------------------------------
 void    Connector::connectorReleased(QQuickItem* target) noexcept
 {
-    qWarning() << "connectorReleased...";
+//    qWarning() << "connectorReleased...";
     // Restore original position
     if ( _connectorItem )
         _connectorItem->setState("NORMAL");

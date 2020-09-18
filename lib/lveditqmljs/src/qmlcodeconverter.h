@@ -34,8 +34,6 @@ public:
         QObject* parent = nullptr
     );
 
-    static void writeForFragment(lv::QmlEditFragment* edit, const QJSValue options);
-    static bool bindExpressionForFragment(lv::QmlEditFragment* edit, const QString& expression);
 
 public slots:
     lv::QmlEditFragment* editingFragment();
@@ -45,9 +43,14 @@ public slots:
     QVariant parse();
     QString readContents();
     void updateBindings();
+
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
+
+    bool bindExpressionForFragment(lv::QmlEditFragment* edit, const QString& expression);
     bool bindExpression(const QString& expression);
     bool bindFunctionExpression(const QString& expression);
+
+    void writeForFragment(lv::QmlEditFragment* edit, const QJSValue options);
 
     void updateFromPalette();
 

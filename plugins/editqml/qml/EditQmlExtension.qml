@@ -228,6 +228,10 @@ WorkspaceExtension{
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
+            if ( !palettes ){
+                return
+            }
+
             if ( palettes.size() === 1 ){
                 root.loadPalette(editor, palettes, 0)
             } else {
