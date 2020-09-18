@@ -24,7 +24,6 @@ Column{
             var box = paletteGroup.parent
             if ( editingFragment.bindingPalette() ){
                 if ( box.objectName === 'editorBox' ){
-                    paletteGroup.destroy()
                     box.destroy()
                 }
             } else {
@@ -36,10 +35,6 @@ Column{
         onAboutToBeRemoved : {
             var p = paletteGroup.parent
             if ( p && p.objectName === 'editorBox' ){
-                for (var i = 0; i < children.length; ++i)
-                    if (children[i].objectName === "paletteContainer")
-                        children[i].destroy()
-                paletteGroup.destroy()
                 p.destroy()
             }
         }
