@@ -112,6 +112,35 @@ Item{
         paletteControls.addPropertyContainer(root, ef, expandDefault)
     }
 
+    function destroyObjectContainer(oc){
+        for (var pi = 0; pi < oc.groupsContainer.children.length; ++pi){
+            var child = oc.groupsContainer.children[pi]
+            if (child.objectName === "paletteGroup"){
+                var pg = child
+                for (var xi = 0; xi < pg.children.length; ++xi)
+                    if (pg.children[xi].objectName === "paletteContainer")
+                        pg.children[xi].destroy()
+                pg.destroy()
+            }
+            if (child.objectName === "propertyContainer"){
+                var pc = child
+                if (pc.valueContainer.objectName === "paletteGroup"){
+                    var pg = pc.valueContainer
+                    for (var xi = 0; xi < pg.children.length; ++xi)
+                        if (pg.children[xi].objectName === "paletteContainer")
+                            pg.children[xi].destroy()
+                    pg.destroy()
+                }
+                if (pc.valueContainer.objectName === "objectContainer"){
+                    oc.destroyObjectContainer(pc.valueContainer)
+                }
+
+                pc.destroy()
+            }
+        }
+        oc.destroy()
+    }
+
     Item{
         id: objectContainer
         objectName: "objectContainerFrame"
@@ -233,12 +262,13 @@ Item{
                 var p = root.parent
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
+                    destroyObjectContainer(root)
                     p.destroy()
                 } else { // if this is nested
                     //TODO: Check if this is nested within a property container
                     if ( objectContainer.pane )
                         objectContainer.closeAsPane()
-                    root.destroy()
+                    destroyObjectContainer(root)
                 }
             }
         }
