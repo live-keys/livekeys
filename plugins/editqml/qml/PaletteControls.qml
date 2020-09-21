@@ -404,15 +404,18 @@ QtObject{
 
 
         var rootPos = codeHandler.findRootPosition()
-        if (ef.position() === rootPos)
+        if (ef.position() === rootPos){
+            objectContainer.contentWidth = Qt.binding(function(){
+                return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
+            })
             editor.editor.rootShaped = true
-
+        }
         return objectContainer
     }
 
-    function createEditorBoxForFragment(editor, ef){
+    function createEditorBoxForFragment(editor, ef, shape){
         var codeHandler = editor.documentHandler.codeHandler
-        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
+        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(shape ? editor.textEdit : null)
 
         var paletteBoxGroup = createPaletteGroup(lk.layers.editor.environment.content)
         paletteBoxGroup.editingFragment = ef

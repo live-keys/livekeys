@@ -71,5 +71,6 @@ LabelOnRectangle{
             if (wheel.angleDelta.y > 0 && up) up()
             if (wheel.angleDelta.y < 0 && down) down()
         }
+        onClicked: root.forceActiveFocus()
     }
 }

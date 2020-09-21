@@ -329,6 +329,7 @@ void QmlEditFragment::emitRemoval(){
 QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *){
     if ( !m_bindingSpanModel ){
         m_bindingSpanModel = new QmlBindingSpanModel(this);
+        QQmlEngine::setObjectOwnership(m_bindingSpanModel, QQmlEngine::CppOwnership);
         connect(m_bindingSpanModel, &QmlBindingSpanModel::inputPathIndexChanged, this, &QmlEditFragment::connectionChanged);
     }
     return m_bindingSpanModel;

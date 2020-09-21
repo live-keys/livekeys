@@ -148,7 +148,7 @@ WorkspaceExtension{
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
             } else {
-                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, true)
                 paletteBoxGroup = ef.visualParent
             }
         } else {
@@ -203,7 +203,7 @@ WorkspaceExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, false)
             editorBox.color = "black"
             paletteBoxGroup = ef.visualParent
         }
@@ -318,6 +318,7 @@ WorkspaceExtension{
             if (paletteImports) {
                 var pc = root.shapePalette(editor, paletteImports, 0)
                 pc.item.width = Qt.binding(function(){
+                    if (!pc.item.parent || !pc.item.parent.parent) return
                     var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
                     return editorSize > 280 ? editorSize : 280
                 })

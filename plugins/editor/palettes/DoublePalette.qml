@@ -165,7 +165,7 @@ CodePalette{
                     intSlider.value = intSlider.minimumValue
             }
             text: intSlider.minimumValue
-            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
+            wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
 
         }
 
@@ -216,7 +216,7 @@ CodePalette{
             }
 
             text: intSlider.maximumValue
-            wheelEnabled: numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
+            wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
         }
 
     }
