@@ -151,8 +151,8 @@ CodePalette{
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor
-            editingFragment: palette.editingFragment
-            style: palette ? palette.paletteStyle.nodeEditor : defaultStyle
+            editingFragment: palette ? palette.editingFragment: null
+            style: palette && palette.paletteStyle ? palette.paletteStyle.nodeEditor : defaultStyle
         }
     }
 
