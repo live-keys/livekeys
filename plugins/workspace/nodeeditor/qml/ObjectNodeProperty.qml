@@ -27,8 +27,10 @@ Item{
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
-    width: Math.max(340 - anchors.leftMargin, paletteContainer.width) + 20
+    width: 360
     height: propertyTitle.height + paletteContainer.height
+
+    property int contentWidth: 0
 
     property QtObject defaultStyle : QtObject{
         property color background: "#333"
@@ -76,6 +78,7 @@ Item{
 
                     if (palettes.size() ){
                         var paletteList = paletteControls.createPaletteListView(propertyItem, paletteStyle.selectableListView)
+                        node.item.objectGraph.paletteListOpened = true
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes
 
@@ -83,6 +86,8 @@ Item{
                         paletteList.width = Qt.binding(function(){return propertyItem.width})
 
                         paletteList.cancelledHandler = function(){
+                            node.item.objectGraph.paletteListOpened = false
+
                             paletteList.focus = false
                             paletteList.model = null
                             paletteList.destroy()
@@ -96,16 +101,16 @@ Item{
                             {
                                 var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
                                 var paletteBox = paletteControls.openPalette(palette,
-                                                                             editingFragment,
+                                                                             propertyItem.editingFragment,
                                                                              editor,
                                                                              paletteContainer)
                                 if (paletteBox){
                                     paletteBox.moveEnabledSet = false
-                                    paletteBox.width = Qt.binding(function(){ return paletteContainer.width })
 
                                 }
 
                             }
+                            node.item.objectGraph.paletteListOpened = false
 
                             paletteList.destroy()
 
@@ -165,6 +170,16 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
+        onChildrenChanged: {
+            var max = 360
+            for (var i=0; i<children.length; ++i)
+                if (children.width > max)
+                    max = children.width
+            propertyItem.contentWidth = max
+            node.item.resizeNode()
+        }
+        editingFragment: propertyItem.editingFragment
+
     }
     
     Connections {

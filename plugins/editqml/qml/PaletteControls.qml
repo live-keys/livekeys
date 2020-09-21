@@ -413,9 +413,9 @@ QtObject{
         return objectContainer
     }
 
-    function createEditorBoxForFragment(editor, ef){
+    function createEditorBoxForFragment(editor, ef, shape){
         var codeHandler = editor.documentHandler.codeHandler
-        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
+        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(shape ? editor.textEdit : null)
 
         var paletteBoxGroup = createPaletteGroup(lk.layers.editor.environment.content)
         paletteBoxGroup.editingFragment = ef

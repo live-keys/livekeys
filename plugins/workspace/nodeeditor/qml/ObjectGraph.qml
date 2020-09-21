@@ -119,7 +119,7 @@ Rectangle{
         }
     }
 
-    property var isInteractive: root.activeFocus || selectedEdge || (numOfSelectedNodes > 0)
+    property var isInteractive: root.activeFocus || selectedEdge || (numOfSelectedNodes > 0) || paletteListOpened
     property var connections: []
     property Component propertyDelegate : ObjectNodeProperty{
         style: root.style.propertyDelegateStyle
@@ -140,6 +140,7 @@ Rectangle{
     
     property var selectedEdge: null
     property var numOfSelectedNodes: 0
+    property var paletteListOpened: false
 
     signal userEdgeInserted(QtObject edge)
     signal nodeClicked(QtObject node)
@@ -344,7 +345,15 @@ Rectangle{
         if ( ports === root.inPort || ports === root.inOutPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
             port.label = propertyName + " In"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
+            port.y = Qt.binding(
+                function(){
+                    return node.item.paletteContainer.height +
+                           propertyItem.y +
+                           (propertyItem.propertyTitle.height / 2) +
+                           42
+                }
+            )
+
             propertyItem.inPort = port
             port.objectProperty = propertyItem
             port.multiplicity = Qan.PortItem.Single
@@ -352,7 +361,14 @@ Rectangle{
         if (ports === root.outPort || (node.item.id !== "" && ports === root.inOutPort) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
+            port.y = Qt.binding(
+                function(){
+                    return node.item.paletteContainer.height +
+                           propertyItem.y +
+                           (propertyItem.propertyTitle.height / 2) +
+                           42
+                }
+            )
             propertyItem.outPort = port
             port.objectProperty = propertyItem
         }

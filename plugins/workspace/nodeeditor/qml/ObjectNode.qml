@@ -15,10 +15,13 @@ Qan.NodeItem{
     
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
+    objectName: "objectNode"
     property string label: ''
     property var properties: []
     property var propertiesOpened: []
     property alias propertyContainer: propertyContainer
+    property alias paletteContainer: paletteContainer
+
     property var nodeParent: null
     property var editingFragment: null
     property var removeNode: null
@@ -29,6 +32,23 @@ Qan.NodeItem{
     property var objectGraph: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    function resizeNode(){
+        var max = 370
+
+        if (paletteContainer.width > max){
+            max = paletteContainer.width
+        }
+        for (var i = 0; i < propertyContainer.children.length; ++i)
+            if (propertyContainer.children[i].contentWidth > max)
+                max = propertyContainer.children[i].contentWidth
+
+        if (max !== root.width){
+            root.width = max
+            for (var i = 0; i < propertyContainer.children.length; ++i)
+                propertyContainer.children[i].width = max - 10
+        }
+    }
 
     resizable: false
 
@@ -168,6 +188,7 @@ Qan.NodeItem{
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
                             var paletteList = paletteControls.createPaletteListView(wrapper, paletteStyle.selectableListView)
+                            objectGraph.paletteListOpened = true
                             paletteList.forceActiveFocus()
                             paletteList.model = palettes
 
@@ -176,6 +197,7 @@ Qan.NodeItem{
                             paletteList.cancelledHandler = function(){
                                 paletteList.focus = false
                                 paletteList.model = null
+                                objectGraph.paletteListOpened = false
                                 paletteList.destroy()
                             }
                             paletteList.selectedHandler = function(index){
@@ -189,7 +211,7 @@ Qan.NodeItem{
                                                                              paletteContainer)
                                 if (paletteBox) paletteBox.moveEnabledSet = false
 
-
+                                objectGraph.paletteListOpened = false
                                 paletteList.destroy()
                             }
                         }
@@ -212,6 +234,8 @@ Qan.NodeItem{
             anchors.top: parent.top
             anchors.topMargin: nodeTitle.height
             id: paletteContainer
+            onChildrenChanged: resizeNode()
+            editingFragment: root.editingFragment
         }
     }
 

@@ -148,7 +148,7 @@ WorkspaceExtension{
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
             } else {
-                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, true)
                 paletteBoxGroup = ef.visualParent
             }
         } else {
@@ -203,7 +203,7 @@ WorkspaceExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, false)
             editorBox.color = "black"
             paletteBoxGroup = ef.visualParent
         }
