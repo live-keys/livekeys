@@ -170,13 +170,19 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
-        onChildrenChanged: {
+        function updateContentWidth(){
             var max = 360
             for (var i=0; i<children.length; ++i)
                 if (children.width > max)
                     max = children.width
-            propertyItem.contentWidth = max
+            propertyItem.contentWidth = max + 25
             node.item.resizeNode()
+        }
+        onChildrenChanged: {
+            updateContentWidth()
+        }
+        onWidthChanged: {
+            updateContentWidth()
         }
         editingFragment: propertyItem.editingFragment
 

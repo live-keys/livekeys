@@ -245,6 +245,48 @@ QMat *QMatOp::flip(QMat *m, int direction){
     return r;
 }
 
+QMat *QMatOp::perspective(QMat *input, QJSValue points)
+{
+    if (!points.isArray()) return nullptr;
+    QJSValueIterator it(points);
+    std::vector<cv::Point2f> src;
+    while ( it.hasNext() ){
+        it.next();
+        if (it.name() == "length") continue;
+        QPointF p = it.value().toVariant().toPointF();
+        cv::Point2f pt(p.x(), p.y());
+        src.push_back(pt);
+    }
+
+    if (src.size() != 4 || !input) return nullptr;
+
+    std::vector<cv::Point2f> dst;
+    dst.push_back(cv::Point2f(0,0));
+    dst.push_back(cv::Point2f(input->dimensions().width(),0));
+    dst.push_back(cv::Point2f(input->dimensions().width(),input->dimensions().height()));
+    dst.push_back(cv::Point2f(0,input->dimensions().height()));
+
+    cv::Mat transform = cv::getPerspectiveTransform(src, dst);
+    QMat* output = new QMat(
+        input->dimensions().width(),
+        input->dimensions().height(),
+        static_cast<QMat::Type>(input->data().type()),
+        input->data().channels()
+    );
+
+    cv::warpPerspective(
+        input->data(),
+        output->data(),
+        transform,
+        output->data().size(),
+        cv::INTER_LINEAR,
+        cv::BORDER_CONSTANT,
+        cv::Scalar()
+    );
+
+    return output;
+}
+
 QJSValue QMatOp::split(QMat *m){
     if (!m)
         return QJSValue();

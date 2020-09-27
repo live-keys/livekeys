@@ -76,6 +76,8 @@ DISTFILES += \
     qml/ImageSegmentCreator.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
+    qml/Perspective.qml \
+    qml/PerspectiveTool.qml \
     qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
     qml/VideoCaptureSegmentFactory.qml \

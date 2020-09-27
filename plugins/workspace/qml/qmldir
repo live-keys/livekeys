@@ -39,3 +39,4 @@ Tool                    1.0 Tool.qml
 Toolbar                 1.0 Toolbar.qml
 Toolbox                 1.0 Toolbox.qml
 ToolButton              1.0 ToolButton.qml
+ConvexQuadSelection     1.0 ConvexQuadSelection.qml

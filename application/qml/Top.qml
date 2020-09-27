@@ -390,7 +390,7 @@ Rectangle {
                 font.pixelSize: 12
                 font.family: 'Open Sans, Arial, sans-serif'
                 elide: Text.ElideRight
-                width: 130
+                width: 110
                 text : {
                     if (!project.active)
                         return "";
