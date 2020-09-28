@@ -279,6 +279,26 @@ Rectangle{
     }
 
     function removeEdge(edge){
+        var item = edge.item
+
+        var srcPort = item.sourceItem
+        var dstPort = item.destinationItem
+
+
+        var value = ''
+
+        var result = root.palette.extension.bindExpressionForFragment(
+            dstPort.objectProperty.editingFragment, value
+        )
+
+        if ( result ){
+            root.palette.extension.writeForFragment(
+                dstPort.objectProperty.editingFragment, {'__ref': value ? value : dstPort.objectProperty.editingFragment.defaultValue()}
+            )
+        } else {
+            qWarning("Failed to remove binding.")
+        }
+
         graph.removeEdge(edge)
         if ( edge === selectedEdge )
             selectedEdge = null

@@ -36,6 +36,21 @@ CodePalette{
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
+    function writeBinding(){
+        var text = input.text
+
+        var ef = extension.editingFragment()
+        var result = extension.bindExpression(text)
+
+        if ( result ){
+            extension.write({'__ref': text ? text : ef.defaultValue()})
+        }
+
+        input.autoTextChange = true
+        input.text = text
+        input.autoTextChange = false
+    }
+
     item: Rectangle{
 
         width: 280
@@ -97,10 +112,7 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = extension.bindExpression(input.text)
-                        if ( result ){
-                            extension.write({'__ref': input.text})
-                        }
+                        palette.writeBinding()
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
@@ -135,11 +147,7 @@ CodePalette{
             height: 25
             content: paletteStyle ? paletteStyle.buttons.connect : null
             onClicked: {
-                var ef = extension.editingFragment()
-                var result = extension.bindExpression(input.text)
-                if ( result ){
-                    extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
-                }
+                palette.writeBinding()
             }
         }
     }
