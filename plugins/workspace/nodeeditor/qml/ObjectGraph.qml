@@ -343,6 +343,7 @@ Rectangle{
         propertyItem.propertyName = propertyName
         propertyItem.node = node
 
+        propertyItem.width = node.item.width - 10
         propertyItem.editingFragment = editingFragment
         propertyItem.documentHandler = root.documentHandler
 

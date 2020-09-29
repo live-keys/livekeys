@@ -227,6 +227,8 @@ Pane{
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Normal
+            elide: Text.ElideRight
+            width: Math.max(20, parent.width - 200)
         }
 
         Rectangle{
