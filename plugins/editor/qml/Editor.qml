@@ -288,6 +288,7 @@ Rectangle{
                 flickableItem.contentY = r.y + r.height - height + 20;
         }
 
+        flickableItem.interactive: false
         flickableItem.contentHeight: textEdit.totalHeight
         flickableItem.contentWidth: textEdit.totalWidth + 10
 
