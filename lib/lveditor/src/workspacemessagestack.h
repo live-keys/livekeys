@@ -36,7 +36,7 @@ public slots:
     void clear();
 private:
 
-    std::vector<WorkspaceMessage> m_messages;
+    QList<WorkspaceMessage> m_messages;
     QHash<int, QByteArray> m_roles;
 
 
