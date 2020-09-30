@@ -16,21 +16,21 @@ Grid{
         input: videoDecoderView.image
     }
 
-//    HueSaturationLightness{
-//        id: hueSaturationLightness
-//        input: levels.result
-//        hue: 180
-//        saturation: 100
-//        lightness: 100
-//    }
+    HueSaturationLightness{
+        id: hueSaturationLightness
+        input: levels.result
+        hue: 180
+        saturation: 100
+        lightness: 100
+    }
 
-//    BrightnessAndContrast{
-//        id: brightnessAndContrast
-//        input: hueSaturationLightness.result
-//    }
+    BrightnessAndContrast{
+        id: brightnessAndContrast
+        input: hueSaturationLightness.result
+    }
 
     ImageView{
-        image: levels.result
+        image: brightnessAndContrast.result
     }
 
 }

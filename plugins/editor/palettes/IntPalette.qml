@@ -58,7 +58,7 @@ CodePalette{
                     extension.write(palette.value)
             }
             stepSize: 1.0
-            maximumValue: 200
+            maximumValue: 25
 
             style: SliderStyle{
                 groove: Rectangle {
@@ -72,6 +72,8 @@ CodePalette{
                     color: '#9b9da0'
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: intSlider.activeFocus
         }
 
         Workspace.NumberLabel{
@@ -83,7 +85,7 @@ CodePalette{
 
             width: 50
             height: 25
-
+            wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
             up: function(){
@@ -131,6 +133,7 @@ CodePalette{
 
             width: 50
             height: 25
+            wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
 
             style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
 
@@ -172,7 +175,24 @@ CodePalette{
     }
 
     onInit: {
-        intSlider.value = Math.floor(value)
+        var floorValue = Math.floor(value)
+        if (floorValue < intSlider.minimumValue || floorValue > intSlider.maximumValue){
+            if (floorValue > 0){
+                while (intSlider.maximumValue < floorValue){
+                    intSlider.minimumValue = intSlider.maximumValue
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                }
+            } else if (floorValue < 0){
+                intSlider.minimumValue = -25
+                intSlider.maximumValue = 0
+                while (intSlider.minimumValue > floorValue){
+                    intSlider.maximumValue = intSlider.minimumValue
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                }
+            }
+        }
+        intSlider.value = floorValue
     }
 
     onExtensionChanged: {

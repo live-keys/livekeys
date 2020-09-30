@@ -45,7 +45,7 @@ Item{
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             id: chosenItemText
-            text: root.model ? root.model[0] : ''
+            text: root.model && root.model.length ? root.model[0] : ''
             font.family: "Open Sans, sans-serif"
             font.weight: Font.Light
             font.pixelSize: 12

@@ -66,6 +66,8 @@ DISTFILES += \
     qml/Levels.qml \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
+    qml/Sepia.qml \
+    qml/Temperature.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     palettes/LevelsPalette.qml

@@ -85,7 +85,7 @@ Rectangle {
         }
         Workspace.Tooltip{
             mouseOver: logoFunction.containsMouse
-            text: "Livekeys: Show startup screen"
+            text: "Livekeys: Startup screen"
         }
     }
 
@@ -390,7 +390,7 @@ Rectangle {
                 font.pixelSize: 12
                 font.family: 'Open Sans, Arial, sans-serif'
                 elide: Text.ElideRight
-                width: 130
+                width: 110
                 text : {
                     if (!project.active)
                         return "";

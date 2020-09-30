@@ -8,6 +8,7 @@ Act{
     property double brightness: 0.0
     property double contrast: 1.0
 
+    returns: "qml/object"
     run: [Photo.Adjustments, 'brightnessAndContrast']
     args: ["$input", "$brightness", "$contrast"]
 }

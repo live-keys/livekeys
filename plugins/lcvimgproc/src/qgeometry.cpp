@@ -1,12 +1,17 @@
 #include "qgeometry.h"
 
+#include "live/qmlerror.h"
+#include "live/visuallogqt.h"
+#include "live/exception.h"
+#include "live/viewengine.h"
+
 QGeometry::QGeometry(QObject *parent)
     : QObject(parent)
 {
 }
 
 QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
-    if ( !input )
+    if ( !input || size.width() == 0)
         return nullptr;
     QMat* m = new QMat;
     cv::resize(input->internal(), m->internal(), cv::Size(size.width(), size.height()), 0, 0, interpolation);
@@ -58,6 +63,22 @@ QMat *QGeometry::rotate(QMat *m, double degrees){
 
     cv::Mat M = cv::getRotationMatrix2D(ptCp, degrees, 1.0);
     cv::warpAffine(m->internal(), r->internal(), M, m->internal().size(), cv::INTER_CUBIC);
+
+    return r;
+}
+
+QMat *QGeometry::transform(QMat *input, QMat *m){
+    if ( !input || !m )
+        return nullptr;
+
+    QMat* r = new QMat;
+    try {
+        cv::transform(input->data(), *r->cvMat(), m->data());
+    } catch (cv::Exception& e) {
+        THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
+        delete r;
+        return nullptr;
+    }
 
     return r;
 }

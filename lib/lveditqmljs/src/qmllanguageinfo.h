@@ -142,9 +142,9 @@ class LV_EDITQMLJS_EXPORT QmlDocumentReference{
 public:
     bool isValid() const{ return !path.isEmpty(); }
 
-    QMap<QString, QString> watchers;
-    QString                path;
-    QStringList            dependencies;
+    QMap<QString, QString>          watchers;
+    QString                         path;
+    QList<QPair<QString, QString> > dependencies;
 };
 
 // QmlTypeInfo
@@ -180,6 +180,8 @@ public:
     QmlPropertyInfo propertyAt(int index) const;
     QmlPropertyInfo propertyAt(const QString& name) const;
     void appendProperty(const QmlPropertyInfo& prop);
+    void updateProperty(int index, const QmlPropertyInfo& prop);
+
 
     int totalFunctions() const;
     QmlFunctionInfo functionAt(int index) const;

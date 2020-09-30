@@ -34,7 +34,7 @@ CodePalette{
         width: 280
         height: 55
 
-        property BrightnessAndContrast bandc: null
+        property QtObject bandc: null
 
         Slider{
             id: brightnessSlider
@@ -95,11 +95,13 @@ CodePalette{
             minimumValue: 0
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
-                adjustmentBox.bandc.contrast = value.toFixed(2)
-                if ( !isBindingChange() ){
-                    extension.writeProperties({
-                        'contrast' : adjustmentBox.bandc.contrast
-                    })
+                if ( adjustmentBox.bandc ){
+                    adjustmentBox.bandc.contrast = value.toFixed(2)
+                    if ( !isBindingChange() ){
+                        extension.writeProperties({
+                            'contrast' : adjustmentBox.bandc.contrast
+                        })
+                    }
                 }
             }
             stepSize: 0.01

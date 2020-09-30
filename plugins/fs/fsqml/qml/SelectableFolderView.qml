@@ -2,15 +2,16 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import base 1.0
-import live 1.0
 import editor.private 1.0
+import workspace 1.0 as Workspace
 import fs 1.0 as Fs
 
-ResponsiveListView{
+Workspace.SelectableListView{
     id: root
 
     property var selectedIndexes : []
-    property color selectedIndexColor: "#252830"
+
+    property color iconColor: '#3f444d'
 
     property string cwd: ''
     onCwdChanged: {
@@ -18,6 +19,7 @@ ResponsiveListView{
         model = wdlist
     }
 
+    signal itemSelected(int index)
     onItemSelected: {
         var item = model[index]
         if ( item.isDir ){
@@ -42,31 +44,35 @@ ResponsiveListView{
             height : 25
             color : {
                 if ( ListView.isCurrentItem )
-                    return root.selectionColor
+                    return root.style.selectionBackgroundColor
                 
                 if ( root.selectedIndexes.indexOf(index) != -1 )
-                    return selectedIndexColor
+                    return root.style.selectionBackgroundColor
                 
                 return 'transparent'
             }
-            Text{
+            Workspace.Label{
                 id: label
                 anchors.left: parent.left
                 anchors.leftMargin: 25
                 anchors.verticalCenter: parent.verticalCenter
 
-                font.family: root.fontFamily
-                font.pixelSize: root.fontSize
-
-                color: "#fafafa"
+                textStyle: root.style.labelStyle
                 text: modelData.name
             }
-            
-            Image{
-                source: modelData.isDir ? "qrc:/images/project-directory.png" : "qrc:/images/project-file.png"
+
+            Loader{
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 5
+                width: 15
+                height: 15
+
+                property Component folderIcon: Workspace.FolderIcon{ color: root.iconColor }
+                property Component fileIcon: Workspace.FileIcon{ color: root.iconColor }
+
+                sourceComponent: modelData.isDir ? folderIcon : fileIcon
+
             }
 
             MouseArea{

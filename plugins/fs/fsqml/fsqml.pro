@@ -45,8 +45,10 @@ QMAKE_EXTRA_TARGETS += first samplescopy
 
 
 DISTFILES += \
+    qml/ExtensionPass.qml \
     qml/FileLineReader.qml \
     qml/FileReader.qml \
+    qml/VisualFileSelector.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/plugins.qmltypes

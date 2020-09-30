@@ -134,6 +134,31 @@ QmlScopeSnap::QmlScopeSnap(const ProjectQmlScope::Ptr &p, const DocumentQmlInfo:
 {
 }
 
+/// Checks wether libraries imported or accessed by this document are scanned
+
+bool QmlScopeSnap::areDocumentLibrariesReady() const{
+    QmlLibraryInfo::Ptr lib = project->libraryInfo(document->path());
+    if ( lib->status() != QmlLibraryInfo::Done ){
+        return false;
+    }
+
+    foreach( const DocumentQmlInfo::Import& imp, document->imports() ){
+        QmlLibraryInfo::Ptr lib = project->libraryInfo(imp.uri());
+        if ( !lib || lib->status() != QmlLibraryInfo::Done ){
+            return false;
+        }
+    }
+
+    foreach( const QString& defaultLibrary, project->defaultLibraries() ){
+        QmlLibraryInfo::Ptr lib = project->libraryInfo(defaultLibrary);
+        if ( !lib || lib->status() != QmlLibraryInfo::Done ){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /// Retrieve a type from any available libraries to the document scope
 
 QmlTypeInfo::Ptr QmlScopeSnap::getType(const QString &name) const{
@@ -463,12 +488,6 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
         const QmlTypeInfo::Ptr& currentType = *it;
         QmlPropertyInfo prop = currentType->propertyAt(propertyName);
         if ( prop.isValid() ){
-            QmlScopeSnap::PropertyReference prr(
-                            prop,
-                            prop.typeName.language() == QmlTypeReference::Cpp,
-                            prop.isPointer ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path()) : QmlInheritanceInfo(),
-                            contextTypePath
-                        );
             return QmlScopeSnap::PropertyReference(
                 prop,
                 prop.typeName.language() == QmlTypeReference::Cpp,

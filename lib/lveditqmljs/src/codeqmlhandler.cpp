@@ -77,11 +77,12 @@ public:
         : m_documentParseSync(false)
         , m_documentBackgroundParseSync(false)
         , m_documentValueObjectsSync(false)
+        , m_documentIsScanning(false)
+        , m_documentUpdatedFromBackground(false)
     {
         m_documentInfo = DocumentQmlInfo::createAndParse("", "");
     }
 
-    ProjectQmlExtension*  projectHandler;
 
     QmlScopeSnap snapScope() const{
         return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), m_documentInfo);
@@ -108,32 +109,38 @@ public:
     }
 
     void assignDocumentFromBackgroundSync(const DocumentQmlInfo::Ptr& document){
+        m_documentIsScanning = false;
         if ( !m_documentParseSync ){
             m_documentInfo = document;
             if ( m_documentBackgroundParseSync ){
                 m_documentParseSync        = true;
                 m_documentValueObjectsSync = false;
+                m_documentUpdatedFromBackground = true;
             }
+        }
+        if ( m_documentBackgroundParseSync ){
+            m_documentUpdatedFromBackground = true;
         }
     }
 
     void documentQueuedForScanning(){
+        m_documentIsScanning          = true;
         m_documentBackgroundParseSync = true;
     }
 
     void documentChanged(){
-        m_documentParseSync           = false;
-        m_documentBackgroundParseSync = false;
-        m_documentValueObjectsSync    = false;
+        m_documentParseSync             = false;
+        m_documentBackgroundParseSync   = false;
+        m_documentValueObjectsSync      = false;
+        m_documentUpdatedFromBackground = false;
     }
 
-    const DocumentQmlValueObjects::Ptr& documentObjects() const{
-        return m_documentObjects;
-    }
+    const DocumentQmlValueObjects::Ptr& documentObjects() const{ return m_documentObjects; }
+    const DocumentQmlInfo::Ptr documentInfo() const{ return m_documentInfo;}
+    bool wasDocumentUpdatedFromBackground() const{ return m_documentUpdatedFromBackground; }
+    bool isDocumentBeingScanned() const{ return m_documentIsScanning; }
 
-    const DocumentQmlInfo::Ptr documentInfo() const{
-        return m_documentInfo;
-    }
+    ProjectQmlExtension*  projectHandler;
 
 private:
     DocumentQmlInfo::Ptr         m_documentInfo;
@@ -142,6 +149,8 @@ private:
     bool                  m_documentParseSync;
     bool                  m_documentBackgroundParseSync;
     bool                  m_documentValueObjectsSync;
+    bool                  m_documentIsScanning;
+    bool                  m_documentUpdatedFromBackground;
 };
 
 namespace qmlhandler_helpers{
@@ -307,9 +316,8 @@ CodeQmlHandler::CodeQmlHandler(
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
-
-    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::scannerProcessingChanged,
-            this, &CodeQmlHandler::processingChanged);
+    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::libraryScanQueueCleared,
+            this, &CodeQmlHandler::__whenLibraryScanQueueCleared);
 
     setDocument(document);
 }
@@ -605,7 +613,7 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
  */
 void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
+    if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
@@ -1364,7 +1372,8 @@ QJSValue CodeQmlHandler::editingFragments(){
 
 void CodeQmlHandler::toggleComment(int position, int length)
 {
-    if ( !m_document ) return;
+    if ( !m_document )
+        return;
 
     Q_D(CodeQmlHandler);
 
@@ -2311,6 +2320,7 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     cursor.setPosition(position);
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+
     bool inImports = isInImports(position);
     if ( properties.isEmpty() && !inImports )
         return nullptr;
@@ -3391,18 +3401,27 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-int CodeQmlHandler::insertRootItem(const QString &qmlType)
+int CodeQmlHandler::insertRootItem(const QString &name)
 {
     Q_D(CodeQmlHandler);
     d->syncObjects(m_document);
 
-    QmlTypeReference qtr = QmlTypeReference::split(qmlType);
-
     // add the root via code
+
+    QString type; QString id;
+    if (name.contains('#'))
+    {
+        auto spl = name.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = name;
 
     int insertionPosition = m_target->characterCount()-1;
 
-    QString insertionText = "\n" + qtr.name() + "{\n    id: item\n}\n";
+    QString insertionText = "\n" + type + "{\n";
+    if (id != "") insertionText += "    id: " + id;
+    insertionText += "\n}\n";
+
     m_document->addEditingState(ProjectDocument::Palette);
     QTextCursor cs(m_target);
     cs.setPosition(insertionPosition);
@@ -3416,7 +3435,7 @@ int CodeQmlHandler::insertRootItem(const QString &qmlType)
     d->syncObjects(m_document);
 
     QObject* newRoot = QmlCodeConverter::create(
-        d->documentInfo(), qtr.name() + "{}", "temp"
+        d->documentInfo(), type + "{}", "temp"
     );
     if ( !newRoot )
         return -1;
@@ -3568,12 +3587,70 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
 
     d->assignDocumentFromBackgroundSync(documentInfo);
     m_newScope = true;
+
+    QJSValueList args;
+    args << d->wasDocumentUpdatedFromBackground();
+
+    QLinkedList<QJSValue> callbacks = m_documentParseListeners;
+    m_documentParseListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    }
 }
 
-void CodeQmlHandler::processingChanged(bool value)
-{
-    if (!value)
-        emit stoppedProcessing();
+void CodeQmlHandler::__whenLibraryScanQueueCleared(){
+    QLinkedList<QJSValue> callbacks = m_importsScannedListeners;
+    m_importsScannedListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    }
+    emit importsScanned();
+}
+
+bool CodeQmlHandler::areImportsScanned(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
+    QmlScopeSnap scope = d->snapScope();
+    return scope.areDocumentLibrariesReady();
+}
+
+void CodeQmlHandler::onDocumentParse(QJSValue callback){
+    Q_D(CodeQmlHandler);
+    if ( d->wasDocumentUpdatedFromBackground() ){
+        callback.call(QJSValueList() << true);
+    } else {
+        m_documentParseListeners.append(callback);
+        if ( !d->isDocumentBeingScanned() ){
+            d->documentQueuedForScanning();
+            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+        }
+    }
+}
+
+void CodeQmlHandler::onImportsScanned(QJSValue callback){
+    if ( areImportsScanned() ){
+        QJSValue res = callback.call();
+        if ( res.isError() ){
+            ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+            ve->throwError(res, this);
+        }
+    } else {
+        m_importsScannedListeners.append(callback);
+    }
+}
+
+void CodeQmlHandler::removeSyncImportsListeners(){
+    m_importsScannedListeners.clear();
 }
 
 /**
@@ -3595,7 +3672,6 @@ void CodeQmlHandler::suggestionsForImport(
         const QmlCompletionContext& context,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-
     foreach (const QString& importPath, m_engine->importPathList()){
         suggestionsForRecursiveImport(0, importPath, context.expressionPath(), suggestions);
     }

@@ -8,6 +8,7 @@ Grid{
 
     ImageFile{
         id: imageFile
+        visible: false
         source: project.dir() + '/../../../../samples/_images/object_101_piano_query.jpg'
     }
 

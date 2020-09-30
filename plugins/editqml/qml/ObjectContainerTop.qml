@@ -223,18 +223,19 @@ Rectangle{
 
         Item{
             id: closeObjectItem
-            anchors.top: parent.top
+            anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
             visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
-            Text{
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: 'x'
-                color: '#ffffff'
-                font.pixelSize: 18
-                font.family: "Open Sans"
-                font.weight: Font.Light
+
+            Workspace.XIcon{
+                anchors.centerIn: parent
+                width: 8
+                height: 8
+                color: '#dbdede'
+                strokeWidth: 1
             }
+
             MouseArea{
                 id: paletteCloseArea
                 anchors.fill: parent

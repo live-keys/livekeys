@@ -374,6 +374,9 @@ void    Navigable::wheelEvent( QWheelEvent* event )
         zoomOn( QPointF{ static_cast<qreal>(event->x()),
                          static_cast<qreal>(event->y()) },
                 getZoom() + zoomFactor );
+    } else {
+        event->setAccepted(false);
+        return;
     }
     updateGrid();
 

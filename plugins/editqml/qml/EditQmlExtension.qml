@@ -2,7 +2,7 @@ import QtQuick 2.3
 import editor 1.0
 import editqml 1.0
 
-LiveExtension{
+WorkspaceExtension{
     id: root
 
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
@@ -24,7 +24,7 @@ LiveExtension{
                 property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
                 property double borderThickness: currentTheme ? currentTheme.inputStyle.borderThickness : propertyLabelStyle.borderThickness
             }
-            scrollStyle: currentTheme ? currentTheme.scrollStyle : scrollStyle
+            scrollbarColor: currentTheme ? currentTheme.colorScheme.scrollbarColor : scrollbarColor
             buttons: currentTheme ? currentTheme.buttons : buttons
             nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
             selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView
@@ -33,14 +33,18 @@ LiveExtension{
 
         property PaletteControls paletteControls: PaletteControls{}
 
-        property alias rootPosition: root.rootPosition
-        function shapeRootObject(editor, codeHandler){
-            root.shapeRootObject(editor, codeHandler)
+        function add(activeIndex, objectsOnly, forRoot){
+            root.add(activeIndex, objectsOnly, forRoot)
         }
 
-        function add(activeIndex, objectsOnly){
-            root.add(activeIndex, objectsOnly)
+        function shapeRootObject(editor, codeHandler, callback){
+            root.shapeRootObject(editor, codeHandler, callback)
         }
+
+        function shapeImports(editor, codeHandler){
+            root.shapeImports(editor, codeHandler)
+        }
+        property alias rootPosition: root.rootPosition
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
@@ -132,12 +136,19 @@ LiveExtension{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
+                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+                    objectContainer.contentWidth = Qt.binding(function(){
+                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                                ? objectContainer.containerContentWidth
+                                : objectContainer.editorContentWidth
+                    })
+                objectContainer.expand()
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
             } else {
-                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, true)
                 paletteBoxGroup = ef.visualParent
             }
         } else {
@@ -166,6 +177,8 @@ LiveExtension{
 
         if (forImports) editor.editor.importsShaped = true
         ef.incrementRefCount()
+
+        return objectContainer ? objectContainer : palette
     }
 
     function loadPalette(editor, palettes, index){
@@ -190,7 +203,7 @@ LiveExtension{
         var paletteBoxGroup = editorBox ? editorBox.child : null
 
         if ( paletteBoxGroup === null ){
-            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef)
+            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, false)
             editorBox.color = "black"
             paletteBoxGroup = ef.visualParent
         }
@@ -215,6 +228,10 @@ LiveExtension{
             var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
             var rect = editor.editor.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
+            if ( !palettes ){
+                return
+            }
+
             if ( palettes.size() === 1 ){
                 root.loadPalette(editor, palettes, 0)
             } else {
@@ -293,18 +310,57 @@ LiveExtension{
         }
     }
 
-    function shapeRootObject(editor, codeHandler){
-        var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-        if (paletteRoot){
-            root.shapePalette(editor, paletteRoot, 0)
-            editor.editor.rootShaped = true
+    function shapeImports(editor, codeHandler){
+        var imports = codeHandler.importsModel()
+        if (imports.rowCount() > 0){
+            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
+            var paletteImports = codeHandler.findPalettes(importsPosition, true)
+            if (paletteImports) {
+                var pc = root.shapePalette(editor, paletteImports, 0)
+                pc.item.width = Qt.binding(function(){
+                    if (!pc.item.parent || !pc.item.parent.parent) return
+                    var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
+                    return editorSize > 280 ? editorSize : 280
+                })
+            }
         }
-        else {
-            editor.startLoadingMode()
-            var shapeTrigger = shapeAllTrigger.createObject()
-            shapeTrigger.target = codeHandler
-            shapeTrigger.editor = editor
-        }
+    }
+
+
+
+
+    function shapeRootObject(editor, codeHandler, callback){
+
+        editor.startLoadingMode()
+
+        codeHandler.removeSyncImportsListeners()
+        codeHandler.onImportsScanned(function(){
+
+            editor.stopLoadingMode()
+
+            if (rootPosition === -1){
+                return
+            }
+
+            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+            if (paletteRoot){
+                if ( paletteRoot ){
+                    if (callback)
+                        callback()
+                    else {
+                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        oc.contentWidth = Qt.binding(function(){
+                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                        })
+
+                        editor.editor.rootShaped = true
+                    }
+                }
+            } else {
+                throw linkError(new Error("Failed to shape root object."), this)
+            }
+        })
+
     }
 
     function shapeAll(){
@@ -322,22 +378,13 @@ LiveExtension{
             return
         }
 
-        var imports = codeHandler.importsModel()
-        if (imports.rowCount() > 0){
-            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-            var paletteImports = codeHandler.findPalettes(importsPosition, true)
-            if (paletteImports) root.shapePalette(editor, paletteImports, 0)
-        }
+        shapeImports(editor, codeHandler)
         rootPosition = codeHandler.findRootPosition()
 
         if ( rootPosition >= 0){
             shapeRootObject(editor, codeHandler)
         } else {
             editor.editor.addRootButton.visible = true
-            editor.editor.addRootButton.callback = function(rootPosition){
-                root.rootPosition = rootPosition
-                shapeRootObject(editor, codeHandler)
-            }
         }
     }
 
@@ -346,19 +393,33 @@ LiveExtension{
             id: shapeTrigger
             target: null
             property var editor: null
+            property var callback: null
             ignoreUnknownSignals: true
-            onStoppedProcessing: {
-                if (rootPosition === -1) return
+            onImportsScanned: {
+                if (rootPosition === -1){
+                    editor.stopLoadingMode()
+                    return
+                }
                 var codeHandler = editor.documentHandler.codeHandler
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
-                    root.shapePalette(editor, paletteRoot, 0)
-                    editor.stopLoadingMode()
+                    if (!callback){
+                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        oc.contentWidth = Qt.binding(function(){
+                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                        })
+                        editor.editor.rootShaped = true
+                    } else {
+                        callback()
+                    }
                     rootPosition = -1
 
-                    editor.editor.rootShaped = true
                     shapeTrigger.destroy()
+                } else {
+                    throw linkError(new Error("Failed to shape root object. Unknown type."), this)
                 }
+
+                editor.stopLoadingMode()
             }
         }
     }
@@ -375,7 +436,7 @@ LiveExtension{
         add(3)
     }
 
-    function add(activeIndex, objectsOnly){
+    function add(activeIndex, objectsOnly, forRoot){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
@@ -387,7 +448,7 @@ LiveExtension{
 
             var rect = activePane.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
-            var addBoxItem = globals.paletteControls.createAddQmlBox()
+            var addBoxItem = globals.paletteControls.createAddQmlBox(null, globals.paletteStyle)
             if (!addBoxItem) return
 
             addBoxItem.assignFocus()
@@ -411,9 +472,20 @@ LiveExtension{
                         addContainer.model.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 2 ){
-                    activePane.documentHandler.codeHandler.addItem(
-                        addContainer.model.addPosition, addContainer.objectType, data
-                    )
+                    if (forRoot){
+                        var position = activePane.documentHandler.codeHandler.insertRootItem(data)
+                        if (position === -1){
+                            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create object with name " + data
+                            console.error("Error: Can't create object with name " + data)
+                        } else {
+                            root.rootPosition = position
+                            shapeRootObject(activePane, activePane.documentHandler.codeHandler)
+                        }
+                    }
+                    else
+                        activePane.documentHandler.codeHandler.addItem(
+                            addContainer.model.addPosition, addContainer.objectType, data
+                        )
                 } else if ( addBoxItem.activeIndex === 3 ){
                     activePane.documentHandler.codeHandler.addEvent(
                         addContainer.model.addPosition, addContainer.objectType, type, data
@@ -496,7 +568,7 @@ LiveExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false)
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, root.globals.paletteStyle)
         }
     }
 
@@ -521,57 +593,64 @@ LiveExtension{
         "alt+s" : { command: "editqml.object_container_add", whenPane: "editor", whenItem: "objectContainerFrame" }
     }
 
-    interceptMenu : function(item){
-        if ( item.objectName === 'editorType' && item.document ){
+    menuInterceptors : [
+        {
+            whenPane: 'editor',
+            whenItem: 'editorType',
+            intercept: function(pane, item){
 
-            if ( canBeQml(item.document) ){
+                if ( item.document ){
 
-                var codeHandler = item.documentHandler.codeHandler
-                var cursorInfo = codeHandler.cursorInfo(
-                    item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
-                );
+                    if ( canBeQml(item.document) ){
 
-                return [
-                    {
-                        name : "Edit",
-                        action : root.commands['edit'][0],
-                        enabled : cursorInfo.canEdit
-                    }, {
-                        name : "Palette",
-                        action : root.commands['palette'][0],
-                        enabled : cursorInfo.canAdjust
-                    }, {
-                        name : "Shape",
-                        action : root.commands['shape'][0],
-                        enabled : cursorInfo.canShape
-                    }, {
-                        name : "Bind",
-                        action : root.commands['bind'][0],
-                        enabled : cursorInfo.canBind
-                    }, {
-                        name : "Unbind",
-                        action : root.commands['unbind'][0],
-                        enabled : cursorInfo.canUnbind
-                    }, {
-                        name : "Add Property",
-                        action : root.commands['add_property'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Object",
-                        action : root.commands['add_object'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Event",
-                        action : root.commands['add_event'][0],
-                        enabled : true
-                    }, {
-                        name: "Shape all",
-                        action: root.commands['shape_all'][0],
-                        enabled: true
+                        var codeHandler = item.documentHandler.codeHandler
+                        var cursorInfo = codeHandler.cursorInfo(
+                            item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
+                        );
+
+                        return [
+                            {
+                                name : "Edit",
+                                action : root.commands['edit'][0],
+                                enabled : cursorInfo.canEdit
+                            }, {
+                                name : "Palette",
+                                action : root.commands['palette'][0],
+                                enabled : cursorInfo.canAdjust
+                            }, {
+                                name : "Shape",
+                                action : root.commands['shape'][0],
+                                enabled : cursorInfo.canShape
+                            }, {
+                                name : "Bind",
+                                action : root.commands['bind'][0],
+                                enabled : cursorInfo.canBind
+                            }, {
+                                name : "Unbind",
+                                action : root.commands['unbind'][0],
+                                enabled : cursorInfo.canUnbind
+                            }, {
+                                name : "Add Property",
+                                action : root.commands['add_property'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Object",
+                                action : root.commands['add_object'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Event",
+                                action : root.commands['add_event'][0],
+                                enabled : true
+                            }, {
+                                name: "Shape all",
+                                action: root.commands['shape_all'][0],
+                                enabled: true
+                            }
+                        ]
                     }
-                ]
+                }
+                return null
             }
         }
-        return null
-    }
+    ]
 }

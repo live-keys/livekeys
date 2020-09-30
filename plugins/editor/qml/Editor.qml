@@ -29,6 +29,7 @@ Rectangle{
 
     property alias internalActiveFocus : textEdit.activeFocus
     property alias internalFocus: textEdit.focus
+    property alias lineSurfaceWidth: lineSurface.width
 
     function forceFocus(){
         textEdit.forceActiveFocus()
@@ -47,6 +48,11 @@ Rectangle{
         } else {
             saveAs()
         }
+    }
+
+    function makePositionVisible(y){
+        if (y < 0 || y > root.height - 30)
+            flick.flickableItem.contentY = Math.min(flick.flickableItem.contentY + y, Math.max(0,flick.flickableItem.contentHeight - root.height))
     }
 
     function saveAs(){
@@ -441,50 +447,9 @@ Rectangle{
                     cursorShape: Qt.IBeamCursor
                     acceptedButtons: Qt.RightButton
                     onClicked: {
-                        textEdit.clearSelectionOnFocus(false)
-
-                        for ( var i = 0; i < contextMenu.additionalItems.length; ++i ){
-                            contextMenu.removeItem(contextMenu.additionalItems[i])
+                        if ( lk.layers.workspace ){
+                            lk.layers.workspace.panes.openContextMenu(root, root.parent)
                         }
-                        contextMenu.additionalItems = []
-
-                        var res = lk.layers.workspace.interceptMenu(root)
-                        for ( var i = 0; i < res.length; ++i ){
-                            var menuitem = contextMenu.insertItem(i, res[i].name)
-                            menuitem.enabled = res[i].enabled
-                            menuitem.triggered.connect(res[i].action)
-                            contextMenu.additionalItems.push(menuitem)
-                        }
-
-                        contextMenu.popup()
-                    }
-                }
-
-                Menu{
-                    id: contextMenu
-                    style: ContextMenuStyle{}
-                    property var additionalItems : []
-                    onAboutToHide: {
-                        textEdit.clearSelectionOnFocus(true)
-                    }
-
-                    MenuItem {
-                        text: qsTr("Cut")
-                        shortcut: StandardKey.Cut
-                        enabled: textEdit.selectionStart !== textEdit.selectionEnd
-                        onTriggered: textEdit.cut()
-                    }
-                    MenuItem {
-                        text: qsTr("Copy")
-                        shortcut: StandardKey.Copy
-                        enabled: textEdit.selectionStart !== textEdit.selectionEnd
-                        onTriggered: textEdit.copy()
-                    }
-                    MenuItem {
-                        text: qsTr("Paste")
-                        shortcut: StandardKey.Paste
-                        enabled: textEdit.canPaste
-                        onTriggered: textEdit.paste()
                     }
                 }
             }
@@ -504,9 +469,8 @@ Rectangle{
         visible: false
         property var callback: null
         onClicked: {
-            var rootPosition = documentHandler.codeHandler.insertRootItem("qml/QtQml#QtObject")
-            if (callback) callback(rootPosition)
             visible = false
+            lk.layers.workspace.extensions.editqml.add(2, true, true)
         }
     }
 

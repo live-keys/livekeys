@@ -34,7 +34,7 @@ public:
     std::string path;
     std::string filePath;
     std::string package;
-    std::map<std::string, std::string> palettes;
+    std::list<std::pair<std::string, std::string> > palettes;
     std::list<std::string> dependencies;
     std::list<std::string> modules;
     std::list<std::string> libraryModules;
@@ -75,10 +75,10 @@ Plugin::Ptr Plugin::createFromPath(const std::string &path){
     }
 
     instream.seekg(0, std::ios::end);
-    size_t size = instream.tellg();
+    size_t size = static_cast<size_t>(instream.tellg());
     std::string buffer(size, ' ');
     instream.seekg(0);
-    instream.read(&buffer[0], size);
+    instream.read(&buffer[0], static_cast<std::streamsize>(size));
 
     MLNode m;
     ml::fromJson(buffer, m);
@@ -109,7 +109,14 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
     if ( m.hasKey("palettes") ){
         MLNode::ObjectType pal = m["palettes"].asObject();
         for ( auto it = pal.begin(); it != pal.end(); ++it ){
-            pt->m_d->palettes[it->first] = it->second.asString();
+            if ( it->second.type() == MLNode::Array ){
+                const MLNode::ArrayType& itArray = it->second.asArray();
+                for ( auto itItem = itArray.begin(); itItem != itArray.end(); ++itItem ){
+                    pt->m_d->palettes.push_back(std::make_pair(it->first, itItem->asString()));
+                }
+            } else {
+                pt->m_d->palettes.push_back(std::make_pair(it->first, it->second.asString()));
+            }
         }
     }
 
@@ -178,7 +185,7 @@ const std::list<std::string> &Plugin::libraryModules() const{
 }
 
 /** Palettes getter */
-const std::map<std::string, std::string> &Plugin::palettes() const{
+const std::list<std::pair<std::string, std::string> > &Plugin::palettes() const{
     return m_d->palettes;
 }
 

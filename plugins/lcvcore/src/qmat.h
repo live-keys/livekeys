@@ -56,7 +56,6 @@ public:
     const cv::Mat& data() const;
 
     static QMat* nullMat();
-    static void  cleanUp();
 
     QMat* clone() const;
     static QMat* reloc(QMat* m);

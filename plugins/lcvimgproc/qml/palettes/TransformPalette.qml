@@ -63,11 +63,50 @@ CodePalette{
         property real boxRadius: 3
         property color toolIconColor: paletteStyle ? paletteStyle.colorScheme.foregroundFaded : palette.defaultStyle.toolIconColor
         property color toolIconHighlightBackground: paletteStyle ? paletteStyle.colorScheme.middlegroundOverlayDominant : palette.defaultStyle.toolIconHighlightBackground
-        property Component scrollStyle: paletteStyle ? paletteStyle.scrollStyle : palette.defaultStyle.scrollStyle
         property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : palette.defaultStyle.labelStyle
         property Component saveButton: paletteStyle ? paletteStyle.buttons.save : palette.defaultStyle.saveButton
         property Component applyButton: paletteStyle ? paletteStyle.buttons.apply : palette.defaultStyle.applyButton
         property Component cancelButton: paletteStyle ? paletteStyle.buttons.cancel : palette.defaultStyle.cancelButton
+    }
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    function addTransformation(name){
+        var oc = palette.item
+        while (oc && oc.objectName !== "objectContainer")
+        {
+            oc = oc.parent
+        }
+
+        if (oc){ // inside shaping
+
+            var position =
+                oc.editingFragment.valuePosition() +
+                oc.editingFragment.valueLength() - 1
+            paletteControls.addItem(oc, position, "TransformImage", name, false)
+
+            var cont = oc.groupsContainer
+            return cont.children[cont.children.length - 1]
+
+        } else { // inside palette
+
+            var p = palette.item
+            while (p && p.objectName !== "paletteGroup")
+            {
+                p = p.parent
+            }
+            var ef = p.editingFragment
+            while (p && p.objectName !== "editorType")
+            {
+                p = p.parent
+            }
+            var codeHandler = p.documentHandler.codeHandler
+            var position = ef.valuePosition() + ef.valueLength() - 1
+
+            var childEf = paletteControls.addItemToRuntime(codeHandler, ef, position, "TransformImage", name)
+            childEf.visualParent = p
+            return childEf
+        }
     }
 
     item: Item{
@@ -110,12 +149,23 @@ CodePalette{
                     applyButton: palette.style.applyButton
                     cancelButton: palette.style.cancelButton
 
-                    property Component cropImageFactory : Cv.Crop{}
-
                     onApply: {
-                        var crop = cropImageFactory.createObject(paletteItem.transformImage)
-                        crop.region = Qt.rect(x, y, width, height)
-                        paletteItem.transformImage.transformations.push(crop)
+                        var crop = addTransformation("Crop")
+                        var valueToAssign = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
+
+                        var fragment = null
+                        if (crop.editingFragment){ //objectContainer
+                            fragment = paletteControls.addPropertyByName(crop, "region")
+                            crop.expand()
+                        } else {
+                            if (!crop)
+                                return
+                            var codeHandler = crop.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(crop, codeHandler, "region")
+                        }
+
+                        fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
+                        fragment.bindingModel(null).commit(Qt.rect(x, y, width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -161,12 +211,21 @@ CodePalette{
                         }
                     }
 
-                    property Component resizeImageFactory : Img.Resize{}
-
                     onApply: {
-                        var resize = resizeImageFactory.createObject(paletteItem.transformImage)
-                        resize.size = Qt.size(width, height)
-                        paletteItem.transformImage.transformations.push(resize)
+                        var resize = addTransformation("Resize")
+
+                        var fragment = null
+                        if (resize.editingFragment){
+                            fragment = paletteControls.addPropertyByName(resize, "size")
+                            resize.expand()
+                        } else {
+                            if (!resize)
+                                return
+                            var codeHandler = resize.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
+                        }
+                        fragment.write('"' + Math.round(width) + "x" + Math.round(height) + '"')
+                        fragment.bindingModel(null).commit(Qt.size(width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -198,12 +257,22 @@ CodePalette{
                     applyButton: palette.style.applyButton
                     cancelButton: palette.style.cancelButton
 
-                    property Component rotateImageFactory : Img.Rotate{}
-
                     onApply: {
-                        var rotation = rotateImageFactory.createObject(paletteItem.transformImage)
-                        rotation.degrees = -angle
-                        paletteItem.transformImage.transformations.push(rotation)
+
+                        var rotate = addTransformation("Rotate")
+
+                        var fragment = null
+                        if (rotate.editingFragment){
+                            fragment = paletteControls.addPropertyByName(rotate, "degrees")
+                            rotate.expand()
+                        } else {
+                            if (!rotate)
+                                return
+                            var codeHandler = rotate.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(rotate, codeHandler, "degrees")
+                        }
+                        fragment.write(-angle)
+                        fragment.bindingModel(null).commit(-angle)
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -222,6 +291,50 @@ CodePalette{
                         width: 12
                         height: 12
                     }
+                }
+            }
+
+            Workspace.ToolButton{
+                id: perspectiveButton
+                tool: Cv.PerspectiveTool {
+                    id: perspectiveTool
+
+                    canvas: imageView
+                    labelInfoStyle: palette.style.labelStyle.textStyle
+                    applyButton: palette.style.applyButton
+                    cancelButton: palette.style.cancelButton
+
+                    onApply: {
+                        var perspective = addTransformation("Perspective")
+                        var fragment = null
+                        if (perspective.editingFragment){
+                            fragment = paletteControls.addPropertyByName(perspective, "points")
+                            perspective.expand()
+                        } else {
+                            if (!perspective)
+                                return
+                            var codeHandler = perspective.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(perspective, codeHandler, "points")
+                        }
+                        var value = '['
+                        value += '"' + Math.round(p1.x) + "," + Math.round(p1.y) +'",'
+                        value += '"' + Math.round(p2.x) + "," + Math.round(p2.y) +'",'
+                        value += '"' + Math.round(p3.x) + "," + Math.round(p3.y) +'",'
+                        value += '"' + Math.round(p4.x) + "," + Math.round(p4.y) +'"]'
+                        fragment.write(value)
+                        fragment.bindingModel(null).commit([p1, p2, p3, p4])
+                        paletteItem.transformImage.exec()
+                        toolbox.activateTool(null)
+                    }
+                    onCancel: toolbox.activateTool(null)
+                }
+                content: Rectangle{
+                    width: 20
+                    height: 20
+                    color: perspectiveButton.containsMouse || toolbox.selectedTool === perspectiveTool ? palette.style.toolIconHighlightBackground : 'red'
+                    radius: 2
+
+                    // TODO: perspective icon
                 }
             }
         }

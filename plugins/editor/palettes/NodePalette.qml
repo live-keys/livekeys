@@ -73,8 +73,10 @@ CodePalette{
                     p.z = 1000 - j
                     if (property.value.length === 2)
                     {
-                        props.push({"port": p.inPort, "value": property.value})
-
+                        if (p.inPort)
+                            props.push({"port": p.inPort, "value": property.value})
+                        else
+                            props.push({"value": property.value})
                     }
                 }
 
@@ -110,7 +112,8 @@ CodePalette{
                         {
                             var proppx = node.item.properties[ppx]
                             if (proppx.propertyName === props[k].value[1]){
-                                objectGraph.bindPorts(proppx.outPort, props[k].port)
+                                if (props[k].port)
+                                    objectGraph.bindPorts(proppx.outPort, props[k].port)
                                 break
                             }
 
@@ -148,8 +151,8 @@ CodePalette{
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor
-            editingFragment: palette.editingFragment
-            style: palette ? palette.paletteStyle.nodeEditor : defaultStyle
+            editingFragment: palette ? palette.editingFragment: null
+            style: palette && palette.paletteStyle ? palette.paletteStyle.nodeEditor : defaultStyle
         }
     }
 

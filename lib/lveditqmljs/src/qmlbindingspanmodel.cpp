@@ -86,4 +86,8 @@ int QmlBindingSpanModel::inputPathIndex() const{
     return -1;
 }
 
+void QmlBindingSpanModel::commit(const QVariant &value){
+    m_edit->bindingSpan()->commit(value);
+}
+
 }// namespace

@@ -593,6 +593,16 @@ Module {
         }
     }
     Component {
+        name: "QTransformImage"
+        defaultProperty: "items"
+        prototype: "QObject"
+        exports: ["lcvimgproc/TransformImage 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "input"; type: "QObject" }
+        Property { name: "result"; type: "QJSValue"; isReadonly: true }
+        Property { name: "items"; type: "QObject"; isList: true; isReadonly: true }
+    }
+    Component {
         name: "QHoughLines"
         defaultProperty: "data"
         prototype: "QMatFilter"

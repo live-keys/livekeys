@@ -107,7 +107,12 @@ public:
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
 public slots:
-    void processingChanged(bool value);
+    void __whenLibraryScanQueueCleared();
+    bool areImportsScanned();
+
+    void onDocumentParse(QJSValue callback);
+    void onImportsScanned(QJSValue callback);
+    void removeSyncImportsListeners();
 
     QList<int> languageFeatures() const;
     void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
@@ -201,9 +206,11 @@ public slots:
     void aboutToDelete();
     QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
     QString getFragmentId(lv::QmlEditFragment* ef);
+
 signals:
     void numberOfConnectionsChanged();
-    void stoppedProcessing();
+    void importsScanned();
+
 private:
     QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
@@ -265,6 +272,7 @@ private:
     bool isBlockEmptySpace(const QTextBlock& bl);
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
+private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
     QmlJsSettings*      m_settings;
@@ -272,6 +280,9 @@ private:
     QmlCompletionContextFinder* m_completionContextFinder;
 
     ProjectDocument*       m_document;
+
+    QLinkedList<QJSValue>  m_documentParseListeners;
+    QLinkedList<QJSValue>  m_importsScannedListeners;
 
     bool                   m_newScope;
     QTimer                 m_scopeTimer;

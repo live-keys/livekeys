@@ -18,6 +18,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import editqml 1.0 as QmlEdit
 import live 1.0
 import workspace 1.0 as Workspace
 
@@ -34,6 +35,21 @@ CodePalette{
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
+
+    function writeBinding(){
+        var text = input.text
+
+        var ef = extension.editingFragment()
+        var result = extension.bindExpression(text)
+
+        if ( result ){
+            extension.write({'__ref': text ? text : ef.defaultValue()})
+        }
+
+        input.autoTextChange = true
+        input.text = text
+        input.autoTextChange = false
+    }
 
     item: Rectangle{
 
@@ -96,10 +112,7 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = extension.bindExpression(input.text)
-                        if ( result ){
-                            extension.write({'__ref': input.text})
-                        }
+                        palette.writeBinding()
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
@@ -134,16 +147,34 @@ CodePalette{
             height: 25
             content: paletteStyle ? paletteStyle.buttons.connect : null
             onClicked: {
-                var ef = extension.editingFragment()
-                var result = extension.bindExpression(input.text)
-                if ( result ){
-                    extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
-                }
+                palette.writeBinding()
             }
         }
     }
 
     onInit: {
+        var contents = extension.readContents()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.dot &&
+                 tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                isBindingExpression = false
+            } else {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            }
+        }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
         input.forceActiveFocus()
     }
 

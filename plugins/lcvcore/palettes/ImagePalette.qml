@@ -36,7 +36,6 @@ CodePalette{
         property color boxBorderColor: "#666"
         property int boxBorderWidth: 1
         property real boxRadius: 3
-        property Component scrollStyle: imageView.defaultStyle.scrollStyle
         property QtObject labelStyle: QtObject{
             property color background: '#666'
             property double radius: 3
@@ -55,7 +54,6 @@ CodePalette{
         property color boxBorderColor: paletteStyle ? paletteStyle.colorScheme.backgroundBorder : palette.defaultStyle.boxBorderColor
         property int boxBorderWidth: 1
         property real boxRadius: 3
-        property Component scrollStyle: paletteStyle ? paletteStyle.scrollStyle : palette.defaultStyle.scrollStyle
         property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : palette.defaultStyle.labelStyle
         property Component saveButton: paletteStyle ? paletteStyle.buttons.save : palette.defaultStyle.saveButton
     }

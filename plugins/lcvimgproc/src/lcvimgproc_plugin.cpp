@@ -37,6 +37,7 @@
 #include "qcachedwarpperspective.h"
 #include "qgeometry.h"
 #include "qshapedescriptors.h"
+#include "qtransformimage.h"
 
 #include <QQmlEngine>
 
@@ -71,6 +72,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QGetPerspectiveTransform>(uri, 1, 0, "GetPerspectiveTransform");
     qmlRegisterType<QWarpPerspective>(        uri, 1, 0, "WarpPerspective");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
+    qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");
 
     qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
     qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);

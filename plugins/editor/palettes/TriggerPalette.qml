@@ -18,7 +18,9 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import editqml 1.0 as QmlEdit
 import live 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
@@ -30,6 +32,8 @@ CodePalette{
         weight: Font.Normal
     })
 
+    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
     item: Rectangle{
@@ -40,18 +44,16 @@ CodePalette{
 
         //TODO: ErrorBox when not binding
 
-        InputBox{
+        Workspace.InputBox{
             id: input
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.right: parent.right
-            anchors.rightMargin: 20
+            anchors.rightMargin: 35
             anchors.top: parent.top
-            anchors.topMargin: 5
             height: 25
-            border.width: 1
-            border.color: "#031728"
-            text: ''
+
+            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+
             onTextChanged: {
                 if ( !autoTextChange ){
                    extension.suggestionsForExpression(input.text, palette.codeModel, true)
@@ -106,11 +108,6 @@ CodePalette{
                     event.accepted = true
                 }
             }
-
-            color: '#050e15'
-
-            font.family: palette.inputFont.family
-            font.pixelSize: palette.inputFont.pixelSize
         }
 
         SuggestionBox{
@@ -131,9 +128,63 @@ CodePalette{
                 NumberAnimation { duration: 150 }
             }
         }
+
+        Workspace.Button{
+            anchors.right: parent.right
+            width: 30
+            height: 25
+            content: paletteStyle ? paletteStyle.buttons.connect : null
+            onClicked: {
+                var result = extension.bindFunctionExpression(input.text)
+                if ( result ){
+                    extension.write({'__ref': input.text})
+                }
+            }
+        }
     }
 
     onInit: {
+        var contents = extension.readContents()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+
+        var leftParanthesisIndex = -1
+        var rightParanthesisIndex = -1
+
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind === QmlEdit.Tokenizer.tokenKind.leftParenthesis )
+            {
+                if ( leftParanthesisIndex < 0 )
+                    leftParanthesisIndex = i
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+
+            } else if ( tokens[i].kind === QmlEdit.Tokenizer.tokenKind.rightParenthesis ){
+                if ( rightParanthesisIndex < 0 )
+                    rightParanthesisIndex = i
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+
+            } else if ( tokens[i].kind === QmlEdit.Tokenizer.tokenKind.dot ||
+                        tokens[i].kind === QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            } else {
+                isBindingExpression = false
+            }
+        }
+
+        if ( leftParanthesisIndex < 0 || rightParanthesisIndex !== leftParanthesisIndex + 1 || rightParanthesisIndex !== tokens.length - 1){
+            isBindingExpression = false
+        }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
         input.forceActiveFocus()
     }
 

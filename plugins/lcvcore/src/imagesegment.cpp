@@ -5,10 +5,14 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/project.h"
 
 #include <QMetaObject>
 #include <QJSValue>
 #include <QJSValueIterator>
+#include <QQmlContext>
+#include <QQmlEngine>
+#include <QFileInfo>
 
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
@@ -17,7 +21,7 @@ namespace lv{
 
 ImageSegment::ImageSegment(QObject *parent)
     : Segment(parent)
-    , m_track(nullptr)
+    , m_videoTrack(nullptr)
     , m_image(new QMat)
 {
 }
@@ -37,14 +41,36 @@ void ImageSegment::openFile(){
 void ImageSegment::serialize(QQmlEngine *engine, MLNode &node) const{
     Segment::serialize(engine, node);
 
-    node["file"] = m_file.toStdString();
+    QString filePath = m_file;
+
+    QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
+    Project* project = qobject_cast<Project*>(projectOb);
+
+    if ( project ){
+        if ( filePath.startsWith(project->dir()) ){
+            filePath = filePath.mid(project->dir().length());
+        }
+    }
+
+    node["file"] = filePath.toStdString();
     node["type"] = "ImageSegment";
     node["factory"] = "lcvcore/ImageSegmentFactory.qml";
 }
 
 void ImageSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &node){
     Segment::deserialize(track, engine, node);
-    setFile(QString::fromStdString(node["file"].asString()));
+
+    QString fileName = QString::fromStdString(node["file"].asString());
+    QFileInfo finfo(fileName);
+    if ( finfo.isRelative() ){
+        QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
+        Project* project = qobject_cast<Project*>(projectOb);
+        if ( project ){
+            fileName = QFileInfo(project->dir() + "/" + fileName).canonicalFilePath();
+        }
+    }
+
+    setFile(fileName);
 }
 
 void ImageSegment::assignTrack(Track *track){
@@ -54,35 +80,36 @@ void ImageSegment::assignTrack(Track *track){
         lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
-    m_track = nt;
+    m_videoTrack = nt;
+    Segment::assignTrack(track);
 }
 
 void ImageSegment::cursorEnter(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 void ImageSegment::cursorExit(qint64){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->resetSurface();
+    m_videoTrack->surface()->resetSurface();
 }
 
 void ImageSegment::cursorNext(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 void ImageSegment::cursorMove(qint64 pos){
-    if ( !m_track || !m_track->surface() || !m_image)
+    if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
 
-    m_track->surface()->updateSurface(position() + pos, m_image->cloneMat());
+    m_videoTrack->surface()->updateSurface(position() + pos, m_image->cloneMat());
 }
 
 }// namespace

@@ -30,8 +30,8 @@ Item{
         if (max < 300)
             max = 300
 
-        if (max !== contentWidth){
-            contentWidth = max
+        if (max !== containerContentWidth){
+            containerContentWidth = max
         }
     }
 
@@ -41,6 +41,8 @@ Item{
         }
     }
 
+    property double containerContentWidth : 0
+    property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.editor.lineSurfaceWidth - 50 : 0
 
     property alias editingFragment : objectContainer.editingFragment
     property alias editor : objectContainer.editor
@@ -54,11 +56,12 @@ Item{
     property var parentObjectContainer: null
     property var isForProperty: false
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteStyle: lk? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
 
-    property int contentWidth: 0
+    property int contentWidth: containerContentWidth
 
     property Rectangle placeHolder : Rectangle{
         height: 30
@@ -107,6 +110,35 @@ Item{
         if (!ef) return
 
         paletteControls.addPropertyContainer(root, ef, expandDefault)
+    }
+
+    function destroyObjectContainer(oc){
+        for (var pi = 0; pi < oc.groupsContainer.children.length; ++pi){
+            var child = oc.groupsContainer.children[pi]
+            if (child.objectName === "paletteGroup"){
+                var pg = child
+                for (var xi = 0; xi < pg.children.length; ++xi)
+                    if (pg.children[xi].objectName === "paletteContainer")
+                        pg.children[xi].destroy()
+                pg.destroy()
+            }
+            if (child.objectName === "propertyContainer"){
+                var pc = child
+                if (pc.valueContainer.objectName === "paletteGroup"){
+                    var pg = pc.valueContainer
+                    for (var xi = 0; xi < pg.children.length; ++xi)
+                        if (pg.children[xi].objectName === "paletteContainer")
+                            pg.children[xi].destroy()
+                    pg.destroy()
+                }
+                if (pc.valueContainer.objectName === "objectContainer"){
+                    oc.destroyObjectContainer(pc.valueContainer)
+                }
+
+                pc.destroy()
+            }
+        }
+        oc.destroy()
     }
 
     Item{
@@ -195,6 +227,7 @@ Item{
 
         function expand(){
             compact = false
+            if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
             paletteControls.openDefaults(root)
 
@@ -229,12 +262,13 @@ Item{
                 var p = root.parent
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
+                    destroyObjectContainer(root)
                     p.destroy()
                 } else { // if this is nested
                     //TODO: Check if this is nested within a property container
                     if ( objectContainer.pane )
                         objectContainer.closeAsPane()
-                    root.destroy()
+                    destroyObjectContainer(root)
                 }
             }
         }
@@ -265,7 +299,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                else addPropertyFragmentToContainer(ef, expandDefault)
+                addPropertyFragmentToContainer(ef, expandDefault)
                 container.sortChildren()
             }
         }
@@ -300,12 +334,7 @@ Item{
 
                     if (rootDeleted) {
                         editor.editor.rootShaped = false
-
                         editor.editor.addRootButton.visible = true
-                        editor.editor.addRootButton.callback = function(rootPosition){
-                            lk.layers.workspace.extensions.editqml.rootPosition = rootPosition
-                            lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler)
-                        }
                     }
                 }
                 onToggleConnections: {
@@ -419,7 +448,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false)
+                    paletteControls.compose(objectContainer, false, root.paletteStyle)
                 }
             }
         }

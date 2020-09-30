@@ -175,7 +175,6 @@ CodePalette{
                 }
             }
         }
-
     }
 
     onExtensionChanged: {

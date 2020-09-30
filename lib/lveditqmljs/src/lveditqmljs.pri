@@ -30,6 +30,7 @@ HEADERS += \
     $$PWD/qmldeclaration.h \
     $$PWD/qmllanguagescanner.h \
     $$PWD/qmlbuilder.h \
+    $$PWD/qmltokenizer_p.h \
     $$PWD/qmlwatcher.h \
     $$PWD/qmllanguagescanmonitor.h\
     $$PWD/qmlscopesnap_p.h \
@@ -66,8 +67,11 @@ SOURCES += \
     $$PWD/qmllanguagescanner.cpp \
     $$PWD/qmllanguagescanmonitor.cpp \
     $$PWD/qmlbuilder.cpp \
+    $$PWD/qmltokenizer.cpp \
     $$PWD/qmlwatcher.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlsuggestionmodel.cpp \
     $$PWD/qmlusagegraphscanner.cpp \
     $$PWD/qmlwatcherbackground.cpp
+
+DISTFILES +=

@@ -47,6 +47,12 @@ Pane{
 
     property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
 
+    onCodeOnlyChanged: {
+        if (codeOnly){
+            editor.addRootButton.visible = false
+        }
+    }
+
     paneType: 'editor'
     paneState : { return {} }
     paneInitialize : function(s){
@@ -221,6 +227,8 @@ Pane{
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Normal
+            elide: Text.ElideRight
+            width: Math.max(20, parent.width - 200)
         }
 
         Rectangle{
@@ -275,7 +283,6 @@ Pane{
                             editor.importsShaped = false
                             editor.rootShaped = false
                         }
-                        // close all fragments
                     } else {
                         lk.layers.workspace.commands.execute("editqml.shape_all")
                         // shape all

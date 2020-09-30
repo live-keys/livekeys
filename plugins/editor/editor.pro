@@ -58,6 +58,7 @@ DISTFILES += \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
+    palettes/IntInputPalette.qml \
     palettes/NodePalette.qml \
     palettes/PathPalette.qml \
     palettes/RectangleSizePalette.json \

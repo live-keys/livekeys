@@ -38,18 +38,18 @@ QmlFileReader::~QmlFileReader(){
     }
 }
 
-void QmlFileReader::setSource(QString source){
-    if (m_source == source)
+void QmlFileReader::setFile(QString file){
+    if (m_file == file)
         return;
     if ( m_watcher ){
-        if ( !m_source.isEmpty() )
-            m_watcher->removePath(m_source);
-        if ( !source.isEmpty() )
-            m_watcher->addPath(source);
+        if ( !m_file.isEmpty() )
+            m_watcher->removePath(m_file);
+        if ( !file.isEmpty() )
+            m_watcher->addPath(file);
     }
 
-    m_source = source;
-    emit sourceChanged(source);
+    m_file = file;
+    emit fileChanged(file);
 
     resync();
 }
@@ -58,8 +58,8 @@ void QmlFileReader::setMonitor(bool monitor){
     if ( monitor ){
         if ( !m_watcher ){
             m_watcher = new QFileSystemWatcher;
-            if ( !m_source.isEmpty() )
-                m_watcher->addPath(m_source);
+            if ( !m_file.isEmpty() )
+                m_watcher->addPath(m_file);
             connect(m_watcher, SIGNAL(fileChanged(QString)), this, SLOT(systemFileChanged(QString)));
         }
     } else if ( m_watcher ){
@@ -76,10 +76,10 @@ void QmlFileReader::systemFileChanged(const QString &){
 }
 
 void QmlFileReader::resync(){
-    if ( m_componentComplete && m_source != "" ){
-        QFile fileInput(m_source);
+    if ( m_componentComplete && m_file != "" ){
+        QFile fileInput(m_file);
         if ( !fileInput.open(QIODevice::ReadOnly ) ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_source.toStdString(), 0);
+            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_file.toStdString(), 0);
             lv::ViewContext::instance().engine()->throwError(&e);
             return;
         }

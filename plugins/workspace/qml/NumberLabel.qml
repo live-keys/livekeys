@@ -9,7 +9,7 @@ LabelOnRectangle{
 
     property var up: undefined
     property var down: undefined
-
+    property var wheelEnabled: false
     Triangle{
         id: upTr
         anchors.top: parent.top
@@ -28,6 +28,7 @@ LabelOnRectangle{
                if (up) up()
             }
             onWheel: {
+                if (!wheelEnabled) return
                 if (wheel.angleDelta.y > 0 && up) up()
                 if (wheel.angleDelta.y < 0 && down) down()
             }
@@ -62,10 +63,14 @@ LabelOnRectangle{
 
     MouseArea {
         anchors.fill: parent
-        onWheel: {
-            if (mode === 0) return
+        onWheel: {            
+            if (!wheelEnabled) {
+                wheel.accepted = false
+                return
+            }
             if (wheel.angleDelta.y > 0 && up) up()
             if (wheel.angleDelta.y < 0 && down) down()
         }
+        onClicked: root.forceActiveFocus()
     }
 }

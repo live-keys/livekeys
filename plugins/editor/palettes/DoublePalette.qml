@@ -62,7 +62,7 @@ CodePalette{
                     extension.write(palette.value)
             }
             stepSize: 1.0
-            maximumValue: 200
+            maximumValue: 25
 
             style: SliderStyle{
                 groove: Rectangle {
@@ -76,6 +76,8 @@ CodePalette{
                     color: '#9b9da0'
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: intSlider.activeFocus
         }
 
         Slider{
@@ -115,6 +117,8 @@ CodePalette{
                     rotation: Triangle.Top
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: fractionalSlider.activeFocus
         }
 
         Workspace.NumberLabel{
@@ -161,6 +165,8 @@ CodePalette{
                     intSlider.value = intSlider.minimumValue
             }
             text: intSlider.minimumValue
+            wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
+
         }
 
 
@@ -210,6 +216,7 @@ CodePalette{
             }
 
             text: intSlider.maximumValue
+            wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
         }
 
     }
@@ -221,6 +228,23 @@ CodePalette{
     }
 
     onInit: {
+        if (value < intSlider.minimumValue || value > intSlider.maximumValue){
+            if (value > 0){
+                while (intSlider.maximumValue < value){
+                    intSlider.minimumValue = intSlider.maximumValue
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                }
+            } else if (value < 0){
+                intSlider.minimumValue = -25
+                intSlider.maximumValue = 0
+                while (intSlider.minimumValue > value){
+                    intSlider.maximumValue = intSlider.minimumValue
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                }
+            }
+        }
+
         intSlider.value = Math.floor(value)
         fractionalSlider.value = value - intSlider.value
     }

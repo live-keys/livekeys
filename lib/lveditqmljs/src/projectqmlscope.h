@@ -97,6 +97,7 @@ public:
 
     QString toString();
 
+    QmlLanguageScanMonitor* languageScanMonitor();
     QmlLanguageScanner* languageScanner();
 
 public slots:
@@ -104,6 +105,7 @@ public slots:
 
 signals:
     void __processQueue();
+    void libraryScanQueueCleared();
 
 private:
     ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
@@ -141,6 +143,10 @@ inline void ProjectQmlScope::addDefaultLibraries(const QList<QString> &paths){
 /// \brief Returns the default libraries
 inline const QList<QString> &ProjectQmlScope::defaultLibraries() const{
     return m_defaultLibraries;
+}
+
+inline QmlLanguageScanMonitor *ProjectQmlScope::languageScanMonitor(){
+    return m_scanMonitor;
 }
 
 }// namespace
