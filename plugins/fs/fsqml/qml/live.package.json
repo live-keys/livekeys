@@ -5,13 +5,13 @@
         "label" : "File system.",
         "samples" : [
             {
-                "label" : "Reading files.",
+                "label" : "Reading files",
                 "link" : "samples/readingfiles",
                 "category" : "file-system",
                 "description" : "Reading a file."
             },
             {
-                "label" : "File explorer.",
+                "label" : "File explorer",
                 "link" : "samples/fileexplorer",
                 "category" : "file-system",
                 "description" : "A file explorer that can be connected to other components for automation."
