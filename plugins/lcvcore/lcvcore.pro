@@ -69,7 +69,7 @@ DISTFILES += \
     qml/ColorHistogramView.qml \
     qml/Crop.qml \
     qml/CropTool.qml \
-    qml/Draw.qml \
+    qml/DrawSurface.qml \
     qml/EditCvExtension.qml \
     qml/GrayscaleView.qml \
     qml/ImageRead.qml \

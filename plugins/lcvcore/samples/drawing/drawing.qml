@@ -11,13 +11,13 @@ Grid{
         channels: 3
     }
     
-    Draw{
-        id: draw
+    DrawSurface{
+        id: drawSurface
         input: blankImage.result
     }
         
     ColorHistogramView{
-        input: draw.result
+        input: drawSurface.result
     }
     
     

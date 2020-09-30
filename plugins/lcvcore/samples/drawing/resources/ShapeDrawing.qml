@@ -29,7 +29,7 @@ WorkspaceControl{
                             ]
                         },
                         {
-                            "type": "qml/lcvcore#Draw",
+                            "type": "qml/lcvcore#DrawSurface",
                             "palettes": ["DrawPalette"],
                             "properties": [
                                 {
