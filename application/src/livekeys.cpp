@@ -36,9 +36,6 @@
 #include "live/documenthandler.h"
 #include "live/editorprivate_plugin.h"
 
-#include "live/projectqmlextension.h"
-#include "live/codeqmlhandler.h"
-#include "live/documentqmlinfo.h"
 #include "qmlengineinterceptor.h"
 
 #include "live/windowlayer.h"
