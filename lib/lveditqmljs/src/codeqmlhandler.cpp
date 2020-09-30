@@ -3077,16 +3077,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             defaultExports = defaultLib->listExports();
         }
         for( const QString& de: defaultExports ){
-            addContainer->model()->addItem(
-                QmlSuggestionModel::ItemData(
-                    de,
-                    "",
-                    "",
-                    "QtQml",
-                    "QtQml",
-                    de,
-                    QmlSuggestionModel::ItemData::Object)
-            );
+            if ( de != "Component"){
+                addContainer->model()->addItem(
+                    QmlSuggestionModel::ItemData(
+                        de,
+                        "",
+                        "",
+                        "QtQml",
+                        "QtQml",
+                        de,
+                        QmlSuggestionModel::ItemData::Object)
+                );
+            }
         }
     }
 
@@ -3112,16 +3114,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                 }
 
                 for ( const QString& exp: libexports ){
-                    addContainer->model()->addItem(
-                        QmlSuggestionModel::ItemData(
-                            exp,
-                            "",
-                            "",
-                            imp.uri(),
-                            imp.uri(),
-                            exp,
-                            QmlSuggestionModel::ItemData::Object)
-                    );
+                    if ( exp != "Component"){
+                        addContainer->model()->addItem(
+                            QmlSuggestionModel::ItemData(
+                                exp,
+                                "",
+                                "",
+                                imp.uri(),
+                                imp.uri(),
+                                exp,
+                                QmlSuggestionModel::ItemData::Object)
+                        );
+                    }
                 }
             }
         }
