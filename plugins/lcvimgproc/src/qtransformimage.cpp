@@ -8,6 +8,7 @@
 
 QTransformImage::QTransformImage(QObject *parent)
     : QObject(parent)
+    , m_input(nullptr)
     , m_result(QJSValue(QJSValue::NullValue))
 {
 }
