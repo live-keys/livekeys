@@ -35,6 +35,7 @@ Rectangle {
     signal toggleLogWindow()
     signal openSettings()
     signal openLicense()
+    signal openMessages()
 
     property string newIcon: ""
     property string saveIcon: ""
@@ -365,5 +366,39 @@ Rectangle {
         }
     }
 
+    // Messages
 
+    Rectangle{
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        color: "transparent"
+        height : messagesArea.containsMouse ? parent.height : parent.height - 5
+        width : 25
+        Text{
+            id : messagesText
+            anchors.centerIn: parent
+            text: "!"
+            color: "white"
+        }
+        Rectangle{
+            color : "#031626"
+            width : parent.width
+            height : 3
+            anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            visible : messagesArea.containsMouse
+        }
+        Behavior on height{ NumberAnimation{  duration: 100 } }
+        MouseArea{
+            id : messagesArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: container.openMessages()
+        }
+        Workspace.Tooltip{
+            x: -70
+            mouseOver: messagesArea.containsMouse
+            text: "Show messages"
+        }
+    }
 }

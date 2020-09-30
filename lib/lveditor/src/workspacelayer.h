@@ -9,6 +9,7 @@
 #include "live/layer.h"
 #include "live/keymap.h"
 
+#include "workspacemessagestack.h"
 #include "themecontainer.h"
 #include "commands.h"
 #include "extensions.h"
@@ -27,16 +28,17 @@ class ProjectWorkspace;
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* project                 READ project       NOTIFY projectChanged)
-    Q_PROPERTY(QObject* panes                   READ panes         NOTIFY panesChanged)
-    Q_PROPERTY(lv::Commands* commands           READ commands      CONSTANT)
-    Q_PROPERTY(lv::KeyMap* keymap               READ keymap        CONSTANT)
-    Q_PROPERTY(lv::ThemeContainer* themes       READ themes        CONSTANT)
-    Q_PROPERTY(lv::Documentation* documentation READ documentation CONSTANT)
-    Q_PROPERTY(QQmlPropertyMap* extensions      READ extensions    CONSTANT)
-    Q_PROPERTY(lv::StartupModel* recents        READ recents       CONSTANT)
-    Q_PROPERTY(lv::StartupModel* tutorials      READ tutorials     CONSTANT)
-    Q_PROPERTY(lv::StartupModel* samples        READ samples       CONSTANT)
+    Q_PROPERTY(QObject* project                     READ project       NOTIFY projectChanged)
+    Q_PROPERTY(QObject* panes                       READ panes         NOTIFY panesChanged)
+    Q_PROPERTY(lv::WorkspaceMessageStack* messages  READ messages      CONSTANT)
+    Q_PROPERTY(lv::Commands* commands               READ commands      CONSTANT)
+    Q_PROPERTY(lv::KeyMap* keymap                   READ keymap        CONSTANT)
+    Q_PROPERTY(lv::ThemeContainer* themes           READ themes        CONSTANT)
+    Q_PROPERTY(lv::Documentation* documentation     READ documentation CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap* extensions          READ extensions    CONSTANT)
+    Q_PROPERTY(lv::StartupModel* recents            READ recents       CONSTANT)
+    Q_PROPERTY(lv::StartupModel* tutorials          READ tutorials     CONSTANT)
+    Q_PROPERTY(lv::StartupModel* samples            READ samples       CONSTANT)
 
 public:
     explicit WorkspaceLayer(QObject *parent = nullptr);
@@ -48,6 +50,7 @@ public:
 
     QObject* project() const;
     QObject* panes() const;
+    lv::WorkspaceMessageStack* messages() const;
 
     lv::Commands* commands() const;
     lv::KeyMap* keymap() const;
@@ -100,6 +103,7 @@ private:
     QObject* m_panes;
     QObject* m_viewRoot;
 
+    lv::WorkspaceMessageStack* m_messageStack;
     Commands* m_commands;
     KeyMap*   m_keymap;
     ThemeContainer* m_themes;

@@ -443,6 +443,10 @@ Item{
             commandsMenu.visible = !commandsMenu.visible
         }
 
+        onOpenMessages: {
+            messagesContainer.visible = !messagesContainer.visible
+        }
+
         onOpenSettings: {
             var fe = lk.layers.workspace.project.openFile(
                 lk.settings.file('editor').path, ProjectDocument.Edit
@@ -458,6 +462,13 @@ Item{
         id: commandsMenu
         anchors.top: header.bottom
         x: 355
+    }
+
+    MessagesContainer{
+        id: messagesContainer
+        anchors.top: header.bottom
+        anchors.right: parent.right
+        z: 3000
     }
 
     Component{
