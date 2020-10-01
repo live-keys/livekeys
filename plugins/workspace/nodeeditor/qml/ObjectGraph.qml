@@ -240,11 +240,15 @@ Rectangle{
             )
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
+            root.activateFocus()
+
             addBoxItem.destroy()
             addBox.destroy()
         }
 
         addBoxItem.cancel = function(){
+            root.activateFocus()
+
             addBoxItem.destroy()
             addBox.destroy()
         }
@@ -309,7 +313,8 @@ Rectangle{
         --palette.numOfObjects
         if (node.item.selected)
             --numOfSelectedNodes
-
+        if (numOfSelectedNodes === 0)
+            root.activateFocus()
         graph.removeNode(node)
     }
     
@@ -433,17 +438,22 @@ Rectangle{
         }
     }  // Qan.GraphView
 
-    MouseArea {
-        id: ma
-        visible: !root.isInteractive
-        enabled: !root.isInteractive
+    Rectangle {
         anchors.fill: parent
-        acceptedButtons: Qt.LeftButton
-        onWheel: {
-            wheel.accepted = false
-        }
-        onClicked: {
-            root.activateFocus()
+        visible: !root.isInteractive
+        color: "#66333333"
+        z: 3000
+        MouseArea {
+            id: ma
+            enabled: !root.isInteractive
+            anchors.fill: parent
+            acceptedButtons: Qt.LeftButton
+            onWheel: {
+                wheel.accepted = false
+            }
+            onClicked: {
+                root.activateFocus()
+            }
         }
     }
 
