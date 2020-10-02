@@ -29,7 +29,7 @@ Item{
     anchors.fill: parent
     objectName: "workspace"
 
-    property Item runSpace : runSpace
+    property Item runSpace : viewer.runSpace
 
     property QtObject style : QtObject{
         property font errorFont : Qt.font({
@@ -395,9 +395,9 @@ Item{
 //                    'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
 //                    'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
 //                    'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
-                    'setLiveCodingMode': [modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
-                    'setOnSaveCodingMode': [modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
-                    'setDisabledCodingMode': [modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
+                    'setLiveCodingMode': [viewer.modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
+                    'setOnSaveCodingMode': [viewer.modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
+                    'setDisabledCodingMode': [viewer.modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
                     'runProject': [project.run, "Run Project"],
                     'addRunView' : [root.addRunView, "Add Run View"],
                     "help" : [root.help, "Help"]
@@ -419,8 +419,6 @@ Item{
 
     Top{
         id : header
-        modeContainer: modeContainer
-        runnablesMenu: runnablesMenu
         anchors.top : parent.top
         anchors.left: parent.left
         anchors.right: parent.right
@@ -445,6 +443,10 @@ Item{
             commandsMenu.visible = !commandsMenu.visible
         }
 
+        onOpenMessages: {
+            messagesContainer.visible = !messagesContainer.visible
+        }
+
         onOpenSettings: {
             var fe = lk.layers.workspace.project.openFile(
                 lk.settings.file('editor').path, ProjectDocument.Edit
@@ -462,23 +464,11 @@ Item{
         x: 355
     }
 
-    RunnablesMenu{
-        id: runnablesMenu
+    MessagesContainer{
+        id: messagesContainer
         anchors.top: header.bottom
-        onRunnableSelected: {
-            if ( project.active )
-                project.active.setRunSpace(null)
-
-            project.setActive(path)
-        }
-        x: 550
-    }
-
-    ModeContainer {
-        id: modeContainer
-        onRunTriggerSelected: project.runTrigger = trigger
-        anchors.top: header.bottom
-        x: 620
+        anchors.right: parent.right
+        z: 3000
     }
 
     Component{
@@ -585,36 +575,9 @@ Item{
         panes: root.panes
     }
 
-    property Item viewer : Pane{
-        id : viewer
-        objectName: "viewer"
-        paneType: "viewer"
-        color: 'transparent'
-        property var error: error
-
-        Item{
-            id: runSpace
-            clip: true
-            anchors.fill: parent
-        }
-
-        Connections{
-            target: project.active
-            onObjectReady : { error.text = '' }
-            onRunError : {
-                var errorMessage = error.wrapMessage(errors)
-                error.text = errorMessage.rich
-                console.error(errorMessage.log)
-            }
-        }
-
-        ErrorContainer{
-            id: error
-            anchors.bottom: parent.bottom
-            width : parent.width
-            color : root.style.errorBackgroundColor
-            font: root.style.errorFont
-        }
+    property Item viewer : Viewer {
+        id: viewer
+        panes: root.panes
     }
 
     Component{
