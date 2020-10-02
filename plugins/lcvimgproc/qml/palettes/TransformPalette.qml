@@ -317,10 +317,10 @@ CodePalette{
                             fragment = paletteControls.addPropertyByFragment(perspective, codeHandler, "points")
                         }
                         var value = '['
-                        value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
-                        value += 'Qt.point(' + Math.round(p2.x) + ", " + Math.round(p2.y) +'), '
-                        value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
-                        value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
+                        value += '"' + Math.round(p1.x) + "," + Math.round(p1.y) +'",'
+                        value += '"' + Math.round(p2.x) + "," + Math.round(p2.y) +'",'
+                        value += '"' + Math.round(p3.x) + "," + Math.round(p3.y) +'",'
+                        value += '"' + Math.round(p4.x) + "," + Math.round(p4.y) +'"]'
                         fragment.write(value)
                         fragment.bindingModel(null).commit([p1, p2, p3, p4])
                         paletteItem.transformImage.exec()

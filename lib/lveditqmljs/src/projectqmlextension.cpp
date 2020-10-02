@@ -32,7 +32,6 @@
 #include "qmleditfragment.h"
 #include "qmlbindingspanmodel.h"
 #include "qmltokenizer_p.h"
-#include "qmlmetainfo_p.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -42,11 +41,6 @@ namespace lv{
 static QObject* qmlTokenizerProvider(QQmlEngine* engine, QJSEngine*){
     return new QmlTokenizer(engine);
 }
-
-static QObject* qmlMetaInfoProvider(QQmlEngine* engine, QJSEngine*){
-    return new QmlMetaInfo(engine);
-}
-
 
 /**
  * \class lv::ProjectQmlExtension
@@ -171,7 +165,6 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
-    qmlRegisterSingletonType<lv::QmlMetaInfo>(uri, 1, 0, "MetaInfo", &qmlMetaInfoProvider);
 }
 
 /**

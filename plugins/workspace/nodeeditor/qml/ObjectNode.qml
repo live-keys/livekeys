@@ -90,8 +90,6 @@ Qan.NodeItem{
 
     onSelectedChanged: {
         objectGraph.numOfSelectedNodes += selected ? 1 : -1
-        if (objectGraph.numOfSelectedNodes === 0)
-            objectGraph.activateFocus()
     }
 
     property QtObject defaultStyle : QtObject{
@@ -166,7 +164,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true, root.paletteStyle, objectGraph)
+                        paletteControls.compose(root, true, root.paletteStyle)
                     }
                 }
             }
@@ -200,7 +198,6 @@ Qan.NodeItem{
                                 paletteList.focus = false
                                 paletteList.model = null
                                 objectGraph.paletteListOpened = false
-                                objectGraph.activateFocus()
                                 paletteList.destroy()
                             }
                             paletteList.selectedHandler = function(index){
@@ -215,7 +212,6 @@ Qan.NodeItem{
                                 if (paletteBox) paletteBox.moveEnabledSet = false
 
                                 objectGraph.paletteListOpened = false
-                                objectGraph.activateFocus()
                                 paletteList.destroy()
                             }
                         }

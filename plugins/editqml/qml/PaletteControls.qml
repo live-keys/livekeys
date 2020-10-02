@@ -201,7 +201,7 @@ QtObject{
         }
     }
 
-    function compose(container, isForNode, style, objectGraph){
+    function compose(container, isForNode, style){
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var position =
@@ -218,6 +218,8 @@ QtObject{
         addBoxItem.addContainer = addContainer
         addBoxItem.codeQmlHandler = codeHandler
         addBoxItem.isForNode = isForNode
+
+        addBoxItem.assignFocus()
 
         var oct = container.parent
 
@@ -241,8 +243,6 @@ QtObject{
 
         addBox.color = 'transparent'
         addBoxItem.cancel = function(){
-
-            if (isForNode) objectGraph.activateFocus()
             addBoxItem.destroy()
             addBox.destroy()
         }
@@ -326,7 +326,6 @@ QtObject{
                 addSubobject(container.nodeParent, data, container.nodeParent.item.id ? 1 : 0, null)
             }
 
-            if (isForNode) objectGraph.activateFocus()
             addBoxItem.destroy()
             addBox.destroy()
         }

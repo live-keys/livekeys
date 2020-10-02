@@ -60,8 +60,6 @@ DISTFILES += \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \
-    qml/MessagesContainer.qml \
-    qml/Viewer.qml \
     qml/editorlayer.qml \
     qml/PaneSplitView.qml \
     qml/LiveKeysTheme.qml \

@@ -43,8 +43,7 @@ HEADERS += \
     $$PWD/workspaceextension.h \
     $$PWD/workspaceipc.h \
     $$PWD/workspaceipcsink.h \
-    $$PWD/workspacelayer.h \
-    $$PWD/workspacemessagestack.h
+    $$PWD/workspacelayer.h
 
 SOURCES += \
     $$PWD/codecompletionmodel.cpp \
@@ -87,6 +86,5 @@ SOURCES += \
     $$PWD/workspaceextension.cpp \
     $$PWD/workspaceipc.cpp \
     $$PWD/workspaceipcsink.cpp \
-    $$PWD/workspacelayer.cpp \
-    $$PWD/workspacemessagestack.cpp
+    $$PWD/workspacelayer.cpp
 

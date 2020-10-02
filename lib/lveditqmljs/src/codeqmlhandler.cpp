@@ -2248,7 +2248,6 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     QList<QObject*> toRemove;
     QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->channels();
 
-    bool objectProperty = false;
     for ( auto it = channels.begin(); it != channels.end(); ++it ){
         const QmlBindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -2273,9 +2272,6 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
 
                     toRemove.append(ordered[bc->listIndex()]);
                 }
-            } else {
-                objectProperty = true;
-                bc->property().write(QVariant::fromValue(nullptr));
             }
         }
     }
@@ -2286,7 +2282,7 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     removeEditingFragment(edit);
 
     m_document->addEditingState(ProjectDocument::Runtime);
-    m_document->insert(pos, len, objectProperty ? "null" : "");
+    m_document->insert(pos, len, "");
     m_document->removeEditingState(ProjectDocument::Runtime);
 
     for ( QObject* o : toRemove ){

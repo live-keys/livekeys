@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/lveditqmljsglobal.h \
     $$PWD/projectqmlextension.h \
     $$PWD/qmljsbuiltintypes_p.h \
-    $$PWD/qmlmetainfo_p.h \
     $$PWD/qmlprojectmonitor_p.h \
     $$PWD/qmladdcontainer.h \
     $$PWD/qmlcodeconverter.h \
@@ -59,7 +58,6 @@ SOURCES += \
     $$PWD/codeqmlhandler.cpp \
     $$PWD/projectqmlextension.cpp \
     $$PWD/qmljsbuiltintypes.cpp \
-    $$PWD/qmlmetainfo.cpp \
     $$PWD/qmlprojectmonitor.cpp \
     $$PWD/qmladdcontainer.cpp \
     $$PWD/qmlcodeconverter.cpp \

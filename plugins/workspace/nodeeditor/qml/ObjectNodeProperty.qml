@@ -87,7 +87,6 @@ Item{
 
                         paletteList.cancelledHandler = function(){
                             node.item.objectGraph.paletteListOpened = false
-                            node.item.objectGraph.activateFocus()
 
                             paletteList.focus = false
                             paletteList.model = null
@@ -112,7 +111,6 @@ Item{
 
                             }
                             node.item.objectGraph.paletteListOpened = false
-                            node.item.objectGraph.activateFocus()
 
                             paletteList.destroy()
 
