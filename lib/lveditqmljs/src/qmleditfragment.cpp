@@ -255,6 +255,43 @@ void QmlEditFragment::write(const QString &code){
     document->removeEditingState(ProjectDocument::Palette);
 }
 
+QObject *QmlEditFragment::readObject()
+{
+    QList<QmlBindingChannel::Ptr> channels = bindingSpan()->channels();
+    for ( auto it = channels.begin(); it != channels.end(); ++it ){
+
+        const QmlBindingChannel::Ptr& bc = *it;
+        if ( bc->isEnabled() ){
+            if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
+                QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
+                if (ppref.canAt()){
+                    QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                    // create correct order for list reference
+                    QObjectList ordered;
+                    for (auto child: parent->children())
+                    {
+                        bool found = false;
+                        for (int i = 0; i < ppref.count(); ++i)
+                            if (child == ppref.at(i)){
+                                found = true;
+                                break;
+                            }
+                        if (found)
+                            ordered.push_back(child);
+                    }
+                    return ordered[bc->listIndex()];
+                }
+            }
+            else if (bc->property().propertyTypeCategory() == QQmlProperty::Object){
+                return qvariant_cast<QObject*>(bc->property().read());
+            }
+        }
+    }
+
+    return nullptr;
+}
+
 /**
  * \brief Reads the code value of this fragment and returns it.
  */
