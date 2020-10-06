@@ -36,6 +36,7 @@ signals:
 public slots:
     void exec();
     void __childDestroyed();
+    void __childResultChanged();
 
 private:
     QObject*        m_input;
