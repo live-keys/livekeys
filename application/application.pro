@@ -5,7 +5,6 @@ QT      += qml quick webengine
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
-linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 !isEmpty(BUILD_ELEMENTS){
     DEFINES += BUILD_ELEMENTS
@@ -69,6 +68,8 @@ DISTFILES += \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \
+    qml/MessagesContainer.qml \
+    qml/Viewer.qml \
     qml/editorlayer.qml \
     qml/PaneSplitView.qml \
     qml/LiveKeysTheme.qml \

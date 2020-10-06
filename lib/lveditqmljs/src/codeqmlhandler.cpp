@@ -2248,6 +2248,7 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     QList<QObject*> toRemove;
     QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->channels();
 
+    bool objectProperty = false;
     for ( auto it = channels.begin(); it != channels.end(); ++it ){
         const QmlBindingChannel::Ptr& bc = *it;
         if ( bc->isEnabled() ){
@@ -2272,6 +2273,9 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
 
                     toRemove.append(ordered[bc->listIndex()]);
                 }
+            } else {
+                objectProperty = true;
+                bc->property().write(QVariant::fromValue(nullptr));
             }
         }
     }
@@ -2282,7 +2286,7 @@ void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
     removeEditingFragment(edit);
 
     m_document->addEditingState(ProjectDocument::Runtime);
-    m_document->insert(pos, len, "");
+    m_document->insert(pos, len, objectProperty ? "null" : "");
     m_document->removeEditingState(ProjectDocument::Runtime);
 
     for ( QObject* o : toRemove ){
@@ -3077,16 +3081,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
             defaultExports = defaultLib->listExports();
         }
         for( const QString& de: defaultExports ){
-            addContainer->model()->addItem(
-                QmlSuggestionModel::ItemData(
-                    de,
-                    "",
-                    "",
-                    "QtQml",
-                    "QtQml",
-                    de,
-                    QmlSuggestionModel::ItemData::Object)
-            );
+            if ( de != "Component"){
+                addContainer->model()->addItem(
+                    QmlSuggestionModel::ItemData(
+                        de,
+                        "",
+                        "",
+                        "QtQml",
+                        "QtQml",
+                        de,
+                        QmlSuggestionModel::ItemData::Object)
+                );
+            }
         }
     }
 
@@ -3112,16 +3118,18 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool includeFunctio
                 }
 
                 for ( const QString& exp: libexports ){
-                    addContainer->model()->addItem(
-                        QmlSuggestionModel::ItemData(
-                            exp,
-                            "",
-                            "",
-                            imp.uri(),
-                            imp.uri(),
-                            exp,
-                            QmlSuggestionModel::ItemData::Object)
-                    );
+                    if ( exp != "Component"){
+                        addContainer->model()->addItem(
+                            QmlSuggestionModel::ItemData(
+                                exp,
+                                "",
+                                "",
+                                imp.uri(),
+                                imp.uri(),
+                                exp,
+                                QmlSuggestionModel::ItemData::Object)
+                        );
+                    }
                 }
             }
         }

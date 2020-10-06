@@ -40,6 +40,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_projectEnvironment(nullptr)
     , m_panes(nullptr)
     , m_viewRoot(nullptr)
+    , m_messageStack(new lv::WorkspaceMessageStack(this))
     , m_commands(nullptr)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
@@ -98,6 +99,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 }
 
 WorkspaceLayer::~WorkspaceLayer(){
+    delete m_messageStack;
     delete m_themes;
     delete m_tutorials;
     delete m_samples;
@@ -200,6 +202,11 @@ QObject *WorkspaceLayer::nextViewParent(){
 
 QObject *WorkspaceLayer::viewRoot(){
     return m_viewRoot;
+}
+
+WorkspaceMessageStack *WorkspaceLayer::messages() const
+{
+    return m_messageStack;
 }
 
 StartupModel *WorkspaceLayer::recents() const

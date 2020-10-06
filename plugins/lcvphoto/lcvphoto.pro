@@ -13,7 +13,6 @@ DEFINES += Q_LCV
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
-linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)

@@ -293,6 +293,50 @@ CodePalette{
                     }
                 }
             }
+
+            Workspace.ToolButton{
+                id: perspectiveButton
+                tool: Cv.PerspectiveTool {
+                    id: perspectiveTool
+
+                    canvas: imageView
+                    labelInfoStyle: palette.style.labelStyle.textStyle
+                    applyButton: palette.style.applyButton
+                    cancelButton: palette.style.cancelButton
+
+                    onApply: {
+                        var perspective = addTransformation("Perspective")
+                        var fragment = null
+                        if (perspective.editingFragment){
+                            fragment = paletteControls.addPropertyByName(perspective, "points")
+                            perspective.expand()
+                        } else {
+                            if (!perspective)
+                                return
+                            var codeHandler = perspective.visualParent.documentHandler.codeHandler
+                            fragment = paletteControls.addPropertyByFragment(perspective, codeHandler, "points")
+                        }
+                        var value = '['
+                        value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
+                        value += 'Qt.point(' + Math.round(p2.x) + ", " + Math.round(p2.y) +'), '
+                        value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
+                        value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
+                        fragment.write(value)
+                        fragment.bindingModel(null).commit([p1, p2, p3, p4])
+                        paletteItem.transformImage.exec()
+                        toolbox.activateTool(null)
+                    }
+                    onCancel: toolbox.activateTool(null)
+                }
+                content: Rectangle{
+                    width: 20
+                    height: 20
+                    color: perspectiveButton.containsMouse || toolbox.selectedTool === perspectiveTool ? palette.style.toolIconHighlightBackground : 'red'
+                    radius: 2
+
+                    // TODO: perspective icon
+                }
+            }
         }
 
         Rectangle{

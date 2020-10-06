@@ -27,6 +27,8 @@
         <file alias="TextEditNodeView.qml">qml/TextEditNodeView.qml</file>
         <file alias="StartupBox.qml">qml/StartupBox.qml</file>
         <file alias="ContextMenu.qml">qml/ContextMenu.qml</file>
+        <file alias="Viewer.qml">qml/Viewer.qml</file>
+        <file alias="MessagesContainer.qml">qml/MessagesContainer.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

@@ -13,9 +13,11 @@ NavigableImageView         1.0 NavigableImageView.qml
 Crop                       1.0 Crop.qml
 ImageDrawView              1.0 ImageDrawView.qml
 BlankImage                 1.0 BlankImage.qml
-Draw                       1.0 Draw.qml
+DrawSurface                1.0 DrawSurface.qml
 ColorHistogramView         1.0 ColorHistogramView.qml
 CropTool                   1.0 CropTool.qml
 VideoSurfaceView           1.0 VideoSurfaceView.qml
 VideoSurfaceFactory        1.0 VideoSurfaceFactory.qml
 ImageRead                  1.0 ImageRead.qml
+PerspectiveTool            1.0 PerspectiveTool.qml
+Perspective                1.0 Perspective.qml
