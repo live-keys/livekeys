@@ -6,12 +6,13 @@
         "livekeys": {
             "version": "1.7.0",
             "versionsync": {
-                "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
+                "README.md": "\\s*(?:VERSION\\s*\\=)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
                 "application/src/livekeys.h": [
                     "(?:\\s*#define LIVEKEYS_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
                     "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
                     "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
-                ]
+                ],
+                ".qmake.conf" : "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*"
             }
         },
         "live": {
@@ -852,6 +853,7 @@
                             "QtQuickControls2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
                             "QtQuickParticles.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
                             "QtQuickTemplates2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
+                            "QtQuickShapes.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickShapes.framework/Versions/5",
                             "QtQuickWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
                             "QtSql.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSql.framework/Versions/5",
                             "QtUiPlugin.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
@@ -970,6 +972,16 @@
                         "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess*": [
                             "@executable_path/../../../../.."
                         ]
+                    }
+                },
+                {
+                    "dylibtransferdependencies": {
+                        "dependencies" : "/usr/local/Cellar",
+                        "files" : "{opencv_dir}/lib/libopencv_*.dylib",
+                        "destination" : "livekeys.app/Contents/Frameworks",
+                        "custom" : {
+                            "*libopencv_*" : "OpenCV.Framework/Libraries"
+                        }
                     }
                 },
                 {

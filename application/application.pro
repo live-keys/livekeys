@@ -39,6 +39,15 @@ macx{
 
 DESTDIR = $$BUILD_PATH/bin
 
+# Os Specific
+# -----------
+
+macx{
+    OTHER_FILES += $$PWD/os/ios/Info.plist
+    QMAKE_INFO_PLIST = $$PWD/os/ios/Info.plist
+}
+
+
 # Application
 # -----------
 
