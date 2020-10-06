@@ -316,7 +316,8 @@ bool QmlTypeInfo::isObject(const QString &typeString){
          typeString == "int" || typeString == "list" || typeString == "real" ||
          typeString == "color" || typeString == "QColor" ||
          typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" ||
-         typeString == "uint" || typeString == "size" || typeString == "QStringList" || typeString == "QSize")
+         typeString == "uint" || typeString == "size" || typeString == "QStringList" || typeString == "QSize" ||
+         typeString == "rect" || typeString == "QRect" )
         return false;
     return true;
 }
