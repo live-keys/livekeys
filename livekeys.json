@@ -975,16 +975,6 @@
                     }
                 },
                 {
-                    "dylibtransferdependencies": {
-                        "dependencies" : "/usr/local/Cellar",
-                        "files" : "{opencv_dir}/lib/libopencv_*.dylib",
-                        "destination" : "livekeys.app/Contents/Frameworks",
-                        "custom" : {
-                            "*libopencv_*" : "OpenCV.Framework/Libraries"
-                        }
-                    }
-                },
-                {
                     "solveincludes": [
                         {
                             "from": "{source}/lib/lvbase/include/live",
