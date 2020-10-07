@@ -37,18 +37,18 @@ addons:
 
 install:
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      brew install openssl;
-      brew install wget;
+      brew install openssl > /dev/null;
+      brew install wget > /dev/null;
       wget --help;
       brew update;
-      brew install python3;
-      brew install doxygen;
+      brew install python3 > /dev/null;
+      brew install doxygen > /dev/null;
       sudo mkdir /opt/qt;
       sudo chmod 777 /opt/qt;
       sudo ln -s /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild /Applications/Xcode.app/Contents/Developer/usr/bin/xcrun;
       rm -r '/usr/local/lib/python2.7/site-packages/numpy';
       rm '/usr/local/bin/f2py';
-      brew install numpy;
+      brew install numpy > /dev/null;
       brew search opencv;
       brew info opencv@4;
       brew install opencv@4;

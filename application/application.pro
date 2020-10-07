@@ -41,7 +41,9 @@ DESTDIR = $$BUILD_PATH/bin
 # Os Specific
 # -----------
 
+
 macx{
+    VERSION = $${LIVEKEYS_VERSION}
     OTHER_FILES += $$PWD/os/ios/Info.plist
     QMAKE_INFO_PLIST = $$PWD/os/ios/Info.plist
 }
