@@ -49,13 +49,13 @@ install:
       rm -r '/usr/local/lib/python2.7/site-packages/numpy';
       rm '/usr/local/bin/f2py';
       brew install numpy > /dev/null;
-      brew search opencv;
-      brew info opencv@4;
-      brew install opencv@4;
+      brew tap live-keys/opencv
+      brew install live-keys/opencv/opencv;
       echo "Open CV environment";
       ls /usr/local/Cellar;
       echo "/usr/local/opt";
       ls /usr/local/opt;
+      ls /usr/local/opt/opencv/lib;
       OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv)";
       echo $OPENCV_VERSION;
       export OPENCV_DIR=/usr/local/Cellar/opencv/$OPENCV_VERSION;
