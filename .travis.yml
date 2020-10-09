@@ -45,7 +45,7 @@ install:
       HOMEBREW_NO_AUTO_UPDATE=1 brew install wget > /dev/null;
       wget --help;
     fi
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade python3 > /dev/null; fi
+#   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade python3 > /dev/null; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install doxygen > /dev/null; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       sudo mkdir /opt/qt;
