@@ -36,10 +36,8 @@ addons:
       - unzip
 
 install:
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      brew tap live-keys/opencv;
-      brew update;
-    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew tap live-keys/opencv; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew update; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       brew install openssl > /dev/null;
       brew install wget > /dev/null;
