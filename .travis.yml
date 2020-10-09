@@ -55,7 +55,7 @@ install:
       rm '/usr/local/bin/f2py';
       brew install numpy > /dev/null;
     fi
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew install live-keys/opencv/opencv; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew install --verbose live-keys/opencv/opencv; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       echo "Open CV environment";
       ls /usr/local/Cellar;
