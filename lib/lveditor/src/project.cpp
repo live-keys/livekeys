@@ -507,6 +507,9 @@ Document *Project::createDocument(ProjectFile *file, bool isMonitored){
 }
 
 void Project::documentSaved(Document *document){
+    if ( m_runTrigger == Project::RunOnSave ){
+        scheduleRun();
+    }
     emit fileChanged(document->file()->path());
 }
 
