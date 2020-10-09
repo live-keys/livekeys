@@ -54,7 +54,7 @@ install:
       rm -r '/usr/local/lib/python2.7/site-packages/numpy';
       rm '/usr/local/bin/f2py';
     fi
-  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install numpy > /dev/null; fi
+#   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install numpy > /dev/null; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install --verbose live-keys/opencv/opencv | grep -i "downloading\|building"; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       echo "Open CV environment";
