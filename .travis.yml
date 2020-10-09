@@ -36,26 +36,32 @@ addons:
       - unzip
 
 install:
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew tap live-keys/opencv; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then brew update; fi
   - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
-      brew install openssl > /dev/null;
-      brew install wget > /dev/null;
+      HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl > /dev/null;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
+      HOMEBREW_NO_AUTO_UPDATE=1 brew install wget > /dev/null;
       wget --help;
-      brew update;
-      brew install python3 > /dev/null;
-      brew install doxygen > /dev/null;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew upgrade python3 > /dev/null; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install doxygen > /dev/null; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       sudo mkdir /opt/qt;
       sudo chmod 777 /opt/qt;
       sudo ln -s /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild /Applications/Xcode.app/Contents/Developer/usr/bin/xcrun;
       rm -r '/usr/local/lib/python2.7/site-packages/numpy';
       rm '/usr/local/bin/f2py';
-      brew install numpy > /dev/null;
-      brew search opencv;
-      brew info opencv@4;
-      brew install opencv@4;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install numpy > /dev/null; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install --verbose live-keys/opencv/opencv; fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       echo "Open CV environment";
       ls /usr/local/Cellar;
       echo "/usr/local/opt";
       ls /usr/local/opt;
+      ls /usr/local/opt/opencv/lib;
       OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv)";
       echo $OPENCV_VERSION;
       export OPENCV_DIR=/usr/local/Cellar/opencv/$OPENCV_VERSION;
@@ -63,6 +69,8 @@ install:
       echo $OPENCV_DIR;
       echo $PKG_CONFIG_PATH;
       echo $PWD;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       cd build;
       wget https://github.com/livecv/live-pm/archive/master.zip;
       unzip master.zip;
@@ -73,6 +81,8 @@ install:
       cd ..;
       npm install --global create-dmg;
       export LIVEDOC=$PWD/live-doc/live-doc.js;
+    fi
+  - if [ "${TRAVIS_OS_NAME}" == "osx" ]; then
       pip3 install aqtinstall;
       aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d;
       aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine;
@@ -120,6 +130,7 @@ deploy:
   file_glob: true
   file:
     - live*.tar.gz
+    - Live*.dmg
   skip_cleanup: true
   on:
     tags: true

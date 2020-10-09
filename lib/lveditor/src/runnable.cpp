@@ -294,7 +294,7 @@ void Runnable::setRunTrigger(int runTrigger){
                 }
             }
 
-        } else if ( m_runTrigger == Project::RunOnSave ){
+        } else if ( runTrigger == Project::RunOnSave ){
             m_project->excludeRunTriggers(m_activations);
             m_scheduleTimer = new QTimer(this);
             m_scheduleTimer->setInterval(1000);
