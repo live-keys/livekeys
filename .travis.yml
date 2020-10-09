@@ -120,6 +120,7 @@ deploy:
   file_glob: true
   file:
     - live*.tar.gz
+    - Live*.dmg
   skip_cleanup: true
   on:
     tags: true
