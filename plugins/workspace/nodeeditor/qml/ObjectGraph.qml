@@ -19,7 +19,7 @@ Rectangle{
     color: root.style.backgroundColor
     radius: root.style.radius
     border.width: root.style.borderWidth
-    border.color: root.style.borderColor
+    border.color: root.isInteractive ? root.style.highlightBorderColor : root.style.borderColor
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
     property QtObject paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
@@ -29,6 +29,7 @@ Rectangle{
         property color backgroundGridColor: '#222'
 
         property color borderColor: '#333'
+        property color highlightBorderColor: '#555'
         property double borderWidth: 1
         property double radius: 5
 
@@ -407,6 +408,7 @@ Rectangle{
     Qan.GraphView {
         id: graphView
         anchors.fill: parent
+        anchors.margins: 1
         navigable   : root.isInteractive
         gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
@@ -441,7 +443,7 @@ Rectangle{
     Rectangle {
         anchors.fill: parent
         visible: !root.isInteractive
-        color: "#66333333"
+        color: "transparent"
         z: 3000
         MouseArea {
             id: ma
@@ -450,6 +452,9 @@ Rectangle{
             acceptedButtons: Qt.LeftButton
             onWheel: {
                 wheel.accepted = false
+            }
+            onDoubleClicked: {
+                root.doubleClicked(mouse)
             }
             onClicked: {
                 root.activateFocus()

@@ -19,6 +19,8 @@ PathInputBox            1.0 PathInputBox.qml
 CheckMarkIcon           1.0 CheckMarkIcon.qml
 ResizeIcon              1.0 ResizeIcon.qml
 RotateIcon              1.0 RotateIcon.qml
+PerspectiveIcon         1.0 PerspectiveIcon.qml
+WarningIcon             1.0 WarningIcon.qml
 CropIcon                1.0 CropIcon.qml
 XIcon                   1.0 XIcon.qml
 TwoWayArrowIcon         1.0 TwoWayArrowIcon.qml
@@ -40,3 +42,4 @@ Toolbar                 1.0 Toolbar.qml
 Toolbox                 1.0 Toolbox.qml
 ToolButton              1.0 ToolButton.qml
 ConvexQuadSelection     1.0 ConvexQuadSelection.qml
+

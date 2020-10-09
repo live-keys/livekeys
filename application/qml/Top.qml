@@ -27,8 +27,8 @@ Rectangle {
     height: 35
     color: 'transparent'
 
-
     property bool isLogWindowDirty: false
+
     property var licenseSettings: lk.settings.file('license')
 
     signal openCommandsMenu()
@@ -47,13 +47,18 @@ Rectangle {
     property string openSettingsIcon: ""
     property string openLicenseIcon: ""
 
+    property int errorContainerState: 0
+
     // New
+
+    property QtObject theme : null
 
     Connections{
         target: lk
         onLayerReady: {
             if (layer && layer.name === 'workspace' ){
                 var theme = layer.themes.current
+                container.theme = theme
                 container.newIcon = theme.topNewIcon
                 container.saveIcon = theme.topSaveIcon
                 container.openFileIcon = theme.topOpenFileIcon
@@ -374,11 +379,31 @@ Rectangle {
         color: "transparent"
         height : messagesArea.containsMouse ? parent.height : parent.height - 5
         width : 25
-        Text{
-            id : messagesText
+        Workspace.WarningIcon{
+            id: warningIcon
             anchors.centerIn: parent
-            text: "!"
-            color: "white"
+            width: 24
+            height: 22
+
+            color: {
+                if ( !container.theme )
+                    return color
+                if ( container.errorContainerState === 1 )
+                    return container.theme.colorScheme.warning
+                if ( container.errorContainerState === 2 )
+                    return container.theme.colorScheme.error
+                return container.theme.colorScheme.topIconColor
+            }
+
+            colorAlternate: {
+                if ( !container.theme )
+                    return colorAlternate
+                if ( container.errorContainerState === 1 )
+                    return container.theme.colorScheme.warning
+                if ( container.errorContainerState === 2 )
+                    return container.theme.colorScheme.error
+                return container.theme.colorScheme.topIconColorAlternate
+            }
         }
         Rectangle{
             color : "#031626"

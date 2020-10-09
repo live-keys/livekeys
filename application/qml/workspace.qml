@@ -427,6 +427,8 @@ Item{
 
         property string action : ""
 
+        property int errorContainerState: messagesContainer.messageState
+
         onToggleLogWindow : {
             var fe = root.panes.focusPane('log')
             if ( !fe ){
@@ -466,7 +468,8 @@ Item{
 
     MessagesContainer{
         id: messagesContainer
-        anchors.top: header.bottom
+        anchors.top: parent.top
+        anchors.topMargin: 2
         anchors.right: parent.right
         z: 3000
     }

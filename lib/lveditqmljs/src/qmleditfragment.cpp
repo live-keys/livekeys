@@ -66,6 +66,10 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
  * \brief QmlEditFragment destructor
  */
 QmlEditFragment::~QmlEditFragment(){
+    for ( auto pal : m_palettes ){
+        pal->deleteLater();
+    }
+
     ProjectDocumentSection::Ptr section = declaration()->section();
     ProjectDocument* doc = declaration()->document();
     doc->removeSection(section);

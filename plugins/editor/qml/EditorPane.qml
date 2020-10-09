@@ -190,10 +190,6 @@ Pane{
         height: 30
 
         color : root.topColor
-        gradient: Gradient{
-            GradientStop { position: 0.0;  color: "#030d16" }
-            GradientStop { position: 0.10; color: root.topColor }
-        }
 
         PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter

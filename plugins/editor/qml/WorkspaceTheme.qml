@@ -12,8 +12,8 @@ Theme{
 
     property QtObject colorScheme: QtObject{
 
-        property color background: '#03090d'
-        property color backgroundOverlay: '#060e13'
+        property color background: '#05080a'
+        property color backgroundOverlay: '#0a1014'
 
         property color backgroundBorder: '#232f37'
 
@@ -32,6 +32,12 @@ Theme{
 
         property color textSelection: '#0b273f'
         property color scrollbarColor: '#1f2227'
+
+        property color topIconColor: '#b3bdcc'
+        property color topIconColorAlternate: '#3f4449'
+
+        property color error: '#ba2020'
+        property color warning: '#b99311'
     }
 
     // Icons
@@ -123,7 +129,7 @@ Theme{
             color: colorScheme.foregroundFaded
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
-                weight: Font.Light,
+                weight: Font.Normal,
                 italic: false,
                 pixelSize: 11
             })
@@ -341,6 +347,7 @@ Theme{
         property color backgroundGridColor: root.colorScheme.middleground
 
         property color borderColor: root.colorScheme.middlegroundOverlayDominant
+        property color highlightBorderColor: root.colorScheme.middlegroundOverlayDominantBorder
         property double borderWidth: 1
         property double radius: 3
 

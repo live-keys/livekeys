@@ -27,24 +27,26 @@ Rectangle{
 
     width: 380 + (isForNode? 100: 0)
     height: 280
-    color: "#03070a"
+    color: root.theme.colorScheme.background
     opacity: 0.95
     objectName: "addQmlBox"
 
-
+    property QtObject theme: lk.layers.workspace.themes.current
     property PaletteStyle style: PaletteStyle{}
 
     property QtObject addContainer : null
 
-    property string fontFamily: 'Open Sans, Courier'
-    property int fontSize: 12
+    property string fontFamily: root.theme.inputLabelStyle.textStyle.font.family
+    property int fontSize: root.theme.inputLabelStyle.textStyle.font.pixelSize
+
     property int smallFontSize: 9
     property var codeQmlHandler: null
 
     property bool isForNode: false
     property bool objectsOnly: false
 
-    border.color: (style && style.colorScheme && style.colorScheme.middlegroundBorder) ? style.colorScheme.middlegroundBorder : "#222"
+    border.color: root.theme.colorScheme.middlegroundOverlayDominant
+    border.width: 1
 
     onObjectsOnlyChanged: {
         if (objectsOnly)
@@ -116,16 +118,15 @@ Rectangle{
         height: title.height + buttonsContainer.height
         anchors.top: parent.top
 
-        Text{
+        Workspace.Label{
             id: title
             anchors.top: parent.top
             anchors.topMargin: 5
+            anchors.left: parent.left
+            anchors.leftMargin: 5
             height: 25
             width: parent.width
-            color : "#efefef"
-            font.family: "Open Sans, sans-serif"
-            font.pixelSize: 12
-            font.weight: Font.Normal
+            textStyle: root.theme.inputLabelStyle.textStyle
 
             text: {
                 if (!addContainer) return ""
@@ -146,21 +147,17 @@ Rectangle{
             id: buttonsContainer
             anchors.top: title.bottom
             height: 30
-
-            property var buttonsStyle: {
-                var copy = root.style.buttonStyle
-                copy.backgroundColor = "#111"
-                return copy
-            }
+            spacing: 2
 
             Workspace.TextButton{
                 visible: !objectsOnly
                 text: 'All'
                 height: 22
                 width: 70
-                style: buttonsContainer.buttonsStyle
-                color: activeIndex === 0 ? style.backgroundHoverColor : style.backgroundColor
-
+                style: root.theme.formButtonStyle
+                color: {
+                    activeIndex === 0 ? style.backgroundHoverColor : containsMouse ? style.backgroundHoverColor : style.backgroundColor
+                }
                 onClicked : {
                     root.activeIndex = 0
                 }
@@ -171,9 +168,10 @@ Rectangle{
                 text: 'Property'
                 height: 22
                 width: 70
-                style: buttonsContainer.buttonsStyle
-                color: activeIndex === 1 ? style.backgroundHoverColor : style.backgroundColor
-
+                style: root.theme.formButtonStyle
+                color: {
+                    activeIndex === 1 ? style.backgroundHoverColor : containsMouse ? style.backgroundHoverColor : style.backgroundColor
+                }
                 onClicked : {
                     root.activeIndex = 1
                 }
@@ -184,8 +182,10 @@ Rectangle{
                 height: 22
                 width: 70
 
-                style: buttonsContainer.buttonsStyle
-                color: activeIndex === 2 ? style.backgroundHoverColor : style.backgroundColor
+                style: root.theme.formButtonStyle
+                color: {
+                    activeIndex === 2 ? style.backgroundHoverColor : containsMouse ? style.backgroundHoverColor : style.backgroundColor
+                }
 
                 onClicked : {
                     root.activeIndex = 2
@@ -197,8 +197,10 @@ Rectangle{
                 text: 'Event'
                 height: 22
                 width: 70
-                style: buttonsContainer.buttonsStyle
-                color: activeIndex === 3 ? style.backgroundHoverColor : style.backgroundColor
+                style: root.theme.formButtonStyle
+                color: {
+                    activeIndex === 3 ? style.backgroundHoverColor : containsMouse ? style.backgroundHoverColor : style.backgroundColor
+                }
 
                 onClicked : {
                     root.activeIndex = 3
@@ -210,8 +212,10 @@ Rectangle{
                 text: 'Function'
                 height: 22
                 width: 70
-                style: buttonsContainer.buttonsStyle
-                color: activeIndex === 4 ? style.backgroundHoverColor : style.backgroundColor
+                style: root.theme.formButtonStyle
+                color: {
+                    activeIndex === 4 ? style.backgroundHoverColor : containsMouse ? style.backgroundHoverColor : style.backgroundColor
+                }
 
                 onClicked : {
                     root.activeIndex = 4
@@ -235,11 +239,11 @@ Rectangle{
             width: 16
             height: 16
             border.width: 2
-            border.color: "#0d1f2d"
-            color: "black"
+            border.color: root.theme.colorScheme.middlegroundOverlayDominant
+            color: "transparent"
 
             Rectangle {
-                color: "#0d1f2d"
+                color: root.theme.colorScheme.middlegroundOverlayDominant
                 width: 8
                 height: 8
                 x: 4
@@ -271,7 +275,7 @@ Rectangle{
             height: 18
             anchors.right: parent.right
             anchors.rightMargin: 0
-            color: "black"
+            color: "transparent"
 
             Workspace.InputBox {
 
@@ -282,7 +286,7 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 8
                 anchors.right: parent.right
-                anchors.rightMargin: 8
+                anchors.rightMargin: 1
                 style: root.style.inputStyle
 
                 onActiveFocusLost: {
@@ -361,9 +365,9 @@ Rectangle{
             id : searchInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 8
+            anchors.leftMargin: 1
             anchors.right: parent.right
-            anchors.rightMargin: 8
+            anchors.rightMargin: 1
 
             width: parent.width > implicitWidth ? parent.width : implicitWidth
             style: root.style.inputStyle
@@ -436,15 +440,17 @@ Rectangle{
     Item{
         id: container
         anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible? header.height + 60 : header.height + 30
-
+        anchors.topMargin: idInputItem && idInputItem.visible ? header.height + 60 : header.height + 30
+        anchors.leftMargin: 1
+        anchors.rightMargin: 1
+        anchors.bottomMargin: 1
 
         Workspace.SelectableListView {
             id: categoryList
             anchors.top : parent.top
             anchors.left: parent.left
 
-            height : root.height - container.anchors.topMargin
+            height : root.height - container.anchors.topMargin - 1
             width: root.width / 2
 
             model: {
@@ -471,17 +477,12 @@ Rectangle{
 
                     height : 25
                     color : ListView.isCurrentItem ? style.selectableListView.selectionBackgroundColor : "transparent"
-                    Text{
+                    Workspace.Label{
                         id: label
                         anchors.left: parent.left
                         anchors.leftMargin: 10
                         anchors.verticalCenter: parent.verticalCenter
-
-                        font.family: root.fontFamily
-                        font.pixelSize: root.fontSize
-                        font.weight: Font.Light
-
-                        color: "#fafafa"
+                        textStyle: root.theme.inputLabelStyle.textStyle
                         text: modelData
                     }
 
@@ -533,7 +534,7 @@ Rectangle{
             anchors.top : parent.top
             anchors.right: parent.right
 
-            height : root.height - container.anchors.topMargin
+            height : root.height - container.anchors.topMargin - 1
             width: root.width / 2
 
             model: root.addContainer ? root.addContainer.model : null
@@ -556,7 +557,7 @@ Rectangle{
 
                         font.family: root.fontFamily
                         font.pixelSize: root.fontSize
-                        font.weight: Font.Light
+                        font.weight: Font.Normal
 
                         color: "#fafafa"
                         text: model.label

@@ -5,35 +5,51 @@
 
 namespace lv {
 
-class WorkspaceMessageStack : public QAbstractListModel
-{
+class WorkspaceMessageStack : public QAbstractListModel{
+
     Q_OBJECT
+    Q_ENUMS(Type)
+
+public:
+    enum Type{
+        Info = 0,
+        Warning = 1,
+        Error = 2
+    };
+
 public:
     enum Roles{
         Message = Qt::UserRole + 1,
-        Code
+        Code,
+        MessageType
     };
 
     WorkspaceMessageStack(QObject* parent = nullptr);
     ~WorkspaceMessageStack(){}
 
-    class WorkspaceMessage
-    {
+    class WorkspaceMessage{
     public:
         QString message;
-        int code;
+        int     code;
+        Type    type;
 
-        WorkspaceMessage(QString m = "", int c = 0):
-            message(m), code(c) {}
+        WorkspaceMessage(Type t = WorkspaceMessageStack::Info, const QString& m = "", int c = 0) : message(m), code(c), type(t){}
     };
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     int rowCount(const QModelIndex &) const;
     QHash<int, QByteArray> roleNames() const;
+
 public slots:
-    void pushMessage(QString m, int c);
-    void removeAtIndex(int idx);
+    void pushInfo(const QString& message, int code);
+    void pushWarning(const QString& message, int code);
+    void pushError(const QString& message, int code);
+    void removeAt(int idx);
     void clear();
+
+signals:
+    void messageAdded(int type, QString message, int code);
+
 private:
 
     QList<WorkspaceMessage> m_messages;

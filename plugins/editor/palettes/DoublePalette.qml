@@ -18,7 +18,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
-import live 1.0
+import live 1.0 as L
 import workspace 1.0 as Workspace
 
 CodePalette{
@@ -26,6 +26,7 @@ CodePalette{
     type : "qml/double"
 
     property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         width: 330
@@ -36,7 +37,7 @@ CodePalette{
             anchors.left: parent.left
             width: 70
             height: 25
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: palette.theme.inputStyle
             text: {
                 var roundValue = intSlider.value + fractionalSlider.value
                 roundValue = roundValue.toFixed(2)
@@ -110,11 +111,11 @@ CodePalette{
                     implicitHeight: 1
                     color: 'transparent'
                 }
-                handle: Triangle{
+                handle: L.Triangle{
                     width: 8
                     height: 8
                     color: '#9b9da0'
-                    rotation: Triangle.Top
+                    rotation: L.Triangle.Top
                 }
             }
             activeFocusOnPress: true

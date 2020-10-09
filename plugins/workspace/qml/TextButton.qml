@@ -4,8 +4,7 @@ import workspace 1.0
 Rectangle{
     id: root
 
-    property QtObject defaultStyle : TextButtonStyle{}
-    property QtObject style: defaultStyle
+    property QtObject style: TextButtonStyle{}
     
     signal clicked()
 
@@ -15,6 +14,7 @@ Rectangle{
     border.color: buttonMouseArea.containsMouse ? style.borderHoverColor : style.borderColor
     clip: true
 
+    property alias containsMouse: buttonMouseArea.containsMouse
     property alias label: label
 
     property string text: 'Button'

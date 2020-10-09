@@ -331,10 +331,18 @@ CodePalette{
                 content: Rectangle{
                     width: 20
                     height: 20
-                    color: perspectiveButton.containsMouse || toolbox.selectedTool === perspectiveTool ? palette.style.toolIconHighlightBackground : 'red'
+                    color: perspectiveButton.containsMouse || toolbox.selectedTool === rotateTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
+                    layer.enabled: true
+                    layer.samples: 8
 
-                    // TODO: perspective icon
+                    Workspace.PerspectiveIcon{
+                        anchors.centerIn: parent
+                        strokeWidth: 1.2
+                        color: palette.style.toolIconColor
+                        width: 12
+                        height: 12
+                    }
                 }
             }
         }
