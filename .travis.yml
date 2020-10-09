@@ -49,7 +49,7 @@ install:
       rm -r '/usr/local/lib/python2.7/site-packages/numpy';
       rm '/usr/local/bin/f2py';
       brew install numpy > /dev/null;
-      brew tap live-keys/opencv
+      brew tap live-keys/opencv;
       brew install live-keys/opencv/opencv;
       echo "Open CV environment";
       ls /usr/local/Cellar;
