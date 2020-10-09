@@ -12,7 +12,7 @@
 [![Build Status](https://travis-ci.org/live-keys/livekeys.svg?branch=master)](https://travis-ci.org/live-keys/livekeys)
 [![Build status](https://ci.appveyor.com/api/projects/status/3l5t69h7q3gpkec1?svg=true)](https://ci.appveyor.com/project/dinusv/livekeys)
 
- * **Version**: 1.7.0
+ * **Version**: 1.8.0
  * **License**: LGPL
  * **Website**: [livekeys.io](https://livekeys.io)
  * **Demo**: [www.youtube.com/watch?v=ZPt5KSy1wh0](https://www.youtube.com/watch?v=ZPt5KSy1wh0)

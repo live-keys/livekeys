@@ -1,10 +1,10 @@
 {
-    "version": "1.7.0",
+    "version": "1.8.0",
     "name": "livekeys",
     "webpage": "https://livekeys.io",
     "components": {
         "livekeys": {
-            "version": "1.7.0",
+            "version": "1.8.0",
             "versionsync": {
                 "README.md": "\\s*(?:VERSION\\s*\\=)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
                 "application/src/livekeys.h": [
@@ -12,7 +12,7 @@
                     "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
                     "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
                 ],
-                ".qmake.conf" : "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*"
+                ".qmake.conf" : "\\s*(?:\\* \\*\\*LIVEKEYS_VERSION\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*"
             }
         },
         "live": {
