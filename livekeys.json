@@ -985,14 +985,6 @@
                     }
                 },
                 {
-                    "clean": {
-                        "livekeys.app/Contents/Frameworks/OpenCV.framework/Libraries": [
-                            "*/libopencv_xfeatures*",
-                            "*/libopencv_xobjdetect*"
-                        ]
-                    }
-                },
-                {
                     "solveincludes": [
                         {
                             "from": "{source}/lib/lvbase/include/live",
