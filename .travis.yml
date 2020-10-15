@@ -5,9 +5,6 @@ matrix:
     - os: linux
       dist: bionic
       sudo: required
-    - os: osx
-      osx_image: xcode12.2
-      sudo: required
       
 cache:
   directories:
