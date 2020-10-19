@@ -31,6 +31,7 @@ RectangleButtonStyle    1.0 RectangleButtonStyle.qml
 NumberLabel             1.0 NumberLabel.qml
 PaneMenu                1.0 PaneMenu.qml
 PaneMenuItem            1.0 PaneMenuItem.qml
+PopupMenuStyle          1.0 PopupMenuStyle.qml
 SelectableListView      1.0 SelectableListView.qml
 SelectableListViewStyle 1.0 SelectableListViewStyle.qml
 ColorPicker             1.0 ColorPicker.qml

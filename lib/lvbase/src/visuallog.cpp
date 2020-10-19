@@ -442,6 +442,13 @@ std::string VisualLog::MessageInfo::tag(const VisualLog::Configuration *configur
     return configuration->m_name;
 }
 
+/**
+ * \brief Return the level of this message
+ */
+VisualLog::MessageInfo::Level VisualLog::MessageInfo::level() const{
+    return m_level;
+}
+
 /** \brief Configure VisualLog given a configuration tag and options */
 void VisualLog::configure(const std::string &configuration, const MLNode& options){
     m_output = 0;

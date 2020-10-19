@@ -404,6 +404,7 @@ Item{
                 })
 
                 root.paneSplitterColor = layer.themes.current.paneSplitterColor
+                contextMenu.style = layer.themes.current.popupMenuStyle
             }
         }
     }

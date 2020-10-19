@@ -141,8 +141,8 @@ std::string LockedFileIOSession::readFromFile(const std::string &path){
 
     std::ifstream instream(path, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
-        qCritical("Cannot open file: %s", path.c_str());
         m_d->releaseLock(path);
+        qCritical("Cannot open file: %s", path.c_str());
         return "";
     }
 
@@ -172,8 +172,8 @@ bool LockedFileIOSession::writeToFile(const std::string &path, const char *data,
 
     QFile fileInput(path.c_str());
     if ( !fileInput.open(QIODevice::WriteOnly ) ){
-        qCritical("Can't open file for writing: %s", path.c_str());
         m_d->releaseLock(path);
+        qCritical("Can't open file for writing: %s", path.c_str());
         return false;
     }
 

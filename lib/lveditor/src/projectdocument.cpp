@@ -495,6 +495,10 @@ void ProjectDocument::insert(int from, int length, const QString &text){
     removeEditingState(ProjectDocument::Assisted);
 }
 
+int ProjectDocument::offsetAtLine(int line) const{
+    return m_textDocument->findBlockByLineNumber(line - 1).position();
+}
+
 int ProjectDocument::lastCursorPosition()
 {
     return m_lastCursorPosition;

@@ -263,71 +263,27 @@ Pane{
         x: 200
     }
 
-    Rectangle{
+    Workspace.PaneMenu{
         id: projectMenu
         visible: false
         anchors.right: parent.right
-        anchors.top: header.bottom
-        property int buttonHeight: 30
-        property int buttonWidth: 180
-        opacity: visible ? 1.0 : 0
-        z: 1000
-        color : "#03070b"
+        anchors.topMargin: 30
+        anchors.top: parent.top
 
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+        style: viewer.currentTheme.popupMenuStyle
 
-        Rectangle{
-            id: newWindowEditorButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: newWindowEditorText
-                text: qsTr("Move to new window")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : newWindowEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    projectMenu.visible = false
-                    viewer.panes.movePaneToNewWindow(viewer)
-                }
+        Workspace.PaneMenuItem{
+            text: qsTr("Move to new window")
+            onClicked: {
+                projectMenu.visible = false
+                viewer.panes.movePaneToNewWindow(viewer)
             }
         }
-
-        Rectangle{
-            id: removeProjectViewButton
-            anchors.top: newWindowEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text{
-                text: qsTr("Remove Project View")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: removeProjectViewArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : removeProjectViewArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    projectMenu.visible = false
-                    viewer.panes.removePane(viewer)
-                }
+        Workspace.PaneMenuItem{
+            text: qsTr("Remove View")
+            onClicked: {
+                projectMenu.visible = false
+                viewer.panes.removePane(viewer)
             }
         }
     }
