@@ -30,13 +30,14 @@ QtObject{
         }
 
     }
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property bool instructionsShaping: false
     /////////////////// FACTORY FUNCTIONS
 
-    function createAddQmlBox(parent, style){
+    function createAddQmlBox(parent, theme){
         var aqb = factories.addQmlBox.createObject(parent)
-        if (style) aqb.style = style
+        if (theme) aqb.theme = theme
         return aqb
     }
 
@@ -201,7 +202,7 @@ QtObject{
         }
     }
 
-    function compose(container, isForNode, style, objectGraph){
+    function compose(container, isForNode, theme, objectGraph){
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var position =
@@ -212,7 +213,7 @@ QtObject{
         if ( !addContainer )
             return
 
-        var addBoxItem = createAddQmlBox(null, style ? style: null)
+        var addBoxItem = createAddQmlBox(null, theme ? theme : null)
 
         if (!addBoxItem) return
         addBoxItem.addContainer = addContainer
@@ -399,7 +400,7 @@ QtObject{
 
         editorBox.setChild(objectContainer, rect, cursorCoords, lk.layers.editor.environment.placement.top)
 
-        editorBox.color = globals.paletteStyle.backgroundColor
+        editorBox.color = theme.colorScheme.middleground
         editorBox.border.width = 1
         editorBox.border.color = "#141c25"
 
@@ -427,7 +428,7 @@ QtObject{
         var cursorCoords = editor.cursorWindowCoords()
 
         editorBox.setChild(paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-        editorBox.color = globals.paletteStyle.backgroundColor
+        editorBox.color = theme.colorScheme.middleground
         editorBox.border.width = 1
         editorBox.border.color = "#141c25"
 

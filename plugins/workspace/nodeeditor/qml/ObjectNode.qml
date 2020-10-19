@@ -13,7 +13,7 @@ Qan.NodeItem{
     width: 370
     height: wrapper.height
     
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     objectName: "objectNode"
     property string label: ''
@@ -166,7 +166,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true, root.paletteStyle, objectGraph)
+                        paletteControls.compose(root, true, root.theme, objectGraph)
                     }
                 }
             }
@@ -189,7 +189,7 @@ Qan.NodeItem{
                         root.selected = false
                         var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
                         if (palettes.size() ){
-                            var paletteList = paletteControls.createPaletteListView(wrapper, paletteStyle.selectableListView)
+                            var paletteList = paletteControls.createPaletteListView(wrapper, theme.selectableListView)
                             objectGraph.paletteListOpened = true
                             paletteList.forceActiveFocus()
                             paletteList.model = palettes

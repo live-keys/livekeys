@@ -26,7 +26,7 @@ CodePalette{
 
     type : "qml/lcvphoto#HueSaturationLightness"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Rectangle{
         id: adjustmentBox
@@ -38,9 +38,9 @@ CodePalette{
 
         HueSaturationLightnessSliders{
 
-            property QtObject loadedStyle : palette.paletteStyle
-
-            style: palette.paletteStyle ? loadedStyle : defaultStyle
+            style: QtObject {
+                property QtObject labelStyle : theme.inputLabelStyle
+            }
 
             hue: hsl ? hsl.hue : 100
             onHueChanged: {

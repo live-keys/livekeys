@@ -10,7 +10,7 @@ Rectangle{
     height: child ? child.height + (compact ? 0 : normalHeaderHeight) +5 : 0
     objectName: "paletteContainer"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property double minimumWidth: compact ? 0 : 200
     property double headerWidth: compact ? compactHeaderWidth + 5 : 0
@@ -75,7 +75,7 @@ Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: compact && child ? child.width + 10: 0
         clip: true
-        color: (paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black')
+        color: theme.colorScheme.middleground
 
         MouseArea{
             id: paletteBoxMoveArea
@@ -109,7 +109,7 @@ Rectangle{
 
             var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
             if (palettes.size() ){
-                var paletteList = paletteControls.createPaletteListView(null, paletteContainer.paletteStyle.selectableListView)
+                var paletteList = paletteControls.createPaletteListView(null, theme.selectableListView)
 
 
                 var p = paletteContainer.parent
@@ -286,7 +286,7 @@ Rectangle{
 
     Rectangle {
         id: rightButtons
-        color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
+        color: theme.colorScheme.middleground
         width: rightButtons.makeVertical ? 20 : 35
         height: compact && child ? child.height : 24
         radius: 2

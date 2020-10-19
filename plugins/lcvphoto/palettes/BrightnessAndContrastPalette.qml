@@ -27,7 +27,7 @@ CodePalette{
 
     type : "qml/BrightnessAndContrast"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: adjustmentBox
@@ -78,7 +78,7 @@ CodePalette{
             width: 35
             height: 22
             text: brightnessSlider.minimumValue
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
+            style: theme.inputLabelStyle
         }
 
         Slider{
@@ -129,7 +129,7 @@ CodePalette{
             width: 35
             height: 22
             text: contrastSlider.value.toFixed(2)
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
+            style: theme.inputLabelStyle
         }
 
     }

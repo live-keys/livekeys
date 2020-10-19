@@ -8,29 +8,6 @@ WorkspaceExtension{
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
 
     globals : ProjectQmlExtension{
-        property PaletteStyle paletteStyle: PaletteStyle{
-            colorScheme:  currentTheme ? currentTheme.colorScheme : colorScheme
-            backgroundColor: currentTheme ? currentTheme.colorScheme.middleground : backgroundColor
-            paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
-            paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor
-            sectionHeaderBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlay : sectionHeaderBackgroundColor
-            sectionHeaderFocusBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlayDominant : sectionHeaderFocusBackgroundColor
-            labelStyle: currentTheme ? currentTheme.inputLabelStyle : labelStyle
-            monoInputStyle: currentTheme ? currentTheme.monoInputStyle : monoInputStyle
-            inputStyle: currentTheme ? currentTheme.inputStyle : inputStyle
-            buttonStyle: currentTheme ? currentTheme.formButtonStyle : buttonStyle
-            propertyLabelStyle: QtObject{
-                property color background: currentTheme ? currentTheme.colorScheme.middleground : propertyLabelStyle.background
-                property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
-                property double borderThickness: currentTheme ? currentTheme.inputStyle.borderThickness : propertyLabelStyle.borderThickness
-            }
-            scrollbarColor: currentTheme ? currentTheme.colorScheme.scrollbarColor : scrollbarColor
-            buttons: currentTheme ? currentTheme.buttons : buttons
-            nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
-            selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView
-            timelineStyle: currentTheme ? currentTheme.timelineStyle : timelineStyle
-        }
-
         property PaletteControls paletteControls: PaletteControls{}
 
         function add(activeIndex, objectsOnly, forRoot){
@@ -237,7 +214,7 @@ WorkspaceExtension{
             } else {
                 //Palette list box
 
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
+                var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(
                     palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
                 )
@@ -285,7 +262,7 @@ WorkspaceExtension{
                 root.shapePalette(editor, palettes, 0)
             } else {
                 //Palette list box
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
+                var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model    = palettes
@@ -448,7 +425,7 @@ WorkspaceExtension{
 
             var rect = activePane.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
-            var addBoxItem = globals.paletteControls.createAddQmlBox(null, globals.paletteStyle)
+            var addBoxItem = globals.paletteControls.createAddQmlBox(null)
             if (!addBoxItem) return
 
             addBoxItem.assignFocus()
@@ -518,7 +495,7 @@ WorkspaceExtension{
                 ef.incrementRefCount()
                 codeHandler.openBinding(ef, palettes, 0)
             } else {
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
+                var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
                 var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
                 palListBox.color = 'transparent'
                 palList.model = palettes
@@ -568,7 +545,7 @@ WorkspaceExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, root.globals.paletteStyle)
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, currentTheme)
         }
     }
 

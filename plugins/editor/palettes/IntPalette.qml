@@ -25,7 +25,7 @@ CodePalette{
     id: palette
     type : "qml/int"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Rectangle{
         width: 330
@@ -38,7 +38,7 @@ CodePalette{
             anchors.left: parent.left
             width: 70
             height: 25
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
             text: intSlider.value
         }
 
@@ -63,7 +63,7 @@ CodePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 5
-                    color: paletteStyle ? paletteStyle.backgroundColor : '#0b111c'
+                    color: theme.colorScheme.middleground
                 }
                 handle: Rectangle{
                     width: 11
@@ -86,7 +86,7 @@ CodePalette{
             width: 50
             height: 25
             wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
@@ -135,7 +135,7 @@ CodePalette{
             height: 25
             wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus
 
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.maximumValue === 0)

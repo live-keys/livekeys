@@ -56,7 +56,7 @@ Item{
     property var parentObjectContainer: null
     property var isForProperty: false
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
-    property var paletteStyle: lk? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
@@ -162,7 +162,6 @@ Item{
 
         property var propertiesOpened: []
 
-        property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         Keys.onPressed: {
             var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -317,8 +316,8 @@ Item{
                 color: {
                     return objectContainer.pane ? objectContainer.pane.topColor
                                                 : objectContainer.activeFocus
-                                                  ? objectContainer.paletteStyle.sectionHeaderFocusBackgroundColor
-                                                  : objectContainer.paletteStyle.sectionHeaderBackgroundColor
+                                                  ? theme.colorScheme.middlegroundOverlayDominant
+                                                  : theme.colorScheme.middlegroundOverlay
                 }
                 isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
@@ -400,7 +399,7 @@ Item{
 
                     var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(null, objectContainer.paletteStyle.selectableListView)
+                        var paletteList = paletteControls.createPaletteListView(null, theme.selectableListView)
 
                         var p = objectContainer.parent
                         while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
@@ -448,7 +447,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false, root.paletteStyle)
+                    paletteControls.compose(objectContainer, false, theme)
                 }
             }
         }

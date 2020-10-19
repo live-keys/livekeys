@@ -32,7 +32,7 @@ CodePalette{
         weight: Font.Normal
     })
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
@@ -67,7 +67,7 @@ CodePalette{
             anchors.top: parent.top
             height: 25
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onTextChanged: {
                 if ( !autoTextChange ){
@@ -145,7 +145,7 @@ CodePalette{
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.connect : null
+            content: theme.buttons.connect
             onClicked: {
                 palette.writeBinding()
             }

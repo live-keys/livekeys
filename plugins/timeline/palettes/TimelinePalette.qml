@@ -10,7 +10,7 @@ CodePalette{
     id: palette
 
     type: "qml/timeline#Timeline"
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
     property QtObject defaultTimelineStyle: TimelineStyle{}
 
     item: Item{
@@ -21,7 +21,7 @@ CodePalette{
             id: timelineArea
             anchors.fill: parent
             focus : true
-            timelineStyle: paletteStyle ? paletteStyle.timelineStyle : palette.defaultTimelineStyle
+            timelineStyle: theme.timelineStyle
 
             onSegmentDoubleClicked: {
                 if ( segment instanceof Keyframe ){

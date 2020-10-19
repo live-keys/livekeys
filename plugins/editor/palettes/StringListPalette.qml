@@ -10,7 +10,7 @@ CodePalette{
     type : "qml/QStringList"
 
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property bool valueDirty: false
 
@@ -125,7 +125,7 @@ CodePalette{
                 height: 20
                 textHint: 'Arg...'
 
-                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+                style: theme.inputStyle
             }
 
             Item{
@@ -166,7 +166,7 @@ CodePalette{
             anchors.bottom: parent.bottom
             height: visible ? 20 : 0
             width: 50
-            style: palette.paletteStyle ? palette.paletteStyle.buttonStyle : defaultStyle
+            style: theme.formButtonStyle
             visible: palette.valueDirty
 
             text: "Update"

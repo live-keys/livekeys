@@ -9,7 +9,7 @@ CodePalette{
     id: palette
     type : "qml/int"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: root
@@ -25,7 +25,7 @@ CodePalette{
             width: parent.width - 30
             height: 25
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onKeyPressed: {
                 if ( event.key === Qt.Key_Return ){
@@ -42,7 +42,7 @@ CodePalette{
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.apply : null
+            content: theme.buttons.apply
             onClicked: {
                 palette.value = pathInput.text
                 if ( !palette.isBindingChange() ){

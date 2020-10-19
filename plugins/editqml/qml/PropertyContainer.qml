@@ -8,7 +8,7 @@ Item{
     property string title: "Object"
     objectName: "propertyContainer"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property Item paletteGroup : null
     property alias groupsContainer: container
@@ -52,10 +52,10 @@ Item{
         anchors.topMargin: 5 + topMarginParam
         height: container.height > 30 ? container.height : 30
         width: 110
-        color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.background : 'black'
+        color: theme.colorScheme.middleground
         radius: 3
-        border.width: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderThickness : 1
-        border.color: propertyContainer.paletteStyle ? propertyContainer.paletteStyle.propertyLabelStyle.borderColor : '#232b30'
+        border.width: theme.inputStyle.borderThickness
+        border.color: theme.colorScheme.middlegroundBorder
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 25
@@ -88,7 +88,7 @@ Item{
                     var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
                         editingFragment.position(), true)
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(null, paletteStyle.selectableListView)
+                        var paletteList = paletteControls.createPaletteListView(null, theme.selectableListView)
 
                         var p = propertyContainer.parent
                         while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){

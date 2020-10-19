@@ -25,7 +25,6 @@ CodePalette{
     id: palette
     type : "qml/double"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
     property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
@@ -68,7 +67,7 @@ CodePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 5
-                    color: paletteStyle ? paletteStyle.backgroundColor : '#0b111c'
+                    color: theme.colorScheme.middleground
                 }
                 handle: Rectangle{
                     width: 11
@@ -132,7 +131,7 @@ CodePalette{
             width: 50
             height: 25
 
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
@@ -181,7 +180,7 @@ CodePalette{
             width: 50
             height: 25
 
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.maximumValue === 0)

@@ -8,7 +8,7 @@ import workspace 1.0 as Workspace
 CodePalette {
     id: palette
     type: "qml/size"
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         height: 24
@@ -20,7 +20,7 @@ CodePalette {
             width: 50
             height: 24
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             validator: IntValidator {bottom: 0}
 
@@ -51,7 +51,7 @@ CodePalette {
             width: 50
             height: 24
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
             validator: IntValidator {bottom: 0}
 
             onKeyPressed: {
@@ -69,7 +69,7 @@ CodePalette {
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.apply : null
+            content: theme.buttons.apply
             onClicked: {
                 palette.value = widthInput.text + "x" + heightInput.text
                 if ( !palette.isBindingChange() ){

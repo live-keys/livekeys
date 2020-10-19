@@ -9,7 +9,7 @@ CodePalette{
     id: palette
     type : "qml/import"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
 
@@ -113,7 +113,7 @@ CodePalette{
                 height: 20
                 textHint: 'Path...'
 
-                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+                style: theme.inputStyle
             }
 
             Workspace.InputBox{
@@ -128,7 +128,7 @@ CodePalette{
                 height: 20
                 textHint: '0.0'
 
-                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+                style: theme.inputStyle
             }
 
             Workspace.InputBox{
@@ -143,7 +143,7 @@ CodePalette{
                 height: 20
                 textHint: 'As...'
 
-                style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+                style: theme.inputStyle
             }
 
             Item{

@@ -9,7 +9,7 @@ Item{
     id: propertyItem
     property string propertyName : ''
     
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property Item inPort : null
     property Item outPort : null
@@ -77,7 +77,7 @@ Item{
                         propertyItem.editingFragment.position(), true)
 
                     if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyItem, paletteStyle.selectableListView)
+                        var paletteList = paletteControls.createPaletteListView(propertyItem, theme.selectableListView)
                         node.item.objectGraph.paletteListOpened = true
                         paletteList.forceActiveFocus()
                         paletteList.model = palettes

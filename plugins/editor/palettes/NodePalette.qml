@@ -18,7 +18,7 @@ CodePalette{
     property var numOfObjects: 0
     property var allObjects: []
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
@@ -152,7 +152,7 @@ CodePalette{
             documentHandler: palette.documentHandler
             editor: palette.editor
             editingFragment: palette ? palette.editingFragment: null
-            style: palette && palette.paletteStyle ? palette.paletteStyle.nodeEditor : defaultStyle
+            style: theme.nodeEditor
         }
     }
 
