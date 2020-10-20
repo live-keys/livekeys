@@ -182,6 +182,34 @@ Rectangle {
         }
     }
 
+    Rectangle {
+        width: listView.width
+        height: noMsgsText.height + 11
+        anchors.top: parent.top
+        anchors.topMargin: 30
+        visible: listView.model.count === 0
+        border.width: 1
+        border.color: root.theme.colorScheme.middlegroundOverlayDominant
 
+        color: root.theme.colorScheme.middleground
+
+        Item{
+            id: noMsgsTextContainer
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.leftMargin: 30
+            anchors.topMargin: 5 + listView.style.borderWidth
+            width: parent.width - 35
+            height: noMsgsText.height
+
+            Workspace.Label{
+                id: noMsgsText
+                width: listView.width - 55
+                font.italic: true
+                text: "No messages"
+                textStyle: root.theme.inputLabelStyle.textStyle
+            }
+        }
+    }
 }
 
