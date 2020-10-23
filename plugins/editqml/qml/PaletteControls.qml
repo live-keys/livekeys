@@ -621,5 +621,90 @@ QtObject{
         openNestedProperties(objectContainer, true)
     }
 
+    function addPaletteList(container, paletteGroup, xOffset, yOffset, mode, swap, listParent){
 
+        // mode = 1: objectContainer
+        // mode = 2: paletteContainer
+        // mode = 3: propertyContainer
+        // mode = 4: objectNode/objectNodeProperty
+
+        if (!container.editingFragment) return null
+        var palettes = container.editor.documentHandler.codeHandler.findPalettes(container.editingFragment.position(), true, mode === 1)
+
+        if (palettes.size() === 0) return null
+
+        var paletteList = createPaletteListView(listParent ? listParent : null, theme.selectableListView)
+
+        var palListBox = null
+        if (mode !== 4){
+            var p = container.parent
+            while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
+                p = p.parent
+            }
+            var coords = mode === 1 ? container.objectContainerTitle.mapToItem(p, 0, 0) : container.mapToItem(p, 0, 0)
+            palListBox   = lk.layers.editor.environment.createEditorBox(
+                paletteList,
+                Qt.rect(
+                    coords.x + xOffset,
+                    coords.y + yOffset - (mode === 1 && p.objectName === "objectPalette" ? 8 : 0),
+                    0, 0),
+                mode === 2 ? Qt.point(container.editor.x, container.editor.y) : Qt.point(p.x, p.y),
+                lk.layers.editor.environment.placement.top
+            )
+            palListBox.color = 'transparent'
+
+        } else {
+            container.objectGraph.paletteListOpened = true
+        }
+
+        paletteList.forceActiveFocus()
+        paletteList.model = palettes
+
+
+        paletteList.cancelledHandler = function(){
+            paletteList.focus = false
+            paletteList.model = null
+            paletteList.destroy()
+            if (mode !== 4) palListBox.destroy()
+            else {
+                container.objectGraph.paletteListOpened = false
+                container.objectGraph.activateFocus()
+            }
+        }
+
+        paletteList.selectedHandler = function(index){
+            paletteList.focus = false
+            paletteList.model = null
+
+            var palette = container.editor.documentHandler.codeHandler.openPalette(container.editingFragment, palettes, index)
+            var paletteBox = openPalette(palette,
+                                         container.editingFragment,
+                                         container.editor,
+                                         paletteGroup,
+                                         mode === 1 ? container.parent : null)
+
+            if (paletteBox){
+                if (mode === 1 || mode === 4){
+                    paletteBox.moveEnabledSet = false
+                } else if (mode === 2){
+                    paletteBox.moveEnabledSet = container.moveEnabledGet
+                }
+            }
+
+            if (mode === 2 && swap){
+                container.parent = null
+                container.documentHandler.codeHandler.removePalette(container.palette)
+                container.destroy()
+            }
+
+            paletteList.destroy()
+            if (mode !== 4) palListBox.destroy()
+            else {
+                container.objectGraph.paletteListOpened = false
+                container.objectGraph.activateFocus()
+            }
+        }
+
+        return paletteList
+    }
 }

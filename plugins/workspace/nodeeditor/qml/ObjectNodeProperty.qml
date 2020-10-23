@@ -14,6 +14,7 @@ Item{
     property Item inPort : null
     property Item outPort : null
     property QtObject node : null
+    property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
@@ -71,55 +72,20 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
-                    if (!propertyItem.editingFragment) return
+                    var paletteList = paletteControls.addPaletteList(
+                        propertyItem,
+                        paletteContainer,
+                        0,
+                        0,
+                        4,
+                        false,
+                        propertyItem
+                    )
 
-                    var palettes = propertyItem.documentHandler.codeHandler.findPalettes(
-                        propertyItem.editingFragment.position(), true)
-
-                    if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(propertyItem, theme.selectableListView)
-                        node.item.objectGraph.paletteListOpened = true
-                        paletteList.forceActiveFocus()
-                        paletteList.model = palettes
-
+                    if (paletteList){
                         paletteList.anchors.topMargin = propertyTitle.height
                         paletteList.width = Qt.binding(function(){return propertyItem.width})
-
-                        paletteList.cancelledHandler = function(){
-                            node.item.objectGraph.paletteListOpened = false
-                            node.item.objectGraph.activateFocus()
-
-                            paletteList.focus = false
-                            paletteList.model = null
-                            paletteList.destroy()
-                        }
-                        paletteList.selectedHandler = function(index){
-                            paletteList.focus = false
-                            paletteList.model = null
-
-                            if ( paletteContainer &&
-                                 paletteContainer.objectName === 'paletteGroup' )
-                            {
-                                var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
-                                var paletteBox = paletteControls.openPalette(palette,
-                                                                             propertyItem.editingFragment,
-                                                                             editor,
-                                                                             paletteContainer)
-                                if (paletteBox){
-                                    paletteBox.moveEnabledSet = false
-
-                                }
-
-                            }
-                            node.item.objectGraph.paletteListOpened = false
-                            node.item.objectGraph.activateFocus()
-
-                            paletteList.destroy()
-
-
-                        }
                     }
-
                 }
             }
         }

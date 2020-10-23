@@ -30,7 +30,6 @@ Item{
             propertyContainer.destroy()
         }
     }
-    property int topMarginParam: 0
     width: container.width + 120
     height: container.height > 35 ? container.height : 35
     z: 3000
@@ -49,7 +48,7 @@ Item{
         anchors.left: parent.left
         anchors.leftMargin: 25
         anchors.top: parent.top
-        anchors.topMargin: 5 + topMarginParam
+        anchors.topMargin: 5
         height: container.height > 30 ? container.height : 30
         width: 110
         color: theme.colorScheme.middleground
@@ -85,46 +84,17 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
-                    var palettes = propertyContainer.documentHandler.codeHandler.findPalettes(
-                        editingFragment.position(), true)
-                    if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(null, theme.selectableListView)
+                    var paletteList = paletteControls.addPaletteList(
+                        propertyContainer,
+                        propertyContainer.valueContainer,
+                        110,
+                        -12,
+                        3
+                    )
 
-                        var p = propertyContainer.parent
-                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
-                            p = p.parent
-                        }
-
-                        var coords = propertyContainer.mapToItem(p, 0, 0)
-                        var palListBox   = lk.layers.editor.environment.createEditorBox(
-                            paletteList, Qt.rect(coords.x + 110, coords.y - 12, 0, 0), Qt.point(p.x, p.y), lk.layers.editor.environment.placement.top
-                        )
-                        palListBox.color = 'transparent'
-
-                        paletteList.anchors.topMargin = 15 + topMarginParam
+                    if (paletteList){
+                        paletteList.anchors.topMargin = 15
                         paletteList.width = 250
-                        paletteList.forceActiveFocus()
-                        paletteList.model = palettes
-                        paletteList.cancelledHandler = function(){
-                            paletteList.focus = false
-                            paletteList.model = null
-                            paletteList.destroy()
-                            palListBox.destroy()
-                        }
-                        paletteList.selectedHandler = function(index){
-                            paletteList.focus = false
-                            paletteList.model = null
-
-                            if ( propertyContainer.valueContainer &&
-                                 propertyContainer.valueContainer.objectName === 'paletteGroup' )
-                            {
-                                var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-                                paletteControls.openPalette(palette, editingFragment, editor, propertyContainer.valueContainer)
-                            }
-                            paletteList.destroy()
-                            palListBox.destroy()
-
-                        }
                     }
                 }
             }
@@ -170,7 +140,7 @@ Item{
         id: container
 
         anchors.top: parent.top
-        anchors.topMargin: 5 + topMarginParam
+        anchors.topMargin: 5
         anchors.left: parent.left
         anchors.leftMargin: 140
 

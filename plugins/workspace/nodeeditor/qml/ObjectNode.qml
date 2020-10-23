@@ -187,39 +187,20 @@ Qan.NodeItem{
                     anchors.fill: parent
                     onClicked: {
                         root.selected = false
-                        var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
-                        if (palettes.size() ){
-                            var paletteList = paletteControls.createPaletteListView(wrapper, theme.selectableListView)
-                            objectGraph.paletteListOpened = true
-                            paletteList.forceActiveFocus()
-                            paletteList.model = palettes
+                        var paletteList = paletteControls.addPaletteList(
+                            root,
+                            paletteContainer,
+                            0,
+                            0,
+                            4,
+                            false,
+                            wrapper
+                        )
 
+                        if (paletteList){
                             paletteList.anchors.topMargin = nodeTitle.height
                             paletteList.width = Qt.binding(function(){ return wrapper.width })
-                            paletteList.cancelledHandler = function(){
-                                paletteList.focus = false
-                                paletteList.model = null
-                                objectGraph.paletteListOpened = false
-                                objectGraph.activateFocus()
-                                paletteList.destroy()
-                            }
-                            paletteList.selectedHandler = function(index){
-                                paletteList.focus = false
-                                paletteList.model = null
-                                var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                                var paletteBox = paletteControls.openPalette(palette,
-                                                                             editingFragment,
-                                                                             editor,
-                                                                             paletteContainer)
-                                if (paletteBox) paletteBox.moveEnabledSet = false
-
-                                objectGraph.paletteListOpened = false
-                                objectGraph.activateFocus()
-                                paletteList.destroy()
-                            }
                         }
-
                     }
                 }
             }

@@ -152,6 +152,8 @@ Item{
         property QtObject editingFragment : null
         property Item editor: null
 
+        property alias objectContainerTitle: objectContainerTitle
+
         property Item pane : null
         property Item wrapper : root
 
@@ -393,58 +395,17 @@ Item{
                     }
                 }
                 onAddPalette: {
-                    var editingFragment = objectContainer.editingFragment
-                    if ( !editingFragment )
-                        return
-
-                    var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
-                    if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(null, theme.selectableListView)
-
-                        var p = objectContainer.parent
-                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
-                            p = p.parent
-                        }
-
-                        var coords = objectContainerTitle.mapToItem(p, 0, 0)
-
-                        var palListBox   = lk.layers.editor.environment.createEditorBox(
-                            paletteList,
-                            Qt.rect(coords.x + objectContainerTitle.width - 168,
-                                    coords.y - 33 - (p.objectName === "objectPalette" ? 8 : 0),
-                                    0, 0),
-                            Qt.point(p.x, p.y),
-                            lk.layers.editor.environment.placement.top
-                        )
-                        palListBox.color = 'transparent'
-                        paletteList.forceActiveFocus()
-                        paletteList.model = palettes
+                    var paletteList = paletteControls.addPaletteList(objectContainer,
+                                                                     paletteGroup,
+                                                                     objectContainerTitle.width - 168,
+                                                                     -33,
+                                                                     1 /*mode*/)
+                    if (paletteList){
                         paletteList.width = 250
                         paletteList.anchors.topMargin = titleHeight + topSpacing
-                        paletteList.cancelledHandler = function(){
-                            paletteList.focus = false
-                            paletteList.model = null
-                            paletteList.destroy()
-                            palListBox.destroy()
-                        }
-                        paletteList.selectedHandler = function(index){
-                            paletteList.focus = false
-                            paletteList.model = null
-
-                            var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                            var paletteBox = paletteControls.openPalette(palette,
-                                                                        editingFragment,
-                                                                        editor,
-                                                                        paletteGroup,
-                                                                        root)
-
-                            if (paletteBox) paletteBox.moveEnabledSet = false
-                            paletteList.destroy()
-                            palListBox.destroy()
-
-                        }
                     }
+
+
                 }
                 onCompose : {
                     paletteControls.compose(objectContainer, false, theme)
