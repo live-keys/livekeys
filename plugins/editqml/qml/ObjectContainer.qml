@@ -330,13 +330,7 @@ Item{
                         collapse()
                 }
                 onErase: {
-                    var rootDeleted = (editingFragment.position() === editor.documentHandler.codeHandler.findRootPosition())
-                    editor.documentHandler.codeHandler.deleteObject(editingFragment)
-
-                    if (rootDeleted) {
-                        editor.editor.rootShaped = false
-                        editor.editor.addRootButton.visible = true
-                    }
+                    paletteControls.eraseObject(root)
                 }
                 onToggleConnections: {
                     if ( paletteConnection.model ){
@@ -354,45 +348,10 @@ Item{
                     editingFragment.rebuild()
                 }
                 onPaletteToPane : {
-                    if ( objectContainer.pane === null ){
-                        var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
-                        lk.layers.workspace.panes.splitPaneHorizontallyWith(
-                            objectContainer.editor.parentSplitter,
-                            objectContainer.editor.parentSplitterIndex(),
-                            objectPane
-                        )
-
-                        objectContainerTitle.parent = objectPane.paneHeaderContent
-                        objectPane.objectContainer = objectContainer
-                        objectPane.title = objectContainer.title
-                        objectContainer.pane = objectPane
-                        root.placeHolder.parent = root
-                    } else {
-                        objectContainer.closeAsPane()
-                    }
+                    paletteControls.paletteToPane(objectContainer)
                 }
                 onClose : {
-                    if ( objectContainer.pane )
-                        objectContainer.closeAsPane()
-                    var codeHandler = editor.documentHandler.codeHandler
-                    collapse()
-                    editor.documentHandler.codeHandler.removeConnection(editingFragment)
-
-                    var rootPos = codeHandler.findRootPosition()
-                    if (rootPos === editingFragment.position())
-                        editor.editor.rootShaped = false
-
-                    codeHandler.removeConnection(editingFragment)
-
-                    var p = root.parent
-                    if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
-                        p.destroy()
-                    } else { // if this is nested
-                        //TODO: Check if this is nested within a property container
-                        if ( objectContainer.pane )
-                            objectContainer.closeAsPane()
-                        root.destroy()
-                    }
+                    paletteControls.closeObjectContainer(objectContainer)
                 }
                 onAddPalette: {
                     var paletteList = paletteControls.addPaletteList(objectContainer,

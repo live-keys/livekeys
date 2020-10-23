@@ -707,4 +707,62 @@ QtObject{
 
         return paletteList
     }
+
+    function eraseObject(objectContainer){
+        var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
+        objectContainer.editor.documentHandler.codeHandler.deleteObject(objectContainer.editingFragment)
+
+        if (rootDeleted) {
+            objectContainer.editor.editor.rootShaped = false
+            objectContainer.editor.editor.addRootButton.visible = true
+        }
+    }
+
+    function paletteToPane(objectContainer){
+        if ( objectContainer.pane ){
+            objectContainer.closeAsPane()
+            return
+        }
+
+        var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
+        lk.layers.workspace.panes.splitPaneHorizontallyWith(
+            objectContainer.editor.parentSplitter,
+            objectContainer.editor.parentSplitterIndex(),
+            objectPane
+        )
+
+        var root = objectContainer.parent
+
+        objectContainer.objectContainerTitle.parent = objectPane.paneHeaderContent
+        objectPane.objectContainer = objectContainer
+        objectPane.title = objectContainer.title
+        objectContainer.pane = objectPane
+
+        root.placeHolder.parent = root
+
+    }
+
+    function closeObjectContainer(objectContainer){
+        if ( objectContainer.pane )
+            objectContainer.closeAsPane()
+        var codeHandler = objectContainer.editor.documentHandler.codeHandler
+        objectContainer.collapse()
+        objectContainer.editor.documentHandler.codeHandler.removeConnection(objectContainer.editingFragment)
+
+        var rootPos = codeHandler.findRootPosition()
+        if (rootPos === objectContainer.editingFragment.position())
+            objectContainer.editor.editor.rootShaped = false
+
+        codeHandler.removeConnection(objectContainer.editingFragment)
+
+        var p = objectContainer.parent.parent
+        if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
+            p.destroy()
+        } else { // if this is nested
+            //TODO: Check if this is nested within a property container
+            if ( objectContainer.pane )
+                objectContainer.closeAsPane()
+            objectContainer.parent.destroy()
+        }
+    }
 }
