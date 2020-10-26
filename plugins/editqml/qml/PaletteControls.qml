@@ -765,4 +765,249 @@ QtObject{
             objectContainer.parent.destroy()
         }
     }
+
+    function edit(editor){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+
+        var ef = codeHandler.openConnection(editor.textEdit.cursorPosition)
+        var palette = codeHandler.edit(ef)
+
+        var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
+        var paletteGroup = createPaletteGroup(lk.layers.editor.environment.content)
+        editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
+        paletteGroup.x = 2
+        paletteGroup.editingFragment = ef
+        paletteGroup.codeHandler = codeHandler
+        ef.visualParent = paletteGroup
+        editorBox.color = "black"
+        editorBox.border.width = 1
+        editorBox.border.color = "#141c25"
+
+        var paletteBox = openPalette(palette, ef, editor, paletteGroup)
+        palette.item.x = 5
+        palette.item.y = 7
+        if (paletteBox){
+            paletteBox.title = 'Edit'
+            paletteBox.titleLeftMargin = 10
+            paletteBox.paletteSwapVisible = false
+            paletteBox.paletteAddVisible = false
+        }
+        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+        ef.incrementRefCount()
+    }
+
+    function palette(editor){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+        if ( !palettes ){
+            return
+        }
+
+        if ( palettes.size() === 1 ){
+            loadPalette(editor, palettes, 0)
+        } else {
+            //Palette list box
+
+            var palList      = createPaletteListView(null, theme.selectableListView)
+            var palListBox   = lk.layers.editor.environment.createEditorBox(
+                palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+            )
+            palListBox.color = 'transparent'
+            palList.model    = palettes
+            editor.internalFocus = false
+            palList.forceActiveFocus()
+            lk.layers.workspace.panes.setActiveItem(palList, editor)
+
+            palList.cancelled.connect(function(){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+            })
+            palList.paletteSelected.connect(function(index){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+                loadPalette(editor, palettes, index)
+            })
+        }
+    }
+
+    function shape(editor){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true, true)
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+
+        if ( !palettes || palettes.size() === 0 ){
+            shapePalette(editor, palettes, -1)
+        } else if ( palettes.size() === 1 ){
+            shapePalette(editor, palettes, 0)
+        } else {
+            //Palette list box
+            var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
+            var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
+            palListBox.color = 'transparent'
+            palList.model    = palettes
+            editor.internalFocus = false
+            palList.forceActiveFocus()
+            lk.layers.workspace.panes.setActiveItem(palList, editor)
+
+            palList.cancelled.connect(function(){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+            })
+            palList.paletteSelected.connect(function(index){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+                shapePalette(editor, palettes, index)
+            })
+        }
+    }
+
+    function bind(editor){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+        if ( palettes.size() === 1 ){
+            var ef = codeHandler.openConnection(palettes.position())
+            ef.incrementRefCount()
+            codeHandler.openBinding(ef, palettes, 0)
+        } else {
+            var palList      = createPaletteListView(null, theme.selectableListView)
+            var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
+            palListBox.color = 'transparent'
+            palList.model = palettes
+            editor.internalFocus = false
+            palList.forceActiveFocus()
+            lk.layers.workspace.panes.setActiveItem(palList, editor)
+
+            palList.cancelled.connect(function(){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+            })
+            palList.paletteSelected.connect(function(index){
+                palList.focus = false
+                editor.editor.forceFocus()
+                palList.destroy()
+                palListBox.destroy()
+
+                var ef = codeHandler.openConnection(palettes.position())
+                ef.incrementRefCount()
+
+                codeHandler.openBinding(ef, palettes, index)
+            })
+        }
+    }
+
+    function shapePalette(editor, palettes, index){
+        var codeHandler = editor.documentHandler.codeHandler
+        var ef = codeHandler.openConnection(palettes.position())
+
+        if (!ef){
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
+            console.error("Error: Can't shape palette")
+            return
+        }
+
+        var forAnObject = ef.location === QmlEditFragment.Object
+        var editorBox = ef.visualParent ? ef.visualParent.parent : null
+
+        var objectContainer = null
+        var paletteBoxGroup = editorBox ? editorBox.child : null
+        if ( paletteBoxGroup === null ){
+            if (forAnObject){
+                objectContainer = createObjectContainerForFragment(editor, ef)
+                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+                    objectContainer.contentWidth = Qt.binding(function(){
+                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
+                                ? objectContainer.containerContentWidth
+                                : objectContainer.editorContentWidth
+                    })
+                objectContainer.expand()
+                objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+
+                paletteBoxGroup = objectContainer.paletteGroup
+                editorBox = objectContainer.parent
+            } else {
+                editorBox = createEditorBoxForFragment(editor, ef, true)
+                paletteBoxGroup = ef.visualParent
+            }
+        } else {
+            var p = paletteBoxGroup
+            while (p && p.objectName !== "objectContainer") p = p.parent
+            objectContainer = p
+        }
+
+        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
+        var forImports = ef.location === QmlEditFragment.Imports
+
+        if (palette){
+            if (forImports){
+                palette.item.model = codeHandler.importsModel()
+                palette.item.editor = editor.editor
+            }
+            if (forAnObject && !palette.item ){
+                objectContainer.expandOptions(palette)
+            }
+
+            var paletteBox = openPalette(palette, ef, editor, paletteBoxGroup)
+            if (paletteBox) paletteBox.moveEnabledSet = false
+        }
+
+        codeHandler.frameEdit(editorBox, ef)
+
+        if (forImports) editor.editor.importsShaped = true
+        ef.incrementRefCount()
+
+        return objectContainer ? objectContainer : palette
+    }
+
+    function loadPalette(editor, palettes, index){
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var rect = editor.editor.getCursorRectangle()
+        var cursorCoords = editor.cursorWindowCoords()
+
+        var ef = codeHandler.openConnection(palettes.position())
+
+        if (!ef)
+        {
+            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
+            console.error("Error: Can't create a palette in a non-compiled program")
+            return
+        }
+        ef.incrementRefCount()
+
+        var palette = codeHandler.openPalette(ef, palettes, index)
+
+        var editorBox = ef.visualParent ? ef.visualParent.parent : null
+        var paletteBoxGroup = editorBox ? editorBox.child : null
+
+        if ( paletteBoxGroup === null ){
+            editorBox = createEditorBoxForFragment(editor, ef, false)
+            editorBox.color = "black"
+            paletteBoxGroup = ef.visualParent
+        }
+
+        var paletteBox = openPalette(palette, ef, editor, paletteBoxGroup)
+
+        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+    }
 }
