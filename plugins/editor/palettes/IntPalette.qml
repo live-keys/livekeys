@@ -55,7 +55,7 @@ CodePalette{
             onValueChanged: {
                 palette.value = intSlider.value
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
             }
             stepSize: 1.0
             maximumValue: 25
@@ -195,9 +195,9 @@ CodePalette{
         intSlider.value = floorValue
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

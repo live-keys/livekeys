@@ -50,14 +50,14 @@ CodePalette{
             onSelectedColorChanged: {
                 palette.value = selectedColor
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value.toString())
+                    editFragment.write(palette.value.toString())
             }
         }
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 

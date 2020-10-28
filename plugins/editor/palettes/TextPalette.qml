@@ -31,7 +31,7 @@ CodePalette{
                 if ( event.key === Qt.Key_Return ){
                     palette.value = pathInput.text
                     if ( !palette.isBindingChange() ){
-                        extension.write(palette.value)
+                        editFragment.write(palette.value)
                     }
                     event.accepted = true
                 }
@@ -46,7 +46,7 @@ CodePalette{
             onClicked: {
                 palette.value = pathInput.text
                 if ( !palette.isBindingChange() ){
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
                 }
             }
         }
@@ -57,9 +57,9 @@ CodePalette{
         root.path = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

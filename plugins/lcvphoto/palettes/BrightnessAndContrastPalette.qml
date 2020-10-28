@@ -49,7 +49,7 @@ CodePalette{
             onValueChanged: {
                 adjustmentBox.bandc.brightness = value
                 if ( !isBindingChange() ){
-                    extension.writeProperties({
+                    editFragment.writeProperties({
                         'brightness' : adjustmentBox.bandc.brightness
                     })
                 }
@@ -98,7 +98,7 @@ CodePalette{
                 if ( adjustmentBox.bandc ){
                     adjustmentBox.bandc.contrast = value.toFixed(2)
                     if ( !isBindingChange() ){
-                        extension.writeProperties({
+                        editFragment.writeProperties({
                             'contrast' : adjustmentBox.bandc.contrast
                         })
                     }
@@ -138,9 +138,9 @@ CodePalette{
         adjustmentBox.bandc = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
                 'contrast' : palette.value.contrast
             })

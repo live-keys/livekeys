@@ -67,9 +67,9 @@ CodePalette{
         adjustmentBox.hsl = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'hue' : palette.value.hue,
                 'saturation' : palette.value.saturation,
                 'lightness': palette.value.lightness

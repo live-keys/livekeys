@@ -173,15 +173,15 @@ CodePalette{
             onClicked: {
                 var modelArray = itemList.modelToArray()
                 palette.value = modelArray
-                extension.write(modelArray)
+                editFragment.write(modelArray)
                 palette.valueDirty = false
             }
         }
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(itemList.modelToArray())
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(itemList.modelToArray())
         }
     }
 

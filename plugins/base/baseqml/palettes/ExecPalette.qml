@@ -56,7 +56,7 @@ CodePalette{
         execBox.current = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){}
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){}
     }
 }

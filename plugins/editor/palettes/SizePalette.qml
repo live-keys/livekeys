@@ -28,7 +28,7 @@ CodePalette {
                 if ( event.key === Qt.Key_Return ){
                     palette.value = widthInput.text + "x" + heightInput.text
                     if ( !palette.isBindingChange() ){
-                        extension.write(palette.value)
+                        editFragment.write(palette.value)
                     }
                     event.accepted = true
                 }
@@ -58,7 +58,7 @@ CodePalette {
                 if ( event.key === Qt.Key_Return ){
                     palette.value = widthInput.text + "x" + heightInput.text
                     if ( !palette.isBindingChange() ){
-                        extension.write(palette.value)
+                        editFragment.write(palette.value)
                     }
                     event.accepted = true
                 }
@@ -73,7 +73,7 @@ CodePalette {
             onClicked: {
                 palette.value = widthInput.text + "x" + heightInput.text
                 if ( !palette.isBindingChange() ){
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
                 }
             }
         }
@@ -84,9 +84,9 @@ CodePalette {
         heightInput.text = value.height
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 

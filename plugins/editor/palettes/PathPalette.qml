@@ -27,7 +27,7 @@ CodePalette{
             onPathSelected: {
                 palette.value = path
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
             }
         }
     }
@@ -36,9 +36,9 @@ CodePalette{
         inputBox.path = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

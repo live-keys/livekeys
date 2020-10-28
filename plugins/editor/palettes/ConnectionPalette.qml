@@ -39,11 +39,11 @@ CodePalette{
     function writeBinding(){
         var text = input.text
 
-        var ef = extension.editingFragment()
-        var result = extension.bindExpression(text)
+        var ef = palette.editFragment
+        var result = ef.bindExpression(text)
 
         if ( result ){
-            extension.write({'__ref': text ? text : ef.defaultValue()})
+            ef.write({'__ref': text ? text : ef.defaultValue()})
         }
 
         input.autoTextChange = true
@@ -71,7 +71,7 @@ CodePalette{
 
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                   editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                }
             }
 
@@ -116,7 +116,7 @@ CodePalette{
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                    editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                     event.accepted = true
                 }
             }
@@ -153,7 +153,7 @@ CodePalette{
     }
 
     onInit: {
-        var contents = extension.readContents()
+        var contents = editFragment.readValueText()
         var tokens = QmlEdit.Tokenizer.scan(contents)
 
         var parsedContents = ''
@@ -178,9 +178,9 @@ CodePalette{
         input.forceActiveFocus()
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

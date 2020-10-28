@@ -56,7 +56,7 @@ CodePalette{
 
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel, true)
+                   editFragment.suggestionsForExpression(input.text, palette.codeModel, true)
                }
             }
 
@@ -97,14 +97,14 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = extension.bindFunctionExpression(input.text)
+                        var result = editFragment.bindFunctionExpression(input.text)
                         if ( result ){
-                            extension.write({'__ref': input.text})
+                            editFragment.write({'__ref': input.text})
                         }
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel, true)
+                    editFragment.suggestionsForExpression(input.text, palette.codeModel, true)
                     event.accepted = true
                 }
             }
@@ -135,16 +135,16 @@ CodePalette{
             height: 25
             content: theme.buttons.connect
             onClicked: {
-                var result = extension.bindFunctionExpression(input.text)
+                var result = editFragment.bindFunctionExpression(input.text)
                 if ( result ){
-                    extension.write({'__ref': input.text})
+                    editFragment.write({'__ref': input.text})
                 }
             }
         }
     }
 
     onInit: {
-        var contents = extension.readContents()
+        var contents = editFragment.readValueText()
         var tokens = QmlEdit.Tokenizer.scan(contents)
 
         var parsedContents = ''
@@ -188,9 +188,9 @@ CodePalette{
         input.forceActiveFocus()
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

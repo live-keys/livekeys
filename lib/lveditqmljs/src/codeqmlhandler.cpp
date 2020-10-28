@@ -27,7 +27,6 @@
 #include "qmljshighlighter_p.h"
 #include "qmlbindingchannel.h"
 #include "qmlbindingspan.h"
-#include "qmlcodeconverter.h"
 #include "qmladdcontainer.h"
 #include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
@@ -2410,13 +2409,12 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
 
     if ( PaletteContainer::hasItem(paletteLoader) ){
         CodePalette* palette = paletteList->loadAt(index);
-        QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-        palette->setExtension(cvt, true);
+        palette->setEditFragment(edit);
         edit->addPalette(palette);
         edit->updatePaletteValue(palette);
 
 
-        connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+        connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
         rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2493,12 +2491,11 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
     }
 
     CodePalette* palette = paletteList->loadAt(index);
-    QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-    palette->setExtension(cvt, true);
+    palette->setEditFragment(edit);
     edit->setBindingPalette(palette);
     edit->updatePaletteValue(palette);
 
-    connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+    connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
     rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2826,12 +2823,11 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteLoader);
                 m_engine->setObjectOwnership(palette, QQmlEngine::CppOwnership);
 
-                QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-                palette->setExtension(cvt, true);
+                palette->setEditFragment(edit);
                 edit->addPalette(palette);
                 edit->updatePaletteValue(palette);
 
-                connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+                connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
                 rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2890,7 +2886,7 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
         editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
     });
 
-    palette->setExtension(new QmlCodeConverter(edit, this), true);
+    palette->setEditFragment(edit);
 
     connect(palette, &CodePalette::valueChanged, [this, edit](){
         if ( edit->totalPalettes() > 0 ){
@@ -3442,7 +3438,7 @@ int CodeQmlHandler::insertRootItem(const QString &name)
 
     d->syncObjects(m_document);
 
-    QObject* newRoot = QmlCodeConverter::create(
+    QObject* newRoot = QmlEditFragment::createObject(
         d->documentInfo(), type + "{}", "temp"
     );
     if ( !newRoot )
@@ -3488,7 +3484,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
         if ( bc->canModify() ){
             QQmlProperty& p = bc->property();
 
-            QObject* result = QmlCodeConverter::create(
+            QObject* result = QmlEditFragment::createObject(
                 d->documentInfo(), type + "{}", "temp"
             );
 

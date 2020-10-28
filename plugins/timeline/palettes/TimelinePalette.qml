@@ -64,7 +64,7 @@ CodePalette{
         timelineArea.timeline = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){}
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){}
     }
 }

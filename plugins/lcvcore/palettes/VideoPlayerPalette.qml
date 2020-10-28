@@ -33,9 +33,9 @@ CodePalette{
 
         Connections{
             target: captureContainer
-            onFpsChanged: extension.updateBindings()
-            onCurrentFrameChanged: extension.updateBindings()
-            onPausedChanged: extension.updateBindings()
+            onFpsChanged: editFragment.updateBindings()
+            onCurrentFrameChanged: editFragment.updateBindings()
+            onPausedChanged: editFragment.updateBindings()
 
             ignoreUnknownSignals: true
         }
@@ -55,7 +55,7 @@ CodePalette{
                 if ( !parent || !parent.videoDecoderView )
                     return
                 parent.videoDecoderView.fps = fpsSlider.value
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'fps' : fpsSlider.value
                 })
             }
@@ -84,12 +84,12 @@ CodePalette{
             videoCapture : parent.videoDecoderView
             width: 290
             onSeekTriggered: {
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'currentFrame' : videoCapture.currentFrame
                 })
             }
             onPlayPauseTriggered: {
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'paused' : videoCapture.paused
                 })
             }
@@ -102,9 +102,9 @@ CodePalette{
         captureContainer.videoDecoderView = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'fps' : palette.value.fps,
                 'currentFrame' : palette.value.currentFrame,
                 'paused' : palette.value.paused

@@ -168,31 +168,26 @@ Rectangle{
             var funcName = dstPort.objectProperty.propertyName
             var value = nodeId + "." + funcName + "()"
 
-            var result = root.palette.extension.bindExpressionForFragment(
-                srcPort.objectProperty.editingFragment,
-                value
-            )
-
-            if ( result ){
-                root.palette.extension.writeForFragment(
-                    srcPort.objectProperty.editingFragment,
-                    {'__ref': value}
-                )
+            if (srcPort.objectProperty.editingFragment){
+                var result = srcPort.objectProperty.editingFragment.bindExpression(value)
+                if ( result ){
+                    srcPort.objectProperty.editingFragment.write(
+                        {'__ref': value}
+                    )
+                }
             }
 
         } else {
             var value =
                     srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
 
-            var result = root.palette.extension.bindExpressionForFragment(
-                dstPort.objectProperty.editingFragment,
-                value
-            )
-            if ( result ){
-                root.palette.extension.writeForFragment(
-                    dstPort.objectProperty.editingFragment,
-                    {'__ref': value}
-                )
+            if (dstPort.objectProperty.editingFragment){
+                var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+                if ( result ){
+                    dstPort.objectProperty.editingFragment.write(
+                        {'__ref': value}
+                    )
+                }
             }
         }
 
@@ -292,16 +287,17 @@ Rectangle{
 
         var value = ''
 
-        var result = root.palette.extension.bindExpressionForFragment(
-            dstPort.objectProperty.editingFragment, value
-        )
-
-        if ( result ){
-            root.palette.extension.writeForFragment(
-                dstPort.objectProperty.editingFragment, {'__ref': value ? value : dstPort.objectProperty.editingFragment.defaultValue()}
-            )
-        } else {
-            qWarning("Failed to remove binding.")
+        if (dstPort.objectProperty.editingFragment){
+            var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+            if ( result ){
+                dstPort.objectProperty.editingFragment.write(
+                    {'__ref': value
+                    ? value
+                    : dstPort.objectProperty.editingFragment.defaultValue()}
+                )
+            } else {
+                qWarning("Failed to remove binding.")
+            }
         }
 
         graph.removeEdge(edge)
