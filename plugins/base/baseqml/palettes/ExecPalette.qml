@@ -27,7 +27,7 @@ CodePalette{
 
     type: "qml/Exec"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: execBox
@@ -42,7 +42,7 @@ CodePalette{
             anchors.leftMargin: 10
             height: 28
             width: 80
-            style: palette.paletteStyle ? palette.paletteStyle.buttonStyle : defaultStyle
+            style: theme.formButtonStyle
 
 
             text: "Run"
@@ -56,7 +56,7 @@ CodePalette{
         execBox.current = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){}
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){}
     }
 }

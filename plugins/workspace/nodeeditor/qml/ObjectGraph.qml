@@ -22,7 +22,7 @@ Rectangle{
     border.color: root.isInteractive ? root.style.highlightBorderColor : root.style.borderColor
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
-    property QtObject paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property QtObject defaultStyle : QtObject{
         property color backgroundColor: '#000511'
@@ -168,31 +168,26 @@ Rectangle{
             var funcName = dstPort.objectProperty.propertyName
             var value = nodeId + "." + funcName + "()"
 
-            var result = root.palette.extension.bindExpressionForFragment(
-                srcPort.objectProperty.editingFragment,
-                value
-            )
-
-            if ( result ){
-                root.palette.extension.writeForFragment(
-                    srcPort.objectProperty.editingFragment,
-                    {'__ref': value}
-                )
+            if (srcPort.objectProperty.editingFragment){
+                var result = srcPort.objectProperty.editingFragment.bindExpression(value)
+                if ( result ){
+                    srcPort.objectProperty.editingFragment.write(
+                        {'__ref': value}
+                    )
+                }
             }
 
         } else {
             var value =
                     srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
 
-            var result = root.palette.extension.bindExpressionForFragment(
-                dstPort.objectProperty.editingFragment,
-                value
-            )
-            if ( result ){
-                root.palette.extension.writeForFragment(
-                    dstPort.objectProperty.editingFragment,
-                    {'__ref': value}
-                )
+            if (dstPort.objectProperty.editingFragment){
+                var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+                if ( result ){
+                    dstPort.objectProperty.editingFragment.write(
+                        {'__ref': value}
+                    )
+                }
             }
         }
 
@@ -216,7 +211,7 @@ Rectangle{
     }
 
     onDoubleClicked: {
-        var addBoxItem = paletteControls.createAddQmlBox(null, paletteStyle)
+        var addBoxItem = paletteControls.createAddQmlBox(null)
         if (!addBoxItem) return
         var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
@@ -292,16 +287,17 @@ Rectangle{
 
         var value = ''
 
-        var result = root.palette.extension.bindExpressionForFragment(
-            dstPort.objectProperty.editingFragment, value
-        )
-
-        if ( result ){
-            root.palette.extension.writeForFragment(
-                dstPort.objectProperty.editingFragment, {'__ref': value ? value : dstPort.objectProperty.editingFragment.defaultValue()}
-            )
-        } else {
-            qWarning("Failed to remove binding.")
+        if (dstPort.objectProperty.editingFragment){
+            var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+            if ( result ){
+                dstPort.objectProperty.editingFragment.write(
+                    {'__ref': value
+                    ? value
+                    : dstPort.objectProperty.editingFragment.defaultValue()}
+                )
+            } else {
+                qWarning("Failed to remove binding.")
+            }
         }
 
         graph.removeEdge(edge)

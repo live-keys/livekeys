@@ -26,7 +26,6 @@ HEADERS += \
     $$PWD/qmlmetainfo_p.h \
     $$PWD/qmlprojectmonitor_p.h \
     $$PWD/qmladdcontainer.h \
-    $$PWD/qmlcodeconverter.h \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
     $$PWD/qmllanguagescanner.h \
@@ -62,7 +61,6 @@ SOURCES += \
     $$PWD/qmlmetainfo.cpp \
     $$PWD/qmlprojectmonitor.cpp \
     $$PWD/qmladdcontainer.cpp \
-    $$PWD/qmlcodeconverter.cpp \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/qmlimportsmodel.cpp \

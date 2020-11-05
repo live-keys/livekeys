@@ -10,8 +10,8 @@ Rectangle{
     height: child ? child.height + (compact ? 0 : normalHeaderHeight) +5 : 0
     objectName: "paletteContainer"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
-
+    property QtObject theme: lk.layers.workspace.themes.current
+    property var editingFragment: null
     property double minimumWidth: compact ? 0 : 200
     property double headerWidth: compact ? compactHeaderWidth + 5 : 0
     property int compactHeaderWidth: rightButtons.width + 7
@@ -48,6 +48,7 @@ Rectangle{
         var paletteGroup = paletteContainer.parent
 
         if ( paletteGroup.editingFragment) {
+            paletteContainer.editingFragment = paletteGroup.editingFragment
             paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
             paletteGroup.editingFragment.connectionChanged.connect(function(){
                 paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
@@ -75,7 +76,7 @@ Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: compact && child ? child.width + 10: 0
         clip: true
-        color: (paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black')
+        color: theme.colorScheme.middleground
 
         MouseArea{
             id: paletteBoxMoveArea
@@ -103,67 +104,19 @@ Rectangle{
         }
 
         function swapOrAddPalette(swap){
-            var editingFragment = paletteContainer.parent.editingFragment
-            if ( !editingFragment )
-                return
-
-            var palettes = documentHandler.codeHandler.findPalettes(editingFragment.position(), true)
-            if (palettes.size() ){
-                var paletteList = paletteControls.createPaletteListView(null, paletteContainer.paletteStyle.selectableListView)
-
-
-                var p = paletteContainer.parent
-                while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
-                    p = p.parent
-                }
-
-                var coords = paletteContainer.mapToItem(p, 0, 0)
-                var palListBox   = lk.layers.editor.environment.createEditorBox(
-                    paletteList, Qt.rect(coords.x + 84, coords.y - 20, 0, 0), Qt.point(editor.x, editor.y), lk.layers.editor.environment.placement.top
-                )
-                palListBox.color = 'transparent'
-
-                paletteList.forceActiveFocus()
-                paletteList.model = palettes
+            var paletteList = paletteControls.addPaletteList(paletteContainer,
+                                                             paletteContainer.parent,
+                                                             84,
+                                                             -20,
+                                                             2 /*mode*/,
+                                                             swap)
+            if (paletteList){
                 paletteList.anchors.topMargin = 24
                 paletteList.width = Qt.binding(function() { return paletteContainer.width })
-                paletteList.cancelledHandler = function(){
-                    paletteList.focus = false
-                    paletteList.model = null
-                    paletteList.destroy()
-                    palListBox.destroy()
-                }
-                paletteList.selectedHandler = function(index){
-                    paletteList.focus = false
-                    paletteList.model = null
-
-                    var paletteGroup = paletteContainer.parent;
-                    var editorBox = paletteGroup.parent
-
-                    var palette = documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                    var paletteBox = paletteControls.openPalette(palette,
-                                                                 editingFragment,
-                                                                 editor,
-                                                                 paletteGroup)
-
-                    if (paletteBox) paletteBox.moveEnabled = paletteContainer.moveEnabledGet
-
-                    if (swap){
-                        paletteContainer.parent = null
-                        paletteContainer.documentHandler.codeHandler.removePalette(paletteContainer.palette)
-                        paletteContainer.destroy()
-                    }
-
-                    paletteList.destroy()
-                    palListBox.destroy()
-
-                }
             }
         }
 
         function viewPaletteConnections(){
-            var editingFragment = paletteContainer.parent.editingFragment
             if ( !editingFragment )
                 return
 
@@ -286,7 +239,7 @@ Rectangle{
 
     Rectangle {
         id: rightButtons
-        color: paletteContainer.paletteStyle ? paletteContainer.paletteStyle.paletteHeaderColor : 'black'
+        color: theme.colorScheme.middleground
         width: rightButtons.makeVertical ? 20 : 35
         height: compact && child ? child.height : 24
         radius: 2

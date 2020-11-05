@@ -26,7 +26,7 @@ CodePalette {
                 id: commitArea
                 hoverEnabled: true
                 anchors.fill: parent
-                onClicked: palette.value = extension.parse()
+                onClicked: palette.value = editFragment.parse()
             }
         }
     }

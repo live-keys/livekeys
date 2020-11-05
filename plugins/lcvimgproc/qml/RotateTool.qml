@@ -5,6 +5,7 @@ Tool{
     id: root
     toolLabel: 'Rotate'
 
+    property QtObject theme: lk.layers.workspace.themes.current
     property QtObject labelInfoStyle: TextStyle{}
     property Component applyButton : null
     property Component cancelButton : null
@@ -36,7 +37,7 @@ Tool{
             height: 20
             text: '0'
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
         }
 
         Button{

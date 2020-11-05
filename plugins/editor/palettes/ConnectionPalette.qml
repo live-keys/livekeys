@@ -32,18 +32,18 @@ CodePalette{
         weight: Font.Normal
     })
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
     function writeBinding(){
         var text = input.text
 
-        var ef = extension.editingFragment()
-        var result = extension.bindExpression(text)
+        var ef = palette.editFragment
+        var result = ef.bindExpression(text)
 
         if ( result ){
-            extension.write({'__ref': text ? text : ef.defaultValue()})
+            ef.write({'__ref': text ? text : ef.defaultValue()})
         }
 
         input.autoTextChange = true
@@ -67,11 +67,11 @@ CodePalette{
             anchors.top: parent.top
             height: 25
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                   editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                }
             }
 
@@ -116,7 +116,7 @@ CodePalette{
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                    editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                     event.accepted = true
                 }
             }
@@ -145,7 +145,7 @@ CodePalette{
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.connect : null
+            content: theme.buttons.connect
             onClicked: {
                 palette.writeBinding()
             }
@@ -153,7 +153,7 @@ CodePalette{
     }
 
     onInit: {
-        var contents = extension.readContents()
+        var contents = editFragment.readValueText()
         var tokens = QmlEdit.Tokenizer.scan(contents)
 
         var parsedContents = ''
@@ -178,9 +178,9 @@ CodePalette{
         input.forceActiveFocus()
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

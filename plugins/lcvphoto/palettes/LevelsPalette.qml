@@ -50,7 +50,7 @@ CodePalette{
         onLightnessChanged: {
             if ( !isBindingChange() && levels ){
                 levels.lightness = lightness
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'lightness' : lightness
                 })
             }
@@ -58,16 +58,16 @@ CodePalette{
         onLevelByChannelChanged: {
             if ( !isBindingChange() && levels ){
                 levels.channels = levelByChannel
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'channels' : levelByChannel
                 })
             }
         }
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'lightness' : palette.value.lightness,
                 'channels' : palette.value.channels
             })

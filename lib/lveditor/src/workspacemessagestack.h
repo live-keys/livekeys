@@ -9,7 +9,7 @@ class WorkspaceMessageStack : public QAbstractListModel{
 
     Q_OBJECT
     Q_ENUMS(Type)
-
+    Q_PROPERTY(int count READ count NOTIFY countChanged)
 public:
     enum Type{
         Info = 0,
@@ -46,10 +46,10 @@ public slots:
     void pushError(const QString& message, int code);
     void removeAt(int idx);
     void clear();
-
+    int count();
 signals:
     void messageAdded(int type, QString message, int code);
-
+    void countChanged();
 private:
 
     QList<WorkspaceMessage> m_messages;

@@ -68,4 +68,4 @@ inline LvEditFragment *CodeConverter::editingFragment(){
 
 }// namespace
 
-#endif // LVQMLCODECONVERTER_H
+#endif // LVCODECONVERTER_H

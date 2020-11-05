@@ -32,7 +32,7 @@ CodePalette{
         weight: Font.Normal
     })
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
@@ -52,11 +52,11 @@ CodePalette{
             anchors.top: parent.top
             height: 25
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel, true)
+                   editFragment.suggestionsForExpression(input.text, palette.codeModel, true)
                }
             }
 
@@ -97,14 +97,14 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = extension.bindFunctionExpression(input.text)
+                        var result = editFragment.bindFunctionExpression(input.text)
                         if ( result ){
-                            extension.write({'__ref': input.text})
+                            editFragment.write({'__ref': input.text})
                         }
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel, true)
+                    editFragment.suggestionsForExpression(input.text, palette.codeModel, true)
                     event.accepted = true
                 }
             }
@@ -133,18 +133,18 @@ CodePalette{
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.connect : null
+            content: theme.buttons.connect
             onClicked: {
-                var result = extension.bindFunctionExpression(input.text)
+                var result = editFragment.bindFunctionExpression(input.text)
                 if ( result ){
-                    extension.write({'__ref': input.text})
+                    editFragment.write({'__ref': input.text})
                 }
             }
         }
     }
 
     onInit: {
-        var contents = extension.readContents()
+        var contents = editFragment.readValueText()
         var tokens = QmlEdit.Tokenizer.scan(contents)
 
         var parsedContents = ''
@@ -188,9 +188,9 @@ CodePalette{
         input.forceActiveFocus()
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }

@@ -26,7 +26,7 @@ CodePalette{
     id: palette
     type: "qml/color"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         width: 280
@@ -36,28 +36,28 @@ CodePalette{
             id: colorPicker
 
             style: QtObject{
-                property QtObject input: paletteStyle ? paletteStyle.inputStyle : colorPicker.defaultStyle.input
+                property QtObject input: theme.inputStyle
                 property double colorDisplayBoderWidth: 1
-                property color  colorDisplayBoderColor: paletteStyle ? paletteStyle.inputStyle.borderColor : colorPicker.defaultStyle.colorDisplayBoderColor
+                property color  colorDisplayBoderColor: theme.inputStyle.borderColor
                 property double colorDisplayRadius: 2
                 property color adjustmentBackground: 'transparent'
                 property color adjustmentBorderColor: 'transparent'
                 property int adjustmentBorderWidth: 0
                 property real adjustmentRadius: 3
-                property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : colorPicker.defaultStyle.labelStyle
+                property QtObject labelStyle: theme.inputLabelStyle
             }
 
             onSelectedColorChanged: {
                 palette.value = selectedColor
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value.toString())
+                    editFragment.write(palette.value.toString())
             }
         }
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 

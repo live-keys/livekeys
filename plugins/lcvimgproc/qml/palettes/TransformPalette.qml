@@ -28,45 +28,21 @@ CodePalette{
 
     type : "qml/lcvimgproc#TransformImage"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
-    property QtObject defaultStyle: QtObject{
-        property color toolbarColor: "#333"
-        property color toolbarBorder: "#444"
-        property color boxColor: '#333'
-        property color boxBorderColor: "#666"
-        property int boxBorderWidth: 1
-        property real boxRadius: 3
-        property color toolIconColor: 'grey'
-        property color toolIconHighlightBackground: '#333'
-        property Component scrollStyle: imageView.defaultStyle.scrollStyle
-        property QtObject labelStyle: QtObject{
-            property color background: '#666'
-            property double radius: 3
-            property QtObject textStyle: Workspace.TextStyle{}
-        }
-        property Component saveButton: Workspace.TextButton{
-            width: 50
-            height: 25
-            text: 'Save'
-            onClicked: parent.clicked()
-        }
-        property Component applyButton: null
-        property Component cancelButton: null
-    }
     property QtObject style: QtObject{
-        property color toolbarColor: paletteStyle ? paletteStyle.colorScheme.middleground : palette.defaultStyle.toolbarColor
-        property color toolbarBorder: paletteStyle ? paletteStyle.colorScheme.middlegroundBorder : palette.defaultStyle.toolbarColor
-        property color boxColor: paletteStyle ? paletteStyle.colorScheme.background : palette.defaultStyle.boxColor
-        property color boxBorderColor: paletteStyle ? paletteStyle.colorScheme.backgroundBorder : palette.defaultStyle.boxBorderColor
+        property color toolbarColor: theme.colorScheme.middleground
+        property color toolbarBorder: theme.colorScheme.middlegroundBorder
+        property color boxColor: theme.colorScheme.background
+        property color boxBorderColor: theme.colorScheme.backgroundBorder
         property int boxBorderWidth: 1
         property real boxRadius: 3
-        property color toolIconColor: paletteStyle ? paletteStyle.colorScheme.foregroundFaded : palette.defaultStyle.toolIconColor
-        property color toolIconHighlightBackground: paletteStyle ? paletteStyle.colorScheme.middlegroundOverlayDominant : palette.defaultStyle.toolIconHighlightBackground
-        property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : palette.defaultStyle.labelStyle
-        property Component saveButton: paletteStyle ? paletteStyle.buttons.save : palette.defaultStyle.saveButton
-        property Component applyButton: paletteStyle ? paletteStyle.buttons.apply : palette.defaultStyle.applyButton
-        property Component cancelButton: paletteStyle ? paletteStyle.buttons.cancel : palette.defaultStyle.cancelButton
+        property color toolIconColor: theme.colorScheme.foregroundFaded
+        property color toolIconHighlightBackground: theme.colorScheme.middlegroundOverlayDominant
+        property QtObject labelStyle: theme.inputLabelStyle
+        property Component saveButton: theme.buttons.save
+        property Component applyButton: theme.buttons.apply
+        property Component cancelButton: theme.buttons.cancel
     }
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls

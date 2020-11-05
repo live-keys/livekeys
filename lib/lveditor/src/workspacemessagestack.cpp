@@ -40,6 +40,8 @@ void WorkspaceMessageStack::pushInfo(const QString &message, int code){
     endInsertRows();
 
     emit messageAdded(WorkspaceMessageStack::Info, message, code);
+    emit countChanged();
+
 }
 
 void WorkspaceMessageStack::pushWarning(const QString &message, int code){
@@ -48,6 +50,8 @@ void WorkspaceMessageStack::pushWarning(const QString &message, int code){
     endInsertRows();
 
     emit messageAdded(WorkspaceMessageStack::Warning, message, code);
+    emit countChanged();
+
 }
 
 void WorkspaceMessageStack::pushError(const QString &message, int code){
@@ -56,6 +60,8 @@ void WorkspaceMessageStack::pushError(const QString &message, int code){
     endInsertRows();
 
     emit messageAdded(WorkspaceMessageStack::Error, message, code);
+    emit countChanged();
+
 }
 
 void WorkspaceMessageStack::removeAt(int idx)
@@ -63,6 +69,7 @@ void WorkspaceMessageStack::removeAt(int idx)
     beginRemoveRows(QModelIndex(), idx, idx);
     m_messages.erase(m_messages.begin() + idx);
     endRemoveRows();
+    emit countChanged();
 
 }
 
@@ -72,6 +79,13 @@ void WorkspaceMessageStack::clear()
     beginRemoveRows(QModelIndex(), 0, m_messages.size() - 1);
     m_messages.clear();
     endRemoveRows();
+    emit countChanged();
+
+}
+
+int WorkspaceMessageStack::count()
+{
+    return m_messages.size();
 }
 
 

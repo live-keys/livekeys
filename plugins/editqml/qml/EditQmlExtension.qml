@@ -8,29 +8,6 @@ WorkspaceExtension{
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
 
     globals : ProjectQmlExtension{
-        property PaletteStyle paletteStyle: PaletteStyle{
-            colorScheme:  currentTheme ? currentTheme.colorScheme : colorScheme
-            backgroundColor: currentTheme ? currentTheme.colorScheme.middleground : backgroundColor
-            paletteBackgroundColor: currentTheme ? currentTheme.colorScheme.background : paletteBackgroundColor
-            paletteHeaderColor: currentTheme ? currentTheme.colorScheme.middleground : paletteHeaderColor
-            sectionHeaderBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlay : sectionHeaderBackgroundColor
-            sectionHeaderFocusBackgroundColor: currentTheme ? currentTheme.colorScheme.middlegroundOverlayDominant : sectionHeaderFocusBackgroundColor
-            labelStyle: currentTheme ? currentTheme.inputLabelStyle : labelStyle
-            monoInputStyle: currentTheme ? currentTheme.monoInputStyle : monoInputStyle
-            inputStyle: currentTheme ? currentTheme.inputStyle : inputStyle
-            buttonStyle: currentTheme ? currentTheme.formButtonStyle : buttonStyle
-            propertyLabelStyle: QtObject{
-                property color background: currentTheme ? currentTheme.colorScheme.middleground : propertyLabelStyle.background
-                property color borderColor: currentTheme ? currentTheme.colorScheme.middlegroundBorder : propertyLabelStyle.borderColor
-                property double borderThickness: currentTheme ? currentTheme.inputStyle.borderThickness : propertyLabelStyle.borderThickness
-            }
-            scrollbarColor: currentTheme ? currentTheme.colorScheme.scrollbarColor : scrollbarColor
-            buttons: currentTheme ? currentTheme.buttons : buttons
-            nodeEditor: currentTheme ? currentTheme.nodeEditor : nodeEditor
-            selectableListView: currentTheme ? currentTheme.selectableListView : selectableListView
-            timelineStyle: currentTheme ? currentTheme.timelineStyle : timelineStyle
-        }
-
         property PaletteControls paletteControls: PaletteControls{}
 
         function add(activeIndex, objectsOnly, forRoot){
@@ -81,138 +58,8 @@ WorkspaceExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-
-            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition)
-            var palette = codeHandler.edit(ef)
-
-            var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-            var paletteGroup = globals.paletteControls.createPaletteGroup(lk.layers.editor.environment.content)
-            editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteGroup.x = 2
-            paletteGroup.editingFragment = ef
-            paletteGroup.codeHandler = codeHandler
-            ef.visualParent = paletteGroup
-            editorBox.color = "black"
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
-
-
-
-            var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteGroup)
-            palette.item.x = 5
-            palette.item.y = 7
-            if (paletteBox){
-                paletteBox.title = 'Edit'
-                paletteBox.titleLeftMargin = 10
-                paletteBox.paletteSwapVisible = false
-                paletteBox.paletteAddVisible = false
-            }
-            editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            ef.incrementRefCount()
+            globals.paletteControls.edit(activePane)
         }
-    }
-
-    function shapePalette(editor, palettes, index){
-        var codeHandler = editor.documentHandler.codeHandler
-        var ef = codeHandler.openConnection(palettes.position())
-
-        if (!ef){
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
-            console.error("Error: Can't shape palette")
-            return
-        }
-
-        var forAnObject = ef.location === QmlEditFragment.Object
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
-
-        var objectContainer = null
-
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-        if ( paletteBoxGroup === null ){
-            if (forAnObject){
-                objectContainer = globals.paletteControls.createObjectContainerForFragment(editor, ef)
-                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
-                    objectContainer.contentWidth = Qt.binding(function(){
-                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
-                                ? objectContainer.containerContentWidth
-                                : objectContainer.editorContentWidth
-                    })
-                objectContainer.expand()
-                objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-
-                paletteBoxGroup = objectContainer.paletteGroup
-                editorBox = objectContainer.parent
-            } else {
-                editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, true)
-                paletteBoxGroup = ef.visualParent
-            }
-        } else {
-            var p = paletteBoxGroup
-            while (p && p.objectName !== "objectContainer") p = p.parent
-            objectContainer = p
-        }
-
-        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
-        var forImports = ef.location === QmlEditFragment.Imports
-
-        if (palette){
-            if (forImports){
-                palette.item.model = codeHandler.importsModel()
-                palette.item.editor = editor.editor
-            }
-            if (forAnObject && !palette.item ){
-                objectContainer.expandOptions(palette)
-            }
-
-            var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
-            if (paletteBox) paletteBox.moveEnabledSet = false
-        }
-
-        codeHandler.frameEdit(editorBox, ef)
-
-        if (forImports) editor.editor.importsShaped = true
-        ef.incrementRefCount()
-
-        return objectContainer ? objectContainer : palette
-    }
-
-    function loadPalette(editor, palettes, index){
-        var codeHandler = editor.documentHandler.codeHandler
-
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
-
-        var ef = codeHandler.openConnection(palettes.position())
-
-        if (!ef)
-        {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-            console.error("Error: Can't create a palette in a non-compiled program")
-            return
-        }
-        ef.incrementRefCount()
-
-        var palette = codeHandler.openPalette(ef, palettes, index)
-
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-
-        if ( paletteBoxGroup === null ){
-            editorBox = globals.paletteControls.createEditorBoxForFragment(editor, ef, false)
-            editorBox.color = "black"
-            paletteBoxGroup = ef.visualParent
-        }
-
-        var paletteBox = globals.paletteControls.openPalette(palette, ef, editor, paletteBoxGroup)
-
-
-
-        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }
 
     function palette(){
@@ -222,45 +69,7 @@ WorkspaceExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-            if ( !palettes ){
-                return
-            }
-
-            if ( palettes.size() === 1 ){
-                root.loadPalette(editor, palettes, 0)
-            } else {
-                //Palette list box
-
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
-                var palListBox   = lk.layers.editor.environment.createEditorBox(
-                    palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
-                )
-                palListBox.color = 'transparent'
-                palList.model    = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-                    root.loadPalette(editor, palettes, index)
-                })
-            }
+            globals.paletteControls.palette(activePane)
         }
     }
 
@@ -271,42 +80,7 @@ WorkspaceExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true, true)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-
-            if ( !palettes || palettes.size() === 0 ){
-                root.shapePalette(editor, palettes, -1)
-
-            } else if ( palettes.size() === 1 ){
-                root.shapePalette(editor, palettes, 0)
-            } else {
-                //Palette list box
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
-                var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-                palListBox.color = 'transparent'
-                palList.model    = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-                    root.shapePalette(editor, palettes, index)
-                })
-            }
+            globals.paletteControls.shape(activePane)
         }
     }
 
@@ -316,7 +90,7 @@ WorkspaceExtension{
             var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
             var paletteImports = codeHandler.findPalettes(importsPosition, true)
             if (paletteImports) {
-                var pc = root.shapePalette(editor, paletteImports, 0)
+                var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
                 pc.item.width = Qt.binding(function(){
                     if (!pc.item.parent || !pc.item.parent.parent) return
                     var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
@@ -325,9 +99,6 @@ WorkspaceExtension{
             }
         }
     }
-
-
-
 
     function shapeRootObject(editor, codeHandler, callback){
 
@@ -348,7 +119,7 @@ WorkspaceExtension{
                     if (callback)
                         callback()
                     else {
-                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
                         oc.contentWidth = Qt.binding(function(){
                             return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                         })
@@ -404,7 +175,7 @@ WorkspaceExtension{
                 var paletteRoot = codeHandler.findPalettes(rootPosition, true)
                 if (paletteRoot){
                     if (!callback){
-                        var oc = root.shapePalette(editor, paletteRoot, 0)
+                        var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
                         oc.contentWidth = Qt.binding(function(){
                             return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                         })
@@ -448,7 +219,7 @@ WorkspaceExtension{
 
             var rect = activePane.getCursorRectangle()
             var cursorCoords = activePane.cursorWindowCoords()
-            var addBoxItem = globals.paletteControls.createAddQmlBox(null, globals.paletteStyle)
+            var addBoxItem = globals.paletteControls.createAddQmlBox(null)
             if (!addBoxItem) return
 
             addBoxItem.assignFocus()
@@ -507,43 +278,7 @@ WorkspaceExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-            if ( palettes.size() === 1 ){
-                var ef = codeHandler.openConnection(palettes.position())
-                ef.incrementRefCount()
-                codeHandler.openBinding(ef, palettes, 0)
-            } else {
-                var palList      = globals.paletteControls.createPaletteListView(null, globals.paletteStyle.selectableListView)
-                var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-                palListBox.color = 'transparent'
-                palList.model = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palList.destroy()
-                    palListBox.destroy()
-
-                    var ef = codeHandler.openConnection(palettes.position())
-                    ef.incrementRefCount()
-
-                    codeHandler.openBinding(ef, palettes, index)
-                })
-            }
+            globals.paletteControls.bind(activePane)
         }
     }
 
@@ -568,7 +303,7 @@ WorkspaceExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, root.globals.paletteStyle)
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, currentTheme)
         }
     }
 

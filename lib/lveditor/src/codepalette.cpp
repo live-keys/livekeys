@@ -52,18 +52,14 @@ CodePalette::CodePalette(QObject *parent)
     : QObject(parent)
     , m_bindingChange(false)
     , m_item(nullptr)
-    , m_extension(nullptr)
-    , m_ownExtension(false)
+    , m_editFragment(nullptr)
 {
 }
 
 /**
  * \brief Default destructor
  */
-CodePalette::~CodePalette(){
-    if ( m_ownExtension && m_extension )
-        delete m_extension;
-}
+CodePalette::~CodePalette(){}
 
 /**
  * \brief Assign property value (binding change)

@@ -19,6 +19,7 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/qmldeclaration.h"
+#include "live/documentqmlinfo.h"
 
 #include <QVariant>
 #include <QJSValue>
@@ -32,6 +33,7 @@ class QmlBindingPath;
 class QmlBindingChannel;
 class QmlBindingSpan;
 class QmlBindingSpanModel;
+class CodeCompletionModel;
 
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
@@ -39,6 +41,8 @@ class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
     Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
     Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
     Q_PROPERTY(Location location     READ location     CONSTANT)
+    Q_PROPERTY(QJSValue whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+
 public:
     /** ProjectDocument section type for this QmlEditFragment */
     enum SectionType{
@@ -56,6 +60,13 @@ public:
 public:
     QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
+
+    static QObject* createObject(
+        const DocumentQmlInfo::ConstPtr& info,
+        const QString& declaration,
+        const QString& path,
+        QObject* parent = nullptr
+    );
 
     QmlBindingSpan* bindingSpan();
 
@@ -91,6 +102,9 @@ public:
     void addNestedObjectInfo(QVariantMap& info);
     void clearNestedObjectsInfo();
     void setObjectInfo(QVariantMap& info);
+
+    QJSValue& whenBinding();
+    void setWhenBinding(const QJSValue& whenBinding);
 
 public slots:
     int position();
@@ -132,9 +146,20 @@ public slots:
 
     Location location() const;
 
-    void write(const QString& code);
+    void writeProperties(const QJSValue& properties);
+    void write(const QJSValue options);
+    void writeCode(const QString& code);
 
     QObject* readObject();
+
+    QVariant parse();
+    void updateBindings();
+
+    void updateFromPalette();
+
+    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
+    bool bindExpression(const QString& expression);
+    bool bindFunctionExpression(const QString& expression);
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
@@ -146,8 +171,10 @@ signals:
     void propertyAdded(lv::QmlEditFragment* ef, bool expandDefault);
 
     void refCountChanged();
-
+    void whenBindingChanged();
 private:
+    static QString buildCode(const QJSValue& value);
+
     QmlDeclaration::Ptr  m_declaration;
 
     QList<CodePalette*>  m_palettes;
@@ -168,6 +195,7 @@ private:
     int                     m_refCount;
     QString                 m_objectId;
     Location                m_location;
+    QJSValue                m_whenBinding;
 };
 
 /// \brief Returns the binding channel associated with this object.
@@ -223,6 +251,15 @@ inline void QmlEditFragment::setVisualParent(QObject *visualParent){
 
     m_visualParent = visualParent;
     emit visualParentChanged();
+}
+
+inline QJSValue& QmlEditFragment::whenBinding(){
+    return m_whenBinding;
+}
+
+inline void QmlEditFragment::setWhenBinding(const QJSValue& whenBinding){
+    m_whenBinding = whenBinding;
+    emit whenBindingChanged();
 }
 
 }// namespace
