@@ -52,7 +52,7 @@ void Worker::appendAct(QObject * filter){
 
     lv::QmlAct* f = dynamic_cast<lv::QmlAct*>(filter);
     if ( f ){
-        //HERE
+        //TODO
 //        f->setWorkerThread(m_filterWorker);
         m_filterWorker->acts().append(f);
         return;
