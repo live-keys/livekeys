@@ -56,15 +56,13 @@ void QmlStreamFilter::triggerRun(const QJSValue &arg){
     } else {
         if ( m_workerThread->isWorking() ){
             m_lastValue = arg;
-            m_workerThread->postWork(this, QVariantList(), QList<Shared*>());
+            m_workerThread->postWork(this, QmlWorkerPool::TransferArguments());
             return;
         }
 
-        QList<Shared*> objectTransfer;
-
-        QVariant varg = Shared::transfer(arg, objectTransfer);
-
-        m_workerThread->postWork(this, varg, objectTransfer);
+        QmlWorkerPool::TransferArguments ta;
+        ta.values.append(Shared::transfer(arg, ta.transfers));
+        m_workerThread->postWork(this, ta);
     }
 }
 

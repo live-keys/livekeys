@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QJSValue>
+#include "live/lvbaseqmlglobal.h"
 #include "live/qmlstream.h"
 
 namespace lv{
@@ -10,7 +11,7 @@ namespace lv{
 class WorkerThread;
 
 /// \private
-class LV_VIEW_EXPORT QmlStreamFilter : public QObject{
+class LV_BASEQML_EXPORT QmlStreamFilter : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::QmlStream* pull   READ pull   WRITE setPull NOTIFY pullChanged)

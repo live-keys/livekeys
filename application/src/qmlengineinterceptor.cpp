@@ -66,7 +66,6 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
             memoryPath.setScheme("memory");
             return memoryPath;
         }
-
     }
     return path;
 }
@@ -91,7 +90,6 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
     }
     return QNetworkAccessManager::createRequest(op, request, outgoingData);
 }
-
 
 void QmlEngineInterceptor::interceptEngine(ViewEngine *engine, PackageGraph* packageGraph, Project* project){
     m_project = project;

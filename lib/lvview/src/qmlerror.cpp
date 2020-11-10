@@ -53,7 +53,8 @@ QmlError::QmlError(ViewEngine* engine, const QQmlError &error)
 {
     m_error = m_engine->engine()->newErrorObject(QJSValue::GenericError, error.description());
     m_error.setProperty("type", "Error");
-    assignLocation(error.url().toString(), error.line(), "");
+
+    assignLocation(error.url().isLocalFile() ? error.url().toLocalFile() : error.url().toString(), error.line(), "");
 
     if ( error.object() ){
         assignObject(error.object());
@@ -224,7 +225,7 @@ QmlError QmlError::join(const QList<QmlError> &errors){
 
     QmlError result(first.m_engine, first.message(), static_cast<qint64>(first.code()), first.object());
     if ( first.hasLocation() ){
-        result.assignLocation(result.fileName(), result.lineNumber(), result.functionName());
+        result.assignLocation(first.fileName(), first.lineNumber(), first.functionName());
     }
 
     result.m_error.setProperty("stack", first.m_error.property("stack"));

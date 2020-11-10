@@ -40,7 +40,7 @@ void QStitcher::filter(){
                 for (int i = 0; i < list->itemCount(); ++i){
                     QMat* m = qobject_cast<QMat*>(list->itemAt(i));
                     if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->data());
+                    result.push_back(m->internal());
                 }
                 return result;
             };
@@ -48,14 +48,14 @@ void QStitcher::filter(){
             auto vectorInput = asVector(m_input);
 
             #if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
-                cv::Stitcher::Status status = m_stitcher->stitch(vectorInput, *output()->cvMat());
+                cv::Stitcher::Status status = m_stitcher->stitch(vectorInput, *output()->internalPtr());
             #else
                 cv::Stitcher::Status status = m_stitcher.stitch(vectorInput, *output()->cvMat());
             #endif
 
             if ( status == cv::Stitcher::OK ){
-                setImplicitWidth(output()->data().cols);
-                setImplicitHeight(output()->data().rows);
+                setImplicitWidth(output()->internal().cols);
+                setImplicitHeight(output()->internal().rows);
                 emit outputChanged();
                 update();
             } else {

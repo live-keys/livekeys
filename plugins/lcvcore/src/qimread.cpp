@@ -44,9 +44,9 @@ void QImRead::loadImage(){
     if ( m_file != "" && isComponentComplete() ){
         cv::Mat temp = cv::imread(m_file.toStdString(), m_iscolor);
         if ( !temp.empty() ){
-            temp.copyTo(*output()->cvMat());
-            setImplicitWidth(output()->cvMat()->size().width);
-            setImplicitHeight(output()->cvMat()->size().height);
+            temp.copyTo(*output()->internalPtr());
+            setImplicitWidth(output()->internalPtr()->size().width);
+            setImplicitHeight(output()->internalPtr()->size().height);
             emit outputChanged();
             update();
         }

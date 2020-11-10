@@ -151,25 +151,25 @@ QMat *QAdjustments::levels(QMat *source, const QJSValue &lightness, const QJSVal
         channelConfiguration.clear();
     }
 
-    QMat* m = new QMat(source->cvMat()->cols, source->cvMat()->rows, static_cast<QMat::Type>(source->depth()), source->channels(), nullptr);
-    source->cvMat()->copyTo(*m->cvMat());
+    QMat* m = new QMat(source->internalPtr()->cols, source->internalPtr()->rows, static_cast<QMat::Type>(source->depth()), source->channels(), nullptr);
+    source->internalPtr()->copyTo(*m->internalPtr());
 
     // iterate channels first
     for ( auto it = channelConfiguration.begin(); it != channelConfiguration.end(); ++it ){
         const Levels::Configuration& cfg = it.value();
-        if ( it.key() < source->cvMat()->channels() ){
+        if ( it.key() < source->internalPtr()->channels() ){
             if ( cfg.lowRange > 0 || cfg.highRange < 255 ){
 
                 if ( cfg.lowRange < 253 && cfg.highRange > 0 ){
                     cv::Mat lut;
                     Levels::createBlackAndWhiteLut(256, cfg.lowRange, cfg.highRange, lut);
-                    Levels::applyLut(lut, it.key(), *m->cvMat());
+                    Levels::applyLut(lut, it.key(), *m->internalPtr());
                 }
             }
             if ( cfg.midtonePoint != 1.0 ){
                 cv::Mat lut;
                 Levels::createGammaLut(256, cfg.midtonePoint, lut);
-                Levels::applyLut(lut, it.key(), *m->cvMat());
+                Levels::applyLut(lut, it.key(), *m->internalPtr());
             }
         }
     }
@@ -179,24 +179,24 @@ QMat *QAdjustments::levels(QMat *source, const QJSValue &lightness, const QJSVal
     if ( cfg.lowRange > 0 || cfg.highRange < 255 || cfg.midtonePoint != 1.0 ){
         int channel = 1;
 
-        if ( m->cvMat()->channels() == 3 )
-            cv::cvtColor(*m->cvMat(), *m->cvMat(), cv::COLOR_BGR2HLS);
+        if ( m->internalPtr()->channels() == 3 )
+            cv::cvtColor(*m->internalPtr(), *m->internalPtr(), cv::COLOR_BGR2HLS);
 
         if ( cfg.lowRange > 0 || cfg.highRange < 255 ){
             if ( cfg.lowRange < 253 && cfg.highRange > 0 ){
                 cv::Mat lut;
                 Levels::createBlackAndWhiteLut(256, cfg.lowRange, cfg.highRange, lut);
-                Levels::applyLut(lut, channel, *m->cvMat());
+                Levels::applyLut(lut, channel, *m->internalPtr());
             }
         }
         if ( cfg.midtonePoint != 1.0 ){
             cv::Mat lut;
             Levels::createGammaLut(256, cfg.midtonePoint, lut);
-            Levels::applyLut(lut, channel, *m->cvMat());
+            Levels::applyLut(lut, channel, *m->internalPtr());
         }
 
-        if ( m->cvMat()->channels() == 3 )
-            cv::cvtColor(*m->cvMat(), *m->cvMat(), cv::COLOR_HLS2BGR);
+        if ( m->internalPtr()->channels() == 3 )
+            cv::cvtColor(*m->internalPtr(), *m->internalPtr(), cv::COLOR_HLS2BGR);
     }
 
     return m;
@@ -204,7 +204,7 @@ QMat *QAdjustments::levels(QMat *source, const QJSValue &lightness, const QJSVal
 
 QJSValue QAdjustments::autoLevels(QMat *histogram){
     QJSValue result = lv::ViewContext::instance().engine()->engine()->newObject();
-    const cv::Mat& hist = *histogram->cvMat();
+    const cv::Mat& hist = *histogram->internalPtr();
 
     if ( hist.cols < 3 )
         return QJSValue();
@@ -251,13 +251,13 @@ QMat *QAdjustments::brightnessAndContrast(QMat *source, double brightness, doubl
         return nullptr;
     }
 
-    const cv::Mat& in = source->data();
+    const cv::Mat& in = source->internal();
 
-    QMat* m = new QMat(source->cvMat()->cols, source->cvMat()->rows, static_cast<QMat::Type>(source->depth()), source->channels(), nullptr);
+    QMat* m = new QMat(source->internalPtr()->cols, source->internalPtr()->rows, static_cast<QMat::Type>(source->depth()), source->channels(), nullptr);
 
     for( int y = 0; y < in.rows; y++ ) {
         const uchar* pi = in.ptr<uchar>(y);
-        uchar* po       = m->cvMat()->ptr<uchar>(y);
+        uchar* po       = m->internalPtr()->ptr<uchar>(y);
 
         for( int x = 0; x < in.cols; x++ ) {
             for( int c = 0; c < in.channels(); c++ ){
@@ -277,7 +277,7 @@ QMat *QAdjustments::hueSaturationLightness(QMat *source, int hue, int saturation
         return nullptr;
     }
 
-    cv::Mat& in = *source->cvMat();
+    cv::Mat& in = *source->internalPtr();
 
     if ( (in.channels() != 3 && in.channels() != 4) || in.depth() != CV_8U )
         return nullptr;
@@ -332,7 +332,7 @@ QMat *QAdjustments::hueSaturationLightness(QMat *source, int hue, int saturation
         }
     }
 
-    cvtColor(temp, *m->cvMat(), cv::COLOR_HSV2BGR);
+    cvtColor(temp, *m->internalPtr(), cv::COLOR_HSV2BGR);
 
     return m;
 }

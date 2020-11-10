@@ -73,7 +73,7 @@ QMat *QGeometry::transform(QMat *input, QMat *m){
 
     QMat* r = new QMat;
     try {
-        cv::transform(input->data(), *r->cvMat(), m->data());
+        cv::transform(input->internal(), *r->internalPtr(), m->internal());
     } catch (cv::Exception& e) {
         THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
         delete r;
@@ -127,7 +127,7 @@ QVariantList QGeometry::applyPerspectiveTransform(QVariantList points, QMat *war
 
     warpedPoints.resize(pointsToWarp.size());
 
-    cv::perspectiveTransform(pointsToWarp, warpedPoints, *warp->cvMat());
+    cv::perspectiveTransform(pointsToWarp, warpedPoints, *warp->internalPtr());
 
     QVariantList result;
     for (unsigned i = 0; i < warpedPoints.size(); ++i)
@@ -141,8 +141,8 @@ void QGeometry::warpTriangles(QMat *src, QMat *dst, QVariantList triangles1, QVa
 {
     if (triangles1.size() != triangles2.size()) return;
 
-    cv::Mat& img1 = *src->cvMat();
-    cv::Mat& img2 = *dst->cvMat();
+    cv::Mat& img1 = *src->internalPtr();
+    cv::Mat& img2 = *dst->internalPtr();
 
     img1.convertTo(img1, CV_32F);
     img2.convertTo(img2, CV_32F);

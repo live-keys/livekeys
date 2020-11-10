@@ -193,9 +193,9 @@ QSGNode *QColorHistogram::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePa
         node = new QColorHistogramNode(window());
 
     ushort maxValue = 0;
-    for ( int i = 0; i < m_output->cvMat()->rows; ++i ){
-        const ushort* p = m_output->cvMat()->ptr<ushort>(i);
-        for ( int j = 0; j < m_output->cvMat()->cols; ++j ){
+    for ( int i = 0; i < m_output->internalPtr()->rows; ++i ){
+        const ushort* p = m_output->internalPtr()->ptr<ushort>(i);
+        for ( int j = 0; j < m_output->internalPtr()->cols; ++j ){
             if ( p[j] > maxValue ){
                 maxValue = p[j];
             }
@@ -204,8 +204,8 @@ QSGNode *QColorHistogram::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePa
 
     node->setRect(boundingRect());
 
-    int sendChannel = (m_channel == 0 && m_input->cvMat()->channels() == 1) ? QColorHistogram::Total : m_channel;
-    node->render(sendChannel, *m_output->cvMat(), maxValue, m_renderer);
+    int sendChannel = (m_channel == 0 && m_input->internalPtr()->channels() == 1) ? QColorHistogram::Total : m_channel;
+    node->render(sendChannel, *m_output->internalPtr(), maxValue, m_renderer);
 
     return node;
 }
@@ -216,40 +216,40 @@ void QColorHistogram::createHistogram(){
         return;
 
     if ( m_channel == QColorHistogram::AllChannels ){
-        m_output->cvMat()->create(m_input->cvMat()->channels(), 256, CV_16UC1);
-        m_output->cvMat()->setTo(0);
-        ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
-        for ( int y = 0; y < m_input->cvMat()->rows; ++y ){
-            uchar* p  = m_input->cvMat()->ptr<uchar>(y);
-            for ( int x = 0; x < m_input->cvMat()->cols; ++x ){
-                for ( int c = 0; c < m_input->cvMat()->channels(); ++c ){
-                    uchar v = p[x * m_input->cvMat()->channels() + c];
-                    outdata[c * (m_output->cvMat()->step / sizeof(ushort)) + v]++;
+        m_output->internalPtr()->create(m_input->internalPtr()->channels(), 256, CV_16UC1);
+        m_output->internalPtr()->setTo(0);
+        ushort* outdata = reinterpret_cast<ushort*>(m_output->internalPtr()->data);
+        for ( int y = 0; y < m_input->internalPtr()->rows; ++y ){
+            uchar* p  = m_input->internalPtr()->ptr<uchar>(y);
+            for ( int x = 0; x < m_input->internalPtr()->cols; ++x ){
+                for ( int c = 0; c < m_input->internalPtr()->channels(); ++c ){
+                    uchar v = p[x * m_input->internalPtr()->channels() + c];
+                    outdata[c * (m_output->internalPtr()->step / sizeof(ushort)) + v]++;
                 }
             }
         }
     } else if ( m_channel == QColorHistogram::Total ){
-        m_output->cvMat()->create(1, 256, CV_16UC1);
-        m_output->cvMat()->setTo(0);
-        ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
-        for ( int y = 0; y < m_input->cvMat()->rows; ++y ){
-            uchar* p  = m_input->cvMat()->ptr<uchar>(y);
-            for ( int x = 0; x < m_input->cvMat()->cols; ++x ){
-                for ( int c = 0; c < m_input->cvMat()->channels(); ++c ){
-                    uchar v = p[x * m_input->cvMat()->channels() + c];
+        m_output->internalPtr()->create(1, 256, CV_16UC1);
+        m_output->internalPtr()->setTo(0);
+        ushort* outdata = reinterpret_cast<ushort*>(m_output->internalPtr()->data);
+        for ( int y = 0; y < m_input->internalPtr()->rows; ++y ){
+            uchar* p  = m_input->internalPtr()->ptr<uchar>(y);
+            for ( int x = 0; x < m_input->internalPtr()->cols; ++x ){
+                for ( int c = 0; c < m_input->internalPtr()->channels(); ++c ){
+                    uchar v = p[x * m_input->internalPtr()->channels() + c];
                     outdata[v]++;
                 }
             }
         }
     } else {
-        m_output->cvMat()->create(1, 256, CV_16UC1);
-        m_output->cvMat()->setTo(0);
-        ushort* outdata = reinterpret_cast<ushort*>(m_output->cvMat()->data);
+        m_output->internalPtr()->create(1, 256, CV_16UC1);
+        m_output->internalPtr()->setTo(0);
+        ushort* outdata = reinterpret_cast<ushort*>(m_output->internalPtr()->data);
         int c = m_channel;
-        for ( int y = 0; y < m_input->cvMat()->rows; ++y ){
-            uchar* p  = m_input->cvMat()->ptr<uchar>(y);
-            for ( int x = 0; x < m_input->cvMat()->cols; ++x ){
-                uchar v = p[x * m_input->cvMat()->channels() + c];
+        for ( int y = 0; y < m_input->internalPtr()->rows; ++y ){
+            uchar* p  = m_input->internalPtr()->ptr<uchar>(y);
+            for ( int x = 0; x < m_input->internalPtr()->cols; ++x ){
+                uchar v = p[x * m_input->internalPtr()->channels() + c];
                 outdata[v]++;
             }
         }

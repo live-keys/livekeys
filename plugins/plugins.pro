@@ -37,10 +37,10 @@ timeline.subdir         = $$PWD/timeline
 # --- Dependency configuration ---
 
 live.depends          = editor
-editqml.depends       = live
+editqml.depends       = live base
 lcvcore.depends       = live timeline
 lcvfeatures2d.depends = lcvcore live
-lcvimgproc.depends    = lcvcore live
+lcvimgproc.depends    = lcvcore live base
 lcvphoto.depends      = lcvcore live
 lcvvideo.depends      = lcvcore live
 

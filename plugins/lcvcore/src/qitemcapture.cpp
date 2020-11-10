@@ -46,8 +46,8 @@ void QItemCapture::grabImage(){
 
     QSize ts = texture->textureSize();
     if ( ts.isValid() ){
-        output()->cvMat()->create(cv::Size(ts.width(), ts.height()), CV_8UC4);
-        m_glFunctions->glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, output()->cvMat()->data);
+        output()->internalPtr()->create(cv::Size(ts.width(), ts.height()), CV_8UC4);
+        m_glFunctions->glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, output()->internalPtr()->data);
         emit captureIsReady(ts);
     }
 }

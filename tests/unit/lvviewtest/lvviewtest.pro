@@ -15,7 +15,7 @@ HEADERS += \
     $$PWD/visuallogtest.h \
     $$PWD/grouptest.h \
     $$PWD/linecapturetest.h \
-    memorytest.h
+    $$PWD/memorytest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -24,6 +24,6 @@ SOURCES += \
     $$PWD/visuallogtest.cpp \
     $$PWD/grouptest.cpp \
     $$PWD/linecapturetest.cpp \
-    memorytest.cpp
+    $$PWD/memorytest.cpp
 
 

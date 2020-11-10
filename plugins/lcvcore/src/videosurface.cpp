@@ -20,7 +20,7 @@ VideoSurface::~VideoSurface(){
 
 void VideoSurface::resetSurface(){
     if ( m_image ){
-        m_image->cvMat()->setTo(cv::Scalar(0));
+        m_image->internalPtr()->setTo(cv::Scalar(0));
         emit imageChanged();
     }
 }

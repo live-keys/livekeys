@@ -54,7 +54,7 @@ inline void QMatFilter::setInputMat(QMat *mat){
     if ( mat == nullptr )
         return;
 
-    cv::Mat* matData = mat->cvMat();
+    cv::Mat* matData = mat->internalPtr();
     if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);

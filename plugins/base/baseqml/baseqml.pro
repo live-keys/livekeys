@@ -4,13 +4,14 @@ PLUGIN_PATH = base
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-DEFINES += LV_BASE_PLUGIN
+DEFINES += LV_BASEQML_LIB
 
 uri = base
 
-linkLocalLibrary(lvbase,   lvbase)
-linkLocalLibrary(lvview,   lvview)
-linkLocalLibrary(lveditor, lveditor)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lvview,      lvview)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Source
 
@@ -24,6 +25,7 @@ unix:!macx{
 }
 
 include($$PWD/src/baseqml.pri)
+include($$PWD/include/baseqmlheaders.pri)
 
 OTHER_FILES += \
     qml/*.qml \

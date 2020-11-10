@@ -56,8 +56,8 @@ QSobel::~QSobel(){
  */
 
 QSGNode *QSobel::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
-    if ( output()->cvMat()->size() != Size(0, 0) )
-        convertScaleAbs(*output()->cvMat(), *m_display->cvMat());
+    if ( output()->internalPtr()->size() != Size(0, 0) )
+        convertScaleAbs(*output()->internalPtr(), *m_display->internalPtr());
 
     QMatNode *n = static_cast<QMatNode*>(QMatDisplay::updatePaintNode(node, nodeData));
     static_cast<QSGSimpleMaterial<QMatState>*>(n->material())->state()->mat = m_display;

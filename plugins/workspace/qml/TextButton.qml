@@ -19,6 +19,7 @@ Rectangle{
 
     property string text: 'Button'
 
+    gradient: buttonMouseArea.containsMouse ? style.backgroundHoverGradient : style.backgroundGradient
 
     Label{
         id: label

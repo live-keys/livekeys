@@ -19,7 +19,7 @@ void QGetPerspectiveTransform::process(){
     std::vector<cv::Point2f>* srcPts = m_src->dataAs<std::vector<cv::Point2f> >();
     std::vector<cv::Point2f>* dstPts = m_dst->dataAs<std::vector<cv::Point2f> >();
     if ( srcPts->size() == 4 && dstPts->size() == 4 ){
-        *m_output->cvMat() = cv::getPerspectiveTransform(*srcPts, *dstPts);
+        *m_output->internalPtr() = cv::getPerspectiveTransform(*srcPts, *dstPts);
         emit outputChanged();
     }
 

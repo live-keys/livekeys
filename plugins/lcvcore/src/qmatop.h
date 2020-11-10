@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMatrix4x4>
 #include "qmat.h"
+#include "qumat.h"
 #include "qwritablemat.h"
 #include "live/qmlobjectlist.h"
 
@@ -40,6 +41,8 @@ public slots:
     QWritableMat* createWritable(const QSize& size, int type = QMat::CV8U, int channels = 1);
     QWritableMat* createWritableFill(const QSize& size, int type, int channels, const QColor& color);
     QWritableMat* createWritableFromMat(QMat* m);
+
+    QUMat* toUMat(QMat* m);
 
     void fill(QMat* m, const QColor& color);
     void fillWithMask(QMat* m, const QColor& color, QMat* mask);

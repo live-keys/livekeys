@@ -92,7 +92,7 @@ inline void QKeypointHomography::setQueryImage(QMat *queryImage){
     if ( queryImage == 0 )
         return;
 
-    cv::Mat* matData = queryImage->cvMat();
+    cv::Mat* matData = queryImage->internalPtr();
     if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);

@@ -86,7 +86,7 @@ inline void QCachedWarpPerspective::setInput(QMat *mat){
     if ( mat == 0 )
         return;
 
-    if ( m_in->data().size() != mat->data().size() )
+    if ( m_in->internal().size() != mat->internal().size() )
         m_cacheDirty = true;
 
     m_in = mat;
@@ -98,10 +98,10 @@ inline void QCachedWarpPerspective::setOutput(QMat *mat){
     if ( mat == 0 )
         return;
 
-    if ( m_output->data().size() != mat->data().size() )
+    if ( m_output->internal().size() != mat->internal().size() )
         m_cacheDirty = true;
 
-    cv::Mat* matData = mat->cvMat();
+    cv::Mat* matData = mat->internalPtr();
     if ( implicitWidth() != matData->cols || implicitHeight() != matData->rows ){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);

@@ -11,6 +11,7 @@ HEADERS += \
     $$PWD/qmatbuffer.h \
     $$PWD/qmatread.h \
     $$PWD/qmatroi.h \
+    $$PWD/qumat.h \
     $$PWD/qvideocapture.h \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
@@ -53,6 +54,7 @@ SOURCES += \
     $$PWD/qmatbuffer.cpp \
     $$PWD/qmatread.cpp \
     $$PWD/qmatroi.cpp \
+    $$PWD/qumat.cpp \
     $$PWD/qvideocapture.cpp \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \

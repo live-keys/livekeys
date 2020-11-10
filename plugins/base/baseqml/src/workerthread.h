@@ -17,12 +17,15 @@
 #ifndef LVWORKERTHREAD_H
 #define LVWORKERTHREAD_H
 
-#include "live/lvviewglobal.h"
+#include "live/lvbaseqmlglobal.h"
 #include "live/qmlact.h"
 #include "live/qmlstreamfilter.h"
+#include "live/qmlworkerinterface.h"
+
 #include <QObject>
 #include <QEvent>
 #include <QLinkedList>
+
 #include <functional>
 
 namespace lv{
@@ -30,7 +33,7 @@ namespace lv{
 class WorkerThreadPrivate;
 
 /// \private
-class LV_VIEW_EXPORT WorkerThread : public QObject{
+class LV_BASEQML_EXPORT WorkerThread : public QObject{
 
     Q_OBJECT
 
@@ -62,8 +65,8 @@ public:
     WorkerThread(const QList<QString>& sources, QObject* parent = nullptr);
     virtual ~WorkerThread();
 
-    void postWork(QmlStreamFilter* caller, const QVariant& value, const QList<Shared*> objectTransfers);
-    void postWork(QmlAct* caller, const QVariantList &values, const QList<Shared*> objectTransfers);
+    void postWork(QmlStreamFilter* caller, const QmlWorkerPool::TransferArguments& arguments);
+    void postWork(QmlAct* caller, const QmlWorkerPool::TransferArguments& arguments);
 
     void start();
     bool isWorking() const;

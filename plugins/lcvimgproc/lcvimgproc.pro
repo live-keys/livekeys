@@ -13,6 +13,7 @@ DEFINES += Q_LCV
 linkLocalLibrary(lvbase, lvbase)
 linkLocalLibrary(lvview, lvview)
 
+linkLocalPlugin(base,    base, base/baseqml)
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 

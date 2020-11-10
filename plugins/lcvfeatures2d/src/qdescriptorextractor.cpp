@@ -77,9 +77,9 @@ void QDescriptorExtractor::componentComplete(){
  */
 void QDescriptorExtractor::compute(){
     if ( m_extractor && m_keypoints && isComponentComplete() ){
-        m_extractor->compute(m_keypoints->cvMat(), m_keypoints->keypoints(), *m_descriptors->cvMat());
-        if ( (m_keypoints->cvMat().cols != 0 || m_keypoints->cvMat().rows != 0) && m_descriptors->cvMat()->cols == 0){
-            m_descriptors->cvMat()->create(0, descriptorCols(), CV_8UC1);
+        m_extractor->compute(m_keypoints->cvMat(), m_keypoints->keypoints(), *m_descriptors->internalPtr());
+        if ( (m_keypoints->cvMat().cols != 0 || m_keypoints->cvMat().rows != 0) && m_descriptors->internalPtr()->cols == 0){
+            m_descriptors->internalPtr()->create(0, descriptorCols(), CV_8UC1);
         }
         emit descriptorsChanged();
     }

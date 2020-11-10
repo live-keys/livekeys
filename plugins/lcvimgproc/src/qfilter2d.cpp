@@ -57,9 +57,9 @@ QFilter2D::~QFilter2D(){
  */
 void QFilter2D::transform(const cv::Mat &in, cv::Mat &out){
     if ( m_kernel ){
-        Mat* m = m_kernel->cvMat();
+        Mat* m = m_kernel->internalPtr();
         if ( m->cols > 0 || m->rows > 0 ){
-            filter2D(in, out, m_ddepth, *(m_kernel->cvMat()), m_anchorCv, m_delta, m_borderType);
+            filter2D(in, out, m_ddepth, *(m_kernel->internalPtr()), m_anchorCv, m_delta, m_borderType);
         }
     }
 }

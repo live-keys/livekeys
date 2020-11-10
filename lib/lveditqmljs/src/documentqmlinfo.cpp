@@ -199,6 +199,8 @@ namespace{
                     QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
                     if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
                         QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+                        if ( !parent )
+                            return QmlBindingChannel::Ptr(nullptr);
 
                         // create correct order for list reference
                         QObjectList ordered;
@@ -568,6 +570,36 @@ const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int pos
     return DocumentQmlInfo::ASTReference(range.ast);
 }
 
+QString DocumentQmlInfo::propertySourceFromObjectId(const QString &componentId, const QString &propertyName){
+    Q_D(const DocumentQmlInfo);
+
+    DocumentQmlInfo::ValueReference vr = valueForId(componentId);
+
+    int begin, end;
+    extractRange(vr, begin, end);
+
+    if ( begin > -1 && end > 0){
+
+        QString sourceData = "Worker" + d->internalDoc->source().mid(begin, end - begin);
+
+        lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create("Worker.qml");
+
+        if ( !docinfo->parse(sourceData) )
+            return "";
+
+        lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+        for ( auto pit = objects->root()->properties.begin(); pit != objects->root()->properties.end(); ++pit ){
+            lv::DocumentQmlValueObjects::RangeProperty* p = *pit;
+            QString propertyName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
+            if ( propertyName == "run" ){
+                QString propertyContent = sourceData.mid(p->valueBegin, p->end - p->valueBegin);
+                return propertyContent;
+            }
+        }
+    }
+    return "";
+}
+
 /**
  * \brief Check wether the value reference is null.
  *
@@ -854,6 +886,24 @@ DocumentQmlInfo::Import::Import(
     , m_versionMajor(vMajor)
     , m_versionMinor(vMinor)
 {
+}
+
+QString DocumentQmlInfo::Import::toString() const{
+    if ( m_type == DocumentQmlInfo::Import::Library ){
+        return "import " + m_relativeUri + " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+    } else if ( m_type == DocumentQmlInfo::Import::Invalid || m_relativeUri.isEmpty() ){
+        return "";
+    } else {
+        return "import \"" + m_relativeUri + "\"" + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+    }
+}
+
+QString DocumentQmlInfo::Import::join(const QList<DocumentQmlInfo::Import> &imports){
+    QString result;
+    for( auto import : imports ){
+        result += (result.isEmpty() ? "" : "\n") + import.toString();
+    }
+    return result;
 }
 
 bool DocumentQmlInfo::hasImport(const DocumentQmlInfo::Import &key) const{
