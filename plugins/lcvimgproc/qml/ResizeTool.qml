@@ -4,6 +4,7 @@ import workspace 1.0
 Tool{
     id: root
     toolLabel: 'Resize'
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property QtObject labelInfoStyle: TextStyle{}
     property Component applyButton : null
@@ -39,7 +40,7 @@ Tool{
             height: 20
             text: ''
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onTextChanged: {
                 if ( root.preserveAspect && widthInput.inputActiveFocus ){
@@ -90,7 +91,7 @@ Tool{
             height: 20
             text: ''
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onTextChanged: {
                 if ( root.preserveAspect && heightInput.inputActiveFocus ){

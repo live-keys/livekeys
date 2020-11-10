@@ -56,7 +56,7 @@ Item{
     property var parentObjectContainer: null
     property var isForProperty: false
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
-    property var paletteStyle: lk? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     width: objectContainer.width
     height: objectContainer.pane ? 30 : objectContainer.height
@@ -152,6 +152,8 @@ Item{
         property QtObject editingFragment : null
         property Item editor: null
 
+        property alias objectContainerTitle: objectContainerTitle
+
         property Item pane : null
         property Item wrapper : root
 
@@ -162,7 +164,6 @@ Item{
 
         property var propertiesOpened: []
 
-        property PaletteStyle paletteStyle: lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
 
         Keys.onPressed: {
             var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -317,8 +318,8 @@ Item{
                 color: {
                     return objectContainer.pane ? objectContainer.pane.topColor
                                                 : objectContainer.activeFocus
-                                                  ? objectContainer.paletteStyle.sectionHeaderFocusBackgroundColor
-                                                  : objectContainer.paletteStyle.sectionHeaderBackgroundColor
+                                                  ? theme.colorScheme.middlegroundOverlayDominant
+                                                  : theme.colorScheme.middlegroundOverlay
                 }
                 isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
@@ -329,13 +330,7 @@ Item{
                         collapse()
                 }
                 onErase: {
-                    var rootDeleted = (editingFragment.position() === editor.documentHandler.codeHandler.findRootPosition())
-                    editor.documentHandler.codeHandler.deleteObject(editingFragment)
-
-                    if (rootDeleted) {
-                        editor.editor.rootShaped = false
-                        editor.editor.addRootButton.visible = true
-                    }
+                    paletteControls.eraseObject(root)
                 }
                 onToggleConnections: {
                     if ( paletteConnection.model ){
@@ -353,102 +348,26 @@ Item{
                     editingFragment.rebuild()
                 }
                 onPaletteToPane : {
-                    if ( objectContainer.pane === null ){
-                        var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
-                        lk.layers.workspace.panes.splitPaneHorizontallyWith(
-                            objectContainer.editor.parentSplitter,
-                            objectContainer.editor.parentSplitterIndex(),
-                            objectPane
-                        )
-
-                        objectContainerTitle.parent = objectPane.paneHeaderContent
-                        objectPane.objectContainer = objectContainer
-                        objectPane.title = objectContainer.title
-                        objectContainer.pane = objectPane
-                        root.placeHolder.parent = root
-                    } else {
-                        objectContainer.closeAsPane()
-                    }
+                    paletteControls.paletteToPane(objectContainer)
                 }
                 onClose : {
-                    if ( objectContainer.pane )
-                        objectContainer.closeAsPane()
-                    var codeHandler = editor.documentHandler.codeHandler
-                    collapse()
-                    editor.documentHandler.codeHandler.removeConnection(editingFragment)
-
-                    var rootPos = codeHandler.findRootPosition()
-                    if (rootPos === editingFragment.position())
-                        editor.editor.rootShaped = false
-
-                    codeHandler.removeConnection(editingFragment)
-
-                    var p = root.parent
-                    if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
-                        p.destroy()
-                    } else { // if this is nested
-                        //TODO: Check if this is nested within a property container
-                        if ( objectContainer.pane )
-                            objectContainer.closeAsPane()
-                        root.destroy()
-                    }
+                    paletteControls.closeObjectContainer(objectContainer)
                 }
                 onAddPalette: {
-                    var editingFragment = objectContainer.editingFragment
-                    if ( !editingFragment )
-                        return
-
-                    var palettes = editor.documentHandler.codeHandler.findPalettes(editingFragment.position(), true, true)
-                    if (palettes.size() ){
-                        var paletteList = paletteControls.createPaletteListView(null, objectContainer.paletteStyle.selectableListView)
-
-                        var p = objectContainer.parent
-                        while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
-                            p = p.parent
-                        }
-
-                        var coords = objectContainerTitle.mapToItem(p, 0, 0)
-
-                        var palListBox   = lk.layers.editor.environment.createEditorBox(
-                            paletteList,
-                            Qt.rect(coords.x + objectContainerTitle.width - 168,
-                                    coords.y - 33 - (p.objectName === "objectPalette" ? 8 : 0),
-                                    0, 0),
-                            Qt.point(p.x, p.y),
-                            lk.layers.editor.environment.placement.top
-                        )
-                        palListBox.color = 'transparent'
-                        paletteList.forceActiveFocus()
-                        paletteList.model = palettes
+                    var paletteList = paletteControls.addPaletteList(objectContainer,
+                                                                     paletteGroup,
+                                                                     objectContainerTitle.width - 168,
+                                                                     -33,
+                                                                     1 /*mode*/)
+                    if (paletteList){
                         paletteList.width = 250
                         paletteList.anchors.topMargin = titleHeight + topSpacing
-                        paletteList.cancelledHandler = function(){
-                            paletteList.focus = false
-                            paletteList.model = null
-                            paletteList.destroy()
-                            palListBox.destroy()
-                        }
-                        paletteList.selectedHandler = function(index){
-                            paletteList.focus = false
-                            paletteList.model = null
-
-                            var palette = editor.documentHandler.codeHandler.openPalette(editingFragment, palettes, index)
-
-                            var paletteBox = paletteControls.openPalette(palette,
-                                                                        editingFragment,
-                                                                        editor,
-                                                                        paletteGroup,
-                                                                        root)
-
-                            if (paletteBox) paletteBox.moveEnabledSet = false
-                            paletteList.destroy()
-                            palListBox.destroy()
-
-                        }
                     }
+
+
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false, root.paletteStyle)
+                    paletteControls.compose(objectContainer, false, theme)
                 }
             }
         }

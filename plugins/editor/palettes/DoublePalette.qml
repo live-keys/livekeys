@@ -25,7 +25,6 @@ CodePalette{
     id: palette
     type : "qml/double"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
     property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
@@ -60,7 +59,7 @@ CodePalette{
                 roundValue = roundValue.toFixed(2)
                 palette.value = roundValue
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
             }
             stepSize: 1.0
             maximumValue: 25
@@ -68,7 +67,7 @@ CodePalette{
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 5
-                    color: paletteStyle ? paletteStyle.backgroundColor : '#0b111c'
+                    color: theme.colorScheme.middleground
                 }
                 handle: Rectangle{
                     width: 11
@@ -101,7 +100,7 @@ CodePalette{
                     palette.value = roundValue
 
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
             }
             stepSize: 0.01
             maximumValue: 0.99
@@ -132,7 +131,7 @@ CodePalette{
             width: 50
             height: 25
 
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
@@ -181,7 +180,7 @@ CodePalette{
             width: 50
             height: 25
 
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : leftLabel.defaultStyle
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.maximumValue === 0)
@@ -222,9 +221,9 @@ CodePalette{
 
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 

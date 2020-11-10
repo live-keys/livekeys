@@ -32,7 +32,6 @@ Rectangle{
     objectName: "addQmlBox"
 
     property QtObject theme: lk.layers.workspace.themes.current
-    property PaletteStyle style: PaletteStyle{}
 
     property QtObject addContainer : null
 
@@ -287,7 +286,7 @@ Rectangle{
                 anchors.leftMargin: 8
                 anchors.right: parent.right
                 anchors.rightMargin: 1
-                style: root.style.inputStyle
+                style: root.theme.inputStyle
 
                 onActiveFocusLost: {
                     if (!searchInput.inputActiveFocus && !idInput.inputActiveFocus)
@@ -370,7 +369,7 @@ Rectangle{
             anchors.rightMargin: 1
 
             width: parent.width > implicitWidth ? parent.width : implicitWidth
-            style: root.style.inputStyle
+            style: root.theme.inputStyle
 
             onActiveFocusLost: {
                 if (!searchInput.inputActiveFocus && !idInput.inputActiveFocus)
@@ -476,7 +475,7 @@ Rectangle{
                     width : categoryList.width
 
                     height : 25
-                    color : ListView.isCurrentItem ? style.selectableListView.selectionBackgroundColor : "transparent"
+                    color : ListView.isCurrentItem ? root.theme.selectableListView.selectionBackgroundColor : "transparent"
                     Workspace.Label{
                         id: label
                         anchors.left: parent.left
@@ -548,7 +547,7 @@ Rectangle{
 
                     width : listView.width
                     height : 25
-                    color : ListView.isCurrentItem ? style.selectableListView.selectionBackgroundColor : "transparent"
+                    color : ListView.isCurrentItem ? root.theme.selectableListView.selectionBackgroundColor : "transparent"
                     Text{
                         id: label
                         anchors.left: parent.left

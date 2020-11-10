@@ -9,29 +9,29 @@ CodePalette{
     id: palette
     type : "qml/lcvcore#Mat"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property QtObject style: QtObject{
-        property color toolbarColor: paletteStyle ? paletteStyle.colorScheme.middleground : imagePaintView.defaultStyle.toolbarColor
-        property color boxColor: paletteStyle ? paletteStyle.colorScheme.background : imagePaintView.defaultStyle.boxColor
-        property color boxBorderColor: paletteStyle ? paletteStyle.colorScheme.backgroundBorder : imagePaintView.defaultStyle.boxBorderColor
+        property color toolbarColor: theme.colorScheme.middleground
+        property color boxColor: theme.colorScheme.background
+        property color boxBorderColor: theme.colorScheme.backgroundBorder
         property int boxBorderWidth: 1
         property real boxRadius: 3
-        property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : imagePaintView.defaultStyle.labelStyle
+        property QtObject labelStyle: theme.inputLabelStyle
         property QtObject colorPicker: QtObject{
-            property QtObject input: paletteStyle ? paletteStyle.inputStyle : imagePaintView.defaultStyle.input
+            property QtObject input: theme.inputStyle
             property double colorDisplayBoderWidth: 1
-            property color  colorDisplayBoderColor: paletteStyle ? paletteStyle.inputStyle.borderColor : imagePaintView.defaultStyle.colorPicker.colorDisplayBoderColor
+            property color  colorDisplayBoderColor: theme.inputStyle.borderColor
             property double colorDisplayRadius: 2
-            property color adjustmentBackground:  paletteStyle ? paletteStyle.colorScheme.background : imagePaintView.defaultStyle.colorPicker.adjustmentBackground
-            property color adjustmentBorderColor: paletteStyle ? paletteStyle.colorScheme.backgroundBorder : imagePaintView.defaultStyle.colorPicker.adjustmentBorderColor
+            property color adjustmentBackground:  theme.colorScheme.background
+            property color adjustmentBorderColor: theme.colorScheme.backgroundBorder
             property int adjustmentBorderWidth: 1
             property real adjustmentRadius: 3
-            property QtObject labelStyle: paletteStyle ? paletteStyle.labelStyle : imagePaintView.defaultStyle.colorPicker.labelStyle
+            property QtObject labelStyle: theme.inputLabelStyle
         }
 
-        property Component saveButton: paletteStyle ? paletteStyle.buttons.save : imagePaintView.defaultStyle.saveButton
-        property Component brushSizeButton: paletteStyle ? paletteStyle.buttons.penSize : imagePaintView.defaultStyle.brushSizeButton
+        property Component saveButton: theme.buttons.save
+        property Component brushSizeButton: theme.buttons.penSize
     }
 
     item: Item{

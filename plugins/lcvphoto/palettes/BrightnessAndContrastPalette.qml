@@ -27,7 +27,7 @@ CodePalette{
 
     type : "qml/BrightnessAndContrast"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: adjustmentBox
@@ -49,7 +49,7 @@ CodePalette{
             onValueChanged: {
                 adjustmentBox.bandc.brightness = value
                 if ( !isBindingChange() ){
-                    extension.writeProperties({
+                    editFragment.writeProperties({
                         'brightness' : adjustmentBox.bandc.brightness
                     })
                 }
@@ -78,7 +78,7 @@ CodePalette{
             width: 35
             height: 22
             text: brightnessSlider.minimumValue
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
+            style: theme.inputLabelStyle
         }
 
         Slider{
@@ -98,7 +98,7 @@ CodePalette{
                 if ( adjustmentBox.bandc ){
                     adjustmentBox.bandc.contrast = value.toFixed(2)
                     if ( !isBindingChange() ){
-                        extension.writeProperties({
+                        editFragment.writeProperties({
                             'contrast' : adjustmentBox.bandc.contrast
                         })
                     }
@@ -129,7 +129,7 @@ CodePalette{
             width: 35
             height: 22
             text: contrastSlider.value.toFixed(2)
-            style: palette.paletteStyle ? palette.paletteStyle.labelStyle : defaultStyle
+            style: theme.inputLabelStyle
         }
 
     }
@@ -138,9 +138,9 @@ CodePalette{
         adjustmentBox.bandc = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
                 'contrast' : palette.value.contrast
             })

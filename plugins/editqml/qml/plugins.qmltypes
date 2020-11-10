@@ -470,24 +470,6 @@ Module {
         Property { name: "objectType"; type: "QString"; isReadonly: true }
     }
     Component {
-        name: "lv::QmlCodeConverter"
-        prototype: "QObject"
-        exports: ["editqml/QmlCodeConverter 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "whenBinding"; type: "QJSValue" }
-        Method {
-            name: "writeProperties"
-            Parameter { name: "properties"; type: "QJSValue" }
-        }
-        Method {
-            name: "write"
-            Parameter { name: "options"; type: "QJSValue" }
-        }
-        Method { name: "parse"; type: "QVariant" }
-        Method { name: "updateBindings" }
-        Method { name: "updateFromPalette" }
-    }
-    Component {
         name: "lv::QmlCursorInfo"
         prototype: "QObject"
         exports: ["editqml/QmlCursorInfo 1.0"]

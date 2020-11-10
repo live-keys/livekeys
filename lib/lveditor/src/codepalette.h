@@ -27,11 +27,11 @@ namespace lv{
 class LV_EDITOR_EXPORT CodePalette : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QQuickItem* item    READ item       WRITE setItem       NOTIFY itemChanged)
-    Q_PROPERTY(QString type        READ type       WRITE setType       NOTIFY typeChanged)
-    Q_PROPERTY(QVariant value      READ value      WRITE setValue      NOTIFY valueChanged)
-    Q_PROPERTY(QString name        READ name       CONSTANT)
-    Q_PROPERTY(QObject* extension  READ extension  NOTIFY extensionChanged)
+    Q_PROPERTY(QQuickItem* item         READ item           WRITE setItem       NOTIFY itemChanged)
+    Q_PROPERTY(QString type             READ type           WRITE setType       NOTIFY typeChanged)
+    Q_PROPERTY(QVariant value           READ value          WRITE setValue      NOTIFY valueChanged)
+    Q_PROPERTY(QString name             READ name           CONSTANT)
+    Q_PROPERTY(QObject* editFragment    READ editFragment   NOTIFY editFragmentChanged)
 
 public:
     explicit CodePalette(QObject *parent = nullptr);
@@ -54,8 +54,8 @@ public:
     const QString &path() const;
 
     /** Returns extension for palette */
-    QObject* extension() const;
-    void setExtension(QObject* extension, bool own = false);
+    QObject* editFragment() const;
+    void setEditFragment(QObject* extension);
 
     /** Palette type */
     QString type() const;
@@ -69,8 +69,8 @@ signals:
     void itemChanged();
     /** Value changed */
     void valueChanged();
-    /** Extension changed */
-    void extensionChanged();
+    /** Edit fragment changed */
+    void editFragmentChanged();
     /** Type changed */
     void typeChanged();
 
@@ -87,8 +87,7 @@ private:
     QQuickItem* m_item;
     QVariant    m_value;
     QString     m_path;
-    QObject*    m_extension;
-    bool        m_ownExtension;
+    QObject*    m_editFragment;
     QString     m_type;
 };
 
@@ -143,23 +142,19 @@ inline const QString& CodePalette::path() const{
 }
 
 
-inline QObject *CodePalette::extension() const{
-    return m_extension;
+inline QObject *CodePalette::editFragment() const{
+    return m_editFragment;
 }
 
 /**
  * \brief Extension setter for palette
  */
-inline void CodePalette::setExtension(QObject *extension, bool own){
-    if (m_extension == extension)
+inline void CodePalette::setEditFragment(QObject *editFragment){
+    if (m_editFragment == editFragment)
         return;
 
-    if ( m_ownExtension && m_extension )
-        delete m_extension;
-
-    m_extension = extension;
-    m_ownExtension = own;
-    emit extensionChanged();
+    m_editFragment = editFragment;
+    emit editFragmentChanged();
 }
 
 inline QString CodePalette::type() const{

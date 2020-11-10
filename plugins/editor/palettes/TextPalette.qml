@@ -9,7 +9,7 @@ CodePalette{
     id: palette
     type : "qml/string"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: root
@@ -25,13 +25,13 @@ CodePalette{
             width: parent.width - 30
             height: 25
 
-            style: paletteStyle ? paletteStyle.inputStyle : defaultStyle
+            style: theme.inputStyle
 
             onKeyPressed: {
                 if ( event.key === Qt.Key_Return ){
                     palette.value = pathInput.text
                     if ( !palette.isBindingChange() ){
-                        extension.write(palette.value)
+                        editFragment.write(palette.value)
                     }
                     event.accepted = true
                 }
@@ -42,11 +42,11 @@ CodePalette{
             anchors.right: parent.right
             width: 30
             height: 25
-            content: paletteStyle ? paletteStyle.buttons.apply : null
+            content: theme.buttons.apply
             onClicked: {
                 palette.value = pathInput.text
                 if ( !palette.isBindingChange() ){
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
                 }
             }
         }
@@ -57,9 +57,9 @@ CodePalette{
         root.path = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
     }
 }
