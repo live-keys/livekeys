@@ -19,9 +19,11 @@ public:
     void tryToStartMoreThreads();
     bool tooManyThreadsActive() const;
 
-    void startThread(QmlWorkerPool::Task *task = 0);
+    void startThread(QmlWorkerPool::Task *task = nullptr);
     void reset();
     void waitForDone();
+
+    void clearThreadCache();
 
     mutable QMutex mutex;
     QWaitCondition taskReady;

@@ -2,6 +2,7 @@
 #define LVRUNNABLECONTAINER_H
 
 #include <QAbstractListModel>
+#include <QQmlContext>
 
 #include "live/lveditorglobal.h"
 
@@ -9,12 +10,15 @@ namespace lv{
 
 class Project;
 class Runnable;
+class QmlBuild;
 
 class LV_EDITOR_EXPORT RunnableContainer : public QAbstractListModel{
 
     Q_OBJECT
 
 public:
+    friend class Runnable;
+
     /** Model roles */
     enum Roles{
         Name = Qt::UserRole + 1,
@@ -37,12 +41,14 @@ public:
     Runnable* runnableAt(int index);
 
 signals:
+    void qmlBuild(Runnable* runnable, QmlBuild* build);
 
 public slots:
     void setFilter(const QString& filter);
     Runnable* runnableAt(const QString& path);
 
 private:
+    void announceQmlBuild(Runnable* runnable, QmlBuild* build);
     void updateFilters();
 
     QHash<int, QByteArray> m_roles;

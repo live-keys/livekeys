@@ -681,6 +681,7 @@ QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
         imports << Import(
            importType,
            (importType == Import::Library ? it->name() : it->path()),
+           it->name(),
            it->as(),
            it->version().majorVersion(),
            it->version().minorVersion()
@@ -888,13 +889,35 @@ DocumentQmlInfo::Import::Import(
 {
 }
 
+DocumentQmlInfo::Import::Import(
+        DocumentQmlInfo::Import::Type importType,
+        const QString &uri,
+        const QString &relativeUri,
+        const QString &as,
+        int vMajor,
+        int vMinor)
+    : m_type(importType)
+    , m_uri(uri)
+    , m_relativeUri(relativeUri)
+    , m_as(as)
+    , m_versionMajor(vMajor)
+    , m_versionMinor(vMinor)
+{
+}
+
 QString DocumentQmlInfo::Import::toString() const{
     if ( m_type == DocumentQmlInfo::Import::Library ){
-        return "import " + m_relativeUri + " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+        return "import " + m_relativeUri  +
+                (m_versionMajor >= 0
+                    ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
+                    : "");
     } else if ( m_type == DocumentQmlInfo::Import::Invalid || m_relativeUri.isEmpty() ){
         return "";
     } else {
-        return "import \"" + m_relativeUri + "\"" + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+        return "import \"" + m_relativeUri + "\"" +
+                  (m_versionMajor >= 0
+                      ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
+                      : "");
     }
 }
 

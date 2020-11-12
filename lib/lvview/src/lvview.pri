@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
     $$PWD/metainfo.h \
+    $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
     $$PWD/qmlstreamiterator.h \
     $$PWD/qmlwritablestream.h \
@@ -43,6 +44,7 @@ SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/metainfo.cpp \
+    $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
     $$PWD/qmlstreamiterator.cpp \
     $$PWD/qmlwritablestream.cpp \
