@@ -122,9 +122,9 @@ void QmlAct::extractSource(ViewEngine* ve){
             lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
         );
         if ( !project ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to load 'project' property from context", 0);
-            lv::ViewContext::instance().engine()->throwError(&e);
-            return;
+            delete m_source;
+            m_source = nullptr;
+            THROW_EXCEPTION(Exception, "Failed to load 'project' property from context.", Exception::toCode("~Id"));
         }
 
         QString path = m_source->declarationLocation.url().toLocalFile();
@@ -150,7 +150,6 @@ void QmlAct::exec(){
         ViewEngine* ve = ViewEngine::grab(this);
 
         try {
-
             extractSource(ve);
 
             QmlWorkerPool::TransferArguments transferArguments;
