@@ -104,8 +104,8 @@ Item{
 
                         var containerPanes = containerUsed.panes
                         if ( (containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width) || containerUsed.width === 0 ){
-                            containerPanes[0].width = containerPanes[0].width * 2
-                            fe.width = 400
+                            containerUsed.resizePane(containerPanes[0], containerPanes[0].width * 2)
+                            containerUsed.resizePane(fe, 400)
                         }
                     }
                     if ( !fe.document ){
