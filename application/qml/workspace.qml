@@ -640,11 +640,11 @@ Item{
             if ( data.pane === currentPane )
                 return
 
+            var clone = currentPane
+            root.panes.removePane(currentPane)
+
             var parentSplitter = data.pane.parentSplitter
             var paneIndex = data.pane.parentSplitterIndex()
-            var clone = currentPane
-
-            root.panes.removePane(currentPane)
 
             if ( location === paneDropArea.topPosition ){
                 root.panes.splitPaneVerticallyBeforeWith(parentSplitter, paneIndex, clone)
