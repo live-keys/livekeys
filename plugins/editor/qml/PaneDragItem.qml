@@ -20,12 +20,14 @@ Item{
         id: mouseArea
         anchors.fill: parent
         drag.target: draggable
+        drag.onActiveChanged: draggable.Drag.active = drag.active
         cursorShape: Qt.SizeAllCursor
     }
+
     Item {
         id: draggable
         anchors.fill: parent
-        Drag.active: mouseArea.drag.active
+//        Drag.active: mouseArea.drag.active
         Drag.hotSpot.x: 0
         Drag.hotSpot.y: 0
         Drag.mimeData: { "text/plain": root.display }
