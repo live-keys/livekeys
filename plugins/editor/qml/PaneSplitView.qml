@@ -40,6 +40,14 @@ SplitView{
         return parentSplitter.splitterHierarchyPositioning().concat([currentIndex])
     }
 
+    property var mapGlobalPosition: function(){
+        if ( parentSplitter ){
+            var parentPoint = parentSplitter.mapGlobalPosition()
+            return Qt.point(parentPoint.x + x, parentPoint.y + y)
+        }
+        return Qt.point(x, y)
+    }
+
     property var createNewSplitter : function(){}
 
     property var panes : []
@@ -201,6 +209,7 @@ SplitView{
                                 }
                                 downJ--
                             }
+                        }
 
                     } else if ( newTotalSize < totalSize ){
                         panes[i].height = newSize
@@ -528,14 +537,6 @@ SplitView{
 
         panes = []
         paneSizes = []
-    }
-
-    property var mapGlobalPosition: function(){
-        if ( parentSplitter ){
-            var parentPoint = parentSplitter.mapGlobalPosition()
-            return Qt.point(parentPoint.x + x, parentPoint.y + y)
-        }
-        return Qt.point(x, y)
     }
 
     function createPositioningModel(currentPosition){
