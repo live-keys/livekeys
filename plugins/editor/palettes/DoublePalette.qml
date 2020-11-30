@@ -59,7 +59,7 @@ CodePalette{
                 roundValue = roundValue.toFixed(2)
                 palette.value = roundValue
                 if ( !palette.isBindingChange() )
-                    editFragment.write(palette.value)
+                    editFragment.write(palette.value, codeHandler)
             }
             stepSize: 1.0
             maximumValue: 25
@@ -100,7 +100,7 @@ CodePalette{
                     palette.value = roundValue
 
                 if ( !palette.isBindingChange() )
-                    editFragment.write(palette.value)
+                    editFragment.write(palette.value, codeHandler)
             }
             stepSize: 0.01
             maximumValue: 0.99
@@ -223,7 +223,7 @@ CodePalette{
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
+            editFragment.write(palette.value, codeHandler)
         }
     }
 

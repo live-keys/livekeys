@@ -4,6 +4,18 @@ import editor 1.0
 
 QtObject{
 
+    enum PaletteListMode {
+        ObjectContainer,
+        PaletteContainer,
+        PropertyContainer,
+        NodeEditor
+    }
+
+    enum PaletteListSwap {
+        NoSwap,
+        Swap
+    }
+
     property QtObject factories : QtObject{
 
         property Component addQmlBox: Component{ AddQmlBox{} }
@@ -35,10 +47,8 @@ QtObject{
     property bool instructionsShaping: false
     /////////////////// FACTORY FUNCTIONS
 
-    function createAddQmlBox(parent, theme){
-        var aqb = factories.addQmlBox.createObject(parent)
-        if (theme) aqb.theme = theme
-        return aqb
+    function createAddQmlBox(parent){
+        return factories.addQmlBox.createObject(parent)
     }
 
     function createPaletteGroup(parent){
@@ -202,18 +212,30 @@ QtObject{
         }
     }
 
-    function compose(container, isForNode, theme, objectGraph){
+    function compose(container, isForNode, objectGraph){
         var codeHandler = container.editor.documentHandler.codeHandler
 
-        var position =
-            container.editingFragment.valuePosition() +
-            container.editingFragment.valueLength() - 1
+        var isGroup = container.editingFragment.isGroup()
 
-        var addContainer = codeHandler.getAddOptions(position, isForNode)
+        var position = 0
+        if (container.editingFragment.isGroup()){
+            position = container.editingFragment.position()
+        } else {
+            position = container.editingFragment.valuePosition() +
+                       container.editingFragment.valueLength() - 1
+        }
+
+        var addContainer = null
+        if (container.editingFragment.isGroup()){
+            addContainer = codeHandler.getReadOnlyAddOptions(container.editingFragment, isForNode)
+        } else {
+            addContainer = codeHandler.getAddOptions(position, isForNode)
+        }
+
         if ( !addContainer )
             return
 
-        var addBoxItem = createAddQmlBox(null, theme ? theme : null)
+        var addBoxItem = createAddQmlBox(null)
 
         if (!addBoxItem) return
         addBoxItem.addContainer = addContainer
@@ -263,17 +285,29 @@ QtObject{
 
                 if (!isForNode && container.compact) container.expand()
 
-                var ppos = codeHandler.addProperty(
-                    addContainer.model.addPosition,
-                    addContainer.objectType,
-                    type,
-                    data,
-                    true
-                )
 
-                var ef = codeHandler.openNestedConnection(
-                    container.editingFragment, ppos, project.appRoot()
-                )
+                var propsWritable = codeHandler.propertiesWritable(container.editingFragment)
+
+                var ef = null
+
+                if (propsWritable[data]){
+                    var ppos = codeHandler.addProperty(
+                        addContainer.model.addPosition,
+                        addContainer.objectType,
+                        type,
+                        data,
+                        true,
+                        isGroup ? container.editingFragment : null
+                    )
+
+                    ef = codeHandler.openNestedConnection(
+                        container.editingFragment, ppos, project.appRoot()
+                    )
+
+                    if (isGroup) ef.addFragmentType(QmlEditFragment.GroupChild)
+                } else {
+                    ef = codeHandler.createReadOnlyFragment(container.editingFragment, data)
+                }
 
                 if (ef) {
                     container.editingFragment.signalPropertyAdded(ef)
@@ -351,7 +385,8 @@ QtObject{
         propertyContainer.editingFragment = ef
 
         if ( codeHandler.isForAnObject(ef)){
-            addChildObjectContainer(objectContainer, ef, !instructionsShaping, propertyContainer, propPalette)
+            var childObjectContainer = addChildObjectContainer(objectContainer, ef, !instructionsShaping, propertyContainer, propPalette)
+            childObjectContainer.expand()
         } else {
             propertyContainer.valueContainer = createPaletteGroup()
             ef.visualParent = propertyContainer.valueContainer
@@ -621,34 +656,35 @@ QtObject{
         openNestedProperties(objectContainer, true)
     }
 
-    function addPaletteList(container, paletteGroup, xOffset, yOffset, mode, swap, listParent){
-
-        // mode = 1: objectContainer
-        // mode = 2: paletteContainer
-        // mode = 3: propertyContainer
-        // mode = 4: objectNode/objectNodeProperty
-
+    function addPaletteList(container, paletteGroup, offset, mode, swap, listParent){
         if (!container.editingFragment) return null
-        var palettes = container.editor.documentHandler.codeHandler.findPalettes(container.editingFragment.position(), true, mode === 1)
 
-        if (palettes.size() === 0) return null
+        var palettes = container.editor.documentHandler.codeHandler.findPalettes(
+            container.editingFragment.position(),
+            true,
+            mode === PaletteControls.PaletteListMode.ObjectContainer
+        )
+
+        if (!palettes || palettes.size() === 0) return null
 
         var paletteList = createPaletteListView(listParent ? listParent : null, theme.selectableListView)
 
         var palListBox = null
-        if (mode !== 4){
+        if (mode !== PaletteControls.PaletteListMode.NodeEditor){
             var p = container.parent
             while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
                 p = p.parent
             }
-            var coords = mode === 1 ? container.objectContainerTitle.mapToItem(p, 0, 0) : container.mapToItem(p, 0, 0)
+            var coords = (mode === PaletteControls.PaletteListMode.ObjectContainer)
+                       ? container.objectContainerTitle.mapToItem(p, 0, 0)
+                       : container.mapToItem(p, 0, 0)
             palListBox   = lk.layers.editor.environment.createEditorBox(
                 paletteList,
                 Qt.rect(
-                    coords.x + xOffset,
-                    coords.y + yOffset - (mode === 1 && p.objectName === "objectPalette" ? 8 : 0),
+                    coords.x + offset.x,
+                    coords.y + offset.y - (mode === PaletteControls.PaletteListMode.ObjectContainer && p.objectName === "objectPalette" ? 8 : 0),
                     0, 0),
-                mode === 2 ? Qt.point(container.editor.x, container.editor.y) : Qt.point(p.x, p.y),
+                mode === PaletteControls.PaletteListMode.PaletteContainer ? Qt.point(container.editor.x, container.editor.y) : Qt.point(p.x, p.y),
                 lk.layers.editor.environment.placement.top
             )
             palListBox.color = 'transparent'
@@ -665,7 +701,7 @@ QtObject{
             paletteList.focus = false
             paletteList.model = null
             paletteList.destroy()
-            if (mode !== 4) palListBox.destroy()
+            if (mode !== PaletteControls.PaletteListMode.NodeEditor) palListBox.destroy()
             else {
                 container.objectGraph.paletteListOpened = false
                 container.objectGraph.activateFocus()
@@ -681,24 +717,24 @@ QtObject{
                                          container.editingFragment,
                                          container.editor,
                                          paletteGroup,
-                                         mode === 1 ? container.parent : null)
+                                         mode === PaletteControls.PaletteListMode.ObjectContainer ? container.parent : null)
 
             if (paletteBox){
-                if (mode === 1 || mode === 4){
+                if (mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor){
                     paletteBox.moveEnabledSet = false
-                } else if (mode === 2){
+                } else if (mode === PaletteControls.PaletteListMode.PaletteContainer){
                     paletteBox.moveEnabledSet = container.moveEnabledGet
                 }
             }
 
-            if (mode === 2 && swap){
+            if (mode === PaletteControls.PaletteListMode.PaletteContainer && swap === PaletteControls.PaletteListSwap.Swap){
                 container.parent = null
                 container.documentHandler.codeHandler.removePalette(container.palette)
                 container.destroy()
             }
 
             paletteList.destroy()
-            if (mode !== 4) palListBox.destroy()
+            if (mode !== PaletteControls.PaletteListMode.NodeEditor) palListBox.destroy()
             else {
                 container.objectGraph.paletteListOpened = false
                 container.objectGraph.activateFocus()
@@ -747,8 +783,6 @@ QtObject{
             objectContainer.closeAsPane()
         var codeHandler = objectContainer.editor.documentHandler.codeHandler
         objectContainer.collapse()
-        objectContainer.editor.documentHandler.codeHandler.removeConnection(objectContainer.editingFragment)
-
         var rootPos = codeHandler.findRootPosition()
         if (rootPos === objectContainer.editingFragment.position())
             objectContainer.editor.editor.rootShaped = false
@@ -1009,5 +1043,86 @@ QtObject{
         var paletteBox = openPalette(palette, ef, editor, paletteBoxGroup)
 
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+    }
+
+    function convertStateIntoInstructions(){
+        var editorPane = lk.layers.workspace.panes.focusPane('editor')
+        if ( !editorPane )
+            return
+
+        var editor = editorPane.editor
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var result = null
+        var editingFragments = codeHandler.editingFragments()
+        for ( var i = 0; i < editingFragments.length; ++i ){
+            if (editingFragments[i].location === 1){
+                result = convertObjectIntoInstructions(editingFragments[i])
+            }
+        }
+
+        return result
+    }
+
+    function convertObjectIntoInstructions(object, container){
+        var result = ({})
+        result['type'] = object.type()
+        var paletteList = object.paletteList()
+        var nameList = []
+        for (var p = 0; p < paletteList.length; ++p)
+            nameList.push(paletteList[p].name)
+        if (nameList.length > 0)
+            result['palettes'] = nameList
+
+        var objectContainer = container ? container : object.visualParent.parent.parent.parent
+
+        if (objectContainer.compact) return result
+        var childFragments = object.getChildFragments()
+        var objects = []
+        var properties = []
+        for (var i = 0; i < childFragments.length; ++i){
+            var frag = childFragments[i]
+            if (frag.location === 1)
+                objects.push(convertObjectIntoInstructions(frag))
+            if (frag.location === 2)
+                properties.push(convertPropertyIntoInstructions(frag))
+        }
+
+        if (objects.length > 0)
+            result['children'] = objects
+        if (properties.length > 0)
+            result['properties'] = properties
+
+        return result
+    }
+
+    function convertPropertyIntoInstructions(prop){
+        var result = ({})
+        result['name'] = prop.identifier()
+
+        var p = prop.visualParent
+
+        while (p && p.objectName !== "propertyContainer"){
+            p = p.parent
+        }
+        if (!p) return result
+
+        var propertyContainer = p
+
+        if (propertyContainer.isAnObject){
+            result['isAnObject'] = true
+            var inst = convertObjectIntoInstructions(prop, propertyContainer.childObjectContainer)
+            result['instructions'] = inst
+        } else {
+            var palettes = []
+            var paletteList = prop.paletteList()
+            for (var k = 0; k < paletteList.length; ++k)
+                palettes.push(paletteList[k].name)
+            if (palettes.length > 0)
+                result['palettes'] = palettes
+        }
+
+        return result
+
     }
 }

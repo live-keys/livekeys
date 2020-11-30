@@ -42,6 +42,7 @@ class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
     Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
     Q_PROPERTY(Location location     READ location     CONSTANT)
     Q_PROPERTY(QJSValue whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_ENUMS(FragmentType)
 
 public:
     /** ProjectDocument section type for this QmlEditFragment */
@@ -56,6 +57,14 @@ public:
         Property,
         Slot
     };
+
+    enum FragmentType {
+        Builder = 1,
+        ReadOnly = 2,
+        Group = 4,
+        GroupChild = 8
+    };
+
     Q_ENUM(Location)
 public:
     QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
@@ -85,11 +94,9 @@ public:
 
     void addChildFragment(QmlEditFragment* edit);
     QmlEditFragment* findChildFragment(QmlEditFragment* edit);
-    const QList<QmlEditFragment*> childFragments();
 
     QmlDeclaration::Ptr declaration() const;
 
-    QString readValueText() const;
 
     void updatePaletteValue(CodePalette* palette);
 
@@ -107,6 +114,14 @@ public:
     void setWhenBinding(const QJSValue& whenBinding);
 
 public slots:
+    int fragmentType() const;
+    bool isOfFragmentType(FragmentType type) const;
+    void addFragmentType(FragmentType type);
+    void removeFragmentType(FragmentType type);
+
+    const QList<lv::QmlEditFragment*> childFragments();
+
+
     int position();
     int valuePosition() const;
     int valueLength() const;
@@ -114,7 +129,11 @@ public slots:
     bool isBuilder() const;
     void rebuild();
 
+    bool isGroup() const;
+    void checkIfGroup();
+
     QString defaultValue() const;
+    QString readValueText() const;
 
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
@@ -146,9 +165,8 @@ public slots:
 
     Location location() const;
 
-    void writeProperties(const QJSValue& properties);
-    void write(const QJSValue options);
-    void writeCode(const QString& code);
+    void writeProperties(const QJSValue& properties, lv::CodeQmlHandler* handler);
+    void write(const QJSValue options, lv::CodeQmlHandler* handler);
 
     QObject* readObject();
 
@@ -172,8 +190,10 @@ signals:
 
     void refCountChanged();
     void whenBindingChanged();
+    void typeChanged();
 private:
     static QString buildCode(const QJSValue& value);
+    void writeCode(const QString& code);
 
     QmlDeclaration::Ptr  m_declaration;
 
@@ -196,6 +216,7 @@ private:
     QString                 m_objectId;
     Location                m_location;
     QJSValue                m_whenBinding;
+    int                     m_fragmentType;
 };
 
 /// \brief Returns the binding channel associated with this object.

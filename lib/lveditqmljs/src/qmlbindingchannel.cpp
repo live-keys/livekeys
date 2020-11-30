@@ -39,7 +39,6 @@ QmlBindingChannel::QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable *
     , m_runnable(runnable)
     , m_listIndex(-1)
     , m_enabled(false)
-    , m_builder(false)
 {
     connect(runnable, &Runnable::objectReady, this, &QmlBindingChannel::__runableReady);
 }

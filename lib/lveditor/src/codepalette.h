@@ -32,6 +32,7 @@ class LV_EDITOR_EXPORT CodePalette : public QObject{
     Q_PROPERTY(QVariant value           READ value          WRITE setValue      NOTIFY valueChanged)
     Q_PROPERTY(QString name             READ name           CONSTANT)
     Q_PROPERTY(QObject* editFragment    READ editFragment   NOTIFY editFragmentChanged)
+    Q_PROPERTY(QObject* codeHandler     READ codeHandler    NOTIFY codeHandlerChanged)
 
 public:
     explicit CodePalette(QObject *parent = nullptr);
@@ -57,6 +58,9 @@ public:
     QObject* editFragment() const;
     void setEditFragment(QObject* extension);
 
+    QObject* codeHandler() const;
+    void setCodeHandler(QObject* handler);
+
     /** Palette type */
     QString type() const;
     void setType(QString type);
@@ -74,6 +78,8 @@ signals:
     /** Type changed */
     void typeChanged();
 
+    void codeHandlerChanged();
+
     /** Value was initialized */
     void init(const QVariant& value);
     /** Code changed */
@@ -88,6 +94,7 @@ private:
     QVariant    m_value;
     QString     m_path;
     QObject*    m_editFragment;
+    QObject*    m_codeHandler;
     QString     m_type;
 };
 
@@ -155,6 +162,22 @@ inline void CodePalette::setEditFragment(QObject *editFragment){
 
     m_editFragment = editFragment;
     emit editFragmentChanged();
+}
+
+inline QObject *CodePalette::codeHandler() const{
+    return m_codeHandler;
+}
+
+
+/**
+ * \brief Code handler setter for palette
+ */
+inline void CodePalette::setCodeHandler(QObject *handler){
+    if (m_codeHandler == handler)
+        return;
+
+    m_codeHandler = handler;
+    emit codeHandlerChanged();
 }
 
 inline QString CodePalette::type() const{

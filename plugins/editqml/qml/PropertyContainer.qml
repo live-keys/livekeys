@@ -87,9 +87,8 @@ Item{
                     var paletteList = paletteControls.addPaletteList(
                         propertyContainer,
                         propertyContainer.valueContainer,
-                        110,
-                        -12,
-                        3
+                        {"x": 110, "y": -12},
+                        PaletteControls.PaletteListMode.PropertyContainer
                     )
 
                     if (paletteList){

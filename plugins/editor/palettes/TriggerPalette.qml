@@ -99,7 +99,7 @@ CodePalette{
                     } else {
                         var result = editFragment.bindFunctionExpression(input.text)
                         if ( result ){
-                            editFragment.write({'__ref': input.text})
+                            editFragment.write({'__ref': input.text}, codeHandler)
                         }
                     }
 
@@ -137,7 +137,7 @@ CodePalette{
             onClicked: {
                 var result = editFragment.bindFunctionExpression(input.text)
                 if ( result ){
-                    editFragment.write({'__ref': input.text})
+                    editFragment.write({'__ref': input.text}, codeHandler)
                 }
             }
         }
@@ -190,7 +190,7 @@ CodePalette{
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
+            editFragment.write(palette.value, codeHandler)
         }
     }
 }

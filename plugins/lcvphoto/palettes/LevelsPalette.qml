@@ -52,7 +52,7 @@ CodePalette{
                 levels.lightness = lightness
                 editFragment.writeProperties({
                     'lightness' : lightness
-                })
+                }, codeHandler)
             }
         }
         onLevelByChannelChanged: {
@@ -60,7 +60,7 @@ CodePalette{
                 levels.channels = levelByChannel
                 editFragment.writeProperties({
                     'channels' : levelByChannel
-                })
+                }, codeHandler)
             }
         }
     }
@@ -70,7 +70,7 @@ CodePalette{
             editFragment.writeProperties({
                 'lightness' : palette.value.lightness,
                 'channels' : palette.value.channels
-            })
+            }, codeHandler)
         }
     }
 

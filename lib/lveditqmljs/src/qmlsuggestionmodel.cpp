@@ -15,6 +15,7 @@ QmlSuggestionModel::QmlSuggestionModel(int addPosition, QObject* parent):
     m_roles[Documentation]  = "documentation";
     m_roles[Code]           = "code";
     m_roles[Category]       = "category";
+    m_roles[IsGroup]        = "isGroup";
 }
 
 QmlSuggestionModel::~QmlSuggestionModel()
@@ -39,6 +40,8 @@ QVariant QmlSuggestionModel::data(const QModelIndex &index, int role) const
         return m_data[dataIndex].importSpace;
     } else if ( role == Category ){
         return m_data[dataIndex].category;
+    } else if ( role == IsGroup ){
+        return m_data[dataIndex].isGroup;
     }
     return QVariant();
 }
@@ -133,7 +136,7 @@ void QmlSuggestionModel::updateFilters(){
 }
 
 
-QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pObjType, const QString& ptype, const QString &pimport, const QString &pdoc, const QString &pcode, const int cat)
+QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pObjType, const QString& ptype, const QString &pimport, const QString &pdoc, const QString &pcode, const int cat, bool group)
     : label(plabel)
     , objectType(pObjType)
     , type(ptype)
@@ -141,6 +144,7 @@ QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pOb
     , documentation(pdoc)
     , code(pcode)
     , category(cat)
+    , isGroup(group)
 {
 
 }

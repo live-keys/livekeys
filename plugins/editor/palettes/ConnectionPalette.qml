@@ -43,7 +43,7 @@ CodePalette{
         var result = ef.bindExpression(text)
 
         if ( result ){
-            ef.write({'__ref': text ? text : ef.defaultValue()})
+            ef.write({'__ref': text ? text : ef.defaultValue()}, codeHandler)
         }
 
         input.autoTextChange = true
@@ -180,7 +180,7 @@ CodePalette{
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
+            editFragment.write(palette.value, codeHandler)
         }
     }
 }
