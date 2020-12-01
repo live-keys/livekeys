@@ -1,34 +1,31 @@
 import QtQuick 2.3
-import workspace 1.0 as Workspace
 
-Item{
+Rectangle{
     id: root
-    width: 180
-    height: 30
+    width: parent ? parent.buttonWidth : 100
+    height: parent ? parent.buttonHeight : 30
+    color: parent ? menuItemArea.containsMouse ? parent.style.highlightBackgroundColor : parent.style.backgroundColor : 'transparent'
 
-    property QtObject textDefaultStyle: Workspace.TextStyle{}
+    signal clicked(var mouse)
+    property string text: ''
 
-    property QtObject textStyle: parent && parent.style ? parent.style.itemStyle : textDefaultStyle
-    property QtObject textHoverStyle: parent && parent.style ? parent.style.itemHoverStyle : textDefaultStyle
-
-    signal clicked()
-    property string text : ""
-
-    Workspace.Label{
-        id: paneButtonText
-        anchors.right: parent.right
-
-        textStyle: paneButtonarea.containsMouse ? root.textHoverStyle : root.textStyle
-
-        text: root.text
+    Text{
+        id: menuItemText
         anchors.left: parent.left
         anchors.leftMargin: 10
         anchors.verticalCenter: parent.verticalCenter
+        text: root.text
+        font.family: root.parent ? menuItemArea.containsMouse ? root.parent.style.highlightTextStyle.font.family : root.parent.style.textStyle.font.family : 'sans-serif'
+        font.pixelSize: root.parent ? menuItemArea.containsMouse ? root.parent.style.highlightTextStyle.font.pixelSize : root.parent.style.textStyle.font.pixelSize : 12
+        font.weight: root.parent ? menuItemArea.containsMouse ? root.parent.style.highlightTextStyle.font.weight : root.parent.style.textStyle.font.weight : Font.Normal
+        color: root.parent ? menuItemArea.containsMouse ? root.parent.style.highlightTextStyle.color : root.parent.style.textStyle.color : 'white'
     }
     MouseArea{
-        id : paneButtonarea
+        id : menuItemArea
         anchors.fill: parent
         hoverEnabled: true
-        onClicked: root.clicked()
+        onClicked: {
+            root.clicked(mouse)
+        }
     }
 }

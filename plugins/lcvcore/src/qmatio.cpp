@@ -57,7 +57,7 @@ bool QMatIO::write(const QString &file, QMat *image, QJSValue options){
     }
 
     try{
-        cv::imwrite(file.toStdString(), *image->cvMat(), params);
+        cv::imwrite(file.toStdString(), *image->internalPtr(), params);
     } catch ( cv::Exception& e ){
         qWarning("Failed to save image due to exception: %s", e.what());
         return false;

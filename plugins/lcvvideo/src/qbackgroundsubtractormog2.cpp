@@ -132,7 +132,7 @@ QBackgroundSubtractorMog2::~QBackgroundSubtractorMog2(){
 QMat* QBackgroundSubtractorMog2::backgroundModel(){
     Q_D(QBackgroundSubtractorMog2);
     if ( d->subtractorMog2() )
-        d->subtractorMog2()->getBackgroundImage(*(d->backgroundModel.cvMat()));
+        d->subtractorMog2()->getBackgroundImage(*(d->backgroundModel.internalPtr()));
     return &d->backgroundModel;
 }
 

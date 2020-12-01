@@ -13,15 +13,15 @@ public:
     Q_INVOKABLE QDenoising(QObject *parent = nullptr);
 
 public slots:
-    QMat *fastNlMeans(
-        QMat* input,
+    QObject *fastNlMeans(
+        QObject *input,
         float h = 3,
         int templateWindowSize = 7,
         int searchWindowSize = 21
     );
 
-    QMat *fastNlMeansColored(
-        QMat* input,
+    QObject *fastNlMeansColored(
+        QObject* input,
         float h = 3,
         int templateWindowSize = 7,
         int searchWindowSize = 21

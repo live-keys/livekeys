@@ -42,6 +42,33 @@ WorkspaceExtension{
                     }
                 ]
             }
+        },
+        {
+            whenPane: 'log',
+            whenItem: 'logList',
+            intercept: function(pane, item){
+                return [
+                    {
+                        name : "Copy",
+                        action : pane.copySelection,
+                        shortcut: 'ctrl+c',
+                        enabled: pane.selection.length
+                    }, {
+                        name : "Open Location",
+                        action : pane.openSelectionLocation,
+                        shortcut: 'ctrl+l',
+                        enabled: pane.selection.length
+                    }, {
+                        name : "Open Location Externally",
+                        action : pane.openSelectionLocationExternally,
+                        enabled : pane.selection.length
+                    }, {
+                        name : "Clear Selection",
+                        action : pane.clearSelection,
+                        enabled : pane.selection.length
+                    }
+                ]
+            }
         }
     ]
 

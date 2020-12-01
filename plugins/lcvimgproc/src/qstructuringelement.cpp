@@ -48,7 +48,7 @@ QStructuringElement::~QStructuringElement(){
 
 QMat* QStructuringElement::output() const{
     if ( m_outputDirty )
-        *m_output->cvMat() = getStructuringElement(
+        *m_output->internalPtr() = getStructuringElement(
                 m_shape,
                 Size(m_ksize.width(), m_ksize.height()),
                 Point(m_anchor.x(), m_anchor.y()));

@@ -98,8 +98,8 @@ void QHoughLinesP::transform(const cv::Mat &in, cv::Mat&){
 QSGNode *QHoughLinesP::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     Q_D(QHoughLinesP);
     if ( d->outDirty ){
-        Mat* surface = output()->cvMat();
-        surface->create(inputMat()->cvMat()->size(), CV_8UC4);
+        Mat* surface = output()->internalPtr();
+        surface->create(inputMat()->internalPtr()->size(), CV_8UC4);
         surface->setTo(Scalar(0, 0, 0, 0));
         for( size_t i = 0; i < d->lines.size(); ++i ){
             line( *surface, Point(d->lines[i][0], d->lines[i][1]),

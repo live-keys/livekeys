@@ -8,6 +8,7 @@
 #include "live/project.h"
 #include "live/projectfile.h"
 #include "live/projectdocumentmodel.h"
+#include "live/qmlbuild.h"
 
 #include <QQmlProperty>
 #include <QQmlListReference>
@@ -88,6 +89,8 @@ Runnable::~Runnable(){
 void Runnable::run(){
     if ( m_type == Runnable::QmlFile ){
 
+        RunnableContainer* runnableContainer = static_cast<RunnableContainer*>(parent());
+
         ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
         if ( document ){
             auto documentList = m_project->documentModel()->listUnsavedDocuments();
@@ -95,6 +98,10 @@ void Runnable::run(){
             if ( m_project->active() == this ){
 
                 QQmlContext* ctx = createContext();
+
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
 
                 m_viewEngine->createObjectAsync(
                     document->content(),
@@ -106,6 +113,10 @@ void Runnable::run(){
                 );
             } else {
                 QQmlContext* ctx = createContext();
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
+
                 QObject* obj = createObject(document->content(), QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
@@ -123,6 +134,9 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+
+                    build->setState(QmlBuild::Ready);
+
                 } else {
                     ctx->deleteLater();
                 }
@@ -134,10 +148,13 @@ void Runnable::run(){
             if ( !f.open(QFile::ReadOnly) )
                 THROW_EXCEPTION(Exception, "Failed to read file for running:" + m_path.toStdString(), Exception::toCode("~File"));
 
-            QByteArray contentBytes = f.readAll();;
+            QByteArray contentBytes = f.readAll();
 
             if ( m_project->active() == this ){
                 QQmlContext* ctx = createContext();
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
 
                 m_viewEngine->createObjectAsync(
                     contentBytes,
@@ -149,6 +166,11 @@ void Runnable::run(){
                 );
             } else {
                 QQmlContext* ctx = createContext();
+
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
+
                 QObject* obj = createObject(contentBytes, QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
@@ -165,6 +187,9 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+
+                    build->setState(QmlBuild::Ready);
+
                 } else {
                     ctx->deleteLater();
                 }
@@ -350,10 +375,14 @@ QObject* Runnable::createObject(const QByteArray &code, const QUrl &file, QQmlCo
     return obj;
 }
 
+
 QQmlContext *Runnable::createContext(){
     QQmlContext* ctx = new QQmlContext(m_viewEngine->engine()->rootContext());
+
     HookContainer* hooks = new HookContainer(m_project->dir(), this, ctx);
+    QmlBuild* build      = new QmlBuild(this, ctx);
     ctx->setContextProperty("hooks", hooks);
+    ctx->setContextProperty("build", build);
     return ctx;
 }
 
@@ -377,6 +406,9 @@ void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQ
                 ppref.append(object);
             }
         }
+
+        QmlBuild* build = static_cast<QmlBuild*>(context->contextProperty("build").value<QObject*>());
+        build->setState(QmlBuild::Ready);
 
         connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewContext = context;

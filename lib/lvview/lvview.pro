@@ -1,6 +1,6 @@
 TEMPLATE = lib
 TARGET   = lvview
-QT      += core qml quick
+QT      += core qml quick quick-private
 CONFIG  += qt
 
 linkLocalLibrary(lvbase, lvbase)

@@ -51,7 +51,7 @@ class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
     Q_DISABLE_COPY(DocumentQmlInfo)
 
 public:
-    class Import{
+    class LV_EDITQMLJS_EXPORT Import{
 
     public:
         static const int NoVersion;
@@ -79,6 +79,14 @@ public:
             int vMajor = NoVersion,
             int vMinor = NoVersion
         );
+        Import(
+            Type importType,
+            const QString& uri,
+            const QString& relativeUri,
+            const QString& as = "",
+            int vMajor = NoVersion,
+            int vMinor = NoVersion
+        );
 
         void updateUri(const QString& uri);
         void setImportType(Type importType);
@@ -91,6 +99,9 @@ public:
         int versionMajor() const;
         int versionMinor() const;
         bool isVersionValid() const;
+        QString toString() const;
+
+        static QString join(const QList<Import>& imports);
 
         bool operator ==(const Import& other) const;
 
@@ -208,6 +219,8 @@ public:
     const ValueReference valueAtPosition(int position) const;
     const ValueReference valueAtPosition(int position, int& begin, int& end) const;
     const ASTReference astObjectAtPosition(int position);
+
+    QString propertySourceFromObjectId(const QString& componentId, const QString& propertyName);
 
     bool isValueNull(const ValueReference &vr) const;
 

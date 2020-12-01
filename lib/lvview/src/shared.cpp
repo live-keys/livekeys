@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "live/shared.h"
-#include "live/qmlact.h"
 #include "live/memory.h"
 
 #include <QQmlEngine>

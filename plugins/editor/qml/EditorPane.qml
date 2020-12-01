@@ -19,6 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
+import workspace 1.0
 import base 1.0
 
 Pane{
@@ -380,133 +381,45 @@ Pane{
         }
     }
 
-    Rectangle {
+    PaneMenu{
         id: editorAddRemoveMenu
         visible: false
         anchors.right: root.right
         anchors.topMargin: 30
         anchors.top: root.top
-        property int buttonHeight: 30
-        property int buttonWidth: 180
-        opacity: visible ? 1.0 : 0
-        z: 1000
 
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+        style: root.currentTheme.popupMenuStyle
 
-
-        Rectangle{
-            id: addEditorButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: addEditorText
-                text: qsTr("Split horizontally")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: addEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : addEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
-                }
+        PaneMenuItem{
+            text: qsTr('Split Horizontally')
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
             }
         }
-
-        Rectangle{
-            id: addVerticalEditorButton
-            anchors.top: addEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: addVerticalEditorText
-                text: qsTr("Split vertically")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: addVerticalEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : addVerticalEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
-                }
+        PaneMenuItem{
+            text: qsTr('Split Vertically')
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
             }
         }
-
-        Rectangle{
-            id: newWindowEditorButton
-            anchors.top: addVerticalEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: newWindowEditorText
-                text: qsTr("Move to new window")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : newWindowEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    root.panes.movePaneToNewWindow(root)
-                }
+        PaneMenuItem{
+            text: qsTr("Move to New Window")
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                root.panes.movePaneToNewWindow(root)
             }
         }
-
-        Rectangle{
-            id: removeEditorButton
-            anchors.top: newWindowEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: removeEditorText
-                text: qsTr("Remove Pane")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: removeEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : removeEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    root.panes.clearPane(root)
-                }
+        PaneMenuItem{
+            text: qsTr("Remove Pane")
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                root.panes.clearPane(root)
             }
         }
     }

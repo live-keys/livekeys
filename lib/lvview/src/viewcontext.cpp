@@ -12,6 +12,9 @@ namespace lv{
 QScopedPointer<ViewContext> ViewContext::m_instance;
 
 void ViewContext::initFromEngine(QQmlEngine *engine){
+    if ( m_instance )
+        return;
+
     QObject* livekeys = engine->rootContext()->contextProperty("lk").value<QObject*>();
     if ( !livekeys )
         THROW_EXCEPTION(lv::Exception, "Failed to load lk context property.", 1);

@@ -118,7 +118,7 @@ lv::QmlObjectList* QMatOp::createMatList(const QJSValue &matArray)
             if ( it.name() != "length" ){
                 QMat* m = qobject_cast<QMat*>(it.value().toQObject());
                 if ( m ){
-                    cv::Mat* nmat = new cv::Mat(*m->cvMat());
+                    cv::Mat* nmat = new cv::Mat(*m->internalPtr());
                     data->push_back(new QMat(nmat));
                 } else {
                     data->clear();
@@ -210,6 +210,12 @@ QWritableMat *QMatOp::createWritableFromMat(QMat *mat){
     return new QWritableMat(m);
 }
 
+QUMat *QMatOp::toUMat(QMat *m){
+    QUMat* um = new QUMat;
+    m->internal().copyTo(*um->internalPtr());
+    return um;
+}
+
 void QMatOp::fill(QMat *m, const QColor &color){
     if ( m )
         m->internal().setTo(toScalar(color));
@@ -270,15 +276,15 @@ QMat *QMatOp::perspective(QMat *input, QJSValue points)
     QMat* output = new QMat(
         input->dimensions().width(),
         input->dimensions().height(),
-        static_cast<QMat::Type>(input->data().type()),
-        input->data().channels()
+        static_cast<QMat::Type>(input->internal().type()),
+        input->internal().channels()
     );
 
     cv::warpPerspective(
-        input->data(),
-        output->data(),
+        input->internal(),
+        output->internal(),
         transform,
-        output->data().size(),
+        output->internal().size(),
         cv::INTER_LINEAR,
         cv::BORDER_CONSTANT,
         cv::Scalar()
@@ -292,7 +298,7 @@ QJSValue QMatOp::split(QMat *m){
         return QJSValue();
 
     std::vector<cv::Mat> channels;
-    cv::split(m->data(), channels);
+    cv::split(m->internal(), channels);
 
     quint32 channelsSize = static_cast<quint32>(channels.size());
 
@@ -301,7 +307,7 @@ QJSValue QMatOp::split(QMat *m){
 
     for ( quint32 i = 0; i < channelsSize; ++i ){
         QMat* current = new QMat;
-        *current->cvMat() = channels[i];
+        *current->internalPtr() = channels[i];
         result.setProperty(i, engine->engine()->newQObject(current));
     }
     return result;
@@ -315,13 +321,13 @@ QMat *QMatOp::merge(const QJSValue &matArray){
         if ( it.name() != "length" ){
             QMat* m = qobject_cast<QMat*>(it.value().toQObject());
             if (m){
-                channels.push_back(m->data());
+                channels.push_back(m->internal());
             }
         }
     }
 
     QMat* r = new QMat;
-    cv::merge(channels, *r->cvMat());
+    cv::merge(channels, *r->internalPtr());
     return r;
 }
 
@@ -348,7 +354,7 @@ QMat *QMatOp::spreadByLinearInterpolation(QJSValue reference, QJSValue spread){
     }
 
     QMat* r = new QMat(new cv::Mat(1, 256, CV_8U));
-    uchar* lut = r->cvMat()->ptr();
+    uchar* lut = r->internalPtr()->ptr();
 
     for(int i = 0; i< 256; i++){
         int j = 0;
@@ -375,9 +381,9 @@ QMat *QMatOp::lut(QMat *m, QMat *lut){
     QMat* r = new QMat;
 
     try {
-        cv::LUT(m->data(), lut->data(), *r->cvMat());
-        cv::min(r->data(), 255, *r->cvMat());
-        cv::max(r->data(), 0, *r->cvMat());
+        cv::LUT(m->internal(), lut->internal(), *r->internalPtr());
+        cv::min(r->internal(), 255, *r->internalPtr());
+        cv::max(r->internal(), 0, *r->internalPtr());
     } catch (cv::Exception& e) {
         THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
         delete r;
@@ -440,8 +446,8 @@ QVariantList QMatOp::toArray(QMat *m){
 
 QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -456,8 +462,8 @@ QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseOr(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -470,8 +476,8 @@ QMat *QMatOp::bitwiseOr(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseAnd(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -484,7 +490,7 @@ QMat *QMatOp::bitwiseAnd(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseNot(QMat *arg)
 {
-    cv::Mat* a1 = arg->cvMat();
+    cv::Mat* a1 = arg->internalPtr();
 
     cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
     cv::bitwise_not(*a1, *resMat);

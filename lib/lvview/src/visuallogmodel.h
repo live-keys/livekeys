@@ -18,7 +18,9 @@
 #define LVVISUALLOGMODEL_H
 
 #include <QString>
+#include <QColor>
 #include <QAbstractListModel>
+#include <QJSValue>
 
 #include "live/lvviewglobal.h"
 #include "live/visuallog.h"
@@ -33,7 +35,18 @@ namespace lv{
 class LV_VIEW_EXPORT VisualLogModel : public VisualLogBaseModel, public VisualLog::ViewTransport{
 
     Q_OBJECT
-    Q_PROPERTY(int width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(int      width READ width WRITE setWidth NOTIFY widthChanged)
+    Q_PROPERTY(QJSValue style READ style WRITE setStyle NOTIFY styleChanged)
+
+public:
+    class TextStyle{
+    public:
+        QColor     infoColor;
+        QColor     warnColor;
+        QColor     errorColor;
+        QByteArray font;
+        int        fontSize;
+    };
 
 public:
     VisualLogModel(QQmlEngine* engine);
@@ -67,19 +80,30 @@ public:
     QList<VisualLogEntry>::ConstIterator begin() const;
     QList<VisualLogEntry>::ConstIterator end() const;
 
+    QJSValue style() const;
+
 public slots:
+    QString messageAt(int index) const;
+    QString locationAt(int index) const;
     void setWidth(int width);
     void clearValues();
+
+    void setStyle(QJSValue style);
 
 signals:
     /** Width has changed */
     void widthChanged(int width);
     /** Entry was added */
     void entryAdded();
+    /** Style changed */
+    void styleChanged();
 
 private:
+    void resetTextComponent();
     QQmlComponent* component(const QString& key);
     QString componentPath(const QString& componentKey);
+
+    TextStyle                      m_textStyle;
 
     QQmlEngine*                    m_engine;
     QList<VisualLogEntry>          m_entries;

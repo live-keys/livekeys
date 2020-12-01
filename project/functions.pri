@@ -112,7 +112,9 @@ defineTest(linkLibrary){
 # Args: (path, name, [include_dir])
 #  * path: path to the plugin from 'plugins'
 #  * name: name of the library
-#  * include_dir: include dir path(defaults to library path in source tree + '/src')
+#  * include_dir: include dir path(defaults to library path in source tree + '/include')
+#                 If a relative path is specified, it will append the $$PROJECT_ROOT/plugins, and
+#                 add the include suffix: i.e. myplugin -> $$PROJECT_ROOT/plugins/myplugin/include
 #
 defineTest(linkLocalPlugin){
     win32:LIB_PATH = $$DEPLOY_PATH/dev/plugins/$$1/lib
@@ -120,7 +122,10 @@ defineTest(linkLocalPlugin){
 
     LIB_NAME = $$2
     LIB_INCLUDE_PATH = $$PROJECT_ROOT/plugins/$$1/include
-    !isEmpty(3):LIB_INCLUDE_PATH=$$3
+    !isEmpty(3){
+        exists($$3):LIB_INCLUDE_PATH=$$3
+        else:LIB_INCLUDE_PATH=$$PROJECT_ROOT/plugins/$$3/include
+    }
 
     # use *= instead of += to prevent duplications of link path cofigurations
     LIBS *= -L$$LIB_PATH

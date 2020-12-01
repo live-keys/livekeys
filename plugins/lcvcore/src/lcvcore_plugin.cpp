@@ -16,6 +16,7 @@
 
 #include "lcvcore_plugin.h"
 #include "qmat.h"
+#include "qumat.h"
 #include "qwritablemat.h"
 #include "qmatop.h"
 #include "qmatio.h"
@@ -69,6 +70,7 @@ static QObject* gradientProvider(QQmlEngine *engine, QJSEngine *){
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
+    qmlRegisterType<QUMat>(                  uri, 1, 0, "UMat");
     qmlRegisterType<QWritableMat>(           uri, 1, 0, "WritableMat");
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImageView>(             uri, 1, 0, "ImageView");

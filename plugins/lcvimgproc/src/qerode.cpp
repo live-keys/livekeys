@@ -90,6 +90,6 @@ void QErode::transform(const cv::Mat &in, cv::Mat &out){
             else
                 borderValue = Scalar(m_borderValue.red());
         }
-        erode(in, out, *(m_kernel->cvMat()), m_anchorCv, m_iterations, m_borderType, borderValue);
+        erode(in, out, *(m_kernel->internalPtr()), m_anchorCv, m_iterations, m_borderType, borderValue);
     }
 }

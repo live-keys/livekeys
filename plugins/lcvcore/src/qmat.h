@@ -52,13 +52,12 @@ public:
     QMat(int width, int height, QMat::Type type, int channels, QObject* parent = nullptr);
     virtual ~QMat();
 
-    cv::Mat* cvMat();
-    const cv::Mat& data() const;
-
     static QMat* nullMat();
 
     QMat* clone() const;
     static QMat* reloc(QMat* m);
+
+    cv::Mat* internalPtr();
 
     const cv::Mat& internal() const;
     cv::Mat& internal();
@@ -81,13 +80,12 @@ private:
     static bool memoryValidate(cv::Mat* m, int width, int height, int type, int channels);
     static void memoryFree(cv::Mat* m);
 
-    cv::Mat* m_internal;
+    cv::Mat*  m_internal;
 
     static QMat* m_nullMat;
-    
 };
 
-inline cv::Mat *QMat::cvMat(){
+inline cv::Mat *QMat::internalPtr(){
     return m_internal;
 }
 

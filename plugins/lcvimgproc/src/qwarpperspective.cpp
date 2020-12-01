@@ -23,7 +23,7 @@ QWarpPerspective::~QWarpPerspective(){
 void QWarpPerspective::transform(){
     if ( isComponentComplete() ){
         try{
-            transform(*input()->cvMat(), *output()->cvMat());
+            transform(*input()->internalPtr(), *output()->internalPtr());
             emit outputChanged();
             update();
         } catch (cv::Exception& e ){
@@ -36,7 +36,7 @@ void QWarpPerspective::transform(const cv::Mat &in, cv::Mat &out){
     if ( in.empty() )
         return;
 
-    cv::warpPerspective(in, out, m_m->data(), out.size(), m_interpolation, m_borderMode, m_borderValueInternal);
+    cv::warpPerspective(in, out, m_m->internal(), out.size(), m_interpolation, m_borderMode, m_borderValueInternal);
 }
 
 QSGNode *QWarpPerspective::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *){

@@ -2,9 +2,10 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
+import base 1.0
 import live 1.0
 import editor 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
 
 Pane{
     id: root
@@ -12,14 +13,16 @@ Pane{
     paneState : { return {} }
     objectName: "log"
 
-    color: '#050a0f'
+    color: currentTheme.paneBackground
 
     signal itemAdded()
 
     property bool isInWindow : false
 
     property alias prefixWidth: prefixSplitDragHandle.x
-    onPrefixWidthChanged: logList.model.width = logList.width - root.prefixWidth - 5
+    onPrefixWidthChanged: {
+        logList.model.width = root.width - (root.prefixVisible ? root.prefixWidth : 0) - 5
+    }
 
     property Theme currentTheme : lk.layers.workspace ? lk.layers.workspace.themes.current : null
 
@@ -35,7 +38,63 @@ Pane{
         }
     }
 
+    property var selection: []
+    function clearSelection(){
+        for ( var i = 0; i < selection.length; ++i ){
+            var item = logList.itemAtIndex(selection[i])
+            if ( item )
+                item.bottomBorder.height = 1
+        }
+        selection = []
+    }
+    function __appendToSelection(index){
+        selection.push(index)
+        selection.sort()
+    }
+
+    function copySelection(){
+        var messages = ''
+        for ( var i = 0; i < selection.length; ++i ){
+            if ( messages.length )
+                messages += '\n'
+            messages += logList.model.messageAt(selection[i])
+        }
+        clipboard.setText(messages)
+    }
+    function openSelectionLocation(){
+        if ( !selection.length )
+            return
+        var location = logList.model.locationAt(root.selection[root.selection.length - 1])
+        if ( !location.length )
+            return
+
+        var line = parseInt(location.substr(location.lastIndexOf(':') + 1))
+        var file = location.substr(0, location.lastIndexOf(':'))
+        if ( file.startsWith('memory') )
+            file = 'file' + file.substr(6)
+        var fe = lk.layers.workspace.project.openFile(file)
+        if ( fe ){
+            fe.editor.forceFocus()
+            fe.editor.textEdit.cursorPosition = fe.editor.document.offsetAtLine(line)
+
+        }
+    }
+    function openSelectionLocationExternally(){
+        if ( !selection.length )
+            return
+        var location = logList.model.locationAt(root.selection[root.selection.length - 1])
+        if ( !location.length )
+            return
+
+        var line = parseInt(location.substr(location.lastIndexOf(':') + 1))
+        var file = location.substr(0, location.lastIndexOf(':'))
+        if ( file.startsWith('memory') )
+            file = 'file' + file.substr(6)
+        Qt.openUrlExternally(file)
+    }
+
     function reset(){
+        clearSelection()
         lk.log.clearValues()
     }
 
@@ -43,14 +102,35 @@ Pane{
         return lk.layers.workspace.panes.createPane('log', paneState, [root.width, root.height])
     }
 
+    property Clipboard clipboard: Clipboard{}
+
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     property Component usedDelegate : prefixVisible ? prefixDelegate : noPrefixDelegate
 
     property Component noPrefixDelegate : Item{
         width: logList.model.width
-        height: msg.height + 2
-        children: [msg]
+        height: msg.height + 5
+        children: [bottomBorder, msg, locationItem]
+
+        property Rectangle bottomBorder: Rectangle{
+            anchors.bottom: parent ? parent.bottom : undefined
+            width: logList.model.width
+            height: 1
+            color: root.currentTheme.colorScheme.middleground
+        }
+        property Text locationItem: Text{
+            anchors.right: parent.right
+            anchors.bottom: parent.bottom
+            text: {
+                var fpos = location.lastIndexOf('/')
+                if ( fpos === -1 )
+                    fpos = location.lastIndexOf('\\')
+                return location.substr(fpos + 1)
+            }
+            color: root.currentTheme.smallLabelStyle.color
+            font: root.currentTheme.smallLabelStyle.font
+        }
     }
 
     property Component prefixDelegate : Item{
@@ -164,7 +244,7 @@ Pane{
             anchors.left: parent.left
             anchors.leftMargin: prefixSearchBox.visible ? root.prefixWidth + 5 : 20
             anchors.right: tagSearchBox.visible ? tagSearchBox.left : parent.right
-            anchors.rightMargin: tagSearchBox.visible ? 10 : 90
+            anchors.rightMargin: tagSearchBox.visible ? 10 : 120
             anchors.top: parent.top
             anchors.topMargin: 3
             anchors.fill: undefined
@@ -281,19 +361,19 @@ Pane{
         }
     }
 
-    PaneMenu{
+    Workspace.PaneMenu{
         id: logMenu
         anchors.right: root.right
         anchors.topMargin: 30
         anchors.top: root.top
 
-        style: root.currentTheme.paneMenuStyle
+        style: root.currentTheme.popupMenuStyle
 
         width: 180
 
         Behavior on opacity{ NumberAnimation{ duration: 200 } }
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             id: splitHorizontally
             text: qsTr("Split Horizontally")
             onClicked : {
@@ -304,7 +384,7 @@ Pane{
             }
         }
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             id: splitVertically
             text: qsTr("Split Vertically")
             onClicked : {
@@ -315,7 +395,7 @@ Pane{
             }
         }
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             id: moveToNewWindow
             text: qsTr("Move to New Window")
             onClicked : {
@@ -324,7 +404,7 @@ Pane{
             }
         }
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             id: removeLog
             text: qsTr("Remove Pane")
             onClicked : {
@@ -373,8 +453,9 @@ Pane{
             model: lk.log
             anchors.fill: parent
             delegate: root.usedDelegate
+            objectName: "logList"
 
-            onWidthChanged: lk.log.width = width - root.prefixWidth - root.prefixPadding
+            onWidthChanged: lk.log.width = width - (root.prefixVisible ? root.prefixWidth : 0) - root.prefixPadding
 
             Connections{
                 target: lk.log
@@ -384,6 +465,72 @@ Pane{
                     root.itemAdded()
                 }
             }
+            Component.onCompleted: {
+                lk.log.style = {
+                    infoColor: root.currentTheme.monoTextStyle.color,
+                    warnColor: root.currentTheme.colorScheme.warningForeground,
+                    errorColor: root.currentTheme.colorScheme.errorForeground,
+                    font: root.currentTheme.monoTextStyle.font.family,
+                    fontSize: root.currentTheme.monoTextStyle.font.pixelSize
+                }
+            }
+        }
+
+    }
+
+    MouseArea{
+        id: logArea
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.rightMargin: 50
+        anchors.top: logViewHeader.bottom
+        anchors.bottom: parent.bottom
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: {
+            if ( mouse.button === Qt.RightButton ){
+                var index = logList.indexAt(mouseX, mouseY + logScroll.flickableItem.contentY)
+                if ( index > -1 ){
+                    if ( root.selection.length < 2 ){
+                        root.clearSelection()
+                        var item = logList.itemAtIndex(index)
+                        var bb = item.bottomBorder
+                        bb.height = item.height
+                        root.__appendToSelection(index)
+                    }
+                    if ( lk.layers.workspace ){
+                        lk.layers.workspace.panes.openContextMenu(logList, root)
+                    }
+                }
+            } else if( mouse.button === Qt.LeftButton ){
+                var index = logList.indexAt(mouseX, mouseY + logScroll.flickableItem.contentY)
+                if ( index > -1 ){
+                    if ( (mouse.modifiers & Qt.ShiftModifier) && root.selection.length > 0 ){
+                        var prevSelection = root.selection[root.selection.length - 1]
+                        var from = prevSelection > index ? index : prevSelection
+                        var to   = prevSelection > index ? prevSelection : index
+                        for ( var i = from; i <= to; ++i ){
+                            var item = logList.itemAtIndex(i)
+                            var bb = item.bottomBorder
+                            bb.height = item.height
+                            root.__appendToSelection(i)
+                        }
+                    } else {
+                        if ( !(mouse.modifiers & Qt.ControlModifier) ){
+                            root.clearSelection()
+                        }
+                        var item = logList.itemAtIndex(index)
+                        var bb = item.bottomBorder
+                        bb.height = item.height
+                        root.__appendToSelection(index)
+                    }
+                }
+            }
+        }
+        onDoubleClicked: {
+            if ( mouse.modifiers & Qt.AltModifier )
+                root.openSelectionLocationExternally()
+            else
+                root.openSelectionLocation()
         }
     }
 

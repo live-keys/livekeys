@@ -1,12 +1,12 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/componentdeclaration.h \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
     $$PWD/metainfo.h \
-    $$PWD/qmlact.h \
+    $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
-    $$PWD/qmlstreamfilter.h \
     $$PWD/qmlstreamiterator.h \
     $$PWD/qmlwritablestream.h \
     $$PWD/settings.h \
@@ -20,13 +20,9 @@ HEADERS += \
     $$PWD/viewcontext.h \
     $$PWD/lvviewglobal.h \
     $$PWD/viewengine.h \
-    $$PWD/group.h \
-    $$PWD/groupcollector.h \
-    $$PWD/groupcollectorentry.h \
     $$PWD/memory.h \
     $$PWD/shared.h \
-    $$PWD/workerthread.h \
-    $$PWD/workerthread_p.h \
+    $$PWD/qmlclipboard.h \
     $$PWD/qmlvariantlist.h \
     $$PWD/qmlvariantlistmodel.h \
     $$PWD/qmlobjectlist.h \
@@ -37,24 +33,23 @@ HEADERS += \
     $$PWD/windowlayer.h \
     $$PWD/qmlpropertywatcher.h \
     $$PWD/qmlstream.h \
+    $$PWD/qmlworkerpool.h \
+    $$PWD/qmlworkerpool_p.h \
+    $$PWD/group.h \
     $$PWD/sharedmemoryreadworker.h \
-    $$PWD/sharedmemorywriteworker.h \
-    $$PWD/qmlcontainer.h \
-    $$PWD/qmlopening.h \
-    $$PWD/qmlfollowup.h \
-    $$PWD/qmlclipboard.h
-
+    $$PWD/sharedmemorywriteworker.h
 
 SOURCES += \
+    $$PWD/componentdeclaration.cpp \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
     $$PWD/metainfo.cpp \
-    $$PWD/qmlact.cpp \
+    $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
-    $$PWD/qmlstreamfilter.cpp \
     $$PWD/qmlstreamiterator.cpp \
     $$PWD/qmlwritablestream.cpp \
     $$PWD/settings.cpp \
+    $$PWD/qmlclipboard.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogmodel.cpp \
@@ -63,12 +58,9 @@ SOURCES += \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \
-    $$PWD/group.cpp \
-    $$PWD/groupcollector.cpp \
-    $$PWD/groupcollectorentry.cpp \
     $$PWD/memory.cpp \
+    $$PWD/group.cpp \
     $$PWD/shared.cpp \
-    $$PWD/workerthread.cpp \
     $$PWD/qmlvariantlist.cpp \
     $$PWD/qmlvariantlistmodel.cpp \
     $$PWD/qmlobjectlist.cpp \
@@ -78,10 +70,7 @@ SOURCES += \
     $$PWD/windowlayer.cpp \
     $$PWD/qmlpropertywatcher.cpp \
     $$PWD/qmlstream.cpp \
+    $$PWD/qmlworkerpool.cpp \
     $$PWD/sharedmemoryreadworker.cpp \
-    $$PWD/sharedmemorywriteworker.cpp \
-    $$PWD/qmlcontainer.cpp \
-    $$PWD/qmlopening.cpp \
-    $$PWD/qmlfollowup.cpp \
-    $$PWD/qmlclipboard.cpp
+    $$PWD/sharedmemorywriteworker.cpp
 

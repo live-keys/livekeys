@@ -35,7 +35,7 @@ void ImageSegment::openFile(){
         return;
 
     setLabel(m_file.mid(m_file.lastIndexOf('/') + 1));
-    *m_image->cvMat() = cv::imread(m_file.toStdString());
+    *m_image->internalPtr() = cv::imread(m_file.toStdString());
 }
 
 void ImageSegment::serialize(QQmlEngine *engine, MLNode &node) const{

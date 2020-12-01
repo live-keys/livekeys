@@ -67,7 +67,7 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
         m_glFunctions->glClearColor(0, 0, 0, 0);
         m_glFunctions->glClear(GL_COLOR_BUFFER_BIT);
 
-        Mat* renderSource = image->cvMat();
+        Mat* renderSource = image->internalPtr();
         int cellHeight = ( font.pixelSize() + 2 ) * renderSource->channels() + 4;
         int cellWidth = 4 + numberWidth * ( font.pixelSize() / 3 * 2 );
         if ( equalAspectRatio ){
@@ -246,7 +246,7 @@ QSGNode *QMatRead::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNode
  */
 void QMatRead::calculateImplicitSize(){
     if ( m_input ){
-        Mat* renderSource = m_input->cvMat();
+        Mat* renderSource = m_input->internalPtr();
         if ( renderSource ){
             int cellHeight = ( m_font.pixelSize() + 2 ) * renderSource->channels() + 4;
             int cellWidth = 4 + m_numberWidth * ( m_font.pixelSize() / 3 * 2 );

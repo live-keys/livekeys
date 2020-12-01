@@ -66,11 +66,11 @@ QDMatchVector* QDescriptorMatcher::matches(){
 void QDescriptorMatcher::add(QMat* descriptors){
     if ( !descriptors )
         return;
-    if ( descriptors->cvMat()->cols == 0 )
+    if ( descriptors->internalPtr()->cols == 0 )
         return;
     if ( m_matcher ){
         std::vector<cv::Mat> descriptorVector;
-        descriptorVector.push_back(*descriptors->cvMat());
+        descriptorVector.push_back(*descriptors->internalPtr());
         m_matcher->add(descriptorVector);
     } else {
         qWarning("Descriptor Matcher Add: No matcher defined. You need to initialize the matcher manually.");
@@ -110,9 +110,9 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
             try{
                 if ( matches->matches().size() != 1)
                     matches->matches().resize(1);
-                if ( queryDescriptors->cvMat()->cols == 0 )
+                if ( queryDescriptors->internalPtr()->cols == 0 )
                     return;
-                m_matcher->match(*queryDescriptors->cvMat(), matches->matches()[0] );
+                m_matcher->match(*queryDescriptors->internalPtr(), matches->matches()[0] );
                 m_matches->setType(QDMatchVector::BEST_MATCH);
             } catch ( cv::Exception& e ){
                 qCritical("Descriptor matcher: %s", e.what());
@@ -127,9 +127,9 @@ void QDescriptorMatcher::match(QMat* queryDescriptors, QDMatchVector* matches){
 void QDescriptorMatcher::knnMatch(QMat *queryDescriptors, QDMatchVector *matches, int k){
     if ( m_matcher ){
         try{
-            if ( queryDescriptors->cvMat()->cols == 0 )
+            if ( queryDescriptors->internalPtr()->cols == 0 )
                 return;
-            m_matcher->knnMatch(*queryDescriptors->cvMat(), matches->matches(), k);
+            m_matcher->knnMatch(*queryDescriptors->internalPtr(), matches->matches(), k);
             m_matches->setType(QDMatchVector::KNN);
         } catch ( cv::Exception& e ){
             qCritical("Descriptor matcher knn match: %s", qPrintable(e.what()));

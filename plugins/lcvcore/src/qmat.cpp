@@ -132,13 +132,6 @@ QMat::~QMat(){
     lv::Memory::free(this, m_internal);
 }
 
-/**
- * \brief Returns the matrix internal data.
- */
-const cv::Mat &QMat::data() const{
-    return *m_internal;
-}
-
 QMat* QMat::m_nullMat = nullptr;
 
 /**
@@ -206,6 +199,7 @@ const cv::Mat &QMat::internal() const{
 cv::Mat &QMat::internal(){
     return *m_internal;
 }
+
 /**
 *\brief Memory allocation
 */
@@ -214,7 +208,7 @@ void QMat::recycleSize(int){
 }
 
 /*!
-  \fn cv::Mat* QMat::cvMat()
+  \fn cv::Mat* QMat::internalPtr()
   \brief Returns the contained open cv mat.
  */
 

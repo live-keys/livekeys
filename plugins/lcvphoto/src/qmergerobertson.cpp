@@ -41,7 +41,7 @@ void QMergeRobertson::filter(){
             for (int i = 0; i < list->itemCount(); ++i){
                 QMat* m = qobject_cast<QMat*>(list->itemAt(i));
                 if (!m) return std::vector<cv::Mat>();
-                result.push_back(m->data());
+                result.push_back(m->internal());
             }
             return result;
         };
@@ -50,7 +50,7 @@ void QMergeRobertson::filter(){
         for ( int i = 0; i < m_times.size(); ++i )
             times.push_back(m_times[i]);
 
-        m_mergeRobertson->process(asVector(m_input), *m_output->cvMat(), times, *m_response->cvMat());
+        m_mergeRobertson->process(asVector(m_input), *m_output->internalPtr(), times, *m_response->internalPtr());
 
         emit outputChanged();
     }

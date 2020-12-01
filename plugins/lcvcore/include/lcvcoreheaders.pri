@@ -7,4 +7,5 @@ HEADERS += \
     $$PWD/qmatstate.h \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/qmatext.h \
+    $$PWD/qumat.h \
     $$PWD/qwritablemat.h

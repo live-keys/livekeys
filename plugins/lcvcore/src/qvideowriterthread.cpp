@@ -110,7 +110,7 @@ void QVideoWriterThread::open(){
 
 void QVideoWriterThread::write(QMat *mat){
     m_mutex.lock();
-    mat->cvMat()->copyTo(m_data);
+    mat->internalPtr()->copyTo(m_data);
     m_hasDataToWrite = true;
     m_hasData.wakeAll();
     m_mutex.unlock();

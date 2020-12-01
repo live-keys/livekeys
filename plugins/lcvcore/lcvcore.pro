@@ -16,6 +16,7 @@ linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
+linkLocalPlugin(base, base, base/baseqml)
 linkLocalPlugin(live, live)
 linkLocalPlugin(timeline, timeline)
 
@@ -24,7 +25,6 @@ linkLocalPlugin(timeline, timeline)
 unix:!macx{
     QMAKE_LFLAGS += \
 	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
-
 
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
     QMAKE_EXTRA_TARGETS    += createlinkdir

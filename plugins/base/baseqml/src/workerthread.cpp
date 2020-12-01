@@ -49,7 +49,7 @@ WorkerThread::~WorkerThread(){
     delete m_d;
 }
 
-void WorkerThread::postWork(QmlStreamFilter *caller, const QVariant &value, const QList<Shared *> objectTransfers){
+void WorkerThread::postWork(QmlStreamFilter *caller, const QmlWorkerPool::TransferArguments &arguments){
     if ( m_isWorking ){
         m_toExecute.removeOne(caller);
         m_toExecute.prepend(caller);
@@ -58,16 +58,16 @@ void WorkerThread::postWork(QmlStreamFilter *caller, const QVariant &value, cons
 
     m_isWorking = true;
 
-    for ( Shared* obj : objectTransfers ){
+    for ( Shared* obj : arguments.transfers ){
         obj->moveToThread(m_thread);
     }
 
     int index = m_calls.indexOf(caller);
 
-    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, QVariantList() << value));
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, arguments.values));
 }
 
-void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QList<Shared *> objectTransfers){
+void WorkerThread::postWork(QmlAct *caller, const QmlWorkerPool::TransferArguments &arguments){
     if ( m_isWorking ){
         m_toExecute.removeOne(caller);
         m_toExecute.prepend(caller);
@@ -76,7 +76,7 @@ void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QL
 
     m_isWorking = true;
 
-    for ( Shared* obj : objectTransfers ){
+    for ( Shared* obj : arguments.transfers ){
         obj->moveToThread(m_thread);
     }
 
@@ -93,7 +93,7 @@ void WorkerThread::postWork(QmlAct *caller, const QVariantList &values, const QL
         m_specialFunctions.insert(index, qMakePair(oclone, caller->run().property(1).toString()));
     }
 
-    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, values));
+    QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, arguments.values));
 }
 
 void WorkerThread::start(){
@@ -136,6 +136,7 @@ bool WorkerThread::event(QEvent *ev){
         args.append(Shared::transfer(v, m_engine));
     }
 
+    // Actual call
     QJSValue r = m_actFunctions[ce->m_callerIndex].call(args);
 
     QList<Shared*> robj;

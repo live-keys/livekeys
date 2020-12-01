@@ -6,7 +6,13 @@
 #include "live/exception.h"
 #include "live/shared.h"
 #include "live/visuallogqt.h"
+#include "live/componentdeclaration.h"
+#include "live/documentqmlinfo.h"
+#include "live/viewcontext.h"
+#include "live/project.h"
 
+#include <QQmlContext>
+#include <QQmlEngine>
 #include <QMetaObject>
 #include <QMetaProperty>
 #include <QQmlProperty>
@@ -19,11 +25,15 @@ namespace lv{
 QmlAct::QmlAct(QObject *parent)
     : QObject(parent)
     , m_isComponentComplete(false)
-    , m_workerThread(nullptr)
+    , m_worker(nullptr)
+    , m_source(nullptr)
+    , m_currentTask(nullptr)
+    , m_execAfterCurrent(false)
 {
 }
 
 QmlAct::~QmlAct(){
+    delete m_source;
 }
 
 void QmlAct::componentComplete(){
@@ -95,29 +105,81 @@ void QmlAct::setResult(const QJSValue &result){
     emit resultChanged();
 }
 
-void QmlAct::exec(){
-    if ( m_workerThread ){
+void QmlAct::extractSource(ViewEngine* ve){
+    if ( !m_source ){
 
-        if ( m_workerThread->isWorking() ){
-            m_workerThread->postWork(this, QVariantList(), QList<Shared*>());
+        ComponentDeclaration cd = ve->rootDeclaration(this);
+        if ( cd.id().isEmpty() ){
+            THROW_EXCEPTION(Exception, "Act: Act requires id to be used in workers.", Exception::toCode("~Id"));
+        }
+        if ( cd.url().isEmpty() ){
+            THROW_EXCEPTION(Exception, "Act: Failed ot find path for act " + cd.id().toStdString() + ".", Exception::toCode("~Id"));
+        }
+
+        m_source = new QmlAct::RunSource(cd);
+
+        Project* project = qobject_cast<lv::Project*>(
+            lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
+        );
+        if ( !project ){
+            delete m_source;
+            m_source = nullptr;
+            THROW_EXCEPTION(Exception, "Failed to load 'project' property from context.", Exception::toCode("~Id"));
+        }
+
+        QString path = m_source->declarationLocation.url().toLocalFile();
+
+        DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(path);
+        QString code = QString::fromStdString(project->lockedFileIO()->readFromFile(path.toStdString()));
+        dqi->parse(code);
+        dqi->createRanges();
+
+        m_source->source = dqi->propertySourceFromObjectId(m_source->declarationLocation.id(), "run").toUtf8();
+        m_source->imports = DocumentQmlInfo::Import::join(dqi->imports()).toUtf8();
+    }
+}
+
+void QmlAct::exec(){
+    if ( m_worker ){
+
+        if ( m_currentTask ){ // is working
+            m_execAfterCurrent = true;
             return;
         }
 
-        QVariantList args;
+        ViewEngine* ve = ViewEngine::grab(this);
 
-        QList<Shared*> objectTransfer;
+        try {
+            extractSource(ve);
 
-        for ( auto it = m_argList.begin(); it != m_argList.end(); ++it ){
-            QJSValue& a = *it;
-            args.append(Shared::transfer(a, objectTransfer));
+            QmlWorkerPool::TransferArguments transferArguments;
+
+            for ( auto it = m_argList.begin(); it != m_argList.end(); ++it ){
+                QJSValue& a = *it;
+                transferArguments.values.append(Shared::transfer(a, transferArguments.transfers));
+            }
+
+            for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
+                QVariant v = it->second.read();
+                transferArguments.values[it->first] = Shared::transfer(v, transferArguments.transfers);
+            }
+
+            m_currentTask = new QmlWorkerPool::QmlFunctionTask(
+                m_source->declarationLocation.url().toLocalFile(),
+                m_source->declarationLocation.id(),
+                m_source->imports,
+                m_source->source,
+                transferArguments,
+                this
+            );
+            m_worker->start(m_currentTask);
+
+        } catch (lv::Exception& e) {
+
+            QmlError(ve, e, this).jsThrow();
+            return;
+
         }
-
-        for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
-            QVariant v = it->second.read();
-            args[it->first] = Shared::transfer(v, objectTransfer);
-        }
-
-        m_workerThread->postWork(this, args, objectTransfer);
     } else {
         ViewEngine* ve = ViewEngine::grab(this);
         if ( !ve ){
@@ -147,6 +209,33 @@ void QmlAct::exec(){
             setResult(r);
         }
     }
+}
+
+bool QmlAct::event(QEvent *ev){
+    QmlWorkerPool::TaskReadyEvent* tr = dynamic_cast<QmlWorkerPool::TaskReadyEvent*>(ev);
+    if (!tr)
+        return QObject::event(ev);
+
+    auto ftask = static_cast<QmlWorkerPool::QmlFunctionTask*>(tr->task());
+
+    if ( ftask->isErrored() ){
+        QmlError qe(ViewContext::instance().engine(), ftask->error(), this);
+        qe.jsThrow();
+    }
+
+    ViewEngine* ve = ViewEngine::grab(this);
+
+    setResult(Shared::transfer(ftask->result(), ve->engine()));
+
+    delete m_currentTask;
+    m_currentTask = nullptr;
+    if ( m_execAfterCurrent ){
+        m_execAfterCurrent = false;
+        exec();
+    }
+
+
+    return true;
 }
 
 void QmlAct::setRun(QJSValue run){
@@ -180,7 +269,21 @@ void QmlAct::setReturns(QString returns){
     }
 
     m_returns = returns;
-    emit returnsChanged(m_returns);
+    emit returnsChanged();
+}
+
+
+void lv::QmlAct::setWorker(QmlWorkerInterface *worker){
+    if ( m_isComponentComplete ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set run method after component is complete.", Exception::toCode("~ActFnConfig"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+    if (m_worker == worker)
+        return;
+
+    m_worker = worker;
+    emit workerChanged();
 }
 
 }// namespace

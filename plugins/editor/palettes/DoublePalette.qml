@@ -56,7 +56,7 @@ CodePalette{
             value: 0
             onValueChanged: {
                 var roundValue = intSlider.value + fractionalSlider.value
-                roundValue = roundValue.toFixed(2)
+                roundValue = Math.round(roundValue * 100) / 100
                 palette.value = roundValue
                 if ( !palette.isBindingChange() )
                     editFragment.write(palette.value, codeHandler)
@@ -95,7 +95,7 @@ CodePalette{
             value: 0
             onValueChanged: {
                 var roundValue = intSlider.value + fractionalSlider.value
-                roundValue = roundValue.toFixed(2)
+                roundValue = Math.round(roundValue * 100) / 100
                 if (fractionalSlider.value !== 1.0)
                     palette.value = roundValue
 

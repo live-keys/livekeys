@@ -22,6 +22,7 @@ import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0
+import workspace 1.0 as Workspace
 import live 1.0
 
 Item{
@@ -403,7 +404,13 @@ Item{
                     "help" : [root.help, "Help"]
                 })
 
-                root.paneSplitterColor = layer.themes.current.paneSplitterColor
+                removePaneBox.style.backgroundColor = layer.themes.current.colorScheme.backgroundOverlay
+                removePaneBox.style.borderColor = layer.themes.current.colorScheme.backgroundBorder
+                removePaneBox.style.borderHighlightColor = layer.themes.current.colorScheme.error
+                removePaneBox.style.iconColor = layer.themes.current.colorScheme.topIconColor
+                removePaneBox.style.iconColorAlternate = layer.themes.current.colorScheme.topIconColorAlternate
+                paneSplitterColor = layer.themes.current.paneSplitterColor
+                contextMenu.style = layer.themes.current.popupMenuStyle
             }
         }
     }
@@ -639,11 +646,11 @@ Item{
             if ( data.pane === currentPane )
                 return
 
+            var clone = currentPane
+            root.panes.removePane(currentPane)
+
             var parentSplitter = data.pane.parentSplitter
             var paneIndex = data.pane.parentSplitterIndex()
-            var clone = currentPane
-
-            root.panes.removePane(currentPane)
 
             if ( location === paneDropArea.topPosition ){
                 root.panes.splitPaneVerticallyBeforeWith(parentSplitter, paneIndex, clone)
@@ -653,6 +660,52 @@ Item{
                 root.panes.splitPaneVerticallyWith(parentSplitter, paneIndex, clone)
             } else if ( location === paneDropArea.leftPosition ){
                 root.panes.splitPaneHorizontallyBeforeWith(parentSplitter, paneIndex, clone)
+            }
+        }
+    }
+
+
+    Rectangle{
+        id: removePaneBox
+        width: 30
+        height: 30
+        anchors.top: parent.top
+        anchors.topMargin: 3
+        anchors.right: parent.right
+        anchors.rightMargin: 5
+
+        property QtObject style: QtObject{
+            property color backgroundColor: '#0a1014'
+            property color borderColor: '#232f37'
+            property color borderHighlightColor: '#ba2020'
+            property color iconColor: '#b3bdcc'
+            property color iconColorAlternate: '#3f4449'
+        }
+
+        color: style.backgroundColor
+        border.color: removePaneDropArea.containsDrag ? style.borderHighlightColor : style.borderColor
+        border.width: 1
+        radius: 2
+        visible: paneDropArea.visible
+
+        Workspace.TrashIcon{
+            anchors.centerIn: parent
+            color: parent.style.iconColor
+            alternateColor: parent.style.iconColorAlternate
+            width: 15
+            height: 15
+        }
+
+        DropArea{
+            id: removePaneDropArea
+            anchors.fill: parent
+            keys: ["text/plain"]
+            onDropped: {
+                if ( paneDropArea.currentPane ){
+                    root.panes.clearPane(paneDropArea.currentPane)
+                    paneDropArea.currentPane = null
+                }
+                drag.accepted = true
             }
         }
     }

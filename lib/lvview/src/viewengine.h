@@ -40,6 +40,7 @@ namespace lv{
 class Memory;
 class ErrorHandler;
 class PackageGraph;
+class ComponentDeclaration;
 class IncubationController;
 
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
@@ -142,6 +143,8 @@ public:
     MetaInfo::Ptr typeInfo(const QByteArray& typeName) const;
     MetaInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
+    ComponentDeclaration rootDeclaration(QObject* object) const;
+
     static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
 
     static void registerBaseTypes(const char* uri);
@@ -169,6 +172,9 @@ public:
     ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
     ComponentResult::Ptr createObject(const QString& filePath, QObject* parent);
     ComponentResult::Ptr createObject(const QUrl& filePath, QObject* parent);
+    ComponentResult::Ptr createObject(const QString& filePath, const QByteArray& source, QObject* parent);
+
+    ComponentResult::Ptr compileJsModule(const QByteArray &imports, const QByteArray &source, const QString& moduleFile);
 
 signals:
     /** Signals before compiling a new object. */

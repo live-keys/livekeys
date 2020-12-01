@@ -11,6 +11,7 @@ namespace lv{
 
 class ViewEngine;
 class RunnableContainer;
+class QmlBuild;
 
 namespace el{
     class Engine;

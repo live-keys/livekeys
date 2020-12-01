@@ -20,26 +20,23 @@
 #include "live/incubationcontroller.h"
 #include "live/packagegraph.h"
 #include "live/applicationcontext.h"
+#include "live/componentdeclaration.h"
 
-#include "qmlcontainer.h"
-#include "qmlact.h"
-#include "qmlact.h"
-#include "qmlfollowup.h"
-#include "qmlopening.h"
-#include "group.h"
-#include "groupcollector.h"
-#include "layer.h"
-#include "windowlayer.h"
-#include "qmlstream.h"
-#include "qmlwritablestream.h"
-#include "qmlstreamfilter.h"
-#include "qmlstreamiterator.h"
-#include "qmlclipboard.h"
 #include "live/settings.h"
 #include "live/memory.h"
 #include "live/visuallogmodel.h"
 #include "live/visuallogqmlobject.h"
 #include "live/qmlerror.h"
+
+#include "group.h"
+#include "layer.h"
+#include "windowlayer.h"
+#include "qmlstream.h"
+#include "qmlwritablestream.h"
+#include "qmlstreamiterator.h"
+#include "qmlclipboard.h"
+
+#include "private/qqmlcontext_p.h"
 
 #include <QQmlComponent>
 #include <QQmlContext>
@@ -249,6 +246,25 @@ MetaInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
     return typeInfo(mo);
 }
 
+ComponentDeclaration ViewEngine::rootDeclaration(QObject *object) const{
+    QQmlContext* ctx = qmlContext(object);
+    QQmlContextPrivate* pctx = QQmlContextPrivate::get(ctx);
+
+    QUrl url = pctx->data->url();
+    QString objectId = pctx->data->findObjectId(object);
+
+    QQmlContextData* child = pctx->data->childContexts;
+    while (child) {
+        if ( !child->url().isEmpty() ){
+            url = child->url();
+            objectId = child->findObjectId(object);
+        }
+        child = child->nextChild;
+    }
+
+    return ComponentDeclaration(objectId, url);
+}
+
 /**
  * \brief Generates a message for uncreatable types that are available as properties
  */
@@ -261,12 +277,7 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  */
 void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::ErrorHandler>(          uri, 1, 0, "ErrorHandler");
-    qmlRegisterType<lv::QmlContainer>(          uri, 1, 0, "Container");
-    qmlRegisterType<lv::QmlAct>(                uri, 1, 0, "Act");
-    qmlRegisterType<lv::QmlOpening>(            uri, 1, 0, "Opening");
-    qmlRegisterType<lv::QmlFollowUp>(           uri, 1, 0, "FollowUp");
     qmlRegisterType<lv::Group>(                 uri, 1, 0, "Group");
-    qmlRegisterType<lv::GroupCollector>(        uri, 1, 0, "GroupCollector");
     qmlRegisterType<lv::QmlVariantList>(        uri, 1, 0, "VariantList");
     qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
@@ -274,12 +285,13 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::WindowLayer>(           uri, 1, 0, "WindowLayer");
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
-    qmlRegisterType<lv::QmlStreamFilter>(       uri, 1, 0, "StreamFilter");
     qmlRegisterType<lv::QmlWritableStream>(     uri, 1, 0, "WritableStream");
     qmlRegisterType<lv::QmlStreamIterator>(     uri, 1, 0, "StreamIterator");
 
-    qmlRegisterUncreatableType<lv::Shared>(     uri, 1, 0, "Shared", "Shared is of abstract type.");
-    qmlRegisterUncreatableType<lv::Layer>(      uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::Shared>(
+        uri, 1, 0, "Shared", "Shared is of abstract type.");
+    qmlRegisterUncreatableType<lv::Layer>(
+        uri, 1, 0, "Layer", "Layer is of abstract type.");
 
     qmlRegisterUncreatableType<lv::ViewEngine>(
         uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "lk.engine"));
@@ -563,12 +575,24 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
         return result;
     }
 
+    QByteArray contentBytes = f.readAll();
+
+    return createObject(f.fileName(), contentBytes, parent);
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent){
+    if ( filePath.isLocalFile() ){
+        return createObject(filePath.toLocalFile(), parent);
+    }
+
+    return ViewEngine::ComponentResult::create();
+}
+
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, const QByteArray &source, QObject *parent){
     ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
 
     result->component = new QQmlComponent(m_engine, parent);
-
-    QByteArray contentBytes = f.readAll();
-    result->component->setData(contentBytes, QUrl::fromLocalFile(f.fileName()));
+    result->component->setData(source, QUrl::fromLocalFile(filePath));
 
     QList<QQmlError> errors = result->component->errors();
     if ( errors.size() ){
@@ -583,7 +607,7 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
             this,
             CREATE_EXCEPTION(
                 lv::Exception,
-                "Component: Component is not ready:" + f.fileName().toStdString(),
+                "Component: Component is not ready:" + filePath.toStdString(),
                 Exception::toCode("~Component"))
         ));
         return result;
@@ -600,12 +624,16 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
     return result;
 }
 
-ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent){
-    if ( filePath.isLocalFile() ){
-        return createObject(filePath.toLocalFile(), parent);
-    }
+ViewEngine::ComponentResult::Ptr ViewEngine::compileJsModule(const QByteArray &imports, const QByteArray &source, const QString &moduleFile){
+    QByteArray qtqmlImport = imports.contains("import QtQml 2.3") ? "" : "import QtQml 2.3\n";
 
-    return ViewEngine::ComponentResult::create();
+    QByteArray objectSource =
+        qtqmlImport + imports + "\n" +
+        "QtObject{\n" +
+        "  property var exports: " + source +
+        "\n}\n";
+
+    return createObject(moduleFile, objectSource, nullptr);
 }
 
 QJSValue ViewEngine::unwrapError(QJSValue error) const{

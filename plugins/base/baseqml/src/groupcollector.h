@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include <QQmlComponent>
-#include "group.h"
+#include "live/group.h"
 #include "groupcollectorentry.h"
 
 namespace lv{

@@ -109,12 +109,12 @@ void QImageFile::loadImage(){
         lv::Shared::ownJs(loose);
 
         QMat* newOutput = new QMat;
-        *newOutput->cvMat() = temp;
+        *newOutput->internalPtr() = temp;
 
         setOutput(newOutput);
 
-        setImplicitWidth(output()->cvMat()->size().width);
-        setImplicitHeight(output()->cvMat()->size().height);
+        setImplicitWidth(output()->internalPtr()->size().width);
+        setImplicitHeight(output()->internalPtr()->size().height);
         emit outputChanged();
         update();
     }

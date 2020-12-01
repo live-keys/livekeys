@@ -41,14 +41,14 @@ void QTonemap::initializeTonemapper(cv::Ptr<cv::Tonemap> tonemapper){
 }
 
 void QTonemap::process(){
-    if ( m_tonemapper && !m_input->data().empty() && isComponentComplete() ){
-        m_tonemapper->process(m_input->data(), m_store);
+    if ( m_tonemapper && !m_input->internal().empty() && isComponentComplete() ){
+        m_tonemapper->process(m_input->internal(), m_store);
 //        m_store = m_store * 3;
 
-        m_store.convertTo(*output()->cvMat(), CV_8UC3, 255);
+        m_store.convertTo(*output()->internalPtr(), CV_8UC3, 255);
 
-        setImplicitWidth(output()->data().cols);
-        setImplicitHeight(output()->data().rows);
+        setImplicitWidth(output()->internal().cols);
+        setImplicitHeight(output()->internal().rows);
 
         emit outputChanged();
         update();

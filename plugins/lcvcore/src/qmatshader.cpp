@@ -81,24 +81,24 @@ bool QMatShader::loadTexture(QMat *mat, int index, bool linearFilter){
     m_glFunctions.glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,     GL_CLAMP_TO_EDGE);
 
     // Mat step
-    m_glFunctions.glPixelStorei(GL_UNPACK_ALIGNMENT, (mat->cvMat()->step & 3) ? 1 : 4);
+    m_glFunctions.glPixelStorei(GL_UNPACK_ALIGNMENT, (mat->internalPtr()->step & 3) ? 1 : 4);
 
-    if ( !mat->cvMat()->empty() )
-        m_glFunctions.glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->cvMat()->step / mat->cvMat()->elemSize()) );
+    if ( !mat->internalPtr()->empty() )
+        m_glFunctions.glPixelStorei(GL_UNPACK_ROW_LENGTH, (GLint)( mat->internalPtr()->step / mat->internalPtr()->elemSize()) );
 
-    GLint colorFormat = mat->cvMat()->channels() == 3
-            ? GL_RGB  : mat->cvMat()->channels() == 4
+    GLint colorFormat = mat->internalPtr()->channels() == 3
+            ? GL_RGB  : mat->internalPtr()->channels() == 4
             ? GL_RGBA : GL_LUMINANCE;
 
     m_glFunctions.glTexImage2D(
          GL_TEXTURE_2D, 0,          // Pyramid level (for mip-mapping) - 0 is the top level
          colorFormat,               // Internal colour format to convert to
-         mat->cvMat()->cols,         // Width
-         mat->cvMat()->rows,         // Height
+         mat->internalPtr()->cols,         // Width
+         mat->internalPtr()->rows,         // Height
          0,                         // Border
          colorFormat,               // Input image format (i.e. GL_RGB, GL_RGBA, GL_BGR etc.)0x80E0
          GL_UNSIGNED_BYTE,          // Image data type
-         mat->cvMat()->ptr()         // The actual image data itself
+         mat->internalPtr()->ptr()         // The actual image data itself
     );
     m_glFunctions.glPixelStorei(GL_UNPACK_ALIGNMENT,  4);
     m_glFunctions.glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);

@@ -1,5 +1,5 @@
 #include "groupcollector.h"
-#include "group.h"
+#include "live/group.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"

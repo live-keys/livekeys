@@ -38,6 +38,9 @@ Theme{
 
         property color error: '#ba2020'
         property color warning: '#b99311'
+
+        property color warningForeground: '#fcd612'
+        property color errorForeground: '#ff4e4e'
     }
 
     // Icons
@@ -55,31 +58,36 @@ Theme{
     property string topOnSaveModeIcon : "qrc:/images/top-icon-mode-onsave.png"
     property string topDisabledModeIcon: "qrc:/images/top-icon-mode-disabled.png"
 
-    // Panes
+    // Menus
 
-    property QtObject paneMenuStyle: QtObject{
-        property color backgroundColor: colorScheme.middleground
-        property double radius: 0
+    property QtObject popupMenuStyle: PopupMenuStyle{
+        backgroundColor: colorScheme.background
+        highlightBackgroundColor: colorScheme.middlegroundOverlay
+        borderColor: colorScheme.backgroundBorder
+        borderWidth: 1
+        radius: 2
 
-        property QtObject itemStyle: TextStyle{
+        textStyle: TextStyle{
             color: colorScheme.foregroundFaded
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
-                weight: Font.Light,
+                weight: Font.Normal,
                 italic: false,
                 pixelSize: 11
             })
         }
-        property QtObject itemHoverStyle: TextStyle{
+        highlightTextStyle: TextStyle{
             color: Qt.lighter(colorScheme.foregroundFaded)
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
-                weight: Font.Light,
+                weight: Font.Normal,
                 italic: false,
                 pixelSize: 11
             })
         }
     }
+
+    // Panes
 
     property color paneBackground: colorScheme.background
     property color panebackgroundOverlay: colorScheme.backgroundOverlay
@@ -118,6 +126,28 @@ Theme{
             corner: Rectangle{color: 'transparent'}
         }
 
+    }
+
+    // Labels
+
+    property QtObject monoTextStyle : TextStyle{
+        color: colorScheme.foreground
+        font : Qt.font({
+            family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
+            weight: Font.Normal,
+            italic: false,
+            pixelSize: 12
+        })
+    }
+
+    property QtObject smallLabelStyle: TextStyle{
+        color: colorScheme.foregroundFaded
+        font : Qt.font({
+            family: 'Open Sans, sans-serif',
+            weight: Font.Normal,
+            italic: false,
+            pixelSize: 8
+        })
     }
 
     // Forms
