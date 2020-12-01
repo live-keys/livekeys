@@ -240,7 +240,10 @@ QtObject{
         if (!addBoxItem) return
         addBoxItem.addContainer = addContainer
         addBoxItem.codeQmlHandler = codeHandler
-        addBoxItem.isForNode = isForNode
+        if (isForNode)
+            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.WithFunctions
+        if (isGroup)
+            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.NoObjects
 
         var oct = container.parent
 

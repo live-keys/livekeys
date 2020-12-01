@@ -3260,7 +3260,6 @@ QmlAddContainer *CodeQmlHandler::getReadOnlyAddOptions(QmlEditFragment *fragment
     QmlInheritanceInfo typePath = scope.generateTypePathFromClassName(declaration->type().name(), declaration->type().path());
 
     addPropertiesAndFunctionsToModel(typePath, addContainer->model(), isForNode);
-    addObjectsToModel(scope, addContainer->model());
 
     return addContainer;
 }
@@ -4354,18 +4353,31 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
+    auto cast = qobject_cast<QObject*>(edit);
+    propMap.insert("connection", QVariant::fromValue(cast));
+
     QmlScopeSnap scope = d->snapScope();
+
+    if (edit->isGroup()){
+
+        propMap.insert("name", edit->identifier());
+        propMap.insert("isWritable", false);
+
+        edit->setObjectInfo(propMap);
+        return;
+    }
 
     DocumentQmlValueObjects::Ptr objects = d->documentObjects();
     auto set = objects->propertiesBetween(edit->declaration()->position(), edit->declaration()->position() + edit->declaration()->length());
 
-    if (set.size() != 1) edit->setObjectInfo(propMap);
+    if (set.size() != 1) {
+        edit->setObjectInfo(propMap);
+        return;
+    }
 
     auto property = set[0];
-    propMap.insert("name", property->name());
 
-    auto cast = qobject_cast<QObject*>(edit);
-    propMap.insert("connection", QVariant::fromValue(cast));
+    propMap.insert("name", property->name());
 
     QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 

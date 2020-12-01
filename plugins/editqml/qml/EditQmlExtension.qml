@@ -227,7 +227,9 @@ WorkspaceExtension{
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
-            addBoxItem.objectsOnly = objectsOnly ? objectsOnly : false
+            if (objectsOnly)
+                addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
+
 
             var addBox = lk.layers.editor.environment.createEditorBox(
                 addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
