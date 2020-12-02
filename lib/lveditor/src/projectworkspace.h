@@ -30,6 +30,8 @@ public:
 
     QString projectPath() const;
 
+    void documentWasRemoved(const std::string& path);
+
 signals:
     void projectActiveChange(Runnable* active);
 
