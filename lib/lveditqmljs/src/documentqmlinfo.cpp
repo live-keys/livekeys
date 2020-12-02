@@ -66,12 +66,15 @@ namespace{
                     currentParent = n;
                 }
 
-                // found property
                 declaration->setValuePositionOffset(
                     object->properties[i]->valueBegin -
                     object->properties[i]->begin -
                     declaration->identifierLength()
                 );
+
+                if ( object->properties[i]->child ){
+                    declaration->setValueObjectScopeOffset(object->properties[i]->child->identifierEnd - declaration->valuePosition());
+                }
 
                 declaration->setValueLength(
                     object->properties[i]->end - object->properties[i]->valueBegin

@@ -31,6 +31,7 @@
 #include "qmleditfragment.h"
 #include "qmlbindingspanmodel.h"
 #include "qmltokenizer_p.h"
+#include "qmlsyntax_p.h"
 #include "qmlmetainfo_p.h"
 
 #include <QQmlEngine>
@@ -44,6 +45,10 @@ static QObject* qmlTokenizerProvider(QQmlEngine* engine, QJSEngine*){
 
 static QObject* qmlMetaInfoProvider(QQmlEngine* engine, QJSEngine*){
     return new QmlMetaInfo(engine);
+}
+
+static QObject* qmlSyntaxProvider(QQmlEngine* engine, QJSEngine*){
+    return new QmlSyntax(engine);
 }
 
 
@@ -153,8 +158,8 @@ void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
  */
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
-    qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
     qmlRegisterType<lv::QmlWatcher>(         uri, 1, 0, "Watcher");
+    qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
@@ -168,7 +173,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
-    qmlRegisterSingletonType<lv::QmlMetaInfo>(uri, 1, 0, "MetaInfo", &qmlMetaInfoProvider);
+    qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);
+    qmlRegisterSingletonType<lv::QmlMetaInfo>( uri, 1, 0, "MetaInfo", &qmlMetaInfoProvider);
 }
 
 /**

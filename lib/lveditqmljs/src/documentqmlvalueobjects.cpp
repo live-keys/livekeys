@@ -116,15 +116,15 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
         property->begin       = ast->firstSourceLocation().begin();
         property->propertyEnd = ast->firstSourceLocation().end();
     }
-    if ( ast->initializer )
-        property->valueBegin = ast->initializer->firstSourceLocation().begin();
+    if ( ast->qualifiedTypeNameId )
+        property->valueBegin = ast->qualifiedTypeNameId->firstSourceLocation().begin();
     property->end = ast->lastSourceLocation().end();
     m_lastAppend->appendProperty(property);
 
     DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
     obj->ast   = ast;
-    obj->begin = ast->initializer->firstSourceLocation().begin();
-    obj->identifierEnd = ast->initializer->firstSourceLocation().end();
+    obj->begin = ast->qualifiedTypeNameId->firstSourceLocation().begin();
+    obj->identifierEnd = ast->qualifiedTypeNameId->lastSourceLocation().end();
     obj->end   = ast->initializer->lastSourceLocation().end();
 
     property->child = obj;

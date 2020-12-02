@@ -59,8 +59,15 @@ Pane{
     paneInitialize : function(s){
         if ( s.document ){
             if (typeof s.document === 'string' || s.document instanceof String){
-                var d = project.documentModel.documentByPathHash(s.document)
-                document = d
+                if ( s.document.startsWith('%project%') ){
+                    var documentPath = s.document.replace('%project%', project.dir())
+                    var d = project.openTextFile(documentPath)
+                    if ( d )
+                        document = d
+                } else {
+                    var d = project.documentModel.documentByPathHash(s.document)
+                    document = d
+                }
             } else {
                 document = s.document
             }

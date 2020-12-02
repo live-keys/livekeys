@@ -202,6 +202,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
+            visible: objectContainer.editingFragment && objectContainer.editingFragment.type() !== 'qml/QtQuick#Component'
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add-property.png"
@@ -219,7 +220,6 @@ Rectangle{
                 text: "Add content"
             }
         }
-
 
         Item{
             id: closeObjectItem

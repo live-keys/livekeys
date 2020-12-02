@@ -79,6 +79,9 @@ public:
     int valueOffset() const;
     void setValuePositionOffset(int positionOffset);
 
+    int valueObjectScopeOffset() const;
+    void setValueObjectScopeOffset(int objectScopeOffset);
+
     int valueLength() const;
     void setValueLength(int valueLength);
 
@@ -88,9 +91,11 @@ public:
     void setSection(ProjectDocumentSection::Ptr section);
 
     bool isForObject() const;
+    bool isForComponent() const;
     bool isForProperty() const;
     bool isForSlot() const;
     bool isForImports() const;
+
 private:
     QmlDeclaration(
         const QStringList& identifierChain,
@@ -120,6 +125,7 @@ private:
     QmlTypeReference m_type;
     QmlTypeReference m_parentType;
 
+    int             m_valueObjectScopeOffset;
     int             m_valueOffset;
 
     ProjectDocument* m_document;

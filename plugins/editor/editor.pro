@@ -54,6 +54,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
     palettes/BooleanPalette.qml \
+    palettes/BuilderPalette.qml \
     palettes/ConnectionPalette.qml \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \

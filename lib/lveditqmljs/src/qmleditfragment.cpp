@@ -57,6 +57,8 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
 {
     if (m_declaration->isForSlot()){
         m_location = Slot;
+    } else if (m_declaration->isForComponent() ){
+        m_location = Component;
     } else if (m_declaration->isForImports()){
         m_location = Imports;
     } else if (m_declaration->isForObject()){
@@ -517,6 +519,14 @@ QmlEditFragment *QmlEditFragment::rootFragment(){
     return root;
 }
 
+void QmlEditFragment::setObjectInitializeType(const QmlTypeReference &type){
+    m_objectInitializeType = type;
+}
+
+const QmlTypeReference &QmlEditFragment::objectInitializeType() const{
+    return m_objectInitializeType;
+}
+
 void QmlEditFragment::emitRemoval(){
     emit aboutToBeRemoved();
 
@@ -542,6 +552,24 @@ QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *){
     return m_bindingSpanModel;
 }
 
+QmlImportsModel *QmlEditFragment::documentImports(){
+    CodeQmlHandler* qmlHandler = nullptr;
+    QObject* editParent = parent();
+    while ( editParent ){
+        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        if ( qmlHandler )
+            break;
+
+        editParent = editParent->parent();
+    }
+
+    if (qmlHandler){
+        return qmlHandler->importsModel();
+    }
+
+    return nullptr;
+}
+
 QString QmlEditFragment::type() const{
     return m_declaration->type().join();
 }
@@ -555,6 +583,10 @@ QString QmlEditFragment::identifier() const
     const QStringList& ic = m_declaration->identifierChain();
     if (ic.size() == 0) return "";
     return ic[ic.size()-1];
+}
+
+QString QmlEditFragment::objectInitializerType() const{
+    return m_objectInitializeType.join();
 }
 
 QList<QObject*> QmlEditFragment::paletteList() const{

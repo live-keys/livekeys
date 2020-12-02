@@ -1,8 +1,11 @@
 #include "qmlimportsmodel.h"
 #include "live/codeqmlhandler.h"
+
 namespace lv{
 
-QmlImportsModel::QmlImportsModel(QObject *parent): QAbstractListModel(parent)
+QmlImportsModel::QmlImportsModel(ViewEngine *engine, QObject *parent)
+    : QAbstractListModel(parent)
+    , m_engine(engine)
 {
     m_roles[Module] = "module";
     m_roles[Version] = "version";
@@ -61,6 +64,20 @@ void QmlImportsModel::erase(int pos)
         --m_data[k].line;
 
     emit countChanged();
+}
+
+QJSValue QmlImportsModel::getImportAtUri(const QString &uri){
+    for ( const QmlImportsModel::ItemData& itemData : m_data ){
+        if ( itemData.module == uri ){
+            QQmlEngine* e = m_engine->engine();
+            QJSValue result = e->newObject();
+            result.setProperty("uri", itemData.module);
+            result.setProperty("as", itemData.qualifier);
+            result.setProperty("version", itemData.version);
+            return result;
+        }
+    }
+    return QJSValue();
 }
 
 QVariant QmlImportsModel::data(const QModelIndex &index, int role) const{

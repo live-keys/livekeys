@@ -67,7 +67,7 @@ void QmlBuilder::componentComplete(){
 
 void QmlBuilder::build(){
     QQmlContext* ctx = qmlContext(this);
-    QQmlEngine* engine = qmlEngine(this);
+    ViewEngine* ve = ViewEngine::grab(this);
 
     Project* proj = qobject_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
 
@@ -79,32 +79,20 @@ void QmlBuilder::build(){
         QFile f(m_source);
         if ( !f.open(QFile::ReadOnly) ){
             Exception e = CREATE_EXCEPTION(Exception, "Failed to read file for running:" + m_source.toStdString(), Exception::toCode("~File"));
+            QmlError(e, this).jsThrow();
             return;
         }
         contentBytes = f.readAll();
     }
 
-    QQmlComponent component(engine);
-    component.setData(contentBytes, m_source);
-
-    QList<QQmlError> errors = component.errors();
-    if ( errors.size() ){
-        qDebug() << "ERRORS: " << component.errorString();
-//        emit runError(m_viewEngine->toJSErrors(errors));
+    ViewEngine::ComponentResult::Ptr cr = ve->createObject(m_source, contentBytes, this, ctx);
+    if ( cr->hasError() ){
+        QmlError::join(cr->errors).jsThrow();
         return;
     }
 
-    m_object = component.create(ctx);
-    errors = component.errors();
-    if ( errors.size() ){
-        qDebug() << "ERRORS" << component.errorString();
-//        emit runError(m_viewEngine->toJSErrors(errors));
-        return;
-    }
-
+    m_object = cr->object;
     QQuickItem* item = qobject_cast<QQuickItem*>(m_object);
-    if ( m_object )
-        m_object->setParent(this);
     if ( item ){
         item->setParentItem(this);
         setImplicitHeight(item->height());
