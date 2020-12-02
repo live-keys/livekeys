@@ -341,7 +341,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
     }
 
-    write(source);
+    writeCode(source);
 }
 
 void QmlEditFragment::write(const QJSValue value){

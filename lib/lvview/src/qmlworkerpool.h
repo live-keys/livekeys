@@ -60,9 +60,13 @@ public:
             const QByteArray &source);
         ViewEngine *engine();
 
+        void clearCache(){ m_shouldClearCache = true; }
+        bool shouldClearCache() const{ return m_shouldClearCache; }
+
     private:
         ViewEngine*             m_engine;
         QMap<QString, QJSValue> m_compiledSections;
+        bool                    m_shouldClearCache;
     };
 
     class LV_VIEW_EXPORT Task{
@@ -93,9 +97,9 @@ public:
 
         WorkerData* workerData() const;
 
-        QmlWorkerPoolPrivate *m_workerContainer;
-        WorkerData           *m_workerData;
-        Task                 *m_task;
+        QmlWorkerPoolPrivate* m_workerContainer;
+        WorkerData*           m_workerData;
+        Task*                 m_task;
     };
 
     class LV_VIEW_EXPORT QmlFunctionTask : public Task{
@@ -108,7 +112,7 @@ public:
             const QByteArray& contents,
             const TransferArguments& arguments = TransferArguments(),
             QObject* resultListener = nullptr);
-        ~QmlFunctionTask();
+        ~QmlFunctionTask() override;
         void run(Thread* thread) override;
 
         const QVariant& result() const;
@@ -132,6 +136,7 @@ public:
 
     public:
         TaskReadyEvent(Task* task) : QEvent(QEvent::None), m_task(task){}
+        ~TaskReadyEvent() override;
         Task* task(){ return m_task; }
         void clearTask(){ delete m_task; m_task = nullptr; }
 
@@ -160,6 +165,9 @@ public:
     void releaseThread();
 
     void waitForDone();
+
+public slots:
+    void clearThreadCache();
 
 private:
     QmlWorkerPoolPrivate* d_ptr;

@@ -28,18 +28,23 @@ Q_GLOBAL_STATIC(QmlWorkerPool, theInstance)
 
 QmlWorkerPool::WorkerData::WorkerData()
     : m_engine(nullptr)
+    , m_shouldClearCache(false)
 {
 }
 
 QJSValue QmlWorkerPool::WorkerData::compileJsModule(
         const QString &file, const QString &id, const QByteArray &imports, const QByteArray &source)
 {
+    if ( m_shouldClearCache ){
+        m_compiledSections.clear();
+        m_shouldClearCache = false;
+    }
+
     QString compileId = file + "#" + id;
-//    auto v = m_compiledSections.find(compileId);
-    //TODO: The chache needs to be removed when compiling
-//    if ( v != m_compiledSections.end() ){
-//        return v.value();
-//    }
+    auto v = m_compiledSections.find(compileId);
+    if ( v != m_compiledSections.end() ){
+        return v.value();
+    }
 
     ViewEngine::ComponentResult::Ptr cr = engine()->compileJsModule(imports, source, file);
     if ( cr->hasError() ){
@@ -110,7 +115,7 @@ void QmlWorkerPool::QmlFunctionTask::run(QmlWorkerPool::Thread* thread){
 
             m_error = new Exception(Exception::create<Exception>(
                 qe.message().toStdString(),
-                qe.code(),
+                static_cast<Exception::Code>(qe.code()),
                 qe.fileName().toStdString(),
                 qe.lineNumber(),
                 qe.functionName().toStdString(),
@@ -169,6 +174,17 @@ Exception QmlWorkerPool::QmlFunctionTask::error() const{
     return *m_error;
 }
 
+
+// class QmlWorkerPool::TaskReadyEvent
+// ----------------------------------------------------------------------------
+
+QmlWorkerPool::TaskReadyEvent::~TaskReadyEvent(){
+}
+
+
+// class QmlWorkerPool::Thread
+// ----------------------------------------------------------------------------
+
 QmlWorkerPool::Thread::Thread(QmlWorkerPoolPrivate *workerContainer)
     : m_workerContainer(workerContainer)
     , m_workerData(new QmlWorkerPool::WorkerData)
@@ -181,7 +197,7 @@ void QmlWorkerPool::Thread::run()
     QMutexLocker locker(&m_workerContainer->mutex);
     for(;;) {
         QmlWorkerPool::Task *t = m_task;
-        m_task = 0;
+        m_task = nullptr;
 
         do {
             if (t) {
@@ -210,8 +226,8 @@ void QmlWorkerPool::Thread::run()
             if (m_workerContainer->tooManyThreadsActive())
                 break;
 
-            t = !m_workerContainer->queue.isEmpty() ? m_workerContainer->queue.takeFirst().first : 0;
-        } while (t != 0);
+            t = !m_workerContainer->queue.isEmpty() ? m_workerContainer->queue.takeFirst().first : nullptr;
+        } while (t != nullptr);
 
         if (m_workerContainer->isExiting) {
             registerTheadInactive();
@@ -279,7 +295,7 @@ bool QmlWorkerPoolPrivate::tryStart(QmlWorkerPool::Task *task)
     if (!expiredThreads.isEmpty()) {
         // restart an expired thread
         QmlWorkerPool::Thread *thread = expiredThreads.dequeue();
-        Q_ASSERT(thread->m_task == 0);
+        Q_ASSERT(thread->m_task == nullptr);
 
         ++activeThreads;
 
@@ -381,6 +397,12 @@ void QmlWorkerPoolPrivate::waitForDone()
         noActiveThreads.wait(locker.mutex());
 }
 
+void QmlWorkerPoolPrivate::clearThreadCache(){
+    for ( auto thread : allThreads ){
+        thread->workerData()->clearCache();
+    }
+}
+
 QmlWorkerPool::QmlWorkerPool(QObject *parent)
     : QObject(parent)
 {
@@ -474,6 +496,11 @@ void QmlWorkerPool::waitForDone(){
     Q_D(QmlWorkerPool);
     d->waitForDone();
     d->reset();
+}
+
+void QmlWorkerPool::clearThreadCache(){
+    Q_D(QmlWorkerPool);
+    d->clearThreadCache();
 }
 
 }// namespace

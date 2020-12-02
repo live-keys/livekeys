@@ -13,12 +13,13 @@ class QmlWorkerPoolObject : public QmlWorkerInterface{
 
 public:
     explicit QmlWorkerPoolObject(QObject *parent = nullptr);
-    ~QmlWorkerPoolObject();
+    ~QmlWorkerPoolObject() override;
 
     void start(QmlWorkerPool::Task *task, int priority = 9) override;
 
 private:
     QmlWorkerPool* m_workerPool;
+    static bool    m_hasInitializedCacheReset;
 };
 
 }// namespace

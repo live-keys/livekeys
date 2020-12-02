@@ -107,16 +107,24 @@ void QmlAct::setResult(const QJSValue &result){
 
 void QmlAct::extractSource(ViewEngine* ve){
     if ( !m_source ){
+
         ComponentDeclaration cd = ve->rootDeclaration(this);
+        if ( cd.id().isEmpty() ){
+            THROW_EXCEPTION(Exception, "Act: Act requires id to be used in workers.", Exception::toCode("~Id"));
+        }
+        if ( cd.url().isEmpty() ){
+            THROW_EXCEPTION(Exception, "Act: Failed ot find path for act " + cd.id().toStdString() + ".", Exception::toCode("~Id"));
+        }
+
         m_source = new QmlAct::RunSource(cd);
 
         Project* project = qobject_cast<lv::Project*>(
             lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
         );
         if ( !project ){
-            lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to load 'project' property from context", 0);
-            lv::ViewContext::instance().engine()->throwError(&e);
-            return;
+            delete m_source;
+            m_source = nullptr;
+            THROW_EXCEPTION(Exception, "Failed to load 'project' property from context.", Exception::toCode("~Id"));
         }
 
         QString path = m_source->declarationLocation.url().toLocalFile();
@@ -133,35 +141,45 @@ void QmlAct::extractSource(ViewEngine* ve){
 
 void QmlAct::exec(){
     if ( m_worker ){
+
         if ( m_currentTask ){ // is working
             m_execAfterCurrent = true;
             return;
         }
 
         ViewEngine* ve = ViewEngine::grab(this);
-        extractSource(ve);
 
-        QmlWorkerPool::TransferArguments transferArguments;
+        try {
+            extractSource(ve);
 
-        for ( auto it = m_argList.begin(); it != m_argList.end(); ++it ){
-            QJSValue& a = *it;
-            transferArguments.values.append(Shared::transfer(a, transferArguments.transfers));
+            QmlWorkerPool::TransferArguments transferArguments;
+
+            for ( auto it = m_argList.begin(); it != m_argList.end(); ++it ){
+                QJSValue& a = *it;
+                transferArguments.values.append(Shared::transfer(a, transferArguments.transfers));
+            }
+
+            for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
+                QVariant v = it->second.read();
+                transferArguments.values[it->first] = Shared::transfer(v, transferArguments.transfers);
+            }
+
+            m_currentTask = new QmlWorkerPool::QmlFunctionTask(
+                m_source->declarationLocation.url().toLocalFile(),
+                m_source->declarationLocation.id(),
+                m_source->imports,
+                m_source->source,
+                transferArguments,
+                this
+            );
+            m_worker->start(m_currentTask);
+
+        } catch (lv::Exception& e) {
+
+            QmlError(ve, e, this).jsThrow();
+            return;
+
         }
-
-        for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
-            QVariant v = it->second.read();
-            transferArguments.values[it->first] = Shared::transfer(v, transferArguments.transfers);
-        }
-
-        m_currentTask = new QmlWorkerPool::QmlFunctionTask(
-            m_source->declarationLocation.url().toLocalFile(),
-            m_source->declarationLocation.id(),
-            m_source->imports,
-            m_source->source,
-            transferArguments,
-            this
-        );
-        m_worker->start(m_currentTask);
     } else {
         ViewEngine* ve = ViewEngine::grab(this);
         if ( !ve ){
@@ -212,6 +230,11 @@ bool QmlAct::event(QEvent *ev){
 
     delete m_currentTask;
     m_currentTask = nullptr;
+
+    if ( m_execAfterCurrent ){
+        m_execAfterCurrent = false;
+        exec();
+    }
 
     return true;
 }

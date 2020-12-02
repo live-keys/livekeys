@@ -250,10 +250,10 @@ ComponentDeclaration ViewEngine::rootDeclaration(QObject *object) const{
     QQmlContext* ctx = qmlContext(object);
     QQmlContextPrivate* pctx = QQmlContextPrivate::get(ctx);
 
-    QQmlContextData* child = pctx->data->childContexts;
-    QUrl url;
-    QString objectId;
+    QUrl url = pctx->data->url();
+    QString objectId = pctx->data->findObjectId(object);
 
+    QQmlContextData* child = pctx->data->childContexts;
     while (child) {
         if ( !child->url().isEmpty() ){
             url = child->url();

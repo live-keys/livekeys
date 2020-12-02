@@ -79,6 +79,14 @@ public:
             int vMajor = NoVersion,
             int vMinor = NoVersion
         );
+        Import(
+            Type importType,
+            const QString& uri,
+            const QString& relativeUri,
+            const QString& as = "",
+            int vMajor = NoVersion,
+            int vMinor = NoVersion
+        );
 
         void updateUri(const QString& uri);
         void setImportType(Type importType);
