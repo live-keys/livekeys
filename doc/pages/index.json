@@ -99,6 +99,7 @@
         ["../../plugins/squareone/tutorials/workspace/workspacetutorial.md", "squareone/tutorials/workspace"],
         ["../../plugins/squareone/tutorials/firstapplication/firstapplication.md", "squareone/tutorials/firstapplication"],
         ["../../plugins/lcvcore/samples/coloradjustments/coloradjustments.md", "lcvcore/samples/coloradjustments"],
+        ["../../plugins/lcvcore/samples/multiimage/multiimage.md", "lcvcore/samples/multiimage"],
         ["../../plugins/lcvcore/samples/drawing/drawing.md", "lcvcore/samples/drawing"],
         ["../../plugins/lcvcore/samples/imagetransformations/imagetransformations.md", "lcvcore/samples/imagetransformations"],
         ["../../plugins/lcvcore/samples/videocoloradjustments/videocoloradjustments.md", "lcvcore/samples/videocoloradjustments"],

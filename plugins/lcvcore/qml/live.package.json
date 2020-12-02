@@ -26,6 +26,12 @@
                 "description" : "An example showing how to add color adjustments."
             },
             {
+                "label" : "Color adjustments multiple images",
+                "link" : "samples/multiimage",
+                "category" : "image-processing",
+                "description" : "Color adjustments pipeline applied to multiple images."
+            },
+            {
                 "label" : "Video color adjustments",
                 "link" : "samples/videocoloradjustments",
                 "category" : "video-processing",
