@@ -8,6 +8,8 @@ HEADERS += \
     $$PWD/qmlindexselector.h \
     $$PWD/qmlpropertylog.h \
     $$PWD/qmlscript.h \
+    $$PWD/qmlthreadinfo.h \
+    $$PWD/qmltime.h \
     $$PWD/qmlworkerpoolobject.h \
     $$PWD/qmlstreamlog.h \
     $$PWD/groupcollector.h \
@@ -28,6 +30,8 @@ SOURCES += \
     $$PWD/qmlindexselector.cpp \
     $$PWD/qmlpropertylog.cpp \
     $$PWD/qmlscript.cpp \
+    $$PWD/qmlthreadinfo.cpp \
+    $$PWD/qmltime.cpp \
     $$PWD/qmlworkerinterface.cpp \
     $$PWD/qmlworkerpoolobject.cpp \
     $$PWD/qmlstreamlog.cpp \

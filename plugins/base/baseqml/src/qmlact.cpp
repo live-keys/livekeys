@@ -203,11 +203,15 @@ bool QmlAct::event(QEvent *ev){
     if ( ftask->isErrored() ){
         QmlError qe(ViewContext::instance().engine(), ftask->error(), this);
         qe.jsThrow();
+        return true;
     }
 
     ViewEngine* ve = ViewEngine::grab(this);
 
     setResult(Shared::transfer(ftask->result(), ve->engine()));
+
+    delete m_currentTask;
+    m_currentTask = nullptr;
 
     return true;
 }
