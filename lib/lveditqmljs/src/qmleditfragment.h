@@ -162,8 +162,6 @@ public slots:
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
 
-    QString readValueText() const;
-
     void signalPropertyAdded(lv::QmlEditFragment* ef, bool expandDefault = true);
     void signalObjectAdded(lv::QmlEditFragment* ef, QPointF p = QPointF());
     void incrementRefCount();
