@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import live 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Rectangle{
     id: objectContainerTitle
@@ -228,7 +229,7 @@ Rectangle{
             height: 20
             visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
 
-            Workspace.XIcon{
+            Icons.XIcon{
                 anchors.centerIn: parent
                 width: 8
                 height: 8

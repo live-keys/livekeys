@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 CodePalette {
     id: palette
@@ -18,7 +19,7 @@ CodePalette {
         border.width: 1
         color: "transparent"
 
-        Workspace.CheckMarkIcon{
+        Icons.CheckMarkIcon{
             visible: checked
             anchors.centerIn: parent
             width: 8

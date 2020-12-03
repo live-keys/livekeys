@@ -3,6 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import workspace 1.0
+import workspace.icons 1.0
 import timeline 1.0
 
 Theme{
@@ -257,6 +258,17 @@ Theme{
         radius: 3
     }
 
+    property QtObject minimalIconButtonStyle : RectangleButtonStyle{
+        backgroundColor: 'transparent'
+        backgroundHoverColor: 'transparent'
+        borderColor: 'transparent'
+        borderHoverColor: 'transparent'
+        borderThickness: 0
+        radius: 0
+
+        property color foregroundColor: '#999'
+    }
+
     // Buttons
 
     property QtObject buttons: QtObject{
@@ -282,6 +294,20 @@ Theme{
             style: root.formButtonStyle
 
             content: XIcon{
+                anchors.centerIn: parent
+                width: parent.parent.width / 3
+                height: parent.parent.height / 3
+                strokeWidth: 1
+            }
+            onClicked: parent.clicked()
+        }
+        property Component add: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.formButtonStyle
+
+            content: PlusIcon{
                 anchors.centerIn: parent
                 width: parent.parent.width / 3
                 height: parent.parent.height / 3
@@ -326,6 +352,34 @@ Theme{
                 width: 25
                 height: 25
             }
+            onClicked: parent.clicked()
+        }
+
+        property Component editorCode: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.minimalIconButtonStyle
+
+            content: CodeIcon{
+                width: 15
+                height: 13
+                color: root.minimalIconButtonStyle.foregroundColor
+            }
+
+            onClicked: parent.clicked()
+        }
+
+        property Component editorShape: RectangleButton{
+            width: parent ? parent.width : 20
+            height: parent ? parent.height: 20
+
+            style: root.minimalIconButtonStyle
+
+            content: Image{
+                 source : "qrc:/images/switch-to-design.png"
+             }
+
             onClicked: parent.clicked()
         }
     }

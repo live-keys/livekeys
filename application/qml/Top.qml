@@ -20,6 +20,7 @@ import editor.private 1.0
 import base 1.0
 import live 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Rectangle {
     id : container
@@ -67,7 +68,6 @@ Rectangle {
                 container.runCommandIcon = theme.topRunCommandIcon
                 container.openSettingsIcon = theme.topOpenSettingsIcon
                 container.openLicenseIcon = theme.topOpenLicenseIcon
-
             }
         }
     }
@@ -379,7 +379,7 @@ Rectangle {
         color: "transparent"
         height : messagesArea.containsMouse ? parent.height : parent.height - 5
         width : 25
-        Workspace.WarningIcon{
+        Icons.WarningIcon{
             id: warningIcon
             anchors.centerIn: parent
             width: 24

@@ -22,6 +22,7 @@ import editor 1.0
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 CodePalette{
     id: palette
@@ -153,7 +154,7 @@ CodePalette{
                     height: 20
                     color: cropButton.containsMouse || toolbox.selectedTool === cropTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
-                    Workspace.CropIcon{
+                    Icons.CropIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -178,7 +179,7 @@ CodePalette{
                         radius: 2
                         color: parent.containsMouse ? Qt.lighter(palette.style.toolIconHighlightBackground) : palette.style.toolIconHighlightBackground
 
-                        Workspace.TwoWayArrowIcon{
+                        Icons.TwoWayArrowIcon{
                             anchors.centerIn: parent
                             width: 14
                             height: 14
@@ -214,7 +215,7 @@ CodePalette{
                     color: resizeButton.containsMouse || toolbox.selectedTool === resizeTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
 
-                    Workspace.ResizeIcon{
+                    Icons.ResizeIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -260,7 +261,7 @@ CodePalette{
                     color: rotateButton.containsMouse || toolbox.selectedTool === rotateTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
 
-                    Workspace.RotateIcon{
+                    Icons.RotateIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -312,7 +313,7 @@ CodePalette{
                     layer.enabled: true
                     layer.samples: 8
 
-                    Workspace.PerspectiveIcon{
+                    Icons.PerspectiveIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1.2
                         color: palette.style.toolIconColor

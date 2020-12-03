@@ -19,7 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
 import base 1.0
 
 Pane{
@@ -257,42 +257,27 @@ Pane{
             }
         }
 
-        Rectangle{
+        Workspace.Button{
             anchors.right: parent.right
             anchors.rightMargin: 110
             width: 30
             height: parent.height
-            color: root.optionsColor
+            content: codeOnly ? root.currentTheme.buttons.editorShape : root.currentTheme.buttons.editorCode
+            onClicked: {
+                lk.layers.workspace.panes.activePane = root
 
-            Image{
-                id : codeDesignToggle
-                anchors.centerIn: parent
-                source : "qrc:/images/switch-to-" + (codeOnly? "design": "source") + ".png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-
-                    lk.layers.workspace.panes.activePane = root
-
-                    if (!codeOnly)
-                    {
-                        if (documentHandler.codeHandler)
-                        {
-                            // unfortunate naming, but this actually disables loading
-                            if (loading)
-                                lk.layers.workspace.commands.execute("editqml.shape_all")
-                            documentHandler.codeHandler.removeAllEditingFragments()
-                            editor.importsShaped = false
-                            editor.rootShaped = false
-                        }
-                    } else {
-                        lk.layers.workspace.commands.execute("editqml.shape_all")
-                        // shape all
+                if (!codeOnly){
+                    if (documentHandler.codeHandler){
+                        // unfortunate naming, but this actually disables loading
+                        if (loading)
+                            lk.layers.workspace.commands.execute("editqml.shape_all")
+                        documentHandler.codeHandler.removeAllEditingFragments()
+                        editor.importsShaped = false
+                        editor.rootShaped = false
                     }
-
-
+                } else {
+                    // shape all
+                    lk.layers.workspace.commands.execute("editqml.shape_all")
                 }
             }
         }
@@ -368,7 +353,7 @@ Pane{
         }
     }
 
-    PaneMenu{
+    Workspace.PaneMenu{
         id: editorAddRemoveMenu
         visible: false
         anchors.right: root.right
@@ -377,7 +362,7 @@ Pane{
 
         style: root.currentTheme.popupMenuStyle
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr('Split Horizontally')
             onClicked: {
                 editorAddRemoveMenu.visible = false
@@ -386,7 +371,7 @@ Pane{
                 root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr('Split Vertically')
             onClicked: {
                 editorAddRemoveMenu.visible = false
@@ -395,14 +380,14 @@ Pane{
                 root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr("Move to New Window")
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 root.panes.movePaneToNewWindow(root)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr("Remove Pane")
             onClicked: {
                 editorAddRemoveMenu.visible = false

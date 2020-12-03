@@ -23,6 +23,7 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 import live 1.0
 
 Item{
@@ -688,7 +689,7 @@ Item{
         radius: 2
         visible: paneDropArea.visible
 
-        Workspace.TrashIcon{
+        Icons.TrashIcon{
             anchors.centerIn: parent
             color: parent.style.iconColor
             alternateColor: parent.style.iconColorAlternate

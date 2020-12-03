@@ -5,6 +5,7 @@ import QtQuick.Controls.Styles 1.2
 import timeline 1.0
 import fs 1.0 as Fs
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Rectangle{
     id: root
@@ -60,7 +61,7 @@ Rectangle{
 
     property Item timelineOptions : Item{
         anchors.fill: parent
-        Workspace.MenuIcon{
+        Icons.MenuIcon{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
