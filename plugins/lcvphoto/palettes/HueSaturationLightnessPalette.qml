@@ -74,7 +74,7 @@ CodePalette{
                 'saturation' : palette.value.saturation,
                 'lightness': palette.value.lightness
 
-            }, codeHandler)
+            })
         }
     }
 }

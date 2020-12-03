@@ -53,7 +53,6 @@ CodePalette::CodePalette(QObject *parent)
     , m_bindingChange(false)
     , m_item(nullptr)
     , m_editFragment(nullptr)
-    , m_codeHandler(nullptr)
 {
 }
 

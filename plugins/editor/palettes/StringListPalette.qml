@@ -173,7 +173,7 @@ CodePalette{
             onClicked: {
                 var modelArray = itemList.modelToArray()
                 palette.value = modelArray
-                editFragment.write(modelArray, codeHandler)
+                editFragment.write(modelArray)
                 palette.valueDirty = false
             }
         }
@@ -181,7 +181,7 @@ CodePalette{
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(itemList.modelToArray(), codeHandler)
+            editFragment.write(itemList.modelToArray())
         }
     }
 

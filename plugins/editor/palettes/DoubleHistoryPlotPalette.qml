@@ -30,7 +30,7 @@ CodePalette{
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(palette.value, codeHandler)
+            editFragment.write(palette.value)
         }
     }
 

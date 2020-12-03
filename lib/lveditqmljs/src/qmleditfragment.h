@@ -38,10 +38,11 @@ class CodeCompletionModel;
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
-    Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
-    Q_PROPERTY(Location location     READ location     CONSTANT)
-    Q_PROPERTY(QJSValue whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(QObject*             visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
+    Q_PROPERTY(int                  refCount     READ refCount     NOTIFY refCountChanged)
+    Q_PROPERTY(Location             location     READ location     CONSTANT)
+    Q_PROPERTY(QJSValue             whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(lv::CodeQmlHandler*  codeHandler  READ codeHandler  CONSTANT)
     Q_ENUMS(FragmentType)
 
 public:
@@ -67,7 +68,7 @@ public:
 
     Q_ENUM(Location)
 public:
-    QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
+    QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
 
     static QObject* createObject(
@@ -121,6 +122,7 @@ public slots:
 
     const QList<lv::QmlEditFragment*> childFragments();
 
+    lv::CodeQmlHandler* codeHandler() const;
 
     int position();
     int valuePosition() const;
@@ -165,8 +167,8 @@ public slots:
 
     Location location() const;
 
-    void writeProperties(const QJSValue& properties, lv::CodeQmlHandler* handler);
-    void write(const QJSValue options, lv::CodeQmlHandler* handler);
+    void writeProperties(const QJSValue& properties);
+    void write(const QJSValue options);
 
     QObject* readObject();
 
@@ -217,6 +219,7 @@ private:
     Location                m_location;
     QJSValue                m_whenBinding;
     int                     m_fragmentType;
+    lv::CodeQmlHandler*     m_codeHandler;
 };
 
 /// \brief Returns the binding channel associated with this object.
@@ -226,6 +229,10 @@ inline QmlBindingSpan *QmlEditFragment::bindingSpan(){
 
 inline CodePalette *QmlEditFragment::bindingPalette(){
     return m_bindingPalette;
+}
+
+inline lv::CodeQmlHandler *QmlEditFragment::codeHandler() const {
+    return m_codeHandler;
 }
 
 inline bool QmlEditFragment::hasPalette(CodePalette *palette){

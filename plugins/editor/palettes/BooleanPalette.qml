@@ -38,7 +38,7 @@ CodePalette {
     onCheckedChanged: {
         palette.value = checked
         if ( !palette.isBindingChange() ){
-            editFragment.write(palette.value, codeHandler)
+            editFragment.write(palette.value)
         }
     }
 
@@ -48,7 +48,7 @@ CodePalette {
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
-            editFragment.write(palette.value, codeHandler)
+            editFragment.write(palette.value)
         }
     }
 

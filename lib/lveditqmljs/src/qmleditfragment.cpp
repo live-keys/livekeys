@@ -46,7 +46,7 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
@@ -55,6 +55,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     , m_bindingSpanModel(nullptr)
     , m_refCount(0)
     , m_fragmentType(0)
+    , m_codeHandler(codeHandler)
 {
     if (m_declaration->isForSlot()){
         m_location = Slot;
@@ -278,14 +279,14 @@ QString QmlEditFragment::objectId()
     return m_objectId;
 }
 
-void QmlEditFragment::writeProperties(const QJSValue &properties, lv::CodeQmlHandler* handler)
+void QmlEditFragment::writeProperties(const QJSValue &properties)
 {
     if ( !properties.isObject() ){
         qWarning("Properties must be of object type, use 'write' to add code directly.");
         return;
     }
 
-    QVariantMap propsWritable = handler->propertiesWritable(this);
+    QVariantMap propsWritable = m_codeHandler->propertiesWritable(this);
 
     int valuePosition = declaration()->valuePosition();
     int valueLength   = declaration()->valueLength();
@@ -365,8 +366,8 @@ void QmlEditFragment::writeProperties(const QJSValue &properties, lv::CodeQmlHan
     writeCode(source);
 }
 
-void QmlEditFragment::write(const QJSValue value, lv::CodeQmlHandler* handler){
-    handler->populatePropertyInfoForFragment(this);
+void QmlEditFragment::write(const QJSValue value){
+    m_codeHandler->populatePropertyInfoForFragment(this);
     bool isWritable = m_objectInfo.value("isWritable").toBool();
     if (isWritable)
         writeCode(buildCode(value));

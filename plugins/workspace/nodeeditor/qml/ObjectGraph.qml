@@ -173,8 +173,7 @@ Rectangle{
                 var result = srcPort.objectProperty.editingFragment.bindExpression(value)
                 if ( result ){
                     srcPort.objectProperty.editingFragment.write(
-                        {'__ref': value},
-                        documentHandler.codeHandler
+                        {'__ref': value}
                     )
                 }
             }
@@ -187,8 +186,7 @@ Rectangle{
                 var result = dstPort.objectProperty.editingFragment.bindExpression(value)
                 if ( result ){
                     dstPort.objectProperty.editingFragment.write(
-                        {'__ref': value},
-                        documentHandler.codeHandler
+                        {'__ref': value}
                     )
                 }
             }
@@ -296,8 +294,7 @@ Rectangle{
                 dstPort.objectProperty.editingFragment.write(
                     {'__ref': value
                     ? value
-                    : dstPort.objectProperty.editingFragment.defaultValue()},
-                    documentHandler.codeHandler
+                    : dstPort.objectProperty.editingFragment.defaultValue()}
                 )
             } else {
                 lk.layers.workspace.messages.pushWarning("Failed to remove binding.", 1)

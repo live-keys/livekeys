@@ -51,7 +51,7 @@ CodePalette{
                 if ( !isBindingChange() ){
                     editFragment.writeProperties({
                         'brightness' : adjustmentBox.bandc.brightness
-                    }, codeHandler)
+                    })
                 }
             }
             stepSize: 1.0
@@ -100,7 +100,7 @@ CodePalette{
                     if ( !isBindingChange() ){
                         editFragment.writeProperties({
                             'contrast' : adjustmentBox.bandc.contrast
-                        }, codeHandler)
+                        })
                     }
                 }
             }
@@ -143,7 +143,7 @@ CodePalette{
             editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
                 'contrast' : palette.value.contrast
-            }, codeHandler)
+            })
         }
     }
 }

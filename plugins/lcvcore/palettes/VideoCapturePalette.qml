@@ -55,7 +55,7 @@ CodePalette{
                 parent.videoCapture.fps = fpsSlider.value
                 editFragment.writeProperties({
                     'fps' : fpsSlider.value
-                }, codeHandler)
+                })
             }
             stepSize: 1.0
             maximumValue: 150
@@ -84,12 +84,12 @@ CodePalette{
             onSeekTriggered: {
                 editFragment.writeProperties({
                     'currentFrame' : videoCapture.currentFrame
-                }, codeHandler)
+                })
             }
             onPlayPauseTriggered: {
                 editFragment.writeProperties({
                     'paused' : videoCapture.paused
-                }, codeHandler)
+                })
             }
 
             color: 'transparent'
@@ -106,7 +106,7 @@ CodePalette{
                 'fps' : palette.value.fps,
                 'currentFrame' : palette.value.currentFrame,
                 'paused' : palette.value.paused
-            }, codeHandler)
+            })
         }
     }
 }

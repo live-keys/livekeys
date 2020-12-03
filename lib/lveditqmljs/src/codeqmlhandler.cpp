@@ -1203,7 +1203,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
         if ( !bp )
             return nullptr;
 
-        QmlEditFragment* ef = new QmlEditFragment(declaration);
+        QmlEditFragment* ef = new QmlEditFragment(declaration, this);
 
         Runnable* r = project->runnables()->runnableAt(bp->rootFile());
         if (r && r->type() != Runnable::LvFile ){
@@ -1997,7 +1997,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
             QStringList(),
             QmlTypeReference(QmlTypeReference::Qml, "import"),
             QmlTypeReference(QmlTypeReference::Qml), m_document);
-        QmlEditFragment* ef = new QmlEditFragment(importDecl);
+        QmlEditFragment* ef = new QmlEditFragment(importDecl, this);
 
         auto model = importsModel();
 
@@ -2208,7 +2208,7 @@ lv::QmlEditFragment *CodeQmlHandler::createReadOnlyFragment(QmlEditFragment *par
         }
     }
 
-    auto result = new QmlEditFragment(declaration);
+    auto result = new QmlEditFragment(declaration, this);
     result->checkIfGroup();
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
@@ -2672,7 +2672,6 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
     if ( PaletteContainer::hasItem(paletteLoader) ){
         CodePalette* palette = paletteList->loadAt(index);
         palette->setEditFragment(edit);
-        palette->setCodeHandler(this);
         edit->addPalette(palette);
         edit->updatePaletteValue(palette);
 
@@ -2755,7 +2754,6 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
 
     CodePalette* palette = paletteList->loadAt(index);
     palette->setEditFragment(edit);
-    palette->setCodeHandler(this);
 
     edit->setBindingPalette(palette);
     edit->updatePaletteValue(palette);
@@ -3089,7 +3087,6 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 m_engine->setObjectOwnership(palette, QQmlEngine::CppOwnership);
 
                 palette->setEditFragment(edit);
-                palette->setCodeHandler(this);
 
                 edit->addPalette(palette);
                 edit->updatePaletteValue(palette);
@@ -3154,7 +3151,6 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
     });
 
     palette->setEditFragment(edit);
-    palette->setCodeHandler(this);
 
     connect(palette, &CodePalette::valueChanged, [this, edit](){
         if ( edit->totalPalettes() > 0 ){
