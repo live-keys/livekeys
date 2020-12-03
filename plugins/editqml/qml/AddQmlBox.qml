@@ -25,11 +25,18 @@ import workspace 1.0 as Workspace
 Rectangle{
     id: root
 
-    width: 380 + (isForNode? 100: 0)
+    width: 380 + (mode & AddQmlBox.DisplayMode.WithFunctions ? 100: 0)
     height: 280
     color: root.theme.colorScheme.background
     opacity: 0.95
     objectName: "addQmlBox"
+
+    enum DisplayMode {
+        ObjectsOnly = 0,
+        Default = 1,
+        WithFunctions = 2,
+        NoObjects = 4
+    }
 
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -41,14 +48,13 @@ Rectangle{
     property int smallFontSize: 9
     property var codeQmlHandler: null
 
-    property bool isForNode: false
-    property bool objectsOnly: false
+    property var mode: AddQmlBox.DisplayMode.Default
 
     border.color: root.theme.colorScheme.middlegroundOverlayDominant
     border.width: 1
 
-    onObjectsOnlyChanged: {
-        if (objectsOnly)
+    onModeChanged: {
+        if (mode === AddQmlBox.DisplayMode.ObjectsOnly)
             activeIndex = 2
     }
 
@@ -149,7 +155,7 @@ Rectangle{
             spacing: 2
 
             Workspace.TextButton{
-                visible: !objectsOnly
+                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'All'
                 height: 22
                 width: 70
@@ -163,7 +169,7 @@ Rectangle{
             }
 
             Workspace.TextButton{
-                visible: !objectsOnly
+                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'Property'
                 height: 22
                 width: 70
@@ -180,6 +186,7 @@ Rectangle{
                 text: 'Object'
                 height: 22
                 width: 70
+                visible: !(mode & AddQmlBox.DisplayMode.NoObjects)
 
                 style: root.theme.formButtonStyle
                 color: {
@@ -192,7 +199,7 @@ Rectangle{
             }
 
             Workspace.TextButton{
-                visible: !objectsOnly
+                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'Event'
                 height: 22
                 width: 70
@@ -207,7 +214,7 @@ Rectangle{
             }
 
             Workspace.TextButton{
-                visible: isForNode && !objectsOnly
+                visible: mode & AddQmlBox.DisplayMode.WithFunctions
                 text: 'Function'
                 height: 22
                 width: 70

@@ -35,6 +35,9 @@ Pane{
 
     property alias editor: editor
     property alias document: editor.document
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    property var state: null
 
     property var document: null
     onDocumentChanged: {
@@ -266,18 +269,38 @@ Pane{
             onClicked: {
                 lk.layers.workspace.panes.activePane = root
 
-                if (!codeOnly){
-                    if (documentHandler.codeHandler){
+                if (!codeOnly)
+                {
+                    if (documentHandler.codeHandler)
+                    {
                         // unfortunate naming, but this actually disables loading
                         if (loading)
                             lk.layers.workspace.commands.execute("editqml.shape_all")
+
+                        if (editor.rootShaped){
+                            root.state = paletteControls.convertStateIntoInstructions()
+                        } else {
+                            root.state = null
+                        }
                         documentHandler.codeHandler.removeAllEditingFragments()
                         editor.importsShaped = false
                         editor.rootShaped = false
                     }
                 } else {
-                    // shape all
-                    lk.layers.workspace.commands.execute("editqml.shape_all")
+                    if (root.state){
+                        var codeHandler = editor.documentHandler.codeHandler
+                        var rootPosition = codeHandler.findRootPosition()
+                        lk.layers.workspace.extensions.editqml.shapeRootObject(root, codeHandler, function(){
+                            lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
+                                root,
+                                rootPosition,
+                                root.state
+                            )
+                        })
+                    } else {
+                        // shape all
+                        lk.layers.workspace.commands.execute("editqml.shape_all")
+                    }
                 }
             }
         }

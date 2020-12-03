@@ -46,7 +46,7 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
@@ -54,6 +54,8 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *paren
     , m_visualParent(nullptr)
     , m_bindingSpanModel(nullptr)
     , m_refCount(0)
+    , m_fragmentType(0)
+    , m_codeHandler(codeHandler)
 {
     if (m_declaration->isForSlot()){
         m_location = Slot;
@@ -153,9 +155,7 @@ int QmlEditFragment::valueLength() const{
 }
 
 bool QmlEditFragment::isBuilder() const{
-    if ( m_bindingSpan->connectionChannel() )
-        return m_bindingSpan->connectionChannel()->isBuilder();
-    return false;
+    return isOfFragmentType(QmlEditFragment::FragmentType::Builder);
 }
 
 void QmlEditFragment::rebuild(){
@@ -163,6 +163,26 @@ void QmlEditFragment::rebuild(){
         return;
 
     m_bindingSpan->connectionChannel()->rebuild();
+}
+
+bool QmlEditFragment::isGroup() const
+{
+    return m_fragmentType & QmlEditFragment::FragmentType::Group;
+}
+
+void QmlEditFragment::checkIfGroup()
+{
+    bool isForAnObject = false;
+    if ( !declaration()->type().path().isEmpty() )
+        isForAnObject = true;
+    else if (declaration()->type().name() != "import" && declaration()->type().name() != "slot")
+        isForAnObject = QmlTypeInfo::isObject(declaration()->type().name());
+
+    if (!isForAnObject) return;
+
+    if (declaration()->type().language() == QmlTypeReference::Cpp){
+        addFragmentType(QmlEditFragment::FragmentType::Group);
+    }
 }
 
 QString QmlEditFragment::defaultValue() const{
@@ -268,6 +288,8 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         return;
     }
 
+    QVariantMap propsWritable = m_codeHandler->propertiesWritable(this);
+
     int valuePosition = declaration()->valuePosition();
     int valueLength   = declaration()->valueLength();
     QString source    = declaration()->document()->content().mid(valuePosition, valueLength);
@@ -308,8 +330,9 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
             }
         }
 
-        if ( leftOverProperties.contains(propertyName) ){
-            source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
+        if ( leftOverProperties.contains(propertyName)){
+            if (propsWritable.value(propertyName).toBool())
+                source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
             leftOverProperties.remove(propertyName);
         }
     }
@@ -338,14 +361,18 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
     }
 
     for ( auto it = leftOverProperties.begin(); it != leftOverProperties.end(); ++it ){
-        source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
+        if (propsWritable.value(*it).toBool())
+            source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
     }
 
     writeCode(source);
 }
 
 void QmlEditFragment::write(const QJSValue value){
-    writeCode(buildCode(value));
+    m_codeHandler->populatePropertyInfoForFragment(this);
+    bool isWritable = m_objectInfo.value("isWritable").toBool();
+    if (isWritable)
+        writeCode(buildCode(value));
 }
 
 /**
@@ -638,6 +665,26 @@ void QmlEditFragment::clearNestedObjectsInfo()
 void QmlEditFragment::setObjectInfo(QVariantMap &info)
 {
     m_objectInfo = info;
+}
+
+int QmlEditFragment::fragmentType() const
+{
+    return m_fragmentType;
+}
+
+bool QmlEditFragment::isOfFragmentType(QmlEditFragment::FragmentType type) const
+{
+    return type & m_fragmentType;
+}
+
+void QmlEditFragment::addFragmentType(QmlEditFragment::FragmentType type)
+{
+    m_fragmentType |= type;
+}
+
+void QmlEditFragment::removeFragmentType(QmlEditFragment::FragmentType type)
+{
+    m_fragmentType &= ~type;
 }
 
 void QmlEditFragment::incrementRefCount()

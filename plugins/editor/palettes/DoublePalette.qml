@@ -59,7 +59,7 @@ CodePalette{
                 roundValue = Math.round(roundValue * 100) / 100
                 palette.value = roundValue
                 if ( !palette.isBindingChange() )
-                    editFragment.write(roundValue)
+                    editFragment.write(palette.value)
             }
             stepSize: 1.0
             maximumValue: 25

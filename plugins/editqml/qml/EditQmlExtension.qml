@@ -227,7 +227,9 @@ WorkspaceExtension{
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
-            addBoxItem.objectsOnly = objectsOnly ? objectsOnly : false
+            if (objectsOnly)
+                addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
+
 
             var addBox = lk.layers.editor.environment.createEditorBox(
                 addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
@@ -303,7 +305,7 @@ WorkspaceExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false, currentTheme)
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false)
         }
     }
 
