@@ -6,9 +6,9 @@ Grid{
     
     columns: 2
     
-    ImRead{
+    ImageFile{
         id: src
-        file: project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
+        source: project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
         visible: false
     }
     
@@ -18,7 +18,7 @@ Grid{
         channels: {
             0: [0, 1.0, 170]
         }
-        input: src.output.cloneMat()
+        input: src.output
         onComplete: exec()
     }
     

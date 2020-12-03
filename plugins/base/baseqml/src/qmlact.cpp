@@ -221,6 +221,7 @@ bool QmlAct::event(QEvent *ev){
     if ( ftask->isErrored() ){
         QmlError qe(ViewContext::instance().engine(), ftask->error(), this);
         qe.jsThrow();
+        return true;
     }
 
     ViewEngine* ve = ViewEngine::grab(this);
@@ -229,11 +230,11 @@ bool QmlAct::event(QEvent *ev){
 
     delete m_currentTask;
     m_currentTask = nullptr;
+
     if ( m_execAfterCurrent ){
         m_execAfterCurrent = false;
         exec();
     }
-
 
     return true;
 }

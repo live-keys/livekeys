@@ -170,9 +170,9 @@ public:
     static ViewEngine* grab(QObject* object);
 
     ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
-    ComponentResult::Ptr createObject(const QString& filePath, QObject* parent);
-    ComponentResult::Ptr createObject(const QUrl& filePath, QObject* parent);
-    ComponentResult::Ptr createObject(const QString& filePath, const QByteArray& source, QObject* parent);
+    ComponentResult::Ptr createObject(const QString& filePath, QObject* parent, QQmlContext* context = nullptr);
+    ComponentResult::Ptr createObject(const QUrl& filePath, QObject* parent, QQmlContext* context = nullptr);
+    ComponentResult::Ptr createObject(const QString& filePath, const QByteArray& source, QObject* parent, QQmlContext* context = nullptr);
 
     ComponentResult::Ptr compileJsModule(const QByteArray &imports, const QByteArray &source, const QString& moduleFile);
 
@@ -203,6 +203,7 @@ public slots:
         bool clearCache = false
     );
     QObject* createObject(const QString& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
+    QQmlComponent* createComponent(const QString& qmlCode, const QUrl& file);
     void engineWarnings(const QList<QQmlError>& warnings);
 
     void throwError(const QJSValue& error, QObject* object = nullptr);

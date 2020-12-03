@@ -4,7 +4,8 @@
     "palettes" : {
         "palettes/BooleanPalette.qml" : "qml/bool",
         "palettes/EditPalette.qml" : "edit/qml",
-        "palettes/ConnectionPalette.qml": "qml/property",
+        "palettes/ConnectionPalette.qml": ["qml/property", "qml/Component"],
+        "palettes/BuilderPalette.qml": "qml/Component",
         "palettes/TriggerPalette.qml": "qml/slot",
         "palettes/IntPalette.qml": "qml/int",
         "palettes/IntInputPalette.qml": "qml/int",

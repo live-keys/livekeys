@@ -1204,6 +1204,18 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
             return nullptr;
 
         QmlEditFragment* ef = new QmlEditFragment(declaration, this);
+        if ( declaration->isForProperty() ){
+            if ( declaration->valueObjectScopeOffset() > -1 ){
+                // in case a property also initializes an object, capture the object type
+                int objectInitStart = declaration->valuePosition();
+                QStringList initType = m_document->substring(objectInitStart, declaration->valueObjectScopeOffset()).trimmed().split('.');
+                QmlScopeSnap scope = d->snapScope();
+                QmlTypeInfo::Ptr ti = scope.getType(initType);
+                if ( ti ){
+                    ef->setObjectInitializeType(ti->prefereredType());
+                }
+            }
+        }
 
         Runnable* r = project->runnables()->runnableAt(bp->rootFile());
         if (r && r->type() != Runnable::LvFile ){
@@ -1332,11 +1344,11 @@ QString CodeQmlHandler::getFragmentId(QmlEditFragment *ef)
 QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
 {
     QJSValue result = m_engine->newObject();
-    result.setProperty("canBind", canBind);
+    result.setProperty("canBind",   canBind);
     result.setProperty("canUnbind", canUnbind);
-    result.setProperty("canEdit", canEdit);
+    result.setProperty("canEdit",   canEdit);
     result.setProperty("canAdjust", canAdjust);
-    result.setProperty("canShape", canShape);
+    result.setProperty("canShape",  canShape);
     result.setProperty("inImports", inImports);
     return result;
 }
@@ -2322,8 +2334,7 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
     return fragments;
 }
 
-QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
-{
+QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
     Q_D(CodeQmlHandler);
 
     QList<QObject*> fragments;
@@ -2343,7 +2354,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     docinfo->parse(source);
 
     DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
+    DocumentQmlValueObjects::RangeObject* currentOb = d->documentObjects()->objectAtPosition(edit->position());
 
     if ( !currentOb ) return fragments;
 
@@ -2406,7 +2417,9 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
                     }
 
                     QmlEditFragment* ef = createInjectionChannel(property);
-                    if (!ef) continue;
+
+                    if (!ef)
+                        continue;
 
                     QTextCursor codeCursor(m_target);
                     codeCursor.setPosition(ef->valuePosition());
@@ -2600,15 +2613,20 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
 
     PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), includeExpandables);
 
-    if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
-    {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
-    }
-    if ( declaration->isListDeclaration() ){
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
+    if (declaration->isForComponent()){
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Component", includeExpandables, lpl);
     } else {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
+        if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
+        }
+
+        if ( declaration->isListDeclaration() ){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
+        } else {
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
+        }
     }
+
 
     lpl->setPosition(declaration->position());
     if ( unrepeated ){
@@ -2806,7 +2824,8 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
 lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     Q_D(CodeQmlHandler);
 
-    lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
+    ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+    lv::QmlImportsModel* result = new QmlImportsModel(ve, this);
     d->syncObjects(m_document);
 
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();

@@ -33,8 +33,9 @@ void EditQmlPlugin::registerTypes(const char *uri){
     lv::ProjectQmlExtension::registerTypes(uri);
     qmlRegisterType<lv::QmlPluginInfoExtractor>(uri, 1, 0, "PluginInfoExtractor");
     qmlRegisterType<lv::QmlDocumentSyntax>(     uri, 1, 0, "QmlDocumentSyntax");
-    qmlRegisterType<lv::QmlImportsModel>(       uri, 1, 0, "QmlImportsModel");
 
+    qmlRegisterUncreatableType<lv::QmlImportsModel>(
+        uri, 1, 0, "QmlImportsModel", "\'QmlImportsModel\' is created from a CodeQmlHandler object.");
     qmlRegisterUncreatableType<lv::QmlDocumentSyntaxValue>(
         uri, 1, 0, "QmlDocumentSyntaxValue", "\'QmlDocumentSyntaxValue\' is available through the QmlDocumentSyntax object.");
 }

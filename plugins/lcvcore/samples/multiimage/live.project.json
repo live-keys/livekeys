@@ -1,0 +1,15 @@
+{
+    "layout" : [
+        "v",[
+        "h",
+            {"size":[245,665], "state":{"document":"multiimage.doc.html"},"type":"documentation"},
+            [
+                "v",
+                {"size":[332,240],"type":"projectFileSystem"},
+                {"size":[332,423],"state":{"document":"%project%/multiimage.qml"},"type":"editor"}
+            ],
+            {"size":[524,665],"state":{"document":"%project%/Operations.qml"},"type":"editor"},
+            {"size":[136,665],"type":"viewer"}
+        ]
+    ]
+}

@@ -34,6 +34,7 @@ class QmlBindingChannel;
 class QmlBindingSpan;
 class QmlBindingSpanModel;
 class CodeCompletionModel;
+class QmlImportsModel;
 
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
@@ -55,6 +56,7 @@ public:
     enum Location {
         Imports,
         Object,
+        Component,
         Property,
         Slot
     };
@@ -98,13 +100,15 @@ public:
 
     QmlDeclaration::Ptr declaration() const;
 
-
     void updatePaletteValue(CodePalette* palette);
 
     QObject* visualParent() const;
     void setVisualParent(QObject* visualParent);
 
     QmlEditFragment* rootFragment();
+
+    void setObjectInitializeType(const QmlTypeReference& type);
+    const QmlTypeReference& objectInitializeType() const;
 
     void emitRemoval();
     void addNestedObjectInfo(QVariantMap& info);
@@ -142,9 +146,12 @@ public slots:
     lv::CodePalette* bindingPalette();
     lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
 
+    lv::QmlImportsModel* documentImports();
+
     QString type() const;
     QString typeName() const;
     QString identifier() const;
+    QString objectInitializerType() const;
 
     QList<QObject*> paletteList() const;
     QList<QObject*> getChildFragments() const;
@@ -154,6 +161,8 @@ public slots:
 
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
+
+    QString readValueText() const;
 
     void signalPropertyAdded(lv::QmlEditFragment* ef, bool expandDefault = true);
     void signalObjectAdded(lv::QmlEditFragment* ef, QPointF p = QPointF());
@@ -211,6 +220,7 @@ private:
     bool                    m_paletteUse;
     QObject*                m_visualParent;
 
+    QmlTypeReference        m_objectInitializeType;
     QmlBindingSpanModel*    m_bindingSpanModel;
     QVariantList            m_nestedObjectsInfo;
     QVariantMap             m_objectInfo;

@@ -341,11 +341,18 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 
     QMap<QByteArray, ProjectDocument*> openDocuments;
 
+    std::vector<std::string> removedDocuments;
+
     if ( layout.hasKey("documents") && layout["documents"].type() == MLNode::Array ){
         for ( auto it = layout["documents"].begin(); it != layout["documents"].end(); ++it ){
             QString path = QString::fromStdString((*it).asString());
-            ProjectDocument* doc = m_project->openTextFile(path);
-            openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
+            QFileInfo pathInfo(path);
+            if ( pathInfo.exists() ){
+                ProjectDocument* doc = m_project->openTextFile(path);
+                openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
+            } else {
+                removedDocuments.push_back(path.toStdString());
+            }
         }
     }
 
@@ -369,6 +376,11 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
         if ( it != openDocuments.end() ){
             m_project->setActive(it.value()->file()->path());
         }
+    }
+
+    // notify removed documents
+    for ( const std::string& removedDocument : removedDocuments ){
+        workspace->documentWasRemoved(removedDocument);
     }
 }
 

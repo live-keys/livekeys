@@ -87,8 +87,6 @@ QAdjustments::~QAdjustments(){
 
 QMat *QAdjustments::levels(QMat *source, const QJSValue &lightness, const QJSValue &channels){
     if (!source){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Adjustments: Null source provided.", 0);
-        lv::ViewContext::instance().engine()->throwError(&e);
         return nullptr;
     }
 

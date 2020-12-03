@@ -452,6 +452,12 @@ QObject* ViewEngine::createObject(const QString &qmlCode, QObject *parent, const
     return createObject(qmlCode.toUtf8(), parent, url, clearCache);
 }
 
+QQmlComponent *ViewEngine::createComponent(const QString &qmlCode, const QUrl &file){
+    QQmlComponent* component = new QQmlComponent(m_engine);
+    component->setData(qmlCode.toUtf8(), file);
+    return component;
+}
+
 /**
  * \brief Creates an object from the given qmlcode synchronously
  */
@@ -561,7 +567,7 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createPluginObject(const QString &f
     return createObject(QString::fromStdString(lv::ApplicationContext::instance().pluginPath()) + "/" + filePath, parent);
 }
 
-ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, QObject *parent){
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, QObject *parent, QQmlContext* context){
     QFile f(filePath);
     if ( !f.open(QFile::ReadOnly) ){
         ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
@@ -577,18 +583,18 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
 
     QByteArray contentBytes = f.readAll();
 
-    return createObject(f.fileName(), contentBytes, parent);
+    return createObject(f.fileName(), contentBytes, parent, context);
 }
 
-ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent){
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QUrl &filePath, QObject *parent, QQmlContext* context){
     if ( filePath.isLocalFile() ){
-        return createObject(filePath.toLocalFile(), parent);
+        return createObject(filePath.toLocalFile(), parent, context);
     }
 
     return ViewEngine::ComponentResult::create();
 }
 
-ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, const QByteArray &source, QObject *parent){
+ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePath, const QByteArray &source, QObject *parent, QQmlContext *context){
     ViewEngine::ComponentResult::Ptr result = ViewEngine::ComponentResult::create();
 
     result->component = new QQmlComponent(m_engine, parent);
@@ -613,7 +619,7 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
         return result;
     }
 
-    result->object = result->component->create();
+    result->object = result->component->create(context);
 
     errors = result->component->errors();
     if ( errors.size() ){
