@@ -39,10 +39,12 @@ class QmlImportsModel;
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
-    Q_PROPERTY(int      refCount     READ refCount     NOTIFY refCountChanged)
-    Q_PROPERTY(Location location     READ location     CONSTANT)
-    Q_PROPERTY(QJSValue whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(QObject*             visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
+    Q_PROPERTY(int                  refCount     READ refCount     NOTIFY refCountChanged)
+    Q_PROPERTY(Location             location     READ location     CONSTANT)
+    Q_PROPERTY(QJSValue             whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(lv::CodeQmlHandler*  codeHandler  READ codeHandler  CONSTANT)
+    Q_ENUMS(FragmentType)
 
 public:
     /** ProjectDocument section type for this QmlEditFragment */
@@ -58,9 +60,17 @@ public:
         Property,
         Slot
     };
+
+    enum FragmentType {
+        Builder = 1,
+        ReadOnly = 2,
+        Group = 4,
+        GroupChild = 8
+    };
+
     Q_ENUM(Location)
 public:
-    QmlEditFragment(QmlDeclaration::Ptr declaration, QObject* parent = nullptr);
+    QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
 
     static QObject* createObject(
@@ -87,7 +97,6 @@ public:
 
     void addChildFragment(QmlEditFragment* edit);
     QmlEditFragment* findChildFragment(QmlEditFragment* edit);
-    const QList<QmlEditFragment*> childFragments();
 
     QmlDeclaration::Ptr declaration() const;
 
@@ -110,6 +119,15 @@ public:
     void setWhenBinding(const QJSValue& whenBinding);
 
 public slots:
+    int fragmentType() const;
+    bool isOfFragmentType(FragmentType type) const;
+    void addFragmentType(FragmentType type);
+    void removeFragmentType(FragmentType type);
+
+    const QList<lv::QmlEditFragment*> childFragments();
+
+    lv::CodeQmlHandler* codeHandler() const;
+
     int position();
     int valuePosition() const;
     int valueLength() const;
@@ -117,7 +135,11 @@ public slots:
     bool isBuilder() const;
     void rebuild();
 
+    bool isGroup() const;
+    void checkIfGroup();
+
     QString defaultValue() const;
+    QString readValueText() const;
 
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
@@ -140,8 +162,6 @@ public slots:
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
 
-    QString readValueText() const;
-
     void signalPropertyAdded(lv::QmlEditFragment* ef, bool expandDefault = true);
     void signalObjectAdded(lv::QmlEditFragment* ef, QPointF p = QPointF());
     void incrementRefCount();
@@ -156,7 +176,6 @@ public slots:
 
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
-    void writeCode(const QString& code);
 
     QObject* readObject();
 
@@ -180,9 +199,10 @@ signals:
 
     void refCountChanged();
     void whenBindingChanged();
-
+    void typeChanged();
 private:
     static QString buildCode(const QJSValue& value);
+    void writeCode(const QString& code);
 
     QmlDeclaration::Ptr  m_declaration;
 
@@ -206,6 +226,8 @@ private:
     QString                 m_objectId;
     Location                m_location;
     QJSValue                m_whenBinding;
+    int                     m_fragmentType;
+    lv::CodeQmlHandler*     m_codeHandler;
 };
 
 /// \brief Returns the binding channel associated with this object.
@@ -215,6 +237,10 @@ inline QmlBindingSpan *QmlEditFragment::bindingSpan(){
 
 inline CodePalette *QmlEditFragment::bindingPalette(){
     return m_bindingPalette;
+}
+
+inline lv::CodeQmlHandler *QmlEditFragment::codeHandler() const {
+    return m_codeHandler;
 }
 
 inline bool QmlEditFragment::hasPalette(CodePalette *palette){

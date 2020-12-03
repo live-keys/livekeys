@@ -356,9 +356,8 @@ Item{
                 onAddPalette: {
                     var paletteList = paletteControls.addPaletteList(objectContainer,
                                                                      paletteGroup,
-                                                                     objectContainerTitle.width - 168,
-                                                                     -33,
-                                                                     1 /*mode*/)
+                                                                     { "x": objectContainerTitle.width - 168, "y": -33},
+                                                                     PaletteControls.PaletteListMode.ObjectContainer)
                     if (paletteList){
                         paletteList.width = 250
                         paletteList.anchors.topMargin = titleHeight + topSpacing
@@ -367,7 +366,7 @@ Item{
 
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false, theme)
+                    paletteControls.compose(objectContainer, false)
                 }
             }
         }

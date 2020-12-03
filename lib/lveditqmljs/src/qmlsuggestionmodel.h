@@ -29,7 +29,8 @@ public:
             const QString& pimport,
             const QString& pdoc,
             const QString& pcode,
-            const int cat
+            const int cat,
+            bool group = false
         );
 
         QString label;
@@ -39,6 +40,7 @@ public:
         QString documentation;
         QString code;
         int category;
+        bool isGroup;
     };
 
     enum Roles{
@@ -48,7 +50,8 @@ public:
         ImportSpace,
         Documentation,
         Code,
-        Category
+        Category,
+        IsGroup
     };
 
     QmlSuggestionModel(int addPosition, QObject* parent = 0);

@@ -106,9 +106,8 @@ Rectangle{
         function swapOrAddPalette(swap){
             var paletteList = paletteControls.addPaletteList(paletteContainer,
                                                              paletteContainer.parent,
-                                                             84,
-                                                             -20,
-                                                             2 /*mode*/,
+                                                             {"x": 84, "y": -20},
+                                                             PaletteControls.PaletteListMode.PaletteContainer,
                                                              swap)
             if (paletteList){
                 paletteList.anchors.topMargin = 24
@@ -151,7 +150,7 @@ Rectangle{
             MouseArea{
                 id: paletteSwapMouse
                 anchors.fill: parent
-                onClicked: paletteBoxHeader.swapOrAddPalette(true)
+                onClicked: paletteBoxHeader.swapOrAddPalette(PaletteControls.PaletteListSwap.Swap)
             }
         }
         Item{
@@ -169,7 +168,7 @@ Rectangle{
             MouseArea{
                 id: paletteAddMouse
                 anchors.fill: parent
-                onClicked: paletteBoxHeader.swapOrAddPalette(false)
+                onClicked: paletteBoxHeader.swapOrAddPalette(PaletteControls.PaletteListSwap.NoSwap)
             }
         }
 

@@ -75,10 +75,9 @@ Item{
                     var paletteList = paletteControls.addPaletteList(
                         propertyItem,
                         paletteContainer,
-                        0,
-                        0,
-                        4,
-                        false,
+                        {"x": 0, "y": 0},
+                        PaletteControls.PaletteListMode.NodeEditor,
+                        PaletteControls.PaletteListSwap.NoSwap,
                         propertyItem
                     )
 

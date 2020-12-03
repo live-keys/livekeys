@@ -6,6 +6,7 @@ import live                      1.0
 
 import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
+import editqml 1.0
 
 Rectangle{
     id: root
@@ -218,7 +219,7 @@ Rectangle{
 
         addBoxItem.addContainer = addOptions
 
-        addBoxItem.objectsOnly = true
+        addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
         var cursorCoords = Qt.point(pos.x, pos.y + 30)
@@ -296,7 +297,7 @@ Rectangle{
                     : dstPort.objectProperty.editingFragment.defaultValue()}
                 )
             } else {
-                qWarning("Failed to remove binding.")
+                lk.layers.workspace.messages.pushWarning("Failed to remove binding.", 1)
             }
         }
 

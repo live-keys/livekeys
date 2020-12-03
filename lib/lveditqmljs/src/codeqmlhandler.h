@@ -28,6 +28,7 @@
 #include "live/codecompletionmodel.h"
 #include "live/qmlimportsmodel.h"
 #include "live/documentqmlinfo.h"
+#include "qmlscopesnap_p.h"
 
 #include <QObject>
 #include <QTimer>
@@ -48,6 +49,7 @@ class QmlAddContainer;
 class QmlCompletionContextFinder;
 class QmlCompletionContext;
 class QmlUsageGraphScanner;
+class QmlSuggestionModel;
 
 class CodeQmlHandlerPrivate;
 class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
@@ -118,8 +120,8 @@ public slots:
     void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
     void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
     void populatePropertyInfoForFragment(lv::QmlEditFragment* ef);
-    void testFunction(QVariantList list);
 
+    QVariantMap propertiesWritable(lv::QmlEditFragment* ef);
     // Help
 
     QString help(int position);
@@ -127,6 +129,8 @@ public slots:
     lv::QmlEditFragment* findFragmentByPosition(int position);
     QJSValue editingFragments();
 
+
+    lv::QmlEditFragment* findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const;
 
     void toggleComment(int position, int length);
 
@@ -136,6 +140,7 @@ public slots:
     bool isInImports(int position);
     lv::QmlEditFragment* openConnection(int position);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
+    lv::QmlEditFragment* createReadOnlyFragment(lv::QmlEditFragment* parentFragment, QString name);
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
@@ -143,6 +148,7 @@ public slots:
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
+    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool unrepeated = false, bool includeExpandables = false);
     lv::PaletteList *findPalettes(int position, bool unrepeated = false, bool includeExpandables = false);
 
     QJSValue openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
@@ -175,13 +181,15 @@ public slots:
 
     // Add Property Management
 
-    lv::QmlAddContainer* getAddOptions(int position, bool includeFunctions = false);
+    lv::QmlAddContainer* getAddOptions(int position, bool isForNode = false);
+    lv::QmlAddContainer* getReadOnlyAddOptions(lv::QmlEditFragment* fragment, bool isForNode = false);
     int addProperty(
         int position,
         const QString& object,
         const QString& type,
         const QString& name,
-        bool assignDefault = false);
+        bool assignDefault = false,
+        lv::QmlEditFragment* parentGroup = nullptr);
     int addItem(int position, const QString& object, const QString& type);
     int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);
@@ -217,6 +225,9 @@ private:
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);
+
+    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath, lv::QmlSuggestionModel* model, bool isForNode = false);
+    void addObjectsToModel(const QmlScopeSnap& scope, lv::QmlSuggestionModel* model);
 
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,

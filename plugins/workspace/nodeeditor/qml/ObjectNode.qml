@@ -166,7 +166,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true, root.theme, objectGraph)
+                        paletteControls.compose(root, true, objectGraph)
                     }
                 }
             }
@@ -190,10 +190,9 @@ Qan.NodeItem{
                         var paletteList = paletteControls.addPaletteList(
                             root,
                             paletteContainer,
-                            0,
-                            0,
-                            4,
-                            false,
+                            {"x": 0, "y": 0},
+                            PaletteControls.PaletteListMode.NodeEditor,
+                            PaletteControls.PaletteListSwap.NoSwap,
                             wrapper
                         )
 
