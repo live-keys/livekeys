@@ -959,8 +959,7 @@ QtObject{
 
         if (!ef){
             lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
-            console.error("Error: Can't shape palette")
-            return
+            throw linkError(new Error('Failed to find editing fragment for palette at: ' + palettes.position(), 300))
         }
 
         var forAnObject = ef.location === QmlEditFragment.Object

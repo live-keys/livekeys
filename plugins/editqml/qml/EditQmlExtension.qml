@@ -18,6 +18,27 @@ WorkspaceExtension{
             root.shapeRootObject(editor, codeHandler, callback)
         }
 
+
+        function shapeAllInEditor(editor){
+            var codeHandler = editor.documentHandler.codeHandler
+
+            if (editor.loading){
+                editor.stopLoadingMode()
+                rootPosition = -1
+                return
+            }
+
+            shapeImports(editor, codeHandler)
+            rootPosition = codeHandler.findRootPosition()
+
+            if ( rootPosition >= 0){
+                shapeRootObject(editor, codeHandler)
+            } else {
+                editor.editor.addRootButton.visible = true
+            }
+        }
+
+
         function shapeImports(editor, codeHandler){
             root.shapeImports(editor, codeHandler)
         }

@@ -299,7 +299,7 @@ Pane{
                         })
                     } else {
                         // shape all
-                        lk.layers.workspace.commands.execute("editqml.shape_all")
+                        lk.layers.workspace.extensions.editqml.shapeAllInEditor(root)
                     }
                 }
             }
