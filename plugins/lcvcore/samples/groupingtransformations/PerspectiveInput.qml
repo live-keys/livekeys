@@ -5,8 +5,8 @@ Perspective{
     property double topLeftX: 0
     property double topLeftY: 0
     
-    property double topRightX: 512
-    property double topRightY: 0
+    property double topRightX: 500
+    property double topRightY: 3
     
     property double bottomRightX: 600
     property double bottomRightY: 300
@@ -15,7 +15,7 @@ Perspective{
     property double bottomLeftY: 384
     
     points: [
-        Qt.point(topLeftX, topLeftX), 
+        Qt.point(topLeftX, topLeftY),
         Qt.point(topRightX, topRightY),
         Qt.point(bottomRightX, bottomRightY), 
         Qt.point(bottomLeftX, bottomLeftY)

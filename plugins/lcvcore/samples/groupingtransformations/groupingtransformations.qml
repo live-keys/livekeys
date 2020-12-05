@@ -7,18 +7,24 @@ Grid{
     spacing: 2
     columns: 1
 
-    Cv.ImRead{
-        id: src
-        file: project.path('../../../../samples/_images/buildings_0246.jpg')
+    Cv.BlankImage{
+        id: blankImage
+        size: "600x400"
+        fill: 'white'
+        channels: 3
     }
-
+    
+    Cv.DrawSurface{
+        id: drawSurface
+        input: blankImage.result
+    }
+    
     PerspectiveInput{
         id: perspective
-        property Watcher watcher: Watcher{
-            position: scanner.capture()
-        }
-        input: src.output.cloneMat()
+        property Watcher watcher: Watcher{}
+        input: drawSurface.result
     }
+
 
     Cv.ImageView{
         image: perspective.result
