@@ -24,14 +24,16 @@
 
 namespace lv{
 
+class QmlEditFragment;
+
 class LV_EDITOR_EXPORT CodePalette : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QQuickItem* item         READ item           WRITE setItem       NOTIFY itemChanged)
-    Q_PROPERTY(QString type             READ type           WRITE setType       NOTIFY typeChanged)
-    Q_PROPERTY(QVariant value           READ value          WRITE setValue      NOTIFY valueChanged)
-    Q_PROPERTY(QString name             READ name           CONSTANT)
-    Q_PROPERTY(QObject* editFragment    READ editFragment   NOTIFY editFragmentChanged)
+    Q_PROPERTY(QQuickItem* item                  READ item           WRITE setItem       NOTIFY itemChanged)
+    Q_PROPERTY(QString type                      READ type           WRITE setType       NOTIFY typeChanged)
+    Q_PROPERTY(QVariant value                    READ value          WRITE setValue      NOTIFY valueChanged)
+    Q_PROPERTY(QString name                      READ name           CONSTANT)
+    Q_PROPERTY(lv::QmlEditFragment* editFragment READ editFragment   CONSTANT)
 
 public:
     explicit CodePalette(QObject *parent = nullptr);
@@ -54,8 +56,8 @@ public:
     const QString &path() const;
 
     /** Returns extension for palette */
-    QObject* editFragment() const;
-    void setEditFragment(QObject* extension);
+    QmlEditFragment* editFragment() const;
+    void setEditFragment(QmlEditFragment* extension);
 
     /** Palette type */
     QString type() const;
@@ -83,12 +85,12 @@ signals:
 private:
     Q_DISABLE_COPY(CodePalette)
 
-    bool        m_bindingChange;
-    QQuickItem* m_item;
-    QVariant    m_value;
-    QString     m_path;
-    QObject*    m_editFragment;
-    QString     m_type;
+    bool             m_bindingChange;
+    QQuickItem*      m_item;
+    QVariant         m_value;
+    QString          m_path;
+    QString          m_type;
+    QmlEditFragment* m_editFragment;
 };
 
 inline QQuickItem *CodePalette::item(){
@@ -142,14 +144,14 @@ inline const QString& CodePalette::path() const{
 }
 
 
-inline QObject *CodePalette::editFragment() const{
+inline QmlEditFragment *CodePalette::editFragment() const{
     return m_editFragment;
 }
 
 /**
  * \brief Extension setter for palette
  */
-inline void CodePalette::setEditFragment(QObject *editFragment){
+inline void CodePalette::setEditFragment(QmlEditFragment *editFragment){
     if (m_editFragment == editFragment)
         return;
 

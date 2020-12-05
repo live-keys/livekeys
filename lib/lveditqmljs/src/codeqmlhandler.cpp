@@ -1154,37 +1154,6 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cu
 }
 
 /**
- * \brief Given a declaration identifier \p position and \p length, get the \p valuePosition and \p valueEnd
- * for that declaration
- */
-bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePosition, int &valueEnd){
-    if ( length > 0 ){
-        DocumentQmlValueScanner vs(m_document, position, length);
-        if ( vs() ){
-            valuePosition = vs.valuePosition();
-            valueEnd      = vs.valueEnd();
-            return true;
-        } else {
-            valuePosition = -1;
-            valueEnd      = -1;
-            return false;
-        }
-    } else {
-        DocumentQmlValueScanner vs(m_document, position, length);
-        int valueLength = vs.getBlockExtent(position);
-        if ( valueLength != -1 ){
-            valuePosition = position;
-            valueEnd      = valueLength + position;
-            return true;
-        } else {
-            valuePosition = -1;
-            valueEnd      = -1;
-            return false;
-        }
-    }
-}
-
-/**
  * \brief Creates an injection channel between a declaration and the runtime
  *
  * This method will find all binding channels available by parsing the contents
@@ -1445,41 +1414,6 @@ int CodeQmlHandler::findRootPosition(){
         return d->documentObjects()->root()->begin;
     }
     return -1;
-}
-
-QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
-    auto it = m_edits.begin();
-    while( it != m_edits.end() ){
-        QmlEditFragment* edit = *it;
-        for ( auto eit = edit->begin(); eit != edit->end(); ++eit ){
-            CodePalette* cp = *eit;
-            if ( cp == palette )
-                return edit;
-        }
-
-        QmlEditFragment* recurseEdit = findEditFragmentIn(edit, palette);
-        if ( recurseEdit )
-            return recurseEdit;
-
-        ++it;
-
-    }
-    return nullptr;
-}
-
-QmlEditFragment *CodeQmlHandler::findEditFragmentIn(QmlEditFragment* parent, CodePalette *palette){
-    for ( auto it = parent->childFragments().begin(); it != parent->childFragments().end(); ++it ){
-        QmlEditFragment* edit = *it;
-        for ( auto paIt = edit->begin(); paIt != edit->end(); ++paIt ){
-            if ( *paIt == palette )
-                return edit;
-        }
-
-        QmlEditFragment* childEdit = findEditFragmentIn(edit, palette);
-        if ( childEdit )
-            return childEdit;
-    }
-    return nullptr;
 }
 
 lv::QmlEditFragment *CodeQmlHandler::findObjectFragmentByPosition(int position)
@@ -2061,6 +1995,8 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     QmlEditFragment* ef = createInjectionChannel(declaration);
 
     if ( !ef ){
+        ViewEngine* ve = qobject_cast<ViewEngine*>(m_engine->property("viewEngine").value<QObject*>());
+        QmlError(ve, CREATE_EXCEPTION(lv::Exception, "Cannot create injection channel for declaration: " + QString::number(declaration->position()).toStdString(), lv::Exception::toCode("~Injection")), this).jsThrow();
         return nullptr;
     }
 
@@ -2591,7 +2527,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
     Q_D(CodeQmlHandler);
     if ( !m_document )
         return nullptr;
-
     cancelEdit();
 
     QTextCursor cursor(m_target);
@@ -2719,7 +2654,7 @@ lv::QmlEditFragment *CodeQmlHandler::removePalette(lv::CodePalette *palette){
     if ( !palette )
         return nullptr;
 
-    lv::QmlEditFragment* edit = findEditFragment(palette);
+    lv::QmlEditFragment* edit = palette->editFragment();
     if ( edit ){
         edit->removePalette(palette);
     }

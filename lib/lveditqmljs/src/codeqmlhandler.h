@@ -83,16 +83,12 @@ public:
     void rehighlightBlock(const QTextBlock& block);
 
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
-    bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
 
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
 
     QmlJsSettings* settings();
-
-    QmlEditFragment* findEditFragment(CodePalette* palette);
-    QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
 
     void suggestionsForProposedExpression(
         QmlDeclaration::Ptr declaration,
