@@ -25,6 +25,8 @@ public:
     virtual void timelineComplete() override;
     virtual QString typeReference() const override;
 
+    virtual void cursorPositionProcessed(qint64 position) override;
+
 signals:
     void surfaceChanged(lv::VideoSurface* surface);
 

@@ -36,6 +36,7 @@ HEADERS += \
     $$PWD/qmatio.h \
     $$PWD/qvideodecoder.h \
     $$PWD/qvideodecodethread.h \
+    $$PWD/scriptvideosegment.h \
     $$PWD/videosegment.h \
     $$PWD/videosurface.h \
     $$PWD/videotrack.h
@@ -76,6 +77,7 @@ SOURCES += \
     $$PWD/qmatio.cpp \
     $$PWD/qvideodecoder.cpp \
     $$PWD/qvideodecodethread.cpp \
+    $$PWD/scriptvideosegment.cpp \
     $$PWD/videosegment.cpp \
     $$PWD/videosurface.cpp \
     $$PWD/videotrack.cpp

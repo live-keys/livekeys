@@ -1,8 +1,14 @@
 #include "videotrack.h"
 #include "videosegment.h"
 #include "imagesegment.h"
+#include "scriptvideosegment.h"
+
+#include "live/project.h"
 
 #include <QQmlPropertyMap>
+#include <QQmlEngine>
+#include <QQmlContext>
+#include <QFileInfo>
 
 namespace lv{
 
@@ -36,6 +42,24 @@ void VideoTrack::deserialize(ViewEngine *engine, const MLNode &node){
             ImageSegment* segment = new ImageSegment;
             segment->deserialize(this, engine->engine(), segmNode);
             addSegment(segment);
+        } else if ( segmNode["type"].asString() == "ScriptVideoSegment" ){
+            QString scriptPath = QString::fromStdString(segmNode["script"].asString());
+            QFileInfo finfo(scriptPath);
+            if ( finfo.isRelative() ){
+                QObject* projectOb = engine->engine()->rootContext()->contextProperty("project").value<QObject*>();
+                Project* project = qobject_cast<Project*>(projectOb);
+                if ( project ){
+                    scriptPath = QFileInfo(project->dir() + "/" + scriptPath).canonicalFilePath();
+                }
+            }
+            ViewEngine::ComponentResult::Ptr cr = engine->createObject(scriptPath, nullptr);
+            if ( cr->hasError() ){
+                cr->jsThrowError();
+                return;
+            }
+            ScriptVideoSegment* segment = qobject_cast<ScriptVideoSegment*>(cr->object);
+            segment->deserialize(this, engine->engine(), segmNode);
+            addSegment(segment);
         } else {
             THROW_QMLERROR(Exception, "VideoTrack: Unknown segment type: " + segmNode["type"].asString(), Exception::toCode("~Segment"), this);
             return;
@@ -59,6 +83,13 @@ void VideoTrack::timelineComplete(){
     m_surface = qobject_cast<VideoSurface*>(surf);
 
     Track::timelineComplete();
+}
+
+void VideoTrack::cursorPositionProcessed(qint64 position){
+    Track::cursorPositionProcessed(position);
+    if ( surface() ){
+        surface()->swapSurface(position);
+    }
 }
 
 

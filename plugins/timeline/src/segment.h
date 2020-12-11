@@ -47,7 +47,7 @@ public:
 
     bool contains(qint64 position);
 
-    bool isAsync() const;
+    bool isProcessing() const;
 
     const QString& label() const;
     void setLabel(const QString& label);
@@ -78,7 +78,7 @@ signals:
     void maxStretchRightChanged();
 
 protected:
-    void setIsAsync(bool isAsync);
+    void setIsProcessing(bool isProcessing);
 
 private:
     static void setPosition(Segment* segment, unsigned int position);
@@ -88,7 +88,7 @@ private:
 
     unsigned int m_position;
     unsigned int m_length;
-    bool         m_isAsync;
+    bool         m_isProcessing;
     QString      m_label;
     QColor       m_color;
     unsigned int m_maxStretchLeft;

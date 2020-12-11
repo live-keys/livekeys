@@ -17,6 +17,7 @@ Segment::Segment(QObject *parent)
     , m_track(nullptr)
     , m_position(0)
     , m_length(0)
+    , m_isProcessing(false)
     , m_maxStretchLeft(std::numeric_limits<unsigned int>::max())
     , m_maxStretchRight(std::numeric_limits<unsigned int>::max())
 {
@@ -96,8 +97,8 @@ bool Segment::contains(qint64 position){
     return (position >= m_position && position < m_position + m_length);
 }
 
-bool Segment::isAsync() const{
-    return m_isAsync;
+bool Segment::isProcessing() const{
+    return m_isProcessing;
 }
 
 Track *Segment::currentTrack() const{
@@ -122,8 +123,8 @@ void Segment::stretchRightTo(unsigned int position){
     setLength(position - m_position);
 }
 
-void Segment::setIsAsync(bool isAsync){
-    m_isAsync = isAsync;
+void Segment::setIsProcessing(bool isProcessing){
+    m_isProcessing = isProcessing;
 }
 
 void Segment::setPosition(Segment *segment, unsigned int position){

@@ -45,6 +45,7 @@ public:
     QQmlListProperty<QObject> segments();
 
     virtual CursorOperation updateCursorPosition(qint64 newPosition);
+    virtual void cursorPositionProcessed(qint64 position);
 
     virtual void setContentLength(qint64 contentLength);
 
@@ -61,6 +62,7 @@ public:
     QObject *timelineProperties() const;
 
     virtual void timelineComplete();
+    void notifyCursorProcessed(qint64 position);
 
 public slots:
     bool addSegment(lv::Segment* segment);

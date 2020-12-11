@@ -96,6 +96,7 @@ public slots:
 signals:
     void contentLengthChanged();
     void fpsChanged();
+    void waitingForTrack(qint64 position);
     void cursorPositionChanged(qint64 position);
     void cursorPositionProcessed(qint64 position);
     void isRunningChanged();
@@ -113,7 +114,7 @@ private:
     double m_fps;
     bool   m_loop;
     bool   m_isRunning;
-    bool   m_waitingForTrack;
+    qint64 m_waitingForTrackAt;
     bool   m_isComponentComplete;
 
     TimelineConfig*      m_config;

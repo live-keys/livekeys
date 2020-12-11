@@ -78,6 +78,7 @@ DISTFILES += \
     qml/NavigableImageView.qml \
     qml/Perspective.qml \
     qml/PerspectiveTool.qml \
+    qml/ScriptVideoSegmentCreator.qml \
     qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
     qml/VideoCaptureSegmentFactory.qml \

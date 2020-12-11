@@ -23,6 +23,10 @@
 
 namespace lv{
 
+namespace{
+    static const int WAIT_NOTRACK = -1;
+}
+
 Timeline::Timeline(QObject *parent)
     : QObject(parent)
     , m_cursorPosition(0)
@@ -30,7 +34,7 @@ Timeline::Timeline(QObject *parent)
     , m_fps(1)
     , m_loop(false)
     , m_isRunning(false)
-    , m_waitingForTrack(false)
+    , m_waitingForTrackAt(WAIT_NOTRACK)
     , m_isComponentComplete(false)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
@@ -109,7 +113,7 @@ QString Timeline::positionToLabel(qint64 frameNumber, bool shortZero){
 }
 
 void Timeline::__tick(){
-    if ( m_waitingForTrack ){
+    if ( m_waitingForTrackAt != WAIT_NOTRACK ){
         m_timer.stop();
 
     } else {
@@ -123,6 +127,18 @@ void Timeline::__tick(){
 }
 
 void Timeline::__trackCursorProcessed(Track* track, qint64 position){
+    if ( position != m_waitingForTrackAt ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( ve ){
+            QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "Timeline: Track processed position is not the same as the current waiting track position.", Exception::toCode("~Mismatch")),
+                this
+            ).jsThrow();
+        }
+        return;
+    }
+
     int i = m_trackList->totalTracks() - 1;
 
     if ( position == m_cursorPosition ){ // go to left over tracks
@@ -137,14 +153,20 @@ void Timeline::__trackCursorProcessed(Track* track, qint64 position){
     // process left over tracks (or all tracks in case a new cursor position is set)
     while ( i >= 0 ){
         Track* tr = m_trackList->trackAt(i);
-        Track::CursorOperation co = tr->updateCursorPosition(position);
+        Track::CursorOperation co = tr->updateCursorPosition(m_cursorPosition);
         if ( co == Track::Delayed ){
+            m_waitingForTrackAt = m_cursorPosition;
+            emit waitingForTrack(m_cursorPosition);
             return;
         }
         --i;
     }
 
-    m_waitingForTrack = false;
+    m_waitingForTrackAt = WAIT_NOTRACK;
+
+    for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
+        m_trackList->trackAt(i)->cursorPositionProcessed(position);
+    }
 
     if ( !m_timer.isActive() && m_isRunning ){ // timer was stopped due to wait
         __tick();
@@ -159,6 +181,7 @@ void Timeline::appendTrack(lv::Track *track){
     track->setParent(this);
     m_trackList->appendTrack(track);
     track->setContentLength(m_contentLength);
+    //TODO: WIll need to reupdate all tracks at that cursor position
     track->updateCursorPosition(m_cursorPosition);
     emit trackListChanged();
 }
@@ -384,7 +407,7 @@ void Timeline::updateCursorPosition(qint64 position){
     m_cursorPosition = position;
     emit cursorPositionChanged(position);
 
-    if ( m_waitingForTrack )
+    if ( m_waitingForTrackAt >= 0 )
         return;
 
     int i = m_trackList->totalTracks() - 1;
@@ -392,10 +415,15 @@ void Timeline::updateCursorPosition(qint64 position){
         Track* tr = m_trackList->trackAt(i);
         Track::CursorOperation co = tr->updateCursorPosition(position);
         if ( co == Track::Delayed ){
-            m_waitingForTrack = true;
+            m_waitingForTrackAt = position;
+            emit waitingForTrack(position);
             return;
         }
         --i;
+    }
+
+    for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
+        m_trackList->trackAt(i)->cursorPositionProcessed(position);
     }
 
     emit cursorPositionProcessed(position);

@@ -103,8 +103,6 @@ void VideoSegment::cursorEnter(qint64 pos){
 void VideoSegment::cursorExit(qint64){
     if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
-
-    m_videoTrack->surface()->resetSurface();
 }
 
 void VideoSegment::cursorNext(qint64 pos){
