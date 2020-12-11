@@ -29,6 +29,7 @@
 #include "qmlprojectmonitor_p.h"
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
+#include "qmleditfragmentcontainer.h"
 #include "qmlbindingspanmodel.h"
 #include "qmltokenizer_p.h"
 #include "qmlsyntax_p.h"
@@ -164,7 +165,9 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
     qmlRegisterUncreatableType<lv::CodeQmlHandler>(
-        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
+        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler");
+    qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(
+        uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.documentHandler.codeHandler.editContainer");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(

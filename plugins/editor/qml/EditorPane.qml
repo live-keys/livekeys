@@ -49,7 +49,7 @@ Pane{
     property alias loading: loadingAnimation.visible
     property var panes: null
 
-    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
+    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.editContainer.editCount !== 0)
 
     onCodeOnlyChanged: {
         if (codeOnly){
@@ -282,7 +282,7 @@ Pane{
                         } else {
                             root.state = null
                         }
-                        documentHandler.codeHandler.removeAllEditingFragments()
+                        documentHandler.codeHandler.editContainer.clearAllFragments()
                         editor.importsShaped = false
                         editor.rootShaped = false
                     }

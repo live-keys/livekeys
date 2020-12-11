@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingpath.h \
     $$PWD/qmlbindingspan.h \
+    $$PWD/qmleditfragmentcontainer.h \
     $$PWD/qmlimportsmodel.h \
     $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
@@ -45,6 +46,7 @@ SOURCES += \
     $$PWD/qmlbindingpath.cpp \
     $$PWD/qmlbindingspan.cpp \
     $$PWD/qmlbindingspanmodel.cpp \
+    $$PWD/qmleditfragmentcontainer.cpp \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/qmlcompletioncontext.cpp \
     $$PWD/qmllanguageinfo.cpp \

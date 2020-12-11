@@ -43,6 +43,7 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 
 class QmlEditFragment;
+class QmlEditFragmentContainer;
 class QmlJsHighlighter;
 class QmlJsSettings;
 class QmlAddContainer;
@@ -56,10 +57,11 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
+    Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer CONSTANT)
 
+public:
     friend class ProjectQmlExtension;
-
-    Q_PROPERTY(int numberOfConnections READ numberOfConnections NOTIFY numberOfConnectionsChanged)
+    friend class QmlEditFragmentContainer;
 
 public:
     explicit CodeQmlHandler(
@@ -82,6 +84,8 @@ public:
     void setDocument(ProjectDocument* document);
     void rehighlightBlock(const QTextBlock& block);
 
+    QmlDeclaration::Ptr getDeclarationViaCompletionContext(int position) const;
+    QList<lv::QmlDeclaration::Ptr> getDeclarationsViaParsedDocument(int position, int length = 0);
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
 
@@ -100,9 +104,9 @@ public:
 
     QmlUsageGraphScanner* createScanner();
 
-    int numberOfConnections();
-
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
+
+    QmlEditFragmentContainer *editContainer();
 
 public slots:
     void __whenLibraryScanQueueCleared();
@@ -140,7 +144,7 @@ public slots:
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
-    void deleteObject(lv::QmlEditFragment* edit);
+    void eraseObject(lv::QmlEditFragment* edit);
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
@@ -165,7 +169,6 @@ public slots:
     lv::QmlImportsModel* importsModel();
     void addLineAtPosition(QString line, int pos);
     void removeLineAtPosition(int pos);
-    void removeAllEditingFragments();
 
     int findImportsPosition(int blockPos);
     int findRootPosition();
@@ -212,7 +215,6 @@ public slots:
     QString getFragmentId(lv::QmlEditFragment* ef);
 
 signals:
-    void numberOfConnectionsChanged();
     void importsScanned();
 
 private:
@@ -294,8 +296,9 @@ private:
     bool                   m_newScope;
     QTimer                 m_scopeTimer;
 
-    QLinkedList<QmlEditFragment*> m_edits; // opened palettes
-    QmlEditFragment*              m_editingFragment; // editing fragment
+    QmlEditFragment*              m_editingFragment; // single editing fragment
+
+    QmlEditFragmentContainer*     m_editContainer;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 
@@ -305,6 +308,10 @@ private:
 /// \brief Returns the settings associated with this object.
 inline QmlJsSettings *CodeQmlHandler::settings(){
     return m_settings;
+}
+
+inline QmlEditFragmentContainer *CodeQmlHandler::editContainer(){
+    return m_editContainer;
 }
 
 }// namespace

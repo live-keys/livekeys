@@ -749,7 +749,7 @@ QtObject{
 
     function eraseObject(objectContainer){
         var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
-        objectContainer.editor.documentHandler.codeHandler.deleteObject(objectContainer.editingFragment)
+        objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment)
 
         if (rootDeleted) {
             objectContainer.editor.editor.rootShaped = false
