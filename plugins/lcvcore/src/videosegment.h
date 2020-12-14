@@ -18,7 +18,9 @@ namespace lv{
 class VideoSegment : public Segment{
 
     Q_OBJECT
-    Q_PROPERTY(QString file  READ file WRITE setFile NOTIFY fileChanged)
+    Q_PROPERTY(QString file           READ file          WRITE setFile    NOTIFY fileChanged)
+    Q_PROPERTY(QString filters        READ filters       WRITE setFilters NOTIFY filtersChanged)
+    Q_PROPERTY(QObject* filtersObject READ filtersObject NOTIFY filtersChanged)
 
 public:
     explicit VideoSegment(QObject *parent = nullptr);
@@ -36,20 +38,39 @@ public:
     void cursorNext(qint64 position) override;
     void cursorMove(qint64 position) override;
 
+    const QString& filters() const;
+
+    QObject* filtersObject() const;
+
 public slots:
     void setFile(const QString& file);
 
+    void setFilters(const QString& filters);
+
 signals:
     void fileChanged();
+    void filtersChanged();
 
 private:
+    void createFilters();
+
     VideoTrack*       m_videoTrack;
     QString           m_file;
     cv::VideoCapture* m_capture;
+    QString m_filters;
+    QObject* m_filtersObject;
 };
 
 inline const QString& VideoSegment::file() const{
     return m_file;
+}
+
+inline const QString &VideoSegment::filters() const{
+    return m_filters;
+}
+
+inline QObject *VideoSegment::filtersObject() const{
+    return m_filtersObject;
 }
 
 inline void VideoSegment::setFile(const QString &file){
@@ -61,6 +82,16 @@ inline void VideoSegment::setFile(const QString &file){
 
     openFile();
 
+}
+
+inline void VideoSegment::setFilters(const QString &filters){
+    if (m_filters == filters)
+        return;
+
+    m_filters = filters;
+    emit filtersChanged();
+
+    createFilters();
 }
 
 }// namespace

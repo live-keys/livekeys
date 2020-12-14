@@ -3,6 +3,7 @@
 #include "imagesegment.h"
 #include "scriptvideosegment.h"
 
+#include "live/viewcontext.h"
 #include "live/project.h"
 
 #include <QQmlPropertyMap>
@@ -90,6 +91,19 @@ void VideoTrack::cursorPositionProcessed(qint64 position){
     if ( surface() ){
         surface()->swapSurface(position);
     }
+}
+
+void VideoTrack::recordingStarted(){
+    try {
+        m_surface->createRecorder();
+    } catch (lv::Exception& e) {
+        ViewEngine* ve = ViewContext::instance().engine();
+        QmlError(ve, e, this).jsThrow();
+    }
+}
+
+void VideoTrack::recordingStopped(){
+    m_surface->closeRecorder();
 }
 
 

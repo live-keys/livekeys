@@ -119,6 +119,8 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
 }
 
 void Track::cursorPositionProcessed(qint64){}
+void Track::recordingStarted(){}
+void Track::recordingStopped(){}
 
 void Track::setContentLength(qint64 contentLength){
     segmentModel()->setContentLength(contentLength);

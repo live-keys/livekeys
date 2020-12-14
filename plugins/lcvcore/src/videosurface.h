@@ -3,6 +3,7 @@
 
 #include "qmatdisplay.h"
 #include "live/timelineobjectproperty.h"
+#include "qvideowriter.h"
 
 namespace lv{
 
@@ -34,18 +35,26 @@ public:
 
     bool builderUsed() const;
 
+    void createRecorder();
+    void closeRecorder();
+
+public slots:
+    void setWriterOptions(const QJSValue& options);
+
 signals:
     void imageWidthChanged();
     void imageHeightChanged();
     void imageChanged();
 
 private:
-    qint64 m_lastProcessedPosition;
-    int    m_imageWidth;
-    int    m_imageHeight;
-    qint64 m_currentPosition;
-    QMat*  m_buffer;
-    QMat*  m_current;
+    qint64        m_lastProcessedPosition;
+    int           m_imageWidth;
+    int           m_imageHeight;
+    qint64        m_currentPosition;
+    QMat*         m_buffer;
+    QMat*         m_current;
+    QJSValue      m_writerOptions;
+    QVideoWriter* m_writer;
 };
 
 inline int VideoSurface::imageWidth() const{

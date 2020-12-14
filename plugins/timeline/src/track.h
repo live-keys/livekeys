@@ -46,6 +46,8 @@ public:
 
     virtual CursorOperation updateCursorPosition(qint64 newPosition);
     virtual void cursorPositionProcessed(qint64 position);
+    virtual void recordingStarted();
+    virtual void recordingStopped();
 
     virtual void setContentLength(qint64 contentLength);
 

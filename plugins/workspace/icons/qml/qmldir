@@ -18,3 +18,5 @@ FolderIcon        1.0 FolderIcon.qml
 FileIcon          1.0 FileIcon.qml
 PerspectiveIcon   1.0 PerspectiveIcon.qml
 PenSizeIcon       1.0 PenSizeIcon.qml
+RecordIcon        1.0 RecordIcon.qml
+StopIcon          1.0 StopIcon.qml

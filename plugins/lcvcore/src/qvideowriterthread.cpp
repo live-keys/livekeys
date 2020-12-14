@@ -72,7 +72,6 @@ void QVideoWriterThread::run(){
         m_mutex.lock();
 
         if ( m_hasDataToWrite ){
-
             m_writer->write(m_data);
             ++m_framesWritten;
 

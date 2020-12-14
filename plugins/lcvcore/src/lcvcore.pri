@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/cvextras.h \
     $$PWD/imagesegment.h \
     $$PWD/qabsdiff.h \
     $$PWD/qalphamerge.h \
@@ -42,6 +43,7 @@ HEADERS += \
     $$PWD/videotrack.h
 
 SOURCES += \
+    $$PWD/cvextras.cpp \
     $$PWD/imagesegment.cpp \
     $$PWD/lcvcore_plugin.cpp \
     $$PWD/qabsdiff.cpp \

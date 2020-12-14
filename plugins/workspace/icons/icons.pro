@@ -24,6 +24,8 @@ OTHER_FILES += \
 
 DISTFILES += \
     qml/PlusIcon.qml \
+    qml/RecordIcon.qml \
+    qml/StopIcon.qml \
     qml/live.plugin.json \
     qml/qmldir
 

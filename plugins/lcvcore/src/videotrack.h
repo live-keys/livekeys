@@ -26,6 +26,8 @@ public:
     virtual QString typeReference() const override;
 
     virtual void cursorPositionProcessed(qint64 position) override;
+    virtual void recordingStarted() override;
+    virtual void recordingStopped() override;
 
 signals:
     void surfaceChanged(lv::VideoSurface* surface);

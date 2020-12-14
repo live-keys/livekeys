@@ -22,6 +22,7 @@ VideoSegment::VideoSegment(QObject *parent)
     : Segment(parent)
     , m_videoTrack(nullptr)
     , m_capture(new cv::VideoCapture)
+    , m_filtersObject(nullptr)
 {
 }
 
@@ -37,14 +38,22 @@ void VideoSegment::serialize(QQmlEngine *engine, MLNode &node) const{
     Segment::serialize(engine, node);
 
     QString filePath = m_file;
+    QString filtersPath = m_filters;
 
     QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
     Project* project = qobject_cast<Project*>(projectOb);
 
     if ( project ){
         if ( filePath.startsWith(project->dir()) ){
-            filePath = filePath.mid(project->dir().length());
+            filePath = filePath.mid(project->dir().length() + 1);
         }
+        if ( filtersPath.startsWith(project->dir() ) ){
+            filtersPath = filtersPath.mid(project->dir().length() + 1);
+        }
+    }
+
+    if ( !m_filters.isEmpty() ){
+        node["filters"] = m_filters.toStdString();
     }
 
     node["file"] = filePath.toStdString();
@@ -56,12 +65,21 @@ void VideoSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &n
 
     QString fileName = QString::fromStdString(node["file"].asString());
     QFileInfo finfo(fileName);
-    if ( finfo.isRelative() ){
-        QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
-        Project* project = qobject_cast<Project*>(projectOb);
-        if ( project ){
-            fileName = QFileInfo(project->dir() + "/" + fileName).canonicalFilePath();
+
+    QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
+    Project* project = qobject_cast<Project*>(projectOb);
+
+    if ( finfo.isRelative() && project ){
+        fileName = QFileInfo(project->dir() + "/" + fileName).canonicalFilePath();
+    }
+
+    if ( node.hasKey("filters") ){
+        QString filtersPath = QString::fromStdString(node["filters"].asString());
+        QFileInfo filterPathInfo(filtersPath);
+        if ( filterPathInfo.isRelative() ){
+            filtersPath = QFileInfo(project->dir() + "/" + fileName).canonicalFilePath();
         }
+        setFilters(filtersPath);
     }
 
     setFile(fileName);
@@ -129,6 +147,9 @@ void VideoSegment::cursorMove(qint64 pos){
         QMat* mat = new QMat(frame);
         m_videoTrack->surface()->updateSurface(position() + pos, mat);
     }
+}
+
+void VideoSegment::createFilters(){
 }
 
 }// namespace

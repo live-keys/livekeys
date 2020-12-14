@@ -75,14 +75,59 @@ Rectangle{
                 }
             }
         }
+        Item{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 30
+            width: 15
+            height: 15
+            Icons.RecordIcon{
+                anchors.centerIn: parent
+                width: 12
+                height: 12
+                color: root.timelineStyle.iconColor
+                visible: !root.timeline.isRunning
+            }
+            Icons.StopIcon{
+                anchors.centerIn: parent
+                width: 12
+                height: 12
+                padding: 2
+                color: root.timelineStyle.iconColor
+                visible: root.timeline.isRecording
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if ( root.timeline.isRecording ){
+                        root.timeline.stop()
+                    } else {
+                        lk.layers.window.dialogs.saveFile({filters: ["Avi file (*.avi)"]}, function(url){
+                            var file = Fs.UrlInfo.toLocalFile(url)
+                            var writerOptions = {
+                                'filename': file,
+                                'fourcc' : 'DIVX',
+                                'fps' : root.timeline.fps
+                            }
+                            root.timeline.properties.videoSurface.setWriterOptions(writerOptions)
+                            root.timeline.startRecording()
+                        })
+
+                    }
+                }
+            }
+        }
+
         Workspace.PlayPause{
             width: 15
             height: 15
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 40
+            anchors.leftMargin: 50
             isRunning: root.timeline.isRunning
             color: root.timelineStyle.iconColor
+            visible: !root.timeline.isRecording
             onClicked : {
                 if ( value )
                     root.timeline.start()
@@ -94,7 +139,7 @@ Rectangle{
         Workspace.Label{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 68
+            anchors.leftMargin: 80
             text: root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false)
             textStyle: root.timelineStyle.timeLabelStyle
         }

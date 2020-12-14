@@ -54,7 +54,6 @@ void QmlEditFragmentContainer::derefEdit(QmlEditFragment *edit){
                     for (auto child: edit->childFragments())
                         derefEdit(child);
 
-                    qDebug() << "GOT HERE";
                     emit editCountChanged();
 
                     //TOWORKAROUND

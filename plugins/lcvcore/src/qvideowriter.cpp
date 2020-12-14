@@ -21,13 +21,12 @@
 #include <QQmlContext>
 #include "opencv2/highgui.hpp"
 
-
-QVideoWriter::QVideoWriter(QQuickItem *parent)
-    : QQuickItem(parent)
-    , m_input(QMat::nullMat())
-    , m_thread(0)
+QVideoWriter::QVideoWriter(QObject *parent)
+    : QObject(parent)
+    , m_thread(nullptr)
+    , m_stream(new lv::QmlWritableStream(this))
 {
-    QQuickItem::setFlag(QQuickItem::ItemHasContents, false);
+
 }
 
 QVideoWriter::~QVideoWriter(){
@@ -37,44 +36,35 @@ int QVideoWriter::framesWritten() const{
     return m_thread ? m_thread->framesWritten() : 0;
 }
 
-QString QVideoWriter::getKey(const QString &filename,
-        int fourcc,
-        double fps,
-        const cv::Size frameSize) const
-{
-    return
-        filename +
-        QString::number(fourcc) +
-        QString::number(fps) +
-        QString::number(frameSize.width) +
-        QString::number(frameSize.height);
+void QVideoWriter::onInStream(QObject *that, const QJSValue &val){
+    QVideoWriter* ethat = static_cast<QVideoWriter*>(that);
+    QMat* m = qobject_cast<QMat*>(val.toQObject());
+    if ( m ){
+        ethat->write(m);
+    }
 }
 
-void QVideoWriter::componentComplete(){
-    QQuickItem::componentComplete();
-}
-
-void QVideoWriter::staticLoad(const QJSValue &params){
+void QVideoWriter::setOptions(QJSValue options){
     QString filename = "";
-    int m_fourcc = 0;
-    double m_fps = 0;
-    cv::Size m_frameSize = cv::Size(0, 0);
-    int m_isColor = true;
+    int fourcc = 0;
+    double fps = 0;
+    cv::Size frameSize = cv::Size(0, 0);
+    int isColor = true;
 
-    QJSValueIterator initIt(params);
+    QJSValueIterator initIt(options);
     while ( initIt.hasNext() ){
         initIt.next();
         if ( initIt.name() == "filename" ){
             filename = initIt.value().toString();
         } else if ( initIt.name() == "fourcc" ){
             if ( initIt.value().isNumber() ){
-                m_fourcc = initIt.value().toInt();
+                fourcc = initIt.value().toInt();
             } else {
                 QString fourccstr = initIt.value().toString();
                 if ( fourccstr.length() != 4 ){
                     qWarning("Invalid fourcc codec length. VideoWriter will not work correctly.");
                 } else {
-                    m_fourcc = cv::VideoWriter::fourcc(
+                    fourcc = cv::VideoWriter::fourcc(
                         fourccstr[0].toLatin1(),
                         fourccstr[1].toLatin1(),
                         fourccstr[2].toLatin1(),
@@ -83,27 +73,21 @@ void QVideoWriter::staticLoad(const QJSValue &params){
                 }
             }
         } else if ( initIt.name() == "fps" ){
-            m_fps = initIt.value().toNumber();
+            fps = initIt.value().toNumber();
         } else if ( initIt.name() == "frameWidth" ){
-            m_frameSize.width = initIt.value().toInt();
+            frameSize.width = initIt.value().toInt();
         } else if ( initIt.name() == "frameHeight" ){
-            m_frameSize.height = initIt.value().toInt();
+            frameSize.height = initIt.value().toInt();
         } else if ( initIt.name() == "isColor" ){
-            m_isColor = initIt.value().toBool();
+            isColor = initIt.value().toBool();
         }
     }
 
-    lv::StaticContainer* container = qmlContext(this)->contextProperty("staticContainer").value<lv::StaticContainer*>();
-    m_thread = container->get<QVideoWriterThread>(getKey(
-        filename, m_fourcc, m_fps, m_frameSize
-    ));
+    m_thread = createThread(filename, fourcc, fps, frameSize, isColor);
+    m_thread->start();
 
-    if ( !m_thread ){
-        m_thread = createThread(filename, m_fourcc, m_fps, m_frameSize, m_isColor);
-        container->set<QVideoWriterThread>(getKey(
-            filename, m_fourcc, m_fps, m_frameSize
-        ), m_thread);
-    }
+    m_options = options;
+    emit optionsChanged();
 }
 
 void QVideoWriter::save(){

@@ -34,6 +34,7 @@ Timeline::Timeline(QObject *parent)
     , m_fps(1)
     , m_loop(false)
     , m_isRunning(false)
+    , m_isRecording(false)
     , m_waitingForTrackAt(WAIT_NOTRACK)
     , m_isComponentComplete(false)
     , m_config(new TimelineConfig(this))
@@ -79,7 +80,31 @@ void Timeline::removeTrack(int index){
 }
 
 void Timeline::start(){
+    if ( m_isRunning && m_isRecording ){
+        stop();
+    }
     if ( !m_isRunning ){
+        __tick();
+        m_timer.start();
+        m_isRunning = true;
+        emit isRunningChanged();
+    }
+}
+
+void Timeline::startRecording(){
+    if ( m_isRunning && !m_isRecording ){
+        stop();
+    }
+    if ( !m_isRunning ){
+
+        int i = m_trackList->totalTracks() - 1;
+        while ( i >= 0 ){
+            m_trackList->trackAt(i)->recordingStarted();
+            --i;
+        }
+        m_isRecording = true;
+        emit isRecordingChanged();
+
         __tick();
         m_timer.start();
         m_isRunning = true;
@@ -89,6 +114,16 @@ void Timeline::start(){
 
 void Timeline::stop(){
     if ( m_isRunning ){
+        if ( m_isRecording ){
+            int i = m_trackList->totalTracks() - 1;
+            while ( i >= 0 ){
+                m_trackList->trackAt(i)->recordingStopped();
+                --i;
+            }
+            m_isRecording = false;
+            emit isRecordingChanged();
+        }
+
         m_isRunning = false;
         m_timer.stop();
         emit isRunningChanged();
@@ -422,8 +457,10 @@ void Timeline::updateCursorPosition(qint64 position){
         --i;
     }
 
-    for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
+    i = m_trackList->totalTracks() - 1;
+    while ( i >= 0 ){
         m_trackList->trackAt(i)->cursorPositionProcessed(position);
+        --i;
     }
 
     emit cursorPositionProcessed(position);
