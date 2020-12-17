@@ -100,6 +100,7 @@ void Runnable::run(){
                 QQmlContext* ctx = createContext();
 
                 QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+
                 runnableContainer->announceQmlBuild(this, build);
                 build->setState(QmlBuild::Compiling);
 
@@ -113,7 +114,8 @@ void Runnable::run(){
                 );
             } else {
                 QQmlContext* ctx = createContext();
-                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+
                 runnableContainer->announceQmlBuild(this, build);
                 build->setState(QmlBuild::Compiling);
 
@@ -152,7 +154,7 @@ void Runnable::run(){
 
             if ( m_project->active() == this ){
                 QQmlContext* ctx = createContext();
-                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
                 runnableContainer->announceQmlBuild(this, build);
                 build->setState(QmlBuild::Compiling);
 
@@ -167,7 +169,7 @@ void Runnable::run(){
             } else {
                 QQmlContext* ctx = createContext();
 
-                QmlBuild* build = static_cast<QmlBuild*>(ctx->property("build").value<QObject*>());
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
                 runnableContainer->announceQmlBuild(this, build);
                 build->setState(QmlBuild::Compiling);
 
@@ -407,11 +409,12 @@ void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQ
             }
         }
 
+        m_viewContext = context;
+
         QmlBuild* build = static_cast<QmlBuild*>(context->contextProperty("build").value<QObject*>());
         build->setState(QmlBuild::Ready);
 
         connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
-        m_viewContext = context;
         emit objectReady(object);
     }
 }

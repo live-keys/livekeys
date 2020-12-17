@@ -59,6 +59,12 @@ Theme{
     property string topOnSaveModeIcon : "qrc:/images/top-icon-mode-onsave.png"
     property string topDisabledModeIcon: "qrc:/images/top-icon-mode-disabled.png"
 
+    property Component stackIcon: StackIcon{}
+    property Component fileIcon : Image{ source: "qrc:/images/palette-connection-file.png" }
+    property Component componentIcon : Image{ source: "qrc:/images/palette-connection-component.png" }
+    property Component watcherIcon : Image{ source: "qrc:/images/project-file-monitor.png" }
+
+
     // Menus
 
     property QtObject popupMenuStyle: PopupMenuStyle{

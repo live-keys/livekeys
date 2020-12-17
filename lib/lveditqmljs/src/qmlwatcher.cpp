@@ -19,6 +19,7 @@ namespace lv{
 
 QmlWatcher::QmlWatcher(QObject *parent)
     : QObject(parent)
+    , m_isEnabled(true)
     , m_componentComplete(false)
 {
 }
@@ -32,18 +33,38 @@ void QmlWatcher::componentComplete(){
     ViewEngine* ve = ViewEngine::grab(this);
 
     QQmlContext* ctx = qmlContext(this);
-    m_id = ctx->nameForObject(parent());
+    m_declaredId = ctx->nameForObject(parent());
 
-    if ( m_id.isEmpty() )
+
+
+
+    if ( m_declaredId.isEmpty() )
         return;
 
     ComponentDeclaration cd = ve->rootDeclaration(parent());
-    m_file = cd.url().toLocalFile();
+    m_referencedFile = cd.url().toLocalFile();
 
-    HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
-    hk->insertKey(m_file, m_id, this);
+    if ( checkChildDeclarations() ){
+        HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
+        hk->insertKey(m_referencedFile, m_declaredId, this);
+    }
 
     emit ready();
 }
 
+bool QmlWatcher::checkChildDeclarations(){
+    QQmlProperty pp(parent());
+    if ( pp.propertyTypeCategory() == QQmlProperty::List ){
+        QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(pp.read());
+        for ( int i = 0; i < assignmentList.count(); ++i ){
+            QObject* obj = assignmentList.at(i);
+            QString localUrl = qmlContext(obj)->baseUrl().toLocalFile();
+            if ( m_referencedFile != localUrl )
+                return false;
+        }
+    }
+    return true;
+}
+
 }// namespace
+

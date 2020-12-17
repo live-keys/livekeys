@@ -335,9 +335,11 @@ Item{
                 onToggleConnections: {
                     if ( paletteConnection.model ){
                         paletteConnection.model = null
+                        paletteConnection.editingFragment = null
                     } else {
                         paletteConnection.forceActiveFocus()
-                        paletteConnection.model = editingFragment.bindingModel(editor.documentHandler.codeHandler)
+                        paletteConnection.model = editor.documentHandler.codeHandler.bindingChannels
+                        paletteConnection.editingFragment = editingFragment
                     }
                 }
                 onAssignFocus: {
@@ -373,14 +375,10 @@ Item{
 
         PaletteConnection{
             id: paletteConnection
-            visible: model ? true:false
+            visible: model ? true : false
             anchors.top: parent.top
-            anchors.topMargin: 24
+            anchors.topMargin: 25
             width: parent.width
-            color: "#0a141c"
-            selectionColor: "#0d2639"
-            fontSize: 10
-            fontFamily: "Open Sans, sans-serif"
             onFocusChanged : if ( !focus ) model = null
 
             property var selectedHandler : function(){}

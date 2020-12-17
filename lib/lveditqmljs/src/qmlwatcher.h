@@ -17,8 +17,10 @@ public:
     explicit QmlWatcher(QObject *parent = nullptr);
     ~QmlWatcher() override;
 
-    const QString& fileReference() const{ return m_file; }
-    const QString& declaredId() const{ return m_id; }
+    const QString& referencedFile() const{ return m_referencedFile; }
+    const QString& declaredId() const{ return m_declaredId; }
+
+    bool isEnabled() const;
 
 signals:
     void ready();
@@ -28,10 +30,17 @@ protected:
     void componentComplete() override;
 
 private:
-    QString m_file;
-    QString m_id;
+    bool checkChildDeclarations();
+
+    QString m_referencedFile;
+    QString m_declaredId;
+    bool    m_isEnabled;
     bool    m_componentComplete;
 };
+
+inline bool QmlWatcher::isEnabled() const{
+    return m_isEnabled;
+}
 
 }// namespace
 

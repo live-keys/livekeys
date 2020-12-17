@@ -42,6 +42,7 @@ namespace lv{
 class ProjectQmlScanner;
 class ProjectQmlExtension;
 
+class DocumentQmlChannels;
 class QmlEditFragment;
 class QmlEditFragmentContainer;
 class QmlJsHighlighter;
@@ -57,7 +58,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
-    Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer CONSTANT)
+    Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
+    Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
 
 public:
     friend class ProjectQmlExtension;
@@ -82,12 +84,13 @@ public:
         QTextCursor& cursorChange
     );
     void setDocument(ProjectDocument* document);
+    ProjectDocument* document() const;
     void rehighlightBlock(const QTextBlock& block);
 
     QmlDeclaration::Ptr getDeclarationViaCompletionContext(int position) const;
     QList<lv::QmlDeclaration::Ptr> getDeclarationsViaParsedDocument(int position, int length = 0);
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
-    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
+    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QmlEditFragment* parent = nullptr);
 
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
@@ -107,6 +110,7 @@ public:
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
     QmlEditFragmentContainer *editContainer();
+    DocumentQmlChannels* bindingChannels() const;
 
 public slots:
     void __whenLibraryScanQueueCleared();
@@ -297,13 +301,18 @@ private:
     QTimer                 m_scopeTimer;
 
     QmlEditFragment*              m_editingFragment; // single editing fragment
-
     QmlEditFragmentContainer*     m_editContainer;
+
+    DocumentQmlChannels*   m_bindingChannels;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 
     Q_DECLARE_PRIVATE(CodeQmlHandler)
 };
+
+inline ProjectDocument *CodeQmlHandler::document() const{
+    return m_document;
+}
 
 /// \brief Returns the settings associated with this object.
 inline QmlJsSettings *CodeQmlHandler::settings(){
@@ -312,6 +321,10 @@ inline QmlJsSettings *CodeQmlHandler::settings(){
 
 inline QmlEditFragmentContainer *CodeQmlHandler::editContainer(){
     return m_editContainer;
+}
+
+inline DocumentQmlChannels *CodeQmlHandler::bindingChannels() const{
+    return m_bindingChannels;
 }
 
 }// namespace

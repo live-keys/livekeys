@@ -27,12 +27,11 @@
 
 namespace lv{
 
+class DocumentQmlChannels;
 class CodePalette;
 class CodeQmlHandler;
 class QmlBindingPath;
 class QmlBindingChannel;
-class QmlBindingSpan;
-class QmlBindingSpanModel;
 class CodeCompletionModel;
 class QmlImportsModel;
 
@@ -80,10 +79,7 @@ public:
         QObject* parent = nullptr
     );
 
-    QmlBindingSpan* bindingSpan();
-
     void setPaletteForBinding(CodePalette* palette);
-    void setRelativeBinding(const QSharedPointer<QmlBindingPath>& bp);
 
     bool hasPalette(CodePalette* palette);
     CodePalette* palette(const QString& type);
@@ -118,6 +114,11 @@ public:
     QJSValue& whenBinding();
     void setWhenBinding(const QJSValue& whenBinding);
 
+    void setChannel(QSharedPointer<QmlBindingChannel> channel);
+    const QSharedPointer<QmlBindingChannel> channel() const;
+
+    QSharedPointer<QmlBindingPath> fullBindingPath();
+
 public slots:
     int fragmentType() const;
     bool isOfFragmentType(FragmentType type) const;
@@ -127,6 +128,8 @@ public slots:
     const QList<lv::QmlEditFragment*> childFragments();
 
     lv::CodeQmlHandler* codeHandler() const;
+
+    void commit(const QVariant& value);
 
     int position();
     int valuePosition() const;
@@ -144,9 +147,11 @@ public slots:
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
     lv::CodePalette* bindingPalette();
-    lv::QmlBindingSpanModel *bindingModel(lv::CodeQmlHandler* codeHandler);
+    QStringList bindingPath();
 
     lv::QmlImportsModel* documentImports();
+
+    void __selectedChannelChanged();
 
     QString type() const;
     QString typeName() const;
@@ -211,15 +216,13 @@ private:
 
     QList<QmlEditFragment*> m_childFragments;
 
-    QmlBindingSpan*                m_bindingSpan;
-    QSharedPointer<QmlBindingPath> m_relativeBinding;
+    QSharedPointer<QmlBindingChannel> m_channel;
 
     bool                    m_bindingUse;
     bool                    m_paletteUse;
     QObject*                m_visualParent;
 
     QmlTypeReference        m_objectInitializeType;
-    QmlBindingSpanModel*    m_bindingSpanModel;
     QVariantList            m_nestedObjectsInfo;
     QVariantMap             m_objectInfo;
     int                     m_refCount;
@@ -229,11 +232,6 @@ private:
     int                     m_fragmentType;
     lv::CodeQmlHandler*     m_codeHandler;
 };
-
-/// \brief Returns the binding channel associated with this object.
-inline QmlBindingSpan *QmlEditFragment::bindingSpan(){
-    return m_bindingSpan;
-}
 
 inline CodePalette *QmlEditFragment::bindingPalette(){
     return m_bindingPalette;
@@ -296,6 +294,10 @@ inline QJSValue& QmlEditFragment::whenBinding(){
 inline void QmlEditFragment::setWhenBinding(const QJSValue& whenBinding){
     m_whenBinding = whenBinding;
     emit whenBindingChanged();
+}
+
+inline const QSharedPointer<QmlBindingChannel> QmlEditFragment::channel() const{
+    return m_channel;
 }
 
 }// namespace

@@ -97,11 +97,17 @@ public:
     void appendIndex(int index);
     void appendWatcher(const QString& filePath, const QString& objectId);
 
-    static QmlBindingPath::Ptr join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2, bool firstIndex = true);
+    static QmlBindingPath::Ptr join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2);
     QmlBindingPath::Ptr clone() const;
+    QmlBindingPath::Ptr headPath() const;
+    QmlBindingPath::Ptr tailPath();
     QmlBindingPath::Ptr parentObjectPath() const;
 
+    QmlBindingPath::Node* cloneNode(QmlBindingPath::Node* node);
+
     QString rootFile() const;
+
+    int length() const;
 
     bool operator == (const QmlBindingPath& other) const;
     bool operator != (const QmlBindingPath& other) const;

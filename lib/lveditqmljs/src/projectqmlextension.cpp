@@ -30,7 +30,8 @@
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
 #include "qmleditfragmentcontainer.h"
-#include "qmlbindingspanmodel.h"
+#include "documentqmlchannels.h"
+#include "qmlbindingchannelsdispatcher.h"
 #include "qmltokenizer_p.h"
 #include "qmlsyntax_p.h"
 #include "qmlmetainfo_p.h"
@@ -74,6 +75,7 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
     , m_settings(nullptr)
     , m_scanMonitor(nullptr)
     , m_paletteContainer(nullptr)
+    , m_channelDispatcher(nullptr)
 {
 }
 
@@ -168,12 +170,12 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler");
     qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(
         uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.documentHandler.codeHandler.editContainer");
+    qmlRegisterUncreatableType<lv::DocumentQmlChannels>(
+        uri, 1, 0, "DocumentQmlChannels", "DocumentQmlChannels can only be accessed through the Editor.documentHandler.codeHandler.bindingChannels");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
         uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
-        uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
 
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
     qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);
@@ -202,6 +204,7 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     }
 
     m_paletteContainer = editor->paletteContainer();
+    m_channelDispatcher = new QmlBindingChannelsDispatcher(m_project, this);
 }
 
 bool ProjectQmlExtension::pluginTypesEnabled(){

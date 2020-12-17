@@ -5,13 +5,16 @@
 #include "live/hookcontainer.h"
 #include "documentqmlinfo.h"
 #include "qmlbuilder.h"
+#include "documentqmlchannels.h"
 
 #include <QQmlContext>
 
 namespace lv{
 
-QmlBindingChannel::Ptr QmlBindingChannel::create(QmlBindingPath::Ptr bindingPath, Runnable *runnable){
-    return QmlBindingChannel::Ptr(new QmlBindingChannel(bindingPath, runnable));
+QmlBindingChannel::Ptr QmlBindingChannel::create(QmlBindingPath::Ptr bindingPath, Runnable *runnable, QObject *object){
+    QmlBindingChannel::Ptr bc = QmlBindingChannel::Ptr(new QmlBindingChannel(bindingPath, runnable));
+    bc->m_object = object;
+    return bc;
 }
 
 QmlBindingChannel::Ptr QmlBindingChannel::create(
@@ -37,10 +40,11 @@ QmlBindingChannel::QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable *
     : QObject(parent)
     , m_bindingPath(bindingPath)
     , m_runnable(runnable)
+    , m_object(nullptr)
     , m_listIndex(-1)
     , m_enabled(false)
+    , m_isBuilder(false)
 {
-    connect(runnable, &Runnable::objectReady, this, &QmlBindingChannel::__runableReady);
 }
 
 QmlBindingChannel::~QmlBindingChannel(){
@@ -55,9 +59,13 @@ void QmlBindingChannel::rebuild(){
         return;
 
     QString file = m_bindingPath->rootFile();
-    QmlBindingPath::ComponentNode* cn = (QmlBindingPath::ComponentNode*)m_bindingPath->root()->child;
-    QString builderId = cn->name;
 
+    QmlBindingPath::ComponentNode* cn = static_cast<QmlBindingPath::ComponentNode*>(m_bindingPath->lastNode());
+    if ( !cn ){
+        THROW_EXCEPTION(lv::Exception, "Failed to capture builder node in binding path.", Exception::toCode("~Builder"));
+    }
+
+    QString builderId = cn->name;
     QList<QObject*> builders = hooks->entriesFor(file, builderId);
 
     for ( QObject* ob : builders ){
@@ -68,8 +76,38 @@ void QmlBindingChannel::rebuild(){
     }
 }
 
+QObject *QmlBindingChannel::object() const{
+    if ( m_object )
+        return m_object;
+
+    if ( type() != QmlBindingChannel::ListIndex )
+        return nullptr;
+
+    QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_property.read());
+    QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+    // create correct order for list reference
+    QObjectList ordered;
+    for (auto child: parent->children())
+    {
+        bool found = false;
+        for (int i = 0; i < ppref.count(); ++i)
+            if (child == ppref.at(i)){
+                found = true;
+                break;
+            }
+        if (found) ordered.push_back(child);
+    }
+
+    if ( listIndex() >= ordered.length() ){
+        THROW_EXCEPTION(Exception, "Failed to find object in index: " + QString::number(listIndex()).toStdString() + " where list size is " + QString::number(ordered.length()).toStdString(), Exception::toCode("~Index"));
+    }
+
+    return ordered[listIndex()];
+}
+
 void QmlBindingChannel::__runableReady(){
-    QmlBindingChannel::Ptr bc = DocumentQmlInfo::traverseBindingPath(m_bindingPath, m_runnable);
+    QmlBindingChannel::Ptr bc = DocumentQmlChannels::traverseBindingPath(m_bindingPath, m_runnable);
     if ( bc ){
         m_property = bc->m_property;
         m_listIndex = bc->m_listIndex;

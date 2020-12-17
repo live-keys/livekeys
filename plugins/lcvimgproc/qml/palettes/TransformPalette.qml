@@ -60,7 +60,7 @@ CodePalette{
             var position =
                 oc.editingFragment.valuePosition() +
                 oc.editingFragment.valueLength() - 1
-            paletteControls.addItem(oc, position, "TransformImage", name, false)
+            paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
             var cont = oc.groupsContainer
             return cont.children[cont.children.length - 1]
@@ -142,7 +142,7 @@ CodePalette{
                         }
 
                         fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
-                        fragment.bindingModel(null).commit(Qt.rect(x, y, width, height))
+                        fragment.commit(Qt.rect(x, y, width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -202,7 +202,7 @@ CodePalette{
                             fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
                         }
                         fragment.write('"' + Math.round(width) + "x" + Math.round(height) + '"')
-                        fragment.bindingModel(null).commit(Qt.size(width, height))
+                        fragment.commit(Qt.size(width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -249,7 +249,7 @@ CodePalette{
                             fragment = paletteControls.addPropertyByFragment(rotate, codeHandler, "degrees")
                         }
                         fragment.write(-angle)
-                        fragment.bindingModel(null).commit(-angle)
+                        fragment.commit(-angle)
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -299,7 +299,7 @@ CodePalette{
                         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
                         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
                         fragment.write(value)
-                        fragment.bindingModel(null).commit([p1, p2, p3, p4])
+                        fragment.commit([p1, p2, p3, p4])
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }

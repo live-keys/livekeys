@@ -156,7 +156,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
+            visible: objectContainer.editingFragment
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-connections.png"

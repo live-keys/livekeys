@@ -200,7 +200,7 @@ QtObject{
         return res
     }
 
-    function addItem(container, insPosition, parentType, type, isForNode){
+    function addItemToRuntimeWithNotification(container, insPosition, parentType, type, isForNode){
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
