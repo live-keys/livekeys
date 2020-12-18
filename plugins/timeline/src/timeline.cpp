@@ -162,6 +162,9 @@ void Timeline::__tick(){
 }
 
 void Timeline::__trackCursorProcessed(Track* track, qint64 position){
+    if ( m_waitingForTrackAt == WAIT_NOTRACK )
+        return;
+
     if ( position != m_waitingForTrackAt ){
         ViewEngine* ve = ViewEngine::grab(this);
         if ( ve ){
@@ -375,6 +378,10 @@ void Timeline::componentComplete(){
 
 void Timeline::signalTrackNameChanged(Track *track){
     emit trackNameChanged(track);
+}
+
+void Timeline::refreshPosition(){
+    updateCursorPosition(m_cursorPosition);
 }
 
 void Timeline::load(){

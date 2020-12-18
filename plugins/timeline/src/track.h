@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include <QJSValue>
+
 #include "lvtimelineglobal.h"
 
-class QJSValue;
+class QQmlContext;
 
 namespace lv{
 
@@ -66,6 +68,10 @@ public:
     virtual void timelineComplete();
     void notifyCursorProcessed(qint64 position);
 
+    QQmlContext* timelineContext();
+
+    void refreshPosition();
+
 public slots:
     bool addSegment(lv::Segment* segment);
     lv::Segment* takeSegment(lv::Segment* segment);
@@ -73,6 +79,8 @@ public slots:
     lv::Timeline* timeline();
 
     void __segmentModelItemsChanged(qint64 startPosition, qint64 endPosition);
+
+    virtual QJSValue configuredProperties(lv::Segment*) const;
 
 signals:
     void nameChanged();

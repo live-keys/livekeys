@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "live/segment.h"
+#include "live/qmlstreamfilter.h"
 
 #include "qvideocapture.h"
 #include "videosurface.h"
@@ -18,12 +19,13 @@ namespace lv{
 class VideoSegment : public Segment{
 
     Q_OBJECT
-    Q_PROPERTY(QString file           READ file          WRITE setFile    NOTIFY fileChanged)
-    Q_PROPERTY(QString filters        READ filters       WRITE setFilters NOTIFY filtersChanged)
-    Q_PROPERTY(QObject* filtersObject READ filtersObject NOTIFY filtersChanged)
+    Q_PROPERTY(QString file                       READ file          WRITE setFile    NOTIFY fileChanged)
+    Q_PROPERTY(QString filters                    READ filters       WRITE setFilters NOTIFY filtersChanged)
+    Q_PROPERTY(lv::QmlStreamFilter* filtersObject READ filtersObject NOTIFY filtersObjectChanged)
 
 public:
     explicit VideoSegment(QObject *parent = nullptr);
+    ~VideoSegment() override;
 
     const QString &file() const;
 
@@ -40,25 +42,31 @@ public:
 
     const QString& filters() const;
 
-    QObject* filtersObject() const;
+    QmlStreamFilter* filtersObject() const;
+
+    static void filtersStreamHandler(QObject* that, const QJSValue& val);
+    void streamUpdate(const QJSValue& val);
 
 public slots:
     void setFile(const QString& file);
-
     void setFilters(const QString& filters);
 
 signals:
     void fileChanged();
     void filtersChanged();
+    void filtersObjectChanged();
 
 private:
+    void frameCaptured(QMat* frame, qint64 position);
     void createFilters();
+    void addWatcher();
 
     VideoTrack*       m_videoTrack;
     QString           m_file;
     cv::VideoCapture* m_capture;
-    QString m_filters;
-    QObject* m_filtersObject;
+    QString           m_filters;
+    QmlStreamFilter*  m_filtersObject;
+    qint64            m_filtersPosition;
 };
 
 inline const QString& VideoSegment::file() const{
@@ -69,7 +77,7 @@ inline const QString &VideoSegment::filters() const{
     return m_filters;
 }
 
-inline QObject *VideoSegment::filtersObject() const{
+inline QmlStreamFilter *VideoSegment::filtersObject() const{
     return m_filtersObject;
 }
 

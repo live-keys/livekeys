@@ -5,72 +5,68 @@
 #include <QJSValue>
 #include "live/lvbaseqmlglobal.h"
 #include "live/qmlstream.h"
+#include "live/qmlwritablestream.h"
 
 namespace lv{
 
 class WorkerThread;
 
-/// \private
 class LV_BASEQML_EXPORT QmlStreamFilter : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlStream* pull   READ pull   WRITE setPull NOTIFY pullChanged)
-    Q_PROPERTY(QJSValue run          READ run    WRITE setRun  NOTIFY runChanged)
-    Q_PROPERTY(lv::QmlStream* result READ result NOTIFY resultChanged)
+    Q_PROPERTY(lv::QmlStream* pull           READ pull    WRITE setPull NOTIFY pullChanged)
+    Q_PROPERTY(QJSValue current              READ current NOTIFY currentChanged)
+    Q_PROPERTY(lv::QmlWritableStream* result READ result  CONSTANT)
+    Q_PROPERTY(QQmlListProperty<QObject> childObjects READ childObjects)
+    Q_CLASSINFO("DefaultProperty", "childObjects")
 
 public:
     QmlStreamFilter(QObject* parent = nullptr);
     ~QmlStreamFilter();
 
     lv::QmlStream* pull() const;
-    const QJSValue& run() const;
-    lv::QmlStream* result() const;
+    lv::QmlWritableStream* result() const;
+    QJSValue current() const;
+
+    void setPull(lv::QmlStream* pull);
 
     static void streamHandler(QObject* that, const QJSValue& val);
 
-    void setPull(lv::QmlStream* pull);
-    void setRun(const QJSValue& run);
 
-    void setWorkerThread(WorkerThread* worker);
-    WorkerThread* workerThread();
-
-    void triggerRun();
-    void triggerRun(const QJSValue& arg);
-
-    void pushResult(const QVariant& v);
+    QQmlListProperty<QObject> childObjects();
+    void appendChildObject(QObject* obj);
+    int childObjectCount() const;
+    QObject *childObject(int) const;
+    void clearChildObjects();
 
 signals:
     void pullChanged();
-    void runChanged();
-    void resultChanged();
+    void currentChanged();
 
 private:
-    lv::QmlStream* m_pull;
-    QJSValue       m_run;
-    lv::QmlStream* m_result;
+    static void appendChildObject(QQmlListProperty<QObject>*, QObject*);
+    static int childObjectCount(QQmlListProperty<QObject>*);
+    static QObject* childObject(QQmlListProperty<QObject>*, int);
+    static void clearChildObjects(QQmlListProperty<QObject>*);
 
-    QJSValue       m_lastValue;
-    WorkerThread*  m_workerThread;
+    void setCurrent(const QJSValue& val);
+
+    lv::QmlStream*         m_pull;
+    lv::QmlWritableStream* m_result;
+    QJSValue               m_current;
+    QVector<QObject*>      m_childObjects;
 };
 
 inline QmlStream *QmlStreamFilter::pull() const{
     return m_pull;
 }
 
-inline const QJSValue& QmlStreamFilter::run() const{
-    return m_run;
-}
-
-inline QmlStream *QmlStreamFilter::result() const{
+inline QmlWritableStream *QmlStreamFilter::result() const{
     return m_result;
 }
 
-inline void QmlStreamFilter::setWorkerThread(WorkerThread *worker){
-    m_workerThread = worker;
-}
-
-inline WorkerThread *QmlStreamFilter::workerThread(){
-    return m_workerThread;
+inline QJSValue QmlStreamFilter::current() const{
+    return m_current;
 }
 
 }// namespace

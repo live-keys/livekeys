@@ -5,11 +5,13 @@
 
 #include "live/viewcontext.h"
 #include "live/project.h"
+#include "live/applicationcontext.h"
 
 #include <QQmlPropertyMap>
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QFileInfo>
+#include <QJSValue>
 
 namespace lv{
 
@@ -104,6 +106,20 @@ void VideoTrack::recordingStarted(){
 
 void VideoTrack::recordingStopped(){
     m_surface->closeRecorder();
+}
+
+QJSValue VideoTrack::configuredProperties(Segment *segment) const{
+    VideoSegment* vs = qobject_cast<VideoSegment*>(segment);
+    if ( vs ){
+        ViewEngine* ve = ViewContext::instance().engine();
+        QJSValue result = ve->engine()->newObject();
+        result.setProperty("editor", QString::fromStdString(ApplicationContext::instance().pluginPath() + "/lcvcore/VideoCaptureSegmentEditor.qml"));
+        return result;
+    }
+
+    return QJSValue();
+
+
 }
 
 

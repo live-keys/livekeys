@@ -35,6 +35,7 @@ public:
 
 public slots:
     void __updateKeyframes(qint64 from, qint64 to);
+    virtual QJSValue configuredProperties(lv::Segment *) const override;
 
 signals:
     void valueChanged(double value);

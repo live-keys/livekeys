@@ -5,6 +5,7 @@ import editor 1.0
 import live 1.0
 import lcvcore 1.0
 import timeline 1.0
+import fs 1.0 as Fs
 
 CodePalette{
     id: palette
@@ -24,24 +25,23 @@ CodePalette{
             timelineStyle: theme.timelineStyle
 
             onSegmentDoubleClicked: {
-                if ( segment instanceof Keyframe ){
-                    var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeEditor.qml'
+                var trackProperties = track.configuredProperties(segment)
 
-                    var objectComponent = Qt.createComponent(objectPath);
+                if ( trackProperties.editor ){
+                    var objectPath = trackProperties.editor
+                    var objectUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+                    var objectComponent = Qt.createComponent(objectUrl);
                     if ( objectComponent.status === Component.Error ){
                         throw linkError(new Error(objectComponent.errorString()), timelineArea)
                     }
 
-                    var coords = delegate.mapToItem(lk.layers.workspace.panes.container, 0, 0)
-
                     var object = objectComponent.createObject()
-                    object.currentKeyframe = segment
+                    object.currentSegment = segment
                     var overlay = lk.layers.window.dialogs.overlayBox(object)
                     overlay.centerBox = false
                     overlay.backgroundVisible = true
                     overlay.box.visible = true
-                    overlay.boxX = coords.x
-                    overlay.boxY = coords.y
 
                     object.inputBox.forceFocus()
 

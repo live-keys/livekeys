@@ -188,6 +188,15 @@ void Track::notifyCursorProcessed(qint64 position){
     emit cursorProcessed(this, position);
 }
 
+QQmlContext *Track::timelineContext(){
+    return qmlContext(timeline());
+}
+
+void Track::refreshPosition(){
+    if ( timeline() )
+        timeline()->refreshPosition();
+}
+
 bool Track::addSegment(Segment *segment){
     if ( m_segmentModel->addSegment(segment) ){
         if ( m_timelineReady ){
@@ -220,6 +229,10 @@ void Track::__segmentModelItemsChanged(qint64 from, qint64 to){
             m_activeSegment = nullptr;
         }
     }
+}
+
+QJSValue Track::configuredProperties(Segment *) const{
+    return QJSValue();
 }
 
 void Track::assignCursorPosition(qint64 position){

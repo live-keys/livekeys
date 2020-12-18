@@ -1,14 +1,18 @@
 #ifndef LVQMLWATCHER_H
 #define LVQMLWATCHER_H
 
+#include "live/lveditqmljsglobal.h"
+
 #include <QObject>
 #include <QJSValue>
 #include <QQmlParserStatus>
 
 namespace lv{
 
-class QmlWatcherBackground;
-class QmlWatcher : public QObject, public QQmlParserStatus{
+class ViewEngine;
+class HookContainer;
+
+class LV_EDITQMLJS_EXPORT QmlWatcher : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
@@ -21,6 +25,8 @@ public:
     const QString& declaredId() const{ return m_declaredId; }
 
     bool isEnabled() const;
+
+    void initialize(ViewEngine* engine, HookContainer* hooks, const QString& referencedFile, const QString& declaredId);
 
 signals:
     void ready();

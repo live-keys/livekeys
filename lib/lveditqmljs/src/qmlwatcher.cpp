@@ -27,16 +27,28 @@ QmlWatcher::QmlWatcher(QObject *parent)
 QmlWatcher::~QmlWatcher(){
 }
 
+void QmlWatcher::initialize(ViewEngine *, HookContainer *hooks, const QString &refFile, const QString &declaredId){
+    if ( m_componentComplete )
+        return;
+
+    m_referencedFile = refFile;
+    m_declaredId     = declaredId;
+
+    hooks->insertKey(m_referencedFile, m_declaredId, this);
+    m_componentComplete = true;
+}
+
+
 void QmlWatcher::componentComplete(){
     m_componentComplete = true;
 
     ViewEngine* ve = ViewEngine::grab(this);
 
     QQmlContext* ctx = qmlContext(this);
+    if ( !ctx )
+        return;
+
     m_declaredId = ctx->nameForObject(parent());
-
-
-
 
     if ( m_declaredId.isEmpty() )
         return;

@@ -81,6 +81,7 @@ DISTFILES += \
     qml/ScriptVideoSegmentCreator.qml \
     qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
+    qml/VideoCaptureSegmentEditor.qml \
     qml/VideoCaptureSegmentFactory.qml \
     qml/VideoDecoderView.qml \
     qml/VideoSurfaceCreator.qml \

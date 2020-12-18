@@ -79,6 +79,7 @@ public:
     void signalTrackNameChanged(Track* track);
 
     bool isRecording() const;
+    void refreshPosition();
 
 public slots:
     void appendTrack(lv::Track* track);

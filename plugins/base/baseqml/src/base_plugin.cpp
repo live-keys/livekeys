@@ -25,6 +25,7 @@
 #include "environment.h"
 #include "qmlexec.h"
 #include "qmlstreamlog.h"
+#include "qmlstreamsink.h"
 #include "qmlworkerpoolobject.h"
 #include "qmlcontainer.h"
 #include "qmlopening.h"
@@ -66,16 +67,17 @@ static QObject* scriptProvider(QQmlEngine *engine, QJSEngine *){
 
 void BasePlugin::registerTypes(const char *uri){
     lv::ViewEngine::registerBaseTypes(uri);
-    qmlRegisterType<lv::QmlIndexSelector>(uri, 1, 0, "IndexSelector");
-    qmlRegisterType<lv::QmlAct>(          uri, 1, 0, "Act");
-    qmlRegisterType<lv::QmlExec>(         uri, 1, 0, "Exec");
-    qmlRegisterType<lv::QmlStreamLog>(    uri, 1, 0, "StreamLog");
-    qmlRegisterType<lv::QmlPropertyLog>(  uri, 1, 0, "PropertyLog");
-    qmlRegisterType<lv::QmlContainer>(    uri, 1, 0, "Container");
-    qmlRegisterType<lv::QmlOpening>(      uri, 1, 0, "Opening");
-    qmlRegisterType<lv::QmlFollowUp>(     uri, 1, 0, "FollowUp");
-    qmlRegisterType<lv::GroupCollector>(  uri, 1, 0, "GroupCollector");
-    qmlRegisterType<lv::QmlStreamFilter>( uri, 1, 0, "StreamFilter");
+    qmlRegisterType<lv::QmlIndexSelector>(   uri, 1, 0, "IndexSelector");
+    qmlRegisterType<lv::QmlAct>(             uri, 1, 0, "Act");
+    qmlRegisterType<lv::QmlExec>(            uri, 1, 0, "Exec");
+    qmlRegisterType<lv::QmlStreamLog>(       uri, 1, 0, "StreamLog");
+    qmlRegisterType<lv::QmlPropertyLog>(     uri, 1, 0, "PropertyLog");
+    qmlRegisterType<lv::QmlContainer>(       uri, 1, 0, "Container");
+    qmlRegisterType<lv::QmlOpening>(         uri, 1, 0, "Opening");
+    qmlRegisterType<lv::QmlFollowUp>(        uri, 1, 0, "FollowUp");
+    qmlRegisterType<lv::GroupCollector>(     uri, 1, 0, "GroupCollector");
+    qmlRegisterType<lv::QmlStreamFilter>(    uri, 1, 0, "StreamFilter");
+    qmlRegisterType<lv::QmlStreamSink>(      uri, 1, 0, "StreamSink");
 
     qmlRegisterSingletonType<lv::QmlScript>(           uri, 1, 0, "Script", &scriptProvider);
     qmlRegisterSingletonType<lv::QmlWorkerPoolObject>( uri, 1, 0, "WorkerPool", &workerPoolProvider);

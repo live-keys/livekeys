@@ -16,6 +16,9 @@
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
 
+#include "live/hookcontainer.h"
+#include "live/qmlwatcher.h"
+
 namespace lv{
 
 VideoSegment::VideoSegment(QObject *parent)
@@ -23,7 +26,12 @@ VideoSegment::VideoSegment(QObject *parent)
     , m_videoTrack(nullptr)
     , m_capture(new cv::VideoCapture)
     , m_filtersObject(nullptr)
+    , m_filtersPosition(-1)
 {
+}
+
+VideoSegment::~VideoSegment(){
+    delete m_filtersObject;
 }
 
 void VideoSegment::openFile(){
@@ -53,7 +61,7 @@ void VideoSegment::serialize(QQmlEngine *engine, MLNode &node) const{
     }
 
     if ( !m_filters.isEmpty() ){
-        node["filters"] = m_filters.toStdString();
+        node["filters"] = filtersPath.toStdString();
     }
 
     node["file"] = filePath.toStdString();
@@ -77,7 +85,7 @@ void VideoSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &n
         QString filtersPath = QString::fromStdString(node["filters"].asString());
         QFileInfo filterPathInfo(filtersPath);
         if ( filterPathInfo.isRelative() ){
-            filtersPath = QFileInfo(project->dir() + "/" + fileName).canonicalFilePath();
+            filtersPath = QFileInfo(project->dir() + "/" + filtersPath).canonicalFilePath();
         }
         setFilters(filtersPath);
     }
@@ -94,6 +102,9 @@ void VideoSegment::assignTrack(Track *track){
     }
     m_videoTrack = nt;
     Segment::assignTrack(track);
+
+    if ( m_filtersObject )
+        addWatcher();
 }
 
 void VideoSegment::cursorEnter(qint64 pos){
@@ -105,7 +116,7 @@ void VideoSegment::cursorEnter(qint64 pos){
             cv::Mat* frame = new cv::Mat;
             m_capture->retrieve(*frame);
             QMat* mat = new QMat(frame);
-            m_videoTrack->surface()->updateSurface(position() + pos, mat);
+            frameCaptured(mat, position() + pos);
         }
     } else {
         m_capture->set(cv::CAP_PROP_POS_FRAMES, pos);
@@ -113,7 +124,7 @@ void VideoSegment::cursorEnter(qint64 pos){
             cv::Mat* frame = new cv::Mat;
             m_capture->retrieve(*frame);
             QMat* mat = new QMat(frame);
-            m_videoTrack->surface()->updateSurface(position() + pos, mat);
+            frameCaptured(mat, position() + pos);
         }
     }
 }
@@ -131,7 +142,7 @@ void VideoSegment::cursorNext(qint64 pos){
         cv::Mat* frame = new cv::Mat;
         m_capture->retrieve(*frame);
         QMat* mat = new QMat(frame);
-        m_videoTrack->surface()->updateSurface(position() + pos, mat);
+        frameCaptured(mat, position() + pos);
     }
 }
 
@@ -145,11 +156,82 @@ void VideoSegment::cursorMove(qint64 pos){
         cv::Mat* frame = new cv::Mat;
         m_capture->retrieve(*frame);
         QMat* mat = new QMat(frame);
-        m_videoTrack->surface()->updateSurface(position() + pos, mat);
+        frameCaptured(mat, position() + pos);
+    }
+}
+
+void VideoSegment::filtersStreamHandler(QObject *that, const QJSValue &val){
+    VideoSegment* vs = static_cast<VideoSegment*>(that);
+    vs->streamUpdate(val);
+}
+
+void VideoSegment::streamUpdate(const QJSValue &val){
+    QMat* frame = static_cast<QMat*>(val.toQObject());
+
+    if ( m_filtersPosition > -1 ){
+        m_videoTrack->surface()->updateSurface(m_filtersPosition, frame);
+        qint64 processedPosition = m_filtersPosition;
+        m_filtersPosition = -1;
+        if ( isProcessing() ){
+            setIsProcessing(false);
+            m_videoTrack->notifyCursorProcessed(processedPosition);
+        }
+    } else {
+        m_videoTrack->refreshPosition();
+    }
+
+}
+
+void VideoSegment::frameCaptured(QMat *frame, qint64 position){
+    if ( m_filtersObject ){
+        setIsProcessing(true);
+        m_filtersPosition = position;
+        m_filtersObject->pull()->push(frame);
+    } else {
+        m_videoTrack->surface()->updateSurface(position, frame);
     }
 }
 
 void VideoSegment::createFilters(){
+    if ( m_filtersObject ){
+        m_filtersObject->deleteLater();
+        m_filtersObject = nullptr;
+    }
+
+    if ( !m_filters.isEmpty() ){
+        ViewEngine* ve = ViewContext::instance().engine();
+        ViewEngine::ComponentResult::Ptr cr = ve->createObject(m_filters, this);
+        if ( cr->hasError() ){
+            QmlError::join(cr->errors).jsThrow();
+            return;
+        }
+
+        QmlStreamFilter* sfilter = qobject_cast<QmlStreamFilter*>(cr->object);
+        if ( !sfilter ){
+            //TODO:
+            qWarning("Not of filter object.");
+        }
+
+        m_filtersObject = sfilter;
+        m_filtersObject->setPull(new QmlStream(m_filtersObject));
+        m_filtersObject->result()->stream()->forward(this, &VideoSegment::filtersStreamHandler);
+
+        emit filtersObjectChanged();
+
+        if ( m_videoTrack ){
+            addWatcher();
+        }
+    }
+
+}
+
+void VideoSegment::addWatcher(){
+    HookContainer* hooks = qobject_cast<HookContainer*>(m_videoTrack->timelineContext()->contextProperty("hooks").value<QObject*>());
+    ViewEngine* ve = ViewContext::instance().engine();
+
+    QmlWatcher* watcher = new QmlWatcher(m_filtersObject);
+    //TODO: Generate unique name
+    watcher->initialize(ve, hooks, m_filters, m_videoTrack->name() + "_" + QString::number(position()));
 }
 
 }// namespace

@@ -7,6 +7,8 @@
 #include "live/qmlerror.h"
 #include "live/exception.h"
 #include "live/viewengine.h"
+#include "live/viewcontext.h"
+#include "live/applicationcontext.h"
 
 #include "live/visuallogqt.h"
 
@@ -113,6 +115,18 @@ void KeyframeTrack::__updateKeyframes(qint64 from, qint64 to){
         Keyframe* kf = qobject_cast<Keyframe*>(segmentModel()->segmentAt(i));
         kf->resetCurve();
     }
+}
+
+QJSValue KeyframeTrack::configuredProperties(Segment *segment) const{
+    Keyframe* vs = qobject_cast<Keyframe*>(segment);
+    if ( vs ){
+        ViewEngine* ve = ViewContext::instance().engine();
+        QJSValue result = ve->engine()->newObject();
+        result.setProperty("editor", QString::fromStdString(ApplicationContext::instance().pluginPath() + "/timeline/KeyframeEditor.qml"));
+        return result;
+    }
+
+    return QJSValue();
 }
 
 }// namespace

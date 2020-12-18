@@ -13,10 +13,10 @@ Rectangle{
 
     property QtObject currentTheme: lk.layers.workspace ? lk.layers.workspace.themes.current : null
 
-    property Keyframe currentSegment: null
+    property VideoSegment currentSegment: null
     signal ready()
 
-    property alias inputBox: inputBox
+    property alias inputBox: pathInputBox
 
     Text{
         id: label
@@ -24,22 +24,26 @@ Rectangle{
         anchors.topMargin: 6
         anchors.left: parent.left
         anchors.leftMargin: 14
-        text: 'Keyframe ' + (root.currentSegment ? (' at ' + root.currentSegment.position) : '')
+        text: 'Segment ' + (root.currentSegment ? (' at ' + root.currentSegment.position) : '')
         font.family: 'Open Sans, Arial, sans-serif'
         font.pixelSize: 12
         font.weight: Font.Normal
         color: "#afafaf"
     }
 
-    Workspace.InputBox{
-        id: inputBox
+    Workspace.PathInputBox{
+        id: pathInputBox
         anchors.right: parent.right
         anchors.rightMargin: 60
         anchors.top: parent.top
         anchors.topMargin: 4
         width: 100
         height: 25
-        text: currentSegment ? currentSegment.value : 0
+        style: QtObject{
+            property QtObject inputBoxStyle: currentTheme.inputStyle
+            property QtObject buttonStyle: currentTheme.formButtonStyle
+        }
+        path: root.currentSegment ? root.currentSegment.filters : ''
     }
 
     Workspace.Button{
@@ -51,7 +55,7 @@ Rectangle{
         height: 25
         content: root.currentTheme ? root.currentTheme.buttons.apply : null
         onClicked: {
-            root.currentSegment.value = inputBox.text
+            root.currentSegment.filters = pathInputBox.path
             root.ready()
         }
     }

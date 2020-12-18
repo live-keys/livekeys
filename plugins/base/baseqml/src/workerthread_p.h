@@ -48,10 +48,10 @@ public:
         if ( act ){
             act->setResult(ce->m_args);
         } else {
-            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
-            if( sf ){
-                sf->pushResult(ce->m_args);
-            }
+//            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
+//            if( sf ){
+//                sf->pushResult(ce->m_args);
+//            }
         }
 
         m_worker->m_isWorking = false;

@@ -60,8 +60,8 @@ void Worker::appendAct(QObject * filter){
 
     lv::QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(filter);
     if ( sf ){
-        sf->setWorkerThread(m_filterWorker);
-        m_filterWorker->acts().append(sf);
+//        sf->setWorkerThread(m_filterWorker);
+//        m_filterWorker->acts().append(sf);
         return;
     }
 

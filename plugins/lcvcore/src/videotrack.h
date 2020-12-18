@@ -29,6 +29,9 @@ public:
     virtual void recordingStarted() override;
     virtual void recordingStopped() override;
 
+public slots:
+    virtual QJSValue configuredProperties(lv::Segment *segment) const override;
+
 signals:
     void surfaceChanged(lv::VideoSurface* surface);
 
