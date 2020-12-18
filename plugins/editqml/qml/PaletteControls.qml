@@ -324,7 +324,7 @@ QtObject{
 
             } else if ( addBoxItem.activeIndex === 2 ){ // object
 
-                addItem(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
+                addItemToRuntimeWithNotification(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
 
             } else if ( addBoxItem.activeIndex === 3 ){ // event
 
