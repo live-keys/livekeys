@@ -388,61 +388,69 @@ Item{
         }
 
 
-        Column{
-            id: container
+        Rectangle {
+            width: container.width
+            height: container.height + 5
+            color: theme.colorScheme.middleground
 
             anchors.top: parent.top
             anchors.topMargin: objectContainerTitleWrap.height + topSpacing
             visible: !compact
-            spacing: 5
-            width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 20
 
-            onChildrenChanged: recalculateContentWidth()
+            Column{
+                id: container
 
-            height: {
-                if (compact) return 0
-                var totalHeight = 0;
-                if ( children.length > 0 ){
-                    for ( var i = 0; i < children.length; ++i ){
-                        totalHeight += children[i].height
+                spacing: 5
+                width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 20
+
+                onChildrenChanged: recalculateContentWidth()
+
+                height: {
+                    if (compact) return 0
+                    var totalHeight = 0;
+                    if ( children.length > 0 ){
+                        for ( var i = 0; i < children.length; ++i ){
+                            totalHeight += children[i].height
+                        }
                     }
+                    if ( children.length > 1 )
+                        return totalHeight + (children.length - 1) * spacing
+                    else
+                        return totalHeight
                 }
-                if ( children.length > 1 )
-                    return totalHeight + (children.length - 1) * spacing
-                else
-                    return totalHeight
-            }
 
-            function sortChildren(){
+                function sortChildren(){
 
-                if (!objectContainer.parent) return
-                if (children.length === 0) return
+                    if (!objectContainer.parent) return
+                    if (children.length === 0) return
 
-                var childrenCopy = []
-                childrenCopy.push(children[0])
-                children[0].z = children.length
+                    var childrenCopy = []
+                    childrenCopy.push(children[0])
+                    children[0].z = children.length
 
-                for (var i=1; i<children.length; ++i)
-                {
-                    if (!children[i]) continue
-                    if (children[i].objectName === "propertyContainer")
+                    for (var i=1; i<children.length; ++i)
                     {
-                        childrenCopy.push(children[i])
-                        children[i].z = children.length - childrenCopy.length
+                        if (!children[i]) continue
+                        if (children[i].objectName === "propertyContainer")
+                        {
+                            childrenCopy.push(children[i])
+                            children[i].z = children.length - childrenCopy.length
+                        }
                     }
+
+                    for (var i=1; i<children.length; ++i)
+                    {
+                        if (!children[i]) continue
+                        if (children[i].objectName === "objectContainer"){
+                            children[i].topSpacing = 5
+                            children[i].z = children.length - childrenCopy.length
+                            childrenCopy.push(children[i])
+                        }
+                    }
+
+                    children = childrenCopy
                 }
 
-                for (var i=1; i<children.length; ++i)
-                {
-                    if (!children[i]) continue
-                    if (children[i].objectName === "objectContainer"){
-                        children[i].topSpacing = 5
-                        children[i].z = children.length - childrenCopy.length
-                        childrenCopy.push(children[i])
-                    }
-                }
-
-                children = childrenCopy
             }
         }
 

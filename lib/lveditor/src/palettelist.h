@@ -33,7 +33,7 @@ public slots:
     int size() const;
     lv::CodePalette *loadAt(int index);
     QJSValue contentAt(int index);
-
+    void filterOut(const QStringList& names);
 private:
     int                   m_position;
     PaletteContainer*     m_paletteContainer;

@@ -108,6 +108,15 @@ public:
 
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
+    enum AddOptionsFilter {
+        ReadOnly = 1,
+        ForNode = 2,
+        GroupOnly = 4,
+        NoReadOnly = 8
+    };
+
+    Q_ENUMS(AddOptionsFilter);
+
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
@@ -148,8 +157,8 @@ public slots:
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
-    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool unrepeated = false, bool includeExpandables = false);
-    lv::PaletteList *findPalettes(int position, bool unrepeated = false, bool includeExpandables = false);
+    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeExpandables = false);
+    lv::PaletteList *findPalettes(int position, bool includeExpandables = false);
 
     QJSValue openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
@@ -181,8 +190,7 @@ public slots:
 
     // Add Property Management
 
-    lv::QmlAddContainer* getAddOptions(int position, bool isForNode = false);
-    lv::QmlAddContainer* getReadOnlyAddOptions(lv::QmlEditFragment* fragment, bool isForNode = false);
+    lv::QmlAddContainer* getAddOptions(int position, int filter = 0, lv::QmlEditFragment* fragment = nullptr);
     int addProperty(
         int position,
         const QString& object,
@@ -225,9 +233,6 @@ private:
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);
-
-    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath, lv::QmlSuggestionModel* model, bool isForNode = false);
-    void addObjectsToModel(const QmlScopeSnap& scope, lv::QmlSuggestionModel* model);
 
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,
@@ -282,6 +287,7 @@ private:
     QString getBlockIndent(const QTextBlock& bl);
     bool isBlockEmptySpace(const QTextBlock& bl);
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
+    lv::PaletteList* palettesForDeclaration(QmlDeclaration::Ptr decl, bool includeExpandables = false);
 
 private:
     QTextDocument*      m_target;

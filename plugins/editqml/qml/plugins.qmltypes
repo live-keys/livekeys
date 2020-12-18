@@ -115,14 +115,12 @@ Module {
             name: "findPalettes"
             type: "lv::PaletteList*"
             Parameter { name: "position"; type: "int" }
-            Parameter { name: "unrepeated"; type: "bool" }
             Parameter { name: "includeExpandables"; type: "bool" }
         }
         Method {
             name: "findPalettes"
             type: "lv::PaletteList*"
             Parameter { name: "position"; type: "int" }
-            Parameter { name: "unrepeated"; type: "bool" }
         }
         Method {
             name: "findPalettes"

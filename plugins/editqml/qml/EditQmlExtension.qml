@@ -88,7 +88,7 @@ WorkspaceExtension{
         var imports = codeHandler.importsModel()
         if (imports.rowCount() > 0){
             var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-            var paletteImports = codeHandler.findPalettes(importsPosition, true)
+            var paletteImports = codeHandler.findPalettes(importsPosition)
             if (paletteImports) {
                 var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
                 pc.item.width = Qt.binding(function(){
@@ -113,7 +113,7 @@ WorkspaceExtension{
                 return
             }
 
-            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+            var paletteRoot = codeHandler.findPalettes(rootPosition)
             if (paletteRoot){
                 if ( paletteRoot ){
                     if (callback)
@@ -172,7 +172,7 @@ WorkspaceExtension{
                     return
                 }
                 var codeHandler = editor.documentHandler.codeHandler
-                var paletteRoot = codeHandler.findPalettes(rootPosition, true)
+                var paletteRoot = codeHandler.findPalettes(rootPosition)
                 if (paletteRoot){
                     if (!callback){
                         var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
@@ -213,7 +213,7 @@ WorkspaceExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition)
+            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, CodeQmlHandler.NoReadOnly)
             if ( !addContainer )
                 return
 

@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import live 1.0
 import workspace 1.0 as Workspace
+import editqml 1.0
 
 Rectangle{
     id: objectContainerTitle
@@ -108,6 +109,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: titleHeight
+            visible: objectContainer.editingFragment && !objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-erase-object.png"
@@ -202,7 +204,8 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: objectContainer.editingFragment && objectContainer.editingFragment.type() !== 'qml/QtQuick#Component'
+            visible: objectContainer.editingFragment
+                  && objectContainer.editingFragment.type() !== 'qml/QtQuick#Component'
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add-property.png"

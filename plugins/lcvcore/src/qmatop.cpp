@@ -255,22 +255,22 @@ QMat *QMatOp::perspective(QMat *input, QJSValue points)
 {
     if (!points.isArray()) return nullptr;
     QJSValueIterator it(points);
-    std::vector<cv::Point2f> src;
+    std::vector<cv::Point2f> dst;
     while ( it.hasNext() ){
         it.next();
         if (it.name() == "length") continue;
         QPointF p = it.value().toVariant().toPointF();
         cv::Point2f pt(p.x(), p.y());
-        src.push_back(pt);
+        dst.push_back(pt);
     }
 
-    if (src.size() != 4 || !input) return nullptr;
+    if (dst.size() != 4 || !input) return nullptr;
 
-    std::vector<cv::Point2f> dst;
-    dst.push_back(cv::Point2f(0,0));
-    dst.push_back(cv::Point2f(input->dimensions().width(),0));
-    dst.push_back(cv::Point2f(input->dimensions().width(),input->dimensions().height()));
-    dst.push_back(cv::Point2f(0,input->dimensions().height()));
+    std::vector<cv::Point2f> src;
+    src.push_back(cv::Point2f(0,0));
+    src.push_back(cv::Point2f(input->dimensions().width(),0));
+    src.push_back(cv::Point2f(input->dimensions().width(),input->dimensions().height()));
+    src.push_back(cv::Point2f(0,input->dimensions().height()));
 
     cv::Mat transform = cv::getPerspectiveTransform(src, dst);
     QMat* output = new QMat(

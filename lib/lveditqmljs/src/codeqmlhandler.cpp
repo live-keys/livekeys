@@ -61,6 +61,7 @@
 #include <QStringList>
 #include <QWaitCondition>
 #include <queue>
+#include <QSet>
 
 namespace lv{
 
@@ -776,171 +777,6 @@ QString CodeQmlHandler::getHelpEntity(int position){
     }
 
     return "";
-}
-
-void CodeQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, QmlSuggestionModel *model, bool isForNode)
-{
-    for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
-        const QmlTypeInfo::Ptr& ti = *it;
-
-        for (int i = 0; i < ti->totalFunctions(); ++i)
-        {
-            auto method = ti->functionAt(i);
-            if (method.functionType == QmlFunctionInfo::Signal)
-            {
-                auto name = method.name;
-                name = QString("on") + name[0].toUpper() + name.mid(1);
-
-                model->addItem(QmlSuggestionModel::ItemData(
-                    name,
-                    ti->prefereredType().name(),
-                    "method",
-                    "",
-                    ti->exportType().join() + "." + name,
-                    name,
-                    QmlSuggestionModel::ItemData::Event)
-                );
-            } else if (isForNode) {
-                auto name = method.name;
-
-                model->addItem(QmlSuggestionModel::ItemData(
-                    name,
-                    ti->prefereredType().name(),
-                    "method",
-                    "",
-                    ti->exportType().join() + "." + name,
-                    name,
-                    QmlSuggestionModel::ItemData::Function)
-                );
-
-            }
-        }
-
-        for ( int i = 0; i < ti->totalProperties(); ++i ){
-            QString propertyName = ti->propertyAt(i).name;
-            if ( !propertyName.startsWith("__")){
-                model->addItem(
-                    QmlSuggestionModel::ItemData(
-                        propertyName,
-                        ti->prefereredType().name(),
-                        ti->propertyAt(i).typeName.name(),
-                        "",
-                        ti->exportType().join() + "." + propertyName,
-                        propertyName,
-                        QmlSuggestionModel::ItemData::Property,
-                        ti->propertyAt(i).isPointer)
-                );
-            }
-
-
-            if ( propertyName.size() > 0 )
-                propertyName[0] = propertyName[0].toUpper();
-
-            if (propertyName != "ObjectName"){
-                propertyName = "on" + propertyName + "Changed";
-                model->addItem(
-                    QmlSuggestionModel::ItemData(
-                        propertyName,
-                        ti->prefereredType().name(),
-                        "method",
-                        "",
-                        "", //TODO: Find library path
-                        propertyName,
-                        QmlSuggestionModel::ItemData::Event)
-                );
-            }
-        }
-        model->updateFilters();
-    }
-}
-
-void CodeQmlHandler::addObjectsToModel(const QmlScopeSnap &scope, QmlSuggestionModel *model)
-{
-    // import global objects
-
-    QStringList exports;
-    QmlLibraryInfo::Ptr lib = scope.project->libraryInfo(scope.document->path());
-    if ( lib ){
-        exports = lib->listExports();
-    }
-
-    foreach( const QString& e, exports ){
-        if ( e != scope.document->componentName() ){
-            model->addItem(
-                QmlSuggestionModel::ItemData(
-                    e,
-                    "",
-                    "",
-                    "implicit",
-                    scope.document->path(),
-                    e,
-                    QmlSuggestionModel::ItemData::Object)
-            );
-        }
-    }
-
-    for( const QString& defaultLibrary: scope.project->defaultLibraries() ){
-        QmlLibraryInfo::Ptr defaultLib = scope.project->libraryInfo(defaultLibrary);
-        QStringList defaultExports;
-        if ( defaultLib ){
-            defaultExports = defaultLib->listExports();
-        }
-        for( const QString& de: defaultExports ){
-            if ( de != "Component"){
-                model->addItem(
-                    QmlSuggestionModel::ItemData(
-                        de,
-                        "",
-                        "",
-                        "QtQml",
-                        "QtQml",
-                        de,
-                        QmlSuggestionModel::ItemData::Object)
-                );
-            }
-        }
-    }
-
-    // import namespace objects
-
-    QSet<QString> imports;
-
-    foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
-        if ( imp.as() != "" ){
-            imports.insert(imp.as());
-        }
-    }
-    imports.insert("");
-
-    for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
-
-        foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
-            if ( imp.as() == *it ){
-                QStringList libexports;
-                QmlLibraryInfo::Ptr implib = scope.project->libraryInfo(imp.uri());
-                if ( !lib.isNull() ){
-                    libexports = implib->listExports();
-                }
-
-                for ( const QString& exp: libexports ){
-                    if ( exp != "Component"){
-                        model->addItem(
-                            QmlSuggestionModel::ItemData(
-                                exp,
-                                "",
-                                "",
-                                imp.uri(),
-                                imp.uri(),
-                                exp,
-                                QmlSuggestionModel::ItemData::Object)
-                        );
-                    }
-                }
-            }
-        }
-    }
-
-    model->updateFilters();
 }
 
 /**
@@ -2552,42 +2388,24 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
     return "";
 }
 
-lv::PaletteList* CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment, bool unrepeated, bool includeExpandables)
+lv::PaletteList* CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeExpandables)
 {
-    Q_D(CodeQmlHandler);
-
     if (!fragment) return nullptr;
 
-    if (fragment->valueLength() != 0){
-        return findPalettes(fragment->position(), unrepeated, includeExpandables);
+    if (!fragment->isOfFragmentType(QmlEditFragment::ReadOnly)){
+        return findPalettes(fragment->position(), includeExpandables);
     }
+
 
     auto declaration = fragment->declaration();
-
-    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), includeExpandables);
-
-    if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
-    {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
-    }
-
-    if ( declaration->isListDeclaration() ){
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
-    } else {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
-    }
-
-    return lpl;
+    return palettesForDeclaration(declaration, includeExpandables);
 }
 
 
 /**
  * \brief Finds the available list of palettes at the current \p cursor position
- *
- * The \p unrepeated parameter makes sure the palettes that are found at that
- * \p position are not already opened.
  */
-lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, bool includeExpandables){
+lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool includeExpandables){
     Q_D(CodeQmlHandler);
     if ( !m_document )
         return nullptr;
@@ -2611,58 +2429,8 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, boo
 
     QmlDeclaration::Ptr declaration = properties.first();
 
-    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), includeExpandables);
+    return palettesForDeclaration(declaration, includeExpandables);
 
-    if (declaration->isForComponent()){
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Component", includeExpandables, lpl);
-    } else {
-        if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
-        }
-
-        if ( declaration->isListDeclaration() ){
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
-        } else {
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
-        }
-    }
-
-
-    lpl->setPosition(declaration->position());
-    if ( unrepeated ){
-        std::queue<QmlEditFragment*> q;
-        for ( auto it = m_edits.rbegin(); it != m_edits.rend(); ++it ){
-            q.push(*it);
-        }
-
-        QmlEditFragment* found = nullptr;
-        while (!q.empty() && !found){
-            QmlEditFragment* curr = q.front(); q.pop();
-            if (declaration->position() == curr->position()){
-                found = curr;
-                break;
-            }
-            if (declaration->position() < curr->position() + curr->declaration()->length() && declaration->position() > curr->position())
-            {
-                while (!q.empty()) q.pop();
-                for (auto fr: curr->childFragments()) q.push(fr);
-            }
-        }
-
-        if (found){
-            for ( auto it = found->begin(); it != found->end(); ++it ){
-                CodePalette* loadedPalette = *it;
-
-                for ( int i = 0; i < lpl->size(); ++i ){
-                    PaletteLoader* loader = lpl->loaderAt(i);
-                    if ( PaletteContainer::palettePath(loader) == loadedPalette->path() ){
-                        lpl->remove(loader);
-                    }
-                }
-            }
-        }
-    }
-    return lpl;
 }
 
 /**
@@ -2674,13 +2442,6 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
 
     // check if duplicate
     PaletteLoader* paletteLoader = paletteList->loaderAt(index);
-
-    for ( auto it = edit->begin(); it != edit->end(); ++it ){
-        CodePalette* loadedPalette = *it;
-        if ( loadedPalette->path() == PaletteContainer::palettePath(paletteLoader) ){
-            return QJSValue();
-        }
-    }
 
     if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
         edit->addPalette(edit->bindingPalette());
@@ -3207,75 +2968,69 @@ void CodeQmlHandler::cancelEdit(){
  *
  * Returns an lv::QmlAddContainer for all the options
  */
-QmlAddContainer *CodeQmlHandler::getAddOptions(int position, bool isForNode){
+QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::QmlEditFragment* fragment){
     Q_D(CodeQmlHandler);
     if ( !m_document || !m_target )
         return nullptr;
-
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
-
-    ctx->expressionPath();
-
-    QStringList expression;
-    int propertyPosition = -1;
-    int propertyLength   = 0;
-
-    QChar expressionEndDelimiter;
-
-    if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ||
-         ctx->context() & QmlCompletionContext::InAfterOnLhsOfBinding){
-        expression = ctx->expressionPath();
-
-        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-            m_target, cursor.position(), &expression, &expressionEndDelimiter
-        );
-        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
-        propertyPosition = cursor.position();
-
-    } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding )
-    {
-        expression     = ctx->propertyPath();
-        propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
-        propertyPosition = ctx->propertyPosition();
-    }
-    else propertyPosition = position;
-
-    if ( propertyPosition == -1 )
-        return nullptr;
-
-    QmlAddContainer* addContainer = new QmlAddContainer(propertyPosition, ctx->objectTypePath());
     QmlScopeSnap scope = d->snapScope();
 
-    if ( !ctx->objectTypePath().empty() ){
-        QString type = ctx->objectTypeName();
-        QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-        QmlInheritanceInfo typePath = scope.getTypePath(typeNamespace, type);
+    QStringList objectTypePath;
+    QmlInheritanceInfo typePath;
+    int propertyPosition = 0;
+    if (filter & AddOptionsFilter::ReadOnly){
+        auto declaration = fragment->declaration();
 
-        addPropertiesAndFunctionsToModel(typePath, addContainer->model(), isForNode);
+        objectTypePath = QStringList(declaration->type().name());
+        typePath = scope.generateTypePathFromClassName(declaration->type().name(), declaration->type().path());
+
+        propertyPosition = fragment->position();
+    } else {
+        QTextCursor cursor(m_target);
+        cursor.setPosition(position);
+        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+
+        ctx->expressionPath();
+
+        QStringList expression;
+        int propertyLength   = 0;
+        QChar expressionEndDelimiter;
+
+        if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ||
+             ctx->context() & QmlCompletionContext::InAfterOnLhsOfBinding){
+            expression = ctx->expressionPath();
+
+            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+                m_target, cursor.position(), &expression, &expressionEndDelimiter
+            );
+            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+            propertyPosition = cursor.position();
+
+        }
+        else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
+            expression     = ctx->propertyPath();
+            propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
+            propertyPosition = ctx->propertyPosition();
+        }
+        else propertyPosition = position;
+
+        if ( propertyPosition == -1 )
+            return nullptr;
+
+        objectTypePath = ctx->objectTypePath();
+
+        if (!ctx->objectTypePath().empty()){
+            QString type = ctx->objectTypeName();
+            QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
+            typePath = scope.getTypePath(typeNamespace, type);
+        }
     }
 
-    addObjectsToModel(scope, addContainer->model());
+    QmlAddContainer* addContainer = new QmlAddContainer(propertyPosition, objectTypePath);
 
-    return addContainer;
-}
-
-QmlAddContainer *CodeQmlHandler::getReadOnlyAddOptions(QmlEditFragment *fragment, bool isForNode)
-{
-    Q_D(CodeQmlHandler);
-    if ( !m_document || !m_target )
-        return nullptr;
-
-    auto declaration = fragment->declaration();
-
-    QStringList objectTypePath(declaration->type().name());
-    QmlAddContainer* addContainer = new QmlAddContainer(fragment->position(), objectTypePath);
-    QmlScopeSnap scope = d->snapScope();
-    QmlInheritanceInfo typePath = scope.generateTypePathFromClassName(declaration->type().name(), declaration->type().path());
-
-    addPropertiesAndFunctionsToModel(typePath, addContainer->model(), isForNode);
-
+    addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
+    if ((filter & AddOptionsFilter::ReadOnly) == 0){
+        addContainer->model()->addObjectsToModel(scope);
+    }
     return addContainer;
 }
 
@@ -3335,7 +3090,7 @@ int CodeQmlHandler::addProperty(
 
         for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
             lv::DocumentQmlValueObjects::RangeProperty* p = *it;
-            QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
+            QString propertyName = p->name().join(".");
 
             if ( propertyName == fullName ){ // property already exists, simply position the cursor accordingly
                 lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
@@ -4117,6 +3872,32 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     return QmlTypeInfo::isObject(declaration->type().name());
 }
 
+PaletteList *CodeQmlHandler::palettesForDeclaration(QmlDeclaration::Ptr declaration, bool includeExpandables)
+{
+    Q_D(CodeQmlHandler);
+
+    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), includeExpandables);
+
+    if (declaration->isForComponent()){
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Component", includeExpandables, lpl);
+    } else {
+        if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
+        }
+
+        if ( declaration->isListDeclaration() ){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
+        } else {
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
+        }
+    }
+
+
+    lpl->setPosition(declaration->position());
+
+    return lpl;
+}
+
 void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 {
     Q_D(CodeQmlHandler);
@@ -4152,12 +3933,28 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
 
             QVariantList propertiesList;
+            QSet<QString> setOfNames;
             auto properties = object->properties;
             for (int p = 0; p < properties.length(); ++p)
             {
                 auto property = properties[p];
                 QVariantMap propMap;
-                propMap.insert("name", property->name());
+
+                QString propName = property->name()[0];
+                if (setOfNames.contains(propName)) continue;
+
+
+                setOfNames.insert(propName);
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(property->object()), QStringList(propName), property->begin
+                );
+
+                QmlScopeSnap::PropertyReference& propref = propChain.last();
+                propMap.insert("isWritable", propref.property.isWritable);
+
+
+
+                propMap.insert("name", propName);
 
                 QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 
@@ -4166,8 +3963,13 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     continue;
                 }
 
-                auto fragment = openNestedConnection(conn, property->begin);
+                QmlEditFragment* fragment = nullptr;
+                if (propref.property.isWritable)
+                    fragment = openNestedConnection(conn, property->begin);
+                else {
+                    fragment = createReadOnlyFragment(conn, propName);
 
+                }
                 auto fcast = qobject_cast<QObject*>(fragment);
                 propMap.insert("connection", QVariant::fromValue(fcast));
 
@@ -4184,16 +3986,7 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     propMap.insert("value", value);
                 }
 
-                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                    scope.quickObjectDeclarationType(property->object()), property->name(), property->begin
-                );
 
-
-
-                if ( propChain.size() == property->name().size() && propChain.size() > 0 ){
-                    QmlScopeSnap::PropertyReference& propref = propChain.last();
-                    propMap.insert("isWritable", propref.property.isWritable);
-                }
 
                 propertiesList.push_back(propMap);
 

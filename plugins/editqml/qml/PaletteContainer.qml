@@ -295,6 +295,11 @@ Rectangle{
                     if (paletteContainer.palette.type === "qml/import"){
                         paletteContainer.palette.item.editor.importsShaped = false
                     }
+                    var p = parent
+                    while (p && p.objectName !== "paletteGroup"){
+                        p = p.parent
+                    }
+                    p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== paletteContainer.palette.name })
                     documentHandler.codeHandler.removePalette(paletteContainer.palette)
                 }
             }
