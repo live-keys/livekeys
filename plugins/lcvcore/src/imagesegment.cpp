@@ -94,8 +94,6 @@ void ImageSegment::cursorEnter(qint64 pos){
 void ImageSegment::cursorExit(qint64){
     if ( !m_videoTrack || !m_videoTrack->surface() || !m_image)
         return;
-
-    m_videoTrack->surface()->resetSurface();
 }
 
 void ImageSegment::cursorNext(qint64 pos){

@@ -1,50 +1,52 @@
 #ifndef LVQMLWATCHER_H
 #define LVQMLWATCHER_H
 
+#include "live/lveditqmljsglobal.h"
+
 #include <QObject>
 #include <QJSValue>
 #include <QQmlParserStatus>
 
 namespace lv{
 
-class QmlWatcherBackground;
-class QmlWatcher : public QObject, public QQmlParserStatus{
+class ViewEngine;
+class HookContainer;
+
+class LV_EDITQMLJS_EXPORT QmlWatcher : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* scanner READ scanner CONSTANT)
-    Q_PROPERTY(QJSValue position READ position WRITE setPosition NOTIFY positionChanged)
     Q_INTERFACES(QQmlParserStatus)
 
 public:
     explicit QmlWatcher(QObject *parent = nullptr);
     ~QmlWatcher() override;
 
-    QObject* scanner();
-    const QJSValue& position() const;
+    const QString& referencedFile() const{ return m_referencedFile; }
+    const QString& declaredId() const{ return m_declaredId; }
 
-    const QString& fileReference() const;
+    bool isEnabled() const;
 
-public slots:
-    void setPosition(QJSValue position);
-    void __workerResultReady();
+    void initialize(ViewEngine* engine, HookContainer* hooks, const QString& referencedFile, const QString& declaredId);
+
+signals:
+    void ready();
 
 protected:
     void classBegin() override{}
     void componentComplete() override;
 
-signals:
-    void ready();
-    void positionChanged();
-
 private:
-    QObject* m_scanner;
-    QString  m_filePath;
-    int      m_fileLine;
-    QJSValue m_position;
+    bool checkChildDeclarations();
 
-    QmlWatcherBackground* m_worker;
-    bool     m_componentComplete;
+    QString m_referencedFile;
+    QString m_declaredId;
+    bool    m_isEnabled;
+    bool    m_componentComplete;
 };
+
+inline bool QmlWatcher::isEnabled() const{
+    return m_isEnabled;
+}
 
 }// namespace
 

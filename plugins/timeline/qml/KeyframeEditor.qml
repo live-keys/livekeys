@@ -13,7 +13,7 @@ Rectangle{
 
     property QtObject currentTheme: lk.layers.workspace ? lk.layers.workspace.themes.current : null
 
-    property Keyframe currentKeyframe: null
+    property Keyframe currentSegment: null
     signal ready()
 
     property alias inputBox: inputBox
@@ -24,7 +24,7 @@ Rectangle{
         anchors.topMargin: 6
         anchors.left: parent.left
         anchors.leftMargin: 14
-        text: 'Keyframe ' + (root.currentKeyframe ? (' at ' + root.currentKeyframe.position) : '')
+        text: 'Keyframe ' + (root.currentSegment ? (' at ' + root.currentSegment.position) : '')
         font.family: 'Open Sans, Arial, sans-serif'
         font.pixelSize: 12
         font.weight: Font.Normal
@@ -39,7 +39,7 @@ Rectangle{
         anchors.topMargin: 4
         width: 100
         height: 25
-        text: currentKeyframe ? currentKeyframe.value : 0
+        text: currentSegment ? currentSegment.value : 0
     }
 
     Workspace.Button{
@@ -51,7 +51,7 @@ Rectangle{
         height: 25
         content: root.currentTheme ? root.currentTheme.buttons.apply : null
         onClicked: {
-            root.currentKeyframe.value = inputBox.text
+            root.currentSegment.value = inputBox.text
             root.ready()
         }
     }

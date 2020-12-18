@@ -42,7 +42,9 @@ namespace lv{
 class ProjectQmlScanner;
 class ProjectQmlExtension;
 
+class DocumentQmlChannels;
 class QmlEditFragment;
+class QmlEditFragmentContainer;
 class QmlJsHighlighter;
 class QmlJsSettings;
 class QmlAddContainer;
@@ -56,10 +58,12 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
+    Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
+    Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
 
+public:
     friend class ProjectQmlExtension;
-
-    Q_PROPERTY(int numberOfConnections READ numberOfConnections NOTIFY numberOfConnectionsChanged)
+    friend class QmlEditFragmentContainer;
 
 public:
     explicit CodeQmlHandler(
@@ -80,19 +84,18 @@ public:
         QTextCursor& cursorChange
     );
     void setDocument(ProjectDocument* document);
+    ProjectDocument* document() const;
     void rehighlightBlock(const QTextBlock& block);
 
+    QmlDeclaration::Ptr getDeclarationViaCompletionContext(int position) const;
+    QList<lv::QmlDeclaration::Ptr> getDeclarationsViaParsedDocument(int position, int length = 0);
     QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
-    bool findDeclarationValue(int position, int length, int& valuePosition, int& valueEnd);
-    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property);
+    QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QmlEditFragment* parent = nullptr);
 
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
 
     QmlJsSettings* settings();
-
-    QmlEditFragment* findEditFragment(CodePalette* palette);
-    QmlEditFragment* findEditFragmentIn(QmlEditFragment *parent, CodePalette* palette);
 
     void suggestionsForProposedExpression(
         QmlDeclaration::Ptr declaration,
@@ -104,8 +107,6 @@ public:
 
     QmlUsageGraphScanner* createScanner();
 
-    int numberOfConnections();
-
     void newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo);
 
     enum AddOptionsFilter {
@@ -115,8 +116,10 @@ public:
         NoReadOnly = 8
     };
 
-    Q_ENUMS(AddOptionsFilter);
+    QmlEditFragmentContainer *editContainer();
+    DocumentQmlChannels* bindingChannels() const;
 
+    Q_ENUMS(AddOptionsFilter);
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
@@ -153,7 +156,7 @@ public slots:
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
-    void deleteObject(lv::QmlEditFragment* edit);
+    void eraseObject(lv::QmlEditFragment* edit);
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
@@ -178,7 +181,6 @@ public slots:
     lv::QmlImportsModel* importsModel();
     void addLineAtPosition(QString line, int pos);
     void removeLineAtPosition(int pos);
-    void removeAllEditingFragments();
 
     int findImportsPosition(int blockPos);
     int findRootPosition();
@@ -224,7 +226,6 @@ public slots:
     QString getFragmentId(lv::QmlEditFragment* ef);
 
 signals:
-    void numberOfConnectionsChanged();
     void importsScanned();
 
 private:
@@ -233,6 +234,9 @@ private:
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();
     QString getHelpEntity(int position);
+
+    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath, lv::QmlSuggestionModel* model, bool isForNode = false);
+    void addObjectsToModel(const QmlScopeSnap& scope, lv::QmlSuggestionModel* model);
 
     void suggestionsForGlobalQmlContext(
         const QmlCompletionContext& context,
@@ -304,17 +308,31 @@ private:
     bool                   m_newScope;
     QTimer                 m_scopeTimer;
 
-    QLinkedList<QmlEditFragment*> m_edits; // opened palettes
-    QmlEditFragment*              m_editingFragment; // editing fragment
+    QmlEditFragment*              m_editingFragment; // single editing fragment
+    QmlEditFragmentContainer*     m_editContainer;
+
+    DocumentQmlChannels*   m_bindingChannels;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 
     Q_DECLARE_PRIVATE(CodeQmlHandler)
 };
 
+inline ProjectDocument *CodeQmlHandler::document() const{
+    return m_document;
+}
+
 /// \brief Returns the settings associated with this object.
 inline QmlJsSettings *CodeQmlHandler::settings(){
     return m_settings;
+}
+
+inline QmlEditFragmentContainer *CodeQmlHandler::editContainer(){
+    return m_editContainer;
+}
+
+inline DocumentQmlChannels *CodeQmlHandler::bindingChannels() const{
+    return m_bindingChannels;
 }
 
 }// namespace

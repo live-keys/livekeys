@@ -26,6 +26,7 @@ class Timeline : public QObject, public QQmlParserStatus{
     Q_PROPERTY(bool isRunning                   READ isRunning      NOTIFY isRunningChanged)
     Q_PROPERTY(double fps                       READ fps            WRITE setFps           NOTIFY fpsChanged)
     Q_PROPERTY(bool loop                        READ loop           WRITE setLoop          NOTIFY loopChanged)
+    Q_PROPERTY(bool isRecording                 READ isRecording    NOTIFY isRecordingChanged)
     Q_PROPERTY(QObject* properties              READ properties     WRITE setProperties    NOTIFY propertiesChanged)
     Q_PROPERTY(QString file                     READ file           WRITE setFile          NOTIFY fileChanged)
     Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
@@ -77,11 +78,15 @@ public:
 
     void signalTrackNameChanged(Track* track);
 
+    bool isRecording() const;
+    void refreshPosition();
+
 public slots:
     void appendTrack(lv::Track* track);
     void removeTrack(int index);
 
     void start();
+    void startRecording();
     void stop();
 
     QString positionToLabel(qint64 frameNumber, bool shortZero = false);
@@ -93,9 +98,12 @@ public slots:
     void save();
     void saveAs(const QString& path);
 
+    void setRecord(bool isRecording);
+
 signals:
     void contentLengthChanged();
     void fpsChanged();
+    void waitingForTrack(qint64 position);
     void cursorPositionChanged(qint64 position);
     void cursorPositionProcessed(qint64 position);
     void isRunningChanged();
@@ -104,6 +112,7 @@ signals:
     void fileChanged();
     void trackListChanged();
     void trackNameChanged(Track* track);
+    void isRecordingChanged();
 
 private:
     void updateCursorPosition(qint64 position);
@@ -112,8 +121,9 @@ private:
     qint64 m_contentLength;
     double m_fps;
     bool   m_loop;
+    bool   m_isRecording;
     bool   m_isRunning;
-    bool   m_waitingForTrack;
+    qint64 m_waitingForTrackAt;
     bool   m_isComponentComplete;
 
     TimelineConfig*      m_config;
@@ -209,6 +219,18 @@ inline void Timeline::setFile(const QString &file){
     if ( !m_file.isEmpty() && m_isComponentComplete ){
         load();
     }
+}
+
+inline bool Timeline::isRecording() const{
+    return m_isRecording;
+}
+
+inline void Timeline::setRecord(bool record){
+    if (m_isRecording == record)
+        return;
+
+    m_isRecording = record;
+    emit isRecordingChanged();
 }
 
 }// namespace

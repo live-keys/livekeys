@@ -147,7 +147,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        documentHandler.codeHandler.deleteObject(editingFragment)
+                        paletteControls.eraseObject(editingFragment)
                     }
                 }
             }

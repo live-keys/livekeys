@@ -158,79 +158,6 @@ namespace{
         return nullptr;
     }
 
-    /// \private
-    QmlBindingChannel::Ptr traversePath(QmlBindingPath::Ptr path, Runnable* r, QmlBindingPath::Node* n, QObject* object){
-        if ( n == nullptr || object == nullptr)
-            return QmlBindingChannel::Ptr(nullptr);
-
-        if ( n->type() == QmlBindingPath::Node::Property ){
-            QmlBindingPath::PropertyNode* pn = static_cast<QmlBindingPath::PropertyNode*>(n);
-
-            QQmlProperty prop(object, pn->propertyName);
-            if ( !prop.isValid() ){
-                int findex = pn->propertyName.indexOf('(');
-                if ( findex == -1 )
-                    return QmlBindingChannel::Ptr(nullptr);
-
-                QByteArray upname = pn->propertyName.toUtf8();
-                int methodIndex = object->metaObject()->indexOfMethod(upname.data());
-                if ( methodIndex >= 0 ){
-                    return QmlBindingChannel::create(path, r, QQmlProperty(object, "objectName"), object->metaObject()->method(methodIndex));
-                }
-            }
-
-            if ( n->child == nullptr ){
-                return QmlBindingChannel::create(path, r, prop);
-            } else {
-                return traversePath(path, r, n->child, prop.read().value<QObject*>());
-            }
-        } else if ( n->type() == QmlBindingPath::Node::Index ){
-            QmlBindingPath::IndexNode* in = static_cast<QmlBindingPath::IndexNode*>(n);
-
-            QQmlProperty prop(object);
-            if ( !prop.isValid() )
-                return QmlBindingChannel::Ptr(nullptr);
-            if ( prop.propertyTypeCategory() == QQmlProperty::Object && in->index != 0 )
-                return QmlBindingChannel::Ptr(nullptr);
-
-            if ( n->child == nullptr ){
-                return QmlBindingChannel::create(path, r, prop, in->index);
-            } else {
-                if ( prop.propertyTypeCategory() == QQmlProperty::Object ){
-                    return traversePath(path, r, n->child, prop.read().value<QObject*>());
-                } else if ( prop.propertyTypeCategory() == QQmlProperty::List ){
-                    QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
-                    if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
-                        QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
-                        if ( !parent )
-                            return QmlBindingChannel::Ptr(nullptr);
-
-                        // create correct order for list reference
-                        QObjectList ordered;
-                        for (auto child: parent->children())
-                        {
-                            bool found = false;
-                            for (int i = 0; i < ppref.count(); ++i)
-                                if (child == ppref.at(i)){
-                                    found = true;
-                                    break;
-                                }
-                            if (found) ordered.push_back(child);
-                        }
-
-                        return traversePath(path, r, n->child, ordered[in->index]);
-                    } else
-                        return QmlBindingChannel::Ptr(nullptr);
-                }
-            }
-        } else if ( n->type() == QmlBindingPath::Node::File ){
-            return traversePath(path, r, n->child, object);
-        } else if ( n->type() == QmlBindingPath::Node::Component ){
-            return traversePath(path, r, n->child, object);
-        }
-        return QmlBindingChannel::Ptr(nullptr);
-    }
-
 } // namespace
 
 // class DocumentQmlInfoPrivate
@@ -739,60 +666,6 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
 }
 
 /**
- * \brief Match the binding \p path with the application value and update it's connection
- *
- * This function traverses the binding path recursively starting from the \p root of
- * the application and tries to match the \p path with an application value.
- *
- * If the match is set, then the \p path value will be udpated.
- */
-QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPointer<QmlBindingPath> path, Runnable *r){
-    if ( !path->root() || !r || !r->viewRoot())
-        return nullptr;
-
-    QmlBindingPath::Node* root = path->root();
-
-    QObject* viewRoot = r->viewRoot();
-
-    if ( root && root->type() == QmlBindingPath::Node::Watcher ){
-        QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(path->root());
-
-        HookContainer* hooks = qobject_cast<HookContainer*>(
-            r->viewContext()->contextProperty("hooks").value<QObject*>()
-        );
-
-        if ( !hooks )
-            return nullptr;
-
-        QList<QObject*> watchers = hooks->entriesFor(wnode->filePath, wnode->objectId);
-
-        if ( watchers.isEmpty() )
-            return nullptr;
-
-        QmlWatcher* watcher = qobject_cast<QmlWatcher*>(watchers.first());
-        viewRoot = watcher->parent();
-
-        root = root->child;
-    }
-
-    while ( root && (root->type() == QmlBindingPath::Node::File || root->type() == QmlBindingPath::Node::Component) ){
-        root = root->child;
-    }
-
-    if ( !root )
-        return nullptr;
-
-    if ( root->child == nullptr ){
-        QQmlProperty prop(viewRoot->parent());
-        if( !prop.isValid() )
-            return QmlBindingChannel::Ptr();
-        return QmlBindingChannel::create(path, r, prop, 0);
-    }
-
-    return traversePath(path, r, root->child, viewRoot);
-}
-
-/**
  * \brief Finds the binding path associated with a declaration within a range object
  *
  * To call this method, parse the document first, then get the values:
@@ -820,18 +693,18 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
         declaration->setValuePositionOffset(0);
         declaration->setValueLength(root->end - root->begin);
 
-        QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
-        indexNode->index = 0;
-        n = indexNode;
+        QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+        componentNode->name = document->file()->name();
+        n = componentNode;
 
     } else {
         QmlBindingPath::Node* result = findDeclarationPathImpl(root, declaration);
         if ( result ){
-            QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
-            indexNode->index = 0;
-            indexNode->child = result;
-            result->parent = indexNode;
-            n = indexNode;
+            QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+            componentNode->name = document->file()->name();
+            componentNode->child = result;
+            result->parent = componentNode;
+            n = componentNode;
         }
     }
 

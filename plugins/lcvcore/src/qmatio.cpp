@@ -1,12 +1,84 @@
 #include "qmatio.h"
 #include "opencv2/core.hpp"
 #include "opencv2/highgui.hpp"
+#include "opencv2/imgproc.hpp"
+
+#include "live/exception.h"
+#include "live/viewengine.h"
 
 #include <QJSValueIterator>
+#include <QImage>
 
 QMatIO::QMatIO(QObject *parent)
     : QObject(parent)
 {
+}
+
+cv::Mat QMatIO::fromQImage(const QImage &inImage, bool cloneImageData){
+    switch ( inImage.format() ){
+        // 8-bit, 4 channel
+        case QImage::Format_ARGB32:
+        case QImage::Format_ARGB32_Premultiplied: {
+            cv::Mat  mat( inImage.height(), inImage.width(),
+                          CV_8UC4,
+                          const_cast<uchar*>(inImage.bits()),
+                          static_cast<size_t>(inImage.bytesPerLine())
+                          );
+
+            return (cloneImageData ? mat.clone() : mat);
+        }
+
+        // 8-bit, 3 channel
+        case QImage::Format_RGB32: {
+            if ( !cloneImageData ){
+                THROW_EXCEPTION(lv::Exception, "Conversion requires cloning on RGB32.", lv::Exception::toCode("~Clone"));
+            }
+
+            cv::Mat  mat( inImage.height(), inImage.width(),
+                          CV_8UC4,
+                          const_cast<uchar*>(inImage.bits()),
+                          static_cast<size_t>(inImage.bytesPerLine())
+                          );
+
+            cv::Mat  matNoAlpha;
+
+            cv::cvtColor( mat, matNoAlpha, cv::COLOR_BGRA2BGR );   // drop the all-white alpha channel
+
+            return matNoAlpha;
+        }
+
+        // 8-bit, 3 channel
+        case QImage::Format_RGB888: {
+            if ( !cloneImageData ){
+                THROW_EXCEPTION(lv::Exception, "Conversion requires cloning on RGB32.", lv::Exception::toCode("~Clone"));
+            }
+
+            QImage swapped = inImage.rgbSwapped();
+
+            return cv::Mat( swapped.height(), swapped.width(),
+                            CV_8UC3,
+                            const_cast<uchar*>(swapped.bits()),
+                            static_cast<size_t>(swapped.bytesPerLine())
+                            ).clone();
+        }
+
+        // 8-bit, 1 channel
+        case QImage::Format_Indexed8: {
+            cv::Mat  mat( inImage.height(), inImage.width(),
+                          CV_8UC1,
+                          const_cast<uchar*>(inImage.bits()),
+                          static_cast<size_t>(inImage.bytesPerLine())
+                          );
+
+            return (cloneImageData ? mat.clone() : mat);
+        }
+
+        default:{
+            THROW_EXCEPTION(lv::Exception, "Conversion requires cloning on RGB32.", lv::Exception::toCode("~Clone"));
+        }
+    }
+
+    return cv::Mat();
 }
 
 QMat *QMatIO::read(const QString &path, int isColor){

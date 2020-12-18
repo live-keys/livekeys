@@ -19,7 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
 import base 1.0
 
 Pane{
@@ -49,7 +49,7 @@ Pane{
     property alias loading: loadingAnimation.visible
     property var panes: null
 
-    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
+    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.editContainer.editCount !== 0)
 
     onCodeOnlyChanged: {
         if (codeOnly){
@@ -260,59 +260,47 @@ Pane{
             }
         }
 
-        Rectangle{
+        Workspace.Button{
             anchors.right: parent.right
             anchors.rightMargin: 110
             width: 30
             height: parent.height
-            color: root.optionsColor
+            content: codeOnly ? root.currentTheme.buttons.editorShape : root.currentTheme.buttons.editorCode
+            onClicked: {
+                lk.layers.workspace.panes.activePane = root
 
-            Image{
-                id : codeDesignToggle
-                anchors.centerIn: parent
-                source : "qrc:/images/switch-to-" + (codeOnly? "design": "source") + ".png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-
-                    lk.layers.workspace.panes.activePane = root
-
-                    if (!codeOnly)
+                if (!codeOnly)
+                {
+                    if (documentHandler.codeHandler)
                     {
-                        if (documentHandler.codeHandler)
-                        {
-                            // unfortunate naming, but this actually disables loading
-                            if (loading)
-                                lk.layers.workspace.commands.execute("editqml.shape_all")
-
-                            if (editor.rootShaped){
-                                root.state = paletteControls.convertStateIntoInstructions()
-                            } else {
-                                root.state = null
-                            }
-                            documentHandler.codeHandler.removeAllEditingFragments()
-                            editor.importsShaped = false
-                            editor.rootShaped = false
-                        }
-                    } else {
-                        if (root.state){
-                            var codeHandler = editor.documentHandler.codeHandler
-                            var rootPosition = codeHandler.findRootPosition()
-                            lk.layers.workspace.extensions.editqml.shapeRootObject(root, codeHandler, function(){
-                                lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
-                                    root,
-                                    rootPosition,
-                                    root.state
-                                )
-                            })
-                        } else
+                        // unfortunate naming, but this actually disables loading
+                        if (loading)
                             lk.layers.workspace.commands.execute("editqml.shape_all")
-                        // shape all
+
+                        if (editor.rootShaped){
+                            root.state = paletteControls.convertStateIntoInstructions()
+                        } else {
+                            root.state = null
+                        }
+                        documentHandler.codeHandler.editContainer.clearAllFragments()
+                        editor.importsShaped = false
+                        editor.rootShaped = false
                     }
-
-
+                } else {
+                    if (root.state){
+                        var codeHandler = editor.documentHandler.codeHandler
+                        var rootPosition = codeHandler.findRootPosition()
+                        lk.layers.workspace.extensions.editqml.shapeRootObject(root, codeHandler, function(){
+                            lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
+                                root,
+                                rootPosition,
+                                root.state
+                            )
+                        })
+                    } else {
+                        // shape all
+                        lk.layers.workspace.extensions.editqml.shapeAllInEditor(root)
+                    }
                 }
             }
         }
@@ -388,7 +376,7 @@ Pane{
         }
     }
 
-    PaneMenu{
+    Workspace.PaneMenu{
         id: editorAddRemoveMenu
         visible: false
         anchors.right: root.right
@@ -397,7 +385,7 @@ Pane{
 
         style: root.currentTheme.popupMenuStyle
 
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr('Split Horizontally')
             onClicked: {
                 editorAddRemoveMenu.visible = false
@@ -406,7 +394,7 @@ Pane{
                 root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr('Split Vertically')
             onClicked: {
                 editorAddRemoveMenu.visible = false
@@ -415,14 +403,14 @@ Pane{
                 root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr("Move to New Window")
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 root.panes.movePaneToNewWindow(root)
             }
         }
-        PaneMenuItem{
+        Workspace.PaneMenuItem{
             text: qsTr("Remove Pane")
             onClicked: {
                 editorAddRemoveMenu.visible = false

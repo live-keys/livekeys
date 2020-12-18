@@ -1,0 +1,23 @@
+module workspace.icons
+plugin icons
+
+depends QtQuick 2.3
+
+CodeIcon          1.0 CodeIcon.qml
+PlusIcon          1.0 PlusIcon.qml
+MenuIcon          1.0 MenuIcon.qml
+CheckMarkIcon     1.0 CheckMarkIcon.qml
+ResizeIcon        1.0 ResizeIcon.qml
+RotateIcon        1.0 RotateIcon.qml
+XIcon             1.0 XIcon.qml
+TwoWayArrowIcon   1.0 TwoWayArrowIcon.qml
+TrashIcon         1.0 TrashIcon.qml
+WarningIcon       1.0 WarningIcon.qml
+CropIcon          1.0 CropIcon.qml
+FolderIcon        1.0 FolderIcon.qml
+FileIcon          1.0 FileIcon.qml
+PerspectiveIcon   1.0 PerspectiveIcon.qml
+PenSizeIcon       1.0 PenSizeIcon.qml
+RecordIcon        1.0 RecordIcon.qml
+StopIcon          1.0 StopIcon.qml
+StackIcon         1.0 StackIcon.qml

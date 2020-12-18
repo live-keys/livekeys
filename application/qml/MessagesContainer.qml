@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Rectangle {
     id: root
@@ -163,7 +164,7 @@ Rectangle {
                     width: 20
                     height: 20
 
-                    Workspace.XIcon{
+                    Icons.XIcon{
                         anchors.centerIn: parent
                         width: 8
                         height: 8

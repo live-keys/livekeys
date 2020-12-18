@@ -8,6 +8,29 @@ import QtQuick.tooling 1.2
 
 Module {
     dependencies: []
+    Component { name: "QAbstractListModel"; prototype: "QAbstractItemModel" }
+    Component {
+        name: "QObject"
+        exports: [
+            "QML/QtObject 1.0",
+            "QtQml/QtObject 2.0",
+            "QtQuick/QtObject 2.0",
+            "base/Shared 1.0"
+        ]
+        isCreatable: false
+        exportMetaObjectRevisions: [0, 0, 0, 0]
+        Property { name: "objectName"; type: "QString" }
+        Signal {
+            name: "objectNameChanged"
+            Parameter { name: "objectName"; type: "QString" }
+        }
+        Method { name: "toString" }
+        Method { name: "destroy" }
+        Method {
+            name: "destroy"
+            Parameter { name: "delay"; type: "int" }
+        }
+    }
     Component {
         name: "lv::Environment"
         prototype: "QObject"
@@ -302,12 +325,14 @@ Module {
     }
     Component {
         name: "lv::QmlStreamFilter"
+        defaultProperty: "childObjects"
         prototype: "QObject"
         exports: ["base/StreamFilter 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "pull"; type: "lv::QmlStream"; isPointer: true }
-        Property { name: "run"; type: "QJSValue" }
-        Property { name: "result"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
+        Property { name: "current"; type: "QJSValue"; isReadonly: true }
+        Property { name: "result"; type: "lv::QmlWritableStream"; isReadonly: true; isPointer: true }
+        Property { name: "childObjects"; type: "QObject"; isList: true; isReadonly: true }
     }
     Component {
         name: "lv::QmlStreamIterator"
@@ -324,6 +349,17 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "prefix"; type: "QString" }
         Property { name: "stream"; type: "lv::QmlStream"; isPointer: true }
+    }
+    Component {
+        name: "lv::QmlStreamSink"
+        prototype: "QObject"
+        exports: ["base/StreamSink 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "input"; type: "QJSValue" }
+        Method {
+            name: "setInput"
+            Parameter { name: "input"; type: "QJSValue" }
+        }
     }
     Component {
         name: "lv::QmlThreadInfo"
@@ -536,6 +572,12 @@ Module {
             type: "QObject*"
             Parameter { name: "qmlCode"; type: "QString" }
             Parameter { name: "parent"; type: "QObject"; isPointer: true }
+            Parameter { name: "file"; type: "QUrl" }
+        }
+        Method {
+            name: "createComponent"
+            type: "QQmlComponent*"
+            Parameter { name: "qmlCode"; type: "QString" }
             Parameter { name: "file"; type: "QUrl" }
         }
         Method {

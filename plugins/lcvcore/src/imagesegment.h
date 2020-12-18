@@ -11,7 +11,7 @@ namespace lv{
 class ImageSegment : public Segment{
 
     Q_OBJECT
-    Q_PROPERTY(QString file              READ file    WRITE setFile    NOTIFY fileChanged)
+    Q_PROPERTY(QString file  READ file    WRITE setFile    NOTIFY fileChanged)
 
 public:
     explicit ImageSegment(QObject *parent = nullptr);

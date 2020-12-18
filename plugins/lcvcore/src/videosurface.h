@@ -3,6 +3,7 @@
 
 #include "qmatdisplay.h"
 #include "live/timelineobjectproperty.h"
+#include "qvideowriter.h"
 
 namespace lv{
 
@@ -11,13 +12,13 @@ class VideoSurface : public TimelineObjectProperty{
     Q_OBJECT
     Q_PROPERTY(int imageWidth  READ imageWidth  WRITE setImageWidth  NOTIFY imageWidthChanged)
     Q_PROPERTY(int imageHeight READ imageHeight WRITE setImageHeight NOTIFY imageHeightChanged)
-    Q_PROPERTY(QMat* image     READ image       WRITE setImage       NOTIFY imageChanged)
+    Q_PROPERTY(QMat* image     READ image       NOTIFY imageChanged)
 
 public:
     explicit VideoSurface(QObject *parent = nullptr);
     ~VideoSurface() override;
 
-    void resetSurface();
+    void swapSurface(qint64 position);
     void updateSurface(qint64 cursorPosition, QMat* frame);
 
     virtual void serialize(ViewEngine *engine, MLNode &node) override;
@@ -29,7 +30,16 @@ public:
     void setImageHeight(int imageHeight);
 
     QMat* image() const;
-    void setImage(QMat* image);
+
+    qint64 lastProcessedPosition() const;
+
+    bool builderUsed() const;
+
+    void createRecorder();
+    void closeRecorder();
+
+public slots:
+    void setWriterOptions(const QJSValue& options);
 
 signals:
     void imageWidthChanged();
@@ -37,9 +47,14 @@ signals:
     void imageChanged();
 
 private:
-    int   m_imageWidth;
-    int   m_imageHeight;
-    QMat* m_image;
+    qint64        m_lastProcessedPosition;
+    int           m_imageWidth;
+    int           m_imageHeight;
+    qint64        m_currentPosition;
+    QMat*         m_buffer;
+    QMat*         m_current;
+    QJSValue      m_writerOptions;
+    QVideoWriter* m_writer;
 };
 
 inline int VideoSurface::imageWidth() const{
@@ -67,7 +82,15 @@ inline void VideoSurface::setImageHeight(int imageHeight){
 }
 
 inline QMat *VideoSurface::image() const{
-    return m_image;
+    return m_current;
+}
+
+inline qint64 VideoSurface::lastProcessedPosition() const{
+    return m_lastProcessedPosition;
+}
+
+inline bool VideoSurface::builderUsed() const{
+    return m_currentPosition;
 }
 
 }// namespace

@@ -22,6 +22,7 @@ import editor 1.0
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 CodePalette{
     id: palette
@@ -59,7 +60,7 @@ CodePalette{
             var position =
                 oc.editingFragment.valuePosition() +
                 oc.editingFragment.valueLength() - 1
-            paletteControls.addItem(oc, position, "TransformImage", name, false)
+            paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
             var cont = oc.groupsContainer
             return cont.children[cont.children.length - 1]
@@ -141,7 +142,7 @@ CodePalette{
                         }
 
                         fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
-                        fragment.bindingModel(null).commit(Qt.rect(x, y, width, height))
+                        fragment.commit(Qt.rect(x, y, width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -153,7 +154,7 @@ CodePalette{
                     height: 20
                     color: cropButton.containsMouse || toolbox.selectedTool === cropTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
-                    Workspace.CropIcon{
+                    Icons.CropIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -178,7 +179,7 @@ CodePalette{
                         radius: 2
                         color: parent.containsMouse ? Qt.lighter(palette.style.toolIconHighlightBackground) : palette.style.toolIconHighlightBackground
 
-                        Workspace.TwoWayArrowIcon{
+                        Icons.TwoWayArrowIcon{
                             anchors.centerIn: parent
                             width: 14
                             height: 14
@@ -201,7 +202,7 @@ CodePalette{
                             fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
                         }
                         fragment.write('"' + Math.round(width) + "x" + Math.round(height) + '"')
-                        fragment.bindingModel(null).commit(Qt.size(width, height))
+                        fragment.commit(Qt.size(width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -214,7 +215,7 @@ CodePalette{
                     color: resizeButton.containsMouse || toolbox.selectedTool === resizeTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
 
-                    Workspace.ResizeIcon{
+                    Icons.ResizeIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -248,7 +249,7 @@ CodePalette{
                             fragment = paletteControls.addPropertyByFragment(rotate, codeHandler, "degrees")
                         }
                         fragment.write(-angle)
-                        fragment.bindingModel(null).commit(-angle)
+                        fragment.commit(-angle)
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -260,7 +261,7 @@ CodePalette{
                     color: rotateButton.containsMouse || toolbox.selectedTool === rotateTool ? palette.style.toolIconHighlightBackground : 'transparent'
                     radius: 2
 
-                    Workspace.RotateIcon{
+                    Icons.RotateIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1
                         color: palette.style.toolIconColor
@@ -298,7 +299,7 @@ CodePalette{
                         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
                         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
                         fragment.write(value)
-                        fragment.bindingModel(null).commit([p1, p2, p3, p4])
+                        fragment.commit([p1, p2, p3, p4])
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
                     }
@@ -312,7 +313,7 @@ CodePalette{
                     layer.enabled: true
                     layer.samples: 8
 
-                    Workspace.PerspectiveIcon{
+                    Icons.PerspectiveIcon{
                         anchors.centerIn: parent
                         strokeWidth: 1.2
                         color: palette.style.toolIconColor

@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.3
 import timeline 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Item{
     id: root
@@ -32,7 +33,7 @@ Item{
         height: parent.height - 1
         color: 'transparent'
 
-        Workspace.MenuIcon{
+        Icons.MenuIcon{
             id: menuIcon
             width: 5
             height: 6

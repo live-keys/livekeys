@@ -82,10 +82,10 @@ SplitView{
             paneSizes[j] = newPaneSize
             pane.width = newPaneSize
 
-            if ( pane.width < pane.paneMinimumWidth ){
-                paneSizes[j] = pane.paneMinimumWidth
-                pane.width = pane.paneMinimumWidth
-            }
+//            if ( pane.width < pane.paneMinimumWidth ){
+//                paneSizes[j] = pane.paneMinimumWidth
+//                pane.width = pane.paneMinimumWidth
+//            }
         }
 
 
@@ -130,10 +130,10 @@ SplitView{
             paneSizes[j] = newPaneSize
             pane.height = newPaneSize
 
-            if ( pane.height < pane.paneMinimumHeight ){
-                paneSizes[j] = pane.paneMinimumHeight
-                pane.height = pane.paneMinimumHeight
-            }
+//            if ( pane.height < pane.paneMinimumHeight ){
+//                paneSizes[j] = pane.paneMinimumHeight
+//                pane.height = pane.paneMinimumHeight
+//            }
         }
 
         var totalSize = 0

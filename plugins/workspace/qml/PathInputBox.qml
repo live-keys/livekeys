@@ -38,6 +38,10 @@ Item{
 
     property QtObject style: defaultStyle
 
+    function forceFocus(){
+        pathInput.forceFocus()
+    }
+
     InputBox{
         id: pathInput
         anchors.left: parent.left

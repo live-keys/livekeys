@@ -254,8 +254,9 @@ ComponentDeclaration ViewEngine::rootDeclaration(QObject *object) const{
     QString objectId = pctx->data->findObjectId(object);
 
     QQmlContextData* child = pctx->data->childContexts;
+
     while (child) {
-        if ( !child->url().isEmpty() ){
+        if ( !child->url().isEmpty() && child->contextObject == object ){
             url = child->url();
             objectId = child->findObjectId(object);
         }

@@ -201,7 +201,7 @@ QtObject{
         return res
     }
 
-    function addItem(container, insPosition, parentType, type, isForNode){
+    function addItemToRuntimeWithNotification(container, insPosition, parentType, type, isForNode){
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
@@ -226,10 +226,12 @@ QtObject{
                        container.editingFragment.valueLength() - 1
         }
 
-        var isReadOnly = container.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
-
-        var filter = (isReadOnly ? CodeQmlHandler.ReadOnly : 0 ) | (isForNode ? CodeQmlHandler.ForNode : 0)
-        var addContainer = codeHandler.getAddOptions(position, filter, container.editingFragment)
+        var addContainer = null
+        if (container.editingFragment.isGroup()){
+            addContainer = codeHandler.getReadOnlyAddOptions(container.editingFragment, isForNode)
+        } else {
+            addContainer = codeHandler.getAddOptions(position, isForNode)
+        }
 
         if ( !addContainer )
             return
@@ -328,7 +330,7 @@ QtObject{
 
             } else if ( addBoxItem.activeIndex === 2 ){ // object
 
-                addItem(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
+                addItemToRuntimeWithNotification(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
 
             } else if ( addBoxItem.activeIndex === 3 ){ // event
 
@@ -766,7 +768,7 @@ QtObject{
 
     function eraseObject(objectContainer){
         var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
-        objectContainer.editor.documentHandler.codeHandler.deleteObject(objectContainer.editingFragment)
+        objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment)
 
         if (rootDeleted) {
             objectContainer.editor.editor.rootShaped = false
@@ -977,8 +979,7 @@ QtObject{
 
         if (!ef){
             lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
-            console.error("Error: Can't shape palette")
-            return
+            throw linkError(new Error('Failed to find editing fragment for palette at: ' + palettes.position(), 300))
         }
 
         var forAnObject = ef.location === QmlEditFragment.Object

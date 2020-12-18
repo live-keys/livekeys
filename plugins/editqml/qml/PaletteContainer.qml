@@ -121,9 +121,11 @@ Rectangle{
 
             if ( paletteConnection.model ){
                 paletteConnection.model = null
+                paletteConnection.editingFragment = null
             } else {
                 paletteConnection.forceActiveFocus()
-                paletteConnection.model = editingFragment.bindingModel(documentHandler.codeHandler)
+                paletteConnection.model = editor.documentHandler.codeHandler.bindingChannels
+                paletteConnection.editingFragment = editingFragment
             }
         }
 
@@ -322,10 +324,6 @@ Rectangle{
         anchors.top: parent.top
         anchors.topMargin: 24
         width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
         onFocusChanged : if ( !focus ) model = null
 
         property var selectedHandler : function(){}

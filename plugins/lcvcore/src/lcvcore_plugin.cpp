@@ -42,6 +42,7 @@
 #include "qvideodecoder.h"
 
 #include "videosegment.h"
+#include "scriptvideosegment.h"
 #include "imagesegment.h"
 #include "videosurface.h"
 #include "videotrack.h"
@@ -94,6 +95,7 @@ void LcvcorePlugin::registerTypes(const char *uri){
 
     qmlRegisterType<lv::VideoSurface>(       uri, 1, 0, "VideoSurface");
     qmlRegisterType<lv::VideoSegment>(       uri, 1, 0, "VideoSegment");
+    qmlRegisterType<lv::ScriptVideoSegment>( uri, 1, 0, "ScriptVideoSegment");
     qmlRegisterType<lv::VideoTrack>(         uri, 1, 0, "VideoTrack");
     qmlRegisterType<lv::ImageSegment>(       uri, 1, 0, "ImageSegment");
 

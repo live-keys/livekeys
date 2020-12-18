@@ -1,13 +1,14 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/documentqmlchannels.h \
     $$PWD/documentqmlinfo.h \
     $$PWD/documentqmlranges_p.h \
     $$PWD/qmlbindingchannel.h \
+    $$PWD/qmlbindingchannelsdispatcher.h \
     $$PWD/qmlbindingpath.h \
-    $$PWD/qmlbindingspan.h \
+    $$PWD/qmleditfragmentcontainer.h \
     $$PWD/qmlimportsmodel.h \
-    $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
@@ -36,16 +37,16 @@ HEADERS += \
     $$PWD/qmllanguagescanmonitor.h\
     $$PWD/qmlscopesnap_p.h \
     $$PWD/qmlsuggestionmodel.h \
-    $$PWD/qmlusagegraphscanner.h \
-    $$PWD/qmlwatcherbackground.h
+    $$PWD/qmlusagegraphscanner.h
 
 SOURCES += \
+    $$PWD/documentqmlchannels.cpp \
     $$PWD/documentqmlinfo.cpp \
     $$PWD/documentqmlranges.cpp \
     $$PWD/qmlbindingchannel.cpp \
+    $$PWD/qmlbindingchannelsdispatcher.cpp \
     $$PWD/qmlbindingpath.cpp \
-    $$PWD/qmlbindingspan.cpp \
-    $$PWD/qmlbindingspanmodel.cpp \
+    $$PWD/qmleditfragmentcontainer.cpp \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/qmlcompletioncontext.cpp \
     $$PWD/qmllanguageinfo.cpp \
@@ -73,7 +74,6 @@ SOURCES += \
     $$PWD/qmlbuilder.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlsuggestionmodel.cpp \
-    $$PWD/qmlusagegraphscanner.cpp \
-    $$PWD/qmlwatcherbackground.cpp
+    $$PWD/qmlusagegraphscanner.cpp
 
 DISTFILES +=

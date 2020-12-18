@@ -162,10 +162,10 @@ void WorkerThread::postNextInProcessQueue(){
         if ( act ){
             act->exec();
         } else {
-            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
-            if( sf ){
-                sf->triggerRun();
-            }
+//            QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(caller);
+//            if( sf ){
+//                sf->triggerRun();
+//            }
         }
     }
 }

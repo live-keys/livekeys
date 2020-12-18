@@ -72,12 +72,18 @@ QQmlListProperty<QObject> Track::segments(){
 }
 
 Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
+    CursorOperation cursorOperationType = CursorOperation::Ready;
+
     if ( m_activeSegment ){
         if ( m_activeSegment->contains(newPosition) ){
             if ( newPosition == m_cursorPosition + 1 ){
                 m_activeSegment->cursorNext(newPosition - m_activeSegment->position());
+                if ( m_activeSegment->isProcessing() )
+                    cursorOperationType = CursorOperation::Delayed;
             } else {
                 m_activeSegment->cursorMove(newPosition - m_activeSegment->position());
+                if ( m_activeSegment->isProcessing() )
+                    cursorOperationType = CursorOperation::Delayed;
             }
         } else {
             m_activeSegment->cursorExit(newPosition);
@@ -102,13 +108,19 @@ Track::CursorOperation Track::updateCursorPosition(qint64 newPosition){
         Segment* segm = m_segmentModel->segmentThatWraps(newPosition);
         if ( segm ){
             segm->cursorEnter(newPosition - segm->position());
+            if ( segm->isProcessing() )
+                cursorOperationType = CursorOperation::Delayed;
         }
         m_activeSegment = segm;
     }
     m_cursorPosition = newPosition;
 
-    return CursorOperation::Ready;
+    return cursorOperationType;
 }
+
+void Track::cursorPositionProcessed(qint64){}
+void Track::recordingStarted(){}
+void Track::recordingStopped(){}
 
 void Track::setContentLength(qint64 contentLength){
     segmentModel()->setContentLength(contentLength);
@@ -172,6 +184,19 @@ void Track::timelineComplete(){
     }
 }
 
+void Track::notifyCursorProcessed(qint64 position){
+    emit cursorProcessed(this, position);
+}
+
+QQmlContext *Track::timelineContext(){
+    return qmlContext(timeline());
+}
+
+void Track::refreshPosition(){
+    if ( timeline() )
+        timeline()->refreshPosition();
+}
+
 bool Track::addSegment(Segment *segment){
     if ( m_segmentModel->addSegment(segment) ){
         if ( m_timelineReady ){
@@ -204,6 +229,10 @@ void Track::__segmentModelItemsChanged(qint64 from, qint64 to){
             m_activeSegment = nullptr;
         }
     }
+}
+
+QJSValue Track::configuredProperties(Segment *) const{
+    return QJSValue();
 }
 
 void Track::assignCursorPosition(qint64 position){

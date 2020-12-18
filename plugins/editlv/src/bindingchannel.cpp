@@ -36,7 +36,6 @@ BindingChannel::Ptr BindingChannel::traverseBindingPath(){
 }
 
 void BindingChannel::__runnableReady(){
-
     auto bc = traverseBindingPath();
     if ( bc ){
         m_property = bc->m_property;

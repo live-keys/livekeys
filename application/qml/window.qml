@@ -86,6 +86,11 @@ ApplicationWindow{
             ob.box = object
             return ob
         }
+
+        function newWindow(){
+            var w = windowFactory.createObject(root)
+            return w
+        }
     }
 
     property QtObject handle: QtObject{
@@ -212,6 +217,12 @@ ApplicationWindow{
             border.width: 1
             border.color: "#0c151c"
         }
+    }
+
+    Component{
+        id: windowFactory
+
+        Window{}
     }
 
     Component{

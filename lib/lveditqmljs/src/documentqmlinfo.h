@@ -238,7 +238,6 @@ public:
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
-    static QSharedPointer<QmlBindingChannel> traverseBindingPath(QSharedPointer<QmlBindingPath> path, Runnable* r);
     static QSharedPointer<QmlBindingPath> findDeclarationPath(
             ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,

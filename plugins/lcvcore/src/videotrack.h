@@ -25,6 +25,13 @@ public:
     virtual void timelineComplete() override;
     virtual QString typeReference() const override;
 
+    virtual void cursorPositionProcessed(qint64 position) override;
+    virtual void recordingStarted() override;
+    virtual void recordingStopped() override;
+
+public slots:
+    virtual QJSValue configuredProperties(lv::Segment *segment) const override;
+
 signals:
     void surfaceChanged(lv::VideoSurface* surface);
 

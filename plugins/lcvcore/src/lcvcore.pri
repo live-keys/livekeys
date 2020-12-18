@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/cvextras.h \
     $$PWD/imagesegment.h \
     $$PWD/qabsdiff.h \
     $$PWD/qalphamerge.h \
@@ -36,11 +37,13 @@ HEADERS += \
     $$PWD/qmatio.h \
     $$PWD/qvideodecoder.h \
     $$PWD/qvideodecodethread.h \
+    $$PWD/scriptvideosegment.h \
     $$PWD/videosegment.h \
     $$PWD/videosurface.h \
     $$PWD/videotrack.h
 
 SOURCES += \
+    $$PWD/cvextras.cpp \
     $$PWD/imagesegment.cpp \
     $$PWD/lcvcore_plugin.cpp \
     $$PWD/qabsdiff.cpp \
@@ -76,6 +79,7 @@ SOURCES += \
     $$PWD/qmatio.cpp \
     $$PWD/qvideodecoder.cpp \
     $$PWD/qvideodecodethread.cpp \
+    $$PWD/scriptvideosegment.cpp \
     $$PWD/videosegment.cpp \
     $$PWD/videosurface.cpp \
     $$PWD/videotrack.cpp

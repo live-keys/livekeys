@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.2
 import base 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 import fs 1.0 as Fs
 
 Workspace.SelectableListView{
@@ -68,11 +69,10 @@ Workspace.SelectableListView{
                 width: 15
                 height: 15
 
-                property Component folderIcon: Workspace.FolderIcon{ color: root.iconColor }
-                property Component fileIcon: Workspace.FileIcon{ color: root.iconColor }
+                property Component folderIcon: Icons.FolderIcon{ color: root.iconColor }
+                property Component fileIcon: Icons.FileIcon{ color: root.iconColor }
 
                 sourceComponent: modelData.isDir ? folderIcon : fileIcon
-
             }
 
             MouseArea{
