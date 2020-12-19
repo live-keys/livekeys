@@ -297,7 +297,7 @@ private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
     QmlJsSettings*      m_settings;
-    QQmlEngine*         m_engine;
+    ViewEngine*         m_engine;
     QmlCompletionContextFinder* m_completionContextFinder;
 
     ProjectDocument*       m_document;

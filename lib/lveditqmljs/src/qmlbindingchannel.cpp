@@ -106,18 +106,5 @@ QObject *QmlBindingChannel::object() const{
     return ordered[listIndex()];
 }
 
-void QmlBindingChannel::__runableReady(){
-    QmlBindingChannel::Ptr bc = DocumentQmlChannels::traverseBindingPath(m_bindingPath, m_runnable);
-    if ( bc ){
-        m_property = bc->m_property;
-        m_listIndex = bc->m_listIndex;
-    } else {
-        m_property = QQmlProperty();
-        m_listIndex = -1;
-    }
-
-    emit runnableObjectReady();
-}
-
 
 }// namespace

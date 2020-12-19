@@ -737,36 +737,14 @@ void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoord
 
 bool QmlEditFragment::bindExpression(const QString &expression)
 {
-    QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->findBindingForExpression(this, expression);
-    }
-
+    if ( m_codeHandler )
+        return m_codeHandler->findBindingForExpression(this, expression);
     return false;
 }
 
 bool QmlEditFragment::bindFunctionExpression(const QString &expression){
-    QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->findFunctionBindingForExpression(this, expression);
+    if (m_codeHandler){
+        return m_codeHandler->findFunctionBindingForExpression(this, expression);
     }
 
     return false;
