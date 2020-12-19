@@ -38,6 +38,12 @@ Rectangle{
         NoObjects = 4
     }
 
+    enum AddPropertyMode {
+        Default = 0,
+        AddAsReadOnly = 1,
+        AddAsObject = 2
+    }
+
     property QtObject theme: lk.layers.workspace.themes.current
 
     property QtObject addContainer : null
@@ -77,7 +83,7 @@ Rectangle{
     }
 
     property var cancel: function(){ }
-    property var accept : function(type, data){ }
+    property var accept : function(type, data, mode){ }
 
     function getCompletion(){
         if ( listView.currentItem ){
@@ -431,15 +437,23 @@ Rectangle{
         var code = listView.currentItem.code
         var importSpace = listView.currentItem.importSpace
 
+        var mode = AddQmlBox.AddPropertyMode.Default
+        if (listView.currentItem.isGroup && listView.currentItem.isWritable){
+            if (listView.currentItem.itemChecked){
+                mode = AddQmlBox.AddPropertyMode.AddAsReadOnly
+            } else {
+                mode = AddQmlBox.AddPropertyMode.AddAsObject
+            }
+        }
+
         if (selector === 2){
             var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
             root.activeIndex = 2
-
-            root.accept(importSpace, result)
+            root.accept(importSpace, result, mode)
         } else {
             root.activeIndex = selector
-            root.accept(type, code)
+            root.accept(type, code, mode)
         }
     }
 
@@ -547,10 +561,14 @@ Rectangle{
 
             delegate: Component{
                 Rectangle{
+                    id: modelItem
                     property string objectType : model.objectType
                     property string type : model.type
                     property string code: model.code
                     property int category: model.category
+                    property bool isGroup: model.isGroup
+                    property bool isWritable: model.isWritable
+                    property bool itemChecked: true
 
                     width : listView.width
                     height : 25
@@ -569,8 +587,42 @@ Rectangle{
                         text: model.label
                     }
 
+                    Item {
+                        id: check
+                        height: parent.height
+                        width: height
+                        visible: model.isGroup && model.isWritable
+
+                        Rectangle {
+                            width: 16
+                            height: 16
+                            anchors.centerIn: parent
+                            border.width: 2
+                            border.color: root.theme.colorScheme.middlegroundOverlayDominant
+                            color: "transparent"
+
+                            Rectangle {
+                                color: root.theme.colorScheme.middlegroundOverlayDominant
+                                width: 8
+                                height: 8
+                                x: 4
+                                y: 4
+                                visible: modelItem.itemChecked
+                            }
+                            MouseArea {
+                                anchors.fill: parent
+                                onClicked: {
+                                    modelItem.itemChecked = !modelItem.itemChecked
+                                }
+                            }
+                        }
+                        anchors.right: parent.right
+                        anchors.rightMargin: 15
+                    }
+
                     MouseArea{
                         anchors.fill: parent
+                        anchors.rightMargin: check.visible ? check.width + 15 : 15
                         onClicked: {
                             listView.currentIndex = index
                         }

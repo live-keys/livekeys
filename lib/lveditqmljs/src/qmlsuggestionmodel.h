@@ -2,6 +2,8 @@
 #define QMLSUGGESTIONMODEL_H
 
 #include <QAbstractListModel>
+#include "qmllanguageinfo.h"
+#include "qmlscopesnap_p.h"
 
 namespace lv{
 
@@ -30,7 +32,8 @@ public:
             const QString& pdoc,
             const QString& pcode,
             const int cat,
-            bool group = false
+            bool group = false,
+            bool writable = false
         );
 
         QString label;
@@ -41,6 +44,7 @@ public:
         QString code;
         int category;
         bool isGroup;
+        bool isWritable;
     };
 
     enum Roles{
@@ -51,7 +55,8 @@ public:
         Documentation,
         Code,
         Category,
-        IsGroup
+        IsGroup,
+        IsWritable
     };
 
     QmlSuggestionModel(int addPosition, QObject* parent = 0);
@@ -67,6 +72,8 @@ public:
     int addPosition() const;
 
     void updateFilters();
+    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath, int filter = 0);
+    void addObjectsToModel(const QmlScopeSnap& scope);
 
 public slots:
     void setFilter(const QString& filter);

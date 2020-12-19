@@ -1,5 +1,6 @@
 #include "qmlsuggestionmodel.h"
 #include <QSet>
+#include <codeqmlhandler.h>
 
 namespace lv {
 
@@ -16,6 +17,7 @@ QmlSuggestionModel::QmlSuggestionModel(int addPosition, QObject* parent):
     m_roles[Code]           = "code";
     m_roles[Category]       = "category";
     m_roles[IsGroup]        = "isGroup";
+    m_roles[IsWritable]     = "isWritable";
 }
 
 QmlSuggestionModel::~QmlSuggestionModel()
@@ -42,6 +44,8 @@ QVariant QmlSuggestionModel::data(const QModelIndex &index, int role) const
         return m_data[dataIndex].category;
     } else if ( role == IsGroup ){
         return m_data[dataIndex].isGroup;
+    } else if ( role == IsWritable ){
+        return m_data[dataIndex].isWritable;
     }
     return QVariant();
 }
@@ -135,8 +139,182 @@ void QmlSuggestionModel::updateFilters(){
     }
 }
 
+void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, int filter)
+{
+    for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+        const QmlTypeInfo::Ptr& ti = *it;
 
-QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pObjType, const QString& ptype, const QString &pimport, const QString &pdoc, const QString &pcode, const int cat, bool group)
+        for (int i = 0; i < ti->totalFunctions(); ++i)
+        {
+            auto method = ti->functionAt(i);
+            if (method.functionType == QmlFunctionInfo::Signal)
+            {
+                auto name = method.name;
+                name = QString("on") + name[0].toUpper() + name.mid(1);
+
+                addItem(QmlSuggestionModel::ItemData(
+                    name,
+                    ti->prefereredType().name(),
+                    "method",
+                    "",
+                    ti->exportType().join() + "." + name,
+                    name,
+                    QmlSuggestionModel::ItemData::Event)
+                );
+            } else if (filter & CodeQmlHandler::ForNode) {
+                auto name = method.name;
+
+                addItem(QmlSuggestionModel::ItemData(
+                    name,
+                    ti->prefereredType().name(),
+                    "method",
+                    "",
+                    ti->exportType().join() + "." + name,
+                    name,
+                    QmlSuggestionModel::ItemData::Function)
+                );
+
+            }
+        }
+
+        for ( int i = 0; i < ti->totalProperties(); ++i ){
+            QString propertyName = ti->propertyAt(i).name;
+
+            if ( !propertyName.startsWith("__") &&
+                (
+                    (!(filter & CodeQmlHandler::NoReadOnly) || ti->propertyAt(i).isWritable)
+                    ||
+                    ((filter & CodeQmlHandler::ReadOnly) && ti->propertyAt(i).isPointer)
+
+                )){
+
+                addItem(
+                    QmlSuggestionModel::ItemData(
+                        propertyName,
+                        ti->prefereredType().name(),
+                        ti->propertyAt(i).typeName.name(),
+                        "",
+                        ti->exportType().join() + "." + propertyName,
+                        propertyName,
+                        QmlSuggestionModel::ItemData::Property,
+                        ti->propertyAt(i).isPointer,
+                        ti->propertyAt(i).isWritable)
+                );
+            }
+
+
+            if ( propertyName.size() > 0 )
+                propertyName[0] = propertyName[0].toUpper();
+
+            if (propertyName != "ObjectName"){
+                propertyName = "on" + propertyName + "Changed";
+                addItem(
+                    QmlSuggestionModel::ItemData(
+                        propertyName,
+                        ti->prefereredType().name(),
+                        "method",
+                        "",
+                        "", //TODO: Find library path
+                        propertyName,
+                        QmlSuggestionModel::ItemData::Event)
+                );
+            }
+        }
+        updateFilters();
+    }
+}
+
+void QmlSuggestionModel::addObjectsToModel(const QmlScopeSnap &scope)
+{
+    // import global objects
+
+    QStringList exports;
+    QmlLibraryInfo::Ptr lib = scope.project->libraryInfo(scope.document->path());
+    if ( lib ){
+        exports = lib->listExports();
+    }
+
+    foreach( const QString& e, exports ){
+        if ( e != scope.document->componentName() ){
+            addItem(
+                QmlSuggestionModel::ItemData(
+                    e,
+                    "",
+                    "",
+                    "implicit",
+                    scope.document->path(),
+                    e,
+                    QmlSuggestionModel::ItemData::Object)
+            );
+        }
+    }
+
+    for( const QString& defaultLibrary: scope.project->defaultLibraries() ){
+        QmlLibraryInfo::Ptr defaultLib = scope.project->libraryInfo(defaultLibrary);
+        QStringList defaultExports;
+        if ( defaultLib ){
+            defaultExports = defaultLib->listExports();
+        }
+        for( const QString& de: defaultExports ){
+            if ( de != "Component"){
+                addItem(
+                    QmlSuggestionModel::ItemData(
+                        de,
+                        "",
+                        "",
+                        "QtQml",
+                        "QtQml",
+                        de,
+                        QmlSuggestionModel::ItemData::Object)
+                );
+            }
+        }
+    }
+
+    // import namespace objects
+
+    QSet<QString> imports;
+
+    foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
+        if ( imp.as() != "" ){
+            imports.insert(imp.as());
+        }
+    }
+    imports.insert("");
+
+    for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
+
+        foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
+            if ( imp.as() == *it ){
+                QStringList libexports;
+                QmlLibraryInfo::Ptr implib = scope.project->libraryInfo(imp.uri());
+                if ( !lib.isNull() ){
+                    libexports = implib->listExports();
+                }
+
+                for ( const QString& exp: libexports ){
+                    if ( exp != "Component"){
+                        addItem(
+                            QmlSuggestionModel::ItemData(
+                                exp,
+                                "",
+                                "",
+                                imp.uri(),
+                                imp.uri(),
+                                exp,
+                                QmlSuggestionModel::ItemData::Object)
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    updateFilters();
+}
+
+
+QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pObjType, const QString& ptype, const QString &pimport, const QString &pdoc, const QString &pcode, const int cat, bool group, bool writable)
     : label(plabel)
     , objectType(pObjType)
     , type(ptype)
@@ -145,6 +323,7 @@ QmlSuggestionModel::ItemData::ItemData(const QString& plabel, const QString& pOb
     , code(pcode)
     , category(cat)
     , isGroup(group)
+    , isWritable(writable)
 {
 
 }

@@ -124,6 +124,7 @@ QtObject{
             newPaletteBox.name = palette.name
             newPaletteBox.type = palette.type
 
+            paletteBoxParent.palettesOpened.push(palette.name)
             newPaletteBox.documentHandler = editor.documentHandler
             newPaletteBox.cursorRectangle = editor.getCursorRectangle()
             newPaletteBox.editorPosition = editor.cursorWindowCoords()
@@ -218,7 +219,7 @@ QtObject{
         var isGroup = container.editingFragment.isGroup()
 
         var position = 0
-        if (container.editingFragment.isGroup()){
+        if (isGroup){
             position = container.editingFragment.position()
         } else {
             position = container.editingFragment.valuePosition() +
@@ -273,7 +274,7 @@ QtObject{
             addBox.destroy()
         }
 
-        addBoxItem.accept = function(type, data){
+        addBoxItem.accept = function(type, data, mode){
             if ( addBoxItem.activeIndex === 1 ){ // property
 
                 // check if property is opened already
@@ -293,7 +294,12 @@ QtObject{
 
                 var ef = null
 
-                if (propsWritable[data]){
+                var isWritable = propsWritable[data]
+                if (mode === AddQmlBox.AddPropertyMode.AddAsReadOnly){
+                    isWritable = false
+                }
+
+                if (isWritable){
                     var ppos = codeHandler.addProperty(
                         addContainer.model.addPosition,
                         addContainer.objectType,
@@ -476,6 +482,11 @@ QtObject{
     function shapeAtPositionWithInstructions(editor, position, instructions){
         instructionsShaping = true
         var codeHandler = editor.documentHandler.codeHandler
+
+        if ("shapeImports" in instructions){
+            lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
+        }
+
         var ef = codeHandler.openConnection(position)
 
         if (!ef) return
@@ -662,11 +673,19 @@ QtObject{
     function addPaletteList(container, paletteGroup, offset, mode, swap, listParent){
         if (!container.editingFragment) return null
 
-        var palettes = container.editor.documentHandler.codeHandler.findPalettes(
-            container.editingFragment.position(),
-            true,
-            mode === PaletteControls.PaletteListMode.ObjectContainer
-        )
+        var palettes = null
+        if (container.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly))
+            palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
+                container.editingFragment,
+                mode === PaletteControls.PaletteListMode.ObjectContainer
+            )
+        else
+            palettes = container.editor.documentHandler.codeHandler.findPalettes(
+                container.editingFragment.position(),
+                mode === PaletteControls.PaletteListMode.ObjectContainer
+            )
+
+        palettes.filterOut(paletteGroup.palettesOpened)
 
         if (!palettes || palettes.size() === 0) return null
 
@@ -839,10 +858,11 @@ QtObject{
     function palette(editor){
         var codeHandler = editor.documentHandler.codeHandler
 
-        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
-        if ( !palettes ){
+
+        if ( !palettes || palettes.size() === 0){
             return
         }
 
@@ -880,7 +900,7 @@ QtObject{
     function shape(editor){
         var codeHandler = editor.documentHandler.codeHandler
 
-        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true, true)
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
@@ -917,7 +937,7 @@ QtObject{
     function bind(editor){
         var codeHandler = editor.documentHandler.codeHandler
 
-        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
         if ( palettes.size() === 1 ){
@@ -1062,6 +1082,9 @@ QtObject{
                 result = convertObjectIntoInstructions(editingFragments[i])
             }
         }
+
+        if (editor.importsShaped)
+            result['shapeImports'] = true
 
         return result
     }
