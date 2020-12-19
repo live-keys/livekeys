@@ -119,10 +119,10 @@ void QmlEditFragmentContainer::removeEdit(QmlEditFragment *edit){
 }
 
 QJSValue QmlEditFragmentContainer::allEdits(){
-    QJSValue result = m_codeHandler->m_engine->newArray(static_cast<quint32>(m_edits.size()));
+    QJSValue result = m_codeHandler->m_engine->engine()->newArray(static_cast<quint32>(m_edits.size()));
     quint32 i = 0;
     for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-        result.setProperty(i++, m_codeHandler->m_engine->newQObject(*it));
+        result.setProperty(i++, m_codeHandler->m_engine->engine()->newQObject(*it));
     }
     return result;
 }

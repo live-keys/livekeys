@@ -150,26 +150,6 @@ void QmlEditFragment::checkIfGroup()
     }
 }
 
-bool QmlEditFragment::isGroup() const
-{
-    return m_fragmentType & QmlEditFragment::FragmentType::Group;
-}
-
-void QmlEditFragment::checkIfGroup()
-{
-    bool isForAnObject = false;
-    if ( !declaration()->type().path().isEmpty() )
-        isForAnObject = true;
-    else if (declaration()->type().name() != "import" && declaration()->type().name() != "slot")
-        isForAnObject = QmlTypeInfo::isObject(declaration()->type().name());
-
-    if (!isForAnObject) return;
-
-    if (declaration()->type().language() == QmlTypeReference::Cpp){
-        addFragmentType(QmlEditFragment::FragmentType::Group);
-    }
-}
-
 QString QmlEditFragment::defaultValue() const{
     return QmlTypeInfo::typeDefaultValue(m_declaration->type().name());
 }
@@ -757,36 +737,14 @@ void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoord
 
 bool QmlEditFragment::bindExpression(const QString &expression)
 {
-    QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->findBindingForExpression(this, expression);
-    }
-
+    if ( m_codeHandler )
+        return m_codeHandler->findBindingForExpression(this, expression);
     return false;
 }
 
 bool QmlEditFragment::bindFunctionExpression(const QString &expression){
-    QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->findFunctionBindingForExpression(this, expression);
+    if (m_codeHandler){
+        return m_codeHandler->findFunctionBindingForExpression(this, expression);
     }
 
     return false;

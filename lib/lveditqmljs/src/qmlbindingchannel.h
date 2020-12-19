@@ -76,12 +76,6 @@ public:
 
     void setEnabled(bool enable);
 
-public slots:
-    void __runableReady();
-
-signals:
-    void runnableObjectReady();
-
 private:
     QmlBindingPath::Ptr m_bindingPath;
     Runnable*           m_runnable;
