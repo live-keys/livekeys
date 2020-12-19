@@ -150,26 +150,6 @@ void QmlEditFragment::checkIfGroup()
     }
 }
 
-bool QmlEditFragment::isGroup() const
-{
-    return m_fragmentType & QmlEditFragment::FragmentType::Group;
-}
-
-void QmlEditFragment::checkIfGroup()
-{
-    bool isForAnObject = false;
-    if ( !declaration()->type().path().isEmpty() )
-        isForAnObject = true;
-    else if (declaration()->type().name() != "import" && declaration()->type().name() != "slot")
-        isForAnObject = QmlTypeInfo::isObject(declaration()->type().name());
-
-    if (!isForAnObject) return;
-
-    if (declaration()->type().language() == QmlTypeReference::Cpp){
-        addFragmentType(QmlEditFragment::FragmentType::Group);
-    }
-}
-
 QString QmlEditFragment::defaultValue() const{
     return QmlTypeInfo::typeDefaultValue(m_declaration->type().name());
 }

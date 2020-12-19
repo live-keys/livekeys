@@ -1369,17 +1369,6 @@ lv::QmlEditFragment* CodeQmlHandler::findChildPropertyFragmentByName(lv::QmlEdit
     return m_editContainer->findChildPropertyFragmentByName(parent, name);
 }
 
-lv::QmlEditFragment *CodeQmlHandler::findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const
-{
-    QList<QObject *> children = parent->getChildFragments();
-    for (int i = 0; i < children.length(); ++i){
-        lv::QmlEditFragment* child = qobject_cast<lv::QmlEditFragment*>(children[i]);
-        if (child->identifier() == name) return child;
-    }
-
-    return nullptr;
-}
-
 void CodeQmlHandler::toggleComment(int position, int length)
 {
     if ( !m_document )
@@ -2405,9 +2394,6 @@ lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool includeExpandab
     QmlDeclaration::Ptr declaration = properties.first();
 
     return palettesForDeclaration(declaration, includeExpandables);
-
-    lpl->setPosition(declaration->position());
-    return lpl;
 }
 
 /**
