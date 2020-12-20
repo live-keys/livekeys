@@ -34,6 +34,7 @@ signals:
     void contentChanged(QString content);
 
 private:
+    QRect        m_rendererViewPort;
     QSvgRenderer m_renderer;
     QString      m_path;
     QString      m_content;
