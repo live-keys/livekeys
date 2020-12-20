@@ -92,37 +92,11 @@ Rectangle{
         return ""
     }
 
-    function highlightNext(){
-        if ( listView.currentIndex + 1 <  listView.count ){
-            listView.currentIndex++;
-        } else {
-            listView.currentIndex = 0;
-        }
-    }
-    function highlightPrev(){
-        if ( listView.currentIndex > 0 ){
-            listView.currentIndex--;
-        } else {
-            listView.currentIndex = listView.count - 1;
-        }
-    }
+    function highlightNext(){ listView.highlightNext() }
+    function highlightPrev(){ listView.highlightPrev() }
 
-    function highlightNextPage(){
-        var noItems = Math.floor(listView.height / 25)
-        if ( listView.currentIndex + noItems < listView.count ){
-            listView.currentIndex += noItems;
-        } else {
-            listView.currentIndex = listView.count - 1;
-        }
-    }
-    function highlightPrevPage(){
-        var noItems = Math.floor(listView.height / 25)
-        if ( listView.currentIndex - noItems >= 0 ){
-            listView.currentIndex -= noItems;
-        } else {
-            listView.currentIndex = 0;
-        }
-    }
+    function highlightNextPage(){ listView.highlightNextPage() }
+    function highlightPrevPage(){ listView.highlightPrevPage() }
 
     Item {
         id: header
