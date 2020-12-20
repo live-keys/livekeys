@@ -3892,6 +3892,10 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     scope.quickObjectDeclarationType(property->object()), QStringList(propName), property->begin
                 );
 
+                if ( propChain.isEmpty() ){
+                    continue;
+                }
+
                 QmlScopeSnap::PropertyReference& propref = propChain.last();
                 propMap.insert("isWritable", propref.property.isWritable);
 
