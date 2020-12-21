@@ -2976,10 +2976,17 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
 
         objectTypePath = ctx->objectTypePath();
 
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(position);
+        // get declared type in the document first
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+
         if (!ctx->objectTypePath().empty()){
             QString type = ctx->objectTypeName();
             QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-            typePath = scope.getTypePath(typeNamespace, type);
+            typePath.join(scope.getTypePath(typeNamespace, type));
         }
     }
 
