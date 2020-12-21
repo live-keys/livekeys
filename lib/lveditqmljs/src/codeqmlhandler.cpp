@@ -1223,11 +1223,10 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                     copyLength--;
                 }
 
-                bp = relativeBp;
-                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), bp);
+                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), relativeBp);
                 if ( !newChannel ){
                     //TODO
-                    qWarning("FAILED TO GET NEW CHANNEL");
+                    qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
                 } else {
                     newChannel->setEnabled(true);
                     ef->setChannel(newChannel);
@@ -1237,7 +1236,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                 QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
                 if ( !newChannel ){
                     //TODO
-                    qWarning("FAILED TO GET NEW CHANNEL [DOCUMETN CHANNEL]");
+                    qWarning("Warning: Failed to get new channel from document at: %s", qPrintable(bp->toString()));
                 } else {
                     newChannel->setEnabled(true);
                     ef->setChannel(newChannel);
