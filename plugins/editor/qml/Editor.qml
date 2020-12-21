@@ -29,7 +29,8 @@ Rectangle{
 
     property alias internalActiveFocus : textEdit.activeFocus
     property alias internalFocus: textEdit.focus
-    property alias lineSurfaceWidth: lineSurface.width
+    property alias lineSurfaceVisible: lineSurfaceBackground.visible
+    property double lineSurfaceWidth: lineSurfaceBackground.visible ? lineSurface.width : 0
 
     function forceFocus(){
         textEdit.forceActiveFocus()
@@ -219,9 +220,10 @@ Rectangle{
         anchors.top: parent.top
         anchors.left: parent.left
         anchors.bottom: parent.bottom
-        width: lineSurface.width + 5
+        width: visible ? lineSurface.width + 5 : 0
         color: root.lineSurfaceColor
         clip: true
+        visible: true
 
         Flickable{
             anchors.fill: parent

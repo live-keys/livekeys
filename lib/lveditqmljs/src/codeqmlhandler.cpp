@@ -1223,11 +1223,10 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                     copyLength--;
                 }
 
-                bp = relativeBp;
-                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), bp);
+                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), relativeBp);
                 if ( !newChannel ){
                     //TODO
-                    qWarning("FAILED TO GET NEW CHANNEL");
+                    qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
                 } else {
                     newChannel->setEnabled(true);
                     ef->setChannel(newChannel);
@@ -1237,7 +1236,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                 QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
                 if ( !newChannel ){
                     //TODO
-                    qWarning("FAILED TO GET NEW CHANNEL [DOCUMETN CHANNEL]");
+                    qWarning("Warning: Failed to get new channel from document at: %s", qPrintable(bp->toString()));
                 } else {
                     newChannel->setEnabled(true);
                     ef->setChannel(newChannel);
@@ -1792,7 +1791,8 @@ QList<int> CodeQmlHandler::languageFeatures() const{
         DocumentHandler::LanguageHelp,
         DocumentHandler::LanguageScope,
         DocumentHandler::LanguageHighlighting,
-        DocumentHandler::LanguageCodeCompletion
+        DocumentHandler::LanguageCodeCompletion,
+        DocumentHandler::LanguageLayout
     };
 }
 
@@ -2977,10 +2977,17 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
 
         objectTypePath = ctx->objectTypePath();
 
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(position);
+        // get declared type in the document first
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+
         if (!ctx->objectTypePath().empty()){
             QString type = ctx->objectTypeName();
             QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-            typePath = scope.getTypePath(typeNamespace, type);
+            typePath.join(scope.getTypePath(typeNamespace, type));
         }
     }
 
@@ -3891,6 +3898,10 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                 QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
                     scope.quickObjectDeclarationType(property->object()), QStringList(propName), property->begin
                 );
+
+                if ( propChain.isEmpty() ){
+                    continue;
+                }
 
                 QmlScopeSnap::PropertyReference& propref = propChain.last();
                 propMap.insert("isWritable", propref.property.isWritable);

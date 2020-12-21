@@ -26,9 +26,11 @@ void QmlFileDescriptor::operator=(const QmlFileDescriptor &other)
 
 QmlFileDescriptor::~QmlFileDescriptor()
 {
-    if (!file) return;
+    if (!file)
+        return;
 
-    if (file->isOpen()) file->close();
+    if (file->isOpen())
+        file->close();
 
     delete file;
     file = nullptr;
@@ -73,7 +75,7 @@ qint64 QmlFileDescriptor::write(QByteArray content)
 }
 
 qint64 QmlFileDescriptor::writeString(QString text){
-    if ( !file || !file->isTextModeEnabled()){
+    if ( !file ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No text file opened.", Exception::toCode("~File"));
         lv::ViewContext::instance().engine()->throwError(&e);
         return 0;

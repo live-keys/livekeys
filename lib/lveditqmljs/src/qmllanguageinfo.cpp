@@ -312,7 +312,7 @@ bool QmlTypeInfo::isCreatable() const{
  * \returns true if \p typeString is an object, false otherwise
  */
 bool QmlTypeInfo::isObject(const QString &typeString){
-    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
+    if ( typeString == "bool" || typeString == "double" || typeString == "qlonglong" || typeString == "enumeration" ||
          typeString == "int" || typeString == "list" || typeString == "real" ||
          typeString == "color" || typeString == "QColor" ||
          typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" ||
@@ -323,7 +323,7 @@ bool QmlTypeInfo::isObject(const QString &typeString){
 }
 
 bool QmlTypeInfo::isQmlBasicType(const QString &typeString){
-    if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
+    if ( typeString == "bool" || typeString == "double" || typeString == "qlonglong" || typeString == "enumeration" ||
          typeString == "int" || typeString == "list" || typeString == "real" ||
          typeString == "color" || typeString == "string" || typeString == "url" || typeString == "var" ||
          typeString == "object" || typeString == "Array" || typeString == "size" || typeString == "QStringList")
@@ -353,7 +353,7 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
 QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
     if ( typeString == "bool" )
         return "false";
-    else if ( typeString == "double" || typeString == "int" || typeString == "enumeration" || typeString == "real" )
+    else if ( typeString == "double" || typeString == "int" || typeString == "qlonglong" || typeString == "enumeration" || typeString == "real" )
         return "0";
     else if ( typeString == "list" )
         return "[]";
@@ -485,7 +485,7 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
             typeName = "quaternion";
         } else if (typeName == "QVector2D" || typeName == "QVector3D" || typeName == "QVector4D"){
             typeName = "vector" + typeName[7] + "d";
-        } else if (typeName == "uint"){
+        } else if (typeName == "uint" || typeName == "qlonglong" ){
             typeName = "int";
         }
 
