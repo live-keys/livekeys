@@ -84,6 +84,13 @@ QString QmlPath::dir(const QString &str){
     return QFileInfo(str).path();
 }
 
+QString QmlPath::relativePath(const QString &referencePath, const QString &path){
+    if ( path.startsWith(referencePath) ){
+        return path.mid(referencePath.length() + 1);
+    }
+    return path;
+}
+
 bool QmlPath::hasExtensions(const QString &path, QJSValue extensions){
     if ( extensions.isString() )
         return path.endsWith("." + extensions.toString());

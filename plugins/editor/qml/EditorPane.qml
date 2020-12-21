@@ -21,6 +21,7 @@ import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
 import base 1.0
+import fs 1.0 as Fs
 
 Pane{
     id : root
@@ -383,6 +384,8 @@ Pane{
         anchors.topMargin: 30
         anchors.top: root.top
 
+        property bool supportsShaping: false
+
         style: root.currentTheme.popupMenuStyle
 
         Workspace.PaneMenuItem{
@@ -417,6 +420,108 @@ Pane{
                 root.panes.clearPane(root)
             }
         }
+        Workspace.PaneMenuItem{
+            text: qsTr("Save Layout")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+
+                var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                if ( !layout ){
+                    lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
+                    return
+                }
+
+                var editorFile = editor.document.file.path
+                var layoutFile = editorFile + 'a'
+                editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+
+                var layoutObj = {
+                    file: editorFile,
+                    layout: layout
+                }
+
+                var jsonStr = JSON.stringify(layoutObj)
+                var file = Fs.File.open(layoutFile, Fs.File.WriteOnly)
+                if ( file === null ){
+                    lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + layoutFile, 100)
+                    return
+                }
+
+                file.writeString(jsonStr)
+                file.close()
+            }
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Save Layout As...")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                lk.layers.window.dialogs.saveFile({filters: ["Layout files (*.qmla)"]}, function(url){
+                    var layoutFile = Fs.UrlInfo.toLocalFile(url)
+                    var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                    if ( !layout ){
+                        lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
+                        return
+                    }
+
+                    var editorFile = editor.document.file.path
+                    var relativeLayoutFile = Fs.Path.relativePath(project.dir(), layoutFile)
+                    if ( relativeLayoutFile !== layoutFile ){ // layout file is in project path
+                        editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+                    }
+
+                    var layoutObj = {
+                        file: editorFile,
+                        layout: layout
+                    }
+
+                    var jsonStr = JSON.stringify(layoutObj)
+                    var file = Fs.File.open(layoutFile, Fs.File.WriteOnly)
+                    if ( file === null ){
+                        lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + layoutFile, 100)
+                        return
+                    }
+
+                    file.writeString(jsonStr)
+                    file.close()
+                })
+            }
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Open Layout")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                lk.layers.window.dialogs.openFile({filters: ["Layout files (*.qmla)"]}, function(url){
+                    var layoutFile = Fs.UrlInfo.toLocalFile(url)
+                    var file = Fs.File.open(layoutFile, Fs.File.ReadOnly)
+                    var contents = file.readAll()
+                    var contentsStr = contents.toString()
+
+                    var layoutObj = JSON.parse(contentsStr)
+                    //TODO: Check if parse goes wrong
+
+                    var editorFile = layoutObj.file
+                    if ( Fs.Path.isRelative(editorFile ) )
+                        editorFile = project.path(editorFile)
+
+                    var layout = layoutObj.layout
+
+                    if ( editorFile !== editor.document.file.path ){
+                        lk.layers.workspace.messages.pushWarning("Layout file is not compatible with the file in the editor.", 100)
+                        return
+                    }
+
+                    var codeHandler = editor.documentHandler.codeHandler
+                    var rootPosition = codeHandler.findRootPosition()
+
+                    //TODO
+//                    lk.layers.workspace.extensions.editqml.shapeLayout(editorPane, layout)
+
+                })
+            }
+        }
     }
 
     Editor{
@@ -426,6 +531,10 @@ Pane{
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
         lineSurfaceVisible: !(editor.importsShaped && editor.rootShaped)
+
+        onDocumentChanged: {
+            editorAddRemoveMenu.supportsShaping = documentHandler.has(DocumentHandler.LanguageLayout)
+        }
     }
 
 }

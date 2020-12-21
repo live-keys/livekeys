@@ -1067,12 +1067,7 @@ QtObject{
         editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }
 
-    function convertStateIntoInstructions(){
-        var editorPane = lk.layers.workspace.panes.focusPane('editor')
-        if ( !editorPane )
-            return
-
-        var editor = editorPane.editor
+    function convertEditorStateIntoInstructions(editor){
         var codeHandler = editor.documentHandler.codeHandler
 
         var result = null
@@ -1087,6 +1082,15 @@ QtObject{
             result['shapeImports'] = true
 
         return result
+    }
+
+    function convertStateIntoInstructions(){
+        var editorPane = lk.layers.workspace.panes.focusPane('editor')
+        if ( !editorPane )
+            return
+
+        var editor = editorPane.editor
+        return convertEditorStateIntoInstructions(editor)
     }
 
     function convertObjectIntoInstructions(object, container){

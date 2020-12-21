@@ -1791,7 +1791,8 @@ QList<int> CodeQmlHandler::languageFeatures() const{
         DocumentHandler::LanguageHelp,
         DocumentHandler::LanguageScope,
         DocumentHandler::LanguageHighlighting,
-        DocumentHandler::LanguageCodeCompletion
+        DocumentHandler::LanguageCodeCompletion,
+        DocumentHandler::LanguageLayout
     };
 }
 

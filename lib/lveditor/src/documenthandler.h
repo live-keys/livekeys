@@ -51,7 +51,8 @@ public:
         LanguageHighlighting,
         LanguageJumpToDef,
         LanguageFindReferences,
-        LanguageDiagnostics
+        LanguageDiagnostics,
+        LanguageLayout
     };
 
 public:
