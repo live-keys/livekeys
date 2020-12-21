@@ -425,6 +425,7 @@ Pane{
         anchors.topMargin: 30
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
+        lineSurfaceVisible: !(editor.importsShaped && editor.rootShaped)
     }
 
 }

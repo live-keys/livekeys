@@ -40,6 +40,9 @@ Rectangle {
 
     property alias validator: textInput.validator
 
+    property Item nextFocusItem: null
+    property Item prevFocusItem: null
+
     signal keyPressed(var event)
     signal activeFocusLost()
 
@@ -62,7 +65,46 @@ Rectangle {
 
         property bool touched : false
 
-        Keys.onPressed : root.keyPressed(event)
+        Keys.onTabPressed: {
+            if ( root.nextFocusItem ){
+                if ( root.nextFocusItem.forceFocus )
+                    root.nextFocusItem.forceFocus()
+                else
+                    root.nextFocusItem.forceActiveFocus()
+                event.accepted = true
+            }
+        }
+        Keys.onBacktabPressed: {
+            if ( root.prevFocusItem ){
+                if ( root.prevFocusItem.forceFocus )
+                    root.prevFocusItem.forceFocus()
+                else
+                    root.prevFocusItem.forceActiveFocus()
+                event.accepted = true
+            }
+        }
+
+        Keys.onPressed : {
+            if ( event.key === Qt.Key_Tab ){
+                if ( root.nextFocusItem ){
+                    if ( root.nextFocusItem.forceFocus )
+                        root.nextFocusItem.forceFocus()
+                    else
+                        root.nextFocusItem.forceActiveFocus()
+                    event.accepted = true
+                }
+            } else if ( event.ey === Qt.Key_Backtab ){
+                if ( root.prevFocusItem ){
+                    if ( root.prevFocusItem.forceFocus )
+                        root.prevFocusItem.forceFocus()
+                    else
+                        root.prevFocusItem.forceActiveFocus()
+                    event.accepted = true
+                }
+            }
+
+            root.keyPressed(event)
+        }
 
         MouseArea{
             anchors.fill: parent

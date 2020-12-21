@@ -12,6 +12,14 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    function commitImports(){
+        importsContainer.addImportVisible = false
+        importsContainer.model.commit(moduleInput.text, versionInput.text, qualifierInput.text)
+        moduleInput.text = ""
+        versionInput.text = ""
+        qualifierInput.text = ""
+    }
+
     item: Rectangle{
         id: importsContainer
         visible: true
@@ -103,6 +111,15 @@ CodePalette{
                 width: 140
                 height: 20
                 textHint: 'Path...'
+                prevFocusItem: qualifierInput
+                nextFocusItem: versionInput
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
 
                 style: theme.inputStyle
             }
@@ -115,11 +132,21 @@ CodePalette{
                 anchors.topMargin: 2
                 margins: 2
 
+                prevFocusItem: moduleInput
+                nextFocusItem: qualifierInput
+
                 width: 40
                 height: 20
                 textHint: '0.0'
 
                 style: theme.inputStyle
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
             }
 
             Workspace.InputBox{
@@ -129,6 +156,16 @@ CodePalette{
                 anchors.top: parent.top
                 anchors.topMargin: 2
                 margins: 2
+
+                prevFocusItem: versionInput
+                nextFocusItem: moduleInput
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
 
                 width: 40
                 height: 20
@@ -148,11 +185,7 @@ CodePalette{
 
                 content: theme.buttons.add
                 onClicked: {
-                    importsContainer.addImportVisible = false
-                    importsContainer.model.commit(moduleInput.text, versionInput.text, qualifierInput.text)
-                    moduleInput.text = ""
-                    versionInput.text = ""
-                    qualifierInput.text = ""
+                    palette.commitImports()
                 }
             }
         }
@@ -188,6 +221,7 @@ CodePalette{
                     anchors.fill: parent
                     onClicked: {
                         importsContainer.addImportVisible = true
+                        moduleInput.forceFocus()
                     }
                 }
             }
