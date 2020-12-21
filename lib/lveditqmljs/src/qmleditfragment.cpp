@@ -735,8 +735,7 @@ void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoord
 }
 
 
-bool QmlEditFragment::bindExpression(const QString &expression)
-{
+bool QmlEditFragment::bindExpression(const QString &expression){
     if ( m_codeHandler )
         return m_codeHandler->findBindingForExpression(this, expression);
     return false;

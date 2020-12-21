@@ -40,15 +40,26 @@ CodePalette{
         var text = input.text
 
         var ef = palette.editFragment
-        var result = ef.bindExpression(text)
 
-        if ( result ){
-            ef.write({'__ref': text ? text : ef.defaultValue()})
+        try{
+            var result = ef.bindExpression(text)
+
+            if ( result ){
+                ef.write({'__ref': text ? text : ef.defaultValue()})
+                commitButton.visible = false
+            } else {
+                lk.layers.workspace.messages.pushError("Failed to match expression: " + text)
+                return
+            }
+
+            input.autoTextChange = true
+            input.text = text
+            input.autoTextChange = false
+
+        } catch (e){
+            var error = lk.engine.unwrapError(e)
+            lk.layers.workspace.messages.pushError(error.message, error.code)
         }
-
-        input.autoTextChange = true
-        input.text = text
-        input.autoTextChange = false
     }
 
     item: Rectangle{
@@ -56,8 +67,6 @@ CodePalette{
         width: 280
         height: 25
         color: 'transparent'
-
-        //TODO: ErrorBox when not binding
 
         Workspace.InputBox{
             id: input
@@ -73,6 +82,7 @@ CodePalette{
                 if ( !autoTextChange ){
                    editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                }
+                commitButton.visible = true
             }
 
             property bool autoTextChange : false
@@ -142,10 +152,12 @@ CodePalette{
         }
 
         Workspace.Button{
+            id: commitButton
             anchors.right: parent.right
             width: 30
             height: 25
             content: theme.buttons.connect
+            visible: false
             onClicked: {
                 palette.writeBinding()
             }

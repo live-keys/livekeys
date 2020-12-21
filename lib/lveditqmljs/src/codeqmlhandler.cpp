@@ -1190,6 +1190,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     if ( m_document ){
         d->syncParse(m_document);
         d->syncObjects(m_document);
+
         QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
         if ( !bp )
             return nullptr;
@@ -1211,6 +1212,8 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
         QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
         if ( documentChannel ){
 
+            qDebug() << "[1]   BP : " << bp->toString() << parentEdit;
+
             if ( parentEdit ){
                 auto parentBp = parentEdit->fullBindingPath();
 
@@ -1222,6 +1225,8 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
                     bp = bp->headPath();
                     copyLength--;
                 }
+
+                qDebug() << "[2]   CHANNEL: " << relativeBp->toString() << " FROM " << parentBp->toString();
 
                 QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), relativeBp);
                 if ( !newChannel ){
@@ -1498,8 +1503,13 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
     );
 
     if ( !expressionChain.isValid() ){
-        //TODO: Error
-        qWarning("ERROR: Failed to evaluate expression.");
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Invalid expression: \'" + expression.toStdString() + "\'", lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
     }
 
@@ -1559,7 +1569,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             );
         }
 
-    } else { // <property...>
+    } else if ( expressionChain.hasProperty() ){ // <property...>
         // clone current binding path, append properties to it
 
         bp = edit->fullBindingPath()->clone();
@@ -1590,12 +1600,23 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 n->child = pn;
             }
         }
+    } else {
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
+        return false;
     }
 
     QmlBindingChannel::Ptr receivingChannel = edit->channel();
+
     if ( receivingChannel->isEnabled() ){
 
         QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+
         if ( documentChannel ){
             if ( documentChannel->isBuilder() )
                 return true;
@@ -1603,7 +1624,14 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             QmlBindingChannel::Ptr writeChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
 
             if ( !writeChannel->hasConnection() ){
-                qWarning("Failed to find binding channel at: %s", qPrintable(writeChannel->bindingPath()->toString()));
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(
+                        lv::Exception,
+                        "Failed to find a binding channel at: " + bp->toString().toStdString(), lv::Exception::toCode("~Channel")),
+                        this
+                ).jsThrow();
+                return false;
             } else {
                 // width is the receiving, need to remove the previous listening channel
 
@@ -1634,6 +1662,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             }
         }
     }
+
     return true;
 }
 
@@ -1655,8 +1684,13 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
     );
 
     if ( !expressionChain.isValid() ){
-        //TODO: Error
-        qWarning("ERROR: Failed to evaluate expression.");
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Invalid expression: \'" + expression.toStdString() + "\'", lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
     }
 
@@ -1718,7 +1752,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
             );
         }
 
-    } else { // <property...>
+    } else if ( expressionChain.hasProperty() ) { // <property...>
         // clone current binding path, append properties to it
 
         bp = edit->fullBindingPath()->clone();
@@ -1750,10 +1784,27 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
                 n->child = pn;
             }
         }
+    } else {
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
+        return false;
     }
 
-    if ( bp.isNull() )
+    if ( bp.isNull() ){
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to find path for expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
+    }
 
     QmlBindingChannel::Ptr signalChannel = edit->channel();
     if ( signalChannel->isEnabled() ){
@@ -1765,7 +1816,13 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
             QmlBindingChannel::Ptr functionChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
             if ( functionChannel.isNull() || !functionChannel->hasConnection() ){
-                qWarning("Failed to find binding channel at: %s", qPrintable(bp->toString()));
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(
+                        lv::Exception,
+                        "Failed to find a binding channel at: " + bp->toString().toStdString(), lv::Exception::toCode("~Channel")),
+                        this
+                ).jsThrow();
                 return false;
             } else {
                 if ( functionChannel->method().isValid() && functionChannel->property().object() ){
@@ -1984,13 +2041,13 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
+    editParent->addChildFragment(ef);
+    ef->setParent(editParent);
 
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
     if (ef->location() == QmlEditFragment::Property)
         populatePropertyInfoForFragment(ef);
-    editParent->addChildFragment(ef);
-    ef->setParent(editParent);
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
@@ -2133,15 +2190,13 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                     }
                 });
 
-                if (ef->location() == QmlEditFragment::Object)
-                    populateObjectInfoForFragment(ef);
                 edit->addChildFragment(ef);
                 ef->setParent(edit);
 
-//                ef->setRelativeBinding(bp);
+                if (ef->location() == QmlEditFragment::Object)
+                    populateObjectInfoForFragment(ef);
 
                 fragments.append(ef);
-
             }
         }
     }
@@ -2270,8 +2325,6 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
 
                     if (ef->location() == QmlEditFragment::Property)
                         populatePropertyInfoForFragment(ef);
-
-
 
                     p->addChildFragment(ef);
                     ef->setParent(p);
@@ -3011,6 +3064,8 @@ int CodeQmlHandler::addProperty(
         bool assignDefault,
         lv::QmlEditFragment* parentGroup)
 {
+    qDebug() << "ADD PROPERTY";
+
     Q_D(CodeQmlHandler);
 
     d->syncParse(m_document);
