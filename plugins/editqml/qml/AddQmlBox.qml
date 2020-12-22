@@ -542,7 +542,7 @@ Rectangle{
                     property int category: model.category
                     property bool isGroup: model.isGroup
                     property bool isWritable: model.isWritable
-                    property bool itemChecked: true
+                    property bool itemChecked: false
 
                     width : listView.width
                     height : 25

@@ -487,6 +487,11 @@ Rectangle{
         opacity: visible ? 0.95 : 0
 
         y: {
+            if ( !visible )
+                return 0
+
+            height = 280
+
             var calculatedY =
                 textEdit.cursorRectangle.y +
                 textEdit.cursorRectangle.height + 2 -
@@ -494,9 +499,18 @@ Rectangle{
 
             if ( calculatedY > flick.height - height )
                 calculatedY = textEdit.cursorRectangle.y - height - flick.flickableItem.contentY
+
+            if ( calculatedY < 0 ){
+                height = height + calculatedY
+                calculatedY = 0
+            }
+
             return calculatedY;
         }
         x: {
+            if ( !visible )
+                return 0
+
             var calculatedX =
                 textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
                 flick.flickableItem.contentX

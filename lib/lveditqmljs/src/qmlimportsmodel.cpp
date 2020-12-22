@@ -16,13 +16,13 @@ QmlImportsModel::QmlImportsModel(ViewEngine *engine, QObject *parent)
 int QmlImportsModel::firstBlock()
 {
     if (m_data.empty()) return -1;
-    return m_data[0].line;
+    return m_data[0].location().line() - 1;
 }
 
 int QmlImportsModel::lastBlock()
 {
     if (m_data.empty()) return -1;
-    return m_data[m_data.size()-1].line;
+    return m_data[m_data.size()-1].location().line() - 1;
 }
 
 void QmlImportsModel::commit(QString m, QString v, QString q)
@@ -33,10 +33,10 @@ void QmlImportsModel::commit(QString m, QString v, QString q)
 
     QString line = QString() + "import " + m + " " + v;
     if (q != "") line += " as " + q;
-    handler->addLineAtPosition(line, lastBlock()+1);
+    handler->addLineAtIndex(line, lastBlock()+1);
 
     beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
-    m_data.push_back(ItemData(m,v,q,lastBlock()+1));
+    m_data.push_back(createItem(m,v,q,lastBlock()+1));
     endInsertRows();
 
     handler->updateScope();
@@ -44,15 +44,16 @@ void QmlImportsModel::commit(QString m, QString v, QString q)
     emit countChanged();
 }
 
-void QmlImportsModel::erase(int pos)
+void QmlImportsModel::erase(int line)
 {
     int i = 0;
     auto handler = static_cast<CodeQmlHandler*>(parent());
     if (!handler) return;
     for (;i < m_data.size(); ++i)
-        if (m_data[i].line == pos) break;
+        if (m_data[i].location().line() == line)
+            break;
 
-    handler->removeLineAtPosition(pos);
+    handler->removeLineAtIndex(line - 1);
 
     beginRemoveRows(QModelIndex(), i, i);
     m_data.erase(m_data.begin() + i);
@@ -60,20 +61,21 @@ void QmlImportsModel::erase(int pos)
 
     handler->updateScope();
 
-    for (int k = i; k<m_data.size();++k)
-        --m_data[k].line;
+    for (int k = i; k<m_data.size();++k){
+        m_data[k].setLocation(Document::Location(m_data[k].location().line() - 1, m_data[k].location().column()));
+    }
 
     emit countChanged();
 }
 
 QJSValue QmlImportsModel::getImportAtUri(const QString &uri){
-    for ( const QmlImportsModel::ItemData& itemData : m_data ){
-        if ( itemData.module == uri ){
+    for ( const DocumentQmlInfo::Import& itemData : m_data ){
+        if ( itemData.uri() == uri ){
             QQmlEngine* e = m_engine->engine();
             QJSValue result = e->newObject();
-            result.setProperty("uri", itemData.module);
-            result.setProperty("as", itemData.qualifier);
-            result.setProperty("version", itemData.version);
+            result.setProperty("uri", itemData.uri());
+            result.setProperty("as", itemData.as());
+            result.setProperty("version", itemData.versionString());
             return result;
         }
     }
@@ -81,25 +83,50 @@ QJSValue QmlImportsModel::getImportAtUri(const QString &uri){
 }
 
 QVariant QmlImportsModel::data(const QModelIndex &index, int role) const{
-    unsigned dataIndex = index.row();
+    int dataIndex = index.row();
+    if ( dataIndex > m_data.count() )
+        return QVariant();
+
     if ( role == Module ){
-        return m_data[dataIndex].module;
+        return m_data[dataIndex].uri();
     } else if ( role == Version ){
-        return m_data[dataIndex].version;
+        return m_data[dataIndex].versionString();
     } else if ( role == Qualifier ){
-        return m_data[dataIndex].qualifier;
+        return m_data[dataIndex].as();
     } else if (role == Line){
-        return m_data[dataIndex].line;
+        return m_data[dataIndex].location().line();
     }
     return QVariant();
 }
 
 void QmlImportsModel::addItem(const QString &m, const QString &v, const QString &q, int l)
 {
-    m_data.push_back(ItemData(m, v, q, l));
+    m_data.push_back(createItem(m, v, q, l));
 }
 
-QmlImportsModel::ItemData::ItemData(const QString &m, const QString &v, const QString &q, int l)
-    : module(m), version(v), qualifier(q), line(l) {}
+DocumentQmlInfo::Import QmlImportsModel::createItem(const QString &m, const QString &v, const QString &q, int l){
+    QString major = "1"; QString minor = "0";
+    QStringList version = v.split(".");
+    if ( version.length() == 2 ){
+        major = version[0];
+        minor = version[1];
+    }
+
+    return DocumentQmlInfo::Import(
+       DocumentQmlInfo::Import::Library,
+       m, // path or name
+       m, //name
+       q, // as
+       major.toInt(),
+       minor.toInt(),
+       Document::Location(l, 0)
+    );
+}
+
+void QmlImportsModel::setImports(const QList<DocumentQmlInfo::Import> &imports){
+    beginResetModel();
+    m_data = imports;
+    endResetModel();
+}
 
 } // namespace

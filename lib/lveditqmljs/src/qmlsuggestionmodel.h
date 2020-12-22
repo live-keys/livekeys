@@ -90,6 +90,7 @@ private:
     QString                 m_importFilter;
     QString                 m_typeFilter;
     int                     m_categoryFilter;
+    bool                    m_supportsObjectNesting;
     QList<int>              m_filteredData;
     QHash<int, QByteArray>  m_roles;
     int                     m_addPosition;

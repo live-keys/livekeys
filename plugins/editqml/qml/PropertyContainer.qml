@@ -84,16 +84,22 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
+                    var pane = propertyContainer.editor ? propertyContainer.editor : propertyContainer.parent
+                    while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+                        pane = pane.parent
+                    }
+                    var coords = propertyContainer.mapToItem(pane, 0, 0)
+
                     var paletteList = paletteControls.addPaletteList(
                         propertyContainer,
                         propertyContainer.valueContainer,
-                        {"x": 110, "y": -12},
+                        Qt.rect(coords.x + propertyContainer.width - 180, coords.y, 30, 30),
                         PaletteControls.PaletteListMode.PropertyContainer
                     )
 
                     if (paletteList){
-                        paletteList.anchors.topMargin = 15
                         paletteList.width = 250
+                        paletteList.x -= 70
                     }
                 }
             }

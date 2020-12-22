@@ -539,24 +539,6 @@ QStringList QmlEditFragment::bindingPath(){
     return QStringList();
 }
 
-QmlImportsModel *QmlEditFragment::documentImports(){
-    CodeQmlHandler* qmlHandler = nullptr;
-    QObject* editParent = parent();
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->importsModel();
-    }
-
-    return nullptr;
-}
-
 void QmlEditFragment::__selectedChannelChanged(){
     QmlEditFragment* pf = parentFragment();
     if ( pf ){

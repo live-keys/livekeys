@@ -104,14 +104,24 @@ Rectangle{
         }
 
         function swapOrAddPalette(swap){
-            var paletteList = paletteControls.addPaletteList(paletteContainer,
-                                                             paletteContainer.parent,
-                                                             {"x": 84, "y": -20},
-                                                             PaletteControls.PaletteListMode.PaletteContainer,
-                                                             swap)
+            var pane = editor.parent
+            while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+                pane = pane.parent
+            }
+
+            var coords = paletteContainer.mapToItem(pane, 0, 0)
+            coords.y -= 35;
+
+            var paletteList = paletteControls.addPaletteList(
+                paletteContainer,
+                paletteContainer.parent,
+                Qt.rect(coords.x - 180 / 2, coords.y, 30, 30),
+                PaletteControls.PaletteListMode.PaletteContainer,
+                swap)
+
             if (paletteList){
-                paletteList.anchors.topMargin = 24
                 paletteList.width = Qt.binding(function() { return paletteContainer.width })
+                paletteList.x -= 70
             }
         }
 

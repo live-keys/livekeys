@@ -33,7 +33,6 @@ class CodeQmlHandler;
 class QmlBindingPath;
 class QmlBindingChannel;
 class CodeCompletionModel;
-class QmlImportsModel;
 
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
@@ -148,8 +147,6 @@ public slots:
     lv::QmlEditFragment* parentFragment();
     lv::CodePalette* bindingPalette();
     QStringList bindingPath();
-
-    lv::QmlImportsModel* documentImports();
 
     void __selectedChannelChanged();
 

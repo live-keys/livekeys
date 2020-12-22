@@ -150,6 +150,7 @@ QmlTypeInfo::Ptr QmlTypeInfo::clone(const QmlTypeInfo::ConstPtr &other){
     cl->m_properties = other->m_properties;
     cl->m_methods = other->m_methods;
     cl->m_enums = other->m_enums;
+    cl->m_defaultProperty = other->m_defaultProperty;
     return cl;
 }
 
@@ -295,6 +296,10 @@ bool QmlTypeInfo::isDeclaredInCpp() const{
     return !isDeclaredInQml();
 }
 
+const QString &QmlTypeInfo::defaultProperty() const{
+    return m_defaultProperty;
+}
+
 bool QmlTypeInfo::isSingleton() const{
     return m_isSingleton;
 }
@@ -380,6 +385,7 @@ QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
 QmlTypeInfo::Ptr QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo,
         const QString& libraryUri)
 {
+
     QmlTypeInfo::Ptr qti = QmlTypeInfo::create();
 
     QString foundPackage;
@@ -419,6 +425,7 @@ QmlTypeInfo::Ptr QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObjec
     qti->m_isComposite = fmo->isComposite();
     qti->m_isCreatable = fmo->isCreatable();
     qti->m_isSingleton = fmo->isSingleton();
+    qti->m_defaultProperty = fmo->defaultPropertyName();
 
     return qti;
 }
@@ -531,6 +538,15 @@ void QmlInheritanceInfo::append(const QmlTypeInfo::Ptr &tr){
 
 bool QmlInheritanceInfo::isEmpty() const{
     return nodes.isEmpty();
+}
+
+QmlPropertyInfo QmlInheritanceInfo::defaultProperty() const{
+    for ( const QmlTypeInfo::Ptr& ti : nodes ){
+        qDebug() << ti->prefereredType().join() << ti->defaultProperty();
+        if ( !ti->defaultProperty().isEmpty() )
+            return ti->propertyAt(ti->defaultProperty());
+    }
+    return QmlPropertyInfo();
 }
 
 QmlTypeReference QmlInheritanceInfo::languageType() const{

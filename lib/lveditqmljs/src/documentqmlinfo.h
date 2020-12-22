@@ -18,6 +18,7 @@
 #define LVDOCUMENTQMLINFO_H
 
 #include "live/lveditqmljsglobal.h"
+#include "live/document.h"
 #include "live/documentqmlobject.h"
 #include "live/documentqmlvalueobjects.h"
 #include "live/qmldeclaration.h"
@@ -77,7 +78,8 @@ public:
             const QString& uri,
             const QString& as = "",
             int vMajor = NoVersion,
-            int vMinor = NoVersion
+            int vMinor = NoVersion,
+            Document::Location location = Document::Location()
         );
         Import(
             Type importType,
@@ -85,7 +87,8 @@ public:
             const QString& relativeUri,
             const QString& as = "",
             int vMajor = NoVersion,
-            int vMinor = NoVersion
+            int vMinor = NoVersion,
+            Document::Location location = Document::Location()
         );
 
         void updateUri(const QString& uri);
@@ -100,6 +103,9 @@ public:
         int versionMinor() const;
         bool isVersionValid() const;
         QString toString() const;
+        QString versionString() const;
+        void setLocation(const Document::Location& location);
+        const Document::Location& location() const;
 
         static QString join(const QList<Import>& imports);
 
@@ -112,6 +118,7 @@ public:
         QString m_as;
         int     m_versionMajor;
         int     m_versionMinor;
+        Document::Location m_location;
     };
 
     /** List of import entries */
@@ -234,6 +241,8 @@ public:
     QString componentName() const;
 
     QString source() const;
+
+    void tryExtractImports();
 
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;

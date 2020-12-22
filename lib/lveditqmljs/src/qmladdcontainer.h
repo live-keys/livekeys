@@ -16,7 +16,7 @@ class QmlAddContainer : public QObject{
     Q_PROPERTY(QString                      objectType      READ objectType     CONSTANT)
 
 public:
-    explicit QmlAddContainer(int addPosition, const QStringList& objectType, QObject *parent = 0);
+    explicit QmlAddContainer(int addPosition, const QmlTypeReference& objectType, QObject *parent = nullptr);
     ~QmlAddContainer();
 
     lv::QmlSuggestionModel* model() const;
@@ -26,7 +26,7 @@ public:
 private:
     int                         m_objectBegin;
     QString                     m_objectIndentation;
-    QStringList                 m_objectTypePath;
+    QmlTypeReference            m_objectType;
     lv::QmlSuggestionModel*     m_model;
 };
 
@@ -35,7 +35,7 @@ inline QmlSuggestionModel* QmlAddContainer::model() const{
 }
 
 inline QString QmlAddContainer::objectType() const{
-    return m_objectTypePath.join(".");
+    return m_objectType.join();
 }
 
 }// namespace
