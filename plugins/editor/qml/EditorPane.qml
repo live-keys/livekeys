@@ -516,8 +516,7 @@ Pane{
                     var codeHandler = editor.documentHandler.codeHandler
                     var rootPosition = codeHandler.findRootPosition()
 
-                    //TODO
-//                    lk.layers.workspace.extensions.editqml.shapeLayout(editorPane, layout)
+                    lk.layers.workspace.extensions.editqml.shapeLayout(root, layout)
 
                 })
             }

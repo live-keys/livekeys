@@ -1072,7 +1072,7 @@ QtObject{
         var result = null
         var editingFragments = codeHandler.editingFragments()
         for ( var i = 0; i < editingFragments.length; ++i ){
-            if (editingFragments[i].location === 1){
+            if (editingFragments[i].location === QmlEditFragment.Object){
                 result = convertObjectIntoInstructions(editingFragments[i])
             }
         }
@@ -1110,9 +1110,9 @@ QtObject{
         var properties = []
         for (var i = 0; i < childFragments.length; ++i){
             var frag = childFragments[i]
-            if (frag.location === 1)
+            if (frag.location === QmlEditFragment.Object)
                 objects.push(convertObjectIntoInstructions(frag))
-            if (frag.location === 2)
+            if (frag.location === QmlEditFragment.Property)
                 properties.push(convertPropertyIntoInstructions(frag))
         }
 

@@ -18,6 +18,18 @@ WorkspaceExtension{
             root.shapeRootObject(editor, codeHandler, callback)
         }
 
+        function shapeLayout(editorPane, layout){
+            var codeHandler = editorPane.editor.documentHandler.codeHandler
+            var rootPosition = codeHandler.findRootPosition()
+            root.rootPosition = rootPosition
+            shapeRootObject(editorPane, codeHandler, function(){
+                lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
+                    editorPane,
+                    rootPosition,
+                    layout
+                )
+            })
+        }
 
         function shapeAllInEditor(editor){
             var codeHandler = editor.documentHandler.codeHandler
@@ -133,17 +145,16 @@ WorkspaceExtension{
 
             var paletteRoot = codeHandler.findPalettes(rootPosition)
             if (paletteRoot){
-                if ( paletteRoot ){
-                    if (callback)
-                        callback()
-                    else {
-                        var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
-                        oc.contentWidth = Qt.binding(function(){
-                            return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
-                        })
+                if (callback)
+                    callback()
+                else {
 
-                        editor.editor.rootShaped = true
-                    }
+                    var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
+                    oc.contentWidth = Qt.binding(function(){
+                        return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                    })
+
+                    editor.editor.rootShaped = true
                 }
             } else {
                 throw linkError(new Error("Failed to shape root object."), this)
