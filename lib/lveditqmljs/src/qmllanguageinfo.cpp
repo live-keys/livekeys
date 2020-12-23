@@ -542,7 +542,6 @@ bool QmlInheritanceInfo::isEmpty() const{
 
 QmlPropertyInfo QmlInheritanceInfo::defaultProperty() const{
     for ( const QmlTypeInfo::Ptr& ti : nodes ){
-        qDebug() << ti->prefereredType().join() << ti->defaultProperty();
         if ( !ti->defaultProperty().isEmpty() )
             return ti->propertyAt(ti->defaultProperty());
     }

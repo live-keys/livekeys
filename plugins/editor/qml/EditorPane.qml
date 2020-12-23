@@ -38,8 +38,6 @@ Pane{
     property alias document: editor.document
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
-    property var state: null
-
     property var document: null
     onDocumentChanged: {
         paneState = { document : document }
@@ -279,25 +277,17 @@ Pane{
                             lk.layers.workspace.commands.execute("editqml.shape_all")
 
                         if (editor.rootShaped){
-                            root.state = paletteControls.convertStateIntoInstructions()
+                            root.paneState.layout = paletteControls.convertStateIntoInstructions()
                         } else {
-                            root.state = null
+                            root.paneState.layout = null
                         }
                         documentHandler.codeHandler.editContainer.clearAllFragments()
                         editor.importsShaped = false
                         editor.rootShaped = false
                     }
                 } else {
-                    if (root.state){
-                        var codeHandler = editor.documentHandler.codeHandler
-                        var rootPosition = codeHandler.findRootPosition()
-                        lk.layers.workspace.extensions.editqml.shapeRootObject(root, codeHandler, function(){
-                            lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
-                                root,
-                                rootPosition,
-                                root.state
-                            )
-                        })
+                    if (root.paneState.layout){
+                        lk.layers.workspace.extensions.editqml.shapeLayout(root, root.paneState.layout)
                     } else {
                         // shape all
                         lk.layers.workspace.extensions.editqml.shapeAllInEditor(root)
