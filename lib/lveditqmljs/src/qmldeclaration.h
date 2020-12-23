@@ -52,7 +52,8 @@ public:
         const QmlTypeReference& parentType,
         ProjectDocument* document = nullptr
     );
-    static QmlDeclaration::Ptr create(const QStringList &identifierChain,
+    static QmlDeclaration::Ptr create(
+        const QStringList &identifierChain,
         const QmlTypeReference &type,
         const QmlTypeReference &parentType,
         int identifierPosition,

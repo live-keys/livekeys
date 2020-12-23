@@ -2,9 +2,9 @@
 
 namespace lv{
 
-QmlAddContainer::QmlAddContainer(int addPosition, const QStringList &objectType, QObject *parent)
+QmlAddContainer::QmlAddContainer(int addPosition, const QmlTypeReference &objectType, QObject *parent)
     : QObject(parent)
-    , m_objectTypePath(objectType)
+    , m_objectType(objectType)
     , m_model(new QmlSuggestionModel(addPosition, this))
 {
 }

@@ -87,9 +87,10 @@ public:
     ProjectDocument* document() const;
     void rehighlightBlock(const QTextBlock& block);
 
-    QmlDeclaration::Ptr getDeclarationViaCompletionContext(int position) const;
+    QmlDeclaration::Ptr getDeclarationViaCompletionContext(int position);
     QList<lv::QmlDeclaration::Ptr> getDeclarationsViaParsedDocument(int position, int length = 0);
-    QList<lv::QmlDeclaration::Ptr> getDeclarations(const QTextCursor& cursor);
+    QList<lv::QmlDeclaration::Ptr> getDeclarations(int position, int length = 0);
+
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QmlEditFragment* parent = nullptr);
 
     bool addEditingFragment(QmlEditFragment *edit);
@@ -149,7 +150,7 @@ public slots:
     // Palette and binding management
 
     QJSValue cursorInfo(int position, int length);
-    bool isInImports(int position);
+
     lv::QmlEditFragment* openConnection(int position);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     lv::QmlEditFragment* createReadOnlyFragment(lv::QmlEditFragment* parentFragment, QString name);
@@ -160,8 +161,8 @@ public slots:
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
-    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeExpandables = false);
-    lv::PaletteList *findPalettes(int position, bool includeExpandables = false);
+    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeLayoutConfigurations = false);
+    lv::PaletteList *findPalettes(int position, bool includeLayoutConfigurations = false);
 
     QJSValue openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
@@ -179,10 +180,10 @@ public slots:
     QJSValue contextBlockRange(int cursorPosition);
 
     lv::QmlImportsModel* importsModel();
-    void addLineAtPosition(QString line, int pos);
-    void removeLineAtPosition(int pos);
+    void addLineAtIndex(QString line, int pos);
+    void removeLineAtIndex(int pos);
 
-    int findImportsPosition(int blockPos);
+    int findImportsPosition();
     int findRootPosition();
 
     // Direct editing management
@@ -229,6 +230,7 @@ signals:
     void importsScanned();
 
 private:
+    QmlDeclaration::Ptr createImportDeclaration();
     QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
     void rehighlightSection(int start, int end);
@@ -291,7 +293,8 @@ private:
     QString getBlockIndent(const QTextBlock& bl);
     bool isBlockEmptySpace(const QTextBlock& bl);
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
-    lv::PaletteList* palettesForDeclaration(QmlDeclaration::Ptr decl, bool includeExpandables = false);
+
+    lv::PaletteList* findPalettesForDeclaration(QmlDeclaration::Ptr decl, bool includeExpandables = false);
 
 private:
     QTextDocument*      m_target;

@@ -8,6 +8,7 @@ QmlSuggestionModel::QmlSuggestionModel(int addPosition, QObject* parent):
     QAbstractListModel(parent),
     m_categoryFilter(0),
     m_addPosition(addPosition)
+  , m_supportsObjectNesting(false)
 {
     m_roles[Label]          = "label";
     m_roles[ObjectType]     = "objectType";
@@ -141,6 +142,11 @@ void QmlSuggestionModel::updateFilters(){
 
 void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, int filter)
 {
+    QmlPropertyInfo qpi = typePath.defaultProperty();
+    if ( qpi.isValid() ){
+        m_supportsObjectNesting = true;
+    }
+
     for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
         const QmlTypeInfo::Ptr& ti = *it;
 

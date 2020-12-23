@@ -36,6 +36,34 @@ CodePalette{
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
 
+    function writeBinding(){
+        var text = input.text
+
+        var ef = palette.editFragment
+
+        try{
+            var result = ef.bindFunctionExpression(text)
+
+            if ( result ){
+                ef.write({'__ref': text ? text : ef.defaultValue()})
+                commitButton.visible = false
+            } else {
+                lk.layers.workspace.messages.pushError("Failed to match expression: " + text)
+                return
+            }
+
+            input.autoTextChange = true
+            input.text = text
+            input.autoTextChange = false
+
+        } catch (e){
+            var error = lk.engine.unwrapError(e)
+            lk.layers.workspace.messages.pushError(error.message, error.code)
+        }
+
+
+    }
+
     item: Rectangle{
 
         width: 280
@@ -58,6 +86,7 @@ CodePalette{
                 if ( !autoTextChange ){
                    editFragment.suggestionsForExpression(input.text, palette.codeModel, true)
                }
+               commitButton.visible = true
             }
 
             property bool autoTextChange : false
@@ -97,10 +126,7 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = editFragment.bindFunctionExpression(input.text)
-                        if ( result ){
-                            editFragment.write({'__ref': input.text})
-                        }
+                        palette.writeBinding()
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
@@ -130,16 +156,13 @@ CodePalette{
         }
 
         Workspace.Button{
+            id: commitButton
             anchors.right: parent.right
             width: 30
             height: 25
+            visible: false
             content: theme.buttons.connect
-            onClicked: {
-                var result = editFragment.bindFunctionExpression(input.text)
-                if ( result ){
-                    editFragment.write({'__ref': input.text})
-                }
-            }
+            onClicked: palette.writeBinding()
         }
     }
 

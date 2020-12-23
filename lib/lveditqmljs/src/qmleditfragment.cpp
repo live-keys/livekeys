@@ -539,24 +539,6 @@ QStringList QmlEditFragment::bindingPath(){
     return QStringList();
 }
 
-QmlImportsModel *QmlEditFragment::documentImports(){
-    CodeQmlHandler* qmlHandler = nullptr;
-    QObject* editParent = parent();
-    while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        return qmlHandler->importsModel();
-    }
-
-    return nullptr;
-}
-
 void QmlEditFragment::__selectedChannelChanged(){
     QmlEditFragment* pf = parentFragment();
     if ( pf ){
@@ -735,8 +717,7 @@ void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoord
 }
 
 
-bool QmlEditFragment::bindExpression(const QString &expression)
-{
+bool QmlEditFragment::bindExpression(const QString &expression){
     if ( m_codeHandler )
         return m_codeHandler->findBindingForExpression(this, expression);
     return false;

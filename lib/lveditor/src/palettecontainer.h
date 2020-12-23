@@ -35,6 +35,12 @@ class PaletteContainerPrivate;
 class LV_EDITOR_EXPORT PaletteContainer{
 
 public:
+    enum PaletteSearch{
+        Empty = 0,
+        IncludeLayoutConfigurations
+    };
+
+public:
     ~PaletteContainer();
 
     void scanPalettes(const QString& path);
@@ -44,14 +50,14 @@ public:
 
     PaletteLoader* findPaletteByName(const QString& name) const;
     PaletteLoader* findPalette(const QString& type) const;
-    PaletteList* findPalettes(const QString& type, bool includeExpandables = false, PaletteList* list = nullptr);
+    PaletteList* findPalettes(const QString& type, PaletteSearch searchType, PaletteList* list = nullptr);
     int countPalettes(const QString& type) const;
 
     QString paletteName(PaletteLoader* loader);
     static const QString& palettePath(PaletteLoader* loader);
     CodePalette* createPalette(PaletteLoader* loader);
     QJSValue paletteContent(PaletteLoader* loader);
-    static bool hasItem(PaletteLoader* loader);
+    static bool configuresLayout(PaletteLoader* loader);
 
     int size() const;
 

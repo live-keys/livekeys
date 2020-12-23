@@ -356,16 +356,22 @@ Item{
                     paletteControls.closeObjectContainer(objectContainer)
                 }
                 onAddPalette: {
-                    var paletteList = paletteControls.addPaletteList(objectContainer,
-                                                                     paletteGroup,
-                                                                     { "x": objectContainerTitle.width - 168, "y": -33},
-                                                                     PaletteControls.PaletteListMode.ObjectContainer)
+                    var pane = container.parent
+                    while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+                        pane = pane.parent
+                    }
+                    var coords = objectContainer.mapToItem(pane, 0, 0)
+
+                    var paletteList = paletteControls.addPaletteList(
+                        objectContainer,
+                        paletteGroup,
+                        Qt.rect(coords.x + objectContainer.width - 180 / 2, coords.y, 30, 30),
+                        PaletteControls.PaletteListMode.ObjectContainer
+                    )
                     if (paletteList){
                         paletteList.width = 250
-                        paletteList.anchors.topMargin = titleHeight + topSpacing
+                        paletteList.x -= 70
                     }
-
-
                 }
                 onCompose : {
                     paletteControls.compose(objectContainer, false)

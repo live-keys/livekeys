@@ -614,7 +614,11 @@ QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
            it->name(),
            it->as(),
            it->version().majorVersion(),
-           it->version().minorVersion()
+           it->version().minorVersion(),
+           it->ast()
+                ? Document::Location(static_cast<int>(it->ast()->importToken.startLine), static_cast<int>(it->ast()->importToken.startColumn))
+                : Document::Location()
+
        );
     }
     return imports;
@@ -639,6 +643,66 @@ QString DocumentQmlInfo::componentName() const{
 QString DocumentQmlInfo::source() const{
     Q_D(const DocumentQmlInfo);
     return d->internalDoc->source();
+}
+
+/**
+ * \brief Tries to extract imports from a document that was not correcly parsed
+ */
+void DocumentQmlInfo::tryExtractImports(){
+    Q_D(DocumentQmlInfo);
+    if ( d->imports.isEmpty() ){
+        QList<DocumentQmlInfo::Import> result;
+
+        QString content = d->internalDoc->source();
+        auto lines = content.split('\n');
+        QList<std::pair<QStringList, int>> mid;
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (lines[i].length() == 0)
+                continue;
+            QStringList fragments = lines[i].split(';');
+            for (auto fragment: fragments){
+                auto parts = fragment.split(' ',  QString::SkipEmptyParts);
+
+                if (parts.size() != 3 && parts.size() != 5)
+                    return;
+
+                if (parts[0] != "import")
+                    return;
+
+                if (parts.size() == 5 && parts[3] != "as")
+                    return;
+
+                auto p = std::make_pair(QStringList(), i);
+
+                p.first.push_back(parts[1]);
+                p.first.push_back(parts[2]);
+                p.first.push_back(parts.size() == 5 ? parts[4] : "");
+
+                mid.push_back(p);
+            }
+        }
+
+        for (auto p: mid){
+            QString major = "1"; QString minor = "0";
+            QStringList version = p.first[1].split(".");
+            if ( version.length() == 2 ){
+                major = version[0];
+                minor = version[1];
+            }
+
+            d->imports.append(DocumentQmlInfo::Import(
+               DocumentQmlInfo::Import::Library,
+               p.first[0], // path or name
+               p.first[0], //name
+               p.first[2], // as
+               major.toInt(),
+               minor.toInt(),
+               Document::Location(p.second, 0)
+           ));
+        }
+    }
 }
 
 /**
@@ -755,13 +819,15 @@ DocumentQmlInfo::Import::Import(
         const QString &path,
         const QString& as,
         int vMajor,
-        int vMinor)
+        int vMinor,
+        Document::Location location)
     : m_type(importType)
     , m_uri(path)
     , m_relativeUri(path)
     , m_as(as)
     , m_versionMajor(vMajor)
     , m_versionMinor(vMinor)
+    , m_location(location)
 {
 }
 
@@ -771,13 +837,15 @@ DocumentQmlInfo::Import::Import(
         const QString &relativeUri,
         const QString &as,
         int vMajor,
-        int vMinor)
+        int vMinor,
+        Document::Location location)
     : m_type(importType)
     , m_uri(uri)
     , m_relativeUri(relativeUri)
     , m_as(as)
     , m_versionMajor(vMajor)
     , m_versionMinor(vMinor)
+    , m_location(location)
 {
 }
 
@@ -795,6 +863,18 @@ QString DocumentQmlInfo::Import::toString() const{
                       ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
                       : "");
     }
+}
+
+QString DocumentQmlInfo::Import::versionString() const{
+    return QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+}
+
+void DocumentQmlInfo::Import::setLocation(const Document::Location &location){
+    m_location = location;
+}
+
+const Document::Location &DocumentQmlInfo::Import::location() const{
+    return m_location;
 }
 
 QString DocumentQmlInfo::Import::join(const QList<DocumentQmlInfo::Import> &imports){

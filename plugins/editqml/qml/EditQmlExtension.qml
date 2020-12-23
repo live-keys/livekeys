@@ -118,18 +118,15 @@ WorkspaceExtension{
     }
 
     function shapeImports(editor, codeHandler){
-        var imports = codeHandler.importsModel()
-        if (imports.rowCount() > 0){
-            var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-            var paletteImports = codeHandler.findPalettes(importsPosition)
-            if (paletteImports) {
-                var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
-                pc.item.width = Qt.binding(function(){
-                    if (!pc.item.parent || !pc.item.parent.parent) return
-                    var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
-                    return editorSize > 280 ? editorSize : 280
-                })
-            }
+        var importsPosition = codeHandler.findImportsPosition()
+        var paletteImports = codeHandler.findPalettes(importsPosition)
+        if (paletteImports) {
+            var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
+            pc.item.width = Qt.binding(function(){
+                if (!pc.item.parent || !pc.item.parent.parent) return
+                var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
+                return editorSize > 280 ? editorSize : 280
+            })
         }
     }
 

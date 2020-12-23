@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QJSValue>
 #include <QAbstractListModel>
+#include "live/documentqmlinfo.h"
 #include "lveditqmljsglobal.h"
 
 namespace lv{
@@ -15,23 +16,14 @@ class LV_EDITQMLJS_EXPORT QmlImportsModel : public QAbstractListModel
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
-    /// \private
-    class ItemData{
-    public:
-        ItemData(const QString& m, const QString& v, const QString& q, int l);
-
-        QString module;
-        QString version;
-        QString qualifier;
-        int line;
-    };
-
     enum Roles{
         Module = Qt::UserRole + 1,
         Version,
         Qualifier,
         Line
     };
+
+    // Declaration -> position -> guaranteed to update live
 
 public:
     QmlImportsModel(ViewEngine* engine, QObject* parent = nullptr);
@@ -43,9 +35,13 @@ public:
 
     void addItem(const QString& m, const QString& v, const QString& q, int l);
 
+    DocumentQmlInfo::Import createItem(const QString& m, const QString& v, const QString& q, int l);
+
+    void setImports(const QList<DocumentQmlInfo::Import>& imports);
+
 public slots:
     void commit(QString m, QString v, QString q);
-    void erase(int pos);
+    void erase(int line);
 
     int count();
     QJSValue getImportAtUri(const QString& uri);
@@ -57,9 +53,9 @@ signals:
     void countChanged();
 
 private:
-    ViewEngine*            m_engine;
-    QList<ItemData>        m_data;
-    QHash<int, QByteArray> m_roles;
+    ViewEngine*                    m_engine;
+    QList<DocumentQmlInfo::Import> m_data;
+    QHash<int, QByteArray>         m_roles;
 
 };
 

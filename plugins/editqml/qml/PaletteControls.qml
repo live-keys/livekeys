@@ -222,15 +222,16 @@ QtObject{
         if (isGroup){
             position = container.editingFragment.position()
         } else {
-            position = container.editingFragment.valuePosition() +
-                       container.editingFragment.valueLength() - 1
+            position = container.editingFragment.position() + 1
+//            position = container.editingFragment.valuePosition() +
+//                       container.editingFragment.valueLength() - 1
         }
 
         var addContainer = null
         if (container.editingFragment.isGroup()){
             addContainer = codeHandler.getReadOnlyAddOptions(container.editingFragment, isForNode)
         } else {
-            addContainer = codeHandler.getAddOptions(position, isForNode)
+            addContainer = codeHandler.getAddOptions(position, isForNode, container.editingFragment)
         }
 
         if ( !addContainer )
@@ -670,45 +671,44 @@ QtObject{
         openNestedProperties(objectContainer, true)
     }
 
-    function addPaletteList(container, paletteGroup, offset, mode, swap, listParent){
-        if (!container.editingFragment) return null
+    property Component rrr: Rectangle{
+        width: 300
+        height: 300
+        color: 'red'
+    }
 
-        var palettes = null
-        if (container.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly))
-            palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
-                container.editingFragment,
-                mode === PaletteControls.PaletteListMode.ObjectContainer
-            )
-        else
-            palettes = container.editor.documentHandler.codeHandler.findPalettes(
-                container.editingFragment.position(),
-                mode === PaletteControls.PaletteListMode.ObjectContainer
-            )
+    function addPaletteList(container, paletteGroup, aroundBox, mode, swap, listParent){
+
+        if (!container.editingFragment)
+            return null
+
+        var palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
+            container.editingFragment,
+            mode === PaletteControls.PaletteListMode.ObjectContainer
+        )
 
         palettes.filterOut(paletteGroup.palettesOpened)
 
         if (!palettes || palettes.size() === 0) return null
 
         var paletteList = createPaletteListView(listParent ? listParent : null, theme.selectableListView)
+        paletteList.model = palettes
 
         var palListBox = null
         if (mode !== PaletteControls.PaletteListMode.NodeEditor){
-            var p = container.parent
-            while (p && p.objectName !== "editor" && p.objectName !== "objectPalette"){
-                p = p.parent
+            var pane = container.editor ? container.editor : container.parent
+            while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+                pane = pane.parent
             }
-            var coords = (mode === PaletteControls.PaletteListMode.ObjectContainer)
-                       ? container.objectContainerTitle.mapToItem(p, 0, 0)
-                       : container.mapToItem(p, 0, 0)
-            palListBox   = lk.layers.editor.environment.createEditorBox(
+            var paneCoords = pane.mapGlobalPosition()
+
+            palListBox  = lk.layers.editor.environment.createEditorBox(
                 paletteList,
-                Qt.rect(
-                    coords.x + offset.x,
-                    coords.y + offset.y - (mode === PaletteControls.PaletteListMode.ObjectContainer && p.objectName === "objectPalette" ? 8 : 0),
-                    0, 0),
-                mode === PaletteControls.PaletteListMode.PaletteContainer ? Qt.point(container.editor.x, container.editor.y) : Qt.point(p.x, p.y),
-                lk.layers.editor.environment.placement.top
+                aroundBox,
+                Qt.point(paneCoords.x, paneCoords.y - 35),
+                lk.layers.editor.environment.placement.bottom
             )
+
             palListBox.color = 'transparent'
 
         } else {
@@ -716,7 +716,6 @@ QtObject{
         }
 
         paletteList.forceActiveFocus()
-        paletteList.model = palettes
 
 
         paletteList.cancelledHandler = function(){

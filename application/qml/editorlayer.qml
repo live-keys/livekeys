@@ -41,9 +41,9 @@ EditorLayer{
             return editorBoxFactory.createObject(parent ? parent : lk.layers.workspace.panes.container)
         }
 
-        function createEditorBox(child, aroundRect, editorPosition, relativePlacement){
+        function createEditorBox(child, aroundRect, panePosition, relativePlacement){
             var eb = editorBoxFactory.createObject(lk.layers.workspace.panes.container)
-            eb.setChild(child, aroundRect, editorPosition, relativePlacement)
+            eb.setChild(child, aroundRect, panePosition, relativePlacement)
             return eb;
         }
 
@@ -148,9 +148,9 @@ EditorLayer{
                         moveXBehavior.enabled = false
                         moveYBehavior.enabled = false
 
-                        var startY = editorPosition.y + aroundRectangle.y + 38
+                        var startY = editorPosition.y + aroundRectangle.y
 
-                        editorBoxComponent.x = editorPosition.x + aroundRectangle.x + 7
+                        editorBoxComponent.x = editorPosition.x + aroundRectangle.x
                         editorBoxComponent.y = startY - aroundRectangle.y / 2
 
                         editorBoxComponent.child = item
@@ -163,7 +163,7 @@ EditorLayer{
                         editorBoxComponent.x = newX < 0 ? 0 : (newX > maxX ? maxX : newX)
 
                         var upY = startY - editorBoxComponent.height
-                        var downY = startY + aroundRectangle.height + 5
+                        var downY = startY + aroundRectangle.height
 
                         if ( relativePlacement === 0 ){ // top placement
                             editorBoxComponent.y = upY > 0 ? upY : downY

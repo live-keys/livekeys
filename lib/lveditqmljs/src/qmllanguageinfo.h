@@ -198,6 +198,7 @@ public:
     bool isDeclaredInQml() const;
     bool isDeclaredInCpp() const;
 
+    const QString& defaultProperty() const;
     bool isSingleton() const;
     bool isComposite() const;
     bool isCreatable() const;
@@ -216,6 +217,7 @@ private:
     QmlTypeReference       m_classType;
     QmlTypeReference       m_inherits;
     QmlDocumentReference   m_document;
+    QString                m_defaultProperty;
     bool                   m_isSingleton;
     bool                   m_isCreatable;
     bool                   m_isComposite;
@@ -234,6 +236,7 @@ public:
     void join(const QmlInheritanceInfo& path);
     void append(const QmlTypeInfo::Ptr& tr);
     bool isEmpty() const;
+    QmlPropertyInfo defaultProperty() const;
 
     QmlTypeReference languageType() const;
 public:
