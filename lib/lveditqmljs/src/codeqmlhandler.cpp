@@ -315,7 +315,7 @@ CodeQmlHandler::CodeQmlHandler(
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(aboutToDelete()));
+    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(__aboutToDelete()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
@@ -1274,7 +1274,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     return nullptr;
 }
 
-void CodeQmlHandler::aboutToDelete()
+void CodeQmlHandler::__aboutToDelete()
 {
     cancelEdit();
 
@@ -1942,10 +1942,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
         QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot create injection channel for declaration: " + QString::number(declaration->position()).toStdString(), lv::Exception::toCode("~Injection")), this).jsThrow();
         return nullptr;
     }
-
-    QTextCursor codeCursor(m_target);
-    codeCursor.setPosition(ef->valuePosition());
-    codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
 
     ef->declaration()->setSection(m_document->createSection(
         QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
@@ -3302,10 +3298,10 @@ int CodeQmlHandler::insertRootItem(const QString &name)
     return insertionPosition + 2;
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *currentApp){
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *){
     Q_D(CodeQmlHandler);
 
-    if ( !edit || !currentApp )
+    if ( !edit )
         return;
 
     QString type; QString id;
@@ -3355,16 +3351,6 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
         } else {
             //TODO: Property based asignment
         }
-    }
-}
-
-/**
- * \brief Update palette binding channels for a new runtime root.
- */
-void CodeQmlHandler::updateRuntimeBindings(){
-    QList<QmlEditFragment*> toRemove;
-    for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
-        removeEditingFragment(*it);
     }
 }
 
@@ -3441,7 +3427,6 @@ void CodeQmlHandler::__whenLibraryScanQueueCleared(){
             m_engine->throwError(res, this);
         }
     }
-    emit importsScanned();
 }
 
 bool CodeQmlHandler::areImportsScanned(){
@@ -3482,7 +3467,7 @@ void CodeQmlHandler::removeSyncImportsListeners(){
 /**
  * \brief Handler for when a new project scope is ready
  */
-void CodeQmlHandler::newProjectScopeReady(){
+void CodeQmlHandler::__newProjectScopeReady(){
     m_newScope = true;
 }
 

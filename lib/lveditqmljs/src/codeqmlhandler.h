@@ -130,18 +130,19 @@ public slots:
     void removeSyncImportsListeners();
 
     QList<int> languageFeatures() const;
+
     void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
     void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
     void populatePropertyInfoForFragment(lv::QmlEditFragment* ef);
-
     QVariantMap propertiesWritable(lv::QmlEditFragment* ef);
+
     // Help
 
     QString help(int position);
+
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
     QJSValue editingFragments();
-
 
     lv::QmlEditFragment* findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const;
 
@@ -205,29 +206,28 @@ public slots:
     int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
-    void updateRuntimeBindings();
 
     lv::QmlEditFragment* createObject(int position, const QString& type, lv::QmlEditFragment* parent, QObject* currentApp = nullptr);
 
     QJSValue getDocumentIds();
 
+    // Scopes
+
+    void updateScope();
+
+    QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
+    QString getFragmentId(lv::QmlEditFragment* ef);
+
     void suggestCompletion(int cursorPosition);
+
+    // Registered slots
 
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void __documentFormatUpdate(int position, int length);
     void __cursorWritePositionChanged(QTextCursor cursor);
 
-    // Scopes
-
-    void newProjectScopeReady();
-    void updateScope();
-
-    void aboutToDelete();
-    QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
-    QString getFragmentId(lv::QmlEditFragment* ef);
-
-signals:
-    void importsScanned();
+    void __newProjectScopeReady();
+    void __aboutToDelete();
 
 private:
     QmlDeclaration::Ptr createImportDeclaration();
