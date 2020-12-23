@@ -223,8 +223,6 @@ QtObject{
             position = container.editingFragment.position()
         } else {
             position = container.editingFragment.position() + 1
-//            position = container.editingFragment.valuePosition() +
-//                       container.editingFragment.valueLength() - 1
         }
 
         var addContainer = null
@@ -239,7 +237,8 @@ QtObject{
 
         var addBoxItem = createAddQmlBox(null)
 
-        if (!addBoxItem) return
+        if (!addBoxItem)
+            return
         addBoxItem.addContainer = addContainer
         addBoxItem.codeQmlHandler = codeHandler
         if (isForNode)
@@ -249,28 +248,28 @@ QtObject{
 
         var oct = container.parent
 
-        // capture y
-        var octit = container
-        var octY = 0
-        while ( octit && (octit.objectName !== 'editorBox' && octit.objectName !== 'objectPalette')){
-            octY += octit.y
-            octit = octit.parent
+        var pane = container.parent
+        while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+            pane = pane.parent
         }
-        if ( octit && (octit.objectName === 'editorBox' || octit.objectName === 'objectPalette')){
-            octY += octit.y
-        }
+        var coords = container.mapToItem(pane, 0, 0)
 
-        var rect = Qt.rect(oct.x + 150, octY, oct.width, 25)
-        var cursorCoords = container.editor.cursorWindowCoords()
+        if ( container.parent.objectName !== 'objectContainer' )
+            coords.y = coords.y - 30 // if this container is in the title of a pane
+
+        var paneCoords = pane.mapGlobalPosition()
 
         var addBox = lk.layers.editor.environment.createEditorBox(
-            addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+            addBoxItem,
+            Qt.rect(coords.x + container.width - 180 / 2, coords.y, 30, 30),
+            Qt.point(paneCoords.x, paneCoords.y - 35),
+            lk.layers.editor.environment.placement.top
         )
 
         addBox.color = 'transparent'
         addBoxItem.cancel = function(){
-
-            if (isForNode) objectGraph.activateFocus()
+            if (isForNode)
+                objectGraph.activateFocus()
             addBoxItem.destroy()
             addBox.destroy()
         }
@@ -671,12 +670,6 @@ QtObject{
         openNestedProperties(objectContainer, true)
     }
 
-    property Component rrr: Rectangle{
-        width: 300
-        height: 300
-        color: 'red'
-    }
-
     function addPaletteList(container, paletteGroup, aroundBox, mode, swap, listParent){
 
         if (!container.editingFragment)
@@ -696,10 +689,16 @@ QtObject{
 
         var palListBox = null
         if (mode !== PaletteControls.PaletteListMode.NodeEditor){
-            var pane = container.editor ? container.editor : container.parent
+
+            var pane = container.parent
+            if ( container.pane )
+                pane = container.pane
             while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
                 pane = pane.parent
+                if ( pane.pane && pane.pane.objectName === 'objectPalette' )
+                    pane = pane.pane
             }
+
             var paneCoords = pane.mapGlobalPosition()
 
             palListBox  = lk.layers.editor.environment.createEditorBox(
@@ -858,8 +857,8 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
+        var rect = editor.getCursorRectangle()
+        var paneCoords = editor.mapGlobalPosition()
 
         if ( !palettes || palettes.size() === 0){
             return
@@ -872,7 +871,7 @@ QtObject{
 
             var palList      = createPaletteListView(null, theme.selectableListView)
             var palListBox   = lk.layers.editor.environment.createEditorBox(
-                palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+                palList, rect, paneCoords, lk.layers.editor.environment.placement.bottom
             )
             palListBox.color = 'transparent'
             palList.model    = palettes
@@ -900,8 +899,8 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
+        var rect = editor.getCursorRectangle()
+        var cursorCoords = editor.mapGlobalPosition()
 
         if ( !palettes || palettes.size() === 0 ){
             shapePalette(editor, palettes, -1)
@@ -937,8 +936,8 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
+        var rect = editor.getCursorRectangle()
+        var cursorCoords = editor.mapGlobalPosition()
         if ( palettes.size() === 1 ){
             var ef = codeHandler.openConnection(palettes.position())
             ef.incrementRefCount()

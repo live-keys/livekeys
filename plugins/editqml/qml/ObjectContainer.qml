@@ -357,15 +357,20 @@ Item{
                 }
                 onAddPalette: {
                     var pane = container.parent
+                    if ( container.pane )
+                        pane = container.pane
                     while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
                         pane = pane.parent
                     }
-                    var coords = objectContainer.mapToItem(pane, 0, 0)
+                    var coords = container.mapToItem(pane, 0, 0)
+                    coords.y -= 30
+                    if ( container.pane )
+                        coords.y -= 30 // if this container is in the title of a pane
 
                     var paletteList = paletteControls.addPaletteList(
                         objectContainer,
                         paletteGroup,
-                        Qt.rect(coords.x + objectContainer.width - 180 / 2, coords.y, 30, 30),
+                        Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
                         PaletteControls.PaletteListMode.ObjectContainer
                     )
                     if (paletteList){
