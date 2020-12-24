@@ -216,7 +216,6 @@ public slots:
     void updateScope();
 
     QVariantList nestedObjectsInfo(lv::QmlEditFragment* ef);
-    QString getFragmentId(lv::QmlEditFragment* ef);
 
     void suggestCompletion(int cursorPosition);
 

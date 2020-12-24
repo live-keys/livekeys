@@ -541,9 +541,18 @@ bool QmlInheritanceInfo::isEmpty() const{
 }
 
 QmlPropertyInfo QmlInheritanceInfo::defaultProperty() const{
+    QString defaultPropertyName = "";
     for ( const QmlTypeInfo::Ptr& ti : nodes ){
         if ( !ti->defaultProperty().isEmpty() )
-            return ti->propertyAt(ti->defaultProperty());
+            defaultPropertyName = ti->defaultProperty();
+    }
+    if ( defaultPropertyName.isEmpty() )
+        return QmlPropertyInfo();
+
+    for ( const QmlTypeInfo::Ptr& ti : nodes ){
+        QmlPropertyInfo qpi = ti->propertyAt(defaultPropertyName);
+        if ( qpi.isValid() )
+            return qpi;
     }
     return QmlPropertyInfo();
 }
@@ -554,8 +563,6 @@ QmlTypeReference QmlInheritanceInfo::languageType() const{
 
     return nodes.first()->prefereredType();
 }
-
-
 
 QmlPropertyInfo::QmlPropertyInfo()
     : isWritable(true)

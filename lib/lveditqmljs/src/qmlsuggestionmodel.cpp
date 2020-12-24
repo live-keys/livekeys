@@ -140,8 +140,8 @@ void QmlSuggestionModel::updateFilters(){
     }
 }
 
-void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, int filter)
-{
+void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, int filter){
+
     QmlPropertyInfo qpi = typePath.defaultProperty();
     if ( qpi.isValid() ){
         m_supportsObjectNesting = true;

@@ -38,8 +38,19 @@ namespace lv{
 
 namespace{
 
+
+    class TraversalNodeResult{
+    public:
+        TraversalNodeResult(QmlBindingPath::Node* pBindingNode = nullptr, DocumentQmlValueObjects::RangeItem* pRange = nullptr)
+            : bindingNode(pBindingNode), range(pRange)
+        {}
+
+        QmlBindingPath::Node* bindingNode;
+        DocumentQmlValueObjects::RangeItem* range;
+    };
+
     /// \private
-    QmlBindingPath::Node* findDeclarationPathImpl(
+    TraversalNodeResult findDeclarationPathImpl(
         DocumentQmlValueObjects::RangeObject *object,
         QmlDeclaration::Ptr declaration)
     {
@@ -51,7 +62,7 @@ namespace{
             if ( object->properties[i]->begin == position ){
 
                 if ( declaration->identifierChain().isEmpty() )
-                    return nullptr;
+                    return TraversalNodeResult();
 
                 // iterate property chain (eg. border.size => (border, size))
                 QmlBindingPath::Node* currentParent = nullptr;
@@ -83,7 +94,12 @@ namespace{
                 QmlBindingPath::Node* n = currentParent;
                 while ( n->parent != nullptr )
                     n = n->parent;
-                return n;
+
+                TraversalNodeResult dpr;
+                dpr.bindingNode = n;
+                dpr.range = object->properties[i];
+
+                return dpr;
 
             } else if ( object->properties[i]->child &&
                         object->properties[i]->begin < position &&
@@ -103,20 +119,20 @@ namespace{
                     currentParent = n;
                 }
 
-                QmlBindingPath::Node* n = findDeclarationPathImpl(
+                TraversalNodeResult dpr = findDeclarationPathImpl(
                     object->properties[i]->child, declaration
                 );
-                if ( !n ){
+                if ( !dpr.bindingNode ){
                     delete currentParent;
-                    return nullptr;
+                    return TraversalNodeResult();
                 }
 
-                n->parent = currentParent;
-                currentParent->child = n;
+                dpr.bindingNode->parent = currentParent;
+                currentParent->child = dpr.bindingNode;
 
-                while ( n->parent != nullptr )
-                    n = n->parent;
-                return n;
+                while ( dpr.bindingNode->parent != nullptr )
+                    dpr.bindingNode = dpr.bindingNode->parent;
+                return dpr;
             }
         } // properties end
 
@@ -128,19 +144,20 @@ namespace{
                 QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
                 indexNode->index = i;
 
-                QmlBindingPath::Node* n = findDeclarationPathImpl(
+                TraversalNodeResult dpr = findDeclarationPathImpl(
                     object->children[i], declaration
                 );
 
-                if ( !n ){
+                if ( !dpr.bindingNode ){
                     delete indexNode;
-                    return nullptr;
+                    return TraversalNodeResult();
                 }
 
-                indexNode->child = n;
-                n->parent = indexNode;
+                indexNode->child = dpr.bindingNode;
+                dpr.bindingNode->parent = indexNode;
 
-                return indexNode;
+                dpr.bindingNode = indexNode;
+                return dpr;
 
             } else if ( position == object->children[i]->begin ){ // found object
 
@@ -151,11 +168,14 @@ namespace{
                 QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
                 indexNode->index = i;
 
-                return indexNode;
+                TraversalNodeResult dpr;
+                dpr.bindingNode = indexNode;
+                dpr.range = object->children[i];
+                return dpr;
             }
         }
 
-        return nullptr;
+        return TraversalNodeResult();
     }
 
 } // namespace
@@ -743,14 +763,17 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
  *
  * \returns The found binding path on success, nullptr otherwise
  */
-QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
+DocumentQmlInfo::TraversalResult DocumentQmlInfo::findDeclarationPath(
         ProjectDocument* document,
         DocumentQmlValueObjects::RangeObject *root,
         QmlDeclaration::Ptr declaration)
 {
     if ( !root )
-        return nullptr;
+        return DocumentQmlInfo::TraversalResult();
 
+
+    DocumentQmlInfo::TraversalResult tr;
+    DocumentQmlValueObjects::RangeItem* range = nullptr;
     QmlBindingPath::Node* n = nullptr;
 
     if ( root->begin == declaration->position() ){ // cover the case of root being the actual object
@@ -760,20 +783,21 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
         QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
         componentNode->name = document->file()->name();
         n = componentNode;
-
+        range = root;
     } else {
-        QmlBindingPath::Node* result = findDeclarationPathImpl(root, declaration);
-        if ( result ){
+        TraversalNodeResult result = findDeclarationPathImpl(root, declaration);
+        if ( result.bindingNode ){
             QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
             componentNode->name = document->file()->name();
-            componentNode->child = result;
-            result->parent = componentNode;
+            componentNode->child = result.bindingNode;
+            result.bindingNode->parent = componentNode;
             n = componentNode;
+            range = result.range;
         }
     }
 
     if ( !n )
-        return nullptr;
+        return DocumentQmlInfo::TraversalResult();
 
     QmlBindingPath::Ptr path = QmlBindingPath::create();
 
@@ -785,7 +809,10 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
 
     path->updatePath(fnode);
 
-    return path;
+    tr.range = range;
+    tr.bindingPath = path;
+
+    return tr;
 }
 
 /**
