@@ -328,6 +328,7 @@ void    Navigable::mouseMoveEvent( QMouseEvent* event )
 
 void    Navigable::mousePressEvent( QMouseEvent* event )
 {
+    emit pressed(event->localPos()); // LK
     if ( getNavigable() ) {
         if ( event->button() == Qt::LeftButton ) {
             _leftButtonPressed = true;

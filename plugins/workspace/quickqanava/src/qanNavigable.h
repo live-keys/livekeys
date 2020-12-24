@@ -288,6 +288,7 @@ signals:
     void        zoomMinChanged( );
 
 signals:
+    void    pressed(QVariant pos); // LK
     //! Emitted whenever the mouse is clicked in the container.
     void    clicked( QVariant pos );
 
