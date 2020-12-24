@@ -84,16 +84,16 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
-                    var pane = propertyContainer.editor ? propertyContainer.editor : propertyContainer.parent
+                    var pane = propertyContainer.parent
                     while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
                         pane = pane.parent
                     }
-                    var coords = propertyContainer.mapToItem(pane, 0, 0)
+                    var coords = paletteAddButton.mapToItem(pane, 0, 0)
 
                     var paletteList = paletteControls.addPaletteList(
                         propertyContainer,
                         propertyContainer.valueContainer,
-                        Qt.rect(coords.x + propertyContainer.width - 180, coords.y, 30, 30),
+                        Qt.rect(coords.x + 150, coords.y, 30, 30),
                         PaletteControls.PaletteListMode.PropertyContainer
                     )
 

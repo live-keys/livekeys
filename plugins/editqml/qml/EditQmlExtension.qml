@@ -247,7 +247,7 @@ WorkspaceExtension{
                 return
 
             var rect = activePane.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
+            var paneCoords = activePane.mapGlobalPosition()
             var addBoxItem = globals.paletteControls.createAddQmlBox(null)
             if (!addBoxItem) return
 
@@ -259,9 +259,8 @@ WorkspaceExtension{
             if (objectsOnly)
                 addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
-
             var addBox = lk.layers.editor.environment.createEditorBox(
-                addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+                addBoxItem, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
             )
             addBox.color = 'transparent'
             addBoxItem.cancel = function(){
