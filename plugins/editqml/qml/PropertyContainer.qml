@@ -121,7 +121,7 @@ Item{
                 id: propertyCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    var objectContainer = propertyContainer.parent.parent
+                    var objectContainer = propertyContainer.parent.parent.parent
 
                     propertyContainer.editingFragment.decrementRefCount()
                     if (propertyContainer.editingFragment.refCount === 0)
