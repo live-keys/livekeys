@@ -2888,7 +2888,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         QmlAddContainer* addContainer = new QmlAddContainer(insertionPosition, declaration->type());
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
-        if ((filter & AddOptionsFilter::ReadOnly) == 0){
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
             addContainer->model()->addObjectsToModel(scope);
         }
         return addContainer;
@@ -2952,7 +2952,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
-        if ((filter & AddOptionsFilter::ReadOnly) == 0){
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
             addContainer->model()->addObjectsToModel(scope);
         }
         return addContainer;

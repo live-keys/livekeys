@@ -84,6 +84,7 @@ public slots:
     QStringList importSpaces() const;
     QStringList types() const;
 
+    bool supportsObjectNesting() const { return m_supportsObjectNesting; }
 private:
     QList<ItemData>         m_data;
     QString                 m_filter;

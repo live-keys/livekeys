@@ -140,8 +140,8 @@ CodePalette{
                             var codeHandler = crop.visualParent.documentHandler.codeHandler
                             fragment = paletteControls.addPropertyByFragment(crop, codeHandler, "region")
                         }
-
-                        fragment.write('"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"')
+                        var toWrite = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
+                        fragment.write({"__ref": toWrite})
                         fragment.commit(Qt.rect(x, y, width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
@@ -201,7 +201,8 @@ CodePalette{
                             var codeHandler = resize.visualParent.documentHandler.codeHandler
                             fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
                         }
-                        fragment.write('"' + Math.round(width) + "x" + Math.round(height) + '"')
+                        var toWrite = '"' + Math.round(width) + "x" + Math.round(height) + '"'
+                        fragment.write({"__ref": toWrite})
                         fragment.commit(Qt.size(width, height))
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
@@ -298,7 +299,7 @@ CodePalette{
                         value += 'Qt.point(' + Math.round(p2.x) + ", " + Math.round(p2.y) +'), '
                         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
                         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
-                        fragment.write(value)
+                        fragment.write({"__ref": value})
                         fragment.commit([p1, p2, p3, p4])
                         paletteItem.transformImage.exec()
                         toolbox.activateTool(null)
