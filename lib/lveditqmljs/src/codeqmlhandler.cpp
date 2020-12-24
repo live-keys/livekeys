@@ -315,7 +315,7 @@ CodeQmlHandler::CodeQmlHandler(
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(aboutToDelete()));
+    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(__aboutToDelete()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
@@ -1274,7 +1274,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     return nullptr;
 }
 
-void CodeQmlHandler::aboutToDelete()
+void CodeQmlHandler::__aboutToDelete()
 {
     cancelEdit();
 
@@ -1942,10 +1942,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
         QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot create injection channel for declaration: " + QString::number(declaration->position()).toStdString(), lv::Exception::toCode("~Injection")), this).jsThrow();
         return nullptr;
     }
-
-    QTextCursor codeCursor(m_target);
-    codeCursor.setPosition(ef->valuePosition());
-    codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
 
     ef->declaration()->setSection(m_document->createSection(
         QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
@@ -2940,14 +2936,20 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
             typePath.append(valueObject);
         }
 
+        QmlTypeReference objectType = typePath.languageType();
+
         if (!ctx->objectTypePath().empty()){
             QString type = ctx->objectTypeName();
             QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-            typePath.join(scope.getTypePath(typeNamespace, type));
+
+            QmlInheritanceInfo libtypePath = scope.getTypePath(typeNamespace, type);
+
+            objectType = libtypePath.languageType();
+
+            typePath.join(libtypePath);
         }
 
-
-        QmlAddContainer* addContainer = new QmlAddContainer(position, typePath.languageType());
+        QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
         if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
@@ -3006,7 +3008,9 @@ int CodeQmlHandler::addProperty(
     sourceSelection.setPosition(blockStart);
     sourceSelection.setPosition(blockEnd, QTextCursor::KeepAnchor);
 
-    QString source = object + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
+    QString objecType = QmlTypeReference::split(object).name();
+
+    QString source = objecType + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
 
     lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(m_document->file()->path());
     if ( docinfo->parse(source) ){
@@ -3020,7 +3024,7 @@ int CodeQmlHandler::addProperty(
             if ( propertyName == fullName ){ // property already exists, simply position the cursor accordingly
                 lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
-                int sourceOffset = blockStart - 1 - object.size();
+                int sourceOffset = blockStart - 1 - objecType.size();
 
                 if ( dh ){
                     dh->requestCursorPosition(sourceOffset + p->valueBegin);
@@ -3302,10 +3306,10 @@ int CodeQmlHandler::insertRootItem(const QString &name)
     return insertionPosition + 2;
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *currentApp){
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *){
     Q_D(CodeQmlHandler);
 
-    if ( !edit || !currentApp )
+    if ( !edit )
         return;
 
     QString type; QString id;
@@ -3355,16 +3359,6 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
         } else {
             //TODO: Property based asignment
         }
-    }
-}
-
-/**
- * \brief Update palette binding channels for a new runtime root.
- */
-void CodeQmlHandler::updateRuntimeBindings(){
-    QList<QmlEditFragment*> toRemove;
-    for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
-        removeEditingFragment(*it);
     }
 }
 
@@ -3441,7 +3435,6 @@ void CodeQmlHandler::__whenLibraryScanQueueCleared(){
             m_engine->throwError(res, this);
         }
     }
-    emit importsScanned();
 }
 
 bool CodeQmlHandler::areImportsScanned(){
@@ -3482,7 +3475,7 @@ void CodeQmlHandler::removeSyncImportsListeners(){
 /**
  * \brief Handler for when a new project scope is ready
  */
-void CodeQmlHandler::newProjectScopeReady(){
+void CodeQmlHandler::__newProjectScopeReady(){
     m_newScope = true;
 }
 

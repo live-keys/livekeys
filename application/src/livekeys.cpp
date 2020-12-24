@@ -348,6 +348,7 @@ void Livekeys::loadInternalPackages(){
 
     m_packageGraph = new PackageGraph;
     PackageGraph::internalsContextOwner() = m_packageGraph;
+    m_packageGraph->setPackageImportPaths(packageImportPaths());
 
     m_viewEngine->setPackageGraph(m_packageGraph);
 
@@ -475,7 +476,8 @@ const MLNode &Livekeys::startupConfiguration(){
               "QtCanvas3D",
               "QtGraphicalEffects",
               "QtMultimedia",
-              "QtWebSockets"
+              "QtWebSockets",
+              "QtWebEngine"
           }}
     };
     return config;
