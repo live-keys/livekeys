@@ -2936,14 +2936,20 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
             typePath.append(valueObject);
         }
 
+        QmlTypeReference objectType = typePath.languageType();
+
         if (!ctx->objectTypePath().empty()){
             QString type = ctx->objectTypeName();
             QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-            typePath.join(scope.getTypePath(typeNamespace, type));
+
+            QmlInheritanceInfo libtypePath = scope.getTypePath(typeNamespace, type);
+
+            objectType = libtypePath.languageType();
+
+            typePath.join(libtypePath);
         }
 
-
-        QmlAddContainer* addContainer = new QmlAddContainer(position, typePath.languageType());
+        QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
         if ((filter & AddOptionsFilter::ReadOnly) == 0){
@@ -3002,7 +3008,9 @@ int CodeQmlHandler::addProperty(
     sourceSelection.setPosition(blockStart);
     sourceSelection.setPosition(blockEnd, QTextCursor::KeepAnchor);
 
-    QString source = object + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
+    QString objecType = QmlTypeReference::split(object).name();
+
+    QString source = objecType + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
 
     lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(m_document->file()->path());
     if ( docinfo->parse(source) ){
@@ -3016,7 +3024,7 @@ int CodeQmlHandler::addProperty(
             if ( propertyName == fullName ){ // property already exists, simply position the cursor accordingly
                 lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
-                int sourceOffset = blockStart - 1 - object.size();
+                int sourceOffset = blockStart - 1 - objecType.size();
 
                 if ( dh ){
                     dh->requestCursorPosition(sourceOffset + p->valueBegin);
