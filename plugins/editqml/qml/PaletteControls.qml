@@ -225,12 +225,7 @@ QtObject{
             position = container.editingFragment.position() + 1
         }
 
-        var addContainer = null
-        if (container.editingFragment.isGroup()){
-            addContainer = codeHandler.getReadOnlyAddOptions(container.editingFragment, isForNode)
-        } else {
-            addContainer = codeHandler.getAddOptions(position, isForNode, container.editingFragment)
-        }
+        var addContainer = codeHandler.getAddOptions(position, isForNode, container.editingFragment)
 
         if ( !addContainer )
             return
@@ -243,7 +238,7 @@ QtObject{
         addBoxItem.codeQmlHandler = codeHandler
         if (isForNode)
             addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.WithFunctions
-        if (isGroup)
+        if (isGroup || !addContainer.model.supportsObjectNesting())
             addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.NoObjects
 
         var oct = container.parent
