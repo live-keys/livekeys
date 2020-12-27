@@ -121,11 +121,29 @@ Rectangle{
         }
     }
 
-    property var isInteractive: root.activeFocus || selectedEdge || (numOfSelectedNodes > 0) || paletteListOpened
+    onActiveFocusChanged: {
+        checkFocus()
+    }
+
+    function checkFocus(){
+        var interac = false
+        if ( activeFocus ){
+            interac = true
+        }
+        if ( activeItem )
+            interac = true
+
+        isInteractive = interac
+    }
+
+    property var isInteractive: false
     property var connections: []
     property Component propertyDelegate : ObjectNodeProperty{
         style: root.style.propertyDelegateStyle
     }
+
+    property Item activeItem: null
+
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
     property var documentHandler: null
@@ -406,10 +424,11 @@ Rectangle{
         id: graphView
         anchors.fill: parent
         anchors.margins: 1
-        navigable   : root.isInteractive
+        navigable   : true
         gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
+        onPressed: { root.activateFocus() }
     
         graph: Qan.Graph {
             id: graph
@@ -432,32 +451,11 @@ Rectangle{
                 nodeStyle: root.style.objectNodeStyle
             }
             Component.onCompleted : {
+                graphView.navigable = Qt.binding(function(){ return root.isInteractive })
                 styleManager.styles.at(1).lineColor = root.style.connectorColor
             }
         }
     }  // Qan.GraphView
-
-    Rectangle {
-        anchors.fill: parent
-        visible: !root.isInteractive
-        color: "transparent"
-        z: 3000
-        MouseArea {
-            id: ma
-            enabled: !root.isInteractive
-            anchors.fill: parent
-            acceptedButtons: Qt.LeftButton
-            onWheel: {
-                wheel.accepted = false
-            }
-            onDoubleClicked: {
-                root.doubleClicked(mouse)
-            }
-            onClicked: {
-                root.activateFocus()
-            }
-        }
-    }
 
     ResizeArea{
         minimumHeight: 200

@@ -121,6 +121,14 @@ public:
         Document::Location m_location;
     };
 
+    class TraversalResult{
+    public:
+        TraversalResult() : bindingPath(), range(nullptr){}
+
+        QSharedPointer<QmlBindingPath> bindingPath;
+        DocumentQmlValueObjects::RangeItem* range;
+    };
+
     /** List of import entries */
     typedef QList<Import> ImportList;
 
@@ -247,7 +255,7 @@ public:
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
-    static QSharedPointer<QmlBindingPath> findDeclarationPath(
+    static TraversalResult findDeclarationPath(
             ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,
             QmlDeclaration::Ptr declaration);

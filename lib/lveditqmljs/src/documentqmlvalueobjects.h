@@ -45,8 +45,15 @@ public:
 
     class RangeItem{
     public:
+        enum RangeType{
+            Property,
+            Object
+        };
+
+    public:
         virtual ~RangeItem(){}
 
+        virtual RangeType rangeType() const = 0;
         virtual QmlJS::AST::Node* getAst() = 0;
         virtual RangeItem* getParent() = 0;
         virtual void appendObject(RangeObject* child) = 0;
@@ -60,6 +67,7 @@ public:
         ~RangeProperty(){}
 
         void appendObject(RangeObject* object){ child = object; }
+        RangeType rangeType() const{ return RangeItem::Property; }
         QmlJS::AST::Node* getAst(){ return ast; }
         RangeItem* getParent(){ return parent; }
         QStringList name() const;
@@ -88,6 +96,7 @@ public:
                 delete children[i];
         }
 
+        RangeType rangeType() const{ return RangeItem::Object; }
         void appendObject(RangeObject *child) { children.append(child); }
         void appendProperty(RangeProperty *property){ properties.append(property); }
         QmlJS::AST::Node* getAst(){ return ast; }

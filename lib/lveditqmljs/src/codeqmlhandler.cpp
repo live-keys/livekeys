@@ -1210,11 +1210,36 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
         d->syncParse(m_document);
         d->syncObjects(m_document);
 
-        QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
+        QmlBindingPath::Ptr bp = tr.bindingPath;
+
         if ( !bp )
             return nullptr;
 
+        QString id = "";
+        DocumentQmlValueObjects::RangeObject* rangeObject = nullptr;
+        if ( tr.range && tr.range->rangeType() == DocumentQmlValueObjects::RangeItem::Object ){
+            rangeObject = static_cast<DocumentQmlValueObjects::RangeObject*>(tr.range);
+        } else if ( tr.range && tr.range->rangeType() == DocumentQmlValueObjects::RangeItem::Property ){
+            DocumentQmlValueObjects::RangeProperty* rangeProperty = static_cast<DocumentQmlValueObjects::RangeProperty*>(tr.range);
+            if ( rangeProperty->child )
+                rangeObject = rangeProperty->child;
+        }
+
+        if ( rangeObject ){
+            for (int k = 0; k < rangeObject->properties.size(); ++k){
+                auto prop = rangeObject->properties[k];
+                if (prop->name().size() == 1 && prop->name()[0] == "id"){
+                    id = m_document->substring(prop->valueBegin, prop->end - prop->valueBegin);
+                    break;
+                }
+            }
+        }
+
         QmlEditFragment* ef = new QmlEditFragment(declaration, this);
+        if ( !id.isEmpty() )
+            ef->setObjectId(id);
+
         if ( declaration->isForProperty() ){
             if ( declaration->valueObjectScopeOffset() > -1 ){
                 // in case a property also initializes an object, capture the object type
@@ -1286,36 +1311,6 @@ void CodeQmlHandler::__aboutToDelete()
 QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
 {
     return ef->nestedObjectsInfo();
-}
-
-QString CodeQmlHandler::getFragmentId(QmlEditFragment *ef)
-{
-    Q_D(CodeQmlHandler);
-
-    QList<QObject*> fragments;
-
-    d->syncParse(m_document);
-    d->syncObjects(m_document);
-    QmlScopeSnap scope = d->snapScope();
-
-    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
-    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(ef->position());
-
-    QString id;
-    if ( currentOb ){
-        for (int k = 0; k < currentOb->properties.size(); ++k)
-        {
-            auto prop = currentOb->properties[k];
-            if (prop->name().size() == 1 && prop->name()[0] == "id"){
-                auto docString = m_document->contentString();
-                id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
-                break;
-            }
-        }
-    }
-
-    ef->setObjectId(id);
-    return id;
 }
 
 QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
@@ -1585,11 +1580,13 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
         d->syncParse(m_document);
         d->syncObjects(m_document);
-        QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document,
-            d->documentObjects()->root(),
-            declarations.first());
 
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+                    m_document,
+                    d->documentObjects()->root(),
+                    declarations.first());
+
+        QmlBindingPath::Ptr newBp = tr.bindingPath;
         bp = newBp;
 
         QmlBindingPath::Node* n = bp->root();
@@ -1764,10 +1761,12 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
         d->syncParse(m_document);
         d->syncObjects(m_document);
-        QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document,
-            d->documentObjects()->root(),
-            declarations.first());
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+                    m_document,
+                    d->documentObjects()->root(),
+                    declarations.first());
+
+        QmlBindingPath::Ptr newBp = tr.bindingPath;
 
         bp = newBp;
 
@@ -2126,17 +2125,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
 
             QmlInheritanceInfo obPath = scope.getTypePath(obNs, obName);
 
-            QString id;
-            // find id
-            for (int k = 0; k < child->properties.size(); ++k)
-            {
-                auto prop = child->properties[k];
-                if (prop->name().size() == 1 && prop->name()[0] == "id"){
-                    id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
-                    break;
-                }
-            }
-
             if ( !obPath.isEmpty() ){
 
                 QmlDeclaration::Ptr declaration = QmlDeclaration::create(
@@ -2168,7 +2156,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                     QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
                 ));
 
-                ef->setObjectId(id);
                 ef->declaration()->section()->setUserData(ef);
                 ef->declaration()->section()->onTextChanged(
                             [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
@@ -2231,12 +2218,8 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
         DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
         if (rp->name().size() == 1 && rp->name()[0] == "id"){
-            const QString& document = m_document->contentString();
-            QString id = document.mid(rp->valueBegin, rp->end-rp->valueBegin);
-            edit->setObjectId(id);
             continue;
         }
-
 
         QmlEditFragment* p = edit;
         for (int n = 0; n < rp->name().length(); ++n){
@@ -2888,6 +2871,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         QmlAddContainer* addContainer = new QmlAddContainer(insertionPosition, declaration->type());
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
+
         if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
             addContainer->model()->addObjectsToModel(scope);
         }

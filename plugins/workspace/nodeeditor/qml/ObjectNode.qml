@@ -93,6 +93,14 @@ Qan.NodeItem{
         if (objectGraph.numOfSelectedNodes === 0)
             objectGraph.activateFocus()
     }
+    onActiveFocusChanged: {
+        if ( activeFocus ){
+            objectGraph.activeItem = this
+        } else if ( objectGraph.activeItem === this ){
+            objectGraph.activeItem = null
+        }
+        objectGraph.checkFocus()
+    }
 
     property QtObject defaultStyle : QtObject{
         property color background: "#112"

@@ -106,10 +106,10 @@ Qan.AbstractGraphView {
             graph.connector.visible)
             graph.connector.visible = false
 
-        graphView.focus = true           // User clicked outside a graph item, remove it's eventual active focus
+//        graphView.focus = true           // User clicked outside a graph item, remove it's eventual active focus
     }
     onRightClicked: {
-        graphView.focus = true
+//        graphView.focus = true
     }
 
     // Port management ////////////////////////////////////////////////////////
