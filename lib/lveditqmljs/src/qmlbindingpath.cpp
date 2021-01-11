@@ -365,7 +365,7 @@ bool QmlBindingPath::operator !=(const QmlBindingPath &other) const{
 }
 
 QString QmlBindingPath::toString() const{
-    return "BindingPath(" + m_root->toString() + ")";
+    return "BindingPath(" + (m_root ? m_root->toString() : "null") + ")";
 }
 
 }// namespace
