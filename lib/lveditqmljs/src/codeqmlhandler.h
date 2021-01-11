@@ -295,6 +295,7 @@ private:
 
     lv::PaletteList* findPalettesForDeclaration(QmlDeclaration::Ptr decl, bool includeExpandables = false);
 
+    void createChannelForFragment(QmlEditFragment* parentFragment, QmlEditFragment* fragment, QmlBindingPath::Ptr bindingPath);
 private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;

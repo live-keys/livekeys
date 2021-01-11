@@ -106,7 +106,7 @@ Rectangle{
                 }
 
                 if (maxWidth !== node.width)
-                    node.width = maxWidth + 20
+                    node.parentWidth = maxWidth + 20
             }
         }
     }
@@ -153,10 +153,11 @@ Rectangle{
     property alias zoom: graphView.zoom
     property alias zoomOrigin: graphView.zoomOrigin
 
-    property int inPort: 1
-    property int outPort: 2
-    property int noPort : 0
-    property int inOutPort : 3
+    enum PortMode {
+        None = 0,
+        InPort = 1,
+        OutPort = 2
+    }
     
     property var selectedEdge: null
     property var numOfSelectedNodes: 0
@@ -236,6 +237,7 @@ Rectangle{
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
 
         addBoxItem.addContainer = addOptions
+        addBoxItem.codeQmlHandler = documentHandler.codeHandler
 
         addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
@@ -364,7 +366,7 @@ Rectangle{
         propertyItem.propertyName = propertyName
         propertyItem.node = node
 
-        propertyItem.width = node.item.width - 10
+        propertyItem.parentWidth = node.item.width - 10
         propertyItem.editingFragment = editingFragment
         propertyItem.documentHandler = root.documentHandler
 
@@ -384,7 +386,7 @@ Rectangle{
 
         connections.push(pdestructor)
 
-        if ( ports === root.inPort || ports === root.inOutPort ){
+        if ( ports & ObjectGraph.PortMode.InPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
             port.label = propertyName + " In"
             port.y = Qt.binding(
@@ -400,7 +402,7 @@ Rectangle{
             port.objectProperty = propertyItem
             port.multiplicity = Qan.PortItem.Single
         }
-        if (ports === root.outPort || (node.item.id !== "" && ports === root.inOutPort) ){
+        if ((ports === ObjectGraph.PortMode.OutPort) || (node.item.id !== "" && ports === (ObjectGraph.PortMode.OutPort | ObjectGraph.PortMode.InPort)) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
             port.y = Qt.binding(

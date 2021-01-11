@@ -225,7 +225,9 @@ QtObject{
             position = container.editingFragment.position() + 1
         }
 
-        var addContainer = codeHandler.getAddOptions(position, isForNode, container.editingFragment)
+        var filter = 0 | (isForNode ? CodeQmlHandler.ForNode : 0) | (isGroup ? CodeQmlHandler.ReadOnly : 0)
+
+        var addContainer = codeHandler.getAddOptions(position, filter, container.editingFragment)
 
         if ( !addContainer )
             return
@@ -362,7 +364,7 @@ QtObject{
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                addSubobject(container.nodeParent, data, container.nodeParent.item.id ? 1 : 0, null)
+                addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null)
             }
 
             if (isForNode) objectGraph.activateFocus()
@@ -542,7 +544,7 @@ QtObject{
 
         if (hasChildren) {
             objectContainer.compact = false
-            objectContainer.sortChildren()
+            objectContainer.groupsContainer.sortChildren()
         }
     }
 
