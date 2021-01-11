@@ -2026,53 +2026,45 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     return ef;
 }
 
-lv::QmlEditFragment *CodeQmlHandler::createReadOnlyFragment(QmlEditFragment *parentFragment, QString name)
+lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
 {
+    if ( !m_document )
+        return nullptr;
     Q_D(CodeQmlHandler);
-    int position = parentFragment->valuePosition() + parentFragment->valueLength()-1;
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-    if ( !m_document ) return nullptr;
-
-    d->syncParse(m_document);
     d->syncObjects(m_document);
 
-    DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), parentFragment->declaration());
-    QmlBindingPath::Ptr bp = tr.bindingPath;
-
-    if ( !bp ) return nullptr;
-
-    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
-
-    QStringList expression(name);
-    QmlDeclaration::Ptr declaration = nullptr;
-
     QmlScopeSnap scope = d->snapScope();
+
+    int position = parentFragment->valuePosition() + parentFragment->valueLength() - 1;
     QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-        scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
+        parentFragment->declaration()->type(), QStringList() << propertyName, position
     );
 
-    if ( propChain.size() == expression.size() && propChain.size() > 0 ){
-        QmlScopeSnap::PropertyReference& propref = propChain.last();
-        QmlTypeReference qlt = propref.resultType();
+    if ( propChain.length() != 1 )
+        return nullptr;
 
-        if ( !qlt.isEmpty() ){
-            declaration = QmlDeclaration::create(
-                expression,
-                propref.resultType(),
-                propref.propertyObjectType(),
-                -1,
-                0,
-                m_document
-            );
-            declaration->setValuePositionOffset(0);
-        }
-    }
+    QmlScopeSnap::PropertyReference& propref = propChain.last();
+    QmlTypeReference qlt = propref.resultType();
+
+    if ( qlt.isEmpty() )
+        return nullptr;
+
+    auto declaration = QmlDeclaration::create(
+        QStringList() << propertyName,
+        propref.resultType(),
+        propref.propertyObjectType(),
+        -1,
+        0,
+        m_document
+    );
+    declaration->setValuePositionOffset(0);
+
+    QmlBindingPath::Ptr bp = parentFragment->fullBindingPath()->clone();
+    bp->appendProperty(propertyName, QStringList() << parentFragment->type());
 
     auto result = new QmlEditFragment(declaration, this);
-
     createChannelForFragment(parentFragment, result, bp);
+
     result->checkIfGroup();
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
@@ -2297,7 +2289,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                     if ( dh )
                         dh->requestCursorPosition(ef->valuePosition());
                 } else {
-                    child = createReadOnlyFragment(p, propName);
+                    child = createReadOnlyPropertyFragment(p, propName);
                 }
             }
             else {
@@ -2831,6 +2823,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
     QmlDeclaration::Ptr declaration = nullptr;
 
     if ( fragment ){
+
         declaration = fragment->declaration();
 
         QmlInheritanceInfo typePath;
@@ -3891,7 +3884,7 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                 if (propref.property.isWritable)
                     fragment = openNestedConnection(conn, property->begin);
                 else {
-                    fragment = createReadOnlyFragment(conn, propName);
+                    fragment = createReadOnlyPropertyFragment(conn, propName);
 
                 }
                 auto fcast = qobject_cast<QObject*>(fragment);
