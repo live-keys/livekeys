@@ -1253,41 +1253,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
             }
         }
 
-        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
-        if ( documentChannel ){
-
-            if ( parentEdit ){
-                auto parentBp = parentEdit->fullBindingPath();
-
-                int copyLength = bp->length() - parentBp->length();
-                QmlBindingPath::Ptr relativeBp = QmlBindingPath::create();
-
-                while ( copyLength > 0){
-                    relativeBp = QmlBindingPath::join(bp->tailPath(), relativeBp);
-                    bp = bp->headPath();
-                    copyLength--;
-                }
-
-                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentEdit->channel(), relativeBp);
-                if ( !newChannel ){
-                    //TODO
-                    qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
-                } else {
-                    newChannel->setEnabled(true);
-                    ef->setChannel(newChannel);
-                }
-
-            } else {
-                QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
-                if ( !newChannel ){
-                    //TODO
-                    qWarning("Warning: Failed to get new channel from document at: %s", qPrintable(bp->toString()));
-                } else {
-                    newChannel->setEnabled(true);
-                    ef->setChannel(newChannel);
-                }
-            }
-        }
+        createChannelForFragment(parentEdit, ef, bp);
 
         if ( !ef->channel() ){
             delete ef;
@@ -2042,6 +2008,10 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
 
+    if (!ef->isOfFragmentType(QmlEditFragment::ReadOnly)){
+        ef->commit(ef->readValueText());
+    }
+
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
     if (ef->location() == QmlEditFragment::Property)
@@ -2056,41 +2026,45 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     return ef;
 }
 
-lv::QmlEditFragment *CodeQmlHandler::createReadOnlyFragment(QmlEditFragment *parentFragment, QString name)
+lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
 {
+    if ( !m_document )
+        return nullptr;
     Q_D(CodeQmlHandler);
-    int position = parentFragment->valuePosition() + parentFragment->valueLength()-1;
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
-
-    QStringList expression(name);
-    QmlDeclaration::Ptr declaration = nullptr;
+    d->syncObjects(m_document);
 
     QmlScopeSnap scope = d->snapScope();
+
+    int position = parentFragment->valuePosition() + parentFragment->valueLength() - 1;
     QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-        scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
+        parentFragment->declaration()->type(), QStringList() << propertyName, position
     );
 
-    if ( propChain.size() == expression.size() && propChain.size() > 0 ){
-        QmlScopeSnap::PropertyReference& propref = propChain.last();
-        QmlTypeReference qlt = propref.resultType();
+    if ( propChain.length() != 1 )
+        return nullptr;
 
-        if ( !qlt.isEmpty() ){
-            declaration = QmlDeclaration::create(
-                expression,
-                propref.resultType(),
-                propref.propertyObjectType(),
-                position,
-                0,
-                m_document
-            );
-            declaration->setValuePositionOffset(0);
-        }
-    }
+    QmlScopeSnap::PropertyReference& propref = propChain.last();
+    QmlTypeReference qlt = propref.resultType();
+
+    if ( qlt.isEmpty() )
+        return nullptr;
+
+    auto declaration = QmlDeclaration::create(
+        QStringList() << propertyName,
+        propref.resultType(),
+        propref.propertyObjectType(),
+        -1,
+        0,
+        m_document
+    );
+    declaration->setValuePositionOffset(0);
+
+    QmlBindingPath::Ptr bp = parentFragment->fullBindingPath()->clone();
+    bp->appendProperty(propertyName, QStringList() << parentFragment->type());
 
     auto result = new QmlEditFragment(declaration, this);
+    createChannelForFragment(parentFragment, result, bp);
+
     result->checkIfGroup();
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
@@ -2315,7 +2289,7 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                     if ( dh )
                         dh->requestCursorPosition(ef->valuePosition());
                 } else {
-                    child = createReadOnlyFragment(p, propName);
+                    child = createReadOnlyPropertyFragment(p, propName);
                 }
             }
             else {
@@ -2849,6 +2823,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
     QmlDeclaration::Ptr declaration = nullptr;
 
     if ( fragment ){
+
         declaration = fragment->declaration();
 
         QmlInheritanceInfo typePath;
@@ -2862,11 +2837,15 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
             typePath.join(scope.getTypePath(declaration->type()));
         }
 
+        auto p = fragment;
         if (filter & AddOptionsFilter::ReadOnly){
-            insertionPosition = fragment->position();
-        } else {
-            insertionPosition = fragment->valuePosition() + fragment->valueLength() - 1;
+            while (p && p->isOfFragmentType(QmlEditFragment::ReadOnly))
+            {
+                p = p->parentFragment();
+            }
         }
+
+        insertionPosition = p->valuePosition() + p->valueLength() - 1;
 
         QmlAddContainer* addContainer = new QmlAddContainer(insertionPosition, declaration->type());
 
@@ -3789,6 +3768,46 @@ PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
     return lpl;
 }
 
+void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath)
+{
+    QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+    if ( documentChannel ){
+
+        if ( parentFragment ){
+            auto parentBp = parentFragment->fullBindingPath();
+
+            int copyLength = bindingPath->length() - parentBp->length();
+            QmlBindingPath::Ptr relativeBp = QmlBindingPath::create();
+
+            while ( copyLength > 0){
+                relativeBp = QmlBindingPath::join(bindingPath->tailPath(), relativeBp);
+                bindingPath = bindingPath->headPath();
+                copyLength--;
+            }
+
+            QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentFragment->channel(), relativeBp);
+            if ( !newChannel ){
+                //TODO
+                qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
+            } else {
+                newChannel->setEnabled(true);
+                fragment->setChannel(newChannel);
+            }
+
+        } else {
+            QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bindingPath);
+            if ( !newChannel ){
+                //TODO
+                qWarning("Warning: Failed to get new channel from document at: %s", qPrintable(bindingPath->toString()));
+            } else {
+                newChannel->setEnabled(true);
+                fragment->setChannel(newChannel);
+            }
+        }
+    }
+
+}
+
 void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 {
     Q_D(CodeQmlHandler);
@@ -3836,6 +3855,14 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
 
                 setOfNames.insert(propName);
+
+                QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
+
+                if (property->name().size() == 1 && property->name()[0] == "id"){
+                    objInfo.insert("id", value);
+                    continue;
+                }
+
                 QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
                     scope.quickObjectDeclarationType(property->object()), QStringList(propName), property->begin
                 );
@@ -3851,18 +3878,13 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
                 propMap.insert("name", propName);
 
-                QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 
-                if (property->name().size() == 1 && property->name()[0] == "id"){
-                    objInfo.insert("id", value);
-                    continue;
-                }
 
                 QmlEditFragment* fragment = nullptr;
                 if (propref.property.isWritable)
                     fragment = openNestedConnection(conn, property->begin);
                 else {
-                    fragment = createReadOnlyFragment(conn, propName);
+                    fragment = createReadOnlyPropertyFragment(conn, propName);
 
                 }
                 auto fcast = qobject_cast<QObject*>(fragment);
