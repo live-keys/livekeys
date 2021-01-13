@@ -23,12 +23,13 @@ Item{
     property var editor: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var parentWidth: 360
 
     signal propertyToBeDestroyed(var name)
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
-    width: 360
+    width: parentWidth - anchors.leftMargin
     height: propertyTitle.height + paletteContainer.height
 
     property int contentWidth: 0

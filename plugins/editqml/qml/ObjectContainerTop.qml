@@ -207,6 +207,8 @@ Rectangle{
             height: 20
             visible: objectContainer.editingFragment
                   && objectContainer.editingFragment.type() !== 'qml/QtQuick#Component'
+                  && !(objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
+                  && !objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.Group))
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add-property.png"

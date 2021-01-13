@@ -85,7 +85,7 @@ Qan.NodeItem{
             if (!propertiesOpened[i].toString().localeCompare(name)) return
         }
 
-        addSubobject(nodeParent, name, 2, null)
+        addSubobject(nodeParent, name, ObjectGraph.PortMode.OutPort, null)
     }
 
     onSelectedChanged: {
@@ -244,21 +244,21 @@ Qan.NodeItem{
             documentHandler.codeHandler.populateObjectInfoForFragment(obj)
 
             var object = obj.objectInfo()
-            addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), 0, object.connection)
+            addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
         }
         onPropertyAdded: {
             documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
 
             var prop = ef.objectInfo()
-            var name = prop.name.toString()
+            var name = ef.identifier()
             for (var i=0; i < propertiesOpened.length; ++i){
                 if (!propertiesOpened[i].toString().localeCompare(name)) return
             }
 
-            var portState = 2
+            var portState = ObjectGraph.PortMode.OutPort
 
-            if (prop.isWritable) ++portState
-            addSubobject(nodeParent, prop.name, portState, prop.connection)
+            if (prop.isWritable) portState = portState | ObjectGraph.PortMode.InPort
+            addSubobject(nodeParent, name, portState, prop.connection)
         }
 
     }

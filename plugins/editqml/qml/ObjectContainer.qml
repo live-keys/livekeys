@@ -283,7 +283,7 @@ Item{
 
                 var child = container.children[container.children.length-1]
                 var codeHandler = objectContainer.editor.documentHandler.codeHandler
-                var id = codeHandler.getFragmentId(child.editingFragment)
+                var id = child.editingFragment.objectId()
                 child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
 
                 paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)

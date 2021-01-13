@@ -68,7 +68,7 @@ CodePalette{
 
                 for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
-                    var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
+                    var p = objectGraph.addObjectNodeProperty(n, property.name, ObjectGraph.PortMode.OutPort | (property.isWritable ? ObjectGraph.PortMode.InPort : 0), property.connection)
                     n.item.propertiesOpened.push(property.name)
                     p.z = 1000 - j
                     if (property.value.length === 2)
@@ -84,7 +84,7 @@ CodePalette{
                 for (var so = 0; so < object.subobjects.length; ++so)
                 {
                     var subobject = object.subobjects[so]
-                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), objectGraph.noPort, subobject.connection)
+                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), ObjectGraph.PortMode.None, subobject.connection)
                 }
 
             }
