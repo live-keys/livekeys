@@ -83,6 +83,11 @@ QMat *QGeometry::transform(QMat *input, QMat *m){
     return r;
 }
 
+QMat *QGeometry::getPerspectiveTransform(QJSValue src, QJSValue dst)
+{
+    return getPerspectiveTransform(src.toVariant().toList(), dst.toVariant().toList());
+}
+
 /**
  * @brief QGeometry::getPerspectiveTransform
  * @param Four source points (QVariantList with four QPointF's)
@@ -102,9 +107,34 @@ QMat *QGeometry::getPerspectiveTransform(QVariantList src, QVariantList dst)
         dstPts.push_back(cv::Point2f(dst.at(i).toPoint().x(), dst.at(i).toPoint().y()));
     }
 
-    QMat* result = new QMat(new cv::Mat(cv::getPerspectiveTransform(srcPts, dstPts)), this);
+    return getPerspectiveTransform(srcPts, dstPts);
+}
 
-    return result;
+QMat *QGeometry::getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst)
+{
+    return new QMat(new cv::Mat(cv::getPerspectiveTransform(src, dst)), this);
+}
+
+QMat *QGeometry::warpPerspective(QMat *input, QMat *transform, QSize size, int flags, int borderMode)
+{
+    QMat* output = new QMat(
+        size.width(),
+        size.height(),
+        static_cast<QMat::Type>(input->internal().type()),
+        input->internal().channels()
+    );
+
+    cv::warpPerspective(
+        input->internal(),
+        output->internal(),
+        transform->internal(),
+        output->internal().size(),
+        flags,
+        borderMode,
+        cv::Scalar()
+    );
+
+    return output;
 }
 
 /**

@@ -2008,10 +2008,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
 
-    if (!ef->isOfFragmentType(QmlEditFragment::ReadOnly)){
-        ef->commit(ef->readValueText());
-    }
-
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
     if (ef->location() == QmlEditFragment::Property)

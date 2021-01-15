@@ -300,12 +300,7 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPathFrom(QmlBindingCh
 
     QmlBindingPath::Node* root = path->root();
 
-    QObject* viewRoot = nullptr;
-    if ( from->type() == QmlBindingChannel::Object ){
-        viewRoot = from->object();
-    } else if ( from->type() == QmlBindingChannel::ListIndex ){
-        viewRoot = from->object();
-    }
+    QObject* viewRoot = from->object();
 
     if ( root && root->type() == QmlBindingPath::Node::Watcher ){
         QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(root);

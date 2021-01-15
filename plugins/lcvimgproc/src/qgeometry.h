@@ -9,6 +9,7 @@ class QGeometry : public QObject{
 
     Q_OBJECT
     Q_ENUMS(Interpolation)
+    Q_ENUMS(BorderTypes)
 
 public:
     enum Interpolation{
@@ -21,6 +22,20 @@ public:
         WARP_INVERSE_MAP = cv::WARP_INVERSE_MAP
     };
 
+    enum BorderTypes {
+        BORDER_CONSTANT    = cv::BORDER_CONSTANT, //!< `iiiiii|abcdefgh|iiiiiii`  with some specified `i`
+        BORDER_REPLICATE   = cv::BORDER_REPLICATE, //!< `aaaaaa|abcdefgh|hhhhhhh`
+        BORDER_REFLECT     = cv::BORDER_REFLECT, //!< `fedcba|abcdefgh|hgfedcb`
+        BORDER_WRAP        = cv::BORDER_WRAP, //!< `cdefgh|abcdefgh|abcdefg`
+        BORDER_REFLECT_101 = cv::BORDER_REFLECT_101, //!< `gfedcb|abcdefgh|gfedcba`
+        BORDER_TRANSPARENT = cv::BORDER_TRANSPARENT, //!< `uvwxyz|abcdefgh|ijklmno`
+
+        BORDER_REFLECT101  = cv::BORDER_REFLECT101, //!< same as BORDER_REFLECT_101
+        BORDER_DEFAULT     = cv::BORDER_DEFAULT, //!< same as BORDER_REFLECT_101
+        BORDER_ISOLATED    = cv::BORDER_ISOLATED //!< do not look outside of ROI
+    };
+
+
 public:
     explicit QGeometry(QObject *parent = nullptr);
     ~QGeometry(){}
@@ -32,7 +47,12 @@ public slots:
     QMat* rotate(QMat* input, double degrees);
     QMat* transform(QMat* input, QMat* m);
 
+    QMat* getPerspectiveTransform(QJSValue src, QJSValue dst);
     QMat* getPerspectiveTransform(QVariantList src, QVariantList dst);
+    QMat* getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst);
+
+    QMat* warpPerspective(QMat* input, QMat* transform, QSize size, int flags, int borderMode);
+
     QVariantList applyPerspectiveTransform(QVariantList points, QMat* warp);
     void warpTriangles(QMat* src, QMat* dst, QVariantList triangles1, QVariantList triangles2);
 };

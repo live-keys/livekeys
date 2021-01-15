@@ -176,7 +176,16 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-        var name = srcPort.objectProperty.propertyName
+        var name = ""
+        var value = ""
+        if (!srcPort.objectProperty.propertyName){
+            name = srcPort.objectProperty.id
+            value = name
+        }
+        else {
+            name = srcPort.objectProperty.propertyName
+            value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+        }
 
         if (name.substr(0,2) === "on" && name.substr(name.length-7,7) === "Changed")
         {
@@ -186,7 +195,7 @@ Rectangle{
             if (dstPort.objectProperty.editingFragment) return
 
             var funcName = dstPort.objectProperty.propertyName
-            var value = nodeId + "." + funcName + "()"
+            value = nodeId + "." + funcName + "()"
 
             if (srcPort.objectProperty.editingFragment){
                 var result = srcPort.objectProperty.editingFragment.bindExpression(value)
@@ -198,9 +207,6 @@ Rectangle{
             }
 
         } else {
-            var value =
-                    srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
-
             if (dstPort.objectProperty.editingFragment){
                 var result = dstPort.objectProperty.editingFragment.bindExpression(value)
                 if ( result ){
@@ -354,6 +360,11 @@ Rectangle{
         var idx = label.indexOf('#')
         if (idx !== -1){
             node.item.id = label.substr(idx+1)
+
+            var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
+            port.label = node.item.id + " Out"
+            port.y = 7
+            port.objectProperty = node.item
         }
         
         return node

@@ -312,7 +312,7 @@ QtObject{
 
                     if (isGroup) ef.addFragmentType(QmlEditFragment.GroupChild)
                 } else {
-                    ef = codeHandler.createReadOnlyFragment(container.editingFragment, data)
+                    ef = codeHandler.createReadOnlyPropertyFragment(container.editingFragment, data)
                 }
 
                 if (ef) {
