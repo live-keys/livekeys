@@ -369,7 +369,7 @@ WorkspaceExtension{
                     if ( canBeQml(item.document) ){
 
                         var codeHandler = item.documentHandler.codeHandler
-                        var cursorInfo = codeHandler.cursorInfo(
+                        var declarationInfo = codeHandler.declarationInfo(
                             item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
                         );
 
@@ -377,23 +377,23 @@ WorkspaceExtension{
                             {
                                 name : "Edit",
                                 action : root.commands['edit'][0],
-                                enabled : cursorInfo.canEdit
+                                enabled : declarationInfo ? true : false
                             }, {
                                 name : "Palette",
                                 action : root.commands['palette'][0],
-                                enabled : cursorInfo.canAdjust
+                                enabled : declarationInfo ? true : false
                             }, {
                                 name : "Shape",
                                 action : root.commands['shape'][0],
-                                enabled : cursorInfo.canShape
+                                enabled : declarationInfo ? true : false
                             }, {
                                 name : "Bind",
                                 action : root.commands['bind'][0],
-                                enabled : cursorInfo.canBind
+                                enabled : declarationInfo ? true : false
                             }, {
                                 name : "Unbind",
                                 action : root.commands['unbind'][0],
-                                enabled : cursorInfo.canUnbind
+                                enabled : declarationInfo ? true : false
                             }, {
                                 name : "Add Property",
                                 action : root.commands['add_property'][0],

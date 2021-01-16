@@ -513,6 +513,34 @@ ProjectDocument *ProjectDocument::castFrom(Document *document){
     return qobject_cast<ProjectDocument*>(document);
 }
 
+void ProjectDocument::addLineAtBlockNumber(QString line, int pos){
+
+    QTextCursor c(textDocument());
+    if (pos == 0)
+    {
+        c.beginEditBlock();
+        c.insertText(line + "\n");
+        c.endEditBlock();
+    } else {
+        auto block = textDocument()->findBlockByNumber(pos-1);
+        c = QTextCursor(block);
+        c.beginEditBlock();
+        c.movePosition(QTextCursor::EndOfBlock);
+        c.insertText("\n" + line);
+        c.endEditBlock();
+    }
+
+}
+
+void ProjectDocument::removeLineAtBlockNumber(int pos){
+    auto block = textDocument()->findBlockByNumber(pos);
+    QTextCursor c(block);
+    c.beginEditBlock();
+    c.select(QTextCursor::BlockUnderCursor);
+    c.removeSelectedText();
+    c.endEditBlock();
+}
+
 /**
  * \brief Slot for tracking text document changes which updates markers and sections
  */

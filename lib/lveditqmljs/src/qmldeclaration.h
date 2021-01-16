@@ -86,11 +86,10 @@ public:
     int valueLength() const;
     void setValueLength(int valueLength);
 
-    bool isListDeclaration() const;
-
     ProjectDocumentSection::Ptr section();
     void setSection(ProjectDocumentSection::Ptr section);
 
+    bool isForList() const;
     bool isForObject() const;
     bool isForComponent() const;
     bool isForProperty() const;
@@ -202,7 +201,7 @@ inline void QmlDeclaration::setValueLength(int valueLength){
 }
 
 /// \brief Checks wether this is a list-child declaration instead of a property-based one
-inline bool QmlDeclaration::isListDeclaration() const{
+inline bool QmlDeclaration::isForList() const{
     return m_parentType.isEmpty();
 }
 

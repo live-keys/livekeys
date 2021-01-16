@@ -497,7 +497,7 @@ QtObject{
             })
 
         ef.incrementRefCount()
-        codeHandler.frameEdit(objectContainer.parent, ef)
+        editor.documentHandler.frameBox(objectContainer.parent, ef)
         shapeContainerWithInstructions(objectContainer, editor, instructions)
         instructionsShaping = false
     }
@@ -1022,7 +1022,7 @@ QtObject{
             if (paletteBox) paletteBox.moveEnabledSet = false
         }
 
-        codeHandler.frameEdit(editorBox, ef)
+         editor.documentHandler.frameBox(editorBox, ef)
 
         if (forImports) editor.editor.importsShaped = true
         ef.incrementRefCount()

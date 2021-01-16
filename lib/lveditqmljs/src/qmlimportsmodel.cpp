@@ -33,7 +33,10 @@ void QmlImportsModel::commit(QString m, QString v, QString q)
 
     QString line = QString() + "import " + m + " " + v;
     if (q != "") line += " as " + q;
-    handler->addLineAtIndex(line, lastBlock()+1);
+
+    handler->document()->addEditingState(ProjectDocument::Palette);
+    handler->document()->addLineAtBlockNumber(line, lastBlock() + 1);
+    handler->document()->removeEditingState(ProjectDocument::Palette);
 
     beginInsertRows(QModelIndex(), m_data.size(), m_data.size());
     m_data.push_back(createItem(m,v,q,lastBlock()+1));
@@ -53,7 +56,9 @@ void QmlImportsModel::erase(int line)
         if (m_data[i].location().line() == line)
             break;
 
-    handler->removeLineAtIndex(line - 1);
+    handler->document()->addEditingState(ProjectDocument::Palette);
+    handler->document()->removeLineAtBlockNumber(line - 1);
+    handler->document()->removeEditingState(ProjectDocument::Palette);
 
     beginRemoveRows(QModelIndex(), i, i);
     m_data.erase(m_data.begin() + i);

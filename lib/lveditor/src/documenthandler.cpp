@@ -64,7 +64,6 @@ const QChar DocumentHandler::NewLine            = QChar('\n');
  */
 DocumentHandler::DocumentHandler(QObject *parent)
     : QObject(parent)
-    , m_targetDoc(nullptr)
     , m_completionModel(new CodeCompletionModel)
     , m_codeHandler(nullptr)
     , m_projectDocument(nullptr)
@@ -83,11 +82,6 @@ DocumentHandler::~DocumentHandler(){
     delete m_codeHandler;
 }
 
-/** Set the target doc */
-void DocumentHandler::setTarget(QTextDocument *target){
-    m_targetDoc = target;
-}
-
 /**
  * \brief TextEdit setter
  *
@@ -95,8 +89,8 @@ void DocumentHandler::setTarget(QTextDocument *target){
  */
 void DocumentHandler::setTextEdit(TextEdit *te){
     m_textEdit = te;
-    if (m_targetDoc) {
-        te->setTextDocument(m_targetDoc);
+    if (m_projectDocument) {
+        te->setTextDocument(textDocument());
     }
 }
 
@@ -220,9 +214,9 @@ void DocumentHandler::findCodeHandler(){
  * \brief Adds specific completion that the user picked between given positions
  */
 void DocumentHandler::insertCompletion(int from, int to, const QString &completion){
-    if ( m_targetDoc ){
+    if ( textDocument() ){
         m_projectDocument->addEditingState(ProjectDocument::Assisted);
-        QTextCursor cursor(m_targetDoc);
+        QTextCursor cursor(textDocument());
         cursor.beginEditBlock();
         cursor.setPosition(from);
         cursor.setPosition(to, QTextCursor::KeepAnchor);
@@ -244,7 +238,7 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
     m_lastChar = QChar();
     if ( !m_projectDocument->editingStateIs(ProjectDocument::Silent) && m_editorFocus ){
         if ( charsAdded == 1 )
-            m_lastChar = m_targetDoc->characterAt(position);
+            m_lastChar = textDocument()->characterAt(position);
 
         if ( !m_projectDocument->editingStateIs(ProjectDocument::Overlay) )
             emit contentsChangedManually();
@@ -273,10 +267,8 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
     }
 
     if (m_projectDocument) {
-        m_targetDoc = m_projectDocument->textDocument();
-
         if (m_textEdit) {
-            m_textEdit->setTextDocument(m_targetDoc);
+            m_textEdit->setTextDocument(textDocument());
             if (m_projectDocument->lastCursorPosition() != -1)
             {
                 m_textEdit->setCursorPosition(m_projectDocument->lastCursorPosition());
@@ -284,7 +276,7 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
         }
 
         connect(
-            m_targetDoc, SIGNAL(contentsChange(int,int,int)),
+            textDocument(), SIGNAL(contentsChange(int,int,int)),
             this, SLOT(documentContentsChanged(int,int,int))
         );
     } else {
@@ -306,7 +298,7 @@ void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
  * When a user presses the Tab button, the whole selected text should move
  */
 void DocumentHandler::manageIndent(int from, int length, bool undo){
-    QTextBlock bl = m_targetDoc->findBlock(from);
+    QTextBlock bl = textDocument()->findBlock(from);
     while ( bl.isValid() ){
         QTextCursor cs(bl);
         cs.beginEditBlock();
@@ -339,13 +331,20 @@ void DocumentHandler::manageIndent(int from, int length, bool undo){
 
 void DocumentHandler::insertTab(int position)
 {
-    QTextBlock bl = m_targetDoc->findBlock(position);
+    QTextBlock bl = textDocument()->findBlock(position);
     QTextCursor cs(bl);
     cs.beginEditBlock();
     cs.setPosition(position);
     cs.insertText("    ");
     cs.endEditBlock();
 
+}
+
+void DocumentHandler::frameBox(QQuickItem *box, int position, int length){
+    QTextBlock tb = m_projectDocument->textDocument()->findBlock(position);
+    QTextBlock tbend = m_projectDocument->textDocument()->findBlock(position + length);
+
+    lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
 }
 
 
