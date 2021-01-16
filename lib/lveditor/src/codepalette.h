@@ -81,10 +81,10 @@ signals:
     /** Code changed */
     void codeChanged(const QVariant& value);
 
-
 private:
     Q_DISABLE_COPY(CodePalette)
 
+    bool             m_isChangingValue; // the current palette is changing the value
     bool             m_bindingChange;
     QQuickItem*      m_item;
     QVariant         m_value;
@@ -117,16 +117,6 @@ inline bool CodePalette::hasItem() const{
 
 inline const QVariant& CodePalette::value() const{
     return m_value;
-}
-
-/**
- * \brief Value setter for palette
- */
-inline void CodePalette::setValue(const QVariant &value){
-    if ( (value.canConvert<QObject*>() || m_value != value) && !m_bindingChange ){
-        m_value = value;
-        emit valueChanged();
-    }
 }
 
 /**
