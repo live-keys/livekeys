@@ -42,6 +42,18 @@ CodePalette{
                 roundValue = roundValue.toFixed(2)
                 return roundValue
             }
+            Keys.onPressed: {
+                if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
+                    if (!isNaN(numberInput.text)){
+                        var val = parseFloat(numberInput.text)
+                        palette.value = val
+                        if ( !palette.isBindingChange() ){
+                            editFragment.write(palette.value)
+                        }
+                        event.accepted = true
+                    }
+                }
+            }
         }
 
         Slider{
@@ -227,7 +239,7 @@ CodePalette{
         }
     }
 
-    onInit: {
+    function updateSliders(){
         if (value < intSlider.minimumValue || value > intSlider.maximumValue){
             if (value > 0){
                 while (intSlider.maximumValue < value){
@@ -245,7 +257,12 @@ CodePalette{
             }
         }
 
-        intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
+        //TODO
+//        intSlider.value = Math.floor(value)
+//        fractionalSlider.value = value - intSlider.value
+    }
+
+    onInit: {
+        updateSliders()
     }
 }

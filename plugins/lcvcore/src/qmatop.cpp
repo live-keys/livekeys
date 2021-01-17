@@ -3,6 +3,7 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/qmlerror.h"
+#include "cvextras.h"
 
 #include "opencv2/imgproc.hpp"
 
@@ -143,16 +144,15 @@ QMat *QMatOp::create(const QSize &size, int type, int channels){
 }
 
 QMat *QMatOp::createFill(const QSize &size, int type, int channels, const QColor &color){
-    if ( size.isValid() ){
+    try{
         cv::Mat* m = new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels));
         m->setTo(toScalar(color));
-
         QMat* r = new QMat(m);
         return r;
-    }
 
-    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    }catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, engine(), this, "MatOp: ").jsThrow();
+    }
     return nullptr;
 }
 
@@ -192,7 +192,7 @@ QWritableMat *QMatOp::createWritable(const QSize &size, int type, int channels){
 }
 
 QWritableMat *QMatOp::createWritableFill(const QSize &size, int type, int channels, const QColor &color){
-    if ( size.isValid() ){
+    if ( size.isValid() && channels > 0 ){
         cv::Mat* m = new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels));
         m->setTo(toScalar(color));
 
@@ -497,6 +497,10 @@ QMat *QMatOp::bitwiseNot(QMat *arg)
 
     QMat* result = new QMat(resMat);
     return result;
+}
+
+lv::ViewEngine *QMatOp::engine(){
+    return lv::ViewContext::instance().engine();
 }
 
 

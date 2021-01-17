@@ -32,7 +32,6 @@
 #include "qerode.h"
 #include "qcopymakeborder.h"
 #include "qdraw.h"
-#include "qgetperspectivetransform.h"
 #include "qwarpperspective.h"
 #include "qcachedwarpperspective.h"
 #include "qgeometry.h"
@@ -69,7 +68,6 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
     qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");
     qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
-    qmlRegisterType<QGetPerspectiveTransform>(uri, 1, 0, "GetPerspectiveTransform");
     qmlRegisterType<QWarpPerspective>(        uri, 1, 0, "WarpPerspective");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
     qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");

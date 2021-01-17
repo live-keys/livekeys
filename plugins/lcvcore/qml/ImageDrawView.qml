@@ -68,7 +68,7 @@ Item{
             root.lastY = event.imageY
         }
         onPositionChanged: {
-            if ( root.drawingEnabled ){
+            if ( root.drawingEnabled && root.writableImage ){
                 Img.Draw.line(
                     root.writableImage,
                     Qt.point(root.lastX, root.lastY),

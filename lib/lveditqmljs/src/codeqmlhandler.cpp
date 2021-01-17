@@ -46,6 +46,7 @@
 #include "live/palettecontainer.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
+#include "live/shared.h"
 #include "live/hookcontainer.h"
 
 #include "qmlsuggestionmodel.h"
@@ -1653,28 +1654,39 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 // width is the receiving, need to remove the previous listening channel
 
                 if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
-                    QQmlProperty recivingProperty = receivingChannel->property();
+                    QQmlProperty receivingProperty = receivingChannel->property();
 
-                    QByteArray watcherName = "__" + recivingProperty.name().toUtf8() + "Watcher";
-                    QVariant previousWatcherVariant = recivingProperty.object()->property(watcherName);
+                    QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+                    QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
                     if ( previousWatcherVariant.isValid() ){
                         QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
                         delete previousWatcher;
-                        recivingProperty.object()->setProperty(watcherName, QVariant());
+                        receivingProperty.object()->setProperty(watcherName, QVariant());
                     }
 
                     QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+                    QVariant watcherValue = watcher->read();
 
-                    // receiving channel vs write channel
-                    // clearing up stuff
-                    recivingProperty.write(watcher->read());
-                    watcher->onChange([recivingProperty](const QmlPropertyWatcher& ww){
-                        recivingProperty.write(ww.read());
+                    if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                        QJSValue watcherJsValue = watcherValue.value<QJSValue>();
+                        QList<Shared*> sharedObjects;
+                        watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                    }
+                    receivingProperty.write(watcherValue);
+
+                    watcher->onChange([receivingProperty](const QmlPropertyWatcher& ww){
+                        QVariant wwValue = ww.read();
+                        if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                            QJSValue watcherJsValue = wwValue.value<QJSValue>();
+                            QList<Shared*> sharedObjects;
+                            wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                        }
+                        receivingProperty.write(wwValue);
                     });
+
                     // delete the watcher with the receiving channel
                     watcher->setParent(receivingChannel->property().object());
-
-                    recivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+                    receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
                 }
             }
         }
@@ -2008,9 +2020,9 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
 
-    if (!ef->isOfFragmentType(QmlEditFragment::ReadOnly)){
-        ef->commit(ef->readValueText());
-    }
+//    if (!ef->isOfFragmentType(QmlEditFragment::ReadOnly)){
+//        ef->commit(ef->readValueText());
+//    }
 
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
