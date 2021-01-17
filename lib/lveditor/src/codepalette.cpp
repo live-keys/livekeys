@@ -50,6 +50,7 @@ namespace lv{
  */
 CodePalette::CodePalette(QObject *parent)
     : QObject(parent)
+    , m_isChangingValue(false)
     , m_bindingChange(false)
     , m_item(nullptr)
     , m_editFragment(nullptr)
@@ -65,10 +66,25 @@ CodePalette::~CodePalette(){}
  * \brief Assign property value (binding change)
  */
 void CodePalette::setValueFromBinding(const QVariant &value){
+    if ( m_isChangingValue )
+        return;
+
     m_bindingChange = true;
     m_value = value;
     emit init(value);
     m_bindingChange = false;
+}
+
+/**
+ * \brief Value setter for palette
+ */
+void CodePalette::setValue(const QVariant &value){
+    if ( (value.canConvert<QObject*>() || m_value != value) && !m_bindingChange ){
+        m_isChangingValue = true;
+        m_value = value;
+        emit valueChanged();
+        m_isChangingValue = false;
+    }
 }
 
 QString CodePalette::name() const{

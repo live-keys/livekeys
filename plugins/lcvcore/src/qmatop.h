@@ -7,6 +7,7 @@
 #include "qumat.h"
 #include "qwritablemat.h"
 #include "live/qmlobjectlist.h"
+#include "live/viewengine.h"
 
 /// \private
 class QMatOp : public QObject{
@@ -64,6 +65,9 @@ public slots:
     QMat* bitwiseOr(QMat* arg1, QMat* arg2);
     QMat* bitwiseAnd(QMat* arg1, QMat* arg2);
     QMat* bitwiseNot(QMat* arg);
+
+private:
+    lv::ViewEngine* engine();
 };
 
 inline QMat *QMatOp::nullMat() const{

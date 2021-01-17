@@ -43,18 +43,18 @@ CodePalette{
 
         try{
             var result = ef.bindExpression(text)
-
-            if ( result ){
-                ef.write({'__ref': text ? text : ef.defaultValue()})
-                commitButton.visible = false
-            } else {
+            if ( !result ){
                 lk.layers.workspace.messages.pushError("Failed to match expression: " + text)
                 return
             }
 
+            ef.write({'__ref': text ? text : ef.defaultValue()})
+
             input.autoTextChange = true
             input.text = text
             input.autoTextChange = false
+
+            commitButton.visible = false
 
         } catch (e){
             var error = lk.engine.unwrapError(e)

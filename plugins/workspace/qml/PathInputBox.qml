@@ -7,10 +7,16 @@ Item{
     height: 30
     width: 240
 
-    signal pathSelected(string path)
+    property var selectionType: {
+        return {
+            file: 1,
+            folder: 2
+        }
+    }
 
-    property alias path: pathInput.text
-    property alias font: pathInput.font
+    property int selection: 1
+
+    signal pathSelected(string path)
 
     property QtObject defaultStyle: QtObject{
 
@@ -42,6 +48,8 @@ Item{
         pathInput.forceFocus()
     }
 
+    property alias path: pathInput.text
+
     InputBox{
         id: pathInput
         anchors.left: parent.left
@@ -65,10 +73,18 @@ Item{
         style: root.style.buttonStyle
         text: '/'
         onClicked: {
-            lk.layers.window.dialogs.openFile({}, function(url){
-                pathInput.text = Fs.Path.toLocalFile(url)
-                root.pathSelected(pathInput.text)
-            })
+            if ( selection === root.selectionType.file ){
+                lk.layers.window.dialogs.openFile({}, function(url){
+                    pathInput.text = Fs.Path.toLocalFile(url)
+                    root.pathSelected(pathInput.text)
+                })
+            } else if ( selection === root.selectionType.folder ){
+                lk.layers.window.dialogs.openDir({}, function(url){
+                    pathInput.text = Fs.Path.toLocalFile(url)
+                    root.pathSelected(pathInput.text)
+                })
+            }
+
         }
     }
 }
