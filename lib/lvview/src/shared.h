@@ -29,6 +29,8 @@ class QmlAct;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 
+    Q_OBJECT
+
 public:
     /**
      * \brief Blocks shared data for reading until destroyed.

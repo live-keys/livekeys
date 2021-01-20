@@ -1642,39 +1642,48 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 // width is the receiving, need to remove the previous listening channel
 
                 if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
-                    QQmlProperty receivingProperty = receivingChannel->property();
 
-                    QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
-                    QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
-                    if ( previousWatcherVariant.isValid() ){
-                        QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
-                        delete previousWatcher;
-                        receivingProperty.object()->setProperty(watcherName, QVariant());
-                    }
+                    if ( writeChannel->type() == QmlBindingChannel::Property ){
 
-                    QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
-                    QVariant watcherValue = watcher->read();
+                        QQmlProperty receivingProperty = receivingChannel->property();
 
-                    if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                        QJSValue watcherJsValue = watcherValue.value<QJSValue>();
-                        QList<Shared*> sharedObjects;
-                        watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
-                    }
-                    receivingProperty.write(watcherValue);
-
-                    watcher->onChange([receivingProperty](const QmlPropertyWatcher& ww){
-                        QVariant wwValue = ww.read();
-                        if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                            QJSValue watcherJsValue = wwValue.value<QJSValue>();
-                            QList<Shared*> sharedObjects;
-                            wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                        QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+                        QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+                        if ( previousWatcherVariant.isValid() ){
+                            QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                            delete previousWatcher;
+                            receivingProperty.object()->setProperty(watcherName, QVariant());
                         }
-                        receivingProperty.write(wwValue);
-                    });
 
-                    // delete the watcher with the receiving channel
-                    watcher->setParent(receivingChannel->property().object());
-                    receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+                        QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+                        QVariant watcherValue = watcher->read();
+
+                        if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                            QJSValue watcherJsValue = watcherValue.value<QJSValue>();
+                            QList<Shared*> sharedObjects;
+                            watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                        }
+                        receivingProperty.write(watcherValue);
+
+                        watcher->onChange([receivingProperty](const QmlPropertyWatcher& ww){
+                            QVariant wwValue = ww.read();
+                            if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                                QJSValue watcherJsValue = wwValue.value<QJSValue>();
+                                QList<Shared*> sharedObjects;
+                                wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                            }
+                            receivingProperty.write(wwValue);
+                        });
+
+                        // delete the watcher with the receiving channel
+                        watcher->setParent(receivingChannel->property().object());
+                        receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+
+                    } else if ( writeChannel->type() == QmlBindingChannel::ListIndex ){
+                        QObject* writeValue = writeChannel->object();
+                        receivingChannel->property().write(QVariant::fromValue(writeValue));
+                    }
+
                 }
             }
         }
