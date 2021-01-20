@@ -120,6 +120,10 @@ int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
 }
 
+int QmlEditFragment::length() const{
+    return m_declaration->length();
+}
+
 bool QmlEditFragment::isBuilder() const{
     return isOfFragmentType(QmlEditFragment::FragmentType::Builder);
 }

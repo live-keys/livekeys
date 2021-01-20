@@ -133,6 +133,7 @@ public slots:
     int position();
     int valuePosition() const;
     int valueLength() const;
+    int length() const;
 
     bool isBuilder() const;
     void rebuild();
