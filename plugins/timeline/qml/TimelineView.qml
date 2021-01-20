@@ -180,16 +180,16 @@ Rectangle{
                         var object = objectComponent.createObject();
                         var overlay = lk.layers.window.dialogs.overlayBox(object)
 
-
                         object.surfaceCreated.connect(function(videoSurface){
                             root.timeline.properties.videoSurface = videoSurface
                             addTrack()
                             overlay.closeBox()
+                            object.destroy()
                         })
 
                         object.cancelled.connect(function(){
                             overlay.closeBox()
-                            return
+                            object.destroy()
                         })
                     } else {
                         addTrack()

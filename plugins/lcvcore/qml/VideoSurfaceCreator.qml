@@ -18,10 +18,16 @@ Rectangle{
     property Component surfaceFactory : VideoSurface{}
 
     function createSurface(){
-        var surface = surfaceFactory.createObject()
-        surface.imageWidth = parseInt(widthInput.text)
-        surface.imageHeight = parseInt(heightInput.text)
-        return surface
+
+        var w = parseInt(widthInput.text)
+        var h = parseInt(heightInput.text)
+        if ( w > 0 && h > 0 ){
+            var surface = surfaceFactory.createObject()
+            surface.imageWidth = w
+            surface.imageHeight = h
+            return surface
+        }
+        return null
     }
 
     Text{

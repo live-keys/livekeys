@@ -623,11 +623,4 @@ Module {
             Parameter { name: "file"; type: "QString" }
         }
     }
-    Component {
-        name: "lv::VideoSurface"
-        defaultProperty: "data"
-        prototype: "QMatDisplay"
-        exports: ["lcvcore/VideoSurface 1.0"]
-        exportMetaObjectRevisions: [0]
-    }
 }

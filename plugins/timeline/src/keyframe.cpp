@@ -45,7 +45,8 @@ void Keyframe::resetCurve(){
 
     if ( !track )
         return;
-
+    if ( track->m_values.isEmpty() )
+        return;
 
     int currentIndex = currentTrack()->segmentModel()->segmentIndex(this);
 

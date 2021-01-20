@@ -12,6 +12,7 @@ HEADERS += \
     $$PWD/segment.h \
     $$PWD/segmentmodel.h \
     $$PWD/timelineobjectproperty.h \
+    $$PWD/timelineproperties.h \
     $$PWD/timelinesettings.h \
     $$PWD/track.h \
     $$PWD/tracklistmodel.h
@@ -27,6 +28,7 @@ SOURCES += \
     $$PWD/segment.cpp \
     $$PWD/segmentmodel.cpp \
     $$PWD/timelineobjectproperty.cpp \
+    $$PWD/timelineproperties.cpp \
     $$PWD/timelinesettings.cpp \
     $$PWD/track.cpp \
     $$PWD/tracklistmodel.cpp

@@ -248,7 +248,7 @@ int SegmentModel::insertItemImpl(Segment* item){
 
     int prevIndex = index - 1;
     int nextIndex = index;
-    if ( prevIndex >= 0 ){ // check snap before
+    if ( prevIndex >= 0 ){ // check snap after
         Segment* prevSegm = d->items[prevIndex];
         if ( prevSegm->position() + prevSegm->length() > item->position() ){
             qint64 diff = prevSegm->position() + prevSegm->length() - item->position();
@@ -363,7 +363,9 @@ int SegmentModel::segmentIndex(Segment *segment){
 
 Segment *SegmentModel::segmentThatWraps(qint64 position){
     Q_D(SegmentModel);
+
     int index = d->searchFirstIndex(position);
+
     while ( index > 0 ){
         --index;
         if ( d->items[index]->position() + d->items[index]->length() < position ){
