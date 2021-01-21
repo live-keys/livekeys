@@ -50,9 +50,11 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
                 }
 
                 try{
-                    Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
-                    if ( plugin != nullptr ){
-                        return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                    if ( Plugin::existsIn(localPath.toStdString() ) ){
+                        Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
+                        if ( plugin != nullptr ){
+                            return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                        }
                     }
                 } catch ( lv::Exception& ){}
             }
