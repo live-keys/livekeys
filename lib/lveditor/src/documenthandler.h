@@ -66,7 +66,6 @@ public:
     ~DocumentHandler();
 
     QTextDocument *textDocument();
-    void setTarget(QTextDocument *textDocument);
 
     /**
      * \brief Completion model
@@ -153,7 +152,7 @@ private:
  * \brief Returns the target text document
  */
 inline QTextDocument *DocumentHandler::textDocument(){
-    return m_projectDocument->textDocument();
+    return m_projectDocument ? m_projectDocument->textDocument() : nullptr;
 }
 
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{

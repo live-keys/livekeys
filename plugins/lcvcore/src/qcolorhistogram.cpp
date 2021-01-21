@@ -40,6 +40,9 @@ public:
         qreal maxValue,
         const QColor& color
     ){
+        if ( maxValue == 0 )
+            return;
+
         painter->setPen(QPen(color, 1));
 
         qreal widthStep  = (qreal)size.width() / (valuesSize > 1 ? valuesSize - 1 : valuesSize);
@@ -68,6 +71,9 @@ public:
         qreal maxValue,
         const QColor& color
     ){
+        if ( maxValue == 0 )
+            return;
+
         painter->setPen(QPen(color, 1));
         painter->setBrush(QBrush(color));
 

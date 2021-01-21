@@ -48,6 +48,7 @@ public:
     const QVariant &value() const;
     void setValue(const QVariant& value);
     void setValueFromBinding(const QVariant &value);
+    void initViaSource();
 
     /** Palette name */
     QString name() const;
@@ -78,6 +79,8 @@ signals:
 
     /** Value was initialized */
     void init(const QVariant& value);
+
+    void sourceInit();
     /** Code changed */
     void codeChanged(const QVariant& value);
 

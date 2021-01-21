@@ -47,11 +47,15 @@ CodePalette{
             minimumValue: -200
             value: adjustmentBox.bandc ? adjustmentBox.bandc.brightness : 0
             onValueChanged: {
-                adjustmentBox.bandc.brightness = value
                 if ( !isBindingChange() ){
-                    editFragment.writeProperties({
-                        'brightness' : adjustmentBox.bandc.brightness
-                    })
+                    if ( adjustmentBox.bandc && adjustmentBox.bandc.input ){
+                        adjustmentBox.bandc.brightness = value
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'brightness' :  value
+                        })
+                    }
                 }
             }
             stepSize: 1.0
@@ -95,11 +99,13 @@ CodePalette{
             minimumValue: 0
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
-                if ( adjustmentBox.bandc ){
-                    adjustmentBox.bandc.contrast = value.toFixed(2)
-                    if ( !isBindingChange() ){
+                if ( !isBindingChange() ){
+                    if ( adjustmentBox.bandc && adjustmentBox.bandc.input ){
+                        adjustmentBox.bandc.contrast = value.toFixed(2)
+                    }
+                    if ( editFragment ){
                         editFragment.writeProperties({
-                            'contrast' : adjustmentBox.bandc.contrast
+                            'contrast' :  value
                         })
                     }
                 }

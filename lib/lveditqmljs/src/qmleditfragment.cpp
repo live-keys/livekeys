@@ -472,7 +472,11 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
         return;
 
     if ( inputChannel->listIndex() == -1 ){
-        palette->setValueFromBinding(inputChannel->property().read());
+        if ( inputChannel->isBuilder() ){
+            palette->initViaSource();
+        } else {
+            palette->setValueFromBinding(inputChannel->property().read());
+        }
     } else {
         QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
         QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
@@ -547,13 +551,27 @@ void QmlEditFragment::__selectedChannelChanged(){
     QmlEditFragment* pf = parentFragment();
     if ( pf ){
         m_channel = DocumentQmlChannels::traverseBindingPathFrom(pf->channel(), m_channel->bindingPath());
-        if ( m_channel )
+        if ( m_channel ){
             m_channel->setEnabled(true);
+            if ( m_channel->listIndex() == -1 ){
+                m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+            }
+            for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+                updatePaletteValue(*it);
+            }
+        }
     } else {
         if ( m_channel ){
             m_channel = DocumentQmlChannels::traverseBindingPathFrom(m_codeHandler->bindingChannels()->selectedChannel(), m_channel->bindingPath());
-            if ( m_channel )
+            if ( m_channel ){
                 m_channel->setEnabled(true);
+                if ( m_channel->listIndex() == -1 ){
+                    m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+                }
+                for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+                    updatePaletteValue(*it);
+                }
+            }
         }
     }
     for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){

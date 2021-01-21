@@ -3686,9 +3686,9 @@ PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
     return lpl;
 }
 
-void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath)
-{
+void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
     QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+
     if ( documentChannel ){
 
         if ( parentFragment ){

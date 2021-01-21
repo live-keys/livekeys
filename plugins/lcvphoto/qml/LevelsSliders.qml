@@ -28,7 +28,7 @@ Rectangle{
         width: 120
         height: 30
         dropBoxHeight: 120
-        model: root.input ? (root.input.channels() >= 3 ? ['RGB', 'Red', 'Green', 'Blue'] : ['Grey']) : []
+        model: root.input ? (root.input.channels() >= 3 ? ['RGB', 'Red', 'Green', 'Blue'] : ['Grey']) : ['RGB', 'Red', 'Green', 'Blue']
     }
 
     TextButton{

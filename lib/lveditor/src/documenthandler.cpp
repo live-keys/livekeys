@@ -252,19 +252,18 @@ void DocumentHandler::documentContentsChanged(int position, int, int charsAdded)
  */
 void DocumentHandler::setDocument(ProjectDocument *document, QJSValue){
 
-
     if (m_projectDocument && m_textEdit)
     {
         m_projectDocument->setLastCursorPosition(m_textEdit->cursorPosition());
     }
-
-    m_projectDocument = document;
 
     if ( m_codeHandler ){
         emit aboutToDeleteHandler();
         delete m_codeHandler;
         m_codeHandler = nullptr;
     }
+
+    m_projectDocument = document;
 
     if (m_projectDocument) {
         if (m_textEdit) {

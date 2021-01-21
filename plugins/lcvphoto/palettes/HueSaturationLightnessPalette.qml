@@ -44,20 +44,44 @@ CodePalette{
 
             hue: hsl ? hsl.hue : 100
             onHueChanged: {
-                if ( adjustmentBox.hsl )
-                    adjustmentBox.hsl.hue = hue
+                if ( !isBindingChange() ){
+                    if ( adjustmentBox.hsl && adjustmentBox.hsl.input ){
+                        adjustmentBox.hsl.hue = hue
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'hue' : hue
+                        })
+                    }
+                }
             }
 
             saturation: hsl ? hsl.saturation : 100
             onSaturationChanged: {
-                if ( adjustmentBox.hsl )
-                    adjustmentBox.hsl.saturation = saturation
+                if ( !isBindingChange() ){
+                    if ( adjustmentBox.hsl && adjustmentBox.hsl.input ){
+                        adjustmentBox.hsl.saturation = saturation
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'saturation' : saturation
+                        })
+                    }
+                }
             }
 
             lightness: hsl ? hsl.lightness : 100
             onLightnessChanged: {
-                if ( adjustmentBox.hsl )
-                    adjustmentBox.hsl.lightness = lightness
+                if ( !isBindingChange() ){
+                    if ( adjustmentBox.hsl && adjustmentBox.hsl.input ){
+                        adjustmentBox.hsl.lightness = lightness
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'lightness' : lightness
+                        })
+                    }
+                }
             }
         }
 
@@ -73,7 +97,6 @@ CodePalette{
                 'hue' : palette.value.hue,
                 'saturation' : palette.value.saturation,
                 'lightness': palette.value.lightness
-
             })
         }
     }

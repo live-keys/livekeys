@@ -136,8 +136,6 @@ Rectangle{
 
                     property int type: 0
 
-
-
                     Loader{
                         id: pathIconLoader
                         anchors.verticalCenter: parent.verticalCenter
@@ -153,7 +151,7 @@ Rectangle{
                                 return theme.stackIcon
                             }
 
-                            return ""
+                            return null
                         }
                         onItemChanged: {
                             if ( item.width > 12 )
