@@ -8,7 +8,6 @@ namespace lv{
 QmlStreamLog::QmlStreamLog(QObject *parent)
     : QObject(parent)
     , m_stream(nullptr)
-    , m_log(new VisualLogQmlObject(this))
 {
 }
 
