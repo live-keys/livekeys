@@ -97,6 +97,7 @@ public:
     QmlDeclaration::Ptr declaration() const;
 
     void updatePaletteValue(CodePalette* palette);
+    void initializePaletteValue(CodePalette* palette);
 
     QObject* visualParent() const;
     void setVisualParent(QObject* visualParent);

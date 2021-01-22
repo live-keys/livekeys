@@ -57,6 +57,9 @@ CodePalette{
     onInit: {
         imagePaintView.image = Qt.binding(function(){ return value.input})
     }
+    onValueFromBindingChanged: {
+        imagePaintView.image = Qt.binding(function(){ return value.input})
+    }
 
 }
 

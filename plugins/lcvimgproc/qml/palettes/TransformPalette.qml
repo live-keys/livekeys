@@ -449,4 +449,7 @@ CodePalette{
     onInit: {
         paletteItem.transformImage = value
     }
+    onValueFromBindingChanged: {
+        paletteItem.transformImage = value
+    }
 }

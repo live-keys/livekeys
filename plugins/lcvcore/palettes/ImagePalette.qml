@@ -148,4 +148,7 @@ CodePalette{
     onInit: {
         paletteItem.image = value
     }
+    onValueFromBindingChanged: {
+        paletteItem.image = value
+    }
 }

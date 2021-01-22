@@ -99,6 +99,9 @@ CodePalette{
     onInit: {
         captureContainer.videoCapture = value
     }
+    onValueFromBindingChanged: {
+        captureContainer.videoCapture = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

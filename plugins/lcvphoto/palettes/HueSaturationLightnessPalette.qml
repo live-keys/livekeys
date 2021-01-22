@@ -90,6 +90,9 @@ CodePalette{
     onInit: {
         adjustmentBox.hsl = value
     }
+    onValueFromBindingChanged: {
+        adjustmentBox.hsl = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

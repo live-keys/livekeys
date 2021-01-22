@@ -195,6 +195,27 @@ CodePalette{
         intSlider.value = floorValue
     }
 
+    onValueFromBindingChanged: {
+        var floorValue = Math.floor(value)
+        if (floorValue < intSlider.minimumValue || floorValue > intSlider.maximumValue){
+            if (floorValue > 0){
+                while (intSlider.maximumValue < floorValue){
+                    intSlider.minimumValue = intSlider.maximumValue
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                }
+            } else if (floorValue < 0){
+                intSlider.minimumValue = -25
+                intSlider.maximumValue = 0
+                while (intSlider.minimumValue > floorValue){
+                    intSlider.maximumValue = intSlider.minimumValue
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                }
+            }
+        }
+        intSlider.value = floorValue
+    }
+
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)

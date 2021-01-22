@@ -2427,8 +2427,7 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
         CodePalette* palette = paletteList->loadAt(index);
         palette->setEditFragment(edit);
         edit->addPalette(palette);
-        edit->updatePaletteValue(palette);
-
+        edit->initializePaletteValue(palette);
 
         connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
@@ -2510,7 +2509,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
     palette->setEditFragment(edit);
 
     edit->setBindingPalette(palette);
-    edit->updatePaletteValue(palette);
+    edit->initializePaletteValue(palette);
 
     connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
@@ -2642,7 +2641,7 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 palette->setEditFragment(edit);
 
                 edit->addPalette(palette);
-                edit->updatePaletteValue(palette);
+                edit->initializePaletteValue(palette);
 
                 connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 

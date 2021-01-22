@@ -82,6 +82,9 @@ CodePalette{
         }
     }
 
+    onValueFromBindingChanged: {
+        levelsSliders.levels = value
+    }
     onInit: {
         levelsSliders.levels = value
     }

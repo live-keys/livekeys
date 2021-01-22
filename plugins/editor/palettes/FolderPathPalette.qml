@@ -33,6 +33,9 @@ CodePalette{
         }
     }
 
+    onValueFromBindingChanged: {
+        inputBox.path = value
+    }
     onInit: {
         inputBox.path = value
     }

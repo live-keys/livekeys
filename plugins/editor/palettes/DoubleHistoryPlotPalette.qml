@@ -37,5 +37,8 @@ CodePalette{
     onInit: {
         valueHistory.currentValue = value
     }
+    onValueFromBindingChanged: {
+        valueHistory.currentValue = value
+    }
 
 }

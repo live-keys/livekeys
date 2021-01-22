@@ -83,6 +83,10 @@ CodePalette {
         widthInput.text = value.width
         heightInput.text = value.height
     }
+    onValueFromBindingChanged: {
+        widthInput.text = value.width
+        heightInput.text = value.height
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

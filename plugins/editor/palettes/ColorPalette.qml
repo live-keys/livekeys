@@ -64,4 +64,7 @@ CodePalette{
     onInit: {
         colorPicker.selectedColor = value
     }
+    onValueFromBindingChanged: {
+        colorPicker.selectedColor = value
+    }
 }
