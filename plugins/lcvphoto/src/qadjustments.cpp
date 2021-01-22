@@ -244,8 +244,6 @@ QJSValue QAdjustments::autoLevels(QMat *histogram){
 
 QMat *QAdjustments::brightnessAndContrast(QMat *source, double brightness, double contrast){
     if (!source){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Adjustments: Null source provided.", 0);
-        lv::ViewContext::instance().engine()->throwError(&e);
         return nullptr;
     }
 

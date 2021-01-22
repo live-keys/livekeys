@@ -285,7 +285,7 @@ void LineSurface::updateCollapseSymbols()
     while (it != m_document->rootFrame()->end() && curr < m_bounds.second)
     {
         if (!m_textEdit || !m_textEdit->documentHandler()) break;
-        auto currBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(curr);
+        auto currBlock = m_textEdit->documentHandler()->textDocument()->findBlockByNumber(curr);
         lv::ProjectDocumentBlockData* userData =
                 static_cast<lv::ProjectDocumentBlockData*>(currBlock.userData());
 
@@ -333,7 +333,7 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
     int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(visibleBlockNumber);
 
-    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->target()->findBlockByNumber(absBlockNum);
+    const QTextBlock& matchingBlock = m_textEdit->documentHandler()->textDocument()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
     lv::ProjectDocumentBlockData* userData = static_cast<lv::ProjectDocumentBlockData*>(matchingBlock.userData());
     if (userData && userData->isCollapsible())
@@ -411,7 +411,7 @@ void LineSurface::setLineDocumentFont(const QFont &font)
 void LineSurface::lineNumberChanged()
 {
     m_previousLineNumber = m_lineNumber;
-    m_lineNumber = m_textEdit->documentHandler()->target()->blockCount();
+    m_lineNumber = m_textEdit->documentHandler()->textDocument()->blockCount();
 
     m_visibleSections = m_lineControl->visibleSectionsForViewport(m_viewport);
     m_bounds = visibleSectionsBounds();

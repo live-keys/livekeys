@@ -150,7 +150,7 @@ public slots:
 
     // Palette and binding management
 
-    QJSValue cursorInfo(int position, int length);
+    QJSValue declarationInfo(int position, int length);
 
     lv::QmlEditFragment* openConnection(int position);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
@@ -177,12 +177,9 @@ public slots:
 
     bool isForAnObject(lv::QmlEditFragment* palette);
 
-    void frameEdit(QQuickItem *box, lv::QmlEditFragment* palette);
     QJSValue contextBlockRange(int cursorPosition);
 
     lv::QmlImportsModel* importsModel();
-    void addLineAtIndex(QString line, int pos);
-    void removeLineAtIndex(int pos);
 
     int findImportsPosition();
     int findRootPosition();
@@ -231,7 +228,6 @@ public slots:
 
 private:
     QmlDeclaration::Ptr createImportDeclaration();
-    QJSValue createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports = false);
 
     void rehighlightSection(int start, int end);
     void resetProjectQmlExtension();

@@ -33,11 +33,9 @@ CodePalette{
         property QtObject levels: null
         onLevelsChanged: {
             if ( levels ){
-                input = levels.input
                 lightness = levels.lightness
                 levelByChannel = levels.channels ? levels.channels : {}
             } else {
-                input = Cv.MatOp.nullMat
                 lightness = []
                 levelByChannel = {}
             }
@@ -46,21 +44,31 @@ CodePalette{
         }
 
         color: 'transparent'
-        input: Cv.MatOp.nullMat
+        input: levels ? levels.input : Cv.MatOp.nullMat
+
         onLightnessChanged: {
-            if ( !isBindingChange() && levels ){
-                levels.lightness = lightness
-                editFragment.writeProperties({
-                    'lightness' : lightness
-                })
+            if ( !isBindingChange() ){
+                if ( levels ){
+                    levels.lightness = lightness
+                }
+                if ( editFragment && lightness ){
+                    editFragment.writeProperties({
+                        'lightness' : lightness
+                    })
+                }
             }
         }
         onLevelByChannelChanged: {
-            if ( !isBindingChange() && levels ){
-                levels.channels = levelByChannel
-                editFragment.writeProperties({
-                    'channels' : levelByChannel
-                })
+            if ( !isBindingChange() ){
+                if ( levels ){
+                    levels.channels = levelByChannel
+                }
+                if ( editFragment && levelByChannel ){
+                    editFragment.writeProperties({
+                        'channels' : levelByChannel
+                    })
+                }
+
             }
         }
     }

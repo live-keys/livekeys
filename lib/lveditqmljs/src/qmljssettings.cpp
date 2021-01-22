@@ -65,7 +65,6 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
     m_defaultPalettes["qml/lcvphoto#HueSaturationLightness"] = "HueSaturationLightnessPalette";
     m_defaultPalettes["qml/lcvphoto#Levels"] = "LevelsPalette";
-    m_defaultPalettes["qml/timeline#Timeline"] = "TimelinePalette";
     m_defaultPalettes["qml/lcvphoto#BrightnessAndContrast"] = "BrightnessAndContrastPalette";
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )

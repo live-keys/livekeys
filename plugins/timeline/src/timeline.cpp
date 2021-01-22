@@ -33,14 +33,14 @@ Timeline::Timeline(QObject *parent)
     , m_contentLength(0)
     , m_fps(1)
     , m_loop(false)
-    , m_isRunning(false)
     , m_isRecording(false)
+    , m_isRunning(false)
     , m_waitingForTrackAt(WAIT_NOTRACK)
     , m_isComponentComplete(false)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
     , m_headerModel(new TimelineHeaderModel(this))
-    , m_properties(new QQmlPropertyMap(this))
+    , m_properties(new TimelineProperties(this))
 {
     m_timer.setSingleShot(false);
 
@@ -219,6 +219,7 @@ void Timeline::appendTrack(lv::Track *track){
     track->setParent(this);
     m_trackList->appendTrack(track);
     track->setContentLength(m_contentLength);
+    track->timelineComplete();
     //TODO: WIll need to reupdate all tracks at that cursor position
     track->updateCursorPosition(m_cursorPosition);
     emit trackListChanged();
@@ -294,7 +295,7 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
         timeline->m_contentLength = node["length"].asInt();
         timeline->m_fps = node["fps"].asFloat();
 
-        QQmlPropertyMap* properties = new QQmlPropertyMap;
+        TimelineProperties* properties = new TimelineProperties;
         timeline->m_properties = properties;
 
         if ( node.hasKey("properties") ){
@@ -473,7 +474,7 @@ void Timeline::updateCursorPosition(qint64 position){
     emit cursorPositionProcessed(position);
 }
 
-void Timeline::setContentLength(qint64 contentLength){
+void Timeline::setContentLength(int contentLength){
     if (m_contentLength == contentLength)
         return;
 
@@ -484,6 +485,45 @@ void Timeline::setContentLength(qint64 contentLength){
 
     m_contentLength = contentLength;
     emit contentLengthChanged();
+}
+
+QJSValue Timeline::properties(){
+    ViewEngine* ve = ViewEngine::grab(this);
+    if ( ve )
+        return ve->engine()->newQObject(m_properties);
+    return QJSValue();
+}
+
+TimelineProperties *Timeline::propertiesObject(){
+    return m_properties;
+}
+
+void Timeline::setProperties(QJSValue properties){
+    if ( properties.isQObject() ){
+        QObject* ob = properties.toQObject();
+        const QMetaObject* meta = ob->metaObject();
+
+        for ( int i = 0; i < meta->propertyCount(); i++ ){
+            QMetaProperty property = meta->property(i);
+            QByteArray name = property.name();
+            if ( name != "objectName" ){
+                m_properties->insertAndCheckValue(property.name(), property.read(ob));
+            }
+        }
+
+    } else if ( properties.isObject() ){
+        ViewEngine* engine = ViewEngine::grab(this);
+        if ( !engine )
+            return;
+        QJSValueIterator it(properties);
+        QList<Shared*> shared;
+        while ( it.hasNext() ){
+            it.next();
+            m_properties->insertAndCheckValue(it.name(), Shared::transfer(it.value(), shared));
+        }
+    }
+
+    emit propertiesChanged();
 }
 
 }// namespace

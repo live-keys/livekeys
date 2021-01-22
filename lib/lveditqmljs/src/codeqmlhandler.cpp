@@ -1310,18 +1310,6 @@ QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
     );
 }
 
-QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
-{
-    QJSValue result = m_engine->engine()->newObject();
-    result.setProperty("canBind",   canBind);
-    result.setProperty("canUnbind", canUnbind);
-    result.setProperty("canEdit",   canEdit);
-    result.setProperty("canAdjust", canAdjust);
-    result.setProperty("canShape",  canShape);
-    result.setProperty("inImports", inImports);
-    return result;
-}
-
 /**
  * \brief Adds an editing fragment to the current document
  */
@@ -1654,39 +1642,61 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 // width is the receiving, need to remove the previous listening channel
 
                 if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
-                    QQmlProperty receivingProperty = receivingChannel->property();
 
-                    QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
-                    QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
-                    if ( previousWatcherVariant.isValid() ){
-                        QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
-                        delete previousWatcher;
-                        receivingProperty.object()->setProperty(watcherName, QVariant());
-                    }
+                    if ( writeChannel->type() == QmlBindingChannel::Property ){
 
-                    QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
-                    QVariant watcherValue = watcher->read();
+                        QQmlProperty receivingProperty = receivingChannel->property();
 
-                    if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                        QJSValue watcherJsValue = watcherValue.value<QJSValue>();
-                        QList<Shared*> sharedObjects;
-                        watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
-                    }
-                    receivingProperty.write(watcherValue);
-
-                    watcher->onChange([receivingProperty](const QmlPropertyWatcher& ww){
-                        QVariant wwValue = ww.read();
-                        if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                            QJSValue watcherJsValue = wwValue.value<QJSValue>();
-                            QList<Shared*> sharedObjects;
-                            wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                        QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+                        QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+                        if ( previousWatcherVariant.isValid() ){
+                            QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                            delete previousWatcher;
+                            receivingProperty.object()->setProperty(watcherName, QVariant());
                         }
-                        receivingProperty.write(wwValue);
-                    });
 
-                    // delete the watcher with the receiving channel
-                    watcher->setParent(receivingChannel->property().object());
-                    receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+                        QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+                        QVariant watcherValue = watcher->read();
+
+                        bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
+                        if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                            if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                QJSValue watcherJsValue = watcherValue.value<QJSValue>();
+                                QList<Shared*> sharedObjects;
+                                watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                            }
+                        } else if ( receivingQJSValue ){ // wrap in QJSValue
+                            watcherValue = QVariant::fromValue(Shared::transfer(watcherValue, m_engine->engine()));
+                        }
+
+                        receivingProperty.write(watcherValue);
+
+                        QQmlEngine* captureEngine = m_engine->engine();
+
+                        watcher->onChange([receivingProperty, captureEngine](const QmlPropertyWatcher& ww){
+                            QVariant wwValue = ww.read();
+                            bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
+                            if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                                if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                    QJSValue watcherJsValue = wwValue.value<QJSValue>();
+                                    QList<Shared*> sharedObjects;
+                                    wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                                }
+                            } else if ( receivingQJSValue ){ // wrap in QJSValue
+                                wwValue = QVariant::fromValue(Shared::transfer(wwValue, captureEngine));
+                            }
+                            receivingProperty.write(wwValue);
+                        });
+
+                        // delete the watcher with the receiving channel
+                        watcher->setParent(receivingChannel->property().object());
+                        receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+
+                    } else if ( writeChannel->type() == QmlBindingChannel::ListIndex ){
+                        QObject* writeValue = writeChannel->object();
+                        receivingChannel->property().write(QVariant::fromValue(writeValue));
+                    }
+
                 }
             }
         }
@@ -2515,22 +2525,6 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
 }
 
 /**
- * \brief Integrates a given palette box within the editor
- */
-void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
-    if (!edit)
-        return;
-
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-
-    int pos = edit->declaration()->position();
-    QTextBlock tb = m_document->textDocument()->findBlock(pos);
-    QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
-
-    dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
-}
-
-/**
  * \brief Finds the boundaries of the code block containing the cursor position
  *
  * Mostly used for fragments
@@ -2563,109 +2557,34 @@ lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     return result;
 }
 
-void CodeQmlHandler::addLineAtIndex(QString line, int pos)
-{
-    //TOMOVE: to ProjectDocument
-    if (!m_target) return;
-
-    m_document->addEditingState(ProjectDocument::Palette);
-
-    QTextCursor c(m_target);
-    if (pos == 0)
-    {
-        c.beginEditBlock();
-        c.insertText(line + "\n");
-        c.endEditBlock();
-    } else {
-        auto block = m_target->findBlockByNumber(pos-1);
-        c = QTextCursor(block);
-        c.beginEditBlock();
-        c.movePosition(QTextCursor::EndOfBlock);
-        c.insertText("\n" + line);
-        c.endEditBlock();
-    }
-
-    m_document->removeEditingState(ProjectDocument::Palette);
-}
-
-void CodeQmlHandler::removeLineAtIndex(int pos)
-{
-    //TOMOVE: to ProjectDocument
-    if (!m_target) return;
-    auto block = m_target->findBlockByNumber(pos);
-    m_document->addEditingState(ProjectDocument::Palette);
-    QTextCursor c(block);
-    c.beginEditBlock();
-    c.select(QTextCursor::BlockUnderCursor);
-    c.removeSelectedText();
-    c.endEditBlock();
-    m_document->removeEditingState(ProjectDocument::Palette);
-}
-
-/**
- * \brief Receive different qml based information about a given cursor position
- */
-QJSValue CodeQmlHandler::cursorInfo(int position, int length){
-    Q_D(CodeQmlHandler);
-    bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false, canShape = false;
-
+QJSValue CodeQmlHandler::declarationInfo(int position, int length){
     if ( !m_document )
-        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+        return QJSValue();
 
     QList<QmlDeclaration::Ptr> properties = getDeclarations(position, length);
+    if ( properties.isEmpty() )
+        return QJSValue();
 
-    QTextCursor tc(m_document->textDocument());
-    tc.setPosition(position);
-    if ( length  )
-        tc.setPosition(position + length, QTextCursor::KeepAnchor);
+    auto declaration = properties.first();
 
-    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(tc);
-    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
-        canShape = true;
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", declaration->position());
+    result.setProperty("length", declaration->length());
+    result.setProperty("type", declaration->type().join());
+    result.setProperty("parentType", declaration->parentType().join());
+    if ( declaration->isForComponent() ){
+        result.setProperty("type", "component");
+    } else if ( declaration->isForImports() ){
+        result.setProperty("type", "imports");
+    } else if ( declaration->isForList() ){
+        result.setProperty("type", "list");
+    } else if ( declaration->isForProperty() ){
+        result.setProperty("type", "property");
+    } else if ( declaration->isForSlot() ){
+        result.setProperty("type", "slot");
     }
-
-    if ( properties.isEmpty())
-        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
-
-    if ( properties.size() == 1 ){
-        QmlDeclaration::Ptr firstdecl = properties.first();
-
-        if ( firstdecl->isForImports() )
-            canShape = true;
-
-        if ( isForAnObject(firstdecl) )
-            canShape = true;
-
-        canEdit = true;
-
-        int paletteCount = d->projectHandler->paletteContainer()->countPalettes(firstdecl->type().join());
-        if ( paletteCount > 0 ){
-            int totalLoadedPalettes = 0;
-            canBind = true;
-            canShape = true;
-
-            QmlEditFragment* edit = m_editContainer->topEditAtPosition(firstdecl->position());
-            if ( edit ){
-                if ( edit->bindingPalette() ){
-                    canBind = false;
-                    canUnbind = true;
-                }
-
-                for ( auto paIt = edit->begin(); paIt != edit->end(); ++paIt ){
-                    CodePalette* cp = *paIt;
-                    if ( cp->type() == "edit/qml" )
-                        canEdit = false;
-                    else
-                        ++totalLoadedPalettes;
-                }
-            }
-
-            if ( totalLoadedPalettes < paletteCount ){
-                canAdjust = true;
-            }
-        }
-    }
-    return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+    result.setProperty("hasObject", declaration->isForObject());
+    return result;
 }
 
 /**
@@ -3776,7 +3695,7 @@ PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
             lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", configurations, lpl);
         }
 
-        if ( declaration->isListDeclaration() ){
+        if ( declaration->isForList() ){
             lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", configurations, lpl);
         } else {
             lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", configurations, lpl);
@@ -3789,9 +3708,9 @@ PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
     return lpl;
 }
 
-void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath)
-{
+void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
     QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+
     if ( documentChannel ){
 
         if ( parentFragment ){

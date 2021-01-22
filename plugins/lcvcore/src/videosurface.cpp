@@ -39,6 +39,9 @@ void VideoSurface::swapSurface(qint64 position){
 }
 
 void VideoSurface::updateSurface(qint64 cursorPosition, QMat *frame){
+    if ( m_imageWidth <= 0 || m_imageHeight <= 0 )
+        return;
+
     m_lastProcessedPosition = cursorPosition;
     if ( !m_buffer ){
         m_buffer = new QMat(m_imageWidth, m_imageHeight, QMat::CV8U, 3);

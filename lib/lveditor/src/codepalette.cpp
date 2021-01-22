@@ -75,6 +75,10 @@ void CodePalette::setValueFromBinding(const QVariant &value){
     m_bindingChange = false;
 }
 
+void CodePalette::initViaSource(){
+    emit sourceInit();
+}
+
 /**
  * \brief Value setter for palette
  */

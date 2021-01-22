@@ -42,5 +42,6 @@ DISTFILES += \
     qml/PropertyContainer.qml \
     qml/PaletteContainer.qml \
     qml/ShapingOptions.qml \
+    qml/live.plugin.json \
     qml/plugininfo.qml \
     qml/plugins.qmltypes

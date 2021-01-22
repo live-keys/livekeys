@@ -171,7 +171,7 @@ QString Track::typeReference() const{
 QObject* Track::timelineProperties() const{
     Timeline* timeline = qobject_cast<Timeline*>(parent());
     if ( timeline )
-        return timeline->properties();
+        return timeline->propertiesObject();
     return nullptr;
 }
 

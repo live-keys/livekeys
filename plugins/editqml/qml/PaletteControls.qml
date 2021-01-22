@@ -207,9 +207,12 @@ QtObject{
         var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
 
         if (ef){
-            if (!isForNode && container.compact) container.expand()
-            else container.editingFragment.signalObjectAdded(ef)
-            if (!isForNode && container.compact) container.sortChildren()
+            if (!isForNode && container.compact)
+                container.expand()
+            else
+                container.editingFragment.signalObjectAdded(ef)
+            if (!isForNode && container.compact)
+                container.sortChildren()
         }
     }
 
@@ -497,7 +500,8 @@ QtObject{
             })
 
         ef.incrementRefCount()
-        codeHandler.frameEdit(objectContainer.parent, ef)
+
+        editor.documentHandler.frameBox(objectContainer.parent, ef.position(), ef.length())
         shapeContainerWithInstructions(objectContainer, editor, instructions)
         instructionsShaping = false
     }
@@ -1027,7 +1031,7 @@ QtObject{
             if (paletteBox) paletteBox.moveEnabledSet = false
         }
 
-        codeHandler.frameEdit(editorBox, ef)
+         editor.documentHandler.frameBox(editorBox, ef.position(), ef.length())
 
         if (forImports) editor.editor.importsShaped = true
         ef.incrementRefCount()
