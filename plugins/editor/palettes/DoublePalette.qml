@@ -37,20 +37,28 @@ CodePalette{
             width: 70
             height: 25
             style: palette.theme.inputStyle
-            text: {
-                var roundValue = intSlider.value + fractionalSlider.value
-                roundValue = roundValue.toFixed(2)
-                return roundValue
-            }
             Keys.onPressed: {
                 if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
                     if (!isNaN(numberInput.text)){
+
+                        intSlider.enabled = true
+                        fractionalSlider.enabled = true
                         var val = parseFloat(numberInput.text)
                         palette.value = val
                         if ( !palette.isBindingChange() ){
                             editFragment.write(palette.value)
                         }
+                        updateSliders(val)
                         event.accepted = true
+                    } else if (numberInput.text === 'NaN') {
+                        palette.value = NaN
+                        if ( !palette.isBindingChange() )
+                            editFragment.write(palette.value)
+                        intSlider.enabled = false
+                        fractionalSlider.enabled = false
+
+                    } else {
+                        lk.layers.workspace.messages.pushError('Non-numeric input for DoublePalette', 202)
                     }
                 }
             }
@@ -72,6 +80,9 @@ CodePalette{
                 palette.value = roundValue
                 if ( !palette.isBindingChange() )
                     editFragment.write(palette.value)
+                roundValue = roundValue.toFixed(2)
+                numberInput.text = roundValue
+
             }
             stepSize: 1.0
             maximumValue: 25
@@ -92,6 +103,14 @@ CodePalette{
             wheelEnabled: intSlider.activeFocus
         }
 
+        MouseArea {
+            anchors.fill: intSlider
+            enabled: !intSlider.enabled
+            onClicked: {
+                lk.layers.workspace.messages.pushWarning('Please input a numeric value in the text field.', 200)
+            }
+        }
+
         Slider{
             id: fractionalSlider
 
@@ -108,11 +127,15 @@ CodePalette{
             onValueChanged: {
                 var roundValue = intSlider.value + fractionalSlider.value
                 roundValue = Math.round(roundValue * 100) / 100
-                if (fractionalSlider.value !== 1.0)
-                    palette.value = roundValue
+                if (fractionalSlider.value === 1.0) return
 
+                palette.value = roundValue
                 if ( !palette.isBindingChange() )
                     editFragment.write(palette.value)
+
+                roundValue = roundValue.toFixed(2)
+                numberInput.text = roundValue
+
             }
             stepSize: 0.01
             maximumValue: 0.99
@@ -131,6 +154,14 @@ CodePalette{
             }
             activeFocusOnPress: true
             wheelEnabled: fractionalSlider.activeFocus
+        }
+
+        MouseArea {
+            anchors.fill: fractionalSlider
+            enabled: !fractionalSlider.enabled
+            onClicked: {
+                lk.layers.workspace.messages.pushWarning('Please input a numeric value in the text field.', 201)
+            }
         }
 
         Workspace.NumberLabel{
@@ -239,9 +270,11 @@ CodePalette{
         }
     }
 
-    function updateSliders(){
+    function updateSliders(value){
         if (value < intSlider.minimumValue || value > intSlider.maximumValue){
             if (value > 0){
+                intSlider.minimumValue = 0
+                intSlider.maximumValue = 25
                 while (intSlider.maximumValue < value){
                     intSlider.minimumValue = intSlider.maximumValue
                     intSlider.maximumValue = 2*intSlider.maximumValue
@@ -257,12 +290,20 @@ CodePalette{
             }
         }
 
-        //TODO
-//        intSlider.value = Math.floor(value)
-//        fractionalSlider.value = value - intSlider.value
+        intSlider.value = Math.floor(value)
+        fractionalSlider.value = value - intSlider.value
     }
 
     onInit: {
-        updateSliders()
+        if (isNaN(value)){
+            palette.value = NaN
+            numberInput.text = 'NaN'
+            intSlider.enabled = false
+            fractionalSlider.enabled = false
+
+            editFragment.writeCode('NaN')
+            return
+        }
+        updateSliders(value)
     }
 }

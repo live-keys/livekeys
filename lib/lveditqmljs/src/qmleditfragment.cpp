@@ -345,6 +345,8 @@ void QmlEditFragment::write(const QJSValue value){
  * \brief Writes the \p code to the value part of this fragment
  */
 void QmlEditFragment::writeCode(const QString &code){
+    auto old = readValueText();
+    if (code == old) return;
     ProjectDocument* document = m_declaration->document();
 
     if ( document->editingStateIs(ProjectDocument::Palette))
@@ -363,6 +365,9 @@ void QmlEditFragment::writeCode(const QString &code){
     }
 
     document->removeEditingState(ProjectDocument::Palette);
+
+    if (code == "null" || old == "null")
+        emit isNullChanged();
 }
 
 QObject *QmlEditFragment::readObject()
@@ -729,6 +734,11 @@ bool QmlEditFragment::bindFunctionExpression(const QString &expression){
     }
 
     return false;
+}
+
+bool QmlEditFragment::isNull()
+{
+    return readValueText() == "null";
 }
 
 QString QmlEditFragment::buildCode(const QJSValue &value){

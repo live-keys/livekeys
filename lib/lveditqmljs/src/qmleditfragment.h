@@ -42,6 +42,7 @@ class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
     Q_PROPERTY(Location             location     READ location     CONSTANT)
     Q_PROPERTY(QJSValue             whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
     Q_PROPERTY(lv::CodeQmlHandler*  codeHandler  READ codeHandler  CONSTANT)
+    Q_PROPERTY(bool                 isNull       READ isNull       NOTIFY isNullChanged)
     Q_ENUMS(FragmentType)
 
 public:
@@ -178,6 +179,7 @@ public slots:
 
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
+    void writeCode(const QString& code);
 
     QObject* readObject();
 
@@ -189,6 +191,8 @@ public slots:
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     bool bindExpression(const QString& expression);
     bool bindFunctionExpression(const QString& expression);
+
+    bool isNull();
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
@@ -202,9 +206,10 @@ signals:
     void refCountChanged();
     void whenBindingChanged();
     void typeChanged();
+    void isNullChanged();
 private:
     static QString buildCode(const QJSValue& value);
-    void writeCode(const QString& code);
+    void checkIsNull();
 
     QmlDeclaration::Ptr  m_declaration;
 

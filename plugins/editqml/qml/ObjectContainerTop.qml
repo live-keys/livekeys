@@ -12,6 +12,8 @@ Rectangle{
     property bool compact : true
     property bool isBuilder : false
 
+    property var objectContainer: null
+
     signal toggleCompact()
     signal erase()
     signal rebuild()
@@ -21,6 +23,7 @@ Rectangle{
     signal compose()
     signal paletteToPane()
     signal close()
+    signal createObject()
 
     MouseArea{
         anchors.fill: parent
@@ -65,6 +68,32 @@ Rectangle{
         anchors.right: parent.right
         anchors.rightMargin: 5
         spacing: 3
+
+        Item {
+            id: createObjectButton
+            anchors.verticalCenter: parent.verticalCenter
+            width: 15
+            height: 15
+
+            Rectangle {
+                visible: objectContainer.isForProperty && objectContainer.editingFragment && objectContainer.editingFragment.isNull
+                color: "red"
+                anchors.fill: parent
+            }
+
+            MouseArea{
+                id: createObjectButtonMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    objectContainerTitle.createObject()
+                }
+            }
+            Workspace.Tooltip{
+                mouseOver: createObjectButtonMouseArea.containsMouse
+                text: "Create object"
+            }
+        }
 
         Item{
             id: paletteToPane

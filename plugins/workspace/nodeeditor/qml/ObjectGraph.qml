@@ -106,7 +106,7 @@ Rectangle{
                 }
 
                 if (maxWidth !== node.width)
-                    node.parentWidth = maxWidth + 20
+                    node.width = maxWidth
             }
         }
     }
@@ -248,7 +248,7 @@ Rectangle{
         addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var cursorCoords = Qt.point(pos.x, pos.y + 30)
+        var cursorCoords = Qt.point(pos.x, pos.y)
         var addBox = lk.layers.editor.environment.createEditorBox(
             addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
         )
@@ -261,6 +261,8 @@ Rectangle{
             var ef = documentHandler.codeHandler.openNestedConnection(
                 editingFragment, opos
             )
+            cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
             root.activateFocus()

@@ -2317,7 +2317,7 @@ void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
     m_editContainer->derefEdit(edit);
 }
 
-void CodeQmlHandler::eraseObject(QmlEditFragment *edit){
+void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     QList<QObject*> toRemove;
 
     bool objectProperty = false;
@@ -2345,19 +2345,18 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit){
                 toRemove.append(ordered[bc->listIndex()]);
             }
         } else {
-            objectProperty = true;
+            objectProperty = (bc->property().propertyTypeCategory() != QQmlProperty::InvalidCategory);
             bc->property().write(QVariant::fromValue(nullptr));
         }
     }
 
-    int pos = edit->declaration()->valuePosition();
-    int len = edit->declaration()->valueLength();
+
+    edit->writeCode(objectProperty ? "null" : "");
+    edit->updateValue();
+
+    if (!removeFragment) return;
 
     removeEditingFragment(edit);
-
-    m_document->addEditingState(ProjectDocument::Runtime);
-    m_document->insert(pos, len, objectProperty ? "null" : "");
-    m_document->removeEditingState(ProjectDocument::Runtime);
 
     if ( !toRemove.isEmpty() ){
         for ( QObject* o : toRemove ){
@@ -3218,6 +3217,20 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
+void CodeQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
+{
+    if (!propertyFragment)
+        return;
+
+    QString typeName = propertyFragment->typeName();
+    auto block = m_target->findBlock(propertyFragment->position());
+    QString indent = getBlockIndent(block);
+    QString codeToWrite = typeName + "{\n" + indent + "    \n" + indent + "}\n";
+    propertyFragment->writeCode(codeToWrite);
+    m_scopeTimer.stop();
+    updateScope();
+}
+
 int CodeQmlHandler::insertRootItem(const QString &name)
 {
     Q_D(CodeQmlHandler);
@@ -3328,7 +3341,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
                 return;
             }
         } else {
-            //TODO: Property based asignment
+            edit->channel()->property().write(QVariant::fromValue(result));
         }
     }
 }

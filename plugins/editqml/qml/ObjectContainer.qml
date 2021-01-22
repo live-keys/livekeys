@@ -260,6 +260,7 @@ Item{
                 objectContainerTitle.isBuilder = root.editingFragment.isBuilder()
             }
             onAboutToBeRemoved : {
+                if (isForProperty) return
                 var p = root.parent
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -315,6 +316,7 @@ Item{
                 id: objectContainerTitle
                 anchors.fill: parent
                 compact: objectContainer.compact
+                objectContainer: root
                 color: {
                     return objectContainer.pane ? objectContainer.pane.topColor
                                                 : objectContainer.activeFocus
@@ -380,6 +382,12 @@ Item{
                 }
                 onCompose : {
                     paletteControls.compose(objectContainer, false)
+                }
+
+                onCreateObject: {
+                    var codeHandler = objectContainer.editor.documentHandler.codeHandler
+                    codeHandler.addObjectForProperty(editingFragment)
+                    codeHandler.addItemToRuntime(editingFragment)
                 }
             }
         }
