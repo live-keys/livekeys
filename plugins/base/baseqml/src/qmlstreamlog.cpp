@@ -30,7 +30,10 @@ void QmlStreamLog::setStream(QmlStream *stream){
 
 void QmlStreamLog::onStreamData(QObject *that, const QJSValue &val){
     QmlStreamLog* t = static_cast<QmlStreamLog*>(that);
-    t->m_log->i(val);
+    VisualLog vl(VisualLog::MessageInfo::Info);
+    if ( !t->prefix().isEmpty() )
+        vl << t->prefix();
+    VisualLogQmlObject::logValue(vl, val);
 }
 
 QmlStreamLog::~QmlStreamLog(){
