@@ -207,9 +207,12 @@ QtObject{
         var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
 
         if (ef){
-            if (!isForNode && container.compact) container.expand()
-            else container.editingFragment.signalObjectAdded(ef)
-            if (!isForNode && container.compact) container.sortChildren()
+            if (!isForNode && container.compact)
+                container.expand()
+            else
+                container.editingFragment.signalObjectAdded(ef)
+            if (!isForNode && container.compact)
+                container.sortChildren()
         }
     }
 

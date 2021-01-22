@@ -278,8 +278,10 @@ Item{
             target: editingFragment
             ignoreUnknownSignals: true
             onObjectAdded: {
-                if (compact) expand()
-                else addObjectFragmentToContainer(obj)
+                if (compact)
+                    expand()
+                else
+                    addObjectFragmentToContainer(obj)
 
                 var child = container.children[container.children.length-1]
                 var codeHandler = objectContainer.editor.documentHandler.codeHandler
@@ -414,8 +416,13 @@ Item{
 
                 onChildrenChanged: recalculateContentWidth()
 
+                property double heightSwap: -1
+
                 height: {
-                    if (compact) return 0
+                    if (compact)
+                        return 0
+                    if ( heightSwap !== -1 )
+                        return heightSwap
                     var totalHeight = 0;
                     if ( children.length > 0 ){
                         for ( var i = 0; i < children.length; ++i ){
@@ -430,8 +437,10 @@ Item{
 
                 function sortChildren(){
 
-                    if (!objectContainer.parent) return
-                    if (children.length === 0) return
+                    if (!objectContainer.parent)
+                        return
+                    if (children.length === 0)
+                        return
 
                     var childrenCopy = []
                     childrenCopy.push(children[0])
@@ -457,7 +466,9 @@ Item{
                         }
                     }
 
+                    heightSwap = height
                     children = childrenCopy
+                    heightSwap = -1
                 }
 
             }

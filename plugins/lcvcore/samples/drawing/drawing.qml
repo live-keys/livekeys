@@ -19,6 +19,5 @@ Grid{
     ColorHistogramView{
         input: drawSurface.result
     }
-    
-    
+
 }
