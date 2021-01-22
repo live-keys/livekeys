@@ -1658,19 +1658,32 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                         QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
                         QVariant watcherValue = watcher->read();
 
+                        bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
                         if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                            QJSValue watcherJsValue = watcherValue.value<QJSValue>();
-                            QList<Shared*> sharedObjects;
-                            watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                            if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                QJSValue watcherJsValue = watcherValue.value<QJSValue>();
+                                QList<Shared*> sharedObjects;
+                                watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                            }
+                        } else if ( receivingQJSValue ){ // wrap in QJSValue
+                            watcherValue = QVariant::fromValue(Shared::transfer(watcherValue, m_engine->engine()));
                         }
+
                         receivingProperty.write(watcherValue);
 
-                        watcher->onChange([receivingProperty](const QmlPropertyWatcher& ww){
+                        QQmlEngine* captureEngine = m_engine->engine();
+
+                        watcher->onChange([receivingProperty, captureEngine](const QmlPropertyWatcher& ww){
                             QVariant wwValue = ww.read();
+                            bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
                             if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
-                                QJSValue watcherJsValue = wwValue.value<QJSValue>();
-                                QList<Shared*> sharedObjects;
-                                wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                                if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                    QJSValue watcherJsValue = wwValue.value<QJSValue>();
+                                    QList<Shared*> sharedObjects;
+                                    wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                                }
+                            } else if ( receivingQJSValue ){ // wrap in QJSValue
+                                wwValue = QVariant::fromValue(Shared::transfer(wwValue, captureEngine));
                             }
                             receivingProperty.write(wwValue);
                         });

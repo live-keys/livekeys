@@ -1,5 +1,5 @@
 #include "qmlpropertylog.h"
-#include "live/visuallog.h"
+#include "live/visuallogqt.h"
 #include "live/visuallogqmlobject.h"
 
 namespace lv{
