@@ -158,7 +158,7 @@ public slots:
     QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
     QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
-    void eraseObject(lv::QmlEditFragment* edit);
+    void eraseObject(lv::QmlEditFragment* edit, bool removeFragment = true);
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
@@ -200,9 +200,10 @@ public slots:
         bool assignDefault = false,
         lv::QmlEditFragment* parentGroup = nullptr);
     int addItem(int position, const QString& object, const QString& type);
+    void addObjectForProperty(lv::QmlEditFragment* propertyFragment);
     int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);
-    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type, QObject* currentApp = nullptr);
+    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", QObject* currentApp = nullptr);
 
     lv::QmlEditFragment* createObject(int position, const QString& type, lv::QmlEditFragment* parent, QObject* currentApp = nullptr);
 

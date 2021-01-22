@@ -80,6 +80,9 @@ QObject *QmlBindingChannel::object() const{
     if ( m_object )
         return m_object;
 
+    if ( type() == QmlBindingChannel::Property ){
+        return qobject_cast<QObject*>(m_property.read().value<QObject*>());
+    }
     if ( type() != QmlBindingChannel::ListIndex )
         return nullptr;
 

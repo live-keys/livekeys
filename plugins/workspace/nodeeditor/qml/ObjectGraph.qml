@@ -106,7 +106,7 @@ Rectangle{
                 }
 
                 if (maxWidth !== node.width)
-                    node.parentWidth = maxWidth + 20
+                    node.width = maxWidth
             }
         }
     }
@@ -176,7 +176,16 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-        var name = srcPort.objectProperty.propertyName
+        var name = ""
+        var value = ""
+        if (!srcPort.objectProperty.propertyName){
+            name = srcPort.objectProperty.id
+            value = name
+        }
+        else {
+            name = srcPort.objectProperty.propertyName
+            value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+        }
 
         if (name.substr(0,2) === "on" && name.substr(name.length-7,7) === "Changed")
         {
@@ -186,7 +195,7 @@ Rectangle{
             if (dstPort.objectProperty.editingFragment) return
 
             var funcName = dstPort.objectProperty.propertyName
-            var value = nodeId + "." + funcName + "()"
+            value = nodeId + "." + funcName + "()"
 
             if (srcPort.objectProperty.editingFragment){
                 var result = srcPort.objectProperty.editingFragment.bindExpression(value)
@@ -198,9 +207,6 @@ Rectangle{
             }
 
         } else {
-            var value =
-                    srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
-
             if (dstPort.objectProperty.editingFragment){
                 var result = dstPort.objectProperty.editingFragment.bindExpression(value)
                 if ( result ){
@@ -242,7 +248,7 @@ Rectangle{
         addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var cursorCoords = Qt.point(pos.x, pos.y + 30)
+        var cursorCoords = Qt.point(pos.x, pos.y)
         var addBox = lk.layers.editor.environment.createEditorBox(
             addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
         )
@@ -255,6 +261,8 @@ Rectangle{
             var ef = documentHandler.codeHandler.openNestedConnection(
                 editingFragment, opos
             )
+            cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
             root.activateFocus()
@@ -354,6 +362,11 @@ Rectangle{
         var idx = label.indexOf('#')
         if (idx !== -1){
             node.item.id = label.substr(idx+1)
+
+            var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
+            port.label = node.item.id + " Out"
+            port.y = 7
+            port.objectProperty = node.item
         }
         
         return node

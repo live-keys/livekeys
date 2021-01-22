@@ -27,7 +27,8 @@ Item{
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
         onAboutToBeRemoved : {
-            propertyContainer.destroy()
+            if (!isAnObject)
+                propertyContainer.destroy()
         }
     }
     width: container.width + 120
