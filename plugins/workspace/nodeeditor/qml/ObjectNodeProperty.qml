@@ -42,6 +42,8 @@ Item{
 
     property QtObject style: defaultStyle
     
+    z: -1
+
     Rectangle {
         id: propertyTitle
         radius: propertyItem.style.radius
@@ -73,17 +75,20 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
+                    var coords = propertyItem.mapToItem(node.item, 0, 0)
                     var paletteList = paletteControls.addPaletteList(
                         propertyItem,
                         paletteContainer,
-                        {"x": 0, "y": 0},
+                        Qt.rect(coords.x, coords.y ,1,1),
                         PaletteControls.PaletteListMode.NodeEditor,
                         PaletteControls.PaletteListSwap.NoSwap,
-                        propertyItem
+                        node.item
                     )
 
                     if (paletteList){
-                        paletteList.anchors.topMargin = propertyTitle.height
+                        paletteList.anchors.topMargin = coords.y + 30
+                        paletteList.anchors.left = node.item.left
+                        paletteList.anchors.leftMargin = coords.x
                         paletteList.width = Qt.binding(function(){return propertyItem.width})
                     }
                 }

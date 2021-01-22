@@ -144,7 +144,7 @@ Qan.NodeItem{
             Item{
                 id: eraseButton
                 anchors.right: parent.right
-                anchors.rightMargin: 40
+                anchors.rightMargin: 48
                 anchors.verticalCenter: parent.verticalCenter
                 width: 15
                 height: 20
@@ -163,7 +163,7 @@ Qan.NodeItem{
             Item{
                 id: composeButton
                 anchors.right: parent.right
-                anchors.rightMargin: 22
+                anchors.rightMargin: 30
                 anchors.verticalCenter: parent.verticalCenter
                 width: 15
                 height: 20
@@ -182,7 +182,7 @@ Qan.NodeItem{
             Item{
                 id: paletteAddButton
                 anchors.right: parent.right
-                anchors.rightMargin: 4
+                anchors.rightMargin: 12
                 anchors.verticalCenter: parent.verticalCenter
                 width: 15
                 height: 20

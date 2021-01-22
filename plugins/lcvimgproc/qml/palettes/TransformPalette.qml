@@ -49,29 +49,24 @@ CodePalette{
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     function addTransformation(name){
-        var oc = palette.item
-        while (oc && oc.objectName !== "objectContainer")
+        var p = palette.item
+        while (p && p.objectName !== "objectContainer" && p.objectName !== "paletteGroup")
         {
-            oc = oc.parent
+            p = p.parent
         }
 
-        if (oc){ // inside shaping
+        if (!p) return null
 
+        if (p.objectName === "objectContainer"){ // inside shaping
             var position =
-                oc.editingFragment.valuePosition() +
-                oc.editingFragment.valueLength() - 1
+                p.editingFragment.valuePosition() +
+                p.editingFragment.valueLength() - 1
             paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
-            var cont = oc.groupsContainer
+            var cont = p.groupsContainer
             return cont.children[cont.children.length - 1]
 
         } else { // inside palette
-
-            var p = palette.item
-            while (p && p.objectName !== "paletteGroup")
-            {
-                p = p.parent
-            }
             var ef = p.editingFragment
             while (p && p.objectName !== "editorType")
             {
