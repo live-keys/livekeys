@@ -261,7 +261,7 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPath(QmlBindingPath::
             return nullptr;
 
         QmlWatcher* watcher = qobject_cast<QmlWatcher*>(watchers.first());
-        viewRoot = watcher->parent();
+        viewRoot = watcher->target();
 
         root = root->child;
     }

@@ -160,10 +160,11 @@ CodePalette{
     property Connections connTest: Connections{
         id: efConnection
         target: editingFragment
-        onObjectAdded: {
+
+        function onObjectAdded(obj, cursorCoords){
             addObject(obj.objectInfo(), cursorCoords)
         }
-        onAboutToRemovePalette: {
+        function onAboutToRemovePalette(palette){
             nodeItem.clean()
         }
         ignoreUnknownSignals: true

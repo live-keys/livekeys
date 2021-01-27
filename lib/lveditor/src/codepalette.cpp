@@ -71,6 +71,13 @@ void CodePalette::setValueFromBinding(const QVariant &value){
 
     m_bindingChange = true;
     m_value = value;
+    emit valueFromBindingChanged(value);
+    m_bindingChange = false;
+}
+
+void CodePalette::initValue(const QVariant &value){
+    m_bindingChange = true;
+    m_value = value;
     emit init(value);
     m_bindingChange = false;
 }

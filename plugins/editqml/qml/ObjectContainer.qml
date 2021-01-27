@@ -256,10 +256,10 @@ Item{
 
         property Connections editingFragmentRemovals: Connections{
             target: editingFragment
-            onConnectionChanged : {
+            function onConnectionChanged(){
                 objectContainerTitle.isBuilder = root.editingFragment.isBuilder()
             }
-            onAboutToBeRemoved : {
+            function onAboutToBeRemoved(){
                 if (isForProperty) return
                 var p = root.parent
                 if (!p) return
@@ -278,7 +278,7 @@ Item{
         property Connections addFragmentToContainerConn: Connections{
             target: editingFragment
             ignoreUnknownSignals: true
-            onObjectAdded: {
+            function onObjectAdded(obj, cursorCoords){
                 if (compact)
                     expand()
                 else
@@ -293,7 +293,7 @@ Item{
 
                 container.sortChildren()
             }
-            onPropertyAdded: {
+            function onPropertyAdded(ef, expandDefault){
                 for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
                     if (objectContainer.propertiesOpened[i] === ef.identifier()){
                         if (compact) expand()

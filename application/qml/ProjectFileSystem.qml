@@ -480,7 +480,7 @@ Pane{
         }
         Connections{
             target: project.fileModel
-            onProjectNodeChanged : {
+            function onProjectNodeChanged(index){
                 view.expand(index)
             }
         }

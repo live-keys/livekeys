@@ -48,6 +48,7 @@ public:
     const QVariant &value() const;
     void setValue(const QVariant& value);
     void setValueFromBinding(const QVariant &value);
+    void initValue(const QVariant& value);
     void initViaSource();
 
     /** Palette name */
@@ -79,10 +80,9 @@ signals:
 
     /** Value was initialized */
     void init(const QVariant& value);
-
     void sourceInit();
-    /** Code changed */
-    void codeChanged(const QVariant& value);
+
+    void valueFromBindingChanged(const QVariant& value);
 
 private:
     Q_DISABLE_COPY(CodePalette)

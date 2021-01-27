@@ -63,6 +63,9 @@ CodePalette{
     onInit: {
         timelineArea.timeline = value
     }
+    onValueFromBindingChanged: {
+        timelineArea.timeline = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){}

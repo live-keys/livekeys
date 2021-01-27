@@ -53,6 +53,9 @@ CodePalette{
 
     }
 
+    onValueFromBindingChanged: {
+        root.path = value
+    }
     onInit: {
         root.path = value
     }

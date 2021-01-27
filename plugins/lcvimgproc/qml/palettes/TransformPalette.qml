@@ -60,11 +60,11 @@ CodePalette{
         var oc = p.parent.parent.parent.parent
         if (oc.objectName === "objectContainer"){ // inside shaping
             var position =
-                oc.editingFragment.valuePosition() +
-                oc.editingFragment.valueLength() - 1
+                p.editingFragment.valuePosition() +
+                p.editingFragment.valueLength() - 1
             paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
-            var cont = oc.groupsContainer
+            var cont = p.groupsContainer
             return cont.children[cont.children.length - 1]
 
         } else { // inside palette
@@ -448,6 +448,9 @@ CodePalette{
     }
 
     onInit: {
+        paletteItem.transformImage = value
+    }
+    onValueFromBindingChanged: {
         paletteItem.transformImage = value
     }
 }

@@ -368,7 +368,7 @@ Item{
     property bool documentsReloaded : false
     Connections{
         target: lk.layers.window
-        onIsActiveChanged : {
+        function onIsActiveChanged(isActive){
             if ( isActive ){
                 project.navigationModel.requiresReindex()
                 project.fileModel.rescanEntries()
@@ -386,7 +386,7 @@ Item{
 
     Connections{
         target: lk
-        onLayerReady: {
+        function onLayerReady(layer){
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
                     'toggleNavigation' : [root.toggleNavigation, "Toggle Navigation"],

@@ -101,6 +101,9 @@ CodePalette{
     onInit: {
         captureContainer.videoDecoderView = value
     }
+    onValueFromBindingChanged: {
+        captureContainer.videoDecoderView = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

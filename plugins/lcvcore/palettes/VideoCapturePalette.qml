@@ -33,9 +33,15 @@ CodePalette{
 
         Connections{
             target: captureContainer.videoCapture
-            onFpsChanged: editFragment.updateBindings()
-            onCurrentFrameChanged: editFragment.updateBindings()
-            onPausedChanged: editFragment.updateBindings()
+            function onFpsChanged(){
+                editFragment.updateBindings()
+            }
+            function onCurrentFrameChanged(){
+                editFragment.updateBindings()
+            }
+            function onPausedChanged(){
+                editFragment.updateBindings()
+            }
         }
 
         width: 290
@@ -97,6 +103,9 @@ CodePalette{
     }
 
     onInit: {
+        captureContainer.videoCapture = value
+    }
+    onValueFromBindingChanged: {
         captureContainer.videoCapture = value
     }
 
