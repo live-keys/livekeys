@@ -6,8 +6,6 @@
 #include <QQmlProperty>
 #include <QQmlEngine>
 
-#include <QThread>
-
 #include "live/hookcontainer.h"
 #include "live/project.h"
 #include "live/projectdocument.h"
@@ -21,6 +19,7 @@ QmlWatcher::QmlWatcher(QObject *parent)
     : QObject(parent)
     , m_isEnabled(true)
     , m_componentComplete(false)
+    , m_target(nullptr)
 {
 }
 
@@ -38,9 +37,11 @@ void QmlWatcher::initialize(ViewEngine *, HookContainer *hooks, const QString &r
     m_componentComplete = true;
 }
 
-
 void QmlWatcher::componentComplete(){
     m_componentComplete = true;
+
+    if ( !m_target )
+        m_target = parent();
 
     ViewEngine* ve = ViewEngine::grab(this);
 
@@ -48,12 +49,13 @@ void QmlWatcher::componentComplete(){
     if ( !ctx )
         return;
 
-    m_declaredId = ctx->nameForObject(parent());
+    if ( m_declaredId.isEmpty() )
+        m_declaredId = ctx->nameForObject(m_target);
 
     if ( m_declaredId.isEmpty() )
         return;
 
-    ComponentDeclaration cd = ve->rootDeclaration(parent());
+    ComponentDeclaration cd = ve->rootDeclaration(m_target);
     m_referencedFile = cd.url().toLocalFile();
 
     if ( checkChildDeclarations() ){
@@ -65,7 +67,7 @@ void QmlWatcher::componentComplete(){
 }
 
 bool QmlWatcher::checkChildDeclarations(){
-    QQmlProperty pp(parent());
+    QQmlProperty pp(m_target);
     if ( pp.propertyTypeCategory() == QQmlProperty::List ){
         QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(pp.read());
         for ( int i = 0; i < assignmentList.count(); ++i ){
@@ -76,6 +78,24 @@ bool QmlWatcher::checkChildDeclarations(){
         }
     }
     return true;
+}
+
+void QmlWatcher::setSingleton(QObject *singleton){
+    if ( m_componentComplete ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( ve ){
+            QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already initialized. Cannot set singleton afterwards.", Exception::toCode("Completed")),
+                this
+            ).jsThrow();
+        }
+        return;
+    }
+
+    m_target = singleton;
+    m_declaredId = "__singleton__";
+    emit targetChanged();
 }
 
 }// namespace
