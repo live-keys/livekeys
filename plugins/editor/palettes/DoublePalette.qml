@@ -37,6 +37,7 @@ CodePalette{
             width: 70
             height: 25
             style: palette.theme.inputStyle
+            text: "0.00"
             Keys.onPressed: {
                 if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
                     if (!isNaN(numberInput.text)){

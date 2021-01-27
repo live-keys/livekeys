@@ -50,20 +50,21 @@ CodePalette{
 
     function addTransformation(name){
         var p = palette.item
-        while (p && p.objectName !== "objectContainer" && p.objectName !== "paletteGroup")
+        while (p && p.objectName !== "paletteGroup")
         {
             p = p.parent
         }
 
         if (!p) return null
 
-        if (p.objectName === "objectContainer"){ // inside shaping
+        var oc = p.parent.parent.parent.parent
+        if (oc.objectName === "objectContainer"){ // inside shaping
             var position =
-                p.editingFragment.valuePosition() +
-                p.editingFragment.valueLength() - 1
+                oc.editingFragment.valuePosition() +
+                oc.editingFragment.valueLength() - 1
             paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
-            var cont = p.groupsContainer
+            var cont = oc.groupsContainer
             return cont.children[cont.children.length - 1]
 
         } else { // inside palette
