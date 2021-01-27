@@ -358,6 +358,9 @@ QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoStream(
                 if ( !expt.package.startsWith(lib->uri()) && expt.package != "<cpp>" ){
                     childModule = false;
                     typeModule = "";
+                } else if ( expt.package == lib->uri() ){
+                    typeModule = expt.package;
+                    break;
                 } else if ( expt.package.startsWith(lib->uri()) && childModule ){
                     typeModule = expt.package;
                 } else if ( typeModule.isEmpty() && childModule ){
