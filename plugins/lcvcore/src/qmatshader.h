@@ -48,10 +48,11 @@ private:
 
 inline const char *QMatShader::vertexShader() const{
     return
-        "attribute highp vec4 aVertex;                              \n"
-        "attribute highp vec2 aTexCoord;                            \n"
+        "#version 330\n"
+        "in highp vec4 aVertex;                              \n"
+        "in highp vec2 aTexCoord;                            \n"
         "uniform highp mat4 qt_Matrix;                              \n"
-        "varying highp vec2 texCoord;                               \n"
+        "out highp vec2 texCoord;                               \n"
         "void main() {                                              \n"
         "    gl_Position = qt_Matrix * aVertex;                     \n"
         "    texCoord[0] = aTexCoord.x;"
@@ -61,13 +62,15 @@ inline const char *QMatShader::vertexShader() const{
 
 inline const char *QMatShader::fragmentShader() const{
     return
+        "#version 330\n"
         "uniform lowp float qt_Opacity;                             \n"
-        "varying highp vec2 texCoord;                               \n"
+        "in highp vec2 texCoord;                               \n"
         "uniform sampler2D textures[1];                             \n"
+        "out vec4 fragColor;                                        \n"
         "void main ()                                               \n"
         "{                                                          \n"
-        "   highp vec4 textureColor = texture2D( textures[0], texCoord.st );"
-        "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
+        "   highp vec4 textureColor = texture( textures[0], texCoord.st );"
+        "   fragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
         "}";
 }
 
