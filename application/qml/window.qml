@@ -256,7 +256,7 @@ ApplicationWindow{
 
         Connections{
             target: lk
-            onLayerReady: {
+            function onLayerReady(layer){
                 if ( layer.name === 'workspace' ){
                     logo.opacity = 1.0
                 }

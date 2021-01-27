@@ -52,7 +52,7 @@ CodePalette{
         }
     }
 
-    onInit: {
+    onValueFromBindingChanged: {
         execBox.current = value
     }
 

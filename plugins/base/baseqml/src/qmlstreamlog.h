@@ -32,7 +32,6 @@ signals:
 private:
     QmlStream* m_stream;
     QString    m_prefix;
-    VisualLogQmlObject* m_log;
 };
 
 inline QmlStream *QmlStreamLog::stream() const{

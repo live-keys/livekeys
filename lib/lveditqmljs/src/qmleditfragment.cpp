@@ -472,18 +472,17 @@ QString QmlEditFragment::readValueText() const{
 }
 
 void QmlEditFragment::updatePaletteValue(CodePalette *palette){
-    QmlBindingChannel::Ptr inputChannel = m_channel;
-    if ( !inputChannel )
+    if ( !m_channel )
         return;
 
-    if ( inputChannel->listIndex() == -1 ){
-        if ( inputChannel->isBuilder() ){
+    if ( m_channel->listIndex() == -1 ){
+        if ( m_channel->isBuilder() ){
             palette->initViaSource();
         } else {
-            palette->setValueFromBinding(inputChannel->property().read());
+            palette->setValueFromBinding(m_channel->property().read());
         }
     } else {
-        QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_channel->property().read());
         QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
 
         // create correct order for list reference
@@ -501,7 +500,40 @@ void QmlEditFragment::updatePaletteValue(CodePalette *palette){
                 ordered.push_back(child);
         }
 
-        palette->setValueFromBinding(QVariant::fromValue(ordered[inputChannel->listIndex()]));
+        palette->setValueFromBinding(QVariant::fromValue(ordered[m_channel->listIndex()]));
+    }
+}
+
+void QmlEditFragment::initializePaletteValue(CodePalette *palette){
+    if ( !m_channel )
+        return;
+
+    if ( m_channel->listIndex() == -1 ){
+        if ( m_channel->isBuilder() ){
+            palette->initViaSource();
+        } else {
+            palette->initValue(m_channel->property().read());
+        }
+    } else {
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_channel->property().read());
+        QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+        // create correct order for list reference
+        QObjectList ordered;
+
+        for (auto child: parent->children())
+        {
+            bool found = false;
+            for (int i = 0; i < ppref.count(); ++i)
+                if (child == ppref.at(i)){
+                    found = true;
+                    break;
+                }
+            if (found)
+                ordered.push_back(child);
+        }
+
+        palette->initValue(QVariant::fromValue(ordered[m_channel->listIndex()]));
     }
 }
 

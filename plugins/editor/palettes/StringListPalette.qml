@@ -185,7 +185,7 @@ CodePalette{
         }
     }
 
-    onInit: {
+    onValueFromBindingChanged: {
         argsContainer.model.clear()
         for (var i = 0; i < value.length; ++i)
             argsContainer.model.append({'value': value[i]})

@@ -307,4 +307,16 @@ CodePalette{
         }
         updateSliders(value)
     }
+    onValueFromBindingChanged: {
+        if (isNaN(value)){
+            palette.value = NaN
+            numberInput.text = 'NaN'
+            intSlider.enabled = false
+            fractionalSlider.enabled = false
+
+            editFragment.writeCode('NaN')
+            return
+        }
+        updateSliders(value)
+    }
 }

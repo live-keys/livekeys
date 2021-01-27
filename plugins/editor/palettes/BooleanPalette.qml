@@ -46,6 +46,9 @@ CodePalette {
     onInit: {
         checked = value
     }
+    onValueFromBindingChanged: {
+        checked = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

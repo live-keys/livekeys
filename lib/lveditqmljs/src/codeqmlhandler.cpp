@@ -1211,7 +1211,9 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
         d->syncParse(m_document);
         d->syncObjects(m_document);
 
-        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+            m_document, d->documentObjects()->root(), declaration
+        );
         QmlBindingPath::Ptr bp = tr.bindingPath;
 
         if ( !bp )
@@ -1926,7 +1928,13 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 
 
     if ( !ef ){
-        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot create injection channel for declaration: " + QString::number(declaration->position()).toStdString(), lv::Exception::toCode("~Injection")), this).jsThrow();
+        QmlError(m_engine, CREATE_EXCEPTION(
+            lv::Exception,
+            "Cannot create injection channel for declaration: " +
+            QString::number(declaration->position()).toStdString(),
+            lv::Exception::toCode("~Injection")),
+        this).jsThrow();
+
         return nullptr;
     }
 
@@ -2427,8 +2435,7 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
         CodePalette* palette = paletteList->loadAt(index);
         palette->setEditFragment(edit);
         edit->addPalette(palette);
-        edit->updatePaletteValue(palette);
-
+        edit->initializePaletteValue(palette);
 
         connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
@@ -2510,7 +2517,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
     palette->setEditFragment(edit);
 
     edit->setBindingPalette(palette);
-    edit->updatePaletteValue(palette);
+    edit->initializePaletteValue(palette);
 
     connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
@@ -2642,7 +2649,7 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 palette->setEditFragment(edit);
 
                 edit->addPalette(palette);
-                edit->updatePaletteValue(palette);
+                edit->initializePaletteValue(palette);
 
                 connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 

@@ -142,6 +142,28 @@ CodePalette{
             fontSize: palette.inputFont.pixelSize
             smallFontSize: palette.inputFont.pixelSize - 2
             visible: palette.codeModel.isEnabled
+            onVisibleChanged: {
+                if ( visible ){
+                    var editorPane = palette.item.parent
+                    while ( editorPane && !editorPane.currentWindow ){
+                        editorPane = editorPane.parent
+                    }
+                    if ( editorPane ){
+                        var mainItem = editorPane.currentWindow.contentItem
+                        var coords = palette.item.mapToItem(mainItem, 0, 0)
+                        var suggestionBoxUpper = coords.y + qmlSuggestionBox.height + 30
+
+                        if ( suggestionBoxUpper < mainItem.height ){
+                            qmlSuggestionBox.anchors.bottom = undefined
+                            qmlSuggestionBox.anchors.top = input.bottom
+                        } else {
+                            qmlSuggestionBox.anchors.top = undefined
+                            qmlSuggestionBox.anchors.bottom = input.top
+                        }
+                    }
+                }
+            }
+
             opacity: visible ? 0.95 : 0
 
             model: palette.codeModel

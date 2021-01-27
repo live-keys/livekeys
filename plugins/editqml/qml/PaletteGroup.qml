@@ -13,7 +13,7 @@ Column{
     property var palettesOpened: []
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
-        onAboutToRemovePalette : {
+        function onAboutToRemovePalette(palette){
             var p = palette.item.parent
             while ( p && p.objectName !== "paletteContainer" )
                 p = p.parent
@@ -21,7 +21,7 @@ Column{
             if ( p && p.objectName === "paletteContainer" )
                 p.destroy()
         }
-        onPaletteListEmpty: {
+        function onPaletteListEmpty(){
             var box = paletteGroup.parent
             if ( editingFragment.bindingPalette() ){
                 if ( box.objectName === 'editorBox' ){
@@ -35,7 +35,7 @@ Column{
                 }
             }
         }
-        onAboutToBeRemoved : {
+        function onAboutToBeRemoved(){
             var p = paletteGroup.parent
             if ( p && p.objectName === 'editorBox' ){
                 for (var i = 0; i < children.length; ++i)
@@ -48,7 +48,6 @@ Column{
     }
 
     onWidthChanged: {
-
         if (parent && parent.parent && parent.parent.parent &&
             parent.parent.parent.objectName === "objectContainer")
             parent.parent.parent.recalculateContentWidth()

@@ -56,6 +56,9 @@ CodePalette{
     onInit: {
         root.path = value
     }
+    onValueFromBindingChanged: {
+        root.path = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){

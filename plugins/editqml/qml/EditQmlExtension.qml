@@ -148,7 +148,6 @@ WorkspaceExtension{
                 if (callback)
                     callback()
                 else {
-
                     var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
                     oc.contentWidth = Qt.binding(function(){
                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
@@ -157,7 +156,7 @@ WorkspaceExtension{
                     editor.editor.rootShaped = true
                 }
             } else {
-                throw linkError(new Error("Failed to shape root object."), this)
+                throw linkError(new Error("Failed to shape root object."), null)
             }
         })
 
