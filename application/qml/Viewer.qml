@@ -229,7 +229,7 @@ Pane{
     Connections{
         target: project.active
         function onObjectReady(){ error.text = '' }
-        function onRunError(error){
+        function onRunError(errors){
             var errorMessage = error.wrapMessage(errors)
             error.text = errorMessage.rich
             console.error(errorMessage.log)
