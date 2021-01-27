@@ -459,7 +459,7 @@ Pane{
 
             Connections{
                 target: lk.log
-                onRowsInserted : {
+                function onRowsInserted(){
                     if ( root.visible && logScroll.flickableItem.contentHeight > logScroll.height )
                         logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height
                     root.itemAdded()

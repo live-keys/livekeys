@@ -56,7 +56,7 @@ Rectangle {
 
     Connections{
         target: lk
-        onLayerReady: {
+        function onLayerReady(layer){
             if (layer && layer.name === 'workspace' ){
                 var theme = layer.themes.current
                 container.theme = theme

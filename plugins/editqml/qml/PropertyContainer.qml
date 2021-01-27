@@ -26,7 +26,7 @@ Item{
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
-        onAboutToBeRemoved : {
+        function onAboutToBeRemoved(){
             if (!isAnObject)
                 propertyContainer.destroy()
         }

@@ -438,7 +438,7 @@ Rectangle{
 
                 Connections{
                     target: project.documentModel
-                    onAboutToClose: {
+                    function onAboutToClose(document){
                         if ( document === root.document ){
                             root.document = null
                         }

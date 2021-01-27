@@ -19,7 +19,7 @@ Pane{
 
     Connections{
         target: lk
-        onLayerReady: {
+        function onLayerReady(layer){
             if (!layer || layer.name !== 'workspace' ) return
             modeContainer.liveImage.source = currentTheme.topLiveModeIcon
             modeContainer.onSaveImage.source = currentTheme.topOnSaveModeIcon
@@ -228,8 +228,8 @@ Pane{
 
     Connections{
         target: project.active
-        onObjectReady : { error.text = '' }
-        onRunError : {
+        function onObjectReady(){ error.text = '' }
+        function onRunError(error){
             var errorMessage = error.wrapMessage(errors)
             error.text = errorMessage.rich
             console.error(errorMessage.log)
