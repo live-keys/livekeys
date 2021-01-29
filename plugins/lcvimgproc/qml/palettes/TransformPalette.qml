@@ -50,14 +50,15 @@ CodePalette{
 
     function addTransformation(name){
         var p = palette.item
-        while (p && p.objectName !== "objectContainer" && p.objectName !== "paletteGroup")
+        while (p && p.objectName !== "paletteGroup")
         {
             p = p.parent
         }
 
         if (!p) return null
 
-        if (p.objectName === "objectContainer"){ // inside shaping
+        var oc = p.parent.parent.parent.parent
+        if (oc.objectName === "objectContainer"){ // inside shaping
             var position =
                 p.editingFragment.valuePosition() +
                 p.editingFragment.valueLength() - 1

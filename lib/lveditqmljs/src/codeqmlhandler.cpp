@@ -2848,7 +2848,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
-        if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && (addContainer->model()->supportsObjectNesting() || findRootPosition() == -1)){
             addContainer->model()->addObjectsToModel(scope);
         }
         return addContainer;
