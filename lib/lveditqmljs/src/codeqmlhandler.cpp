@@ -191,13 +191,13 @@ namespace qmlhandler_helpers{
                   m.functionType == QmlFunctionInfo::Slot) && suggestMethods ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "function", ti->prefereredType().name(), completion
+                    m.name + "(", "function", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestSignals ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "signal", ti->prefereredType().name(), completion
+                    m.name + "(", "signal", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestGeneratedSlots ){

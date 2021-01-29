@@ -9,6 +9,7 @@ Item{
 
     property alias paletteGroup: objectContainer.paletteGroup
     property alias groupsContainer: container
+    property alias pane: objectContainer.pane
 
     function recalculateContentWidth(){
         var max = 0
@@ -227,6 +228,7 @@ Item{
         }
 
         function expand(){
+            if (!compact) return
             compact = false
             if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
@@ -241,6 +243,7 @@ Item{
         }
 
         function collapse(){
+            if (compact) return
             for ( var i = 1; i < container.children.length; ++i ){
                 var edit = container.children[i].editingFragment
                 editor.documentHandler.codeHandler.removeConnection(edit)

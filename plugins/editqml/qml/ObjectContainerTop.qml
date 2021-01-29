@@ -36,6 +36,7 @@ Rectangle{
         anchors.verticalCenter: parent.verticalCenter
         width: 15
         height: parent.height
+        visible: !objectContainer.pane
         Triangle{
             width: 8
             height: 8
@@ -261,8 +262,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment())
-
+            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment()) && !objectContainer.pane
             Icons.XIcon{
                 anchors.centerIn: parent
                 width: 8
