@@ -191,7 +191,13 @@ QmlLibraryInfo::Ptr ProjectQmlScope::findQmlLibraryInPath(
     QmlDirParser dirParser;
     dirParser.parse(QString::fromUtf8(dirFile.readAll()));
 
-    QmlLibraryInfo::Ptr linfo = QmlLibraryInfo::create(dirParser);
+    QmlLibraryInfo::Ptr linfo = nullptr;
+    if ( uri == fullPath ){
+        linfo = QmlLibraryInfo::create(uri);
+    } else {
+        linfo = QmlLibraryInfo::create(dirParser);
+    }
+
     linfo->setPath(fullPath);
     return linfo;
 }
