@@ -168,6 +168,11 @@ Rectangle{
     signal doubleClicked(var pos)
     signal rightClicked(var pos)
     signal edgeClicked(QtObject edge)
+    signal clicked()
+
+    onClicked: {
+        deselectEdge()
+    }
 
 
     onUserEdgeInserted: {
@@ -231,8 +236,12 @@ Rectangle{
     }
 
     onNodeClicked: {
+        deselectEdge()
+    }
+
+    function deselectEdge(){
         if (selectedEdge)
-            selectedEdge.item.color = '#6a6a6a'
+            selectedEdge.item.color = '#3f444d'
         selectedEdge = null
     }
 
@@ -248,7 +257,8 @@ Rectangle{
         addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var cursorCoords = Qt.point(pos.x, pos.y)
+        var coords = editor.mapGlobalPosition()
+        var cursorCoords = Qt.point(coords.x, coords.y)
         var addBox = lk.layers.editor.environment.createEditorBox(
             addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
         )
@@ -314,19 +324,14 @@ Rectangle{
         var dstPort = item.destinationItem
 
 
-        var value = ''
 
         if (dstPort.objectProperty.editingFragment){
-            var result = dstPort.objectProperty.editingFragment.bindExpression(value)
-            if ( result ){
-                dstPort.objectProperty.editingFragment.write(
-                    {'__ref': value
-                    ? value
-                    : dstPort.objectProperty.editingFragment.defaultValue()}
-                )
-            } else {
-                lk.layers.workspace.messages.pushWarning("Failed to remove binding.", 1)
-            }
+            var ef = dstPort.objectProperty.editingFragment
+            var value = ef.defaultValue()
+            dstPort.objectProperty.editingFragment.write(
+                {'__ref': value}
+            )
+            ef.commit(value)
         }
 
         graph.removeEdge(edge)
@@ -444,6 +449,7 @@ Rectangle{
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
         onPressed: { root.activateFocus() }
+        onClicked: root.clicked()
     
         graph: Qan.Graph {
             id: graph
