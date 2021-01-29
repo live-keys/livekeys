@@ -42,6 +42,18 @@ void QmlWatcher::componentComplete(){
 
     if ( !m_target )
         m_target = parent();
+    if ( !m_target )
+        return;
+
+    resolveTarget();
+}
+
+void QmlWatcher::resolveTarget(){
+    if ( !m_componentComplete )
+        return;
+
+    if ( !m_referencedFile.isEmpty() ) // skip if already initialized
+        return;
 
     ViewEngine* ve = ViewEngine::grab(this);
 
@@ -81,12 +93,12 @@ bool QmlWatcher::checkChildDeclarations(){
 }
 
 void QmlWatcher::setSingleton(QObject *singleton){
-    if ( m_componentComplete ){
+    if ( m_target ){
         ViewEngine* ve = ViewEngine::grab(this);
         if ( ve ){
             QmlError(
                 ve,
-                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already initialized. Cannot set singleton afterwards.", Exception::toCode("Completed")),
+                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already has a target. Cannot overwrite with new singleton.", Exception::toCode("Completed")),
                 this
             ).jsThrow();
         }
@@ -96,6 +108,28 @@ void QmlWatcher::setSingleton(QObject *singleton){
     m_target = singleton;
     m_declaredId = "__singleton__";
     emit targetChanged();
+
+    resolveTarget();
+}
+
+void QmlWatcher::setTarget(QObject *target){
+    if ( m_target ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( ve ){
+            QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already has a target. Cannot overwrite with new target.", Exception::toCode("Completed")),
+                this
+            ).jsThrow();
+        }
+        return;
+    }
+
+
+    m_target = target;
+    emit targetChanged();
+
+    resolveTarget();
 }
 
 }// namespace

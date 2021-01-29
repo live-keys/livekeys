@@ -26,6 +26,8 @@ void HookContainer::insertKey(const QString &file, const QString &id, QObject *o
     }
 
     idIt.value().append(obj);
+
+    emit entryAdded(file, id, obj);
 }
 
 QMap<QString, QList<QObject *> > HookContainer::entriesForFile(const QString &sourceFile){
