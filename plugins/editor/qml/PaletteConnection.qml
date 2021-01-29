@@ -21,10 +21,6 @@ Rectangle{
     z: 3000
 
     focus: false
-    onFocusChanged: {
-        console.trace()
-        console.log("MY FOCUS:" + focus)
-    }
 
     property QtObject theme: lk.layers.workspace.themes.current
 

@@ -3235,8 +3235,10 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     if ( bc->canModify() ){
         QQmlProperty& p = bc->property();
 
+        QString creationPath = m_document->file()->path();
+        creationPath.replace(".qml", "_a.qml");
         QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", "temp"
+            d->documentInfo(), type + "{}", creationPath
         );
 
         if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){

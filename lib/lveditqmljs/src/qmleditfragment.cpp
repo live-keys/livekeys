@@ -79,7 +79,8 @@ QmlEditFragment::~QmlEditFragment(){
     ProjectDocument* doc = declaration()->document();
     doc->removeSection(section);
 
-    for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){
+    auto fragments = childFragments();
+    for ( auto it = fragments.begin(); it != fragments.end(); ++it ){
         QmlEditFragment* edit = *it;
         edit->deleteLater();
     }
@@ -88,21 +89,13 @@ QmlEditFragment::~QmlEditFragment(){
 QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent)
 {
     QString fullDeclaration;
+    fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "\n";
 
-    for ( auto it = info->imports().begin(); it != info->imports().end(); ++it ){
-        fullDeclaration +=
-            "import " + it->uri() + " " +
-            QString::number(it->versionMajor()) + "." + QString::number(it->versionMinor());
-        if ( !it->as().isEmpty() ){
-            fullDeclaration += " as " + it->as();
-        }
-        fullDeclaration += "\n";
-    }
-    fullDeclaration += "\n" + declaration + "\n";
-
-    QObject* obj = ViewContext::instance().engine()->createObject(fullDeclaration, parent, path);
-
-    return obj;
+    ViewEngine* engine = ViewContext::instance().engine();
+    ViewEngine::ComponentResult::Ptr cr = engine->createObject(
+        path, fullDeclaration.toUtf8(), parent
+    );
+    return cr->object;
 }
 
 /**
