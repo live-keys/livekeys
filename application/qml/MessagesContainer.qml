@@ -89,7 +89,7 @@ Rectangle {
 
     Connections{
         target: listView.model
-        onMessageAdded:{
+        function onMessageAdded(type, message, code){
             if ( type > root.messageState && !root.visible )
                 root.messageState = type
             if ( !root.visible )

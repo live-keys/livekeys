@@ -54,6 +54,9 @@ void QTransformImage::clearObjects(QQmlListProperty<QObject> *list){
 }
 
 void QTransformImage::run(){
+    if (!m_input)
+        return;
+
     lv::ViewEngine* engine = lv::ViewEngine::grab(this);
 
     if ( !m_children.length() ){
@@ -85,6 +88,9 @@ void QTransformImage::__childDestroyed(){
 
 void QTransformImage::__childResultChanged(){
     //TODO: Optimize: start from that child onward only
+    if (!m_input)
+        return;
+
     lv::ViewEngine* engine = lv::ViewEngine::grab(this);
 
     if ( !m_children.length() ){

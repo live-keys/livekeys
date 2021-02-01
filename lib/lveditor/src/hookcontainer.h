@@ -29,6 +29,9 @@ public:
     QMap<QString, QList<QObject*> > entriesForFile(const QString& sourceFile);
     QList<QObject*> entriesFor(const QString& file, const QString& id);
 
+signals:
+    void entryAdded(const QString& file, const QString& id, QObject* object);
+
 private:
     Runnable* m_runnable;
     QString   m_projectPath;

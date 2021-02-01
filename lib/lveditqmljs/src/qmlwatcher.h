@@ -15,6 +15,8 @@ class HookContainer;
 class LV_EDITQMLJS_EXPORT QmlWatcher : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
+    Q_PROPERTY(QObject* singleton READ target WRITE setSingleton NOTIFY targetChanged)
+    Q_PROPERTY(QObject* target READ target WRITE setTarget NOTIFY targetChanged)
     Q_INTERFACES(QQmlParserStatus)
 
 public:
@@ -28,24 +30,36 @@ public:
 
     void initialize(ViewEngine* engine, HookContainer* hooks, const QString& referencedFile, const QString& declaredId);
 
+    QObject* target() const;
+    void setSingleton(QObject* singleton);
+
+    void setTarget(QObject* target);
+
 signals:
     void ready();
+    void targetChanged();
 
 protected:
     void classBegin() override{}
     void componentComplete() override;
 
 private:
+    void resolveTarget();
     bool checkChildDeclarations();
 
-    QString m_referencedFile;
-    QString m_declaredId;
-    bool    m_isEnabled;
-    bool    m_componentComplete;
+    QString  m_referencedFile;
+    QString  m_declaredId;
+    bool     m_isEnabled;
+    bool     m_componentComplete;
+    QObject* m_target;
 };
 
 inline bool QmlWatcher::isEnabled() const{
     return m_isEnabled;
+}
+
+inline QObject *QmlWatcher::target() const{
+    return m_target;
 }
 
 }// namespace

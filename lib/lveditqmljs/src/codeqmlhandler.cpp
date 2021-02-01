@@ -1211,7 +1211,9 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
         d->syncParse(m_document);
         d->syncObjects(m_document);
 
-        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+            m_document, d->documentObjects()->root(), declaration
+        );
         QmlBindingPath::Ptr bp = tr.bindingPath;
 
         if ( !bp )
@@ -1956,7 +1958,13 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 
 
     if ( !ef ){
-        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot create injection channel for declaration: " + QString::number(declaration->position()).toStdString(), lv::Exception::toCode("~Injection")), this).jsThrow();
+        QmlError(m_engine, CREATE_EXCEPTION(
+            lv::Exception,
+            "Cannot create injection channel for declaration: " +
+            QString::number(declaration->position()).toStdString(),
+            lv::Exception::toCode("~Injection")),
+        this).jsThrow();
+
         return nullptr;
     }
 
@@ -2870,7 +2878,7 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
 
         addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
-        if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && (addContainer->model()->supportsObjectNesting() || findRootPosition() == -1)){
             addContainer->model()->addObjectsToModel(scope);
         }
         return addContainer;
@@ -3257,8 +3265,10 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     if ( bc->canModify() ){
         QQmlProperty& p = bc->property();
 
+        QString creationPath = m_document->file()->path();
+        creationPath.replace(".qml", "_a.qml");
         QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", "temp"
+            d->documentInfo(), type + "{}", creationPath
         );
 
         if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
