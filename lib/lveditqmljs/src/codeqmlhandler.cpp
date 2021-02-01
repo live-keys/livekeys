@@ -1502,13 +1502,14 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         expressionPath.append(expr.trimmed());
     }
 
+
     int cursorPosition = edit->declaration()->position();
 
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
     );
 
-    if ( !expressionChain.isValid() ){
+    if ( !expressionChain.isValid() && expression != "null" ){
         QmlError(
             m_engine,
             CREATE_EXCEPTION(
@@ -1605,6 +1606,35 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 pn->parent = n;
                 n->child = pn;
             }
+        }
+    } else if ( expression == "null" ){
+        // disable the binding
+        QmlBindingChannel::Ptr receivingChannel = edit->channel();
+        if ( !receivingChannel->isEnabled() )
+            return true;
+
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+        if ( !documentChannel )
+            return true;
+
+        if ( documentChannel->isBuilder() )
+            return true;
+
+        if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
+            QQmlProperty receivingProperty = receivingChannel->property();
+            QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+            QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+
+            if ( previousWatcherVariant.isValid() ){
+                QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                delete previousWatcher;
+                receivingProperty.object()->setProperty(watcherName, QVariant());
+            }
+
+            QVariant val = receivingProperty.read();
+            receivingProperty.write(val);
+
+            return true;
         }
     } else {
         QmlError(

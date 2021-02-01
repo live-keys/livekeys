@@ -317,16 +317,15 @@ Rectangle{
         var value = ''
 
         if (dstPort.objectProperty.editingFragment){
-            var result = dstPort.objectProperty.editingFragment.bindExpression(value)
-            if ( result ){
-                dstPort.objectProperty.editingFragment.write(
-                    {'__ref': value
-                    ? value
-                    : dstPort.objectProperty.editingFragment.defaultValue()}
-                )
-            } else {
-                lk.layers.workspace.messages.pushWarning("Failed to remove binding.", 1)
-            }
+            var ef = dstPort.objectProperty.editingFragment
+
+            var result = ef.bindExpression('null')
+
+            value = ef.defaultValue()
+            dstPort.objectProperty.editingFragment.write(
+                {'__ref': value}
+            )
+            ef.commit(value)
         }
 
         graph.removeEdge(edge)
