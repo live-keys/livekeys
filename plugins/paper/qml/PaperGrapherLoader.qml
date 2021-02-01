@@ -1,6 +1,6 @@
 import QtQuick 2.3
 import paper 1.0
-import 'papergraph.js' as PaperGraph
+import 'papergrapherjs/papergraph.js' as PaperGraph
 
 Item{
     id: root

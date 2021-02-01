@@ -12,6 +12,7 @@ Item{
     function paint(){ canvas.requestPaint() }
 
     signal paperReady(var paper)
+    signal painted()
 
     property string xmldomPath: ':/xmldom.js'
     property string domScriptPath: ':/paper-dom.js'
@@ -102,6 +103,7 @@ Item{
             }
             root.paper.view.update()
         }
+        onPainted: root.painted()
     }
 
     Timer{
