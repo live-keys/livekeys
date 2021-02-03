@@ -217,6 +217,8 @@ public slots:
 
     void suggestCompletion(int cursorPosition);
 
+    int checkPragma(int position);
+
     // Registered slots
 
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);

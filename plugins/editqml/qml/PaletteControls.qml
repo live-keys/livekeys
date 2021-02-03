@@ -1033,7 +1033,11 @@ QtObject{
             if (paletteBox) paletteBox.moveEnabledSet = false
         }
 
-         editor.documentHandler.frameBox(editorBox, ef.position(), ef.length())
+        var frameBoxPosition = ef.position()
+        if (forImports){
+            frameBoxPosition = codeHandler.checkPragma(ef.position())
+        }
+        editor.documentHandler.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports) editor.editor.importsShaped = true
         ef.incrementRefCount()
