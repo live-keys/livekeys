@@ -24,6 +24,16 @@ QmlWatcher::QmlWatcher(QObject *parent)
 }
 
 QmlWatcher::~QmlWatcher(){
+    if ( m_target ){
+        QQmlContext* ctx = qmlContext(this);
+        if ( !ctx )
+            return;
+
+        HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
+        if ( !hk )
+            return;
+        hk->removeEntry(m_referencedFile, m_declaredId, this);
+    }
 }
 
 void QmlWatcher::initialize(ViewEngine *, HookContainer *hooks, const QString &refFile, const QString &declaredId){
@@ -79,6 +89,8 @@ void QmlWatcher::resolveTarget(){
 }
 
 bool QmlWatcher::checkChildDeclarations(){
+    // children of the target need to be declared in the file being watched, not
+    // where the watcher was set
     QQmlProperty pp(m_target);
     if ( pp.propertyTypeCategory() == QQmlProperty::List ){
         QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(pp.read());
