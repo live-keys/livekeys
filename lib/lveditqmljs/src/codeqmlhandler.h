@@ -227,6 +227,8 @@ public slots:
     void __aboutToDelete();
 
 private:
+    void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "");
+
     QmlDeclaration::Ptr createImportDeclaration();
 
     void rehighlightSection(int start, int end);
