@@ -5,6 +5,7 @@ import editor 1.0
 import editor.private 1.0
 import base 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -460,7 +461,7 @@ Rectangle{
         }
     }
 
-    TextButton {
+    Workspace.TextButton{
         id: addRootButton
         anchors.left: lineSurfaceBackground.right
         anchors.leftMargin: 10
