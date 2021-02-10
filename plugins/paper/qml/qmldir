@@ -1,0 +1,27 @@
+module paper
+plugin paper
+
+depends QtQuick 2.3
+
+Paper              1.0 Paper.qml
+PaperGrapherLoader 1.0 PaperGrapherLoader.qml
+PaperEditor        1.0 PaperEditor.qml
+PaperCanvas        1.0 paperqml/PaperCanvas.qml
+
+CircleTool       1.0 tools/CircleTool.qml
+DetailSelectTool 1.0 tools/DetailSelectTool.qml
+DrawTool         1.0 tools/DrawTool.qml
+EyeDropperTool   1.0 tools/EyeDropperTool.qml
+PenTool          1.0 tools/PenTool.qml
+RectangleTool    1.0 tools/RectangleTool.qml
+RotateTool       1.0 tools/RotateTool.qml
+ScaleTool        1.0 tools/ScaleTool.qml
+SelectTool       1.0 tools/SelectTool.qml
+TextTool         1.0 tools/TextTool.qml
+
+Chessboard         1.0 papergrapherqml/Chessboard.qml
+PaperGrapherConfig 1.0 papergrapherqml/PaperGrapherConfig.qml
+Tool               1.0 papergrapherqml/Tool.qml
+Toolbox            1.0 papergrapherqml/Toolbox.qml
+ToolButton         1.0 papergrapherqml/ToolButton.qml
+ToolIcon           1.0 papergrapherqml/ToolIcon.qml

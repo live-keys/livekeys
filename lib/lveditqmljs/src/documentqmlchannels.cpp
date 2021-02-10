@@ -164,6 +164,10 @@ void DocumentQmlChannels::addChannel(QmlBindingChannel::Ptr bc){
     }
 }
 
+QmlBindingChannel::Ptr DocumentQmlChannels::channelAt(int index) const{
+    return m_channels.at(index);
+}
+
 void DocumentQmlChannels::selectChannel(int index){
     if ( m_selectedIndex != index && index < m_channels.size() ){
         if ( m_selectedChannel ){
@@ -219,6 +223,14 @@ void DocumentQmlChannels::updateChannel(QmlBindingChannel::Ptr newChannel){
     }
 
     addChannel(newChannel);
+}
+
+void DocumentQmlChannels::removeChannels(){
+    m_channels.clear();
+    m_selectedChannel = nullptr;
+    m_selectedIndex = -1;
+    emit selectedChannelChanged();
+    emit selectedIndexChanged();
 }
 
 ProjectDocument *DocumentQmlChannels::document() const{
@@ -288,6 +300,8 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPath(QmlBindingPath::
 }
 
 QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPathFrom(QmlBindingChannel::Ptr from, QmlBindingPath::Ptr path){
+    if ( from.isNull() )
+        return nullptr;
     Runnable* r = from->runnable();
     if ( !path->root() || !r || !r->viewRoot())
         return nullptr;

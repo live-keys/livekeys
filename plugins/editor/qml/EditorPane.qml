@@ -507,7 +507,6 @@ Pane{
                     var rootPosition = codeHandler.findRootPosition()
 
                     lk.layers.workspace.extensions.editqml.shapeLayout(root, layout)
-
                 })
             }
         }
@@ -524,6 +523,10 @@ Pane{
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = documentHandler.has(DocumentHandler.LanguageLayout)
         }
+    }
+
+    Component.onCompleted:{
+        editor.addRootButton.style = root.currentTheme.formButtonStyle
     }
 
 }

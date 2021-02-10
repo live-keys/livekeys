@@ -39,11 +39,14 @@ public:
     QmlBindingChannel::Ptr selectedChannel() const;
 
     void addChannel(QmlBindingChannel::Ptr bc);
+    QmlBindingChannel::Ptr channelAt(int index) const;
 
     void updateChannelForRunnable(Runnable* r);
     void updateChannel(QmlBindingChannel::Ptr newChannel);
 
     int totalChannels() const;
+
+    void removeChannels();
 
     static QmlBindingChannel::Ptr traverseBindingPath(QmlBindingPath::Ptr path, Runnable* r);
     static QmlBindingChannel::Ptr traverseBindingPathFrom(QmlBindingChannel::Ptr from, QmlBindingPath::Ptr path);
