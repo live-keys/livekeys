@@ -124,7 +124,7 @@ WorkspaceExtension{
             var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
             pc.item.width = Qt.binding(function(){
                 if (!pc.item.parent || !pc.item.parent.parent) return
-                var editorSize = editor.width - editor.editor.lineSurfaceWidth - 50 - pc.item.parent.parent.headerWidth
+                var editorSize = editor.width - editor.editor.lineSurfaceWidth - 30 - pc.item.parent.parent.headerWidth
                 return editorSize > 280 ? editorSize : 280
             })
         }

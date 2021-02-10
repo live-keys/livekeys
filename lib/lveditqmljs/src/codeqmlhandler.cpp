@@ -2362,6 +2362,15 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
                 }
 
                 toRemove.append(ordered[bc->listIndex()]);
+
+                auto parentFrag = edit->parentFragment();
+                if (parentFrag){
+                    for (auto cf: parentFrag->childFragments()){
+                        if (!cf->channel()) continue;
+                        if (cf->channel()->listIndex() <= bc->listIndex()) continue;
+                        cf->channel()->updateConnection(cf->channel()->listIndex()-1);
+                    }
+                }
             }
         } else {
             objectProperty = (bc->property().propertyTypeCategory() != QQmlProperty::InvalidCategory);
@@ -3405,7 +3414,7 @@ void CodeQmlHandler::suggestionsForGlobalQmlContext(
         QList<CodeCompletionSuggestion> &suggestions
 ){
     suggestions << CodeCompletionSuggestion("import", "", "", "import ");
-    suggestions << CodeCompletionSuggestion("pragma singleton", "", "", "pragma singleton");
+    suggestions << CodeCompletionSuggestion("pragma Singleton", "", "", "pragma Singleton");
 }
 
 void CodeQmlHandler::suggestionsForImport(

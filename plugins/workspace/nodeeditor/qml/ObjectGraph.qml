@@ -384,8 +384,10 @@ Rectangle{
         propertyItem.propertyName = propertyName
         propertyItem.node = node
 
-        propertyItem.parentWidth = node.item.width - 10
         propertyItem.editingFragment = editingFragment
+        var isForObject = propertyItem.isForObject
+        propertyItem.width = node.item.width - (isForObject ? 30 : 0)
+
         propertyItem.documentHandler = root.documentHandler
 
         if (editingFragment) editingFragment.incrementRefCount()

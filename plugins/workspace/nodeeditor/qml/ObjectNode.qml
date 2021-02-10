@@ -35,18 +35,21 @@ Qan.NodeItem{
 
     function resizeNode(){
         var max = 370
-
-        if (paletteContainer.width > max){
-            max = paletteContainer.width
+        if (paletteContainer.width + 15 > max){
+            max = paletteContainer.width + 15
         }
-        for (var i = 0; i < propertyContainer.children.length; ++i)
-            if (propertyContainer.children[i].contentWidth > max)
-                max = propertyContainer.children[i].contentWidth
 
-        if (max !== root.width){
-            root.width = max
+        for (var i = 0; i < propertyContainer.children.length; ++i){
+            if (propertyContainer.children[i].contentWidth > max){
+                max = propertyContainer.children[i].contentWidth
+            }
+        }
+
+
+        if (max + 20 !== root.width){
+            root.width = max + 20
             for (var i = 0; i < propertyContainer.children.length; ++i)
-                propertyContainer.children[i].width = max - 10
+                propertyContainer.children[i].width = max - propertyContainer.children[i].anchors.leftMargin
         }
     }
 

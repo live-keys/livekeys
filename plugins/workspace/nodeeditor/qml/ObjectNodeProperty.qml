@@ -23,16 +23,15 @@ Item{
     property var editor: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
-    property var parentWidth: 360
 
     signal propertyToBeDestroyed(var name)
 
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
-    width: parentWidth - anchors.leftMargin
     height: propertyTitle.height + paletteContainer.height
 
-    property int contentWidth: 0
+
+    property int contentWidth: 360 - anchors.leftMargin
 
     property QtObject defaultStyle : QtObject{
         property color background: "#333"
@@ -48,7 +47,7 @@ Item{
         id: propertyTitle
         radius: propertyItem.style.radius
         color: propertyItem.style.background
-        width: parent.width
+        width: parent.width - 10
         height: 30
 
         Workspace.Label{
@@ -144,11 +143,11 @@ Item{
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
         function updateContentWidth(){
-            var max = 360
+            var max = 355
             for (var i=0; i<children.length; ++i)
-                if (children.width > max)
-                    max = children.width
-            propertyItem.contentWidth = max + 25
+                if (children[i].width > max)
+                    max = children[i].width
+            propertyItem.contentWidth = max + anchors.leftMargin
             node.item.resizeNode()
         }
         onChildrenChanged: {

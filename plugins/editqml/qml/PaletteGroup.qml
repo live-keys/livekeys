@@ -48,9 +48,9 @@ Column{
     }
 
     onWidthChanged: {
-        if (parent && parent.parent && parent.parent.parent &&
-            parent.parent.parent.objectName === "objectContainer")
-            parent.parent.parent.recalculateContentWidth()
+        if (parent && parent.parent && parent.parent.parent && parent.parent.parent.parent &&
+            parent.parent.parent.parent.objectName === "objectContainer")
+            parent.parent.parent.parent.recalculateContentWidth()
         if (parent && parent.parent && parent.parent.objectName === "objectNode"){
             parent.parent.resizeNode()
         }

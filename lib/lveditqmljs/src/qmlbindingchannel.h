@@ -54,6 +54,7 @@ public:
     void updateConnection(const QQmlProperty& property, int listIndex = -1);
     void updateConnection(const QQmlProperty& property, const QMetaMethod &method);
     void updateConnection(QObject* object);
+    void updateConnection(int listIndex);
     void clearConnection();
 
     Type type() const;
