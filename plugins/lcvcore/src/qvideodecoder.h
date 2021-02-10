@@ -50,6 +50,8 @@ public:
         bool  forceSeek;
     };
 
+    static const int FramesToGC;
+
 public:
     explicit QVideoDecoder(QObject *parent = nullptr);
     virtual ~QVideoDecoder();
@@ -94,6 +96,7 @@ private:
     QVideoDecodeThread*        m_worker;
     lv::QmlStream*             m_stream;
     QVideoDecoder::Properties* m_properties;
+    int                        m_decodedFramesToGC;
 };
 
 inline qreal QVideoDecoder::fps() const{

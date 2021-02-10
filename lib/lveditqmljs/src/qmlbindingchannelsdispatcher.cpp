@@ -46,10 +46,10 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
         DocumentQmlChannels* documentChannels = *it;
         QString filePath = documentChannels->document()->file()->path();
 
+        documentChannels->removeChannels();
         if ( filePath == run->path() ){
             documentChannels->updateChannelForRunnable(run);
         }
-
 
         QMap<QString, QList<QObject*> > entries = hooks->entriesForFile(filePath);
         for ( auto entryIt = entries.begin(); entryIt != entries.end(); ++entryIt ){

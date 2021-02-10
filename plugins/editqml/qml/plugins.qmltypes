@@ -633,13 +633,7 @@ Module {
         prototype: "QObject"
         exports: ["editqml/Watcher 1.0"]
         exportMetaObjectRevisions: [0]
-        Property { name: "scanner"; type: "QObject"; isReadonly: true; isPointer: true }
-        Property { name: "position"; type: "QJSValue" }
+        Property { name: "singleton"; type: "QObject"; isPointer: true }
         Signal { name: "ready" }
-        Method {
-            name: "setPosition"
-            Parameter { name: "position"; type: "QJSValue" }
-        }
-        Method { name: "__workerResultReady" }
     }
 }

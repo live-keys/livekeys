@@ -19,6 +19,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import live 1.0
 import editor 1.0
+import fs 1.0 as Fs
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace

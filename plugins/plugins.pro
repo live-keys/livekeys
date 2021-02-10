@@ -14,6 +14,7 @@ SUBDIRS += \
     fs \
     workspace \
     squareone \
+    paper \
     timeline \
     lcvcore \
     lcvimgproc \

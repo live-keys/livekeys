@@ -1277,6 +1277,66 @@ void CodeQmlHandler::__aboutToDelete()
     }
 }
 
+void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype){
+    Q_D(CodeQmlHandler);
+
+    if ( !edit )
+        return;
+
+    QString type; QString id;
+    if (ctype.contains('#'))
+    {
+        auto spl = ctype.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = ctype;
+
+    QmlBindingChannel::Ptr bc = edit->channel();
+
+    if ( bc->canModify() ){
+        QQmlProperty& p = bc->property();
+
+        QString creationPath = m_document->file()->path();
+        creationPath.replace(".qml", "_a.qml");
+        QObject* result = QmlEditFragment::createObject(
+            d->documentInfo(), type + "{}", creationPath
+        );
+        if ( !result )
+            THROW_EXCEPTION(lv::Exception, "Failed to create object: " + type.toStdString(), Exception::toCode("~CreateObject"));
+
+        if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
+
+            QObject* obat = bc->object();
+
+            QQmlProperty assignmentProperty(obat);
+            if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
+                QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
+                vlog("editqmljs-codehandler").v() <<
+                    "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                    "property " << assignmentProperty.name();
+
+                QQmlEngine::setObjectOwnership(result, QQmlEngine::CppOwnership);
+                if ( assignmentList.canAppend() ){
+                    result->setParent(obat);
+                    assignmentList.append(result);
+
+                    m_bindingChannels->desyncInactiveChannels();
+
+                    return;
+                }
+            } else {
+                vlog("editqmljs-codehandler").v() <<
+                    "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                    "property " << assignmentProperty.name();
+                assignmentProperty.write(QVariant::fromValue(result));
+                return;
+            }
+        } else {
+            edit->channel()->property().write(QVariant::fromValue(result));
+        }
+    }
+}
+
 QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
 {
     return ef->nestedObjectsInfo();
@@ -1505,13 +1565,14 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         expressionPath.append(expr.trimmed());
     }
 
+
     int cursorPosition = edit->declaration()->position();
 
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
     );
 
-    if ( !expressionChain.isValid() ){
+    if ( !expressionChain.isValid() && expression != "null" ){
         QmlError(
             m_engine,
             CREATE_EXCEPTION(
@@ -1608,6 +1669,35 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 pn->parent = n;
                 n->child = pn;
             }
+        }
+    } else if ( expression == "null" ){
+        // disable the binding
+        QmlBindingChannel::Ptr receivingChannel = edit->channel();
+        if ( !receivingChannel->isEnabled() )
+            return true;
+
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+        if ( !documentChannel )
+            return true;
+
+        if ( documentChannel->isBuilder() )
+            return true;
+
+        if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
+            QQmlProperty receivingProperty = receivingChannel->property();
+            QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+            QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+
+            if ( previousWatcherVariant.isValid() ){
+                QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                delete previousWatcher;
+                receivingProperty.object()->setProperty(watcherName, QVariant());
+            }
+
+            QVariant val = receivingProperty.read();
+            receivingProperty.write(val);
+
+            return true;
         }
     } else {
         QmlError(
@@ -3227,66 +3317,23 @@ int CodeQmlHandler::insertRootItem(const QString &name)
 }
 
 void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *){
-    Q_D(CodeQmlHandler);
-
-    if ( !edit )
-        return;
-
-    QString type; QString id;
-    if (ctype.contains('#'))
-    {
-        auto spl = ctype.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = ctype;
-
-    QmlBindingChannel::Ptr bc = edit->channel();
-
-    if ( bc->canModify() ){
-        QQmlProperty& p = bc->property();
-
-        QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", "temp"
-        );
-
-        if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
-
-            QObject* obat = bc->object();
-
-            QQmlProperty assignmentProperty(obat);
-            if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
-                QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
-                vlog("editqmljs-codehandler").v() <<
-                    "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                    "property " << assignmentProperty.name();
-
-                QQmlEngine::setObjectOwnership(result, QQmlEngine::CppOwnership);
-                if ( assignmentList.canAppend() ){
-                    result->setParent(obat);
-                    assignmentList.append(result);
-
-                    m_bindingChannels->desyncInactiveChannels();
-
-                    return;
-                }
-            } else {
-                vlog("editqmljs-codehandler").v() <<
-                    "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                    "property " << assignmentProperty.name();
-                assignmentProperty.write(QVariant::fromValue(result));
-                return;
-            }
-        } else {
-            edit->channel()->property().write(QVariant::fromValue(result));
-        }
+    try{
+        addItemToRunTimeImpl(edit, ctype);
+    } catch ( lv::Exception& e ){
+        m_engine->throwError(&e, this);
     }
 }
 
 QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *currentApp)
 {
-    int opos = addItem(position, "", type);
-    addItemToRuntime(parent, type, currentApp);
-    return openNestedConnection(parent, opos);
+    try{
+        int opos = addItem(position, "", type);
+        addItemToRunTimeImpl(parent, type);
+        return openNestedConnection(parent, opos);
+    } catch ( lv::Exception& e ){
+        m_engine->throwError(&e, this);
+    }
+    return nullptr;
 }
 
 QJSValue CodeQmlHandler::getDocumentIds(){

@@ -1,12 +1,14 @@
 #include "qmlfile.h"
 #include "qmlfiledescriptor.h"
+#include "live/visuallogqt.h"
 #include <QFile>
 #include <QVariant>
 
 namespace lv {
 
 
-QmlFile::QmlFile(QObject *parent) : QObject(parent)
+QmlFile::QmlFile(QObject *parent)
+    : QObject(parent)
 {
 
 }
@@ -38,7 +40,8 @@ lv::QmlFileDescriptor* QmlFile::open(QJSValue path, QmlFile::Flags flags)
     QFile* file = new QFile(path.toString());
 
     bool success = file->open(static_cast<QFile::OpenMode>(flags));
-    if (!success) return nullptr;
+    if (!success)
+        return nullptr;
 
     QmlFileDescriptor *fd = new QmlFileDescriptor(file, this);
     return fd;

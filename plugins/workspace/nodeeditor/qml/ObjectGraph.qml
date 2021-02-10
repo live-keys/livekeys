@@ -328,6 +328,7 @@ Rectangle{
         if (dstPort.objectProperty.editingFragment){
             var ef = dstPort.objectProperty.editingFragment
             var value = ef.defaultValue()
+            var result = ef.bindExpression('null')
             dstPort.objectProperty.editingFragment.write(
                 {'__ref': value}
             )

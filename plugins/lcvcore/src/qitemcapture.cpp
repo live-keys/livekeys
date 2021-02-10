@@ -68,7 +68,8 @@ void QItemCapture::capture(){
 }
 
 void QItemCapture::__itemWindowAttached(QQuickWindow* window){
-    connect(window, &QQuickWindow::afterRendering, this, &QItemCapture::__windowRendered, Qt::DirectConnection);
+    if ( window )
+        connect(window, &QQuickWindow::afterRendering, this, &QItemCapture::__windowRendered, Qt::DirectConnection);
 }
 
 void QItemCapture::__windowRendered(){
