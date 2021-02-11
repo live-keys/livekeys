@@ -496,9 +496,23 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
             return QmlScopeSnap::PropertyReference(
                 prop,
                 prop.typeName.language() == QmlTypeReference::Cpp,
-                prop.isPointer ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path()) : QmlInheritanceInfo(),
+                prop.isPointer
+                    ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path())
+                    : QmlInheritanceInfo(),
                 contextTypePath
             );
+        }
+
+        if ( propertyName.indexOf('(') > 0 ){
+            QmlFunctionInfo func = currentType->functionAt(propertyName.mid(0, propertyName.indexOf('(')));
+            if ( func.isValid() ){
+                return QmlScopeSnap::PropertyReference(
+                    func,
+                    false,
+                    prop.isPointer ? getTypePath(func.returnType.name()) : QmlInheritanceInfo(),
+                    contextTypePath
+                );
+            }
         }
     }
 

@@ -295,7 +295,7 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
         timeline->m_contentLength = node["length"].asInt();
         timeline->m_fps = node["fps"].asFloat();
 
-        TimelineProperties* properties = new TimelineProperties;
+        TimelineProperties* properties = new TimelineProperties(timeline);
         timeline->m_properties = properties;
 
         if ( node.hasKey("properties") ){
@@ -390,7 +390,6 @@ void Timeline::load(){
         return;
     }
 
-
     QFile file(m_file);
     if ( !file.exists() ){
         THROW_QMLERROR(Exception, "Timeline: Failed to find file: " + m_file.toStdString(), Exception::toCode("~File"), this);
@@ -467,7 +466,8 @@ void Timeline::updateCursorPosition(qint64 position){
 
     i = m_trackList->totalTracks() - 1;
     while ( i >= 0 ){
-        m_trackList->trackAt(i)->cursorPositionProcessed(position);
+        Track* tr = m_trackList->trackAt(i);
+        tr->cursorPositionProcessed(position);
         --i;
     }
 

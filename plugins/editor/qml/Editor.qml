@@ -485,41 +485,45 @@ Rectangle{
         fontSize: textEdit.font.pixelSize
         smallFontSize: textEdit.font.pixelSize - 2
         visible: documentHandler.completionModel.isEnabled && suggestionCount > 0
+
+        Connections{
+            target: documentHandler.completionModel
+            function onCompletionPositionChanged(){
+                var h = 280
+
+                var calculatedY =
+                    textEdit.cursorRectangle.y +
+                    textEdit.cursorRectangle.height + 4 -
+                    flick.flickableItem.contentY
+
+                if ( calculatedY > flick.height - h )
+                    calculatedY = textEdit.cursorRectangle.y - h - flick.flickableItem.contentY
+
+                if ( calculatedY < 0 ){
+                    h = h + calculatedY
+                    calculatedY = 0
+                }
+
+
+                var calculatedX =
+                    lineSurface.width +
+                    textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
+                    flick.flickableItem.contentX
+
+                var totalWidth = lineSurface.width + flick.width
+                if ( calculatedX > totalWidth - qmlSuggestionBox.width)
+                    calculatedX = totalWidth - qmlSuggestionBox.width
+
+                qmlSuggestionBox.height = h
+                qmlSuggestionBox.y = calculatedY
+                qmlSuggestionBox.x = calculatedX
+            }
+        }
+
         opacity: visible ? 0.95 : 0
 
-        y: {
-            if ( !visible )
-                return 0
-
-            height = 280
-
-            var calculatedY =
-                textEdit.cursorRectangle.y +
-                textEdit.cursorRectangle.height + 2 -
-                flick.flickableItem.contentY
-
-            if ( calculatedY > flick.height - height )
-                calculatedY = textEdit.cursorRectangle.y - height - flick.flickableItem.contentY
-
-            if ( calculatedY < 0 ){
-                height = height + calculatedY
-                calculatedY = 0
-            }
-
-            return calculatedY;
-        }
-        x: {
-            if ( !visible )
-                return 0
-
-            var calculatedX =
-                textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
-                flick.flickableItem.contentX
-
-            if ( calculatedX > flick.width - width)
-                calculatedX = flick.width - width
-            return calculatedX;
-        }
+        y: 0
+        x: 0
         model: documentHandler.completionModel
 
         Behavior on opacity {

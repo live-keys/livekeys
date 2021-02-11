@@ -24,6 +24,7 @@ Rectangle{
 
     property var surface : null
     property int zoom : 1
+    property bool interactive: true
 
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
 
@@ -271,7 +272,15 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onWheel: {
+                    if ( !interactive )
+                        return
+
                     wheel.accepted = true
+
+                    if ( timelineView.height > timelineView.contentHeight ){
+                        return
+                    }
+
                     var newContentY = timelineView.contentY -= wheel.angleDelta.y / 6
                     if ( newContentY > timelineView.contentHeight - timelineView.height )
                         timelineView.contentY = timelineView.contentHeight - timelineView.height
