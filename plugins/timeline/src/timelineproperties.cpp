@@ -8,7 +8,6 @@ namespace lv{
 TimelineProperties::TimelineProperties(QObject *parent)
     : QQmlPropertyMap(parent)
 {
-
 }
 
 TimelineProperties::~TimelineProperties(){

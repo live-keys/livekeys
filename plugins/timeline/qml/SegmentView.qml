@@ -17,9 +17,15 @@ Loader{
 
     property QtObject timelineRow : null
 
+    function __segmentFocused(segment){
+        if ( root.parent )
+            root.parent.segmentFocused(segment)
+    }
+
     signal segmentDoubleClicked(Segment segment)
     onSegmentDoubleClicked: {
-        root.parent.segmentDoubleClicked(segment)
+        if ( timelineRow )
+            timelineRow.segmentDoubleClicked(segment)
     }
 
     sourceComponent: segment
@@ -133,6 +139,7 @@ Loader{
 
                     onPressed: {
                         rootItem.forceActiveFocus()
+                        root.__segmentFocused(segment)
                     }
                     onDoubleClicked: {
                         root.segmentDoubleClicked(segment)
@@ -186,6 +193,7 @@ Loader{
                     property int oldMouseX
 
                     onPressed: {
+                        root.__segmentFocused(segment)
                         oldMouseX = mouseX
                     }
                     onPositionChanged: {
@@ -238,7 +246,10 @@ Loader{
 
                     property int oldMouseX
 
-                    onPressed: oldMouseX = mouseX
+                    onPressed: {
+                        root.__segmentFocused(segment)
+                        oldMouseX = mouseX
+                    }
                     onPositionChanged: {
                         if (pressed) {
                             var newWidth = root.width + (mouseX - oldMouseX)
@@ -303,6 +314,7 @@ Loader{
                 drag.maximumX: segment ? (segment.segmentModel().contentWidth - 7.5 - 1) : 0
 
                 onPressed: {
+                    root.__segmentFocused(segment)
                     keyframeItem.forceActiveFocus()
                 }
                 onDoubleClicked: {
