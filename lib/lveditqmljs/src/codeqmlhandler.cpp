@@ -191,13 +191,13 @@ namespace qmlhandler_helpers{
                   m.functionType == QmlFunctionInfo::Slot) && suggestMethods ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "function", ti->prefereredType().name(), completion
+                    m.name + "(", "function", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestSignals ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "signal", ti->prefereredType().name(), completion
+                    m.name + "(", "signal", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestGeneratedSlots ){
@@ -1359,8 +1359,8 @@ QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
         int blockEnd = docinfo->imports()[docinfo->imports().size()-1].location().line() - 1;
 
         identifierPosition = m_target->findBlockByNumber(blockStart).position();
-        auto lastBlock = m_target->findBlockByNumber(blockEnd - 1);
-        identifierLength = lastBlock.position() + lastBlock.length() - identifierPosition;
+        auto lastBlock = m_target->findBlockByNumber(blockEnd);
+        identifierLength = lastBlock.position() + lastBlock.length() - 1 - identifierPosition;
     }
 
     return QmlDeclaration::create(
@@ -1398,9 +1398,10 @@ int CodeQmlHandler::findImportsPosition(){
     }
 
     if ( !docinfo->imports().isEmpty() ){
-        return m_document->textDocument()->findBlock(
-            docinfo->imports().first().location().line() - 1).position() +
-            docinfo->imports().first().location().column() + 7;
+        return m_document->textDocument()->findBlockByNumber(
+            docinfo->imports().first().location().line() - 1
+        ).position() + docinfo->imports().first().location().column() + 7;
+
     }
 
     return 0;
@@ -2451,6 +2452,15 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
                 }
 
                 toRemove.append(ordered[bc->listIndex()]);
+
+                auto parentFrag = edit->parentFragment();
+                if (parentFrag){
+                    for (auto cf: parentFrag->childFragments()){
+                        if (!cf->channel()) continue;
+                        if (cf->channel()->listIndex() <= bc->listIndex()) continue;
+                        cf->channel()->updateConnection(cf->channel()->listIndex()-1);
+                    }
+                }
             }
         } else {
             objectProperty = (bc->property().propertyTypeCategory() != QQmlProperty::InvalidCategory);
@@ -3356,6 +3366,16 @@ void CodeQmlHandler::suggestCompletion(int cursorPosition){
     );
 }
 
+int CodeQmlHandler::checkPragma(int position)
+{
+    QString content = m_document->contentString();
+    QString sub = content.left(position);
+    int find = sub.lastIndexOf("pragma Singleton");
+    if (find != -1)
+        return find;
+    return position;
+}
+
 /**
  * \brief Handler for when a new document scope is ready
  */
@@ -3441,7 +3461,7 @@ void CodeQmlHandler::suggestionsForGlobalQmlContext(
         QList<CodeCompletionSuggestion> &suggestions
 ){
     suggestions << CodeCompletionSuggestion("import", "", "", "import ");
-    suggestions << CodeCompletionSuggestion("pragma singleton", "", "", "pragma singleton");
+    suggestions << CodeCompletionSuggestion("pragma Singleton", "", "", "pragma Singleton");
 }
 
 void CodeQmlHandler::suggestionsForImport(
@@ -3757,8 +3777,7 @@ PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
     }
 
 
-    lpl->setPosition(declaration->position());
-
+    lpl->setPosition(declaration->position() + (declaration->isForImports() ? 7 : 0));
     return lpl;
 }
 

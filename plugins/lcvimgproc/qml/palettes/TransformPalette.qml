@@ -64,7 +64,7 @@ CodePalette{
                 p.editingFragment.valueLength() - 1
             paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
 
-            var cont = p.groupsContainer
+            var cont = oc.groupsContainer
             return cont.children[cont.children.length - 1]
 
         } else { // inside palette

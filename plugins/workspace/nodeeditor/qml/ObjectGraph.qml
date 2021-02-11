@@ -327,9 +327,8 @@ Rectangle{
 
         if (dstPort.objectProperty.editingFragment){
             var ef = dstPort.objectProperty.editingFragment
-
+            var value = ef.defaultValue()
             var result = ef.bindExpression('null')
-            value = ef.defaultValue()
             dstPort.objectProperty.editingFragment.write(
                 {'__ref': value}
             )
@@ -386,8 +385,10 @@ Rectangle{
         propertyItem.propertyName = propertyName
         propertyItem.node = node
 
-        propertyItem.parentWidth = node.item.width - 10
         propertyItem.editingFragment = editingFragment
+        var isForObject = propertyItem.isForObject
+        propertyItem.width = node.item.width - (isForObject ? 30 : 0)
+
         propertyItem.documentHandler = root.documentHandler
 
         if (editingFragment) editingFragment.incrementRefCount()

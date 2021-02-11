@@ -334,8 +334,10 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
 void QmlEditFragment::write(const QJSValue value){
     m_codeHandler->populatePropertyInfoForFragment(this);
     bool isWritable = m_objectInfo.value("isWritable").toBool();
-    if (isWritable)
+
+    if (isWritable || m_declaration->isForSlot()){
         writeCode(buildCode(value));
+    }
 }
 
 /**

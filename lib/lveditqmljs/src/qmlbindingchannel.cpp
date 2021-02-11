@@ -50,6 +50,11 @@ QmlBindingChannel::QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable *
 QmlBindingChannel::~QmlBindingChannel(){
 }
 
+void QmlBindingChannel::updateConnection(int listIndex)
+{
+    m_listIndex = listIndex;
+}
+
 void QmlBindingChannel::rebuild(){
     HookContainer* hooks = qobject_cast<HookContainer*>(
         m_runnable->viewContext()->contextProperty("hooks").value<QObject*>()
