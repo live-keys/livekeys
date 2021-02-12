@@ -276,6 +276,14 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPath(QmlBindingPath::
         viewRoot = watcher->target();
 
         root = root->child;
+    } else if ( root && root->type() == QmlBindingPath::Node::ContextValue ){
+        QmlBindingPath::ContextValueNode* vnode = static_cast<QmlBindingPath::ContextValueNode*>(root);
+        if ( vnode->name == "runSpace" ){
+            viewRoot = r->runSpace();
+        } else {
+            return nullptr;
+        }
+        root = root->child;
     }
 
     while ( root && (root->type() == QmlBindingPath::Node::File || root->type() == QmlBindingPath::Node::Component) ){
@@ -334,6 +342,14 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPathFrom(QmlBindingCh
         QmlWatcher* watcher = qobject_cast<QmlWatcher*>(watchers.first());
         viewRoot = watcher->parent();
 
+        root = root->child;
+    } else if ( root && root->type() == QmlBindingPath::Node::ContextValue ){
+        QmlBindingPath::ContextValueNode* vnode = static_cast<QmlBindingPath::ContextValueNode*>(root);
+        if ( vnode->name == "runSpace" ){
+            viewRoot = r->runSpace();
+        } else {
+            return nullptr;
+        }
         root = root->child;
     }
 
