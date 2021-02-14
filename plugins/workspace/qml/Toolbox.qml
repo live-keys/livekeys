@@ -10,14 +10,18 @@ Rectangle{
     border.width: style.borderWidth
     border.color: style.borderColor
 
-    default property alias contents: layout.children
-
     property QtObject defaultStyle: QtObject{
         property color background: "#333"
         property color borderColor: "#555"
         property double borderWidth: 1
     }
-    property QtObject style: defaultStyle
+    property QtObject style: QtObject{
+        property color background: "#333"
+        property color borderColor: "#555"
+        property double borderWidth: 1
+    }
+
+    default property alias contents: layout.children
 
     function activateTool(tool){
         if ( root.selectedTool ){

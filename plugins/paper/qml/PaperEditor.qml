@@ -24,6 +24,14 @@ Rectangle{
         propertyBar: propertyPanel
         infoBar: infobar
 
+        style: Paper.PaperGrapherConfig{
+            box: QtObject{
+                property color background: lk.layers.workspace.themes.current.colorScheme.middleground
+                property color borderColor: lk.layers.workspace.themes.current.colorScheme.middlegroundBorder
+                property double borderWidth: 1
+            }
+        }
+
         Paper.ToolButton{
             id: rectangleToolButton
             tool: Paper.RectangleTool{
@@ -143,7 +151,8 @@ Rectangle{
             anchors.topMargin: 1
             width: 80
             height: parent.height - 2
-            color: lk.layers.workspace.themes.current.colorScheme.middlegroundOverlay
+            radius: 5
+            color: lk.layers.workspace.themes.current.colorScheme.background
 
             Item{
                 id: newButtonWrap
@@ -164,12 +173,22 @@ Rectangle{
                     anchors.fill: parent
                     onClicked: {
                         var pg = paperGraphLoader.paperGrapher
-                        messageDialog.confirm({
-                            title: 'New document',
-                            text: 'Are you sure you want to clear the current contents of the document?',
-                            accepted: function(){
+
+                        lk.layers.window.dialogs.message('This will clear the contents of the current document.', {
+                            button1Name : 'ok',
+                            button1Function : function(mbox){
                                 pg.document.clear()
                                 paperCanvas.paint()
+                                mbox.close()
+                            },
+                            button3Name : 'Cancel',
+                            button3Function : function(mbox){
+                                mbox.close()
+                            },
+                            returnPressed : function(mbox){
+                                pg.document.clear()
+                                paperCanvas.paint()
+                                mbox.close()
                             }
                         })
                     }
@@ -199,18 +218,18 @@ Rectangle{
                         onTriggered: {
                             var pg = paperGraphLoader.paperGrapher
                             var pcanvas = paperCanvas
-                            fileDialog.setup({
-                                 name: "Open project",
-                                 filters: ["Json files (*.json)"],
-                                 existing: true,
-                                 accepted: function(url){
-                                     var jsonString = Paper.FileIO.readUrl(url)
-                                     pcanvas.paper.project.clear();
-                                     pcanvas.paper.project.importJSON(jsonString.toString());
-                                     paperCanvas.paint()
-                                 }
-                            })
 
+                            lk.layers.window.dialogs.openFile(
+                                { filters: ["Json files (*.json)"] },
+                                function(url){
+                                    var path = Fs.UrlInfo.toLocalFile(url)
+                                    var file = Fs.File.open(path, Fs.File.ReadOnly)
+                                    var jsonString = file.readAll()
+                                    pcanvas.paper.project.clear();
+                                    pcanvas.paper.project.importJSON(jsonString.toString());
+                                    paperCanvas.paint()
+                                }
+                            )
                         }
                     }
                 }
@@ -248,16 +267,21 @@ Rectangle{
                         onTriggered: {
                             var pg = paperGraphLoader.paperGrapher
                             var pcanvas = paperCanvas
-                            fileDialog.setup({
-                                 name: "Save Project",
-                                 filters: ["Json files (*.json)"],
-                                 existing: false,
-                                 accepted: function(url){
-                                     var exportData = pcanvas.paper.project.exportJSON({ asString: true });
-                                     Paper.FileIO.writeUrl(url, exportData)
-                                 }
-                            })
-                            paperCanvas.paint()
+
+                            lk.layers.window.dialogs.saveFile(
+                                { filters: ["Json files (*.json)"] },
+                                function(url){
+                                    var path = Fs.UrlInfo.toLocalFile(url)
+                                    var file = Fs.File.open(path, Fs.File.WriteOnly)
+                                    if ( file === null ){
+                                        lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + path, 100)
+                                        return
+                                    }
+                                    var exportData = pcanvas.paper.project.exportJSON({ asString: true });
+                                    file.writeString(exportData)
+                                    file.close()
+                                }
+                            )
                         }
                     }
                 }
@@ -280,7 +304,8 @@ Rectangle{
             anchors.topMargin: 1
             width: 55
             height: parent.height - 2
-            color: lk.layers.workspace.themes.current.colorScheme.middlegroundOverlay
+            radius: 5
+            color: lk.layers.workspace.themes.current.colorScheme.background
 
             Item{
                 id: undoButtonWrap
