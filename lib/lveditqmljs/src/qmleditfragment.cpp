@@ -86,14 +86,14 @@ QmlEditFragment::~QmlEditFragment(){
     }
 }
 
-QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent)
+QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent, QQmlContext *context)
 {
     QString fullDeclaration;
     fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "\n";
 
     ViewEngine* engine = ViewContext::instance().engine();
     ViewEngine::ComponentResult::Ptr cr = engine->createObject(
-        path, fullDeclaration.toUtf8(), parent
+        path, fullDeclaration.toUtf8(), parent, context
     );
     return cr->object;
 }

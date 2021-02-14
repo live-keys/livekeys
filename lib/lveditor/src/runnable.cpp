@@ -388,6 +388,30 @@ QQmlContext *Runnable::createContext(){
     return ctx;
 }
 
+void Runnable::swapViewRoot(QObject *newViewRoot){
+    newViewRoot->setParent(m_runSpace);
+    QQuickItem* newRootItem = qobject_cast<QQuickItem*>(newViewRoot);
+    QQuickItem* runSpaceItem = qobject_cast<QQuickItem*>(m_runSpace);
+    if ( newRootItem && runSpaceItem ){
+        newRootItem->setParentItem(runSpaceItem);
+    }
+
+    if (m_viewRoot)
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+    m_viewRoot = newViewRoot;
+
+    QQuickItem* rootItem = qobject_cast<QQuickItem*>(m_runSpace);
+    if ( rootItem ){
+        QQmlProperty pp(rootItem);
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+        if ( ppref.canAppend() ){
+            ppref.append(newViewRoot);
+        }
+    }
+
+    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+}
+
 void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
     if ( ref == this ){
         emptyRunSpace();

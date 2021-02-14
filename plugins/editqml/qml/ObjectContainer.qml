@@ -337,7 +337,12 @@ Item{
                         collapse()
                 }
                 onErase: {
-                    paletteControls.eraseObject(root)
+                    try{
+                        paletteControls.eraseObject(root)
+                    } catch ( e ){
+                        var eunwrap = lk.engine.unwrapError(e)
+                        lk.layers.workspace.messages.pushError(eunwrap.message, eunwrap.code)
+                    }
                 }
                 onToggleConnections: {
                     if ( paletteConnection.model ){
