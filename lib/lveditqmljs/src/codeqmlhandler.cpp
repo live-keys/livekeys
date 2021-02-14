@@ -1627,17 +1627,43 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
-        bp = edit->fullBindingPath()->parentObjectPath();
-        if ( !bp )
-            return false;
+        QmlBindingPath::Ptr editBp = edit->fullBindingPath();
 
+        bp = editBp->parentObjectPath();
+        if ( !bp ){
+            bool isViewRoot = false;
+            if ( edit->location() == QmlEditFragment::Property ){
+                QmlEditFragment* editIt = edit;
+                while ( true ){
+                    if ( editIt->location() != QmlEditFragment::Property && !editIt->isGroup() ){
+                        break;
+                    }
+                    if ( !editIt->parentFragment() )
+                        break;
 
-        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
-            bp->appendProperty(
-                prop.property.name,
-                QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
-            );
+                    editIt = editIt->parentFragment();
+                }
+
+                if ( editIt->channel()->object() == edit->channel()->runnable()->viewRoot() ){
+                    isViewRoot = true;
+                }
+            }
+
+            if ( !isViewRoot)
+                return false;
+
+            bp = QmlBindingPath::create();
+            bp->appendContextValue("runSpace");
+
+        } else {
+            for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+                bp->appendProperty(
+                    prop.property.name,
+                    QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
+                );
+            }
         }
+
 
     } else if ( expressionChain.hasProperty() ){ // <property...>
         // clone current binding path, append properties to it
@@ -1722,7 +1748,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
             QmlBindingChannel::Ptr writeChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
 
-            if ( !writeChannel->hasConnection() ){
+            if ( !writeChannel || !writeChannel->hasConnection() ){
                 QmlError(
                     m_engine,
                     CREATE_EXCEPTION(
@@ -1786,6 +1812,9 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                         receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
 
                     } else if ( writeChannel->type() == QmlBindingChannel::ListIndex ){
+                        QObject* writeValue = writeChannel->object();
+                        receivingChannel->property().write(QVariant::fromValue(writeValue));
+                    } else if ( writeChannel->type() == QmlBindingChannel::Object ){
                         QObject* writeValue = writeChannel->object();
                         receivingChannel->property().write(QVariant::fromValue(writeValue));
                     }

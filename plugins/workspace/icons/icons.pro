@@ -23,6 +23,7 @@ OTHER_FILES += \
     qml/plugins.qmltypes
 
 DISTFILES += \
+    qml/CreateObjectIcon.qml \
     qml/PlusIcon.qml \
     qml/RecordIcon.qml \
     qml/StopIcon.qml \

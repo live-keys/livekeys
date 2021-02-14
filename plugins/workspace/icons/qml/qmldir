@@ -21,3 +21,4 @@ PenSizeIcon       1.0 PenSizeIcon.qml
 RecordIcon        1.0 RecordIcon.qml
 StopIcon          1.0 StopIcon.qml
 StackIcon         1.0 StackIcon.qml
+CreateObjectIcon  1.0 CreateObjectIcon.qml

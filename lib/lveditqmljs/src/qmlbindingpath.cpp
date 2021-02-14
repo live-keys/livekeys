@@ -30,6 +30,9 @@ QString QmlBindingPath::WatcherNode::toString() const{
     return "Watcher(" + filePath.mid(filePath.indexOf("/") + 1) + ")" + "[" + objectId + "]" + (child ? ( + " -> " + child->toString()) : "");
 }
 
+QString QmlBindingPath::ContextValueNode::toString() const{
+    return "ContextValue(" + name + ")";
+}
 
 
 QmlBindingPath::QmlBindingPath()
@@ -130,6 +133,19 @@ void QmlBindingPath::appendWatcher(const QString &filePath, const QString &objec
     }
 }
 
+void QmlBindingPath::appendContextValue(const QString &name){
+    QmlBindingPath::ContextValueNode* vnode = new QmlBindingPath::ContextValueNode;
+    vnode->name = name;
+
+    QmlBindingPath::Node* lnode = lastNode();
+    if ( lnode ){
+        lnode->child = vnode;
+        vnode->parent = lnode;
+    } else {
+        m_root = vnode;
+    }
+}
+
 QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2){
     // firstIndex: avoid first index, since that represents the root of the file
     QmlBindingPath::Ptr result = src1->clone();
@@ -150,6 +166,9 @@ QmlBindingPath::Ptr QmlBindingPath::join(QmlBindingPath::ConstPtr src1, QmlBindi
         } else if ( n->type() == QmlBindingPath::Node::Watcher ){
             QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(n);
             result->appendWatcher(wnode->filePath, wnode->objectId);
+        } else if ( n->type() == QmlBindingPath::Node::ContextValue ){
+            QmlBindingPath::ContextValueNode* vnode = static_cast<QmlBindingPath::ContextValueNode*>(n);
+            result->appendContextValue(vnode->name);
         }
         n = n->child;
     }
@@ -219,6 +238,17 @@ QmlBindingPath::Ptr QmlBindingPath::clone() const{
             }
             icpy->filePath = static_cast<QmlBindingPath::WatcherNode*>(cur)->filePath;
             icpy->objectId = static_cast<QmlBindingPath::WatcherNode*>(cur)->objectId;
+            cpy = icpy;
+        } else if ( cur->type() == QmlBindingPath::Node::ContextValue ){
+            // set child, parent, filePath
+            QmlBindingPath::ContextValueNode* icpy = new QmlBindingPath::ContextValueNode;
+            if ( cpy ){
+                icpy->parent = cpy;
+                cpy->child = icpy;
+            } else {
+                cpyroot = icpy;
+            }
+            icpy->name = static_cast<QmlBindingPath::ContextValueNode*>(cur)->name;
             cpy = icpy;
         }
 
@@ -293,6 +323,11 @@ QmlBindingPath::Node *QmlBindingPath::cloneNode(QmlBindingPath::Node *cur){
         icpy->filePath = static_cast<QmlBindingPath::WatcherNode*>(cur)->filePath;
         icpy->objectId = static_cast<QmlBindingPath::WatcherNode*>(cur)->objectId;
         return icpy;
+    } else if ( cur->type() == QmlBindingPath::Node::ContextValue ){
+        // set child, parent, filePath
+        QmlBindingPath::ContextValueNode* icpy = new QmlBindingPath::ContextValueNode;
+        icpy->name = static_cast<QmlBindingPath::ContextValueNode*>(cur)->name;
+        return icpy;
     }
     return nullptr;
 }
@@ -350,6 +385,11 @@ bool QmlBindingPath::operator ==(const QmlBindingPath &other) const{
             QmlBindingPath::WatcherNode* pn = static_cast<QmlBindingPath::WatcherNode*>(n);
             QmlBindingPath::WatcherNode* po = static_cast<QmlBindingPath::WatcherNode*>(o);
             if ( pn->filePath != po->filePath || pn->objectId != po->objectId )
+                return false;
+        } else if ( n->type() == Node::ContextValue && o->type() == n->type() ){
+            QmlBindingPath::ContextValueNode* pn = static_cast<QmlBindingPath::ContextValueNode*>(n);
+            QmlBindingPath::ContextValueNode* po = static_cast<QmlBindingPath::ContextValueNode*>(o);
+            if ( pn->name != po->name )
                 return false;
         } else {
             return false;
