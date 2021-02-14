@@ -181,6 +181,11 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
+        if (dstPort.objectName === "objectNode"){
+            removeEdge(edge)
+            return
+        }
+
         var name = ""
         var value = ""
         if (!srcPort.objectProperty.propertyName){
@@ -196,21 +201,22 @@ Rectangle{
         {
             // source is event, different direction
             var nodeId = dstPort.objectProperty.node.item.id
-            if (!nodeId) return
-            if (dstPort.objectProperty.editingFragment) return
+
+            if (nodeId === "") return
+            // if (dstPort.objectProperty.editingFragment) return
 
             var funcName = dstPort.objectProperty.propertyName
             value = nodeId + "." + funcName + "()"
 
-            if (srcPort.objectProperty.editingFragment){
-                var result = srcPort.objectProperty.editingFragment.bindExpression(value)
-                if ( result ){
-                    srcPort.objectProperty.editingFragment.write(
-                        {'__ref': value}
-                    )
-                }
-            }
+            if (!srcPort.objectProperty.editingFragment)
+                return
 
+            var result = srcPort.objectProperty.editingFragment.bindExpression(value)
+            if ( result ){
+                srcPort.objectProperty.editingFragment.write(
+                    {'__ref': value}
+                )
+            }
         } else {
             if (dstPort.objectProperty.editingFragment){
                 var result = dstPort.objectProperty.editingFragment.bindExpression(value)
@@ -325,7 +331,7 @@ Rectangle{
 
 
 
-        if (dstPort.objectProperty.editingFragment){
+        if (dstPort.objectProperty && dstPort.objectProperty.editingFragment){
             var ef = dstPort.objectProperty.editingFragment
             var value = ef.defaultValue()
             var result = ef.bindExpression('null')

@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import editqml 1.0
 import editor 1.0
+import workspace.nodeeditor 1.0
 
 QtObject{
 
@@ -205,15 +206,15 @@ QtObject{
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var ef = addItemToRuntime(codeHandler, container.editingFragment, insPosition, parentType, type)
+        if (!ef)
+            return
 
-        if (ef){
-            if (!isForNode && container.compact)
-                container.expand()
-            else
-                container.editingFragment.signalObjectAdded(ef)
-            if (!isForNode && container.compact)
-                container.sortChildren()
-        }
+        if (!isForNode && container.compact)
+            container.expand()
+        else
+            container.editingFragment.signalObjectAdded(ef)
+        if (!isForNode && container.compact)
+            container.sortChildren()
     }
 
     function compose(container, isForNode, objectGraph){
@@ -367,7 +368,7 @@ QtObject{
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null)
+                container.nodeParent.item.addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null)
             }
 
             if (isForNode) objectGraph.activateFocus()
@@ -600,15 +601,17 @@ QtObject{
         ef.incrementRefCount()
     }
 
-    function addPropertyByName(objectContainer, name){
-        for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
-            if (objectContainer.propertiesOpened[i] === name){
-                return
+    function addPropertyByName(container, name){
+        if (container.propertiesOpened){
+            for (var i = 0; i < container.propertiesOpened.length; ++i){
+                if (container.propertiesOpened[i] === name){
+                    return
+                }
             }
         }
 
-        var codeHandler = objectContainer.editor.documentHandler.codeHandler
-        return addPropertyByFragment(objectContainer.editingFragment, codeHandler, name)
+        var codeHandler = container.editor.documentHandler.codeHandler
+        return addPropertyByFragment(container.editingFragment, codeHandler, name)
     }
 
     function addPropertyByFragment(ef, codeHandler, name){
