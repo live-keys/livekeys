@@ -70,32 +70,6 @@ Rectangle{
         anchors.rightMargin: 5
         spacing: 3
 
-        Item {
-            id: createObjectButton
-            anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 15
-
-            Rectangle {
-                visible: objectContainer.isForProperty && objectContainer.editingFragment && objectContainer.editingFragment.isNull
-                color: "red"
-                anchors.fill: parent
-            }
-
-            MouseArea{
-                id: createObjectButtonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.createObject()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: createObjectButtonMouseArea.containsMouse
-                text: "Create object"
-            }
-        }
-
         Item{
             id: paletteToPane
             anchors.verticalCenter: parent.verticalCenter
@@ -132,6 +106,37 @@ Rectangle{
             Workspace.Tooltip{
                 mouseOver: paletteToPaneMouseArea.containsMouse
                 text: "Move to new pane"
+            }
+        }
+
+        Item {
+            id: createObjectButton
+            anchors.verticalCenter: parent.verticalCenter
+            visible: objectContainer.isForProperty && objectContainer.editingFragment && objectContainer.editingFragment.isNull
+            width: 15
+            height: 15
+
+            Icons.CreateObjectIcon{
+                anchors.top: parent.top
+                anchors.topMargin: 1
+                anchors.left: parent.left
+                anchors.leftMargin: 2
+                width: 12
+                height: 12
+                color: '#9b9da0'
+            }
+
+            MouseArea{
+                id: createObjectButtonMouseArea
+                anchors.fill: parent
+                hoverEnabled: true
+                onClicked: {
+                    objectContainerTitle.createObject()
+                }
+            }
+            Workspace.Tooltip{
+                mouseOver: createObjectButtonMouseArea.containsMouse
+                text: "Create object"
             }
         }
 

@@ -21,7 +21,7 @@ public:
     /// \private
     class Node{
     public:
-        enum Type{ Index, Property, File, Component, Watcher };
+        enum Type{ Index, Property, File, Component, Watcher, ContextValue };
 
     public:
         Node* child;
@@ -82,6 +82,15 @@ public:
         virtual QString toString() const override;
     };
 
+    /// \private
+    class ContextValueNode : public Node{
+    public:
+        QString name;
+
+        virtual Node::Type type() const override{ return Node::ContextValue; }
+        virtual QString toString() const override;
+    };
+
 public:
     virtual ~QmlBindingPath();
 
@@ -96,6 +105,7 @@ public:
     void appendProperty(const QString& name, const QStringList& objectName);
     void appendIndex(int index);
     void appendWatcher(const QString& filePath, const QString& objectId);
+    void appendContextValue(const QString& name);
 
     static QmlBindingPath::Ptr join(QmlBindingPath::ConstPtr src1, QmlBindingPath::ConstPtr src2);
     QmlBindingPath::Ptr clone() const;
