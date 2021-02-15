@@ -5,6 +5,7 @@ import editor 1.0
 import workspace 1.0
 import workspace.icons 1.0
 import timeline 1.0
+import visual.input 1.0 as Input
 
 Theme{
     id: root
@@ -273,6 +274,48 @@ Theme{
         radius: 0
 
         property color foregroundColor: '#999'
+    }
+
+    property QtObject checkBoxStyle : Input.CheckBoxStyle{
+        backgroundColor: colorScheme.middlegroundOverlayDominant
+        borderColor: colorScheme.middlegroundOverlayDominantBorder
+
+        checkMark: CheckMarkIcon{
+            width: 6
+            height: 6
+            strokeWidth: 2
+        }
+    }
+
+    property QtObject numberSpinBoxStyle: Input.NumberSpinBoxStyle{
+        inputBox: inputStyle
+        incrementButton: Rectangle{
+            signal clicked()
+            color: colorScheme.middlegroundOverlayDominant
+            Text{
+                anchors.centerIn: parent
+                color: colorScheme.foreground
+                text: '+'
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: parent.clicked()
+            }
+        }
+
+        decrementButton: Rectangle{
+            signal clicked()
+            color: colorScheme.middlegroundOverlayDominant
+            Text{
+                anchors.centerIn: parent
+                color: colorScheme.foreground
+                text: '-'
+            }
+            MouseArea{
+                anchors.fill: parent
+                onClicked: parent.clicked()
+            }
+        }
     }
 
     // Buttons

@@ -3,6 +3,7 @@ import QtQuick.Controls 2.5
 import workspace.icons 1.0
 import fs 1.0 as Fs
 import paper 1.0 as Paper
+import visual.input 1.0 as Input
 
 Rectangle{
     visible: true
@@ -29,6 +30,79 @@ Rectangle{
                 property color background: lk.layers.workspace.themes.current.colorScheme.middleground
                 property color borderColor: lk.layers.workspace.themes.current.colorScheme.middlegroundBorder
                 property double borderWidth: 1
+            }
+
+            boolInput: Item{
+                width: boolCheckBox.width
+                height: boolCheckBox.height
+                x: 5
+
+                Input.CheckBox{
+                    id: boolCheckBox
+                    width: 20
+                    height: 20
+
+                    onCheckedChanged:{
+                        parent.valueChanged(checked)
+                    }
+
+                    style: lk.layers.workspace.themes.current.checkBoxStyle
+                }
+
+                signal valueChanged(bool value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty("value") )
+                        boolCheckBox.checked = options.value
+                }
+            }
+
+            intInput: Item{
+
+                Input.NumberSpinBox{
+                    id: spinbox
+                    anchors.fill: parent
+                    decimals: false
+                    onValueChanged: parent.valueChanged(value)
+
+                    style: lk.layers.workspace.themes.current.numberSpinBoxStyle
+                }
+
+                signal valueChanged(int value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') && options.value !== undefined ){
+                        spinbox.initializeValue(options.value)
+                    }
+                    if ( options.hasOwnProperty('min') )
+                        spinbox.from = options.min
+                    if ( options.hasOwnProperty('max') )
+                        spinbox.to = options.max
+                }
+            }
+
+            numberInput: Item{
+
+                Input.NumberSpinBox{
+                    id: numberSpinBox
+                    anchors.fill: parent
+                    decimals: true
+                    onValueChanged: parent.valueChanged(value)
+
+                    style: lk.layers.workspace.themes.current.numberSpinBoxStyle
+                }
+
+                signal valueChanged(int value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') && options.value !== undefined ){
+                        numberSpinBox.initializeValue(options.value)
+                    }
+                    if ( options.hasOwnProperty('min') )
+                        numberSpinBox.from = options.min
+                    if ( options.hasOwnProperty('max') )
+                        numberSpinBox.to = options.max
+                }
             }
         }
 
@@ -566,6 +640,7 @@ Rectangle{
     Paper.PaperGrapherLoader{
         id: paperGraphLoader
         paperCanvas: paperCanvas
+        style: toolbox.style
 
         property var openType: null
 
