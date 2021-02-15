@@ -6,11 +6,13 @@ import paper 1.0 as Paper
 import visual.input 1.0 as Input
 
 Rectangle{
+    id: root
     visible: true
     width: 800
     height: 550
 
     property alias paperCanvas: paperCanvas
+    property color iconColor: lk.layers.workspace.themes.current.colorScheme.foregroundFaded
 
     Paper.Toolbox{
         id: toolbox
@@ -104,6 +106,64 @@ Rectangle{
                         numberSpinBox.to = options.max
                 }
             }
+
+            dropDownInput: Item{
+
+                Input.DropDown{
+                    id: dropDownBox
+                    width: 100
+                    height: 25
+                    style: lk.layers.workspace.themes.current.dropDownStyle
+
+                    onActivated: {
+                        parent.selectedValue = dropDownBox.model[index]
+                        parent.valueChanged(index, dropDownBox.model[index])
+                    }
+                }
+
+                property var selectedValue: ''
+
+                signal valueChanged(int index, var value)
+
+                function setup(options){
+                    if ( options.model )
+                        dropDownBox.model = options.model
+                    if ( options.hasOwnProperty('index') ){
+                        selectedValue = dropDownBox.model[options.index]
+                        dropDownBox.currentIndex = options.index
+                    }
+                }
+
+            }
+
+            textInput: Item{
+
+                Input.InputBox{
+                    id: textField
+                    anchors.fill: parent
+
+                    style: lk.layers.workspace.themes.current.inputStyle
+
+                    margins: 3
+                    height: 25
+                    width: 150
+                    textHint: qsTr("Enter text")
+                    onTextChanged: parent.valueChanged(text)
+                }
+
+                signal valueChanged(var value)
+
+                property string currentValue: textField.text
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') )
+                        textField.text = options.value
+                }
+
+
+            }
+
+
         }
 
         Paper.ToolButton{
@@ -114,7 +174,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ SquareIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
         }
 
         Paper.ToolButton{
@@ -125,7 +185,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ CircleIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
 
         Paper.ToolButton{
@@ -136,7 +196,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ MousePointerFillIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: detailSelectToolButton
@@ -146,7 +206,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ MousePointerIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: scaleToolButton
@@ -156,7 +216,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ ResizeIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: rotateToolButton
@@ -166,7 +226,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ RotateIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: drawToolButton
@@ -176,7 +236,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ PencilIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: penToolButton
@@ -186,7 +246,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ PenIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: textToolButton
@@ -196,7 +256,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ TypeIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: eyeDropperButton
@@ -205,7 +265,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ EyeDropperIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
     }
 
@@ -226,7 +286,7 @@ Rectangle{
             width: 80
             height: parent.height - 2
             radius: 5
-            color: lk.layers.workspace.themes.current.colorScheme.background
+            color: lk.layers.workspace.themes.current.colorScheme.middleground
 
             Item{
                 id: newButtonWrap
@@ -388,10 +448,11 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 5
 
-                Rectangle{
+                UndoIcon{
                     id: undoIcon
                     width: 15
                     height: 15
+                    color: root.iconColor
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -410,10 +471,11 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 30
 
-                Rectangle{
+                RedoIcon{
                     id: redoIcon
                     width: 15
                     height: 15
+                    color: root.iconColor
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -600,12 +662,22 @@ Rectangle{
                             onClicked: {
                                 var layerView = layerList
                                 var layerId = modelData.id
-                                messageDialog.confirm({
-                                    title: 'Delete Layer',
-                                    text: 'Are you sure you want to delete the current layer?',
-                                    accepted: function(){
+
+                                lk.layers.window.dialogs.message('Are you sure you want to delete the current layer?', {
+                                    button1Name : 'ok',
+                                    button1Function : function(mbox){
                                         layerView.pg.layer.deleteLayer(layerId)
                                         layerView.updateLayers()
+                                        mbox.close()
+                                    },
+                                    button3Name : 'Cancel',
+                                    button3Function : function(mbox){
+                                        mbox.close()
+                                    },
+                                    returnPressed : function(mbox){
+                                        layerView.pg.layer.deleteLayer(layerId)
+                                        layerView.updateLayers()
+                                        mbox.close()
                                     }
                                 })
                             }

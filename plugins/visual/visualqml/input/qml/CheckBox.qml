@@ -21,7 +21,7 @@ Rectangle{
         __checkMark = style.checkMark.createObject(root)
         __checkMark.parent = root
         __checkMark.anchors.centerIn = root
-        __checkMark.visible = root.checked
+        __checkMark.visible = Qt.binding(function(){ return root.checked })
     }
     
     property QtObject style: CheckBoxStyle{}
@@ -31,7 +31,6 @@ Rectangle{
         anchors.fill: parent
         onClicked: {
             root.checked = !root.checked
-            root.__checkMark.visible = root.checked
         }
     }
     

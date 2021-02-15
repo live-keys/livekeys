@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 2.10
 import QtGraphicalEffects 1.0
 import paper 1.0
+import workspace.icons 1.0
 import '../papergrapherqml/tools/SelectToolControl.js' as SelectToolControl
 
 Tool{
@@ -28,11 +29,11 @@ Tool{
             height: 25
             color: 'transparent'
 
-            Rectangle{
+            MenuIcon{
                 id: menuIcon
                 anchors.centerIn: parent
-                width: 15
-                height: 15
+                width: 12
+                height: 12
             }
 
             MouseArea{

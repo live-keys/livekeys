@@ -26,6 +26,7 @@ DISTFILES += \
     qml/CreateObjectIcon.qml \
     qml/PlusIcon.qml \
     qml/RecordIcon.qml \
+    qml/SquareIcon.qml \
     qml/StopIcon.qml \
     qml/live.plugin.json \
     qml/qmldir

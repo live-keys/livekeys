@@ -9,3 +9,5 @@ NumberSpinBoxStyle 1.0 NumberSpinBoxStyle.qml
 TextStyle          1.0 TextStyle.qml
 InputBox           1.0 InputBox.qml
 InputBoxStyle      1.0 InputBoxStyle.qml
+DropDown           1.0 DropDown.qml
+DropDownStyle      1.0 DropDownStyle.qml

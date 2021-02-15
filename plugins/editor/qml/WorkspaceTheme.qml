@@ -318,6 +318,15 @@ Theme{
         }
     }
 
+    property QtObject dropDownStyle : Input.DropDownStyle{
+        backgroundColor: inputStyle.backgroundColor
+        backgroundColorHighlight: Qt.lighter(inputStyle.backgroundColor)
+        borderColor: inputStyle.borderColor
+        borderSize: 1
+        radius: inputStyle.radius
+        textStyle: inputStyle.textStyle
+    }
+
     // Buttons
 
     property QtObject buttons: QtObject{
