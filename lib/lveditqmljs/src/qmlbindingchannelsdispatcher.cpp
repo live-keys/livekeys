@@ -46,7 +46,7 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
         DocumentQmlChannels* documentChannels = *it;
         QString filePath = documentChannels->document()->file()->path();
 
-        documentChannels->removeChannels();
+        documentChannels->removeIndirectChannels();
         if ( filePath == run->path() ){
             documentChannels->updateChannelForRunnable(run);
         }

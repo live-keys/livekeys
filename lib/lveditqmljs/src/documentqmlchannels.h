@@ -47,6 +47,7 @@ public:
     int totalChannels() const;
 
     void removeChannels();
+    void removeIndirectChannels();
 
     static QmlBindingChannel::Ptr traverseBindingPath(QmlBindingPath::Ptr path, Runnable* r);
     static QmlBindingChannel::Ptr traverseBindingPathFrom(QmlBindingChannel::Ptr from, QmlBindingPath::Ptr path);

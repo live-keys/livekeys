@@ -196,6 +196,9 @@ public slots:
     bool bindFunctionExpression(const QString& expression);
 
     bool isNull();
+
+    void __channelObjectErased();
+
 signals:
     void visualParentChanged();
     void connectionChanged(int index);
