@@ -62,6 +62,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 DISTFILES += \
     palettes/DrawPalette.qml \
     palettes/GrayscaleViewPalette.json \
+    palettes/PaperSurfacePalette.qml \
     palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoPlayerPalette.qml \
@@ -76,6 +77,7 @@ DISTFILES += \
     qml/ImageSegmentCreator.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
+    qml/PaperSurface.qml \
     qml/Perspective.qml \
     qml/PerspectiveTool.qml \
     qml/ScriptVideoSegmentCreator.qml \

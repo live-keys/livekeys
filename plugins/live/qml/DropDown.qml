@@ -38,7 +38,7 @@ Item{
         id: chosenItem
         width: parent.width
         height: root.height
-        radius: height/2
+        radius: height / 2
         color: chosenItemMouse.containsMouse ? root.highlightColor : root.backgroundColor
         Text{
             anchors.left: parent.left

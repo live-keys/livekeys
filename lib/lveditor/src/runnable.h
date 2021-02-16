@@ -66,6 +66,8 @@ public:
 
     QQmlContext* createContext();
 
+    void swapViewRoot(QObject* object);
+
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
     void engineObjectReady(QObject* object, const QUrl& file, QObject* ref, QQmlContext* context);

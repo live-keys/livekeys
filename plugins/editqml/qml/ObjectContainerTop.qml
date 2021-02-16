@@ -3,6 +3,7 @@ import live 1.0
 import workspace 1.0 as Workspace
 import editqml 1.0
 import workspace.icons 1.0 as Icons
+import visual.shapes 1.0
 
 Rectangle{
     id: objectContainerTitle

@@ -20,6 +20,7 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0 as L
 import workspace 1.0 as Workspace
+import visual.shapes 1.0 as Vs
 
 CodePalette{
     id: palette
@@ -146,11 +147,11 @@ CodePalette{
                     implicitHeight: 1
                     color: 'transparent'
                 }
-                handle: L.Triangle{
+                handle: Vs.Triangle{
                     width: 8
                     height: 8
                     color: '#9b9da0'
-                    rotation: L.Triangle.Top
+                    rotation: Vs.Triangle.Top
                 }
             }
             activeFocusOnPress: true

@@ -21,3 +21,4 @@ VideoSurfaceFactory        1.0 VideoSurfaceFactory.qml
 ImageRead                  1.0 ImageRead.qml
 PerspectiveTool            1.0 PerspectiveTool.qml
 Perspective                1.0 Perspective.qml
+PaperSurface               1.0 PaperSurface.qml
