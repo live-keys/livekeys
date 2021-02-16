@@ -7,6 +7,7 @@ CheckBoxStyle      1.0 CheckBoxStyle.qml
 NumberSpinBox      1.0 NumberSpinBox.qml
 NumberSpinBoxStyle 1.0 NumberSpinBoxStyle.qml
 TextStyle          1.0 TextStyle.qml
+Label              1.0 Label.qml
 InputBox           1.0 InputBox.qml
 InputBoxStyle      1.0 InputBoxStyle.qml
 DropDown           1.0 DropDown.qml
