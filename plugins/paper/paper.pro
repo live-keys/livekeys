@@ -46,6 +46,9 @@ QMAKE_EXTRA_TARGETS += first paperjscopy paperqmlcopy papergrapherjscopy papergr
 OTHER_FILES += \
     $$PWD/qml/*.qml \
     $$PWD/qml/tools/*.qml \
+    $$PWD/3rdparty/qml/*.qml \
+    $$PWD/3rdparty/qml/tools/*.js \
+    $$PWD/3rdparty/qml/tools/*.qml \
     $$PWD/qml/live.package.json \
     $$PWD/qml/live.plugin.json \
     $$PWD/qml/qmldir

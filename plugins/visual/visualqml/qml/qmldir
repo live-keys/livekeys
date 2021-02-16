@@ -1,0 +1,3 @@
+module visual
+
+depends QtQuick 2.3

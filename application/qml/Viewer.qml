@@ -3,6 +3,7 @@ import live 1.0
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
+import visual.shapes 1.0
 
 Pane{
     id : viewer

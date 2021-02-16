@@ -233,6 +233,30 @@ void DocumentQmlChannels::removeChannels(){
     emit selectedIndexChanged();
 }
 
+
+void DocumentQmlChannels::removeIndirectChannels(){
+    // remove all watchers and builders, but do not remove main runnable channels
+    auto it = m_channels.begin();
+    while ( it != m_channels.end() ){
+
+        QmlBindingChannel::Ptr& bc = *it;
+        QmlBindingPath::Ptr channelPath = bc->bindingPath();
+        if ( channelPath->root() && (
+            channelPath->root()->type() == QmlBindingPath::Node::Watcher )
+        ){
+            if ( m_selectedChannel == bc ){
+                m_selectedChannel = nullptr;
+                m_selectedIndex = -1;
+                emit selectedChannelChanged();
+                emit selectedIndexChanged();
+            }
+            it = m_channels.erase(it);
+        } else {
+            ++it;
+        }
+    }
+}
+
 ProjectDocument *DocumentQmlChannels::document() const{
     return m_codeHandler->document();
 }
@@ -313,6 +337,7 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPathFrom(QmlBindingCh
     Runnable* r = from->runnable();
     if ( !path->root() || !r || !r->viewRoot())
         return nullptr;
+
 
     if ( from->isBuilder() ){
         QmlBindingChannel::Ptr builderChannel = QmlBindingChannel::create(path, r);

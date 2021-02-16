@@ -347,6 +347,17 @@ Item{
             return null
         }
 
+        function findPanesByType(paneType){
+            var result = []
+            result = result.concat(mainSplit.findPanesByType(paneType))
+
+            for ( var i = 0; i < root.panes.openWindows.length; ++i ){
+                var w = root.panes.openWindows[i]
+                result = result.concat(w.mainSplit.findPanesByType(paneType))
+            }
+            return result
+        }
+
         function openContextMenu(item, pane){
             if ( !item )
                 item = activeItem

@@ -2460,7 +2460,8 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
 
     bool objectProperty = false;
     const QmlBindingChannel::Ptr& bc = edit->channel();
-    if ( bc->isEnabled() ){
+    if ( bc->isEnabled() && !bc->isBuilder() ){
+
         if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
             QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
             if (ppref.canAt()){
@@ -2491,17 +2492,44 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
                     }
                 }
             }
-        } else {
+        } else if ( bc->type() == QmlBindingChannel::Property ){
             objectProperty = (bc->property().propertyTypeCategory() != QQmlProperty::InvalidCategory);
             bc->property().write(QVariant::fromValue(nullptr));
+        } else if ( bc->type() == QmlBindingChannel::Object ){
+            bool isWatcher = false;
+            QmlBindingPath::Ptr bp = m_bindingChannels->selectedChannel()->bindingPath();
+            QmlBindingPath::Node* n = bp->root();
+            while ( n ){
+                if ( n->type() == QmlBindingPath::Node::Watcher ){
+                    isWatcher = true;
+                    break;
+                }
+                n = n->child;
+            }
+            if ( isWatcher ){
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(Exception, "QmlWatcher: Cannot erase an object that is part of a watcher. You need to delete the watcher first.", Exception::toCode("HasWatcher")),
+                    this
+                ).jsThrow();
+                return;
+            }
+
+            // remove dangling pointer from binding channels
+            if ( bc->object() == m_bindingChannels->selectedChannel()->object() ) {
+                m_bindingChannels->selectedChannel()->clearConnection();
+            }
+
+            objectProperty = false;
+            toRemove.append(bc->object());
         }
     }
-
 
     edit->writeCode(objectProperty ? "null" : "");
     edit->updateValue();
 
-    if (!removeFragment) return;
+    if (!removeFragment)
+        return;
 
     removeEditingFragment(edit);
 
@@ -3301,7 +3329,7 @@ int CodeQmlHandler::insertRootItem(const QString &name)
         id = spl[1];
     } else type = name;
 
-    int insertionPosition = m_target->characterCount()-1;
+    int insertionPosition = m_target->characterCount() - 1;
 
     QString insertionText = "\n" + type + "{\n";
     if (id != "") insertionText += "    id: " + id;
@@ -3319,28 +3347,23 @@ int CodeQmlHandler::insertRootItem(const QString &name)
 
     d->syncObjects(m_document);
 
-    QObject* newRoot = QmlEditFragment::createObject(
-        d->documentInfo(), type + "{}", "temp"
-    );
-    if ( !newRoot )
+    QmlBindingChannel::Ptr channel = m_bindingChannels->selectedChannel();
+    if ( !channel )
         return -1;
 
-    Project* project = d->projectHandler->project();
-    Runnable* r = project->runnables()->runnableAt(m_document->file()->path());
-
+    Runnable* r = channel->runnable();
     if ( !r )
         return -1;
 
-    QQmlContext* ctx = r->createContext();
-    newRoot->setParent(r->runSpace());
+    QObject* newRoot = QmlEditFragment::createObject(
+        d->documentInfo(), type + "{}", "temp", r->viewContext()
+    );
 
-    QQuickItem* newRootItem = qobject_cast<QQuickItem*>(newRoot);
-    QQuickItem* runSpaceItem = qobject_cast<QQuickItem*>(r->runSpace());
-    if ( newRootItem && runSpaceItem ){
-        newRootItem->setParentItem(runSpaceItem);
-    }
+    if ( !newRoot )
+        return -1;
 
-    r->engineObjectReady(newRoot, QUrl(), r, ctx);
+    r->swapViewRoot(newRoot);
+    channel->updateConnection(newRoot);
 
     return insertionPosition + 2;
 }

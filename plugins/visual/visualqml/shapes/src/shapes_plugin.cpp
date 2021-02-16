@@ -14,9 +14,11 @@
 **
 ****************************************************************************/
 
-#include "icons_plugin.h"
+#include "shapes_plugin.h"
 
 #include "svgview.h"
+#include "triangle.h"
+#include "linegrid.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -27,9 +29,11 @@
 #include <QSvgRenderer>
 #include <QPainter>
 
-void IconsPlugin::registerTypes(const char *uri){
-    qmlRegisterType<lv::SvgView>(uri, 1, 0, "SvgView");
+void ShapesPlugin::registerTypes(const char *uri){
+    qmlRegisterType<lv::SvgView>( uri, 1, 0, "SvgView");
+    qmlRegisterType<lv::Triangle>(uri, 1, 0, "Triangle");
+    qmlRegisterType<lv::LineGrid>(uri, 1, 0, "LineGrid");
 }
 
-void IconsPlugin::initializeEngine(QQmlEngine *, const char *){
+void ShapesPlugin::initializeEngine(QQmlEngine *, const char *){
 }

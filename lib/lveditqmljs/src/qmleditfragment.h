@@ -76,7 +76,8 @@ public:
         const DocumentQmlInfo::ConstPtr& info,
         const QString& declaration,
         const QString& path,
-        QObject* parent = nullptr
+        QObject* parent = nullptr,
+        QQmlContext* context = nullptr
     );
 
     void setPaletteForBinding(CodePalette* palette);
@@ -195,6 +196,9 @@ public slots:
     bool bindFunctionExpression(const QString& expression);
 
     bool isNull();
+
+    void __channelObjectErased();
+
 signals:
     void visualParentChanged();
     void connectionChanged(int index);

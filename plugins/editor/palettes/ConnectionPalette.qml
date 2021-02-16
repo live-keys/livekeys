@@ -212,6 +212,32 @@ CodePalette{
         input.forceActiveFocus()
     }
 
+    onSourceInit: {
+        var contents = editFragment.readValueText()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.dot &&
+                 tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                isBindingExpression = false
+            } else {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            }
+        }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
+        input.forceActiveFocus()
+    }
+
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)

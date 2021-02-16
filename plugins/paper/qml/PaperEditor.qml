@@ -3,13 +3,16 @@ import QtQuick.Controls 2.5
 import workspace.icons 1.0
 import fs 1.0 as Fs
 import paper 1.0 as Paper
+import visual.input 1.0 as Input
 
 Rectangle{
+    id: root
     visible: true
     width: 800
     height: 550
 
     property alias paperCanvas: paperCanvas
+    property color iconColor: lk.layers.workspace.themes.current.colorScheme.foregroundFaded
 
     Paper.Toolbox{
         id: toolbox
@@ -24,6 +27,145 @@ Rectangle{
         propertyBar: propertyPanel
         infoBar: infobar
 
+        style: Paper.PaperGrapherConfig{
+            box: QtObject{
+                property color background: lk.layers.workspace.themes.current.colorScheme.middleground
+                property color borderColor: lk.layers.workspace.themes.current.colorScheme.middlegroundBorder
+                property double borderWidth: 1
+            }
+
+            boolInput: Item{
+                width: boolCheckBox.width
+                height: boolCheckBox.height
+                x: 5
+
+                Input.CheckBox{
+                    id: boolCheckBox
+                    width: 20
+                    height: 20
+
+                    onCheckedChanged:{
+                        parent.valueChanged(checked)
+                    }
+
+                    style: lk.layers.workspace.themes.current.checkBoxStyle
+                }
+
+                signal valueChanged(bool value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty("value") )
+                        boolCheckBox.checked = options.value
+                }
+            }
+
+            intInput: Item{
+
+                Input.NumberSpinBox{
+                    id: spinbox
+                    anchors.fill: parent
+                    decimals: false
+                    onValueChanged: parent.valueChanged(value)
+
+                    style: lk.layers.workspace.themes.current.numberSpinBoxStyle
+                }
+
+                signal valueChanged(int value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') && options.value !== undefined ){
+                        spinbox.initializeValue(options.value)
+                    }
+                    if ( options.hasOwnProperty('min') )
+                        spinbox.from = options.min
+                    if ( options.hasOwnProperty('max') )
+                        spinbox.to = options.max
+                }
+            }
+
+            numberInput: Item{
+
+                Input.NumberSpinBox{
+                    id: numberSpinBox
+                    anchors.fill: parent
+                    decimals: true
+                    onValueChanged: parent.valueChanged(value)
+
+                    style: lk.layers.workspace.themes.current.numberSpinBoxStyle
+                }
+
+                signal valueChanged(int value)
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') && options.value !== undefined ){
+                        numberSpinBox.initializeValue(options.value)
+                    }
+                    if ( options.hasOwnProperty('min') )
+                        numberSpinBox.from = options.min
+                    if ( options.hasOwnProperty('max') )
+                        numberSpinBox.to = options.max
+                }
+            }
+
+            dropDownInput: Item{
+
+                Input.DropDown{
+                    id: dropDownBox
+                    width: 100
+                    height: 25
+                    style: lk.layers.workspace.themes.current.dropDownStyle
+
+                    onActivated: {
+                        parent.selectedValue = dropDownBox.model[index]
+                        parent.valueChanged(index, dropDownBox.model[index])
+                    }
+                }
+
+                property var selectedValue: ''
+
+                signal valueChanged(int index, var value)
+
+                function setup(options){
+                    if ( options.model )
+                        dropDownBox.model = options.model
+                    if ( options.hasOwnProperty('index') ){
+                        selectedValue = dropDownBox.model[options.index]
+                        dropDownBox.currentIndex = options.index
+                    }
+                }
+
+            }
+
+            textInput: Item{
+
+                Input.InputBox{
+                    id: textField
+                    anchors.fill: parent
+
+                    style: lk.layers.workspace.themes.current.inputStyle
+
+                    margins: 3
+                    height: 25
+                    width: 150
+                    textHint: qsTr("Enter text")
+                    onTextChanged: parent.valueChanged(text)
+                }
+
+                signal valueChanged(var value)
+
+                property string currentValue: textField.text
+
+                function setup(options){
+                    if ( options.hasOwnProperty('value') )
+                        textField.text = options.value
+                }
+
+
+            }
+
+
+        }
+
         Paper.ToolButton{
             id: rectangleToolButton
             tool: Paper.RectangleTool{
@@ -32,7 +174,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ SquareIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
         }
 
         Paper.ToolButton{
@@ -43,7 +185,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ CircleIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
 
         Paper.ToolButton{
@@ -54,7 +196,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ MousePointerFillIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: detailSelectToolButton
@@ -64,7 +206,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ MousePointerIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: scaleToolButton
@@ -74,7 +216,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ ResizeIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: rotateToolButton
@@ -84,7 +226,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ RotateIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: drawToolButton
@@ -94,7 +236,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ PencilIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: penToolButton
@@ -104,7 +246,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ PenIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: textToolButton
@@ -114,7 +256,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ TypeIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: eyeDropperButton
@@ -123,7 +265,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: MenuIcon{}
+            content: Item{ EyeDropperIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
     }
 
@@ -143,7 +285,8 @@ Rectangle{
             anchors.topMargin: 1
             width: 80
             height: parent.height - 2
-            color: lk.layers.workspace.themes.current.colorScheme.middlegroundOverlay
+            radius: 5
+            color: lk.layers.workspace.themes.current.colorScheme.middleground
 
             Item{
                 id: newButtonWrap
@@ -164,12 +307,22 @@ Rectangle{
                     anchors.fill: parent
                     onClicked: {
                         var pg = paperGraphLoader.paperGrapher
-                        messageDialog.confirm({
-                            title: 'New document',
-                            text: 'Are you sure you want to clear the current contents of the document?',
-                            accepted: function(){
+
+                        lk.layers.window.dialogs.message('This will clear the contents of the current document.', {
+                            button1Name : 'ok',
+                            button1Function : function(mbox){
                                 pg.document.clear()
                                 paperCanvas.paint()
+                                mbox.close()
+                            },
+                            button3Name : 'Cancel',
+                            button3Function : function(mbox){
+                                mbox.close()
+                            },
+                            returnPressed : function(mbox){
+                                pg.document.clear()
+                                paperCanvas.paint()
+                                mbox.close()
                             }
                         })
                     }
@@ -199,18 +352,18 @@ Rectangle{
                         onTriggered: {
                             var pg = paperGraphLoader.paperGrapher
                             var pcanvas = paperCanvas
-                            fileDialog.setup({
-                                 name: "Open project",
-                                 filters: ["Json files (*.json)"],
-                                 existing: true,
-                                 accepted: function(url){
-                                     var jsonString = Paper.FileIO.readUrl(url)
-                                     pcanvas.paper.project.clear();
-                                     pcanvas.paper.project.importJSON(jsonString.toString());
-                                     paperCanvas.paint()
-                                 }
-                            })
 
+                            lk.layers.window.dialogs.openFile(
+                                { filters: ["Json files (*.json)"] },
+                                function(url){
+                                    var path = Fs.UrlInfo.toLocalFile(url)
+                                    var file = Fs.File.open(path, Fs.File.ReadOnly)
+                                    var jsonString = file.readAll()
+                                    pcanvas.paper.project.clear();
+                                    pcanvas.paper.project.importJSON(jsonString.toString());
+                                    paperCanvas.paint()
+                                }
+                            )
                         }
                     }
                 }
@@ -248,16 +401,21 @@ Rectangle{
                         onTriggered: {
                             var pg = paperGraphLoader.paperGrapher
                             var pcanvas = paperCanvas
-                            fileDialog.setup({
-                                 name: "Save Project",
-                                 filters: ["Json files (*.json)"],
-                                 existing: false,
-                                 accepted: function(url){
-                                     var exportData = pcanvas.paper.project.exportJSON({ asString: true });
-                                     Paper.FileIO.writeUrl(url, exportData)
-                                 }
-                            })
-                            paperCanvas.paint()
+
+                            lk.layers.window.dialogs.saveFile(
+                                { filters: ["Json files (*.json)"] },
+                                function(url){
+                                    var path = Fs.UrlInfo.toLocalFile(url)
+                                    var file = Fs.File.open(path, Fs.File.WriteOnly)
+                                    if ( file === null ){
+                                        lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + path, 100)
+                                        return
+                                    }
+                                    var exportData = pcanvas.paper.project.exportJSON({ asString: true });
+                                    file.writeString(exportData)
+                                    file.close()
+                                }
+                            )
                         }
                     }
                 }
@@ -280,7 +438,8 @@ Rectangle{
             anchors.topMargin: 1
             width: 55
             height: parent.height - 2
-            color: lk.layers.workspace.themes.current.colorScheme.middlegroundOverlay
+            radius: 5
+            color: lk.layers.workspace.themes.current.colorScheme.background
 
             Item{
                 id: undoButtonWrap
@@ -289,10 +448,11 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 5
 
-                Rectangle{
+                UndoIcon{
                     id: undoIcon
                     width: 15
                     height: 15
+                    color: root.iconColor
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -311,10 +471,11 @@ Rectangle{
                 anchors.left: parent.left
                 anchors.leftMargin: 30
 
-                Rectangle{
+                RedoIcon{
                     id: redoIcon
                     width: 15
                     height: 15
+                    color: root.iconColor
                     anchors.centerIn: parent
                 }
                 MouseArea{
@@ -501,12 +662,22 @@ Rectangle{
                             onClicked: {
                                 var layerView = layerList
                                 var layerId = modelData.id
-                                messageDialog.confirm({
-                                    title: 'Delete Layer',
-                                    text: 'Are you sure you want to delete the current layer?',
-                                    accepted: function(){
+
+                                lk.layers.window.dialogs.message('Are you sure you want to delete the current layer?', {
+                                    button1Name : 'ok',
+                                    button1Function : function(mbox){
                                         layerView.pg.layer.deleteLayer(layerId)
                                         layerView.updateLayers()
+                                        mbox.close()
+                                    },
+                                    button3Name : 'Cancel',
+                                    button3Function : function(mbox){
+                                        mbox.close()
+                                    },
+                                    returnPressed : function(mbox){
+                                        layerView.pg.layer.deleteLayer(layerId)
+                                        layerView.updateLayers()
+                                        mbox.close()
                                     }
                                 })
                             }
@@ -541,6 +712,7 @@ Rectangle{
     Paper.PaperGrapherLoader{
         id: paperGraphLoader
         paperCanvas: paperCanvas
+        style: toolbox.style
 
         property var openType: null
 

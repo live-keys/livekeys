@@ -19,7 +19,6 @@
 #include "staticloader.h"
 #include "live/staticcontainer.h"
 #include "licensesettings.h"
-#include "triangle.h"
 #include "loglistener.h"
 #include "worker.h"
 #include "valuehistory.h"
@@ -45,7 +44,6 @@
 #include "tcplineconnection.h"
 #include "remotelineresponse.h"
 #include "tcplineserver.h"
-#include "linegrid.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -64,7 +62,6 @@ static QObject* eventRelayProvider(QQmlEngine *engine, QJSEngine *){
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<lv::Triangle>(            uri, 1, 0, "Triangle");
     qmlRegisterType<lv::StaticLoader>(        uri, 1, 0, "StaticLoader");
     qmlRegisterType<lv::VisualLogFilter>(     uri, 1, 0, "VisualLogFilter");
     qmlRegisterType<lv::LogListener>(         uri, 1, 0, "LogListener");
@@ -78,7 +75,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::RemoteLine>(          uri, 1, 0, "RemoteLine");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
-    qmlRegisterType<lv::LineGrid>(            uri, 1, 0, "LineGrid");
 
     qmlRegisterUncreatableType<lv::LicenseSettings>(
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");

@@ -1,0 +1,4 @@
+module visual.shapes
+plugin shapes
+
+depends QtQuick 2.3

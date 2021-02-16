@@ -3,6 +3,7 @@
     "package" : ".",
     "palettes" : {
         "palettes/ImagePalette.qml" : "qml/lcvcore#Mat",
+        "palettes/PaperSurfacePalette.qml" : "qml/lcvcore#PaperSurface",
         "palettes/DrawPalette.qml" : "qml/lcvcore#DrawSurface",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
         "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",

@@ -479,6 +479,18 @@ SplitView{
         return null
     }
 
+    function findPanesByType(paneType){
+        var result = []
+        for ( var j = 0; j < panes.length; ++j ){
+            if ( panes[j].paneType === "splitview" ){
+                result = result.concat(panes[j].findPanesByType(paneType))
+            } else if ( panes[j].paneType === paneType ) {
+                result.push(panes[j])
+            }
+        }
+        return result
+    }
+
     function paneAt(i){
         return panes[i]
     }

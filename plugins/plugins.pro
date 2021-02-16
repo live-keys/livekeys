@@ -16,6 +16,7 @@ SUBDIRS += \
     squareone \
     paper \
     timeline \
+    visual \
     lcvcore \
     lcvimgproc \
     lcvfeatures2d \
@@ -34,6 +35,7 @@ fs.subdir               = $$PWD/fs
 lcvphoto.subdir         = $$PWD/lcvphoto
 lcvvideo.subdir         = $$PWD/lcvvideo
 timeline.subdir         = $$PWD/timeline
+visual.subdir           = $$PWD/visual
 
 # --- Dependency configuration ---
 

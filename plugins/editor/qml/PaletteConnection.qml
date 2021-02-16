@@ -7,6 +7,7 @@ import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.shapes 1.0
 
 Rectangle{
     id: root

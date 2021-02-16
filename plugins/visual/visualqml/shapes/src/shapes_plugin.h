@@ -14,12 +14,12 @@
 **
 ****************************************************************************/
 
-#ifndef LVWORKSPACEICONS_PLUGIN_H
-#define LVWORKSPACEICONS_PLUGIN_H
+#ifndef LVVISUALSHAPES_PLUGIN_H
+#define LVVISUALSHAPES_PLUGIN_H
 
 #include <QQmlExtensionPlugin>
 
-class IconsPlugin : public QQmlExtensionPlugin{
+class ShapesPlugin : public QQmlExtensionPlugin{
 
     Q_OBJECT
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QQmlExtensionInterface")
@@ -28,4 +28,4 @@ public:
     void registerTypes(const char *uri) Q_DECL_OVERRIDE;
     void initializeEngine(QQmlEngine *engine, const char *uri) Q_DECL_OVERRIDE;
 };
-#endif // ICONS_PLUGIN_H
+#endif // LVVISUALSHAPES_PLUGIN_H

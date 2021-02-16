@@ -76,6 +76,10 @@ Pane{
         }
     }
 
+    paneCleared: function(){
+        root.destroy()
+    }
+
     paneHelp : function(){
         if ( documentHandler && documentHandler.has(DocumentHandler.LanguageHelp) ){
             var helpPath = ''
@@ -260,6 +264,7 @@ Pane{
         }
 
         Workspace.Button{
+            id: shapeAllButton
             anchors.right: parent.right
             anchors.rightMargin: 110
             width: 30

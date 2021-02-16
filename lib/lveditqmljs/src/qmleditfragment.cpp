@@ -86,14 +86,14 @@ QmlEditFragment::~QmlEditFragment(){
     }
 }
 
-QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent)
+QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent, QQmlContext *context)
 {
     QString fullDeclaration;
     fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "\n";
 
     ViewEngine* engine = ViewContext::instance().engine();
     ViewEngine::ComponentResult::Ptr cr = engine->createObject(
-        path, fullDeclaration.toUtf8(), parent
+        path, fullDeclaration.toUtf8(), parent, context
     );
     return cr->object;
 }
@@ -210,23 +210,8 @@ void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
 
 void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
     for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){
-
         if ( *it == edit ){
             edit->emitRemoval();
-
-            for ( auto nextIt = it + 1; nextIt != m_childFragments.end(); ++nextIt ){
-                //HERE
-//                QmlEditFragment* nextFrag = *nextIt;
-//                const QList<QmlBindingChannel::Ptr> &chs = nextFrag->bindingSpan()->channels();
-
-//                for ( QmlBindingChannel::Ptr channel : chs ){
-//                    if ( channel->listIndex() > -1 ){
-//                        QQmlProperty pp = channel->property();
-//                        channel->updateConnection(pp, channel->listIndex() - 1);
-//                    }
-//                }
-            }
-
             edit->deleteLater();
             m_childFragments.erase(it);
             return;
@@ -581,6 +566,12 @@ QStringList QmlEditFragment::bindingPath(){
 
 void QmlEditFragment::__selectedChannelChanged(){
     QmlEditFragment* pf = parentFragment();
+
+    if ( m_channel && ( m_channel->type() == QmlBindingChannel::Object || m_channel->type() == QmlBindingChannel::ListIndex ) ){
+        QObject* ob = m_channel->object();
+        disconnect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    }
+
     if ( pf ){
         m_channel = DocumentQmlChannels::traverseBindingPathFrom(pf->channel(), m_channel->bindingPath());
         if ( m_channel ){
@@ -688,6 +679,13 @@ void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
             connect(channels, &DocumentQmlChannels::selectedChannelChanged, this, &QmlEditFragment::__selectedChannelChanged);
     }
     m_channel = channel;
+    if ( m_channel && m_channel->type() == QmlBindingChannel::Object ){
+        QObject* ob = m_channel->object();
+        connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    } else if ( m_channel && m_channel->type() == QmlBindingChannel::ListIndex ){
+        QObject* ob = m_channel->object();
+        connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    }
     if ( m_channel && m_channel->isBuilder() )
         addFragmentType(QmlEditFragment::Builder);
     else {
@@ -788,6 +786,25 @@ bool QmlEditFragment::bindFunctionExpression(const QString &expression){
 bool QmlEditFragment::isNull()
 {
     return readValueText() == "null";
+}
+
+void QmlEditFragment::__channelObjectErased(){
+    if ( !m_channel )
+        return;
+
+    if ( m_channel->type() == QmlBindingChannel::Object ){
+        m_codeHandler->removeEditingFragment(this);
+    } else if ( m_channel->type() == QmlBindingChannel::ListIndex ){
+        auto parentFrag = parentFragment();
+        if (parentFrag){
+            for (auto cf: parentFrag->childFragments()){
+                if (!cf->channel()) continue;
+                if (cf->channel()->listIndex() <= m_channel->listIndex()) continue;
+                cf->channel()->updateConnection(cf->channel()->listIndex()-1);
+            }
+        }
+        m_codeHandler->removeEditingFragment(this);
+    }
 }
 
 QString QmlEditFragment::buildCode(const QJSValue &value){
