@@ -2,13 +2,18 @@ module visual.input
 
 depends QtQuick 2.3
 
-CheckBox           1.0 CheckBox.qml
-CheckBoxStyle      1.0 CheckBoxStyle.qml
-NumberSpinBox      1.0 NumberSpinBox.qml
-NumberSpinBoxStyle 1.0 NumberSpinBoxStyle.qml
-TextStyle          1.0 TextStyle.qml
-Label              1.0 Label.qml
-InputBox           1.0 InputBox.qml
-InputBoxStyle      1.0 InputBoxStyle.qml
-DropDown           1.0 DropDown.qml
-DropDownStyle      1.0 DropDownStyle.qml
+CheckBox                   1.0 CheckBox.qml
+CheckBoxStyle              1.0 CheckBoxStyle.qml
+NumberSpinBox              1.0 NumberSpinBox.qml
+NumberSpinBoxStyle         1.0 NumberSpinBoxStyle.qml
+TextStyle                  1.0 TextStyle.qml
+Label                      1.0 Label.qml
+InputBox                   1.0 InputBox.qml
+InputBoxStyle              1.0 InputBoxStyle.qml
+DropDown                   1.0 DropDown.qml
+DropDownStyle              1.0 DropDownStyle.qml
+AlphaSlider                1.0 AlphaSlider.qml
+ColorPicker                1.0 ColorPicker.qml
+ColorPickerStyle           1.0 ColorPickerStyle.qml
+HueSlider                  1.0 HueSlider.qml
+SaturationBrightnessSlider 1.0 SaturationBrightnessSlider.qml
