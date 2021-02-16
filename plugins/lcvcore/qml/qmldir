@@ -7,6 +7,7 @@ depends live 1.0
 RegionSelection            1.0 RegionSelection.qml
 VideoControls              1.0 VideoControls.qml
 VideoDecoderView           1.0 VideoDecoderView.qml
+VideoFile                  1.0 VideoFile.qml
 GrayscaleView              1.0 GrayscaleView.qml
 VideoCaptureSegmentFactory 1.0 VideoCaptureSegmentFactory.qml
 NavigableImageView         1.0 NavigableImageView.qml
