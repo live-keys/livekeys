@@ -2,7 +2,6 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/eventrelay.h \
-    $$PWD/linegrid.h \
     $$PWD/live_plugin.h \
     $$PWD/qmlcolor.h \
     $$PWD/stringbasedloader.h \
@@ -24,7 +23,6 @@ HEADERS += \
     $$PWD/remotelineresponse.h \
     $$PWD/scriptcommandlineparser_p.h \
     $$PWD/valuehistory.h \
-    $$PWD/triangle.h \
     $$PWD/licensesettings.h \
     $$PWD/loglistener.h \
     $$PWD/loglistenersocket.h \
@@ -34,7 +32,6 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/eventrelay.cpp \
-    $$PWD/linegrid.cpp \
     $$PWD/live_plugin.cpp \
     $$PWD/qmlcolor.cpp \
     $$PWD/stringbasedloader.cpp \
@@ -55,7 +52,6 @@ SOURCES += \
     $$PWD/remotelineresponse.cpp \
     $$PWD/scriptcommandlineparser.cpp \
     $$PWD/valuehistory.cpp \
-    $$PWD/triangle.cpp \
     $$PWD/licensesettings.cpp \
     $$PWD/loglistener.cpp \
     $$PWD/loglistenersocket.cpp \

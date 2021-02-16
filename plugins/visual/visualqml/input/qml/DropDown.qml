@@ -17,6 +17,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 2.4
 import live 1.0
+import visual.shapes 1.0
 
 ComboBox{
     id: root

@@ -1,5 +1,5 @@
 import QtQuick 2.3
-import workspace.icons 1.0
+import visual.shapes 1.0
 
 SvgView{
     property color color: 'white'

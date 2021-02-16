@@ -1,5 +1,4 @@
 module workspace.icons
-plugin icons
 
 depends QtQuick 2.3
 
