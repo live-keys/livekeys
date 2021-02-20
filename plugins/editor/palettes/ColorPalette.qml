@@ -21,6 +21,7 @@ import QtGraphicalEffects 1.0
 import live 1.0
 import editor 1.0
 import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -28,29 +29,86 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    property color selectedColor: 'white'
+    function colorPicked(color){
+        selectedColor = color
+        palette.value = selectedColor
+        if ( !palette.isBindingChange() ){
+            editFragment.write(palette.value.toString())
+        }
+    }
+
+    function toggleColorPicker(){
+        colorPicker.visible = !colorPicker.visible
+    }
+
     item: Item{
-        width: 280
-        height: colorPicker.height
+        width: colorPicker.visible ? colorPicker.width : (colorDisplay.width + (inputLoader.visible ? input.width + 2 : 0))
+        height: 25 + (colorPicker.visible ? colorPicker.height + 2 : 0)
 
-        Workspace.ColorPicker{
+        Rectangle{
+            id: colorDisplay
+            anchors.top: parent.top
+            anchors.left: parent.left
+            width: 40
+            height: 25
+            color: 'transparent'
+            radius: 3
+            border.width: 1
+            border.color: palette.theme.colorScheme.backgroundBorder
+
+            Rectangle{
+                anchors.centerIn: parent
+                width: parent.width - 6
+                height: parent.height - 6
+                color: palette.selectedColor
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    palette.toggleColorPicker()
+                }
+            }
+        }
+
+        Loader{
+            id: inputLoader
+            visible: true
+            active: true
+            anchors.left: parent.left
+            anchors.leftMargin: colorDisplay.width + 2
+
+            Workspace.InputBox{
+                id: input
+                height: 25
+                anchors.top: parent.top
+                style: palette.theme.inputStyle
+
+                text: palette.selectedColor
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return )
+                        palette.colorPicked(text)
+                }
+            }
+        }
+
+        Input.ColorPicker{
             id: colorPicker
+            anchors.top: parent.top
+            anchors.topMargin: 27
+            visible: false
+            height: 180
 
-            style: QtObject{
-                property QtObject input: theme.inputStyle
-                property double colorDisplayBoderWidth: 1
-                property color  colorDisplayBoderColor: theme.inputStyle.borderColor
-                property double colorDisplayRadius: 2
-                property color adjustmentBackground: 'transparent'
-                property color adjustmentBorderColor: 'transparent'
-                property int adjustmentBorderWidth: 0
-                property real adjustmentRadius: 3
-                property QtObject labelStyle: theme.inputLabelStyle
+            style: Input.ColorPickerStyle{
+                backgroundColor: theme.colorScheme.backgroundOverlay
+                colorPanelBorderColor: theme.colorScheme.backgroundBorder
+                inputBoxStyle: theme.inputStyle
+                labelStyle: theme.inputStyle.textStyle
             }
 
             onSelectedColorChanged: {
-                palette.value = selectedColor
-                if ( !palette.isBindingChange() )
-                    editFragment.write(palette.value.toString())
+                palette.colorPicked(selectedColor)
             }
         }
     }
@@ -62,9 +120,11 @@ CodePalette{
     }
 
     onInit: {
-        colorPicker.selectedColor = value
+        palette.selectedColor = value
+        colorPicker.color = value
     }
     onValueFromBindingChanged: {
-        colorPicker.selectedColor = value
+        palette.selectedColor = value
+        colorPicker.color = value
     }
 }
