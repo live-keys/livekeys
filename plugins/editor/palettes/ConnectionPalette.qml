@@ -32,9 +32,13 @@ CodePalette{
         weight: Font.Normal
     })
 
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
     property QtObject theme: lk.layers.workspace.themes.current
 
     property CodeCompletionModel codeModel : CodeCompletionModel{}
+
+    property var qmlSuggestionBox: null
 
     function writeBinding(){
         var text = input.text
@@ -128,48 +132,37 @@ CodePalette{
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
                     editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                     event.accepted = true
-                }
-            }
-        }
+                } else {
+                    var activePane = lk.layers.workspace.panes.activePane
+                    var paneCoords = activePane.mapGlobalPosition()
+                    var coords = input.mapToItem(activePane, 0, 0)
 
-        SuggestionBox{
-            id: qmlSuggestionBox
-            anchors.left: input.left
-            anchors.top: input.bottom
-            width: input.width
+                    var rect = Qt.rect(coords.x, coords.y, input.width, input.height)
 
-            fontFamily: palette.inputFont.family
-            fontSize: palette.inputFont.pixelSize
-            smallFontSize: palette.inputFont.pixelSize - 2
-            visible: palette.codeModel.isEnabled
-            onVisibleChanged: {
-                if ( visible ){
-                    var editorPane = palette.item.parent
-                    while ( editorPane && !editorPane.currentWindow ){
-                        editorPane = editorPane.parent
+                    if (qmlSuggestionBox){
+                        qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x + 113, paneCoords.y - 75), lk.layers.editor.environment.placement.bottom)
+                        return
                     }
-                    if ( editorPane ){
-                        var mainItem = editorPane.currentWindow.contentItem
-                        var coords = palette.item.mapToItem(mainItem, 0, 0)
-                        var suggestionBoxUpper = coords.y + qmlSuggestionBox.height + 30
+                    qmlSuggestionBox = paletteControls.createSuggestionBox()
+                    qmlSuggestionBox.width = Qt.binding(function(){ return input.width })
+                    qmlSuggestionBox.height = 200
+                    qmlSuggestionBox.x = 0
 
-                        if ( suggestionBoxUpper < mainItem.height ){
-                            qmlSuggestionBox.anchors.bottom = undefined
-                            qmlSuggestionBox.anchors.top = input.bottom
-                        } else {
-                            qmlSuggestionBox.anchors.top = undefined
-                            qmlSuggestionBox.anchors.bottom = input.top
-                        }
-                    }
+                    qmlSuggestionBox.fontFamily = palette.inputFont.family
+                    qmlSuggestionBox.fontSize = palette.inputFont.pixelSize
+                    qmlSuggestionBox.smallFontSize = palette.inputFont.pixelSize - 2
+                    qmlSuggestionBox.visible = Qt.binding(function(){ return palette.codeModel.isEnabled })
+
+                    qmlSuggestionBox.opacity = Qt.binding(function(){
+                        return palette.codeModel.isEnabled ? 0.95 : 0
+                    })
+                    qmlSuggestionBox.model = Qt.binding(function(){ return palette.codeModel })
+
+                    var editorBox = lk.layers.editor.environment.createEditorBox(
+                        qmlSuggestionBox, rect, Qt.point(paneCoords.x + 120, paneCoords.y - 32), lk.layers.editor.environment.placement.bottom
+                    )
+                    editorBox.color = 'transparent'
                 }
-            }
-
-            opacity: visible ? 0.95 : 0
-
-            model: palette.codeModel
-
-            Behavior on opacity {
-                NumberAnimation { duration: 150 }
             }
         }
 
@@ -242,5 +235,13 @@ CodePalette{
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)
         }
+    }
+
+    Component.onDestruction: {
+        if (!qmlSuggestionBox) return
+        var par = qmlSuggestionBox.parent
+        qmlSuggestionBox.destroy()
+        qmlSuggestionBox = null
+        par.destroy()
     }
 }

@@ -197,7 +197,9 @@ Rectangle{
             value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
         }
 
-        if (name.substr(0,2) === "on" && name.substr(name.length-7,7) === "Changed")
+        var srcLocation = srcPort.objectProperty.editingFragment.location
+
+        if (srcLocation === QmlEditFragment.Slot)
         {
             // source is event, different direction
             var nodeId = dstPort.objectProperty.node.item.id

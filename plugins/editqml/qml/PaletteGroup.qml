@@ -1,4 +1,5 @@
 import QtQuick 2.7
+import editqml 1.0
 
 Column{
     id: paletteGroup
@@ -37,6 +38,16 @@ Column{
         }
         function onAboutToBeRemoved(){
             var p = paletteGroup.parent
+
+            var ed = p
+            while (ed && ed.objectName !== "editorType"){
+                ed = ed.parent
+            }
+
+            if (ed && paletteGroup.editingFragment && paletteGroup.editingFragment.location === QmlEditFragment.Imports){
+                ed.importsShaped = false
+            }
+
             if ( p && p.objectName === 'editorBox' ){
                 for (var i = 0; i < children.length; ++i)
                     if (children[i].objectName === "paletteContainer")

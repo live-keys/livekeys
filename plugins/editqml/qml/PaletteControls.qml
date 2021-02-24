@@ -41,7 +41,13 @@ QtObject{
                 }
             }
         }
-
+        property Component suggestionBox: Component {
+            SuggestionBox {
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+            }
+        }
     }
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -72,6 +78,10 @@ QtObject{
 
     function createPropertyContainer(parent){
         return factories.propertyContainer.createObject(parent)
+    }
+
+    function createSuggestionBox(parent){
+        return factories.suggestionBox.createObject(parent)
     }
 
     //////////////////////////////////////////////

@@ -33,6 +33,8 @@ Rectangle{
     property alias lineSurfaceVisible: lineSurfaceBackground.visible
     property double lineSurfaceWidth: lineSurfaceBackground.visible ? lineSurface.width : 0
 
+    property var qmlSuggestionBox: null
+
     function forceFocus(){
         textEdit.forceActiveFocus()
     }
@@ -417,7 +419,37 @@ Rectangle{
                         if ( command !== '' ){
                             lk.layers.workspace.commands.execute(command)
                             event.accepted = true
+                            return
                         }
+
+                        var activePane = lk.layers.workspace.panes.activePane
+                        var paneCoords = activePane.mapGlobalPosition()
+                        var rect = textEdit.cursorRectangle
+
+                        if (qmlSuggestionBox){
+                            qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x -7, paneCoords.y - 43), lk.layers.editor.environment.placement.bottom)
+                            return
+                        }
+                        qmlSuggestionBox = paletteControls.createSuggestionBox()
+
+                        qmlSuggestionBox.fontFamily = textEdit.font.family
+                        qmlSuggestionBox.fontSize = textEdit.font.pixelSize
+                        qmlSuggestionBox.smallFontSize = textEdit.font.pixelSize - 2
+                        qmlSuggestionBox.visible = Qt.binding(function(){
+                            return documentHandler.completionModel.isEnabled && qmlSuggestionBox.suggestionCount > 0
+                        })
+                        qmlSuggestionBox.opacity = Qt.binding(function(){
+                            return (qmlSuggestionBox && qmlSuggestionBox.visible) ? 0.95 : 0
+                        })
+                        qmlSuggestionBox.model = Qt.binding(function(){
+                            return documentHandler.completionModel
+                        })
+
+                        var editorBox = lk.layers.editor.environment.createEditorBox(
+                            qmlSuggestionBox, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
+                        )
+
+                        editorBox.color = 'transparent'
                     }
                 }
 
@@ -478,56 +510,11 @@ Rectangle{
         }
     }
 
-    SuggestionBox{
-        id: qmlSuggestionBox
-
-        fontFamily: textEdit.font.family
-        fontSize: textEdit.font.pixelSize
-        smallFontSize: textEdit.font.pixelSize - 2
-        visible: documentHandler.completionModel.isEnabled && suggestionCount > 0
-
-        Connections{
-            target: documentHandler.completionModel
-            function onCompletionPositionChanged(){
-                var h = 280
-
-                var calculatedY =
-                    textEdit.cursorRectangle.y +
-                    textEdit.cursorRectangle.height + 4 -
-                    flick.flickableItem.contentY
-
-                if ( calculatedY > flick.height - h )
-                    calculatedY = textEdit.cursorRectangle.y - h - flick.flickableItem.contentY
-
-                if ( calculatedY < 0 ){
-                    h = h + calculatedY
-                    calculatedY = 0
-                }
-
-
-                var calculatedX =
-                    lineSurface.width +
-                    textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
-                    flick.flickableItem.contentX
-
-                var totalWidth = lineSurface.width + flick.width
-                if ( calculatedX > totalWidth - qmlSuggestionBox.width)
-                    calculatedX = totalWidth - qmlSuggestionBox.width
-
-                qmlSuggestionBox.height = h
-                qmlSuggestionBox.y = calculatedY
-                qmlSuggestionBox.x = calculatedX
-            }
-        }
-
-        opacity: visible ? 0.95 : 0
-
-        y: 0
-        x: 0
-        model: documentHandler.completionModel
-
-        Behavior on opacity {
-            NumberAnimation { duration: 150 }
-        }
+    Component.onDestruction: {
+        if (!qmlSuggestionBox) return
+        var par = qmlSuggestionBox.parent
+        qmlSuggestionBox.destroy()
+        qmlSuggestionBox = null
+        par.destroy()
     }
 }
