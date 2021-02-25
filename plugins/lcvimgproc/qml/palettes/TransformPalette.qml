@@ -57,15 +57,19 @@ CodePalette{
 
         if (!p) return null
 
+        var on = p.parent.parent
+        var container = (on && on.objectName === "objectNode") ? on : null
         var oc = p.parent.parent.parent.parent
-        if (oc.objectName === "objectContainer"){ // inside shaping
+        container = (oc && oc.objectName === "objectContainer") ? oc : container
+
+        if (container){ // inside shaping
             var position =
                 p.editingFragment.valuePosition() +
                 p.editingFragment.valueLength() - 1
-            paletteControls.addItemToRuntimeWithNotification(oc, position, "TransformImage", name, false)
+            paletteControls.addItemToRuntimeWithNotification(container, position, "TransformImage", name, false)
 
-            var cont = oc.groupsContainer
-            return cont.children[cont.children.length - 1]
+            var children = container.objectName === "objectContainer" ? container.groupsContainer.children : container.propertyContainer.children
+            return children[children.length - 1]
 
         } else { // inside palette
             var ef = p.editingFragment
@@ -129,7 +133,8 @@ CodePalette{
                         var fragment = null
                         if (crop.editingFragment){ //objectContainer
                             fragment = paletteControls.addPropertyByName(crop, "region")
-                            crop.expand()
+                            if (crop.objectName === "objectContainer")
+                                crop.expand()
                         } else {
                             if (!crop)
                                 return
@@ -190,7 +195,8 @@ CodePalette{
                         var fragment = null
                         if (resize.editingFragment){
                             fragment = paletteControls.addPropertyByName(resize, "size")
-                            resize.expand()
+                            if (resize.objectName === "objectContainer")
+                                resize.expand()
                         } else {
                             if (!resize)
                                 return
@@ -238,7 +244,8 @@ CodePalette{
                         var fragment = null
                         if (rotate.editingFragment){
                             fragment = paletteControls.addPropertyByName(rotate, "degrees")
-                            rotate.expand()
+                            if (rotate.objectName === "objectContainer")
+                                rotate.expand()
                         } else {
                             if (!rotate)
                                 return
@@ -283,7 +290,8 @@ CodePalette{
                         var fragment = null
                         if (perspective.editingFragment){
                             fragment = paletteControls.addPropertyByName(perspective, "points")
-                            perspective.expand()
+                            if (perspective.objectName === "objectContainer")
+                                perspective.expand()
                         } else {
                             if (!perspective)
                                 return
