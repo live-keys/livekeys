@@ -83,8 +83,8 @@ Pane{
     paneHelp : function(){
         if ( documentHandler && documentHandler.has(DocumentHandler.LanguageHelp) ){
             var helpPath = ''
-            if ( documentHandler.completionModel.isEnabled ){
-                helpPath = qmlSuggestionBox.getDocumentation()
+            if ( documentHandler.completionModel.isEnabled && editor.qmlSuggestionBox){
+                helpPath = editor.qmlSuggestionBox.getDocumentation()
             } else {
                 helpPath = documentHandler.codeHandler.help(textEdit.cursorPosition)
             }

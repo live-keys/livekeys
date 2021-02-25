@@ -3,9 +3,17 @@ import QtQuick 2.11
 Item {
     id: root
     property color hueColor : "blue"
-    property real saturation : pickerCursor.x / (width - 2 * r)
-    property real brightness : 1 - pickerCursor.y / (height - 2 * r)
+    property double saturation : pickerCursor.x / (width - 2 * r)
+    property double brightness : 1 - pickerCursor.y / (height - 2 * r)
     property int r : 8
+
+    property color color: '#fff'
+    onColorChanged: {
+        pickerCursor.x = Qt.binding(function(){ return color.hslSaturation * (width - 2 * r) })
+        pickerCursor.y = Qt.binding(function(){
+            return (1 - color.hsvValue) * (height - 2 * r)
+        })
+    }
 
     signal valueSelected()
 
@@ -37,6 +45,7 @@ Item {
 
     Item {
         id: pickerCursor
+
         Rectangle {
             width: r * 2
             height: r * 2
