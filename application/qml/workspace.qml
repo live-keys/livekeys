@@ -159,6 +159,8 @@ Item{
                 initializeSplitterPanes(panesToOpen[configIndex - 1], paneConfiguration[configIndex])
             }
 
+            splitter.__updatePaneSizes()
+
             return panesToOpen
         }
 
