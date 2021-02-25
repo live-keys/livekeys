@@ -5,6 +5,7 @@ import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
 Item{
     id: root
