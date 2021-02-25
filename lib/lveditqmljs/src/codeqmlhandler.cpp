@@ -1725,6 +1725,9 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
             return true;
         }
+    } else if ( expression == "modelData" ){
+        bp = QmlBindingPath::create();
+        bp->appendContextValue("modelData");
     } else {
         QmlError(
             m_engine,

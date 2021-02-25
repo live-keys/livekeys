@@ -567,7 +567,7 @@ QStringList QmlEditFragment::bindingPath(){
 void QmlEditFragment::__selectedChannelChanged(){
     QmlEditFragment* pf = parentFragment();
 
-    if ( m_channel && ( m_channel->type() == QmlBindingChannel::Object || m_channel->type() == QmlBindingChannel::ListIndex ) ){
+    if ( m_channel && !m_channel->isBuilder() &&  ( m_channel->type() == QmlBindingChannel::Object || m_channel->type() == QmlBindingChannel::ListIndex ) ){
         QObject* ob = m_channel->object();
         disconnect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
     }
@@ -679,10 +679,10 @@ void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
             connect(channels, &DocumentQmlChannels::selectedChannelChanged, this, &QmlEditFragment::__selectedChannelChanged);
     }
     m_channel = channel;
-    if ( m_channel && m_channel->type() == QmlBindingChannel::Object ){
+    if ( m_channel && !m_channel->isBuilder() && m_channel->type() == QmlBindingChannel::Object ){
         QObject* ob = m_channel->object();
         connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
-    } else if ( m_channel && m_channel->type() == QmlBindingChannel::ListIndex ){
+    } else if ( m_channel && !m_channel->isBuilder() && m_channel->type() == QmlBindingChannel::ListIndex ){
         QObject* ob = m_channel->object();
         connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
     }

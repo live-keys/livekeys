@@ -196,7 +196,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: Item{ MousePointerFillIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
+            content: Item{ MousePointerIcon{ anchors.centerIn: parent; width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: detailSelectToolButton
@@ -206,7 +206,7 @@ Rectangle{
                 paperGrapherLoader: paperGraphLoader
                 pg: paperGraphLoader.paperGrapher
             }
-            content: Item{ MousePointerIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
+            content: Item{ MousePointerFillIcon{ anchors.centerIn: parent;width: 15; height: 15; color: root.iconColor } }
         }
         Paper.ToolButton{
             id: scaleToolButton
@@ -439,7 +439,7 @@ Rectangle{
             width: 55
             height: parent.height - 2
             radius: 5
-            color: lk.layers.workspace.themes.current.colorScheme.background
+            color: lk.layers.workspace.themes.current.colorScheme.middleground
 
             Item{
                 id: undoButtonWrap

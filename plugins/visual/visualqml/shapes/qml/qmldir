@@ -2,3 +2,5 @@ module visual.shapes
 plugin shapes
 
 depends QtQuick 2.3
+
+Chessboard 1.0 Chessboard.qml
