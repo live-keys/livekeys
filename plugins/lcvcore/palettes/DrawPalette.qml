@@ -18,17 +18,9 @@ CodePalette{
         property int boxBorderWidth: 1
         property real boxRadius: 3
         property QtObject labelStyle: theme.inputLabelStyle
-        property QtObject colorPicker: QtObject{
-            property QtObject input: theme.inputStyle
-            property double colorDisplayBoderWidth: 1
-            property color  colorDisplayBoderColor: theme.inputStyle.borderColor
-            property double colorDisplayRadius: 2
-            property color adjustmentBackground:  theme.colorScheme.background
-            property color adjustmentBorderColor: theme.colorScheme.backgroundBorder
-            property int adjustmentBorderWidth: 1
-            property real adjustmentRadius: 3
-            property QtObject labelStyle: theme.inputLabelStyle
-        }
+        property color toolHighlightColor: theme.colorScheme.middlegroundOverlay
+        property QtObject formButtonStyle: theme.formButtonStyle
+        property QtObject labelBoxStyle: theme.inputLabelStyle
 
         property Component saveButton: theme.buttons.save
         property Component brushSizeButton: theme.buttons.penSize

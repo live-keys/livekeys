@@ -20,7 +20,11 @@ Item{
 
     signal clicked(var event)
     signal pressed(var event)
+    signal released(var event)
     signal positionChanged(var event)
+
+    property double scrollX: scrollView.flickableItem.contentX
+    property double scrollY: scrollView.flickableItem.contentY
 
     function setScale(scale, position){
         if ( scale > root.scale ){
@@ -122,6 +126,13 @@ Item{
             var x = mouse.x / root.scale + scrollView.flickableItem.contentX / root.scale
             var y = mouse.y / root.scale + scrollView.flickableItem.contentY / root.scale
             parent.positionChanged({
+                imageX: x, imageY: y, mouse: mouse
+            })
+        }
+        onReleased: {
+            var x = mouse.x / root.scale + scrollView.flickableItem.contentX / root.scale
+            var y = mouse.y / root.scale + scrollView.flickableItem.contentY / root.scale
+            parent.released({
                 imageX: x, imageY: y, mouse: mouse
             })
         }

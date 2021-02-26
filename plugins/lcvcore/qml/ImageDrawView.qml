@@ -4,7 +4,12 @@ import QtQuick.Controls.Styles 1.2
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
+import visual.shapes 1.0
+
+import paper 1.0 as Paper
 
 Item{
     id: root
@@ -12,12 +17,11 @@ Item{
     height: 400
 
     property bool drawingEnabled: true
-    property double brushSize: brushSizeSlider.value
-    property color brushColor: colorPicker.selectedColor
+//    property double brushSize: brushSizeSlider.value
+//    property color brushColor: colorPicker.selectedColor
 
-    property real lastX
-    property real lastY
     property QtObject image: null
+    property QtObject imageView: imageView
     onImageChanged: {
         root.writableImage = Cv.MatOp.createWritableFromMat(image)
         imageView.image = image
@@ -27,15 +31,16 @@ Item{
 
     signal imagePaint(QtObject image)
 
-
     property QtObject defaultStyle: QtObject{
         property color toolbarColor: "#333"
         property color boxColor: '#333'
         property color boxBorderColor: "#666"
         property int boxBorderWidth: 1
         property real boxRadius: 3
-        property QtObject labelStyle: colorPicker.defaultStyle.labelStyle
-        property QtObject colorPicker: colorPicker.defaultStyle
+        property color toolHighlightColor: "#444"
+        property QtObject labelStyle: colorPicker.style.labelStyle
+        property QtObject labelBoxStyle: Workspace.LabelOnRectangleStyle{}
+        property QtObject formButtonStyle: Workspace.RectangleButtonStyle{}
 
         property Component saveButton: Workspace.TextButton{
             width: 50
@@ -55,128 +60,253 @@ Item{
     Cv.NavigableImageView{
         id: imageView
         anchors.left: parent.left
-        anchors.leftMargin: toolbar.width + 1
+        anchors.leftMargin: toolbox.width + 1
         anchors.top: parent.top
         anchors.topMargin: 31
 
         maxWidth: root.width - anchors.leftMargin
         maxHeight: root.height - anchors.topMargin
 
-
         onPressed: {
-            root.lastX = event.imageX
-            root.lastY = event.imageY
+            if ( toolbox.selectedTool ){
+                toolbox.selectedTool.mouseDown(event)
+            }
+        }
+        onReleased: {
+            if ( toolbox.selectedTool ){
+                toolbox.selectedTool.mouseUp(event)
+            }
         }
         onPositionChanged: {
-            if ( root.drawingEnabled && root.writableImage ){
-                Img.Draw.line(
-                    root.writableImage,
-                    Qt.point(root.lastX, root.lastY),
-                    Qt.point(event.imageX, event.imageY),
-                    root.brushColor,
-                    root.brushSize
-                );
-                root.lastX = event.imageX
-                root.lastY = event.imageY
-
-                imageView.image = root.writableImage.toMat()
-                root.imagePaint(imageView.image)
+            if ( toolbox.selectedTool && ( event.mouse.buttons & Qt.LeftButton ) ){
+                toolbox.selectedTool.mouseDrag(event)
             }
         }
     }
 
     Rectangle{
-        id: toolbar
-        anchors.top: parent.top
-        anchors.topMargin: 31
-        width: 30
-        height: imageView.height > 150 ? imageView.height : 150
-        color: root.style.toolbarColor
+        color: toolbox.color
+        width: 50
+        height: parent.height
 
-        Column{
+        Workspace.Toolbox{
+            id: toolbox
             anchors.top: parent.top
-            anchors.topMargin: 10
+            anchors.topMargin: 31
+            width: parent.width
+            height: 100
 
-            Item{
-                visible: root.drawingEnabled
-                width: 30 + (sliderBackground.visible ? sliderBackground.width : 0)
-                height: 30
+            property color foreground: 'black'
+            property color background: 'white'
 
+            canvas: imageView
+            infoBar: infobar
+            color: root.style.toolbarColor
+            border.width: 0
+            border.color: 'transparent'
 
-                Workspace.Button{
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 30
-                    height: 30
-                    content: root.style.brushSizeButton
-
-                    onClicked: sliderBackground.visible = !sliderBackground.visible
+            Workspace.ToolButton{
+                id: brushTool
+                tool: Cv.BrushTool{
+                    id: cropTool
+                    canvas: imageView
+                    imageContainer: root
+                    toolbox: toolbox
+                    formButtonStyle: root.style.formButtonStyle
+                    labelBoxStyle: root.style.labelBoxStyle
                 }
-
-                Rectangle{
-                    id: sliderBackground
-                    anchors.left: parent.left
-                    anchors.leftMargin: 30
-                    width: 220
-                    height: 30
-                    color: root.style.boxColor
-                    border.color: root.style.boxBorderColor
-                    border.width: root.style.boxBorderWidth
-                    radius: root.style.boxRadius
-                    visible: false
-
-                    Slider{
-                        id: brushSizeSlider
-                        anchors.verticalCenter: parent.verticalCenter
-                        anchors.left: parent.left
-                        anchors.leftMargin: valueLabel.width + 5
-                        width: parent.width - valueLabel.width - 10
-                        height: 15
-                        minimumValue: 1
-                        value: 1
-                        stepSize: 1.0
-                        maximumValue: 500
-
-                        style: SliderStyle{
-                            groove: Rectangle {
-                                implicitHeight: 5
-                                color: '#0b111c'
-                            }
-                            handle: Rectangle{
-                                width: 11
-                                height: 11
-                                radius: 5
-                                color: '#9b9da0'
-                            }
-                        }
-                    }
-
-                    Workspace.LabelOnRectangle{
-                        id: valueLabel
-                        anchors.left: parent.left
-                        anchors.leftMargin: 2
-                        height: 25
-                        width: 40
-                        style: root.style.labelStyle
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: brushSizeSlider.value
+                content: Rectangle{
+                    width: 20
+                    height: 20
+                    color: brushTool.containsMouse || toolbox.selectedTool === cropTool ? root.style.toolHighlightColor : 'transparent'
+                    radius: 2
+                    Icons.BrushIcon{
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
                     }
                 }
             }
 
-            Rectangle{
-                width: colorPicker.width + 5
-                height: colorPicker.height
-                color: root.style.boxColor
+            Workspace.ToolButton{
+                id: gradientTool
+                tool: Cv.GradientTool{
+                    id: rotateTool
+                    canvas: imageView
+                    imageContainer: root
+                    toolbox: toolbox
 
-                Workspace.ColorPicker{
+                }
+                content: Rectangle{
+                    width: 20
+                    height: 20
+                    color: gradientTool.containsMouse || toolbox.selectedTool === rotateTool ? root.style.toolHighlightColor : 'transparent'
+                    radius: 2
+
+                    Icons.GradientIcon{
+                        anchors.centerIn: parent
+                        width: 12
+                        height: 12
+                    }
+                }
+            }
+        }
+
+        Item{
+            anchors.top: toolbox.bottom
+            anchors.topMargin: 30
+            width: 50
+            height: 50
+
+            Chessboard{
+                x: 5
+                color: 'white'
+                width: 25
+                height: 25
+                cellSize: 25 / 6
+
+                Rectangle{
+                    border.width: 1
+                    border.color: 'black'
+                    width: 25
+                    height: 25
+
+                    color: toolbox.foreground
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+
+                            if ( colorPickerBox.visible && colorPicker.selection === 'foreground'){
+                                colorPickerBox.visible = false
+                            } else {
+                                colorPicker.selection = ''
+                                colorPicker.color = toolbox.foreground
+                                colorPicker.selection = 'foreground'
+                                colorPickerBox.visible = true
+                            }
+                        }
+                    }
+
+                    Loader{
+                        id: foregroundColorLoader
+                        anchors.fill: parent
+                        sourceComponent: root.style.colorInput
+                        onItemChanged: {
+                            item.onValueChanged.connect(function(value){
+                                root.toolStyle.foreground = value
+                            })
+                        }
+                    }
+                }
+            }
+
+
+            Chessboard{
+                color: 'white'
+                width: 25
+                height: 25
+                cellSize: 25 / 6
+                x: 20
+                y: 20
+
+                Rectangle{
+                    width: 25
+                    height: 25
+                    border.width: 3
+                    border.color: toolbox.background
+                    color: "transparent"
+
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            if ( colorPickerBox.visible && colorPicker.selection === 'background'){
+                                colorPickerBox.visible = false
+                            } else {
+                                colorPicker.selection = ''
+                                colorPicker.color = toolbox.background
+                                colorPicker.selection = 'background'
+                                colorPickerBox.visible = true
+                            }
+                        }
+                    }
+
+                    Loader{
+                        id: borderColorLoader
+                        anchors.fill: parent
+                        sourceComponent: root.style.colorInput
+                        onItemChanged: {
+                            item.onValueChanged.connect(function(value){
+                                root.toolStyle.background = value
+                            })
+                        }
+                    }
+                }
+
+                Rectangle{
+                    x: 3
+                    y: 3
+                    color: toolbox.color
+                    width: 19
+                    height: 19
+                }
+            }
+
+            Rectangle{
+                id: colorPickerBox
+                visible: false
+                anchors.top: parent.top
+                anchors.topMargin: 30
+                anchors.left: parent.left
+                anchors.leftMargin: toolbox.width
+
+                width: colorPicker.width
+                height: colorPicker.height
+                color: colorPicker.style.backgroundColor
+
+                Item{
+                    anchors.right: parent.right
+                    anchors.rightMargin: 3
+                    anchors.top: parent.top
+                    anchors.topMargin: 3
+                    width: 25
+                    height: 25
+                    Icons.XIcon{
+                        width: 8
+                        height: 8
+                        anchors.centerIn: parent
+                        strokeWidth: 1
+                    }
+                    MouseArea{
+                        anchors.fill: parent
+                        onClicked: {
+                            colorPickerBox.visible = false
+                        }
+                    }
+                }
+
+                Input.ColorPicker{
                     id: colorPicker
-                    anchors.left: parent.left
-                    anchors.leftMargin: 3
-                    colorDisplayHeight: 25
-                    colorDisplayWidth: 25
-                    visible: root.drawingEnabled
-                    inputBoxVisible: false
-                    style: root.style.colorPicker
+                    anchors.top: parent.top
+                    anchors.topMargin: 27
+                    height: 180
+
+                    property string selection: 'foreground'
+
+                    style: Input.ColorPickerStyle{
+                        backgroundColor: root.style.toolbarColor
+                        colorPanelBorderColor: root.style.boxBorderColor
+    //                    inputBoxStyle: theme.inputStyle
+//                        labelStyle: root.style.textStyle
+                    }
+
+                    onSelectedColorChanged: {
+                        if ( selection === 'background' ){
+                            toolbox.background = selectedColor
+                        } else if ( selection === 'foreground' ){
+                            toolbox.foreground = selectedColor
+                        }
+                    }
                 }
             }
         }
@@ -190,7 +320,7 @@ Item{
 
         Workspace.Button{
             anchors.left: parent.left
-            anchors.leftMargin: 30
+            anchors.leftMargin: 5
             anchors.verticalCenter: parent.verticalCenter
             width: 30
             height: 25
@@ -208,7 +338,7 @@ Item{
             height: parent.height
             width: zoomInfo.width
             anchors.left: parent.left
-            anchors.leftMargin: 70
+            anchors.leftMargin: 35
             Workspace.Label{
                 id: zoomInfo
                 anchors.verticalCenter: parent.verticalCenter
@@ -217,6 +347,16 @@ Item{
         }
 
         Item{
+            id: infobar
+            anchors.left: parent.left
+            anchors.leftMargin: 70
+            height: parent.height
+            clip: true
+            width: parent.width - zoomInfo.width - dimensionsPanel.width - 50 - anchors.leftMargin
+        }
+
+        Item{
+            id: dimensionsPanel
             height: parent.height
             width: imageInfo.width
             anchors.right: parent.right
