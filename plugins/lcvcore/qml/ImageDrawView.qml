@@ -340,6 +340,7 @@ Item{
             Workspace.Label{
                 id: zoomInfo
                 anchors.verticalCenter: parent.verticalCenter
+                textStyle: root.style.labelStyle.textStyle
                 text: Math.floor(imageView.scale * 100) + '%'
             }
         }
@@ -362,6 +363,7 @@ Item{
             Workspace.Label{
                 id: imageInfo
                 anchors.verticalCenter: parent.verticalCenter
+                textStyle: root.style.labelStyle.textStyle
                 text: {
                     if ( !imageView.image )
                         return '-'
