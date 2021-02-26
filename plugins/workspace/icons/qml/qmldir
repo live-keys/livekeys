@@ -31,3 +31,5 @@ CircleIcon           1.0 CircleIcon.qml
 TypeIcon             1.0 TypeIcon.qml
 UndoIcon             1.0 UndoIcon.qml
 RedoIcon             1.0 RedoIcon.qml
+BrushIcon            1.0 BrushIcon.qml
+GradientIcon         1.0 GradientIcon.qml

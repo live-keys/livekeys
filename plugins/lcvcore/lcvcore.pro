@@ -67,11 +67,13 @@ DISTFILES += \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoPlayerPalette.qml \
     qml/BlankImage.qml \
+    qml/BrushTool.qml \
     qml/ColorHistogramView.qml \
     qml/Crop.qml \
     qml/CropTool.qml \
     qml/DrawSurface.qml \
     qml/EditCvExtension.qml \
+    qml/GradientTool.qml \
     qml/GrayscaleView.qml \
     qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
