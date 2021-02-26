@@ -14,9 +14,9 @@ Item{
     Shape{
         id: circle
         anchors.fill: parent
-        property real r: root.height / 5
-        property real circleX: 2 * r + 1
-        property real circleY: root.height - r - 1
+        property real r: root.height / 2
+        property real circleX: r
+        property real circleY: r
         ShapePath {
             strokeColor: root.circleColor
             fillColor: 'transparent'
@@ -37,20 +37,6 @@ Item{
             }
         }
 
-        ShapePath{
-            strokeColor: root.penColor
-            strokeWidth: root.height / 15
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-
-
-            startX: root.width - root.width / 4
-            startY: strokeWidth + circle.r
-            PathLine {
-                x: circle.r * 2
-                y: root.height - circle.r
-            }
-        }
     }
 
 }
