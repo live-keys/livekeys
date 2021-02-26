@@ -181,6 +181,10 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
+        if (dstPort.inEdge){
+            removeEdge(dstPort.inEdge)
+        }
+
         if (dstPort.objectName === "objectNode"){
             removeEdge(edge)
             return
@@ -307,6 +311,9 @@ Rectangle{
         var edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate)
         graph.bindEdge(edge, src, dst)
         
+        src.outEdges.push(edge)
+        dst.inEdge = edge
+
         return edge
     }
 
@@ -429,7 +436,6 @@ Rectangle{
 
             propertyItem.inPort = port
             port.objectProperty = propertyItem
-            port.multiplicity = Qan.PortItem.Single
         }
         if ((ports === ObjectGraph.PortMode.OutPort) || (node.item.id !== "" && ports === (ObjectGraph.PortMode.OutPort | ObjectGraph.PortMode.InPort)) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
