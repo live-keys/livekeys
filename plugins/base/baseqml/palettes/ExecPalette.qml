@@ -55,6 +55,9 @@ CodePalette{
     onValueFromBindingChanged: {
         execBox.current = value
     }
+    onInit: {
+        execBox.current = value
+    }
 
     onEditFragmentChanged: {
         editFragment.whenBinding = function(){}

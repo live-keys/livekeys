@@ -9,8 +9,6 @@ import fs 1.0 as Fs
 import visual.input 1.0 as Input
 import visual.shapes 1.0
 
-import paper 1.0 as Paper
-
 Item{
     id: root
     width: 700
