@@ -115,7 +115,7 @@ Rectangle{
             target: null
             property var node: null
             ignoreUnknownSignals: true
-            onPropertyToBeDestroyed: {
+            function onPropertyToBeDestroyed(name){
                 node.item.removePropertyName(name)
             }
         }

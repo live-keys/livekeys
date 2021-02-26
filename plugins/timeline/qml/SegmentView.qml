@@ -24,8 +24,8 @@ Loader{
 
     signal segmentDoubleClicked(Segment segment)
     onSegmentDoubleClicked: {
-        if ( timelineRow )
-            timelineRow.segmentDoubleClicked(segment)
+        if ( root.parent )
+            root.parent.segmentDoubleClicked(segment)
     }
 
     sourceComponent: segment

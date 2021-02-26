@@ -19,3 +19,7 @@ OTHER_FILES += \
     qml/qmldir \
     qml/plugins.qmltypes
 
+DISTFILES += \
+    qml/BrushIcon.qml \
+    qml/GradientIcon.qml
+

@@ -220,7 +220,6 @@ CodePalette{
 
                     Icons.ResizeIcon{
                         anchors.centerIn: parent
-                        strokeWidth: 1
                         color: palette.style.toolIconColor
                         width: 12
                         height: 12
@@ -267,7 +266,6 @@ CodePalette{
 
                     Icons.RotateIcon{
                         anchors.centerIn: parent
-                        strokeWidth: 1
                         color: palette.style.toolIconColor
                         width: 12
                         height: 12
