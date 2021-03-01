@@ -21,6 +21,7 @@ public:
     Q_ENUMS(ThresholdType);
 public slots:
     QMat* threshold(QMat* in, double thresh, double maxVal, int type);
+    QMat* blend(QMat* src1, QMat* src2, QMat* mask);
 signals:
 
 };

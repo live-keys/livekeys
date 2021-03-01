@@ -51,6 +51,7 @@ OTHER_FILES *= \
     qml/palettes/*.qml
 
 DISTFILES += \
+    qml/Blend.qml \
     qml/Resize.qml \
     qml/ResizeTool.qml \
     qml/ResizeWithAspect.qml \
