@@ -11,3 +11,4 @@ Scale            1.0 Scale.qml
 Rotate           1.0 Rotate.qml
 ResizeTool       1.0 ResizeTool.qml
 RotateTool       1.0 RotateTool.qml
+Threshold        1.0 Threshold.qml

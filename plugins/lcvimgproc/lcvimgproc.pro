@@ -57,5 +57,6 @@ DISTFILES += \
     qml/Rotate.qml \
     qml/RotateTool.qml \
     qml/Scale.qml \
+    qml/Threshold.qml \
     qml/live.package.json \
     qml/live.plugin.json
