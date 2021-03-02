@@ -10,6 +10,7 @@ Item{
     property string propertyName : ''
     
     property QtObject theme: lk.layers.workspace.themes.current
+    objectName: "objectNodeProperty"
 
     property Item inPort : null
     property Item outPort : null

@@ -22,9 +22,43 @@ CodePalette {
             Img.Transformations.TOZERO,
             Img.Transformations.TOZERO_INV
         ]
+
+        function lcvImgProcQualifier(){
+            var imports = editFragment.codeHandler.importsModel()
+            if (!imports)
+                return ''
+
+            var lcvimgprocImport = imports.getImportAtUri('lcvimgproc')
+            if (!lcvimgprocImport)
+                return ''
+
+            return lcvimgprocImport.as.length ? lcvimgprocImport.as : ''
+
+        }
+
         onCurrentIndexChanged: {
-            if (!threshold) return
+            if ( isBindingChange() )
+                return
+
+            if (!threshold)
+                return
+
             threshold.type = values[dropdown.currentIndex]
+            if (!editFragment)
+                return
+
+            var qual = lcvImgProcQualifier()
+            if (qual.length){
+                var writeValue = qual + ".Transformations." + model[dropdown.currentIndex]
+                editFragment.writeProperties({
+                    'type' : {"__ref": writeValue}
+                })
+            }
+            else {
+                editFragment.writeProperties({
+                    'type' : threshold.type
+                })
+            }
         }
     }
 

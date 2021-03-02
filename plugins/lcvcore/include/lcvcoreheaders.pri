@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/cvextras.h \
     $$PWD/qmat.h \
     $$PWD/qmatdisplay.h \
     $$PWD/qmatfilter.h \

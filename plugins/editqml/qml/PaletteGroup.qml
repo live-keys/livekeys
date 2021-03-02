@@ -59,24 +59,43 @@ Column{
     }
 
     onWidthChanged: {
-        if (!parent || !parent.parent || !parent.parent.parent || !parent.parent.parent.parent)
-            return
+        // objectNodeProperty palette
+        var p = parent
+        while (p && p.objectName !== "objectNodeProperty")
+            p = p.parent
 
-        var p = parent.parent.parent.parent
-        if (p.objectName === "objectContainer"){
-            p.recalculateContentWidth()
+        if (p){
+            var objectNodeProperty = p
+            while (p && p.objectName !== "objectNode")
+                p = p.parent
+            var objectNode = p
+
+            objectNodeProperty.updateContentWidth()
+            objectNode.resizeNode()
             return
         }
 
-        if (p.objectName === "objectNode"){
-            parent.updateContentWidth()
-            p.resizeNode()
+        // objectNode palette
+        p = parent
+        while (p && p.objectName !== "objectNode")
+            p = p.parent
+
+        if (p){
+            var objectNode = p
+            objectNode.resizeNode()
             return
         }
 
-        if (parent.parent.objectName === "objectNode"){
-            parent.parent.resizeNode()
-        }
+        // objectContainer palette
+        p = parent
+        while (p && p.objectName !== "objectContainer")
+            p = p.parent
+
+        if (!p)
+            return
+
+        var objectContainer = p
+        objectContainer.recalculateContentWidth()
     }
 
     width: {
