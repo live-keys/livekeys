@@ -4,7 +4,7 @@ import editqml 1.0
 Column{
     id: paletteGroup
     spacing: 3
-    leftPadding: 0
+    leftPadding: 3
     topPadding: 0
     objectName: "paletteGroup"
 
@@ -59,12 +59,43 @@ Column{
     }
 
     onWidthChanged: {
-        if (parent && parent.parent && parent.parent.parent && parent.parent.parent.parent &&
-            parent.parent.parent.parent.objectName === "objectContainer")
-            parent.parent.parent.parent.recalculateContentWidth()
-        if (parent && parent.parent && parent.parent.objectName === "objectNode"){
-            parent.parent.resizeNode()
+        // objectNodeProperty palette
+        var p = parent
+        while (p && p.objectName !== "objectNodeProperty")
+            p = p.parent
+
+        if (p){
+            var objectNodeProperty = p
+            while (p && p.objectName !== "objectNode")
+                p = p.parent
+            var objectNode = p
+
+            objectNodeProperty.updateContentWidth()
+            objectNode.resizeNode()
+            return
         }
+
+        // objectNode palette
+        p = parent
+        while (p && p.objectName !== "objectNode")
+            p = p.parent
+
+        if (p){
+            var objectNode = p
+            objectNode.resizeNode()
+            return
+        }
+
+        // objectContainer palette
+        p = parent
+        while (p && p.objectName !== "objectContainer")
+            p = p.parent
+
+        if (!p)
+            return
+
+        var objectContainer = p
+        objectContainer.recalculateContentWidth()
     }
 
     width: {

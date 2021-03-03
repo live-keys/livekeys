@@ -13,8 +13,8 @@ HEADERS += \
     $$PWD/qshapedescriptors.h \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
-    $$PWD/qthreshold.h \
     $$PWD/lcvimgproc_plugin.h \
+    $$PWD/qtransformations.h \
     $$PWD/qtransformimage.h \
     $$PWD/qcachedwarpperspective.h \
     $$PWD/qdraw.h \
@@ -37,7 +37,7 @@ SOURCES += \
     $$PWD/qshapedescriptors.cpp \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
-    $$PWD/qthreshold.cpp \
+    $$PWD/qtransformations.cpp \
     $$PWD/qtransformimage.cpp \
     $$PWD/qcachedwarpperspective.cpp \
     $$PWD/qdraw.cpp \

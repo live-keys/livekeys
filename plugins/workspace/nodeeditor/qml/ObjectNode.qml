@@ -34,9 +34,9 @@ Qan.NodeItem{
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     function resizeNode(){
-        var max = 370
-        if (paletteContainer.width + 15 > max){
-            max = paletteContainer.width + 15
+        var max = 350
+        if (paletteContainer.width +10 > max){
+            max = paletteContainer.width + 10
         }
 
         for (var i = 0; i < propertyContainer.children.length; ++i){
@@ -46,10 +46,11 @@ Qan.NodeItem{
         }
 
 
-        if (max + 20 !== root.width){
-            root.width = max + 20
-            for (var i = 0; i < propertyContainer.children.length; ++i)
+        if (max !== root.width){
+            root.width = max
+            for (var i = 0; i < propertyContainer.children.length; ++i){
                 propertyContainer.children[i].width = max - propertyContainer.children[i].anchors.leftMargin
+            }
         }
     }
 

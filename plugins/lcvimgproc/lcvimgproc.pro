@@ -51,11 +51,13 @@ OTHER_FILES *= \
     qml/palettes/*.qml
 
 DISTFILES += \
+    qml/Blend.qml \
     qml/Resize.qml \
     qml/ResizeTool.qml \
     qml/ResizeWithAspect.qml \
     qml/Rotate.qml \
     qml/RotateTool.qml \
     qml/Scale.qml \
+    qml/Threshold.qml \
     qml/live.package.json \
     qml/live.plugin.json
