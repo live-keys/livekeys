@@ -68,7 +68,7 @@ Rectangle{
         anchors.verticalCenter: parent.verticalCenter
         width  : parent.width - 70
         height : 8
-        color  : "#0d1a2a"
+        color  : "#141b20"
         Rectangle{
             height : parent.height
             width : root.videoCapture && root.videoCapture.totalFrames > 0 ?

@@ -8,7 +8,7 @@ import editor.private 1.0
 Rectangle{
     id: paletteContainer
 
-    width: (child && child.width > minimumWidth ? child.width : minimumWidth) + headerWidth
+    width: pane ? minimumWidth + 100 : ( (child && child.width > minimumWidth ? child.width : minimumWidth) + headerWidth )
     height: pane
             ? normalHeaderHeight
             : (child
