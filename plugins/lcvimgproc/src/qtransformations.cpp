@@ -11,7 +11,8 @@ QTransformations::QTransformations(QObject *parent) : QObject(parent)
 
 QMat* QTransformations::threshold(QMat* input, double thresh, double maxVal, int type)
 {
-    if (!input) return nullptr;
+    if (!input)
+        return nullptr;
     try {
         QMat* output = new QMat(input->dimensions().width(), input->dimensions().height(), QMat::CV8U, 3);
         cv::threshold(input->internal(), output->internal(), thresh, maxVal, type);
@@ -19,7 +20,9 @@ QMat* QTransformations::threshold(QMat* input, double thresh, double maxVal, int
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Transformations: ").jsThrow();
     }
+    return nullptr;
 }
+
 QMat *QTransformations::blend(QMat *src1, QMat *src2, QMat *mask)
 {
     if (!src1 || !src2 || !mask) return nullptr;
@@ -65,7 +68,10 @@ QMat *QTransformations::blend(QMat *src1, QMat *src2, QMat *mask)
         }
 
         return result;
+
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Transformations: ").jsThrow();
     }
+
+    return nullptr;
 }
