@@ -3,5 +3,6 @@
     "package" : ".",
     "palettes" : {
         "palettes/TransformPalette.qml" : "qml/lcvimgproc#TransformImage",
+        "palettes/ThresholdPalette.qml" : "qml/lcvimgproc#Threshold"
     }
 }

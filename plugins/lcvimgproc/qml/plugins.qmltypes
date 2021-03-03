@@ -725,27 +725,6 @@ Module {
         Property { name: "output"; type: "QMat"; isPointer: true }
     }
     Component {
-        name: "QThreshold"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Threshold 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "Type"
-            values: {
-                "BINARY": 0,
-                "BINARY_INV": 1,
-                "TRUNC": 2,
-                "TOZERO": 3,
-                "TOZERO_INV": 4,
-                "OTSU": 8
-            }
-        }
-        Property { name: "thresh"; type: "double" }
-        Property { name: "maxVal"; type: "double" }
-        Property { name: "thresholdType"; type: "QThreshold::Type" }
-    }
-    Component {
         name: "QWarpPerspective"
         defaultProperty: "data"
         prototype: "QQuickItem"

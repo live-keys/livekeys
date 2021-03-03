@@ -10,6 +10,7 @@ Item{
     property string propertyName : ''
     
     property QtObject theme: lk.layers.workspace.themes.current
+    objectName: "objectNodeProperty"
 
     property Item inPort : null
     property Item outPort : null
@@ -26,12 +27,17 @@ Item{
 
     signal propertyToBeDestroyed(var name)
 
+    signal updateContentWidth()
+
+    onUpdateContentWidth:
+        paletteContainer.updateContentWidth()
+
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
     height: propertyTitle.height + paletteContainer.height
 
 
-    property int contentWidth: 360 - anchors.leftMargin
+    property int contentWidth: 355 - anchors.leftMargin
 
     property QtObject defaultStyle : QtObject{
         property color background: "#333"
@@ -144,16 +150,14 @@ Item{
         id: paletteContainer
         function updateContentWidth(){
             var max = 355
-            for (var i=0; i<children.length; ++i)
-                if (children[i].width > max)
-                    max = children[i].width
-            propertyItem.contentWidth = max + anchors.leftMargin
+            for (var i=0; i<children.length; ++i){
+                if (children[i].width + 10 > max)
+                    max = children[i].width + 10
+            }
+            propertyItem.contentWidth = max + propertyItem.anchors.leftMargin
             node.item.resizeNode()
         }
         onChildrenChanged: {
-            updateContentWidth()
-        }
-        onWidthChanged: {
             updateContentWidth()
         }
         editingFragment: propertyItem.editingFragment

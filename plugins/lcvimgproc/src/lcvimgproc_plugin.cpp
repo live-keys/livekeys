@@ -25,7 +25,6 @@
 #include "qsobel.h"
 #include "qcvtcolor.h"
 #include "qfilter2d.h"
-#include "qthreshold.h"
 #include "qchannelselect.h"
 #include "qstructuringelement.h"
 #include "qdilate.h"
@@ -36,7 +35,7 @@
 #include "qgeometry.h"
 #include "qshapedescriptors.h"
 #include "qtransformimage.h"
-
+#include "qtransformations.h"
 #include <QQmlEngine>
 
 
@@ -51,6 +50,10 @@ static QObject* shapeDescriptorsProvider(QQmlEngine *engine, QJSEngine *){
     return new QShapeDescriptors(engine);
 }
 
+static QObject* transformationsProvider(QQmlEngine *engine, QJSEngine *){
+    return new QTransformations(engine);
+}
+
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
     qmlRegisterType<QBlur>(                   uri, 1, 0, "Blur");
@@ -60,7 +63,6 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QHoughLinesP>(            uri, 1, 0, "HoughLinesP");
     qmlRegisterType<QSobel>(                  uri, 1, 0, "Sobel");
     qmlRegisterType<QCvtColor>(               uri, 1, 0, "CvtColor");
-    qmlRegisterType<QThreshold>(              uri, 1, 0, "Threshold");
     qmlRegisterType<QChannelSelect>(          uri, 1, 0, "ChannelSelect");
     qmlRegisterType<QStructuringElement>(     uri, 1, 0, "StructuringElement");
     qmlRegisterType<QFilter2D>(               uri, 1, 0, "Filter2D");
@@ -74,6 +76,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);
     qmlRegisterSingletonType<QShapeDescriptors>( uri, 1, 0, "ShapeDescriptors",
                                                  &shapeDescriptorsProvider);
+    qmlRegisterSingletonType<QTransformations>(uri, 1, 0, "Transformations", &transformationsProvider);
 }
 
 
