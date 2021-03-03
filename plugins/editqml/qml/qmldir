@@ -3,11 +3,14 @@ plugin editqml
 
 depends QtQuick 2.3
 
-AddQmlBox          1.0 AddQmlBox.qml
-PaletteGroup       1.0 PaletteGroup.qml
-ObjectContainer    1.0 ObjectContainer.qml
-ObjectContainerTop 1.0 ObjectContainerTop.qml
-PaletteContainer   1.0 PaletteContainer.qml
-PaletteStyle       1.0 PaletteStyle.qml
-PaletteControls    1.0 PaletteControls.qml
-PropertyContainer  1.0 PropertyContainer.qml
+AddQmlBox              1.0 AddQmlBox.qml
+PaletteGroup           1.0 PaletteGroup.qml
+ObjectContainer        1.0 ObjectContainer.qml
+ObjectContainerTop     1.0 ObjectContainerTop.qml
+PaletteContainer       1.0 PaletteContainer.qml
+PaletteStyle           1.0 PaletteStyle.qml
+PaletteControls        1.0 PaletteControls.qml
+PropertyContainer      1.0 PropertyContainer.qml
+PaletteContainerHeader 1.0 PaletteContainerHeader.qml
+PaletteContainerSide   1.0 PaletteContainerSide.qml
+PalettePlaceHolder     1.0 PalettePlaceHolder.qml
