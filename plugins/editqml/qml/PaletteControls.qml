@@ -472,7 +472,10 @@ QtObject{
 
     function createEditorBoxForFragment(editor, ef, shape){
         var codeHandler = editor.documentHandler.codeHandler
-        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(shape ? editor.textEdit : null)
+        var par = editor
+        if (shape)
+            par = editor.textEdit
+        var editorBox = lk.layers.editor.environment.createEmptyEditorBox(par)
 
         var paletteBoxGroup = createPaletteGroup(lk.layers.editor.environment.content)
         paletteBoxGroup.editingFragment = ef
@@ -709,8 +712,9 @@ QtObject{
                 pane = container.pane
             while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
                 pane = pane.parent
-                if ( pane.pane && pane.pane.objectName === 'objectPalette' )
+                if ( pane && pane.pane && pane.pane.objectName === 'objectPalette' ){
                     pane = pane.pane
+                }
             }
 
             var paneCoords = pane.mapGlobalPosition()
@@ -762,6 +766,12 @@ QtObject{
             }
 
             if (mode === PaletteControls.PaletteListMode.PaletteContainer && swap === PaletteControls.PaletteListSwap.Swap){
+
+                var p = container.parent
+                while (p && p.objectName !== "paletteGroup"){
+                    p = p.parent
+                }
+                p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== container.palette.name })
                 container.parent = null
                 container.documentHandler.codeHandler.removePalette(container.palette)
                 container.destroy()
