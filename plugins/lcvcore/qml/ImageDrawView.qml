@@ -312,8 +312,9 @@ Item{
 
     Rectangle{
         id: topBar
-        width: imageView.width + 30 > 150 ? imageView.width + 30 : 150
+        width: imageView.width + 30 > 250 ? imageView.width + 30 : 250
         height: 30
+        visible: root.image ? true : false
         color: root.style.toolbarColor
 
         Workspace.Button{

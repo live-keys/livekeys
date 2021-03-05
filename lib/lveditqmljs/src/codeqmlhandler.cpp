@@ -1557,6 +1557,8 @@ void CodeQmlHandler::suggestionsForProposedExpression(
 bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
     Q_D(CodeQmlHandler);
 
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
     QmlScopeSnap scope = d->snapScope();
 
     QStringList expressionPathNotTrimmed = expression.split(".");
@@ -1597,8 +1599,16 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
         QList<QmlDeclaration::Ptr> declarations = getDeclarations(end);
 
-        d->syncParse(m_document);
-        d->syncObjects(m_document);
+        if ( declarations.isEmpty() ){
+            QmlError(
+                m_engine,
+                CREATE_EXCEPTION(
+                    lv::Exception,
+                    "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Expression")),
+                    this
+            ).jsThrow();
+            return false;
+        }
 
         DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
                     m_document,
@@ -1733,7 +1743,7 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
             m_engine,
             CREATE_EXCEPTION(
                 lv::Exception,
-                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Expression")),
                 this
         ).jsThrow();
         return false;

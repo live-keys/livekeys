@@ -85,6 +85,12 @@ Item{
                         pane.paneInitialize(s)
                     return pane
                 },
+                "palette" : function(p, s){
+                    var pane = paletteFactory.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
                 "log" : function(p, s){
                     if ( !root.logView.parent ){
                         root.logView.visible = true
@@ -534,7 +540,15 @@ Item{
         id: objectPaletteFactory
 
         ObjectPalettePane{
-            id: objacetPaletteComponent
+            id: objectPaletteComponent
+            panes: root.panes
+        }
+    }
+    Component{
+        id: paletteFactory
+
+        PalettePane{
+            id: paletteComponent
             panes: root.panes
         }
     }

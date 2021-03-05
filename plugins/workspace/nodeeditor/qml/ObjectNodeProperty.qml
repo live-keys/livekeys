@@ -166,7 +166,7 @@ Item{
     
     Connections {
         target: editingFragment
-        onAboutToBeRemoved: {
+        function onAboutToBeRemoved(){
             propertyItem.propertyToBeDestroyed(propertyName)
             var graph = node.graph
             if (propertyItem.inPort) {

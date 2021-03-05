@@ -19,3 +19,4 @@ WorkspaceTheme    1.0 WorkspaceTheme.qml
 WorkspaceControl  1.0 WorkspaceControl.qml
 DocumentationView 1.0 DocumentationView.qml
 ObjectPalettePane 1.0 ObjectPalettePane.qml
+PalettePane       1.0 PalettePane.qml
