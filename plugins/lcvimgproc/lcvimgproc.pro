@@ -52,6 +52,7 @@ OTHER_FILES *= \
 
 DISTFILES += \
     qml/Blend.qml \
+    qml/FaceDetection.qml \
     qml/Resize.qml \
     qml/ResizeTool.qml \
     qml/ResizeWithAspect.qml \

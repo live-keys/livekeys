@@ -4,12 +4,12 @@ import base 1.0
 import lcvimgproc 1.0 as Img
 
 Act{
-    property Mat src1: null
-    property Mat src2: null
+    property Mat input1: null
+    property Mat input2: null
     property Mat mask: null
 
-    run: function(src1, src2, mask){
-        return Img.Transformations.blend(src1, src2, mask)
+    run: function(input1, input2, mask){
+        return Img.Transformations.blend(input1, input2, mask)
     }
-    args: ["$src1", "$src2", "$mask"]
+    args: ["$input1", "$input2", "$mask"]
 }

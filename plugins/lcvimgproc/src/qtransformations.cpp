@@ -22,7 +22,10 @@ QMat* QTransformations::threshold(QMat* input, double thresh, double maxVal, int
 }
 QMat *QTransformations::blend(QMat *src1, QMat *src2, QMat *mask)
 {
-    if (!src1 || !src2 || !mask) return nullptr;
+
+    if (!src1 && src2) return src2;
+    if (src1 && !src2) return src1;
+    if ((!src1 && !src2) || !mask) return nullptr;
     if (src1->dimensions() != src2->dimensions()) return nullptr;
     if (src1->dimensions() != mask->dimensions()) return nullptr;
 

@@ -1,6 +1,7 @@
 HEADERS += \
     $$PWD/qblur.h \
     $$PWD/qcanny.h \
+    $$PWD/qcascadeclassifier.h \
     $$PWD/qchannelselect.h \
     $$PWD/qcopymakeborder.h \
     $$PWD/qcvtcolor.h \
@@ -25,6 +26,7 @@ SOURCES += \
     $$PWD/lcvimgproc_plugin.cpp \
     $$PWD/qblur.cpp \
     $$PWD/qcanny.cpp \
+    $$PWD/qcascadeclassifier.cpp \
     $$PWD/qchannelselect.cpp \
     $$PWD/qcopymakeborder.cpp \
     $$PWD/qcvtcolor.cpp \
