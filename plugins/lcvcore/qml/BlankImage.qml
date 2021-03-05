@@ -8,6 +8,14 @@ Act{
     property int channels: 3
     property color fill: 'black'
     property bool runOnComplete: true
+    property QtObject reference: null
+    onReferenceChanged: {
+        if ( reference ){
+            type = reference.depth()
+            channels = reference.channels()
+            size = reference.dimensions()
+        }
+    }
 
     run: function(size, type, channels, fill){
         return Cv.MatOp.createFill(size, type, channels, fill)

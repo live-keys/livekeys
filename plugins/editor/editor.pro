@@ -72,6 +72,7 @@ DISTFILES += \
     qml/EditorPane.qml \
     qml/ObjectPalettePane.qml \
     qml/PaletteConnection.qml \
+    qml/PalettePane.qml \
     qml/WorkspaceControl.qml \
     qml/live.package.json \
     qml/live.plugin.json \

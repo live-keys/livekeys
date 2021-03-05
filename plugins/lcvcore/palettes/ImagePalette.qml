@@ -53,7 +53,7 @@ CodePalette{
 
         Rectangle{
             id: topBar
-            width: imageView.width > 150 ? imageView.width : 150
+            width: imageView.width > parent.width ? imageView.width : parent.width
             height: 30
             color: palette.style.toolbarColor
 
