@@ -118,7 +118,7 @@ CodePalette *PaletteLoader::getItem(QQmlEngine *engine){
 }
 
 QJSValue PaletteLoader::getContent(QQmlEngine *engine){
-    if ( m_configuresLayout )
+    if ( !m_configuresLayout )
         return QJSValue();
 
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();

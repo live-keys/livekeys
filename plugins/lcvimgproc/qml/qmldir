@@ -13,3 +13,4 @@ ResizeTool       1.0 ResizeTool.qml
 RotateTool       1.0 RotateTool.qml
 Threshold        1.0 Threshold.qml
 Blend            1.0 Blend.qml
+FaceDetection    1.0 FaceDetection.qml

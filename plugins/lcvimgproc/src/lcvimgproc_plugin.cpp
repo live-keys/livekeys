@@ -36,6 +36,7 @@
 #include "qshapedescriptors.h"
 #include "qtransformimage.h"
 #include "qtransformations.h"
+#include "qcascadeclassifier.h"
 #include <QQmlEngine>
 
 
@@ -71,6 +72,7 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
     qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");
+    qmlRegisterType<QCascadeClassifier>(      uri, 1, 0, "CascadeClassifier");
 
     qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
     qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);

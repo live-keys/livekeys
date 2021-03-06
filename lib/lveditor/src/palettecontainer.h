@@ -53,7 +53,7 @@ public:
     PaletteList* findPalettes(const QString& type, PaletteSearch searchType, PaletteList* list = nullptr);
     int countPalettes(const QString& type) const;
 
-    QString paletteName(PaletteLoader* loader);
+    static QString paletteName(PaletteLoader* loader);
     static const QString& palettePath(PaletteLoader* loader);
     CodePalette* createPalette(PaletteLoader* loader);
     QJSValue paletteContent(PaletteLoader* loader);
