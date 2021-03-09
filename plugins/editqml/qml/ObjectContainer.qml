@@ -188,6 +188,13 @@ Item{
         function expandOptions(options){
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
 
+            if ( 'palettes' in options){
+                var palettes = options['palettes']
+                for ( var i = 0; i < palettes.length; ++i){
+                    paletteControls.openPaletteByName(palettes[i], objectContainer.editingFragment, editor, paletteGroup)
+                }
+            }
+
             if ( 'properties' in options){
                 var newProps = options['properties']
                 for ( var i = 0; i < newProps.length; ++i ){
@@ -199,24 +206,42 @@ Item{
 
                     if ( propType === '' ) continue
 
-                    var ppos = codeHandler.addProperty(
-                        objectContainer.editingFragment.valuePosition() + objectContainer.editingFragment.valueLength() - 1,
-                        objectContainer.editingFragment.typeName(),
-                        propType,
-                        propName,
-                        true
-                    )
 
-                    var ef = codeHandler.openNestedConnection(
-                        objectContainer.editingFragment, ppos
-                    )
+                    var ef = null
+                    if (newProps[i].length > 2)
+                    {
+                        ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
+                    } else {
 
-                    if ( ef ){
-                        paletteControls.addPropertyContainer(root, ef, true, propPalette)
+                        var ppos = codeHandler.addProperty(
+                            root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
+                            root.editingFragment.typeName(),
+                            propType,
+                            propName,
+                            true
+                        )
+                        ef = codeHandler.openNestedConnection(
+                            root.editingFragment, ppos
+                        )
                     }
-                    else {
-                        lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                        console.error("Error: Can't create a palette in a non-compiled program") // better message needed
+
+                    if (ef) {
+                        objectContainer.editingFragment.signalPropertyAdded(ef, false)
+                        if (propPalette.length === 0) continue
+
+                        for (var j = 0; j < container.children.length; ++j)
+                        {
+                            var child = container.children[j]
+                            if (child.objectName !== "propertyContainer") continue
+                            if (child.title !== propName) continue
+
+                            paletteControls.openPaletteByName(propPalette, ef, editor, child.valueContainer)
+                            break
+                        }
+
+                    } else {
+                        lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>ObjectContainer: Can't open declared palette for property " + propName
+                        console.error("<br>ObjectContainer: Can't open declared palette for property " + propName) // better message needed
                     }
 
                     container.sortChildren()
@@ -232,7 +257,7 @@ Item{
             compact = false
             if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
-            paletteControls.openDefaults(root)
+            // paletteControls.openDefaults(root)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)
@@ -296,7 +321,7 @@ Item{
                 var id = child.editingFragment.objectId()
                 child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
 
-                paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
+                // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
 
                 container.sortChildren()
             }

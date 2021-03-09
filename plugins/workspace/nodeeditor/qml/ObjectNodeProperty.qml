@@ -19,6 +19,7 @@ Item{
     property var editingFragment: null
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
+    property alias paletteContainer: paletteContainer
 
     property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null

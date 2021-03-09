@@ -56,6 +56,68 @@ Qan.NodeItem{
 
     resizable: false
 
+    function expandDefaultPalette(){
+        paletteControls.openDefaultPalette(editingFragment, editor, paletteContainer, root)
+    }
+
+    function expandOptions(options){
+        var codeHandler = root.documentHandler.codeHandler
+
+        if ( 'palettes' in options){
+            var palettes = options['palettes']
+            for ( var i = 0; i < palettes.length; ++i){
+                paletteControls.openPaletteByName(palettes[i], root.editingFragment, editor, paletteContainer)
+            }
+        }
+
+        if ( 'properties' in options){
+            var newProps = options['properties']
+            for ( var i = 0; i < newProps.length; ++i ){
+
+                var propName = newProps[i][0]
+                var propType = codeHandler.propertyType(root.editingFragment, propName)
+
+                var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
+
+                if ( propType === '' ) continue
+
+                var ef = null
+                if (newProps[i].length > 2)
+                {
+                    ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
+                } else {
+                    var ppos = codeHandler.addProperty(
+                        root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
+                        root.editingFragment.typeName(),
+                        propType,
+                        propName,
+                        true
+                    )
+                    ef = codeHandler.openNestedConnection(
+                        root.editingFragment, ppos
+                    )
+                }
+
+
+
+                if (ef) {
+                    root.editingFragment.signalPropertyAdded(ef, false)
+                    if (propPalette.length === 0) continue
+                    for (var j = 0; j < propertyContainer.children.length; ++j){
+                        if (propertyContainer.children[j].propertyName !== propName) continue
+
+                        paletteControls.openPaletteByName(propPalette, ef, editor, propertyContainer.children[j].paletteContainer)
+                        break
+                    }
+                } else {
+                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>ObjectNode: Can't open declared palette for property " + propName
+                    console.error("<br>ObjectNode: Can't open declared palette for property " + propName) // better message needed
+                }
+
+            }
+        }
+    }
+
     function removePropertyName(name){
         var idx = propertiesOpened.find(function(str){ return str === name })
         if (idx !== -1){

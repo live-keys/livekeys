@@ -49,6 +49,7 @@ CodePalette{
             object.connection.incrementRefCount()
         }
 
+        n.item.expandDefaultPalette()
         return n
     }
 

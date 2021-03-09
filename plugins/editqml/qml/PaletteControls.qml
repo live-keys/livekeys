@@ -694,7 +694,7 @@ QtObject{
 
         var palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
             container.editingFragment,
-            mode === PaletteControls.PaletteListMode.ObjectContainer
+            mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor
         )
 
         palettes.filterOut(paletteGroup.palettesOpened)
@@ -755,7 +755,9 @@ QtObject{
                                          container.editingFragment,
                                          container.editor,
                                          paletteGroup,
-                                         mode === PaletteControls.PaletteListMode.ObjectContainer ? container.parent : null)
+                                         mode === PaletteControls.PaletteListMode.ObjectContainer
+                                         ? container.parent
+                                         : (container.objectName === "objectNode" ? container : null))
 
             if (paletteBox){
                 if (mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor){

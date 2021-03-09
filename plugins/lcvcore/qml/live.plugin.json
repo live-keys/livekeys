@@ -5,10 +5,14 @@
         "palettes/ImagePalette.qml" : "qml/lcvcore#Mat",
         "palettes/PaperSurfacePalette.qml" : "qml/lcvcore#PaperSurface",
         "palettes/DrawPalette.qml" : "qml/lcvcore#DrawSurface",
+        "palettes/DrawSurfacePalette.json" : "qml/lcvcore#DrawSurface",
+        "palettes/ImageViewPalette.json" : "qml/lcvcore#ImageView",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
         "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",
         "palettes/VideoFilePalette.qml": "qml/lcvcore#VideoFile",
         "palettes/VideoDecoderViewPalette.json" : "qml/lcvcore#VideoDecoderView",
-        "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView"
+        "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView",
+        "palettes/ImageReadPalette.json" : "qml/lcvcore#ImageRead",
+        "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage"
     }
 }
