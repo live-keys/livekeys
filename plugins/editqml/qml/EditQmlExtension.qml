@@ -275,8 +275,7 @@ WorkspaceExtension{
                     if (forRoot){
                         var position = activePane.documentHandler.codeHandler.insertRootItem(data)
                         if (position === -1){
-                            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create object with name " + data
-                            console.error("Error: Can't create object with name " + data)
+                            lk.layers.workspace.messages.pushError("Error: Can't create object with name " + data, 1)
                         } else {
                             root.rootPosition = position
                             shapeRootObject(activePane, activePane.documentHandler.codeHandler)

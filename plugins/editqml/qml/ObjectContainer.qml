@@ -240,8 +240,7 @@ Item{
                         }
 
                     } else {
-                        lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>ObjectContainer: Can't open declared palette for property " + propName
-                        console.error("<br>ObjectContainer: Can't open declared palette for property " + propName) // better message needed
+                        lk.layers.workspace.messages.pushError("ObjectContainer: Can't open declared palette for property " + propName, 1)
                     }
 
                     container.sortChildren()

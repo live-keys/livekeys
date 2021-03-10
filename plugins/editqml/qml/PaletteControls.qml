@@ -334,8 +334,7 @@ QtObject{
                 }
 
                 if (!ef) {
-                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                    console.error("Error: Can't create a palette in a non-compiled program")
+                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
                 }
 
 
@@ -373,8 +372,8 @@ QtObject{
                 }
 
                 if (!ef) {
-                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                    console.error("Error: Can't create a palette in a non-compiled program")
+                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
+
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
@@ -1080,8 +1079,7 @@ QtObject{
 
         if (!ef)
         {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-            console.error("Error: Can't create a palette in a non-compiled program")
+            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
             return
         }
         ef.incrementRefCount()

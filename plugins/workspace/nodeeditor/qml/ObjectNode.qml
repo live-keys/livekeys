@@ -110,8 +110,7 @@ Qan.NodeItem{
                         break
                     }
                 } else {
-                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>ObjectNode: Can't open declared palette for property " + propName
-                    console.error("<br>ObjectNode: Can't open declared palette for property " + propName) // better message needed
+                    lk.layers.workspace.messages.pushError("ObjectNode: Can't open declared palette for property " + propName, 1)
                 }
 
             }
