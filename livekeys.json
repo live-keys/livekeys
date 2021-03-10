@@ -836,6 +836,7 @@
                             "QtConcurrent.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
                             "QtCore.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
                             "QtDBus.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                            "QtSvg.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSvg.framework/Versions/5",
                             "QtGui.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
                             "QtMacExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
                             "QtMultimedia.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
