@@ -2,7 +2,8 @@
     "type": "qml/lcvcore#BlankImage",
     "properties" : [
         ["size", "SizePalette"],
-        ["fill", "ColorPalette"]
+        ["fill", "ColorPalette"],
+        ["result", "", "true"]
     ]
 }
 
