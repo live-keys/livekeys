@@ -70,4 +70,5 @@ DISTFILES += \
     qml/Temperature.qml \
     qml/live.package.json \
     qml/live.plugin.json \
-    palettes/LevelsPalette.qml
+    palettes/LevelsPalette.qml \
+    palettes/LevelsDefaultPalette.json

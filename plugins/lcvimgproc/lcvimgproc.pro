@@ -48,7 +48,8 @@ OTHER_FILES *= \
     qml/plugins.qmltypes \
     doc/*.md \
     samples/*.qml \
-    qml/palettes/*.qml
+    qml/palettes/*.qml \
+    qml/palettes/*.json
 
 DISTFILES += \
     qml/Blend.qml \

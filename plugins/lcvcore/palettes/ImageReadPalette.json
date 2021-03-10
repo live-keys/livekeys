@@ -1,0 +1,8 @@
+{
+    "type": "qml/lcvcore#ImageRead",
+    "properties" : [
+        ["file", "FilePathPalette"],
+        ["result", "", "true"]
+    ]
+}
+

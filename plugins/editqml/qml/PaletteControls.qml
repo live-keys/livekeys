@@ -334,8 +334,7 @@ QtObject{
                 }
 
                 if (!ef) {
-                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                    console.error("Error: Can't create a palette in a non-compiled program")
+                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
                 }
 
 
@@ -373,8 +372,8 @@ QtObject{
                 }
 
                 if (!ef) {
-                    lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-                    console.error("Error: Can't create a palette in a non-compiled program")
+                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
+
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
@@ -694,7 +693,7 @@ QtObject{
 
         var palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
             container.editingFragment,
-            mode === PaletteControls.PaletteListMode.ObjectContainer
+            mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor
         )
 
         palettes.filterOut(paletteGroup.palettesOpened)
@@ -755,7 +754,9 @@ QtObject{
                                          container.editingFragment,
                                          container.editor,
                                          paletteGroup,
-                                         mode === PaletteControls.PaletteListMode.ObjectContainer ? container.parent : null)
+                                         mode === PaletteControls.PaletteListMode.ObjectContainer
+                                         ? container.parent
+                                         : (container.objectName === "objectNode" ? container : null))
 
             if (paletteBox){
                 if (mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor){
@@ -1078,8 +1079,7 @@ QtObject{
 
         if (!ef)
         {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-            console.error("Error: Can't create a palette in a non-compiled program")
+            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
             return
         }
         ef.incrementRefCount()

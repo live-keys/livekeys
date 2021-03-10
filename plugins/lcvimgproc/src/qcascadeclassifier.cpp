@@ -37,7 +37,7 @@ QVariantList QCascadeClassifier::detectFaces(QMat *input, double scaleFactor, in
         cv::Mat gray;
 
         cv::cvtColor(input->internal(), gray, cv::COLOR_BGR2GRAY);
-
+        cv::equalizeHist(gray, gray);
         std::vector<cv::Rect> cvResult;
         m_cc->detectMultiScale(gray, cvResult, scaleFactor, minNeighbors, flags);
         for (auto cvr: cvResult)
