@@ -12,8 +12,8 @@ environment:
 
 install:
   - choco install opencv -version 4.1.1
-  - appveyor DownloadFile http://doxygen.nl/files/doxygen-1.8.19.windows.x64.bin.zip
-  - 7z x doxygen-1.8.19.windows.x64.bin.zip -oc:\projects\install\doxygen > nul
+  - appveyor DownloadFile https://doxygen.nl/files/doxygen-1.9.1.windows.x64.bin.zip
+  - 7z x doxygen-1.9.1.windows.x64.bin.zip -oc:\projects\install\doxygen > nul
   - set PATH=c:\projects\install\doxygen;%PATH%
 before_build:
   - SET ARCH=x64

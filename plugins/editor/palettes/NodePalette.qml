@@ -27,7 +27,6 @@ CodePalette{
     }
 
     function addObject(object, cursorCoords){
-
         var n
         if (cursorCoords){
             n = objectGraph.addObjectNode(cursorCoords.x, cursorCoords.y, (object.name + (object.id ? ("#" + object.id) : "")))
