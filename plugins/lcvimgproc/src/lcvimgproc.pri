@@ -7,7 +7,6 @@ HEADERS += \
     $$PWD/qcvtcolor.h \
     $$PWD/qdilate.h \
     $$PWD/qerode.h \
-    $$PWD/qfacelandmarks.h \
     $$PWD/qfilter2d.h \
     $$PWD/qgaussianblur.h \
     $$PWD/qhoughlines.h \
@@ -33,7 +32,6 @@ SOURCES += \
     $$PWD/qcvtcolor.cpp \
     $$PWD/qdilate.cpp \
     $$PWD/qerode.cpp \
-    $$PWD/qfacelandmarks.cpp \
     $$PWD/qfilter2d.cpp \
     $$PWD/qgaussianblur.cpp \
     $$PWD/qhoughlines.cpp \
