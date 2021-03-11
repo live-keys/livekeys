@@ -142,7 +142,7 @@ Rectangle{
     onDetectorChanged: selectedExtractor.keypoints = detector ? detector.keypoints : null
     Connections{
         target : detector
-        onKeypointsChanged : selectedExtractor.keypoints = detector.keypoints
+        function onKeypointsChanged(){ selectedExtractor.keypoints = detector.keypoints }
     }
 
     property alias selectedName: chosenItemText.text

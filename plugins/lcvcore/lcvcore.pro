@@ -69,6 +69,7 @@ DISTFILES += \
     palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoFilePalette.qml \
+    palettes/ImageViewPalette.json \
     palettes/VideoPlayerPalette.qml \
     qml/BlankImage.qml \
     qml/BrushTool.qml \

@@ -299,11 +299,11 @@ Qan.NodeItem{
     Connections {
         target: editingFragment
         ignoreUnknownSignals: true
-        onAboutToBeRemoved: {
+        function onAboutToBeRemoved(){
             if (removeNode)
                 removeNode(nodeParent)
         }
-        onObjectAdded: {
+        function onObjectAdded(obj, cursorCoords){
             if (!addSubobject) return
 
             documentHandler.codeHandler.populateObjectInfoForFragment(obj)
@@ -311,7 +311,7 @@ Qan.NodeItem{
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
         }
-        onPropertyAdded: {
+        function onPropertyAdded(ef, expandDefault){
             documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
 
             var prop = ef.objectInfo()
