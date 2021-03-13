@@ -138,6 +138,9 @@ Item{
 
                 pc.destroy()
             }
+            if (child.objectName === "objectContainer"){
+                destroyObjectContainer(child)
+            }
         }
         oc.destroy()
     }
