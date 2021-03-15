@@ -43,10 +43,10 @@ Qan.AbstractNavigablePreview {
     }
     Connections {
         id: sourceMonitor
-        onWidthChanged: updatevisibleWindow()
-        onHeightChanged: updatevisibleWindow()
-        onZoomChanged: updatevisibleWindow()
-        onChildrenRectChanged: {
+        function onWidthChanged(){ updatevisibleWindow() }
+        function onHeightChanged(){ updatevisibleWindow() }
+        function onZoomChanged(){ updatevisibleWindow() }
+        function onChildrenRectChanged(){
             if ( preview.source &&     // Manually update shader effect source source rect
                  preview.source.containerItem &&
                  sourcePreview.sourceItem === preview.source.containerItem ) {
@@ -59,11 +59,11 @@ Qan.AbstractNavigablePreview {
     Connections {
         id: containerItemMonitor
         target: voidItem
-        onXChanged: updatevisibleWindow()
-        onYChanged: updatevisibleWindow()
-        onScaleChanged: updatevisibleWindow()
-        onWidthChanged: updatevisibleWindow()
-        onHeightChanged: updatevisibleWindow()
+        function onXChanged(){ updatevisibleWindow() }
+        function onYChanged(){ updatevisibleWindow() }
+        function onScaleChanged(){ updatevisibleWindow() }
+        function onWidthChanged(){ updatevisibleWindow() }
+        function onHeightChanged(){ updatevisibleWindow() }
     }
     onSourceChanged: {
         if ( source &&

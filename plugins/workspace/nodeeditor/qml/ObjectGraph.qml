@@ -97,7 +97,7 @@ Rectangle{
             target: null
             property var node: null
             ignoreUnknownSignals: true
-            onWidthChanged: {
+            function onWidthChanged(){
                 var maxWidth = 340
                 for (var i=0; i < node.propertyContainer.children.length; ++i)
                 {

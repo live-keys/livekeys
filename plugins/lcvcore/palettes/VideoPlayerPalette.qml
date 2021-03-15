@@ -33,9 +33,9 @@ CodePalette{
 
         Connections{
             target: captureContainer
-            onFpsChanged: editFragment.updateBindings()
-            onCurrentFrameChanged: editFragment.updateBindings()
-            onPausedChanged: editFragment.updateBindings()
+            function onFpsChanged(){ editFragment.updateBindings() }
+            function onCurrentFrameChanged(){ editFragment.updateBindings() }
+            function onPausedChanged(){ editFragment.updateBindings() }
 
             ignoreUnknownSignals: true
         }

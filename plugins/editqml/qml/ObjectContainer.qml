@@ -194,6 +194,7 @@ Item{
             if ( 'palettes' in options){
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
+                    if (paletteGroup.palettesOpened.indexOf(palettes[i]) !== -1) continue
                     paletteControls.openPaletteByName(palettes[i], objectContainer.editingFragment, editor, paletteGroup)
                 }
             }
@@ -238,6 +239,7 @@ Item{
                             if (child.objectName !== "propertyContainer") continue
                             if (child.title !== propName) continue
 
+                            if (child.valueContainer.palettesOpened.indexOf(propPalette) !== -1) break
                             paletteControls.openPaletteByName(propPalette, ef, editor, child.valueContainer)
                             break
                         }
