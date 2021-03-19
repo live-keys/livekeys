@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "scriptcommandlineparser_p.h"
+#include <stdexcept>
 
 namespace{
 
