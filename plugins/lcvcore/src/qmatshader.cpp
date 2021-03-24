@@ -64,6 +64,13 @@
 QMatShader::QMatShader()
     : m_glFunctions()
 {
+    auto v = QSurfaceFormat::defaultFormat().version();
+    if ( v.first > 3 )
+        m_shaderVersion = 330;
+    else if ( v.first == 3 && v.second >= 3 )
+        m_shaderVersion = 330;
+    else
+        m_shaderVersion = 20;
 }
 
 /**

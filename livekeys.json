@@ -229,8 +229,12 @@
                             "libQt5Qml.so*": "lib/-",
                             "libQt5QmlWorkerScript.so*": "lib/-",
                             "libQt5QmlModels.so*": "lib/-",
+                            "libQt5QuickShapes.so*": "lib/-",
+                            "libQt5QuickTemplates2.so*": "lib/-",
+                            "libQt5QuickControls2.so*": "lib/-",
                             "libQt5Quick.so*": "lib/-",
                             "libQt5Script.so*": "lib/-",
+                            "libQt5Svg.so*": "lib/-",
                             "libQt5Widgets.so*": "lib/-",
                             "libQt5Network.so*": "lib/-",
                             "libQt5Xml.so*": "lib/-",
@@ -261,11 +265,14 @@
                                 "Controls/*.qml": "plugins/QtQuick/Controls/-",
                                 "Controls/Private": "plugins/QtQuick/Controls/Private",
                                 "Controls/Styles": "plugins/QtQuick/Controls/Styles",
+                                "Controls.2": "plugins/QtQuick/Controls.2",
                                 "Dialogs": "plugins/QtQuick/Dialogs",
                                 "Layouts": "plugins/QtQuick/Layouts",
                                 "LocalStorage": "plugins/QtQuick/LocalStorage",
                                 "Particles.2": "plugins/QtQuick/Particles.2",
                                 "PrivateWidgets": "plugins/QtQuick/PrivateWidgets",
+                                "Shapes": "plugins/QtQuick/Shapes",
+                                "Templates.2": "plugins/QtQuick/Templates.2",
                                 "Window.2": "plugins/QtQuick/Window.2",
                                 "XmlListModel": "plugins/QtQuick/XmlListModel"
                             },
@@ -300,6 +307,13 @@
                         "chmod",
                         "755",
                         "livekeys"
+                    ]
+                },
+                {
+                    "run": [
+                        "chmod",
+                        "755",
+                        "QtWebEngineProcess"
                     ]
                 },
                 {
@@ -873,6 +887,7 @@
                             "QtConcurrent.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
                             "QtCore.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
                             "QtDBus.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                            "QtSvg.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSvg.framework/Versions/5",
                             "QtGui.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
                             "QtMacExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
                             "QtMultimedia.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
