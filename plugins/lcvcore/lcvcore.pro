@@ -66,6 +66,7 @@ DISTFILES += \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \
     palettes/PaperSurfacePalette.qml \
+    palettes/PerspectiveProjectionPalette.qml \
     palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoFilePalette.qml \
@@ -86,6 +87,7 @@ DISTFILES += \
     qml/NavigableImageView.qml \
     qml/PaperSurface.qml \
     qml/Perspective.qml \
+    qml/PerspectiveProjection.qml \
     qml/PerspectiveTool.qml \
     qml/ScriptVideoSegmentCreator.qml \
     qml/TransformImage.qml \
