@@ -66,6 +66,8 @@ Qan.NodeItem{
         if ( 'palettes' in options){
             var palettes = options['palettes']
             for ( var i = 0; i < palettes.length; ++i){
+                if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
+
                 paletteControls.openPaletteByName(palettes[i], root.editingFragment, editor, paletteContainer)
             }
         }
@@ -105,6 +107,7 @@ Qan.NodeItem{
                     if (propPalette.length === 0) continue
                     for (var j = 0; j < propertyContainer.children.length; ++j){
                         if (propertyContainer.children[j].propertyName !== propName) continue
+                        if (propertyContainer.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
                         paletteControls.openPaletteByName(propPalette, ef, editor, propertyContainer.children[j].paletteContainer)
                         break
@@ -118,10 +121,9 @@ Qan.NodeItem{
     }
 
     function removePropertyName(name){
-        var idx = propertiesOpened.find(function(str){ return str === name })
-        if (idx !== -1){
-            propertiesOpened.splice(idx, 1)
-        }
+        propertiesOpened = propertiesOpened.filter(function(value, index, arr){
+            return value !== name
+        })
     }
 
     function addPropertyToNodeByName(name){
@@ -299,11 +301,11 @@ Qan.NodeItem{
     Connections {
         target: editingFragment
         ignoreUnknownSignals: true
-        onAboutToBeRemoved: {
+        function onAboutToBeRemoved(){
             if (removeNode)
                 removeNode(nodeParent)
         }
-        onObjectAdded: {
+        function onObjectAdded(obj, cursorCoords){
             if (!addSubobject) return
 
             documentHandler.codeHandler.populateObjectInfoForFragment(obj)
@@ -311,7 +313,7 @@ Qan.NodeItem{
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
         }
-        onPropertyAdded: {
+        function onPropertyAdded(ef, expandDefault){
             documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
 
             var prop = ef.objectInfo()
@@ -319,7 +321,7 @@ Qan.NodeItem{
             for (var i=0; i < propertiesOpened.length; ++i){
                 if (!propertiesOpened[i].toString().localeCompare(name)) return
             }
-
+            propertiesOpened.push(name)
             var portState = ObjectGraph.PortMode.OutPort
 
             if (prop.isWritable) portState = portState | ObjectGraph.PortMode.InPort

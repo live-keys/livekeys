@@ -51,6 +51,8 @@ public slots:
     QMat* getPerspectiveTransform(QVariantList src, QVariantList dst);
     QMat* getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst);
 
+    QMat* perspectiveProjection(QMat* input, QMat* background, QJSValue points);
+
     QMat* warpPerspective(QMat* input, QMat* transform, QSize size, int flags, int borderMode);
 
     QVariantList applyPerspectiveTransform(QVariantList points, QMat* warp);

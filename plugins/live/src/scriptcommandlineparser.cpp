@@ -15,12 +15,13 @@
 ****************************************************************************/
 
 #include "scriptcommandlineparser_p.h"
+#include "live/exception.h"
 
 namespace{
 
     /// \private
     std::exception makeException(const QString& str){
-        return std::runtime_error(str.toStdString().c_str());
+        return CREATE_EXCEPTION(lv::Exception, str.toStdString().c_str(), lv::Exception::toCode("scriptcommandlineparser"));
     }
 
 }// namespace

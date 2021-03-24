@@ -30,7 +30,7 @@ Column{
     property FeatureDetector queryFeatureDetector : FastFeatureDetector{}
     Connections{
         target : queryFeatureDetector
-        onKeypointsChanged : {
+        function onKeypointsChanged(){
             queryDescriptorExtractor.keypoints = queryFeatureDetector.keypoints
         }
     }
@@ -46,7 +46,7 @@ Column{
     property var querySource : ImRead{}
     Connections{
         target : querySource
-        onOutputChanged : queryFeatureDetector.input = querySource.output
+        function onOutputChanged(){ queryFeatureDetector.input = querySource.output }
     }
 
     property double minMatchDistanceCoeff : 2.5
@@ -125,7 +125,7 @@ Column{
         }
         Connections{
             target : root.queryDescriptorExtractor
-            onDescriptorsChanged : {
+            function onDescriptorsChanged(){
                 if ( descriptorMatcherComponent.item ){
                     descriptorMatcherComponent.item.queryDescriptors = root.queryDescriptorExtractor.descriptors
                     descriptorMatchFilter.matches1to2 = descriptorMatcherComponent.item.matches
