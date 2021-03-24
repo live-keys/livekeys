@@ -14,6 +14,7 @@
         "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView",
         "palettes/ImageReadPalette.json" : "qml/lcvcore#ImageRead",
         "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage",
-        "palettes/PerspectiveProjectionPalette.qml": "qml/lcvcore#PerspectiveProjection"
+        "palettes/PerspectiveProjectionPalette.qml": "qml/lcvcore#PerspectiveProjection",
+        "palettes/PerspectiveProjectionPropertiesPalette.json": "qml/lcvcore#PerspectiveProjection"
     }
 }

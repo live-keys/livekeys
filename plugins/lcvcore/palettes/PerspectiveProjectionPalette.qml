@@ -41,7 +41,7 @@ CodePalette{
         property QtObject perspectiveProjection: null
         onPerspectiveProjectionChanged: {
             if ( perspectiveProjection ){
-                imageView.image = Qt.binding(function(){ return perspectiveProjection.result })
+                imageView.image = Qt.binding(function(){ return perspectiveProjection.result ? perspectiveProjection.result : null  })
                 imageView.autoScale()
             }
         }
