@@ -61,11 +61,13 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/string"] = "TextPalette";
     m_defaultPalettes["qml/color"] = "ColorPalette";
     m_defaultPalettes["qml/lcvcore#VideoDecoderView"] = "VideoDecoderViewPalette";
-    m_defaultPalettes["qml/lcvcore#VideoFile"] = "VideoFilePalette";
+    m_defaultPalettes["qml/lcvcore#VideoFile"] = "VideoFilePropertiesPalette";
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
+    m_defaultPalettes["qml/fs#VisualFileSelector"] = "VisualFileSelectorPropertiesPalette";
     m_defaultPalettes["qml/lcvimgproc#Blend"] = "BlendPalette";
     m_defaultPalettes["qml/lcvcore#ImageRead"] = "ImageReadPalette";
+    m_defaultPalettes["qml/lcvcore#ImageFile"] = "ImageFilePalette";
     m_defaultPalettes["qml/lcvcore#BlankImage"] = "BlankImagePalette";
     m_defaultPalettes["qml/lcvcore#DrawSurface"] = "DrawSurfacePalette";
     m_defaultPalettes["qml/lcvcore#ImageView"] = "ImageViewPalette";

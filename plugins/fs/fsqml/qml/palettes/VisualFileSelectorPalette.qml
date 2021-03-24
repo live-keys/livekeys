@@ -9,10 +9,9 @@ CodePalette{
     id: palette
     type : "qml/fs#VisualFileSelector"
 
-    property QtObject paletteStyle : lk ? lk.layers.workspace.extensions.editqml.paletteStyle : null
+    property QtObject theme: lk.layers.workspace.themes.current
 
-    property QtObject style: QtObject{
-    }
+    property QtObject style: QtObject{}
 
     item: Item{
         width: 250
@@ -24,13 +23,14 @@ CodePalette{
             id: selectableFolderView
             anchors.fill: parent
             cwd: {
-                if (!parent.visualFileSelector) return
+                if (!parent.visualFileSelector)
+                    return ''
                 if (!Fs.Path.exists(parent.visualFileSelector.workingDirectory))
                     return project.dir()
                 return parent.visualFileSelector.workingDirectory
             }
-            style: palette.paletteStyle ? palette.paletteStyle.selectableListView : defaultStyle
-            iconColor: palette.paletteStyle ? palette.paletteStyle.sectionHeaderFocusBackgroundColor : defaultStyle
+            style: palette.theme.selectableListView
+            iconColor: palette.theme.colorScheme.middlegroundOverlayDominant
             onItemSelected: {
                 var item = model[index]
 
@@ -38,10 +38,6 @@ CodePalette{
                     var itemPath = Fs.Path.absolutePath(item.path ? item.path : Fs.Path.join(cwd, item.name))
                     parent.visualFileSelector.selectedFile = itemPath
                 }
-
-                //HERE:
-                //ADD ExtensionPass Act
-                //ADD Sepia filter, Warm filter and Dark filter
             }
         }
 

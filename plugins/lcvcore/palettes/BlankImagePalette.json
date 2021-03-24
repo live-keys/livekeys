@@ -3,6 +3,7 @@
     "properties" : [
         ["size", "SizePalette"],
         ["fill", "ColorPalette"],
+        ["reference", ""],
         ["result", "", "true"]
     ]
 }

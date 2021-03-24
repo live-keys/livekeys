@@ -62,6 +62,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 DISTFILES += \
     palettes/DrawPalette.qml \
     palettes/GrayscaleViewPalette.json \
+    palettes/ImageFilePalette.json \
     palettes/ImageReadPalette.json \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \
@@ -69,6 +70,7 @@ DISTFILES += \
     palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoFilePalette.qml \
+    palettes/VideoFilePropertiesPalette.json \
     palettes/VideoPlayerPalette.qml \
     qml/BlankImage.qml \
     qml/BrushTool.qml \
