@@ -421,35 +421,6 @@ Rectangle{
                             event.accepted = true
                             return
                         }
-
-                        var activePane = lk.layers.workspace.panes.activePane
-                        var paneCoords = activePane.mapGlobalPosition()
-                        var rect = textEdit.cursorRectangle
-
-                        if (qmlSuggestionBox){
-                            qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x -7, paneCoords.y - 43), lk.layers.editor.environment.placement.bottom)
-                            return
-                        }
-                        qmlSuggestionBox = paletteControls.createSuggestionBox()
-
-                        qmlSuggestionBox.fontFamily = textEdit.font.family
-                        qmlSuggestionBox.fontSize = textEdit.font.pixelSize
-                        qmlSuggestionBox.smallFontSize = textEdit.font.pixelSize - 2
-                        qmlSuggestionBox.visible = Qt.binding(function(){
-                            return documentHandler.completionModel.isEnabled && qmlSuggestionBox.suggestionCount > 0
-                        })
-                        qmlSuggestionBox.opacity = Qt.binding(function(){
-                            return (qmlSuggestionBox && qmlSuggestionBox.visible) ? 0.95 : 0
-                        })
-                        qmlSuggestionBox.model = Qt.binding(function(){
-                            return documentHandler.completionModel
-                        })
-
-                        var editorBox = lk.layers.editor.environment.createEditorBox(
-                            qmlSuggestionBox, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
-                        )
-
-                        editorBox.color = 'transparent'
                     }
                 }
 
@@ -493,6 +464,61 @@ Rectangle{
         }
     }
 
+    Connections{
+        target: documentHandler.completionModel
+        function onIsEnabledChanged(){
+            if ( !documentHandler.completionModel.isEnabled || documentHandler.completionModel.suggestionCount() === 0 ){
+                qmlSuggestionBox.visible = false
+                qmlSuggestionBox.opacity = 0
+                return
+            }
+
+            var activePane = editor.parent
+            var paneCoords = activePane.mapGlobalPosition()
+            var r = textEdit.cursorRectangle
+
+            var rect = {
+                x:  textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
+                    flick.flickableItem.contentX +
+                    167, // compensate for center alignment when creating the editor box
+                y: r.y - flick.flickableItem.contentY,
+                width: r.width,
+                height: r.height
+            }
+
+            if (qmlSuggestionBox){
+                qmlSuggestionBox.visible = true
+                qmlSuggestionBox.opacity = 0.95
+                qmlSuggestionBox.parent.updatePlacement(
+                    rect,
+                    Qt.point(
+                        paneCoords.x - 7, paneCoords.y - 43),
+                        lk.layers.editor.environment.placement.bottom)
+
+            } else {
+                qmlSuggestionBox = paletteControls.createSuggestionBox()
+
+                qmlSuggestionBox.fontFamily = textEdit.font.family
+                qmlSuggestionBox.fontSize = textEdit.font.pixelSize
+                qmlSuggestionBox.smallFontSize = textEdit.font.pixelSize - 2
+
+                qmlSuggestionBox.opacity = 0.95
+                qmlSuggestionBox.model = documentHandler.completionModel
+
+                var editorBox = lk.layers.editor.environment.createEditorBox(
+                    qmlSuggestionBox,
+                    rect,
+                    Qt.point(paneCoords.x, paneCoords.y),
+                    lk.layers.editor.environment.placement.bottom
+                )
+
+                editorBox.color = 'transparent'
+            }
+
+        }
+
+    }
+
     Workspace.TextButton{
         id: addRootButton
         anchors.left: lineSurfaceBackground.right
@@ -511,7 +537,8 @@ Rectangle{
     }
 
     Component.onDestruction: {
-        if (!qmlSuggestionBox) return
+        if (!qmlSuggestionBox)
+            return
         var par = qmlSuggestionBox.parent
         qmlSuggestionBox.destroy()
         qmlSuggestionBox = null

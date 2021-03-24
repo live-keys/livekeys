@@ -76,6 +76,7 @@ public:
 public slots:
     void enable();
     void disable();
+    int suggestionCount() const;
 
 signals:
     /** completion position changed */
@@ -147,6 +148,13 @@ inline void CodeCompletionModel::disable(){
         m_isEnabled = false;
         emit isEnabledChanged(m_isEnabled);
     }
+}
+
+/**
+ * \brief Returns the number of model entries
+ */
+inline int CodeCompletionModel::suggestionCount() const{
+    return m_filteredSuggestions.size();
 }
 
 /**
