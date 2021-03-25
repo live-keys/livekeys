@@ -76,7 +76,7 @@ CodePalette{
 
                     onApply: {
                         var value = '['
-                        value += '[Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
+                        value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
                         value += 'Qt.point(' + Math.round(p2.x) + ", " + Math.round(p2.y) +'), '
                         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
                         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
