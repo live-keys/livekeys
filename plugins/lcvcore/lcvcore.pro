@@ -68,6 +68,7 @@ DISTFILES += \
     palettes/DrawSurfacePalette.json \
     palettes/PaperSurfacePalette.qml \
     palettes/PerspectiveProjectionPalette.qml \
+    palettes/PerspectiveProjectionPropertiesPalette.json \
     palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
     palettes/VideoFilePalette.qml \
