@@ -1,0 +1,10 @@
+{
+    "type": "qml/lcvcore#PerspectiveProjection",
+    "palettes": ["PerspectiveProjectionPalette"],
+    "properties" : [
+        ["input"],
+        ["background"],
+        ["result", "", "true"]
+    ]
+}
+
