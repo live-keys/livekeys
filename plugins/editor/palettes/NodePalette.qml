@@ -69,11 +69,20 @@ CodePalette{
                 for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
 
-                    if (n.item.propertiesOpened.indexOf(property.name) !== -1) continue
+                    var p = null
+                    if (n.item.propertiesOpened.indexOf(property.name) === -1){
+                        p = objectGraph.addObjectNodeProperty(n, property.name, ObjectGraph.PortMode.OutPort | (property.isWritable ? ObjectGraph.PortMode.InPort : 0), property.connection)
+                        n.item.propertiesOpened.push(property.name)
+                        p.z = 1000 - j
+                    } else {
+                        var children = n.item.propertyContainer.children
+                        for (var idx = 0; idx < children.length; ++idx)
+                            if (children[idx].propertyName === property.name){
+                                p = children[idx]
+                                break
+                            }
+                    }
 
-                    var p = objectGraph.addObjectNodeProperty(n, property.name, ObjectGraph.PortMode.OutPort | (property.isWritable ? ObjectGraph.PortMode.InPort : 0), property.connection)
-                    n.item.propertiesOpened.push(property.name)
-                    p.z = 1000 - j
                     if (property.value.length === 2)
                     {
                         if (p.inPort)
