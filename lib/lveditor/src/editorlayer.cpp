@@ -25,12 +25,12 @@ EditorLayer::EditorLayer(QObject *parent)
 
     lv::KeyMap* keymap = static_cast<lv::KeyMap*>(workspace->property("keymap").value<QObject*>());
     if ( keymap ){
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.addHorizontalEditorView");
-        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.workspace.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.workspace.addHorizontalFragmentEditorView");
-        keymap->store(0, Qt::Key_BraceRight,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.removeHorizontalEditorView");
-        keymap->store(0, Qt::Key_BracketRight,lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.removeHorizontalEditorView");
+//        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.addHorizontalEditorView");
+//        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.addHorizontalEditorView");
+//        keymap->store(0, Qt::Key_BraceLeft,   lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.workspace.addHorizontalFragmentEditorView");
+//        keymap->store(0, Qt::Key_BracketLeft, lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt,   "window.workspace.addHorizontalFragmentEditorView");
+//        keymap->store(0, Qt::Key_BraceRight,  lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.removeHorizontalEditorView");
+//        keymap->store(0, Qt::Key_BracketRight,lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Shift, "window.workspace.removeHorizontalEditorView");
 
         keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND, "editor.saveFile");
         keymap->store(0, Qt::Key_S,           lv::KeyMap::CONTROL_OR_COMMAND | lv::KeyMap::Alt, "editor.saveFileAs");
