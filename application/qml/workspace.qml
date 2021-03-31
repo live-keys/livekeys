@@ -286,7 +286,13 @@ Item{
             }
         }
 
-        property var __clearPanes : function(){
+        property var reset: function(){
+            __clearAll()
+            var split = mainSplit.createNewSplitter(Qt.Horizontal)
+            mainSplit.initialize([split])
+        }
+
+        property var __clearAll : function(){
             mainSplit.clearPanes()
             activePane = null
             activeItem = null
@@ -411,7 +417,7 @@ Item{
                     'toggleNavigation' : [root.toggleNavigation, "Toggle Navigation"],
 //                    'openLogInWindow' : [mainVerticalSplit.openLogInWindow, "Open Log In Window"],
 //                    'openLogInEditor' : [mainVerticalSplit.openLogInEditor, "Open Log In Editor"],
-//                    'toggleLog' : [mainVerticalSplit.toggleLog, "Toggle Log"],
+                    'toggleLog' : [function(){}, "Toggle Log"],
                     'toggleLogPrefix' : [logView.toggleLogPrefix, "Toggle Log Prefix"],
 //                    'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
 //                    'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
