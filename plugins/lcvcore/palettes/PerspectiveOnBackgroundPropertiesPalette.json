@@ -1,6 +1,6 @@
 {
-    "type": "qml/lcvcore#PerspectiveProjection",
-    "palettes": ["PerspectiveProjectionPalette"],
+    "type": "qml/lcvcore#PerspectiveOnBackground",
+    "palettes": ["PerspectiveOnBackgroundPalette"],
     "properties" : [
         ["input"],
         ["background"],

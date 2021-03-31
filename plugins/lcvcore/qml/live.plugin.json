@@ -16,7 +16,7 @@
         "palettes/ImageReadPalette.json" : "qml/lcvcore#ImageRead",
         "palettes/ImageFilePalette.json" : "qml/lcvcore#ImageFile",
         "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage",
-        "palettes/PerspectiveProjectionPalette.qml": "qml/lcvcore#PerspectiveProjection",
-        "palettes/PerspectiveProjectionPropertiesPalette.json": "qml/lcvcore#PerspectiveProjection"
+        "palettes/PerspectiveOnBackgroundPalette.qml": "qml/lcvcore#PerspectiveOnBackground",
+        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground"
     }
 }

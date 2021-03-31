@@ -12,7 +12,7 @@ import fs 1.0 as Fs
 CodePalette{
     id: palette
 
-    type : "qml/lcvcore#PerspectiveProjection"
+    type : "qml/lcvcore#PerspectiveOnBackground"
 
     property QtObject theme: lk.layers.workspace.themes.current
 

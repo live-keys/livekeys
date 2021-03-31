@@ -74,7 +74,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/lcvphoto#HueSaturationLightness"] = "HueSaturationLightnessPalette";
     m_defaultPalettes["qml/lcvphoto#Levels"] = "LevelsDefaultPalette";
     m_defaultPalettes["qml/lcvphoto#BrightnessAndContrast"] = "BrightnessAndContrastPalette";
-    m_defaultPalettes["qml/lcvcore#PerspectiveProjection"] = "PerspectiveProjectionPropertiesPalette";
+    m_defaultPalettes["qml/lcvcore#PerspectiveOnBackground"] = "PerspectiveOnBackgroundPropertiesPalette";
 
     MLNode s = parent->readFor("qmljs");
     if ( s.type() == MLNode::Object )

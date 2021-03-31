@@ -25,4 +25,4 @@ BrushTool                  1.0 BrushTool.qml
 GradientTool               1.0 GradientTool.qml
 Perspective                1.0 Perspective.qml
 PaperSurface               1.0 PaperSurface.qml
-PerspectiveProjection      1.0 PerspectiveProjection.qml
+PerspectiveOnBackground    1.0 PerspectiveOnBackground.qml
