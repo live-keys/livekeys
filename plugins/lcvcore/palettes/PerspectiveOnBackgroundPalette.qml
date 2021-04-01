@@ -12,7 +12,7 @@ import fs 1.0 as Fs
 CodePalette{
     id: palette
 
-    type : "qml/lcvcore#PerspectiveProjection"
+    type : "qml/lcvcore#PerspectiveOnBackground"
 
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -76,7 +76,7 @@ CodePalette{
 
                     onApply: {
                         var value = '['
-                        value += '[Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
+                        value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
                         value += 'Qt.point(' + Math.round(p2.x) + ", " + Math.round(p2.y) +'), '
                         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
                         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'

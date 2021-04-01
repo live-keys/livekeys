@@ -160,6 +160,8 @@ public:
      */
     Q_INVOKABLE void    fitInView( );
 
+    Q_INVOKABLE void    requestUpdateGrid() noexcept;
+
 public:
     //! \brief Auto fitting mode.
     enum AutoFitMode

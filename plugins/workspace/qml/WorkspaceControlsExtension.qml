@@ -10,12 +10,16 @@ WorkspaceExtension{
     commands: {
         'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
         'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
-        "node_delete_active": [objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."]
+        "node_delete_active": [objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
+        "nodeEditMode" : [objectGraphControls.nodeEditMode, "Switch to node editing mode."]
     }
+
+    // quick node editing
 
     keyBindings: {
         "backspace": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
-        "delete": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" }
+        "delete": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
+        "alt+n": {command: "workspace.nodeEditMode" }
     }
 
     menuInterceptors: [
