@@ -1,0 +1,9 @@
+{
+    "type": "qml/lcvcore#VisualFileSelector",
+    "palettes": ["VisualFileSelectorPalette"],
+    "properties" : [
+        ["workingDirectory", "FolderPathPalette"],
+        ["selectedFile", "", "true"]
+    ]
+}
+
