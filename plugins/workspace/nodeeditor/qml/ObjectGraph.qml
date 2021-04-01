@@ -92,13 +92,19 @@ Rectangle{
     property QtObject style: defaultStyle
 
     
-    property Component resizeConnectionsFactory: Component{
+    property Component propertyDestructorFactory: Component {
         Connections {
+            id: pdf
             target: null
             property var node: null
             ignoreUnknownSignals: true
+            function onPropertyToBeDestroyed(name){
+                node.item.removePropertyName(name)
+                pdf.destroy()
+            }
             function onWidthChanged(){
                 var maxWidth = 340
+                if (!node || !node.propertyContainer) return
                 for (var i=0; i < node.propertyContainer.children.length; ++i)
                 {
                     var child = node.propertyContainer.children[i]
@@ -107,16 +113,6 @@ Rectangle{
 
                 if (maxWidth !== node.width)
                     node.width = maxWidth
-            }
-        }
-    }
-    property Component propertyDestructorFactory: Component {
-        Connections {
-            target: null
-            property var node: null
-            ignoreUnknownSignals: true
-            function onPropertyToBeDestroyed(name){
-                node.item.removePropertyName(name)
             }
         }
     }
@@ -362,6 +358,17 @@ Rectangle{
             --numOfSelectedNodes
         if (numOfSelectedNodes === 0)
             root.activateFocus()
+
+        // clear everything inside node
+
+        var children = node.item.propertyContainer.children
+        for (var i = 0; i < children.length; ++i){
+            children[i].destroyObjectNodeProperty()
+        }
+
+        if (node.item.outPort)
+            graph.removePort(node, node.item.outPort)
+
         graph.removeNode(node)
     }
     
@@ -385,6 +392,7 @@ Rectangle{
             node.item.id = label.substr(idx+1)
 
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
+            node.item.outPort = port
             port.label = node.item.id + " Out"
             port.y = 7
             port.objectProperty = node.item
@@ -409,12 +417,6 @@ Rectangle{
         if (editingFragment) editingFragment.incrementRefCount()
 
         propertyItem.editor = root.editor
-
-        var conn = resizeConnectionsFactory.createObject()
-        conn.target = propertyItem
-        conn.node = item
-
-        connections.push(conn)
 
         var pdestructor = propertyDestructorFactory.createObject()
         pdestructor.target = propertyItem
@@ -442,6 +444,7 @@ Rectangle{
             port.label = propertyName + " Out"
             port.y = Qt.binding(
                 function(){
+                    if (!node || !node.item) return 0
                     return node.item.paletteContainer.height +
                            propertyItem.y +
                            (propertyItem.propertyTitle.height / 2) +
