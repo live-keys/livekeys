@@ -27,6 +27,7 @@ include($$PWD/src/fsqml.pri)
 
 OTHER_FILES += \
     qml/*.qml \
+    qml/palettes/* \
     qml/qmldir
 
 # Handling the palette

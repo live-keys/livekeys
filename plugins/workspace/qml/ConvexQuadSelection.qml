@@ -7,11 +7,10 @@ Shape{
 
     property QtObject defaultStyle: QtObject{
        property color background: "#33333333"
-       property color lineColor: "#395997"
+       property color lineColor: "#6da2f0"
        property int lineWidth: 3
-       property color pointColor: "#395997"
-       property double pointDim: 16
-
+       property color pointColor: "#6da2f0"
+       property double pointDim: 10
     }
 
     property point p1: Qt.point(d.x, d.y)
@@ -70,7 +69,7 @@ Shape{
             anchors.fill: parent
             drag.target: parent
             drag.axis: Drag.XAndYAxis
-            drag.smoothed: true
+            drag.smoothed: false
             property bool dragActive: drag.active
 
             onDragActiveChanged: {

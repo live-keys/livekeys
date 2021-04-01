@@ -111,6 +111,7 @@ QtObject{
                                      objectRoot)
         if (paletteBox) paletteBox.moveEnabledSet = false
 
+        return paletteBox
     }
 
     function openPalette(palette, editingFragment, editor, paletteBoxParent, objectRoot){

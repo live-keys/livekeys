@@ -3,6 +3,7 @@
     "package" : ".",
     "libraryModules" : ["lvfs"],
     "palettes" : {
-        "palettes/VisualFileSelectorPalette.qml" : "qml/fs#VisualFileSelector"
+        "palettes/VisualFileSelectorPalette.qml" : "qml/fs#VisualFileSelector",
+        "palettes/VisualFileSelectorPropertiesPalette.json" : "qml/fs#VisualFileSelector"
     }
 }

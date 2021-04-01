@@ -57,7 +57,7 @@ Rectangle{
             color : "#afafaf"
             font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
             font.pixelSize: 12
-            font.weight: Font.Light
+            font.weight: Font.Normal
 
             selectByMouse: true
 
@@ -215,7 +215,7 @@ Rectangle{
                 property string command: model.command
 
                 z: 400
-                color: ListView.isCurrentItem ? "#051d32" : "#000509"
+                color: ListView.isCurrentItem ? "#292d34" : "#05080a"
                 width: root.width
                 height: commandsView.delegateHeight
                 Text{
@@ -226,7 +226,7 @@ Rectangle{
 
                     font.family: "Open Sans, sans-serif"
                     font.pixelSize: 12
-                    font.weight: Font.Light
+                    font.weight: Font.Normal
                 }
 
                 Text{
@@ -238,7 +238,7 @@ Rectangle{
 
                     font.family: "Open Sans, sans-serif"
                     font.pixelSize: 12
-                    font.weight: Font.Light
+                    font.weight: Font.Normal
                 }
 
                 MouseArea{
@@ -269,7 +269,7 @@ Rectangle{
 
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
-            font.weight: Font.Light
+            font.weight: Font.Normal
             font.italic: true
         }
 
