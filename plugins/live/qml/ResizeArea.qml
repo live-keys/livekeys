@@ -15,6 +15,8 @@ Rectangle{
     property double minimumHeight: 50
     property double minimumWidth : 50
 
+    signal resizeFinished()
+
     MouseArea {
         anchors.fill: parent
         drag{
@@ -36,5 +38,6 @@ Rectangle{
                     root.target.width = root.minimumWidth
             }
         }
+        onReleased: root.resizeFinished()
     }
 }

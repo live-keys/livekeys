@@ -58,6 +58,12 @@ CodePalette{
         width: objectGraph.width
         height: objectGraph.height
 
+        function resize(w, h){
+            objectGraph.width = w
+            objectGraph.height = h
+            objectGraph.redrawGrid()
+        }
+
         function init(){
             var objectList = editingFragment.nestedObjectsInfo()
             var props = []
@@ -157,9 +163,9 @@ CodePalette{
         }
 
         ObjectGraph {
+            id: objectGraph
             width: 600
             height: 300
-            id: objectGraph
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor

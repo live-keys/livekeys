@@ -18,6 +18,15 @@ Act{
     }
 
     run: function(size, type, channels, fill){
+        if ( reference && result ){
+            var t = reference.depth()
+            var ch = reference.channels()
+            var s = reference.dimensions()
+            if ( reference.depth() === result.depth() && result.channels() === reference.channels() && result.dimensions() === reference.dimensions() ){
+                return result
+            }
+        }
+
         return Cv.MatOp.createFill(size, type, channels, fill)
     }
     args: ["$size", "$type", "$channels", "$fill"]

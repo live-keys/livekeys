@@ -130,6 +130,10 @@ void    Navigable::fitInView( )
     }
 }
 
+void Navigable::requestUpdateGrid() noexcept{
+    updateGrid();
+}
+
 void    Navigable::setAutoFitMode( AutoFitMode autoFitMode )
 {
     if ( _autoFitMode != AutoFit &&

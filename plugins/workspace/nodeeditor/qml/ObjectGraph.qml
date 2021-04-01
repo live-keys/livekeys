@@ -79,6 +79,10 @@ Rectangle{
         }
     }
 
+    function redrawGrid(){
+        graphView.requestUpdateGrid()
+    }
+
     Keys.onPressed: {
         if ( lk.layers.workspace ){
             var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -498,6 +502,7 @@ Rectangle{
     ResizeArea{
         minimumHeight: 200
         minimumWidth: 400
+        onResizeFinished: { graphView.redrawGrid() }
     }
 }
 

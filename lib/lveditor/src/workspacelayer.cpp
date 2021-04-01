@@ -171,7 +171,7 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     m_keymap->store(0, Qt::Key_O,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.openFile");
     m_keymap->store(0, Qt::Key_Backslash, lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.toggleVisibility");
-    m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
+//    m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
     m_keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleNavigation");
     m_keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleLog");
     m_keymap->store(0, Qt::Key_F1,        0,                              "window.workspace.help");
@@ -385,7 +385,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 }
 
 void WorkspaceLayer::whenProjectClose(){
-    QJSValue v = m_panes->property("__clearPanes").value<QJSValue>();
+    QJSValue v = m_panes->property("__clearAll").value<QJSValue>();
     QJSValue res = v.call();
     if ( res.isError() ){
         m_engine->throwError(res, this);

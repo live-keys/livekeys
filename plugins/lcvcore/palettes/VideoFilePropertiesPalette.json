@@ -1,0 +1,8 @@
+{
+    "type": "qml/lcvcore#VideoFile",
+    "properties" : [
+        ["source", "FilePathPalette"],
+        ["image", "", "true"]
+    ]
+}
+

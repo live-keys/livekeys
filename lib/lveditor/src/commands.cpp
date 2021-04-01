@@ -181,7 +181,8 @@ void Commands::execute(const QString &command){
     if ( it != m_commands.end() ){
         QJSValue r = it.value()->function.call();
         if ( r.isError() ){
-            QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Error executing command '" + command.toStdString() + "': " + r.toString().toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
+            m_engine->throwError(r, this);
+//            QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Error executing command '" + command.toStdString() + "': " + r.toString().toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
         }
         return;
     }
