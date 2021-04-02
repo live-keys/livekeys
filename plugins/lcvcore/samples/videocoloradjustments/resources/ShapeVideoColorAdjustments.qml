@@ -20,7 +20,7 @@ WorkspaceControl{
                             "properties": [
                                 {
                                     "name": "file",
-                                    "palettes": ["PathPalette"]
+                                    "palettes": ["FilePathPalette"]
                                 }
                             ]
                         },

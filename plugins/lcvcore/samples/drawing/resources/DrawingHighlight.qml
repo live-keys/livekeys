@@ -28,6 +28,38 @@ WorkspaceControl{
         return ob
     }
 
+    function findDrawPalette(){
+        var editorPane = lk.layers.workspace.panes.focusPane('editor')
+        if ( !editorPane )
+            return
+
+        var editor = editorPane.editor
+        var codeHandler = editor.documentHandler.codeHandler
+
+        var editingFragments = codeHandler.editingFragments()
+
+        for ( var i = 0; i < editingFragments.length; ++i ){
+            var gridEdit = editingFragments[i]
+            if ( gridEdit.type() === 'qml/QtQuick#Grid' ){
+                var childFragments = gridEdit.getChildFragments()
+                for ( var j = 0; j < childFragments.length; ++j ){
+                    var drawSurfaceEdit = childFragments[j]
+                    if ( drawSurfaceEdit.type() === 'qml/lcvcore#DrawSurface' ){
+                        var palettes = drawSurfaceEdit.paletteList()
+                        for ( var pi = 0; pi < palettes.length; ++pi ){
+                            var palette = palettes[pi]
+                            if (palette.name === 'DrawPalette'){
+                                return palette
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        return null
+    }
+
     run: function(workspace, state, fragment){
         var highlight = null
         if ( fragment === 'first-component' ){
@@ -79,7 +111,7 @@ WorkspaceControl{
                     var childFragments = gridEdit.getChildFragments()
                     for ( var j = 0; j < childFragments.length; ++j ){
                         var blankImageEdit = childFragments[j]
-                        if ( blankImageEdit.type() === 'qml/lcvcore#Draw' ){
+                        if ( blankImageEdit.type() === 'qml/lcvcore#DrawSurface' ){
                             var objectContainer = blankImageEdit.visualParent.parent.parent.parent
 
                             var coords = objectContainer.mapToItem(editor, 0, 0)
@@ -89,7 +121,7 @@ WorkspaceControl{
                             highlight = createHighlight(state)
                             highlight.boxX = coords.x + editorCoords.x + 20
                             highlight.boxY = coords.y + editorCoords.y + 33
-                            highlight.box.width = 110
+                            highlight.box.width = 210
                             highlight.box.height = 35
 
                         }
@@ -97,71 +129,97 @@ WorkspaceControl{
                 }
             }
         } else if ( fragment === 'brush-icon' ){
+            var drawPalette = findDrawPalette()
+            if (!drawPalette) return
+
             var editorPane = lk.layers.workspace.panes.focusPane('editor')
             if ( !editorPane )
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var coords = drawPalette.item.mapToItem(editor, 0, 0)
+            var editorCoords = editorPane.mapGlobalPosition()
+            var xOffset = -3
+            var yOffset = 65
+            editor.makePositionVisible(coords.y + editorCoords.y + yOffset - 80)
+            coords = drawPalette.item.mapToItem(editor, 0, 0)
+            highlight = createHighlight(state)
 
-            var editingFragments = codeHandler.editingFragments()
+            highlight.boxX = coords.x + editorCoords.x + xOffset
+            highlight.boxY = coords.y + editorCoords.y + yOffset
+            highlight.box.width = 30
+            highlight.box.height = 30
+            return highlight
+        } else if ( fragment === 'brush-size' ){
+            var drawPalette = findDrawPalette()
+            if (!drawPalette) return
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var gridEdit = editingFragments[i]
-                if ( gridEdit.type() === 'qml/QtQuick#Grid' ){
-                    var childFragments = gridEdit.getChildFragments()
-                    for ( var j = 0; j < childFragments.length; ++j ){
-                        var blankImageEdit = childFragments[j]
-                        if ( blankImageEdit.type() === 'qml/lcvcore#Draw' ){
-                            var objectContainer = blankImageEdit.visualParent.parent.parent.parent
-
-                            var coords = objectContainer.mapToItem(editor, 0, 0)
-                            var editorCoords = editorPane.mapGlobalPosition()
-                            editor.makePositionVisible(coords.y + editorCoords.y + 115 - 80)                            
-                            coords = objectContainer.mapToItem(editor, 0, 0)
-                            highlight = createHighlight(state)
-                            highlight.boxX = coords.x + editorCoords.x + 7
-                            highlight.boxY = coords.y + editorCoords.y + 115
-                            highlight.box.width = 35
-                            highlight.box.height = 35
-
-                        }
-                    }
-                }
-            }
-        } else if ( fragment === 'color-icon' ){
             var editorPane = lk.layers.workspace.panes.focusPane('editor')
             if ( !editorPane )
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var coords = drawPalette.item.mapToItem(editor, 0, 0)
+            var editorCoords = editorPane.mapGlobalPosition()
+            var xOffset = 110
+            var yOffset = 30
+            editor.makePositionVisible(coords.y + editorCoords.y + yOffset - 80)
+            coords = drawPalette.item.mapToItem(editor, 0, 0)
+            highlight = createHighlight(state)
 
-            var editingFragments = codeHandler.editingFragments()
+            highlight.boxX = coords.x + editorCoords.x + xOffset
+            highlight.boxY = coords.y + editorCoords.y + yOffset
+            highlight.box.width = 30
+            highlight.box.height = 30
+            return highlight
+        } else if ( fragment === 'gradient-icon' ){
+            var drawPalette = findDrawPalette()
+            if (!drawPalette) return
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var gridEdit = editingFragments[i]
-                if ( gridEdit.type() === 'qml/QtQuick#Grid' ){
-                    var childFragments = gridEdit.getChildFragments()
-                    for ( var j = 0; j < childFragments.length; ++j ){
-                        var blankImageEdit = childFragments[j]
-                        if ( blankImageEdit.type() === 'qml/lcvcore#Draw' ){
-                            var objectContainer = blankImageEdit.visualParent.parent.parent.parent
+            var editorPane = lk.layers.workspace.panes.focusPane('editor')
+            if ( !editorPane )
+                return
 
-                            var coords = objectContainer.mapToItem(editor, 0, 0)
-                            var editorCoords = editorPane.mapGlobalPosition()
-                            editor.makePositionVisible(coords.y + editorCoords.y + 140 - 80)                            
-                            coords = objectContainer.mapToItem(editor, 0, 0)
-                            highlight = createHighlight(state)
-                            highlight.boxX = coords.x + editorCoords.x + 7
-                            highlight.boxY = coords.y + editorCoords.y + 140
-                            highlight.box.width = 35
-                            highlight.box.height = 35
+            var editor = editorPane.editor
+            var coords = drawPalette.item.mapToItem(editor, 0, 0)
+            var editorCoords = editorPane.mapGlobalPosition()
+            var xOffset = 24
+            var yOffset = 65
+            editor.makePositionVisible(coords.y + editorCoords.y + yOffset - 80)
+            coords = drawPalette.item.mapToItem(editor, 0, 0)
+            highlight = createHighlight(state)
 
-                        }
-                    }
-                }
-            }
+            highlight.boxX = coords.x + editorCoords.x + xOffset
+            highlight.boxY = coords.y + editorCoords.y + yOffset
+            highlight.box.width = 30
+            highlight.box.height = 30
+            return highlight
+        } else if ( fragment === 'color-pickers' ){
+            var drawPalette = findDrawPalette()
+            if (!drawPalette) return
+
+            var editorPane = lk.layers.workspace.panes.focusPane('editor')
+            if ( !editorPane )
+                return
+
+            var editor = editorPane.editor
+            var coords = drawPalette.item.mapToItem(editor, 0, 0)
+            var editorCoords = editorPane.mapGlobalPosition()
+            var xOffset = -10
+            var yOffset = 180
+            editor.makePositionVisible(coords.y + editorCoords.y + yOffset - 80)
+            coords = drawPalette.item.mapToItem(editor, 0, 0)
+            highlight = createHighlight(state)
+
+            highlight.boxX = coords.x + editorCoords.x + xOffset
+            highlight.boxY = coords.y + editorCoords.y + yOffset
+            highlight.box.width = 70
+            highlight.box.height = 70
+            highlight.box.border.width = 5
+            highlight.box.border.color = highlight.box.color
+            highlight.box.color = 'transparent'
+            return highlight
+
         } else if ( fragment === 'histogram-component' ){
             var editorPane = lk.layers.workspace.panes.focusPane('editor')
             if ( !editorPane )
@@ -203,7 +261,7 @@ WorkspaceControl{
             var coords = viewerPane.mapGlobalPosition()
             highlight = createHighlight(state)
             highlight.boxX = coords.x - 15
-            highlight.boxY = coords.y - 15
+            highlight.boxY = coords.y + 15
             highlight.box.width = 330
             highlight.box.height = 235
             highlight.box.border.width = 5

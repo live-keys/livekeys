@@ -30,7 +30,7 @@ WorkspaceControl{
                             "properties": [
                                 {
                                     "name": "path",
-                                    "palettes": ["PathPalette"]
+                                    "palettes": ["FilePathPalette"]
                                 },
                                 {
                                     "name": "args",
@@ -51,7 +51,7 @@ WorkspaceControl{
                                 },
                                 {
                                     "name": "path",
-                                    "palettes": ["PathPalette"]
+                                    "palettes": ["FilePathPalette"]
                                 },
                                 {
                                     "name": "args",
