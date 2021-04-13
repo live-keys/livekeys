@@ -176,13 +176,18 @@ public:
     bool isArray() const;
     bool isElement() const;
 
+
+
     template <typename T> static ScopedValue createValue(Engine* engine, const T& val){
         return ScopedValue(engine, val);
     }
 
+    Engine *engine() const;
+
 private:
     LocalValuePrivate* m_d;
     int*               m_ref;
+    Engine*            m_engine;
 };
 
 // Type Conversions

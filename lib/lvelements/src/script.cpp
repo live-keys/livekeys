@@ -49,8 +49,9 @@ Value Script::run(){
 }
 
 Object Script::loadAsModule(ModuleFile* file){
-    v8::HandleScope handle(m_d->engine->isolate());
-    v8::Local<v8::Context> context = m_d->engine->currentContext()->asLocal();
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::HandleScope handle(isolate);
     v8::Context::Scope context_scope(context);
 
     if ( m_d->engine->tryCatchNesting() == 0){
@@ -63,14 +64,14 @@ Object Script::loadAsModule(ModuleFile* file){
             Engine::CatchData cd(m_d->engine, &tc);
 
             v8::Local<v8::String> ehKey = v8::String::NewFromUtf8(
-                m_d->engine->isolate(), "__errorhandler__", v8::String::kInternalizedString
-            );
+                m_d->engine->isolate(), "__errorhandler__", v8::NewStringType::kInternalized
+            ).ToLocalChecked();
 
             Element* current = cd.object();
             while ( current ){
                 v8::Local<v8::Object> lo = ElementPrivate::localObject(current);
-                if ( lo->Has(ehKey) ){
-                    Element* elem = ElementPrivate::elementFromObject(lo->Get(ehKey)->ToObject());
+                if ( lo->Has(context, ehKey).ToChecked() ){
+                    Element* elem = ElementPrivate::elementFromObject(lo->Get(context, ehKey).ToLocalChecked()->ToObject(context).ToLocalChecked());
                     ErrorHandler* ehandler = elem->cast<ErrorHandler>();
                     ErrorHandler::ErrorData ed;
                     ed.fileName = cd.fileName();
@@ -122,9 +123,9 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
     ScopedValue module = mf->createObject(m_d->engine);
 
     v8::Local<v8::String> name = v8::String::NewFromUtf8(
-        m_d->engine->isolate(), mf->name().c_str(), v8::String::kInternalizedString);
+        m_d->engine->isolate(), mf->name().c_str(), v8::NewStringType::kInternalized).ToLocalChecked();
     v8::Local<v8::String> filePath = v8::String::NewFromUtf8(
-        m_d->engine->isolate(), mf->filePath().c_str(), v8::String::kInternalizedString);
+        m_d->engine->isolate(), mf->filePath().c_str(), v8::NewStringType::kInternalized).ToLocalChecked();
 
     v8::Local<v8::Value> args[4];
     args[0] = module.data();
@@ -132,13 +133,13 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
     args[2] = name;
     args[3] = filePath;
 
-    loadFunction->Call(context->Global(), 4, args);
+    loadFunction->Call(context, context->Global(), 4, args).IsEmpty();
 
 
     v8::Local<v8::Object> moduleValue = v8::Local<v8::Object>::Cast(module.data());
-    v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(m_d->engine->isolate(), "exports");
+    v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(m_d->engine->isolate(), "exports").ToLocalChecked();
 
-    v8::Local<v8::Value> exportsValue = moduleValue->Get(exportsKey);
+    v8::Local<v8::Value> exportsValue = moduleValue->Get(context, exportsKey).ToLocalChecked();
     if ( !exportsValue->IsObject() ){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception,
@@ -151,9 +152,9 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
 
     v8::Local<v8::Object> exportsObject = v8::Local<v8::Object>::Cast(exportsValue);
 
-    v8::Local<v8::Array> propertyNames = exportsObject->GetOwnPropertyNames();
+    v8::Local<v8::Array> propertyNames = exportsObject->GetOwnPropertyNames(context, v8::ALL_PROPERTIES).ToLocalChecked();
     for (uint32_t i = 0; i < propertyNames->Length(); ++i) {
-        v8::Local<v8::Value> key = propertyNames->Get(i);
+        v8::Local<v8::Value> key = propertyNames->Get(context, i).ToLocalChecked();
 
         if ( !key->IsString() ){
             lv::Exception e = CREATE_EXCEPTION(
@@ -165,10 +166,12 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
             return module.toObject(m_d->engine);
         }
 
-        v8::String::Utf8Value utf8_key(key);
+        auto isolate = m_d->engine->isolate();
+        auto context = isolate->GetCurrentContext();
+        v8::String::Utf8Value utf8_key(isolate, key);
 
         if ( strcmp(*utf8_key, "__shared__") != 0 && strlen(*utf8_key) > 0 ){
-            v8::Local<v8::Value> value = exportsObject->Get(key);
+            v8::Local<v8::Value> value = exportsObject->Get(context, key).ToLocalChecked();
 
             if ( value->IsFunction() ){
                 v8::Local<v8::Function> func = v8::Local<v8::Function>::Cast(value);

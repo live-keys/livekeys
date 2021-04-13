@@ -27,6 +27,7 @@ public:
 ScopedValue::ScopedValue(Engine *engine)
     : m_d(new LocalValuePrivate(v8::Undefined(engine->isolate())))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -34,6 +35,7 @@ ScopedValue::ScopedValue(Engine *engine)
 ScopedValue::ScopedValue(Engine *engine, bool val)
     : m_d(new LocalValuePrivate(v8::Boolean::New(engine->isolate(), val)))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -41,6 +43,7 @@ ScopedValue::ScopedValue(Engine *engine, bool val)
 ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -48,6 +51,7 @@ ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
 ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -55,6 +59,7 @@ ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
 ScopedValue::ScopedValue(Engine *engine, Value::Number val)
     : m_d(new LocalValuePrivate(v8::Number::New(engine->isolate(), val)))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -62,22 +67,25 @@ ScopedValue::ScopedValue(Engine *engine, Value::Number val)
 ScopedValue::ScopedValue(Engine *engine, const std::string &val)
     : m_d(nullptr)
     , m_ref(new int)
+    , m_engine(engine)
 {
-    v8::Local<v8::Value> s = v8::String::NewFromUtf8(engine->isolate(), val.c_str());
+    v8::Local<v8::Value> s = v8::String::NewFromUtf8(engine->isolate(), val.c_str()).ToLocalChecked();
     m_d = new LocalValuePrivate(s);
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *, Callable val)
+ScopedValue::ScopedValue(Engine *engine, Callable val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *, Object val)
+ScopedValue::ScopedValue(Engine *engine, Object val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -85,13 +93,15 @@ ScopedValue::ScopedValue(Engine *, Object val)
 ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
     : m_d(new LocalValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *, Element* val)
+ScopedValue::ScopedValue(Engine *engine, Element* val)
     : m_d(new LocalValuePrivate(ElementPrivate::localObject(val)))
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -99,6 +109,7 @@ ScopedValue::ScopedValue(Engine *, Element* val)
 ScopedValue::ScopedValue(Engine *engine, const Value &value)
     : m_d(nullptr)
     , m_ref(new int)
+    , m_engine(engine)
 {
     ++(*m_ref);
     switch ( value.type() ){
@@ -128,9 +139,10 @@ ScopedValue::ScopedValue(Engine *engine, const Value &value)
     }
 }
 
-ScopedValue::ScopedValue(Engine *, const ScopedValue &other)
+ScopedValue::ScopedValue(Engine *engine, const ScopedValue &other)
     : m_d(other.m_d)
     , m_ref(other.m_ref)
+    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -172,24 +184,24 @@ const v8::Local<v8::Value> &ScopedValue::data() const{
     return m_d->data;
 }
 
-bool ScopedValue::toBool(Engine*) const{
-    return m_d->data->BooleanValue();
+bool ScopedValue::toBool(Engine *engine) const{
+    return m_d->data->BooleanValue(engine->isolate());
 }
 
 Value::Int32 ScopedValue::toInt32(Engine *engine) const{
-    return m_d->data->ToInt32(engine->isolate())->Value();
+    return m_d->data->ToInt32(engine->isolate()->GetCurrentContext()).ToLocalChecked()->Value();
 }
 
 Value::Int64 ScopedValue::toInt64(Engine *engine) const{
-    return (Value::Int64)m_d->data->ToNumber(engine->isolate())->Value();
+    return (Value::Int64)m_d->data->ToNumber(engine->isolate()->GetCurrentContext()).ToLocalChecked()->Value();
 }
 
 Value::Number ScopedValue::toNumber(Engine *engine) const{
-    return m_d->data->ToNumber(engine->isolate())->Value();
+    return m_d->data->ToNumber(engine->isolate()->GetCurrentContext()).ToLocalChecked()->Value();
 }
 
 std::string ScopedValue::toStdString(Engine *engine) const{
-    return *v8::String::Utf8Value(m_d->data->ToString(engine->isolate()));
+    return *v8::String::Utf8Value(engine->isolate(), m_d->data->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked());
 }
 
 Callable ScopedValue::toCallable(Engine* engine) const{
@@ -202,8 +214,8 @@ Buffer ScopedValue::toBuffer(Engine *) const{
 
 Object ScopedValue::toObject(Engine *engine) const{
     if ( isString() && !isObject() ){
-        v8::Local<v8::String> vs = m_d->data->ToString();
-        v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(v8::StringObject::New(vs));
+        v8::Local<v8::String> vs = m_d->data->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked();
+        v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(v8::StringObject::New(engine->isolate(), vs));
         return Object(engine, vo);
     } else {
         v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(m_d->data);
@@ -284,6 +296,11 @@ bool ScopedValue::isElement() const{
     return vo->InternalFieldCount() == 1;
 }
 
+Engine *ScopedValue::engine() const
+{
+    return m_engine;
+}
+
 ScopedValue::ScopedValue(const v8::Local<v8::Value> &data)
     : m_d(new LocalValuePrivate(data))
     , m_ref(new int)
@@ -292,29 +309,29 @@ ScopedValue::ScopedValue(const v8::Local<v8::Value> &data)
 }
 
 template<>
-bool convertFromV8(Engine *, const v8::Local<v8::Value> &value){
-    return value->BooleanValue();
+bool convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
+    return value->BooleanValue(engine->isolate());
 }
 
 
 template<>
-Value::Int32 convertFromV8(Engine *, const v8::Local<v8::Value> &value){
-    return value->Int32Value();
+Value::Int32 convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
+    return value->Int32Value(engine->isolate()->GetCurrentContext()).ToChecked();
 }
 
 template<>
-Value::Int64 convertFromV8(Engine *, const v8::Local<v8::Value> &value){
-    return value->IntegerValue();
+Value::Int64 convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
+    return value->IntegerValue(engine->isolate()->GetCurrentContext()).ToChecked();
 }
 
 template<>
-Value::Number convertFromV8(Engine *, const v8::Local<v8::Value> &value){
-    return value->NumberValue();
+Value::Number convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
+    return value->NumberValue(engine->isolate()->GetCurrentContext()).ToChecked();
 }
 
 template<>
 std::string convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
-    return *v8::String::Utf8Value(value->ToString(engine->isolate()));
+    return *v8::String::Utf8Value(engine->isolate(), value->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked());
 }
 
 template<>

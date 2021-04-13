@@ -47,8 +47,9 @@ Callable::Callable(Engine* engine, const v8::Local<v8::Function> &data)
     : m_d(nullptr)
     , m_ref(nullptr)
 {
-
-    v8::Local<v8::Value> shared = data->Get(v8::String::NewFromUtf8(engine->isolate(), "__shared__"));
+    auto isolate = engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Value> shared = data->Get(context, v8::String::NewFromUtf8(engine->isolate(), "__shared__").ToLocalChecked()).ToLocalChecked();
 
     if ( shared->IsExternal() ){
         m_d = reinterpret_cast<CallablePrivate*>(v8::Local<v8::External>::Cast(shared)->Value());
@@ -57,18 +58,29 @@ Callable::Callable(Engine* engine, const v8::Local<v8::Function> &data)
         m_d = new CallablePrivate(engine, data);
         m_ref = new int;
         m_d->ref = m_ref;
-        data->Set(v8::String::NewFromUtf8(engine->isolate(), "__shared__"), v8::External::New(engine->isolate(), m_d));
+        data->Set(
+            context,
+            v8::String::NewFromUtf8(engine->isolate(), "__shared__").ToLocalChecked(),
+            v8::External::New(engine->isolate(), m_d)
+        ).IsNothing();
     }
 
     ++(*m_ref);
 }
 
 Callable::~Callable(){
+
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
     --(*m_ref);
     if ( *m_ref == 0 ){
         if ( !m_d->data.IsEmpty() ){
             v8::Local<v8::Function> v = m_d->data.Get(m_d->engine->isolate());
-            v->Set(v8::String::NewFromUtf8(m_d->engine->isolate(), "__shared__"), v8::Undefined(m_d->engine->isolate()));
+            v->Set(
+                context,
+                v8::String::NewFromUtf8(m_d->engine->isolate(), "__shared__").ToLocalChecked(),
+                v8::Undefined(m_d->engine->isolate())
+            ).IsNothing();
             m_d->data.SetWeak();
         }
 
@@ -112,14 +124,18 @@ Component Callable::toComponent() const{
 }
 
 ScopedValue Callable::call(Element *that, const Function::Parameters &params) const{
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::Function> local = m_d->data.Get(that->engine()->isolate());
     v8::Local<v8::Object> localThat = ElementPrivate::localObject(that);
-    return ScopedValue(local->Call(localThat, params.m_length, params.m_args));
+    return ScopedValue(local->Call(context, localThat, params.m_length, params.m_args).ToLocalChecked());
 }
 
 ScopedValue Callable::call(Engine *engine, const Function::Parameters &params) const{
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::Function> local = m_d->data.Get(engine->isolate());
-    return ScopedValue(local->Call(engine->currentContext()->asLocal()->Global(), params.m_length, params.m_args));
+    return ScopedValue(local->Call(context, engine->currentContext()->asLocal()->Global(), params.m_length, params.m_args).ToLocalChecked());
 }
 
 ScopedValue Callable::callAsConstructor(Engine *engine, const Function::Parameters &params) const{

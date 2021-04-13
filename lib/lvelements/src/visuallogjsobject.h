@@ -43,7 +43,7 @@ public:
             return;
         }
 
-        v8::String::Utf8Value utfKey(info[0]->ToString(info.GetIsolate()));
+        v8::String::Utf8Value utfKey(info.GetIsolate(), info[0]->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked());
         ScopedValue val(info[1]);
 
         MLNode mlopt;
@@ -53,9 +53,9 @@ public:
 
     static void captureStackHelper(Engine* engine, VisualLog& vl){
         v8::Local<v8::StackTrace> st = v8::StackTrace::CurrentStackTrace(engine->isolate(), 1, v8::StackTrace::kScriptName);
-        v8::Local<v8::StackFrame> sf = st->GetFrame(0);
-        v8::String::Utf8Value scriptName(sf->GetScriptName());
-        v8::String::Utf8Value functionName(sf->GetFunctionName());
+        v8::Local<v8::StackFrame> sf = st->GetFrame(engine->isolate(), 0);
+        v8::String::Utf8Value scriptName(engine->isolate(), sf->GetScriptName());
+        v8::String::Utf8Value functionName(engine->isolate(), sf->GetFunctionName());
         sf->GetLineNumber();
 
         vl.at(*scriptName, sf->GetLineNumber(), *functionName);
@@ -63,19 +63,23 @@ public:
 
     static void logHelper(VisualLog::MessageInfo::Level level, const v8::FunctionCallbackInfo<v8::Value>& info){
 
-        bool captureStack = info.This()->Get(v8::String::NewFromUtf8(info.GetIsolate(), "sourceInfo"))->BooleanValue();
+        bool captureStack = info.This()->Get(
+            info.GetIsolate()->GetCurrentContext(),
+            v8::String::NewFromUtf8(info.GetIsolate(), "sourceInfo").ToLocalChecked()
+        ).ToLocalChecked()->BooleanValue(info.GetIsolate());
+
+        Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
 
         if ( info.Length() == 0 ){
             VisualLog vl(level);
             if ( captureStack ){
-                Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
                 captureStackHelper(engine, vl);
             }
 
         } else if ( info.Length() == 1 ){
             VisualLog vl(level);
+
             if ( captureStack ){
-                Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
                 captureStackHelper(engine, vl);
             }
 
@@ -91,11 +95,11 @@ public:
                 }
             }
 
-            v8::String::Utf8Value utfVal(arg->ToString());
+            v8::String::Utf8Value utfVal(engine->isolate(), arg->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked());
             vl << *utfVal;
 
         } else if ( info.Length() == 2 ){
-            v8::String::Utf8Value utfKey(info[0]->ToString());
+            v8::String::Utf8Value utfKey(engine->isolate(), info[0]->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked());
 
             VisualLog vl(*utfKey, level);
             if ( captureStack ){
@@ -116,7 +120,7 @@ public:
                 }
             }
 
-            v8::String::Utf8Value utfVal(arg->ToString());
+            v8::String::Utf8Value utfVal(engine->isolate(), arg->ToString(engine->isolate()->GetCurrentContext()).ToLocalChecked());
             vl << *utfVal;
 
         } else {
@@ -133,17 +137,17 @@ public:
     static v8::Local<v8::FunctionTemplate> functionTemplate(v8::Isolate* isolate){
         v8::Local<v8::FunctionTemplate> localTpl;
         localTpl = v8::FunctionTemplate::New(isolate);
-        localTpl->SetClassName(v8::String::NewFromUtf8(isolate, "VisualLog"));
+        localTpl->SetClassName(v8::String::NewFromUtf8(isolate, "VisualLog").ToLocalChecked());
 
         v8::Local<v8::Template> tplPrototype = localTpl->PrototypeTemplate();
 
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "f"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::f));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "e"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::e));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "w"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::w));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "i"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::i));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "d"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::d));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "v"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::v));
-        tplPrototype->Set(v8::String::NewFromUtf8(isolate, "configure"), v8::FunctionTemplate::New(isolate, &VisualLogJsObject::configure));
+        tplPrototype->Set(isolate, "f", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::f));
+        tplPrototype->Set(isolate, "e", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::e));
+        tplPrototype->Set(isolate, "w", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::w));
+        tplPrototype->Set(isolate, "i", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::i));
+        tplPrototype->Set(isolate, "d", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::d));
+        tplPrototype->Set(isolate, "v", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::v));
+        tplPrototype->Set(isolate, "configure", v8::FunctionTemplate::New(isolate, &VisualLogJsObject::configure));
 
         return localTpl;
     }

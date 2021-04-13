@@ -103,16 +103,18 @@ const Plugin::Ptr& ElementsPlugin::plugin() const{
 }
 
 Object ElementsPlugin::collectExportsObject(){
-    v8::Local<v8::Object> result = v8::Object::New(m_d->engine->isolate());
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Object> result = v8::Object::New(isolate);
 
     v8::Local<v8::Object> lo = m_d->libraryExports.data();
-    v8::Local<v8::Array> pn = lo->GetOwnPropertyNames();
+    v8::Local<v8::Array> pn = lo->GetOwnPropertyNames(context, v8::ALL_PROPERTIES).ToLocalChecked();
 
     for (uint32_t i = 0; i < pn->Length(); ++i) {
-        v8::Local<v8::Value> key = pn->Get(i);
-        v8::Local<v8::Value> value = lo->Get(key);
+        v8::Local<v8::Value> key = pn->Get(context, i).ToLocalChecked();
+        v8::Local<v8::Value> value = lo->Get(context, key).ToLocalChecked();
 
-        result->Set(key, value);
+        result->Set(context, key, value).IsNothing();
     }
 
     //TODO: Capture file exports

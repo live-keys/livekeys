@@ -40,7 +40,12 @@ Object::Object(Engine* engine, const v8::Local<v8::Object> &data)
     : m_d(nullptr)
     , m_ref(nullptr)
 {
-    v8::Local<v8::Value> shared = data->Get(v8::String::NewFromUtf8(engine->isolate(), "__shared__"));
+    auto isolate = engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Value> shared = data->Get(
+        context,
+        v8::String::NewFromUtf8(engine->isolate(), "__shared__").ToLocalChecked()
+    ).ToLocalChecked();
 
     if ( shared->IsExternal() ){
         m_d = reinterpret_cast<ObjectPrivate*>(v8::Local<v8::External>::Cast(shared)->Value());
@@ -51,7 +56,7 @@ Object::Object(Engine* engine, const v8::Local<v8::Object> &data)
         m_d->ref = m_ref;
         v8::Maybe<bool> result = data->DefineOwnProperty(
             engine->currentContext()->asLocal(),
-            v8::String::NewFromUtf8(engine->isolate(), "__shared__"),
+            v8::String::NewFromUtf8(engine->isolate(), "__shared__").ToLocalChecked(),
             v8::External::New(engine->isolate(), m_d),
             v8::DontEnum
         );
@@ -69,11 +74,17 @@ Object::Object(Engine* engine, const v8::Local<v8::Object> &data)
 }
 
 Object::~Object(){
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
     --(*m_ref);
     if ( *m_ref == 0 ){
         if ( !m_d->data.IsEmpty() ){
             v8::Local<v8::Object> v = m_d->data.Get(m_d->engine->isolate());
-            v->Set(v8::String::NewFromUtf8(m_d->engine->isolate(), "__shared__"), v8::Undefined(m_d->engine->isolate()));
+            v->Set(
+                context,
+                v8::String::NewFromUtf8(m_d->engine->isolate(), "__shared__").ToLocalChecked(),
+                v8::Undefined(m_d->engine->isolate())
+            ).IsNothing();
             m_d->data.SetWeak();
         }
 
@@ -94,8 +105,10 @@ std::string Object::toString() const{
     if ( m_d->data.IsEmpty() )
         return std::string();
 
-    v8::Local<v8::Object> s = m_d->data.Get(m_d->engine->isolate());
-    return *v8::String::Utf8Value(s->ToString(m_d->engine->isolate()));
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Object> s = m_d->data.Get(isolate);
+    return *v8::String::Utf8Value(isolate, s->ToString(context).ToLocalChecked());
 }
 
 Buffer Object::toBuffer() const{
@@ -159,15 +172,24 @@ bool Object::isPoint() const{
 }
 
 void Object::toPoint(double &x, double &y) const{
-    v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
+
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Object> lo = m_d->data.Get(isolate);
     if ( !isPoint() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Point type.", 1);
         m_d->engine->throwError(&e, nullptr);
         return;
     }
 
-    x = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "x", v8::String::kInternalizedString))->NumberValue();
-    y = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "y", v8::String::kInternalizedString))->NumberValue();
+    x = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "x", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
+    y = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "y", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
 }
 
 bool Object::isSize() const{
@@ -177,15 +199,24 @@ bool Object::isSize() const{
 }
 
 void Object::toSize(double &width, double &height) const{
-    v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
+
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::Object> lo = m_d->data.Get(isolate);
     if ( !isSize() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Size type.", 1);
         m_d->engine->throwError(&e, nullptr);
         return;
     }
 
-    width =  lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "width", v8::String::kInternalizedString))->NumberValue();
-    height = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "height", v8::String::kInternalizedString))->NumberValue();
+    width = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "width", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
+    height = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "height", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
 }
 
 bool Object::isRectangle() const{
@@ -195,6 +226,8 @@ bool Object::isRectangle() const{
 }
 
 void Object::toRectangle(double &x, double &y, double &width, double &height){
+    auto isolate = m_d->engine->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::Object> lo = m_d->data.Get(m_d->engine->isolate());
     if ( !isRectangle() ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Object is not of Rectangle type.", 1);
@@ -202,10 +235,22 @@ void Object::toRectangle(double &x, double &y, double &width, double &height){
         return;
     }
 
-    x = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "x", v8::String::kInternalizedString))->NumberValue();
-    y = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "y", v8::String::kInternalizedString))->NumberValue();
-    width = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "width", v8::String::kInternalizedString))->NumberValue();
-    height = lo->Get(v8::String::NewFromUtf8(m_d->engine->isolate(), "height", v8::String::kInternalizedString))->NumberValue();
+    x = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "x", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
+    y = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "y", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
+    width = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "width", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
+    height = lo->Get(
+        context,
+        v8::String::NewFromUtf8(isolate, "height", v8::NewStringType::kInternalized).ToLocalChecked()
+    ).ToLocalChecked()->NumberValue(context).ToChecked();
 }
 
 bool Object::isDate() const{
@@ -254,12 +299,13 @@ Object::Accessor::~Accessor(){
     delete m_d;
 }
 
-ScopedValue Object::Accessor::get(int index){
-    return ScopedValue(m_d->data->Get(static_cast<uint32_t>(index)));
+ScopedValue Object::Accessor::get(Engine* engine, int index){
+
+    return ScopedValue(m_d->data->Get(engine->isolate()->GetCurrentContext(), static_cast<uint32_t>(index)).ToLocalChecked());
 }
 
 ScopedValue Object::Accessor::get(const ScopedValue &key){
-    return m_d->data->Get(key.data());
+    return m_d->data->Get(key.engine()->isolate()->GetCurrentContext(), key.data()).ToLocalChecked();
 }
 
 ScopedValue Object::Accessor::get(Engine *engine, const std::string &str){
@@ -267,11 +313,19 @@ ScopedValue Object::Accessor::get(Engine *engine, const std::string &str){
 }
 
 void Object::Accessor::set(int index, const ScopedValue &value){
-    m_d->data->Set(static_cast<uint32_t>(index), value.data());
+    m_d->data->Set(
+        value.engine()->isolate()->GetCurrentContext(),
+        static_cast<uint32_t>(index),
+        value.data()
+    ).IsNothing();
 }
 
 void Object::Accessor::set(const ScopedValue &key, const ScopedValue &value){
-    m_d->data->Set(key.data(), value.data());
+    m_d->data->Set(
+        value.engine()->isolate()->GetCurrentContext(),
+        key.data(),
+        value.data()
+    ).IsNothing();
 }
 
 void Object::Accessor::set(Engine *engine, const std::string &key, const ScopedValue &value){
@@ -283,8 +337,8 @@ bool Object::Accessor::has(Engine* engine, const ScopedValue &key) const{
     return result.IsJust() && result.ToChecked();
 }
 
-ScopedValue Object::Accessor::ownProperties() const{
-    return ScopedValue(m_d->data->GetOwnPropertyNames());
+ScopedValue Object::Accessor::ownProperties(Engine *engine) const{
+    return ScopedValue(m_d->data->GetOwnPropertyNames(engine->isolate()->GetCurrentContext(), v8::ALL_PROPERTIES).ToLocalChecked());
 }
 
 
@@ -316,12 +370,12 @@ int Object::ArrayAccessor::length() const{
     return static_cast<int>(m_d->data->Length());
 }
 
-ScopedValue Object::ArrayAccessor::get(int index){
-    return m_d->data->Get(static_cast<uint32_t>(index));
+ScopedValue Object::ArrayAccessor::get(Engine *engine, int index){
+    return m_d->data->Get(engine->isolate()->GetCurrentContext(), static_cast<uint32_t>(index)).ToLocalChecked();
 }
 
 void Object::ArrayAccessor::set(int index, const ScopedValue &value){
-    m_d->data->Set(static_cast<uint32_t>(index), value.data());
+    m_d->data->Set(value.engine()->isolate()->GetCurrentContext(), static_cast<uint32_t>(index), value.data()).IsNothing();
 }
 
 

@@ -107,9 +107,9 @@ void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8
     v8::Local<v8::External> engineData = v8::Local<v8::External>::Cast(data);
     Engine* engine = reinterpret_cast<Engine*>(engineData->Value());
 
-    v8::String::Utf8Value msg(message->Get());
-    v8::String::Utf8Value file(v8::Local<v8::String>::Cast(message->GetScriptResourceName()));
-    int line = message->GetScriptOrigin().ResourceLineOffset()->Int32Value();
+    v8::String::Utf8Value msg(engine->isolate(), message->Get());
+    v8::String::Utf8Value file(engine->isolate(), v8::Local<v8::String>::Cast(message->GetScriptResourceName()));
+    int line = message->GetScriptOrigin().ResourceLineOffset()->Int32Value(engine->isolate()->GetCurrentContext()).ToChecked();
 
     engine->handleError(*msg, "", *file, line);
 }
@@ -131,7 +131,7 @@ void Engine::initialize(const std::string &defaultLocation){
         v8::V8::InitializeExternalStartupData(defaultLocation.c_str());
 
         m_initializeData = new Engine::InitializeData;
-        m_initializeData->platform = v8::platform::CreateDefaultPlatform();
+        m_initializeData->platform = v8::platform::NewDefaultPlatform().get();
         m_initializeData->disposeAtExit = false;
 
         v8::V8::InitializePlatform(m_initializeData->platform);
@@ -233,7 +233,7 @@ Script::Ptr Engine::compileJs(const std::string &str){
     v8::Context::Scope context_scope(context);
 
     v8::Local<v8::String> source =
-        v8::String::NewFromUtf8(isolate(), str.c_str());
+        v8::String::NewFromUtf8(isolate(), str.c_str()).ToLocalChecked();
 
     v8::MaybeLocal<v8::Script> r = v8::Script::Compile(context, source);
 
@@ -266,7 +266,7 @@ Script::Ptr Engine::compileJsEnclosed(const std::string &str){
     v8::Context::Scope context_scope(context);
 
     v8::Local<v8::String> source =
-        v8::String::NewFromUtf8(isolate(), (Script::encloseStart + str + Script::encloseEnd).c_str());
+        v8::String::NewFromUtf8(isolate(), (Script::encloseStart + str + Script::encloseEnd).c_str()).ToLocalChecked();
 
     Script::Ptr sc(new Script(this, v8::Script::Compile(context, source).ToLocalChecked()));
     return sc;
@@ -284,7 +284,7 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
     std::stringstream sstr;
     sstr << Script::moduleEncloseStart << file.rdbuf() << Script::moduleEncloseEnd;
 
-    v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate(), (sstr.str()).c_str());
+    v8::Local<v8::String> source = v8::String::NewFromUtf8(isolate(), (sstr.str()).c_str()).ToLocalChecked();
 
     v8::MaybeLocal<v8::Script> script = v8::Script::Compile(context, source);
     if ( script.IsEmpty() )
@@ -365,7 +365,7 @@ Script::Ptr Engine::compileModuleSource(const std::string &path, const std::stri
 
     std::string jssourceEnclosed = Script::moduleEncloseStart + jssource + Script::moduleEncloseEnd;
 
-    v8::Local<v8::String> sourceLocal = v8::String::NewFromUtf8(isolate(), jssourceEnclosed.c_str());
+    v8::Local<v8::String> sourceLocal = v8::String::NewFromUtf8(isolate(), jssourceEnclosed.c_str()).ToLocalChecked();
 
     v8::MaybeLocal<v8::Script> script = v8::Script::Compile(context, sourceLocal);
     if ( script.IsEmpty() )
@@ -465,7 +465,7 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     } else {
         tpl->SetCallHandler(&Constructor::nullImplementation);
     }
-    tpl->SetClassName(v8::String::NewFromUtf8(isolate(), t->name().c_str()));
+    tpl->SetClassName(v8::String::NewFromUtf8(isolate(), t->name().c_str()).ToLocalChecked());
 
     v8::Local<v8::ObjectTemplate> tplInstance = tpl->InstanceTemplate();
     tplInstance->SetInternalFieldCount(1);
@@ -492,14 +492,14 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
 
         if ( p->isWritable() ){
             tplInstance->SetAccessor(
-                v8::String::NewFromUtf8(isolate(), propIt->first.c_str()),
+                v8::String::NewFromUtf8(isolate(), propIt->first.c_str()).ToLocalChecked(),
                 &Property::ptrGetImplementation,
                 &Property::ptrSetImplementation,
                 pdata
             );
         } else {
             tplInstance->SetAccessor(
-                v8::String::NewFromUtf8(isolate(), propIt->first.c_str()),
+                v8::String::NewFromUtf8(isolate(), propIt->first.c_str()).ToLocalChecked(),
                 &Property::ptrGetImplementation,
                 nullptr,
                 pdata
@@ -523,14 +523,15 @@ ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
     }
 
     // Functions
-    v8::Local<v8::Function> ftpl = tpl->GetFunction();
+    v8::Local<v8::Function> ftpl = tpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked();
     for ( auto funcIt = t->functionsBegin(); funcIt != t->functionsEnd(); ++funcIt ){
         Function* f = funcIt->second;
         v8::Local<v8::External> fdata = v8::External::New(isolate(), f);
         ftpl->Set(
-            v8::String::NewFromUtf8(isolate(), funcIt->first.c_str()),
-            v8::FunctionTemplate::New(isolate(), f->ptr(), fdata)->GetFunction()
-        );
+            isolate()->GetCurrentContext(),
+            v8::String::NewFromUtf8(isolate(), funcIt->first.c_str()).ToLocalChecked(),
+            v8::FunctionTemplate::New(isolate(), f->ptr(), fdata)->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+        ).IsNothing();
     }
 
     ComponentTemplate* compTpl = new ComponentTemplate(this, tpl);
@@ -568,11 +569,11 @@ v8::Local<v8::FunctionTemplate> Engine::importsTemplate(){
 // }
 
 bool Engine::isElementConstructor(const Callable &c){
-    v8::Local<v8::Function> elemClass = m_d->elementTemplate->data.Get(isolate())->GetFunction();
+    v8::Local<v8::Function> elemClass = m_d->elementTemplate->data.Get(isolate())->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked();
     v8::Local<v8::Function> childClass = c.data();
 
-    v8::Local<v8::Value> elemClassPrototype = elemClass->Get(v8::String::NewFromUtf8(isolate(), "prototype"));
-    v8::Local<v8::Value> childClassPrototype = childClass->Get(v8::String::NewFromUtf8(isolate(), "prototype"));
+    v8::Local<v8::Value> elemClassPrototype = elemClass->Get(isolate()->GetCurrentContext(), v8::String::NewFromUtf8(isolate(), "prototype").ToLocalChecked()).ToLocalChecked();
+    v8::Local<v8::Value> childClassPrototype = childClass->Get(isolate()->GetCurrentContext(), v8::String::NewFromUtf8(isolate(), "prototype").ToLocalChecked()).ToLocalChecked();
 
     while (childClassPrototype->IsObject()){
         v8::Maybe<bool> eq = childClassPrototype->Equals(m_d->context->asLocal(), elemClassPrototype);
@@ -581,7 +582,7 @@ bool Engine::isElementConstructor(const Callable &c){
         }
 
         v8::Local<v8::Object> fncPrototypeCast = v8::Local<v8::Object>::Cast(childClassPrototype);
-        childClassPrototype = fncPrototypeCast->Get(v8::String::NewFromUtf8(isolate(), "__proto__"));
+        childClassPrototype = fncPrototypeCast->Get(isolate()->GetCurrentContext(), v8::String::NewFromUtf8(isolate(), "__proto__").ToLocalChecked()).ToLocalChecked();
     }
 
     return false;
@@ -604,11 +605,11 @@ void Engine::throwError(const Exception *exception, Element *object){
     if (se)
     {
         e = v8::Exception::SyntaxError(
-            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()).ToLocalChecked());
     }
     else {
         e = v8::Exception::Error(
-            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()));
+            v8::String::NewFromUtf8(m_d->isolate, exception->message().c_str()).ToLocalChecked());
     }
 
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(e);
@@ -619,9 +620,9 @@ void Engine::throwError(const Exception *exception, Element *object){
     for (int i = 0; i<jsStackFrameSize; ++i)
     {
         if (i!=0) stackCapture << "\n";
-        v8::Local<v8::StackFrame> sf = st->GetFrame(i);
-        v8::String::Utf8Value scriptName(sf->GetScriptName());
-        v8::String::Utf8Value functionName(sf->GetFunctionName());
+        v8::Local<v8::StackFrame> sf = st->GetFrame(isolate(), i);
+        v8::String::Utf8Value scriptName(isolate(), sf->GetScriptName());
+        v8::String::Utf8Value functionName(isolate(), sf->GetFunctionName());
 
         stackCapture << "at ";
         if (functionName.length() != 0)
@@ -651,36 +652,36 @@ void Engine::throwError(const Exception *exception, Element *object){
 
     }
 
-    v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::String::kInternalizedString);
-    v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::String::kInternalizedString);
+    v8::Local<v8::String> stackKey = v8::String::NewFromUtf8(isolate(), "stack", v8::NewStringType::kInternalized).ToLocalChecked();
+    v8::Local<v8::String> stackValue = v8::String::NewFromUtf8(isolate(), stackCapture.str().c_str(), v8::NewStringType::kInternalized).ToLocalChecked();
 
-    o->Set(stackKey, stackValue);
+    o->Set(isolate()->GetCurrentContext(), stackKey, stackValue).IsNothing();
 
     if (se) {
-        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
-        o->Set(lineNumberKey, v8::Integer::New(isolate(), se->parsedLine()));
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), lineNumberKey, v8::Integer::New(isolate(), se->parsedLine())).IsNothing();
 
 
-        v8::Local<v8::String> columnKey = v8::String::NewFromUtf8(isolate(), "column", v8::String::kInternalizedString);
-        o->Set(columnKey, v8::Integer::New(isolate(), se->parsedColumn()));
+        v8::Local<v8::String> columnKey = v8::String::NewFromUtf8(isolate(), "column", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), columnKey, v8::Integer::New(isolate(), se->parsedColumn())).IsNothing();
 
-        v8::Local<v8::String> offsetKey = v8::String::NewFromUtf8(isolate(), "offset", v8::String::kInternalizedString);
-        o->Set(offsetKey, v8::Integer::New(isolate(), se->parsedColumn()));
+        v8::Local<v8::String> offsetKey = v8::String::NewFromUtf8(isolate(), "offset", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), offsetKey, v8::Integer::New(isolate(), se->parsedColumn())).IsNothing();
 
-        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
-        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), se->fileName().c_str(), v8::String::kInternalizedString));
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), fileNameKey, v8::String::NewFromUtf8(isolate(), se->fileName().c_str(), v8::NewStringType::kInternalized).ToLocalChecked()).IsNothing();
     }
     else {
         if ( object ){
-            v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::String::kInternalizedString);
-            o->Set(objectKey, ElementPrivate::localObject(object));
+            v8::Local<v8::String> objectKey = v8::String::NewFromUtf8(isolate(), "object", v8::NewStringType::kInternalized).ToLocalChecked();
+            o->Set(isolate()->GetCurrentContext(), objectKey, ElementPrivate::localObject(object)).IsNothing();
         }
 
-        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::String::kInternalizedString);
-        o->Set(fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::String::kInternalizedString));
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(isolate(), "fileName", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), fileNameKey, v8::String::NewFromUtf8(isolate(), exception->file().c_str(), v8::NewStringType::kInternalized).ToLocalChecked()).IsNothing();
 
-        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::String::kInternalizedString);
-        o->Set(lineNumberKey, v8::Integer::New(isolate(), exception->line()));
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(isolate(), "lineNumber", v8::NewStringType::kInternalized).ToLocalChecked();
+        o->Set(isolate()->GetCurrentContext(), lineNumberKey, v8::Integer::New(isolate(), exception->line())).IsNothing();
     }
 
     m_d->pendingExceptionNesting = m_d->tryCatchNesting;
@@ -771,44 +772,80 @@ void Engine::importInternals(){
     ComponentTemplate* tupleTemplate = registerTemplate(&Tuple::metaObject());
 
     v8::Local<v8::FunctionTemplate> tpl = m_d->elementTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Element"), tpl->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Element").ToLocalChecked(),
+        tpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     v8::Local<v8::FunctionTemplate> listTpl = listTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "List"), listTpl->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "List").ToLocalChecked(),
+        listTpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     v8::Local<v8::FunctionTemplate> containerTpl = containerTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Container"), containerTpl->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Container").ToLocalChecked(),
+        containerTpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     v8::Local<v8::FunctionTemplate> errorHandlerTpl = errorHandlerTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "ErrorHandler"), errorHandlerTpl->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "ErrorHandler").ToLocalChecked(),
+        errorHandlerTpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     v8::Local<v8::FunctionTemplate> tupleTpl = tupleTemplate->data.Get(isolate());
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Tuple"), tupleTpl->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Tuple").ToLocalChecked(),
+        tupleTpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     m_d->pointTemplate.Reset(isolate(), Point::functionTemplate(isolate()));
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Point"), pointTemplate()->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Point").ToLocalChecked(),
+        pointTemplate()->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     m_d->sizeTemplate.Reset(isolate(), Size::functionTemplate(isolate()));
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Size"), sizeTemplate()->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Size").ToLocalChecked(),
+        sizeTemplate()->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     m_d->rectangleTemplate.Reset(isolate(), Rectangle::functionTemplate(isolate()));
-    context->Global()->Set(v8::String::NewFromUtf8(isolate(), "Rectangle"), rectangleTemplate()->GetFunction());
+    context->Global()->Set(
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "Rectangle").ToLocalChecked(),
+        rectangleTemplate()->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     m_d->importsTemplate.Reset(isolate(), Imports::functionTemplate(isolate()));
 
     context->Global()->Set(
-        v8::String::NewFromUtf8(isolate(), "vlog"),
-        VisualLogJsObject::functionTemplate(isolate())->InstanceTemplate()->NewInstance());
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "vlog").ToLocalChecked(),
+        VisualLogJsObject::functionTemplate(isolate())->InstanceTemplate()->NewInstance(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 
     context->Global()->Set(
-        v8::String::NewFromUtf8(isolate(), "linkError"),
-        v8::FunctionTemplate::New(isolate(), &linkError)->GetFunction());
+        isolate()->GetCurrentContext(),
+        v8::String::NewFromUtf8(isolate(), "linkError").ToLocalChecked(),
+        v8::FunctionTemplate::New(isolate(), &linkError)->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+    ).IsNothing();
 }
 
 void Engine::wrapScriptObject(Element *element){
     ComponentTemplate* ctpl = registerTemplate(&element->typeMetaObject());
     v8::Local<v8::FunctionTemplate> tpl = ctpl->data.Get(isolate());
-    v8::Local<v8::Object> instance = tpl->InstanceTemplate()->NewInstance();
+    v8::Local<v8::Object> instance = tpl->InstanceTemplate()->NewInstance(isolate()->GetCurrentContext()).ToLocalChecked();
     element->setLifeTimeWithObject(instance);
 }
 
@@ -836,14 +873,22 @@ Object Engine::require(ModuleLibrary *module, const Object& o){
         ComponentTemplate* ctpl = registerTemplate(t);
         v8::Local<v8::FunctionTemplate> tpl = ctpl->data.Get(isolate());
 
-        base->Set(v8::String::NewFromUtf8(isolate(), t->name().c_str()), tpl->GetFunction());
+        base->Set(
+            isolate()->GetCurrentContext(),
+            v8::String::NewFromUtf8(isolate(), t->name().c_str()).ToLocalChecked(),
+            tpl->GetFunction(isolate()->GetCurrentContext()).ToLocalChecked()
+        ).IsNothing();
     }
 
     for ( auto it = module->instancesBegin(); it != module->instancesEnd(); ++it ){
         std::string name = it->first;
         Element* e       = it->second;
         v8::Local<v8::Object> lo = ElementPrivate::localObject(e);
-        base->Set(v8::String::NewFromUtf8(isolate(), name.c_str()), lo);
+        base->Set(
+            isolate()->GetCurrentContext(),
+            v8::String::NewFromUtf8(isolate(), name.c_str()).ToLocalChecked(),
+            lo
+        ).IsNothing();
     }
 
     return exportsObject;
@@ -889,50 +934,60 @@ void Engine::CatchData::rethrow(){
 }
 
 std::string Engine::CatchData::message() const{
-    v8::Local<v8::String> messageKey = v8::String::NewFromUtf8(m_engine->isolate(), "message", v8::String::kInternalizedString);
-    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
-    if ( exceptionObj->Has(messageKey) ){
-        v8::String::Utf8Value result(exceptionObj->Get(messageKey)->ToString());
+    auto isolate = m_engine->isolate();
+    auto context = isolate->GetCurrentContext();
+
+    v8::Local<v8::String> messageKey = v8::String::NewFromUtf8(isolate, "message", v8::NewStringType::kInternalized).ToLocalChecked();
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject(context).ToLocalChecked();
+    if ( exceptionObj->Has(context, messageKey).ToChecked() ){
+        v8::String::Utf8Value result(isolate, exceptionObj->Get(context, messageKey).ToLocalChecked());
         return *result;
     } else {
-        v8::String::Utf8Value msg(m_tryCatch->Message()->Get());
+        v8::String::Utf8Value msg(isolate, m_tryCatch->Message()->Get());
         return *msg;
     }
 }
 
 std::string Engine::CatchData::stack() const{
-    v8::String::Utf8Value msg(m_tryCatch->StackTrace()->ToString());
+    auto context = m_engine->isolate()->GetCurrentContext();
+    v8::String::Utf8Value msg(m_engine->isolate(), m_tryCatch->StackTrace(context).ToLocalChecked());
     return *msg;
 }
 
 std::string Engine::CatchData::fileName() const{
-    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(m_engine->isolate(), "fileName", v8::String::kInternalizedString);
-    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
-    if ( exceptionObj->Has(fileNameKey) ){
-        v8::String::Utf8Value result(exceptionObj->Get(fileNameKey)->ToString());
+    auto isolate = m_engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(m_engine->isolate(), "fileName", v8::NewStringType::kInternalized).ToLocalChecked();
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject(context).ToLocalChecked();
+    if ( exceptionObj->Has(context, fileNameKey).ToChecked() ){
+        v8::String::Utf8Value result(isolate, exceptionObj->Get(context, fileNameKey).ToLocalChecked());
         return *result;
     } else {
-        v8::String::Utf8Value file(m_tryCatch->Message()->GetScriptResourceName()->ToString());
+        v8::String::Utf8Value file(isolate, m_tryCatch->Message()->GetScriptResourceName()->ToString(context).ToLocalChecked());
         return *file;
     }
 }
 
 int Engine::CatchData::lineNumber() const{
-    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(m_engine->isolate(), "lineNumber", v8::String::kInternalizedString);
-    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject();
-    if ( exceptionObj->Has(lineNumberKey) ){
-        return exceptionObj->Get(lineNumberKey)->Int32Value();
+    auto isolate = m_engine->isolate();
+    auto context = isolate->GetCurrentContext();
+    v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(m_engine->isolate(), "lineNumber", v8::NewStringType::kInternalized).ToLocalChecked();
+    v8::Local<v8::Object> exceptionObj = m_tryCatch->Exception()->ToObject(context).ToLocalChecked();
+    if ( exceptionObj->Has(context, lineNumberKey).ToChecked() ){
+        return exceptionObj->Get(context, lineNumberKey).ToLocalChecked()->ToInteger(context).ToLocalChecked()->Value();
     }
 
-    return m_tryCatch->Message()->GetLineNumber();
+    return m_tryCatch->Message()->GetLineNumber(context).ToChecked();
 }
 
 Element *Engine::CatchData::object() const{
+    auto isolate = m_engine->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::Object> o = v8::Local<v8::Object>::Cast(m_tryCatch->Exception());
-    v8::Local<v8::String> oKey = v8::String::NewFromUtf8(m_engine->isolate(), "object", v8::String::kInternalizedString);
+    v8::Local<v8::String> oKey = v8::String::NewFromUtf8(m_engine->isolate(), "object", v8::NewStringType::kInternalized).ToLocalChecked();
 
-    if ( o->Has(oKey) ){
-        v8::Local<v8::Object> obj = o->Get(oKey)->ToObject();
+    if ( o->Has(context, oKey).ToChecked() ){
+        v8::Local<v8::Object> obj = o->Get(context, oKey).ToLocalChecked()->ToObject(context).ToLocalChecked();
         if ( obj->InternalFieldCount() == 1 ){
             v8::Local<v8::External> wrap = v8::Local<v8::External>::Cast(obj->GetInternalField(0));
             void* ptr = wrap->Value();
