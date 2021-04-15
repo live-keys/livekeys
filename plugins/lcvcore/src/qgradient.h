@@ -5,6 +5,7 @@
 #include <QPointF>
 #include <QColor>
 #include <QVector3D>
+#include <QJSValue>
 
 class QWritableMat;
 
@@ -19,20 +20,16 @@ signals:
 
 public slots:
 
-    void draw(QWritableMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2);
-
+    void draw(QWritableMat* result, QPointF p1, QPointF p2, QJSValue list);
 private:
     const double Gamma = 0.43;
 
-    QPointF start, end;
     qreal A, B, C;
     qreal radius;
-    QColor startColor, endColor;
-    QVector3D linearSC, linearEC;
-    qreal brightness1, brightness2;
     qreal correctiveSign;
+    std::vector<std::pair<double, QColor>> colorList;
 
-    void calculateLineParams();
+    void calculateLineParams(QPointF start, QPointF end);
     qreal calculateSignedDistance(QPointF p);
     qreal linearFromComponent(qreal x);
     qreal componentFromLinear(qreal x);
