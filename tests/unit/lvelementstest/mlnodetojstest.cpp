@@ -63,12 +63,12 @@ void MLNodeToJsTest::jsConvertTest(){
         int oaLen = loa.get(engine, "length").toInt32(engine);
         QVERIFY(oaLen == 3);
 
-        QVERIFY(loa.get(0).isInt());
-        QVERIFY(loa.get(0).toInt32(engine) == 100);
-        QVERIFY(loa.get(1).isString());
-        QVERIFY(loa.get(1).toStdString(engine) == "200");
-        QVERIFY(loa.get(2).isBool());
-        QVERIFY(loa.get(2).toBool(engine) == false);
+        QVERIFY(loa.get(engine, 0).isInt());
+        QVERIFY(loa.get(engine, 0).toInt32(engine) == 100);
+        QVERIFY(loa.get(engine, 1).isString());
+        QVERIFY(loa.get(engine, 1).toStdString(engine) == "200");
+        QVERIFY(loa.get(engine, 2).isBool());
+        QVERIFY(loa.get(engine, 2).toBool(engine) == false);
 
         QVERIFY(lo.get(engine, "bool").isBool());
         QVERIFY(lo.get(engine, "bool").toBool(engine) == true);

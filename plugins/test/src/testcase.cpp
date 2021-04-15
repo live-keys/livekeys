@@ -35,7 +35,7 @@ void TestCase::setChildren(ScopedValue children){
     if ( children.isArray() ){
         Object::ArrayAccessor la(engine(), children);
         for ( int i = 0; i < la.length(); ++i ){
-            ScopedValue lval = la.get(i);
+            ScopedValue lval = la.get(engine(), i);
             if ( lval.isElement() ){
                 Element* el = lval.toElement(engine());
                 if (el){

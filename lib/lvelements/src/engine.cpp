@@ -119,7 +119,7 @@ void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8
 
 class Engine::InitializeData{
 public:
-    v8::Platform* platform;
+    std::unique_ptr<v8::Platform> platform;
     bool disposeAtExit;
 };
 
@@ -131,10 +131,10 @@ void Engine::initialize(const std::string &defaultLocation){
         v8::V8::InitializeExternalStartupData(defaultLocation.c_str());
 
         m_initializeData = new Engine::InitializeData;
-        m_initializeData->platform = v8::platform::NewDefaultPlatform().get();
+        m_initializeData->platform = v8::platform::NewDefaultPlatform();
         m_initializeData->disposeAtExit = false;
 
-        v8::V8::InitializePlatform(m_initializeData->platform);
+        v8::V8::InitializePlatform(m_initializeData->platform.get());
         v8::V8::Initialize();
     }
 }

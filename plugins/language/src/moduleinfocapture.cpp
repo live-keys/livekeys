@@ -52,11 +52,11 @@ void ModuleInfoCapture::readModule(){
     ElementsPlugin::Ptr ep = engine()->require(m_current->importUri().data());
     Object epexports = ep->collectExportsObject();
     Object::Accessor lo(epexports);
-    ScopedValue lokeys = lo.ownProperties();
+    ScopedValue lokeys = lo.ownProperties(engine());
     Object::ArrayAccessor lokeysArray(engine(), lokeys);
 
     for ( int i = 0; i < lokeysArray.length(); ++i ){
-        ScopedValue exportValue = lo.get(lokeysArray.get(i));
+        ScopedValue exportValue = lo.get(lokeysArray.get(engine(), i));
         if ( exportValue.isElement() ){
             TypeInfo::Ptr ti = TypeInfo::extract(
                 exportValue.toElement(engine())->typeMetaObject(), m_current->importUri(), true, false

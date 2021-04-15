@@ -52,8 +52,8 @@ void JsTupleTest::propertyAdditionTest(){
             int totalPropertiesChanged = lo.get(engine, "length").toInt32(engine);
             QVERIFY(totalPropertiesChanged == 2);
 
-            QVERIFY(lo.get(0).toStdString(engine) == "p");
-            QVERIFY(lo.get(1).toStdString(engine) == "x");
+            QVERIFY(lo.get(engine, 0).toStdString(engine) == "p");
+            QVERIFY(lo.get(engine, 1).toStdString(engine) == "x");
         });
     }
 

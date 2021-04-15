@@ -2,6 +2,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4100)
+#define V8_COMPRESS_POINTERS
 
 #include "v8.h"
 #include "libplatform/libplatform.h"
