@@ -257,24 +257,21 @@ void LvParseTest::testSimplePropertyAssignment()
 
 void LvParseTest::testScenarioTest(){
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest13.lv");
-//    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest10.lv.js");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest13.lv.js");
 
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
 
-    std::string conversion = parser->toJs(contents, "ParserTest11");
+    std::string conversion = parser->toJs(contents, "ParserTest13");
 
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 
-//    vlog() << conversion;
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
 
-//    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
 
-//    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
-
-//    parser->destroy(conversionAST);
-//    parser->destroy(expectedAST);
-
-    //    QVERIFY(compare.isEqual());
+    QVERIFY(compare.isEqual());
 }
 
 void LvParseTest::nestedLanguageScannerTest(){
@@ -284,6 +281,26 @@ void LvParseTest::nestedLanguageScannerTest(){
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
 
     std::string conversion = parser->toJs(contents, "ParserTest14");
+
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
+}
+
+void LvParseTest::nestedFunctionAssignment()
+{
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/ParserTest15.lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/ParserTest15.lv.js");
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+
+    std::string conversion = parser->toJs(contents, "ParserTest15");
 
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
     el::LanguageParser::AST* expectedAST   = parser->parse(expect);

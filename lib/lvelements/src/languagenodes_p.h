@@ -186,6 +186,8 @@ class VariableDeclarationNode : public BaseNode{
 public:
     VariableDeclarationNode(const TSNode& node) : BaseNode(node, "VariableDeclaration"){}
     virtual std::string toString(int indent = 0) const;
+    virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0);
+
 private:
     std::vector<VariableDeclaratorNode*> m_declarators;
 };
@@ -421,9 +423,10 @@ public:
     BindableExpressionNode(const TSNode& node) : BaseNode(node, "BindableExpression"){}
 };
 
-class StatementBlockNode : public BaseNode{
+class StatementBlockNode : public JsBlockNode{
 public:
-    StatementBlockNode(const TSNode& node) : BaseNode(node, "StatementBlock"){}
+    StatementBlockNode(const TSNode& node) : JsBlockNode(node, "StatementBlock"){}
+    std::vector<IdentifierNode*> m_localVariables;
 };
 
 class MemberExpressionNode : public BaseNode{
