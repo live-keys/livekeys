@@ -149,7 +149,7 @@ WorkspaceControl{
                             for ( var pi = 0; pi < palettes.length; ++pi ){
 
                                 var palette = palettes[pi]
-                                if ( palette.name === 'PathPalette' ){
+                                if ( palette.name === 'FilePathPalette' ){
                                     var coords = palette.item.mapToItem(editor, 0, 0)
                                     var editorCoords = editorPane.mapGlobalPosition()
                                     editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            
@@ -241,7 +241,7 @@ WorkspaceControl{
                             highlight.boxX = coords.x + editorCoords.x + 185
                             highlight.boxY = coords.y + editorCoords.y + 70
                             highlight.box.width = 40
-                            highlight.box.height = 120
+                            highlight.box.height = 60
                             highlight.box.border.width = 5
                             highlight.box.border.color = highlight.box.color
                             highlight.box.color = 'transparent'

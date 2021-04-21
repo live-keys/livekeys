@@ -32,7 +32,7 @@ WorkspaceControl{
                                 var palettes = sourceProperty.paletteList()
                                 for ( var pi = 0; pi < palettes.length; ++pi ){
                                     var palette = palettes[pi]
-                                    if ( palette.name === 'PathPalette' ){
+                                    if ( palette.name === 'FilePathPalette' ){
                                         palette.value = project.path('../../../../samples/_images/buildings_0246.jpg')
                                     }
                                 }

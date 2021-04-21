@@ -289,6 +289,13 @@ void    Connector::setSourcePort( qan::PortItem* sourcePort ) noexcept
             setVisible(false);
 
         emit sourcePortChanged();
+    } else if (sourcePort != nullptr && sourcePort->getNode() != nullptr ) {
+        if ( _connectorItem ) {
+            _connectorItem->setParentItem(this);
+            _connectorItem->setState("NORMAL");
+            _connectorItem->setVisible(true);
+        }
+        setVisible(true);
     }
 }
 

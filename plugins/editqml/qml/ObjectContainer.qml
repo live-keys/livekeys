@@ -261,7 +261,7 @@ Item{
             compact = false
             if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
-            // paletteControls.openDefaults(root)
+            paletteControls.openDefaults(root)
 
             var id = editingFragment.objectId()
             var check = (objectContainer.title.indexOf('#') === -1)

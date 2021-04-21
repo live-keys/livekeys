@@ -2799,14 +2799,6 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
             if ( !paletteLoader )
                 return QJSValue();
 
-            // check if duplicate
-            for ( auto it = edit->begin(); it != edit->end(); ++it ){
-                CodePalette* loadedPalette = *it;
-                if ( loadedPalette->path() == PaletteContainer::palettePath(paletteLoader) ){
-                    return m_engine->engine()->newQObject(loadedPalette);
-                }
-            }
-
             if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
                 edit->addPalette(edit->bindingPalette());
                 return m_engine->engine()->newQObject(edit->bindingPalette());

@@ -98,7 +98,7 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 3.8
+          python-version: 3.9
           
       - name: Setup Qt MacOS
         if: runner.os == 'macOS'

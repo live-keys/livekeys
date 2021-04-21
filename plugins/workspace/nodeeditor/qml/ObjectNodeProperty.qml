@@ -50,6 +50,30 @@ Item{
     
     z: -1
 
+    function destroyObjectNodeProperty(){
+        propertyItem.propertyToBeDestroyed(propertyName)
+        var graph = node.graph
+        if (propertyItem.inPort) {
+
+            if (propertyItem.inPort.inEdge)
+                graph.removeEdge(propertyItem.inPort.inEdge)
+
+            graph.removePort(node, propertyItem.inPort)
+        }
+        if (propertyItem.outPort) {
+            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+            graph.removePort(node, propertyItem.outPort)
+        }
+
+        var children = propertyItem.paletteContainer.children
+        for (var idx = 0; idx < children.length; ++idx)
+            children[idx].destroy()
+
+        propertyItem.destroy()
+    }
+
     Rectangle {
         id: propertyTitle
         radius: propertyItem.style.radius
@@ -123,22 +147,7 @@ Item{
                     documentHandler.codeHandler.removeConnection(editingFragment)
                     if (editingFragment.refCount > 0)
                     {
-                        propertyItem.propertyToBeDestroyed(propertyName)
-                        var graph = node.graph
-                        if (propertyItem.inPort) {
-
-                            if (propertyItem.inPort.inEdge)
-                                graph.removeEdge(propertyItem.inPort.inEdge)
-
-                            graph.removePort(node, propertyItem.inPort)
-                        }
-                        if (propertyItem.outPort) {
-                            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
-                                graph.removeEdge(propertyItem.outPort.outEdges[i])
-
-                            graph.removePort(node, propertyItem.outPort)
-                        }
-                        propertyItem.destroy()
+                        destroyObjectNodeProperty()
                     }
                 }
             }
@@ -156,7 +165,8 @@ Item{
                     max = children[i].width + 10
             }
             propertyItem.contentWidth = max + propertyItem.anchors.leftMargin
-            node.item.resizeNode()
+            if (node)
+                node.item.resizeNode()
         }
         onChildrenChanged: {
             updateContentWidth()
@@ -168,22 +178,7 @@ Item{
     Connections {
         target: editingFragment
         function onAboutToBeRemoved(){
-            propertyItem.propertyToBeDestroyed(propertyName)
-            var graph = node.graph
-            if (propertyItem.inPort) {
-
-                if (propertyItem.inPort.inEdge)
-                    graph.removeEdge(propertyItem.inPort.inEdge)
-
-                graph.removePort(node, propertyItem.inPort)
-            }
-            if (propertyItem.outPort) {
-                for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
-                    graph.removeEdge(propertyItem.outPort.outEdges[i])
-
-                graph.removePort(node, propertyItem.outPort)
-            }
-            propertyItem.destroy()
+            destroyObjectNodeProperty()
         }
         ignoreUnknownSignals: true
     }
