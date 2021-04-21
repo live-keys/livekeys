@@ -1,0 +1,9 @@
+{
+    "layout" : [
+        "v",[
+            "h",
+            {"size":[300,250],"type":"documentation", "state" : {"document" : "linkingexecutables.doc.html"}},
+            {"size":[250,250],"type":"viewer"}
+        ]
+    ]
+}

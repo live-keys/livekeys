@@ -19,7 +19,9 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
+import workspace 1.0 as Workspace
 import base 1.0
+import fs 1.0 as Fs
 
 Pane{
     id : root
@@ -34,6 +36,7 @@ Pane{
 
     property alias editor: editor
     property alias document: editor.document
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     property var document: null
     onDocumentChanged: {
@@ -45,26 +48,43 @@ Pane{
     property alias loading: loadingAnimation.visible
     property var panes: null
 
-    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.numberOfConnections !== 0)
+    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.editContainer.editCount !== 0)
+
+    onCodeOnlyChanged: {
+        if (codeOnly){
+            editor.addRootButton.visible = false
+        }
+    }
 
     paneType: 'editor'
     paneState : { return {} }
     paneInitialize : function(s){
         if ( s.document ){
             if (typeof s.document === 'string' || s.document instanceof String){
-                var d = project.documentModel.documentByPathHash(s.document)
-                document = d
+                if ( s.document.startsWith('%project%') ){
+                    var documentPath = s.document.replace('%project%', project.dir())
+                    var d = project.openTextFile(documentPath)
+                    if ( d )
+                        document = d
+                } else {
+                    var d = project.documentModel.documentByPathHash(s.document)
+                    document = d
+                }
             } else {
                 document = s.document
             }
         }
     }
 
+    paneCleared: function(){
+        root.destroy()
+    }
+
     paneHelp : function(){
         if ( documentHandler && documentHandler.has(DocumentHandler.LanguageHelp) ){
             var helpPath = ''
-            if ( documentHandler.completionModel.isEnabled ){
-                helpPath = qmlSuggestionBox.getDocumentation()
+            if ( documentHandler.completionModel.isEnabled && editor.qmlSuggestionBox){
+                helpPath = editor.qmlSuggestionBox.getDocumentation()
             } else {
                 helpPath = documentHandler.codeHandler.help(textEdit.cursorPosition)
             }
@@ -101,8 +121,8 @@ Pane{
     property Theme currentTheme : lk.layers.workspace.themes.current
 
     property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
-    property color lineSurfaceColor: topColor
-    property color lineInfoColor:  currentTheme ? currentTheme.paneTopBackgroundAlternate : 'black'
+    property color lineSurfaceColor: currentTheme ? currentTheme.panebackgroundOverlay : 'black'
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopbackgroundOverlay : 'black'
     property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     color : lk.layers.workspace.themes.current.paneBackground
@@ -184,10 +204,6 @@ Pane{
         height: 30
 
         color : root.topColor
-        gradient: Gradient{
-            GradientStop { position: 0.0;  color: "#030d16" }
-            GradientStop { position: 0.10; color: root.topColor }
-        }
 
         PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
@@ -221,6 +237,8 @@ Pane{
             font.family: "Open Sans, sans-serif"
             font.pixelSize: 12
             font.weight: Font.Normal
+            elide: Text.ElideRight
+            width: Math.max(20, parent.width - 200)
         }
 
         Rectangle{
@@ -245,43 +263,40 @@ Pane{
             }
         }
 
-        Rectangle{
+        Workspace.Button{
+            id: shapeAllButton
             anchors.right: parent.right
             anchors.rightMargin: 110
             width: 30
             height: parent.height
-            color: root.optionsColor
+            content: codeOnly ? root.currentTheme.buttons.editorShape : root.currentTheme.buttons.editorCode
+            onClicked: {
+                lk.layers.workspace.panes.activePane = root
 
-            Image{
-                id : codeDesignToggle
-                anchors.centerIn: parent
-                source : "qrc:/images/switch-to-" + (codeOnly? "design": "source") + ".png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: {
-
-                    lk.layers.workspace.panes.activePane = root
-
-                    if (!codeOnly)
+                if (!codeOnly)
+                {
+                    if (documentHandler.codeHandler)
                     {
-                        if (documentHandler.codeHandler)
-                        {
-                            // unfortunate naming, but this actually disables loading
-                            if (loading)
-                                lk.layers.workspace.commands.execute("editqml.shape_all")
-                            documentHandler.codeHandler.removeAllEditingFragments()
-                            editor.importsShaped = false
-                            editor.rootShaped = false
+                        // unfortunate naming, but this actually disables loading
+                        if (loading)
+                            lk.layers.workspace.commands.execute("editqml.shape_all")
+
+                        if (editor.rootShaped){
+                            root.paneState.layout = paletteControls.convertStateIntoInstructions()
+                        } else {
+                            root.paneState.layout = null
                         }
-                        // close all fragments
-                    } else {
-                        lk.layers.workspace.commands.execute("editqml.shape_all")
-                        // shape all
+                        documentHandler.codeHandler.editContainer.clearAllFragments()
+                        editor.importsShaped = false
+                        editor.rootShaped = false
                     }
-
-
+                } else {
+                    if (root.paneState.layout){
+                        lk.layers.workspace.extensions.editqml.shapeLayout(root, root.paneState.layout)
+                    } else {
+                        // shape all
+                        lk.layers.workspace.extensions.editqml.shapeAllInEditor(root)
+                    }
                 }
             }
         }
@@ -357,133 +372,147 @@ Pane{
         }
     }
 
-    Rectangle {
+    Workspace.PaneMenu{
         id: editorAddRemoveMenu
         visible: false
         anchors.right: root.right
         anchors.topMargin: 30
         anchors.top: root.top
-        property int buttonHeight: 30
-        property int buttonWidth: 180
-        opacity: visible ? 1.0 : 0
-        z: 1000
 
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+        property bool supportsShaping: false
 
+        style: root.currentTheme.popupMenuStyle
 
-        Rectangle{
-            id: addEditorButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: addEditorText
-                text: qsTr("Split horizontally")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: addEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : addEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
-                }
+        Workspace.PaneMenuItem{
+            text: qsTr('Split Horizontally')
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
             }
         }
-
-        Rectangle{
-            id: addVerticalEditorButton
-            anchors.top: addEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: addVerticalEditorText
-                text: qsTr("Split vertically")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: addVerticalEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : addVerticalEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
-                }
+        Workspace.PaneMenuItem{
+            text: qsTr('Split Vertically')
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                var clone = root.paneClone()
+                var index = root.parentSplitterIndex()
+                root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
             }
         }
-
-        Rectangle{
-            id: newWindowEditorButton
-            anchors.top: addVerticalEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: newWindowEditorText
-                text: qsTr("Move to new window")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : newWindowEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    root.panes.movePaneToNewWindow(root)
-                }
+        Workspace.PaneMenuItem{
+            text: qsTr("Move to New Window")
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                root.panes.movePaneToNewWindow(root)
             }
         }
-
-        Rectangle{
-            id: removeEditorButton
-            anchors.top: newWindowEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: removeEditorText
-                text: qsTr("Remove Pane")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: removeEditorArea.containsMouse ? "#969aa1" : "#808691"
+        Workspace.PaneMenuItem{
+            text: qsTr("Remove Pane")
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                root.panes.clearPane(root)
             }
-            MouseArea{
-                id : removeEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    editorAddRemoveMenu.visible = false
-                    root.panes.clearPane(root)
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Save Layout")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+
+                var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                if ( !layout ){
+                    lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
+                    return
                 }
+
+                var editorFile = editor.document.file.path
+                var layoutFile = editorFile + 'a'
+                editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+
+                var layoutObj = {
+                    file: editorFile,
+                    layout: layout
+                }
+
+                var jsonStr = JSON.stringify(layoutObj)
+                var file = Fs.File.open(layoutFile, Fs.File.WriteOnly)
+                if ( file === null ){
+                    lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + layoutFile, 100)
+                    return
+                }
+
+                file.writeString(jsonStr)
+                file.close()
+            }
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Save Layout As...")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                lk.layers.window.dialogs.saveFile({filters: ["Layout files (*.qmla)"]}, function(url){
+                    var layoutFile = Fs.UrlInfo.toLocalFile(url)
+                    var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                    if ( !layout ){
+                        lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
+                        return
+                    }
+
+                    var editorFile = editor.document.file.path
+                    var relativeLayoutFile = Fs.Path.relativePath(project.dir(), layoutFile)
+                    if ( relativeLayoutFile !== layoutFile ){ // layout file is in project path
+                        editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+                    }
+
+                    var layoutObj = {
+                        file: editorFile,
+                        layout: layout
+                    }
+
+                    var jsonStr = JSON.stringify(layoutObj)
+                    var file = Fs.File.open(layoutFile, Fs.File.WriteOnly)
+                    if ( file === null ){
+                        lk.layers.workspace.messages.pushWarning("Failed to open file for writing: " + layoutFile, 100)
+                        return
+                    }
+
+                    file.writeString(jsonStr)
+                    file.close()
+                })
+            }
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Open Layout")
+            visible: editorAddRemoveMenu.supportsShaping
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                lk.layers.window.dialogs.openFile({filters: ["Layout files (*.qmla)"]}, function(url){
+                    var layoutFile = Fs.UrlInfo.toLocalFile(url)
+                    var file = Fs.File.open(layoutFile, Fs.File.ReadOnly)
+                    var contents = file.readAll()
+                    var contentsStr = contents.toString()
+
+                    var layoutObj = JSON.parse(contentsStr)
+                    //TODO: Check if parse goes wrong
+
+                    var editorFile = layoutObj.file
+                    if ( Fs.Path.isRelative(editorFile ) )
+                        editorFile = project.path(editorFile)
+
+                    var layout = layoutObj.layout
+
+                    if ( editorFile !== editor.document.file.path ){
+                        lk.layers.workspace.messages.pushWarning("Layout file is not compatible with the file in the editor.", 100)
+                        return
+                    }
+
+                    var codeHandler = editor.documentHandler.codeHandler
+                    var rootPosition = codeHandler.findRootPosition()
+
+                    lk.layers.workspace.extensions.editqml.shapeLayout(root, layout)
+                })
             }
         }
     }
@@ -494,6 +523,15 @@ Pane{
         anchors.topMargin: 30
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
+        lineSurfaceVisible: !(editor.importsShaped && editor.rootShaped)
+
+        onDocumentChanged: {
+            editorAddRemoveMenu.supportsShaping = documentHandler.has(DocumentHandler.LanguageLayout)
+        }
+    }
+
+    Component.onCompleted:{
+        editor.addRootButton.style = root.currentTheme.formButtonStyle
     }
 
 }

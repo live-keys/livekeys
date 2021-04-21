@@ -1,4 +1,6 @@
 HEADERS += \
+    $$PWD/cvextras.h \
+    $$PWD/imagesegment.h \
     $$PWD/qabsdiff.h \
     $$PWD/qalphamerge.h \
     $$PWD/qcamcapture.h \
@@ -10,10 +12,10 @@ HEADERS += \
     $$PWD/qmatbuffer.h \
     $$PWD/qmatread.h \
     $$PWD/qmatroi.h \
+    $$PWD/qumat.h \
     $$PWD/qvideocapture.h \
     $$PWD/qvideocapturethread.h \
     $$PWD/qmatview.h \
-    $$PWD/qimwrite.h \
     $$PWD/qvideowriter.h \
     $$PWD/qvideowriterthread.h \
     $$PWD/qmat.h \
@@ -35,10 +37,14 @@ HEADERS += \
     $$PWD/qmatio.h \
     $$PWD/qvideodecoder.h \
     $$PWD/qvideodecodethread.h \
+    $$PWD/scriptvideosegment.h \
     $$PWD/videosegment.h \
-    $$PWD/videosurface.h
+    $$PWD/videosurface.h \
+    $$PWD/videotrack.h
 
 SOURCES += \
+    $$PWD/cvextras.cpp \
+    $$PWD/imagesegment.cpp \
     $$PWD/lcvcore_plugin.cpp \
     $$PWD/qabsdiff.cpp \
     $$PWD/qalphamerge.cpp \
@@ -51,10 +57,10 @@ SOURCES += \
     $$PWD/qmatbuffer.cpp \
     $$PWD/qmatread.cpp \
     $$PWD/qmatroi.cpp \
+    $$PWD/qumat.cpp \
     $$PWD/qvideocapture.cpp \
     $$PWD/qvideocapturethread.cpp \
     $$PWD/qmatview.cpp \
-    $$PWD/qimwrite.cpp \
     $$PWD/qvideowriter.cpp \
     $$PWD/qvideowriterthread.cpp \
     $$PWD/qmat.cpp \
@@ -73,6 +79,8 @@ SOURCES += \
     $$PWD/qmatio.cpp \
     $$PWD/qvideodecoder.cpp \
     $$PWD/qvideodecodethread.cpp \
+    $$PWD/scriptvideosegment.cpp \
     $$PWD/videosegment.cpp \
-    $$PWD/videosurface.cpp
+    $$PWD/videosurface.cpp \
+    $$PWD/videotrack.cpp
 

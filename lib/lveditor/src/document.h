@@ -21,6 +21,19 @@ class LV_EDITOR_EXPORT Document : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
+    class LV_EDITOR_EXPORT Location{
+    public:
+        Location(int line = -1, int column = 0) : m_line(line), m_column(column){}
+
+        bool isValid() const{ return m_line >= 0; }
+        int line() const{ return m_line; }
+        int column() const{ return m_column; }
+    private:
+        int m_line;
+        int m_column;
+    };
+
+public:
     /** Enum containing possible modes of opening documents */
     enum OpenMode{
         /** The file open in the editor */

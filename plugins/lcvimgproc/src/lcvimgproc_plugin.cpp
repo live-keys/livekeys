@@ -25,20 +25,18 @@
 #include "qsobel.h"
 #include "qcvtcolor.h"
 #include "qfilter2d.h"
-#include "qthreshold.h"
 #include "qchannelselect.h"
 #include "qstructuringelement.h"
-#include "qmatresize.h"
 #include "qdilate.h"
 #include "qerode.h"
 #include "qcopymakeborder.h"
 #include "qdraw.h"
-#include "qgetperspectivetransform.h"
-#include "qwarpperspective.h"
 #include "qcachedwarpperspective.h"
 #include "qgeometry.h"
 #include "qshapedescriptors.h"
-
+#include "qtransformimage.h"
+#include "qtransformations.h"
+#include "qcascadeclassifier.h"
 #include <QQmlEngine>
 
 
@@ -53,6 +51,10 @@ static QObject* shapeDescriptorsProvider(QQmlEngine *engine, QJSEngine *){
     return new QShapeDescriptors(engine);
 }
 
+static QObject* transformationsProvider(QQmlEngine *engine, QJSEngine *){
+    return new QTransformations(engine);
+}
+
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
     qmlRegisterType<QBlur>(                   uri, 1, 0, "Blur");
@@ -62,22 +64,21 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QHoughLinesP>(            uri, 1, 0, "HoughLinesP");
     qmlRegisterType<QSobel>(                  uri, 1, 0, "Sobel");
     qmlRegisterType<QCvtColor>(               uri, 1, 0, "CvtColor");
-    qmlRegisterType<QThreshold>(              uri, 1, 0, "Threshold");
     qmlRegisterType<QChannelSelect>(          uri, 1, 0, "ChannelSelect");
     qmlRegisterType<QStructuringElement>(     uri, 1, 0, "StructuringElement");
-    qmlRegisterType<QMatResize>(              uri, 1, 0, "Resize");
     qmlRegisterType<QFilter2D>(               uri, 1, 0, "Filter2D");
     qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
     qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");
     qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
-    qmlRegisterType<QGetPerspectiveTransform>(uri, 1, 0, "GetPerspectiveTransform");
-    qmlRegisterType<QWarpPerspective>(        uri, 1, 0, "WarpPerspective");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
+    qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");
+    qmlRegisterType<QCascadeClassifier>(      uri, 1, 0, "CascadeClassifier");
 
     qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
     qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);
     qmlRegisterSingletonType<QShapeDescriptors>( uri, 1, 0, "ShapeDescriptors",
                                                  &shapeDescriptorsProvider);
+    qmlRegisterSingletonType<QTransformations>(uri, 1, 0, "Transformations", &transformationsProvider);
 }
 
 

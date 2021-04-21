@@ -64,7 +64,7 @@ void QCalibrateRobertson::filter(){
                 for (int i = 0; i < list->itemCount(); ++i){
                     QMat* m = qobject_cast<QMat*>(list->itemAt(i));
                     if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->data());
+                    result.push_back(m->internal());
                 }
                 return result;
             };
@@ -73,7 +73,7 @@ void QCalibrateRobertson::filter(){
             for ( int i = 0; i < m_times.size(); ++i )
                 times.push_back(m_times[i]);
 
-            m_calibrateRobertson->process(asVector(m_input), *m_output->cvMat(), times);
+            m_calibrateRobertson->process(asVector(m_input), *m_output->internalPtr(), times);
         } catch ( cv::Exception& e ){
             lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
             lv::ViewContext::instance().engine()->throwError(&lve, this);

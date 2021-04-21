@@ -21,6 +21,8 @@ void QmlStream::push(QObject *object){
         m_callbackForward.call(QJSValueList() << m_engine->newQObject(object));
     } else if ( m_objectForward.isWritable() ){
         m_objectForward.write(QVariant::fromValue(object));
+    } else if ( m_object ){
+        m_functionForward(m_object, m_engine->newQObject(object));
     }
 }
 

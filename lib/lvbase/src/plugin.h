@@ -44,7 +44,7 @@ public:
     const std::list<std::string>& dependencies() const;
     const std::list<std::string>& modules() const;
     const std::list<std::string>& libraryModules() const;
-    const std::map<std::string, std::string>& palettes() const;
+    const std::list<std::pair<std::string, std::string> >& palettes() const;
 
     void assignContext(PackageGraph* graph);
     Context* context();

@@ -2,6 +2,7 @@ import QtQuick 2.0
 import timeline 1.0
 import lcvcore 1.0
 import live 1.0
+import workspace 1.0 as Workspace
 
 Rectangle{
     width: 300
@@ -12,12 +13,10 @@ Rectangle{
     signal cancelled()
 
     property Component segmentFactory : VideoSegment{
-
     }
 
     function createSegment(options, track){
         return segmentFactory.createObject()
-        //TODO: Add serialization options
     }
 
     Text{
@@ -32,7 +31,7 @@ Rectangle{
         color: "#afafaf"
     }
 
-    PathInputBox{
+    Workspace.PathInputBox{
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.top: parent.top

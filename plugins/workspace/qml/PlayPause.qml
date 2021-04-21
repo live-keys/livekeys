@@ -1,5 +1,6 @@
 import QtQuick 2.3
 import live 1.0
+import visual.shapes 1.0
 
 Item{
     id : root
@@ -28,6 +29,7 @@ Item{
         color : root.color
         font.pixelSize: root.height
         font.bold: true
+        font.letterSpacing: -1
         visible: root.isRunning
     }
 

@@ -4,8 +4,10 @@
 #include <QObject>
 #include <QMatrix4x4>
 #include "qmat.h"
+#include "qumat.h"
 #include "qwritablemat.h"
 #include "live/qmlobjectlist.h"
+#include "live/viewengine.h"
 
 /// \private
 class QMatOp : public QObject{
@@ -41,14 +43,20 @@ public slots:
     QWritableMat* createWritableFill(const QSize& size, int type, int channels, const QColor& color);
     QWritableMat* createWritableFromMat(QMat* m);
 
+    QUMat* toUMat(QMat* m);
+
     void fill(QMat* m, const QColor& color);
     void fillWithMask(QMat* m, const QColor& color, QMat* mask);
 
     QMat* reloc(QMat* m);
-
     QMat* crop(QMat* m, const QRect& region);
-
     QMat* flip(QMat* m, int direction);
+
+    QJSValue split(QMat* m);
+    QMat* merge(const QJSValue& matArray);
+
+    QMat* spreadByLinearInterpolation(QJSValue reference, QJSValue spread);
+    QMat* lut(QMat* m, QMat* lut);
 
     QMatrix4x4 to4x4Matrix(QMat* m);
     QVariantList toArray(QMat* m);
@@ -57,6 +65,9 @@ public slots:
     QMat* bitwiseOr(QMat* arg1, QMat* arg2);
     QMat* bitwiseAnd(QMat* arg1, QMat* arg2);
     QMat* bitwiseNot(QMat* arg);
+
+private:
+    lv::ViewEngine* engine();
 };
 
 inline QMat *QMatOp::nullMat() const{

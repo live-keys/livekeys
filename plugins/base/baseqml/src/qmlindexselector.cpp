@@ -1,4 +1,5 @@
 #include "qmlindexselector.h"
+#include "live/visuallogqt.h"
 
 namespace lv{
 
@@ -6,7 +7,6 @@ QmlIndexSelector::QmlIndexSelector(QObject *parent)
     : QObject(parent)
     , m_index(-1)
 {
-
 }
 
 void QmlIndexSelector::setList(QJSValue list){
@@ -19,7 +19,7 @@ void QmlIndexSelector::setList(QJSValue list){
     }
 }
 
-void lv::QmlIndexSelector::setIndex(int index){
+void QmlIndexSelector::setIndex(int index){
     if (m_index == index)
         return;
 
@@ -30,7 +30,6 @@ void lv::QmlIndexSelector::setIndex(int index){
         m_current = m_list.property(static_cast<unsigned int>(m_index));
         emit currentChanged();
     }
-
 }
 
 }// namespace

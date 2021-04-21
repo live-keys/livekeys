@@ -19,6 +19,8 @@ import QtQuick.Controls 1.4
 import editor.private 1.0
 import base 1.0
 import live 1.0
+import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Rectangle {
     id : container
@@ -26,17 +28,15 @@ Rectangle {
     height: 35
     color: 'transparent'
 
-    property alias modeImage: modeImage
-    property var modeContainer: null
-    property var runnablesMenu : null
-
     property bool isLogWindowDirty: false
+
     property var licenseSettings: lk.settings.file('license')
 
     signal openCommandsMenu()
     signal toggleLogWindow()
     signal openSettings()
     signal openLicense()
+    signal openMessages()
 
     property string newIcon: ""
     property string saveIcon: ""
@@ -48,13 +48,18 @@ Rectangle {
     property string openSettingsIcon: ""
     property string openLicenseIcon: ""
 
+    property int errorContainerState: 0
+
     // New
+
+    property QtObject theme : null
 
     Connections{
         target: lk
-        onLayerReady: {
+        function onLayerReady(layer){
             if (layer && layer.name === 'workspace' ){
                 var theme = layer.themes.current
+                container.theme = theme
                 container.newIcon = theme.topNewIcon
                 container.saveIcon = theme.topSaveIcon
                 container.openFileIcon = theme.topOpenFileIcon
@@ -63,13 +68,27 @@ Rectangle {
                 container.runCommandIcon = theme.topRunCommandIcon
                 container.openSettingsIcon = theme.topOpenSettingsIcon
                 container.openLicenseIcon = theme.topOpenLicenseIcon
-
-                container.modeContainer.liveImage.source = theme.topLiveModeIcon
-                container.modeContainer.onSaveImage.source = theme.topOnSaveModeIcon
-                container.modeContainer.disabledImage.source = theme.topDisabledModeIcon
             }
         }
     }
+
+    MouseArea{
+        id: logoFunction
+        anchors.left: parent.left
+        anchors.leftMargin: 20
+        anchors.top: parent.top
+        width: 30
+        height: parent.height
+        hoverEnabled: true
+        onClicked: {
+            lk.layers.workspace.panes.initializeStartupBox()
+        }
+        Workspace.Tooltip{
+            mouseOver: logoFunction.containsMouse
+            text: "Livekeys: Startup screen"
+        }
+    }
+
 
     Item{
         anchors.left: parent.left
@@ -95,6 +114,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.newProject()
+        }
+        Workspace.Tooltip{
+            mouseOver: newMArea.containsMouse
+            text: "New Project"
         }
     }
 
@@ -129,6 +152,10 @@ Rectangle {
                     fe.saveAs()
             }
         }
+        Workspace.Tooltip{
+            mouseOver: saveMArea.containsMouse
+            text: "Save file as"
+        }
     }
 
     // Open File
@@ -157,6 +184,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.openFileDialog()
+        }
+        Workspace.Tooltip{
+            mouseOver: openMArea.containsMouse
+            text: "Open file"
         }
     }
 
@@ -187,6 +218,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: lk.layers.workspace.project.openProject()
+        }
+        Workspace.Tooltip{
+            mouseOver: openProjectMArea.containsMouse
+            text: "Open project"
         }
     }
 
@@ -230,6 +265,10 @@ Rectangle {
             hoverEnabled: true
             onClicked: container.toggleLogWindow()
         }
+        Workspace.Tooltip{
+            mouseOver: openLogMArea.containsMouse
+            text: "Toggle log pane"
+        }
     }
 
     // Commands
@@ -259,6 +298,10 @@ Rectangle {
             hoverEnabled: true
             onClicked: container.openCommandsMenu()
         }
+        Workspace.Tooltip{
+            mouseOver: commandMArea.containsMouse
+            text: "View commands"
+        }
     }
 
     // Configuration
@@ -287,6 +330,10 @@ Rectangle {
             anchors.fill: parent
             hoverEnabled: true
             onClicked: container.openSettings()
+        }
+        Workspace.Tooltip{
+            mouseOver: openSettingsArea.containsMouse
+            text: "Configuration"
         }
     }
 
@@ -318,153 +365,65 @@ Rectangle {
             hoverEnabled: true
             onClicked: container.openLicense()
         }
+        Workspace.Tooltip{
+            mouseOver: openLicenseArea.containsMouse
+            text: "Package licenses"
+        }
     }
 
+    // Messages
 
-    Rectangle {
-        id: modeWrapper
-        anchors.left: parent.left
-        anchors.leftMargin: 520
-        width: 220
-        height: 30
-        color: 'transparent'
+    Rectangle{
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        color: "transparent"
+        height : messagesArea.containsMouse ? parent.height : parent.height - 5
+        width : 25
+        Icons.WarningIcon{
+            id: warningIcon
+            anchors.centerIn: parent
+            width: 24
+            height: 22
 
-        Item{
-            anchors.left: parent.left
-            anchors.leftMargin: 35
-            height : parent.height
-            Text{
-                color :  "#969aa1"
-                anchors.verticalCenter: parent.verticalCenter
-                font.pixelSize: 12
-                font.family: 'Open Sans, Arial, sans-serif'
-                elide: Text.ElideRight
-                width: 130
-                text : {
-                    if (!project.active)
-                        return "";
+            color: {
+                if ( !container.theme )
+                    return color
+                if ( container.errorContainerState === 1 )
+                    return container.theme.colorScheme.warning
+                if ( container.errorContainerState === 2 )
+                    return container.theme.colorScheme.error
+                return container.theme.colorScheme.topIconColor
+            }
 
-                    return project.active.name
-                }
+            colorAlternate: {
+                if ( !container.theme )
+                    return colorAlternate
+                if ( container.errorContainerState === 1 )
+                    return container.theme.colorScheme.warning
+                if ( container.errorContainerState === 2 )
+                    return container.theme.colorScheme.error
+                return container.theme.colorScheme.topIconColorAlternate
             }
         }
-
-        Triangle{
-            id: compileButtonShape
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            width: compileButton.containsMouse ? 8 : 7
-            height: compileButton.containsMouse ? 13 : 12
-            state : "Released"
-            rotation: Triangle.Right
-
-            Behavior on height{ NumberAnimation{ duration: 100 } }
-            Behavior on width{ NumberAnimation{ duration: 100 } }
-
-            states: [
-                State {
-                    name: "Pressed"
-                    PropertyChanges { target: compileButtonShape; color: "#487db9"}
-                },
-                State {
-                    name: "Released"
-                    PropertyChanges { target: compileButtonShape; color: compileButton.containsMouse ? "#768aca" : "#bcbdc1"}
-                }
-            ]
-            transitions: [
-                Transition {
-                    from: "Pressed"
-                    to: "Released"
-                    ColorAnimation { target: compileButtonShape; duration: 100}
-                },
-                Transition {
-                    from: "Released"
-                    to: "Pressed"
-                    ColorAnimation { target: compileButtonShape; duration: 100}
-                }
-            ]
-        }
-
-        MouseArea{
-            id : compileButton
-            anchors.left: parent.left
-            anchors.leftMargin: 0
-            width: 50
-            height: 30
-            hoverEnabled: true
-            onPressed: compileButtonShape.state = "Pressed"
-            onReleased: compileButtonShape.state = "Released"
-            onClicked: { project.run() }
-        }
-
-        Item{
-            anchors.right: parent.right
-            anchors.rightMargin: 50
-            width: 30
-            height: parent.height
-
-            Image{
-                id: switchRunnableImage
-                anchors.centerIn: parent
-                source : "qrc:/images/switch-file.png"
-            }
-
-            MouseArea{
-                anchors.fill: parent
-                onClicked: container.runnablesMenu.visible = !container.runnablesMenu.visible
-            }
-        }
-
-        Item{
-            width: modeImage.width + modeImage.anchors.rightMargin + 10
-            height: parent.height
-            anchors.right: parent.right
-
-            Item{
-                width: 25
-                height: 25
-                anchors.verticalCenter: parent.verticalCenter
-                anchors.right: parent.right
-                anchors.rightMargin: 20
-
-                Image{
-                    id : modeImage
-                    anchors.centerIn: parent
-                    source: project.runTrigger === Project.RunOnChange
-                        ? modeContainer.liveImage.source
-                        : project.runTrigger === Project.RunOnSave
-                            ? container.modeContainer.onSaveImage.source
-                            : container.modeContainer.disabledImage.source
-                }
-            }
-
-
-            Triangle{
-                anchors.right: parent.right
-                anchors.rightMargin: 7
-                anchors.verticalCenter: parent.verticalCenter
-                width: 9
-                height: 5
-                color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
-                rotation: Triangle.Bottom
-            }
-
-            MouseArea{
-                id : openStatesDropdown
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: modeContainer.visible = !modeContainer.visible
-            }
-        }
-
-
         Rectangle{
-            width: parent.width
-            height: 1
-            color: "#1a1f25"
+            color : "#031626"
+            width : parent.width
+            height : 3
             anchors.bottom: parent.bottom
+            anchors.left: parent.left
+            visible : messagesArea.containsMouse
         }
-
+        Behavior on height{ NumberAnimation{  duration: 100 } }
+        MouseArea{
+            id : messagesArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: container.openMessages()
+        }
+        Workspace.Tooltip{
+            x: -70
+            mouseOver: messagesArea.containsMouse
+            text: "Show messages"
+        }
     }
 }

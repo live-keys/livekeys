@@ -80,16 +80,18 @@ void CommandsModel::updateAvailableCommands()
         m_commandEntries[commandId] = CommandEntry(commandId, it.value()->description);
     }
 
-    for (auto it = m_keymap->commandMap().begin(); it != m_keymap->commandMap().end(); ++it)
-    {
+    for (auto it = m_keymap->commandMap().begin(); it != m_keymap->commandMap().end(); ++it){
         auto key = it.key();
-        QString command = it.value().command;
-        CommandEntry& entry = m_commandEntries[command];
-        if (entry.m_shortcuts != "")
-        {
-            entry.m_shortcuts += ", ";
+
+        const QList<KeyMap::StoredCommand> l = it.value();
+        for( auto storedCommand : l ){
+            QString command = storedCommand.command;
+            CommandEntry& entry = m_commandEntries[command];
+            if (entry.m_shortcuts != ""){
+                entry.m_shortcuts += ", ";
+            }
+            entry.m_shortcuts += m_keymap->getKeyCodeDescription(key);
         }
-        entry.m_shortcuts += m_keymap->getKeyCodeDescription(key);
     }
     updateFilter();
 }

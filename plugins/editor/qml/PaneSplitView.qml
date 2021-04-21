@@ -5,10 +5,13 @@ import editor 1.0
 SplitView{
     id: splitRoot
     orientation: Qt.Horizontal
+
+    property color handleColor: '#081019'
+
     handleDelegate: Rectangle{
         implicitWidth: 1
         implicitHeight: 1
-        color: "#081019"
+        color: splitRoot.handleColor
     }
     objectName: "splitview"
 
@@ -37,11 +40,242 @@ SplitView{
         return parentSplitter.splitterHierarchyPositioning().concat([currentIndex])
     }
 
+    property var mapGlobalPosition: function(){
+        if ( parentSplitter ){
+            var parentPoint = parentSplitter.mapGlobalPosition()
+            return Qt.point(parentPoint.x + x, parentPoint.y + y)
+        }
+        return Qt.point(x, y)
+    }
+
     property var createNewSplitter : function(){}
 
     property var panes : []
     property var paneSizes : []
     property var paneCleared : function(){}
+
+    onResizingChanged: {
+        if ( !resizing )
+            __updatePaneSizes()
+    }
+
+    onWidthChanged: {
+        if ( panes.length === 0 || !parent )
+            return
+
+        if ( orientation === Qt.Vertical )
+            return
+
+        var totalSize = 0
+        for ( var i = 0; i < panes.length; ++i ){
+            totalSize += paneSizes[i]
+        }
+
+        if ( totalSize === 0 )
+            return
+
+        for ( var j = 0; j < panes.length; ++j ){
+            var paneSizeRatio = paneSizes[j] / totalSize
+            var pane = panes[j]
+
+            var newPaneSize = paneSizeRatio * width
+            paneSizes[j] = newPaneSize
+            pane.width = newPaneSize
+
+//            if ( pane.width < pane.paneMinimumWidth ){
+//                paneSizes[j] = pane.paneMinimumWidth
+//                pane.width = pane.paneMinimumWidth
+//            }
+        }
+
+
+        var totalSize = 0
+        for ( var i = 0; i < panes.length; ++i ){
+            totalSize += paneSizes[i]
+        }
+
+        // remove panes that don't fit
+
+        var downJ = panes.length - 1
+        while ( downJ > -1 ){
+            if ( panes[downJ].x + panes[downJ].width > splitRoot.width ){
+                splitRoot.removeAt(downJ)
+            } else {
+                return
+            }
+            downJ--
+        }
+    }
+
+    onHeightChanged: {
+        if ( panes.length === 0 || !parent )
+            return
+
+        if ( orientation === Qt.Horizontal )
+            return
+
+        var totalSize = 0
+        for ( var i = 0; i < panes.length; ++i ){
+            totalSize += paneSizes[i]
+        }
+
+        if ( totalSize === 0 )
+            return
+
+        for ( var j = 0; j < panes.length; ++j ){
+            var paneSizeRatio = paneSizes[j] / totalSize
+            var pane = panes[j]
+
+            var newPaneSize = paneSizeRatio * height
+            paneSizes[j] = newPaneSize
+            pane.height = newPaneSize
+
+//            if ( pane.height < pane.paneMinimumHeight ){
+//                paneSizes[j] = pane.paneMinimumHeight
+//                pane.height = pane.paneMinimumHeight
+//            }
+        }
+
+        var totalSize = 0
+        for ( var i = 0; i < panes.length; ++i ){
+            totalSize += paneSizes[i]
+        }
+
+        // remove panes that don't fit
+
+        var downJ = panes.length - 1
+        while ( downJ > -1 ){
+            if ( panes[downJ].y + panes[downJ].height > splitRoot.height ){
+                splitRoot.removeAt(downJ)
+            } else {
+                return
+            }
+            downJ--
+        }
+
+    }
+
+    function resizePane(pane, newSize){
+        if ( panes.length === 0 )
+            return
+
+        var totalSize = 0
+        for ( var i = 0; i < panes.length; ++i ){
+            totalSize += paneSizes[i]
+        }
+
+        for ( var i = 0; i < panes.length; ++i ){
+            if ( panes[i] === pane ){
+
+                var newTotalSize = totalSize - paneSizes[i] + newSize
+
+                if ( splitRoot.orientation === Qt.Vertical ){
+
+
+                    if ( newTotalSize > totalSize ){
+                        var newSizeDiff = newSize - totalSize
+
+                        panes[i].height = newSize
+                        paneSizes[i] = newSize
+
+                        // resize panes and make sure they exceed the minimum height
+
+                        var downJ = panes.length - 1
+                        while ( downJ > -1 ){
+                            var currentPaneHeight = panes[downJ].height
+                            panes[downJ].height -= newSizeDiff
+                            if ( panes[downJ].height > panes[downJ].paneMinimumHeight ){
+                                paneSizes[downJ] = panes[downJ].height
+                                return
+                            } else {
+                                panes[downJ].height = panes[downJ].paneMinimumHeight
+                                paneSizes[downJ] = panes[downJ].height
+                                newSizeDiff -= (currentPaneHeight - panes[downJ].height)
+                            }
+
+                            downJ--
+                        }
+
+                        if ( newSizeDiff > 0 ){
+
+                            // remove panes that don't fit
+
+                            var downJ = panes.length - 1
+                            while ( downJ > -1 ){
+                                if ( panes[downJ].y + panes[downJ].height > splitRoot.height ){
+                                    splitRoot.removeAt(downJ)
+                                } else {
+                                    return
+                                }
+                                downJ--
+                            }
+                        }
+
+                    } else if ( newTotalSize < totalSize ){
+                        panes[i].height = newSize
+                        paneSizes[i] = newSize
+
+                        panes[panes.length - 1].height += totalSize - newSize
+                        paneSizes[pane.length - 1] = panes[panes.length - 1].height
+                    }
+
+                } else {
+
+                    if ( newTotalSize > totalSize ){
+                        var newSizeDiff = newSize - totalSize
+
+                        panes[i].width = newSize
+                        paneSizes[i] = newSize
+
+                        // resize panes and make sure they exceed the minimum width
+
+                        var downJ = panes.length - 1
+                        while ( downJ > -1 ){
+                            var currentPaneWidth = panes[downJ].width
+                            panes[downJ].width -= newSizeDiff
+                            if ( panes[downJ].width > panes[downJ].paneMinimumWidth ){
+                                paneSizes[downJ] = panes[downJ].width
+                                return
+                            } else {
+                                panes[downJ].width = panes[downJ].paneMinimumWidth
+                                paneSizes[downJ] = panes[downJ].width
+                                newSizeDiff -= (currentPaneWidth - panes[downJ].width)
+                            }
+
+                            downJ--
+                        }
+
+                        // remove panes that don't fit
+
+                        var downJ = panes.length - 1
+                        while ( downJ > -1 ){
+                            if ( panes[downJ].x + panes[downJ].width > splitRoot.width ){
+                                splitRoot.removeAt(downJ)
+                            } else {
+                                return
+                            }
+                            downJ--
+                        }
+
+                    } else if ( newTotalSize < totalSize ){
+                        panes[i].width = newSize
+                        paneSizes[i] = newSize
+
+                        panes[panes.length - 1].width += totalSize - newSize
+                        paneSizes[pane.length - 1] = panes[panes.length - 1].width
+                    }
+                }
+
+                return
+            }
+        }
+    }
+
+    function __updatePaneSizes(){
+        for ( var i = 0; i < panes.length; ++i ){
+            paneSizes[i] = orientation === Qt.Horizontal ? panes[i].width : panes[i].height
+        }
+    }
 
     function __splitPaneForVertical(i, item, positionBefore){
         if ( i === 0 && panes.length === 0 ){
@@ -245,6 +479,18 @@ SplitView{
         return null
     }
 
+    function findPanesByType(paneType){
+        var result = []
+        for ( var j = 0; j < panes.length; ++j ){
+            if ( panes[j].paneType === "splitview" ){
+                result = result.concat(panes[j].findPanesByType(paneType))
+            } else if ( panes[j].paneType === paneType ) {
+                result.push(panes[j])
+            }
+        }
+        return result
+    }
+
     function paneAt(i){
         return panes[i]
     }
@@ -303,14 +549,6 @@ SplitView{
 
         panes = []
         paneSizes = []
-    }
-
-    property var mapGlobalPosition: function(){
-        if ( parentSplitter ){
-            var parentPoint = parentSplitter.mapGlobalPosition()
-            return Qt.point(parentPoint.x + x, parentPoint.y + y)
-        }
-        return Qt.point(x, y)
     }
 
     function createPositioningModel(currentPosition){

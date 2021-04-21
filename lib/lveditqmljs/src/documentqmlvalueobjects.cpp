@@ -17,8 +17,8 @@
 #include "live/documentqmlvalueobjects.h"
 
 #include "qmljs/qmljsdocument.h"
-#include "qmljs/parser/qmljsastvisitor_p.h"
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsastvisitor_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 
 namespace lv{
 
@@ -116,15 +116,15 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
         property->begin       = ast->firstSourceLocation().begin();
         property->propertyEnd = ast->firstSourceLocation().end();
     }
-    if ( ast->initializer )
-        property->valueBegin = ast->initializer->firstSourceLocation().begin();
+    if ( ast->qualifiedTypeNameId )
+        property->valueBegin = ast->qualifiedTypeNameId->firstSourceLocation().begin();
     property->end = ast->lastSourceLocation().end();
     m_lastAppend->appendProperty(property);
 
     DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
     obj->ast   = ast;
-    obj->begin = ast->initializer->firstSourceLocation().begin();
-    obj->identifierEnd = ast->initializer->firstSourceLocation().end();
+    obj->begin = ast->qualifiedTypeNameId->firstSourceLocation().begin();
+    obj->identifierEnd = ast->qualifiedTypeNameId->lastSourceLocation().end();
     obj->end   = ast->initializer->lastSourceLocation().end();
 
     property->child = obj;
@@ -576,7 +576,7 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
  */
 QString DocumentQmlValueObjects::RangeProperty::type() const{
     if ( ast->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
-        return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType.toString();
+        return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType->name.toString();
     }
     return "";
 }

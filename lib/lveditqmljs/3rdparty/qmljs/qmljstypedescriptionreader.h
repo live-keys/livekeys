@@ -32,7 +32,7 @@
 #define QMLJSTYPEDESCRIPTIONREADER_H
 
 #include "qmljs/qmljs_global.h"
-#include <qmljs/parser/qmljsastfwd_p.h>
+#include <qmljs/parser/qqmljsastfwd_p.h>
 
 #include <languageutils/fakemetaobject.h>
 

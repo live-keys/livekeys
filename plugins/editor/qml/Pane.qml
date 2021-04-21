@@ -30,7 +30,6 @@ Rectangle{
         return null
     }
 
-
     property var mapGlobalPosition: function(){
         if ( parentSplitter ){
             var parentPoint = parentSplitter.mapGlobalPosition()
@@ -40,6 +39,9 @@ Rectangle{
     }
 
     property string paneType: ''
+    property int paneMinimumWidth: 100
+    property int paneMinimumHeight: 50
+
     property var paneState : { return {} }
     property var paneInitialize : function(s){}
     property var paneCleared : function(){}

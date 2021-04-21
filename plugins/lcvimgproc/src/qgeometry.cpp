@@ -1,12 +1,21 @@
 #include "qgeometry.h"
 
+#include "live/qmlerror.h"
+#include "live/visuallogqt.h"
+#include "live/exception.h"
+#include "live/viewengine.h"
+#include "qtransformations.h"
+#include "cvextras.h"
+#include "qqmlapplicationengine.h"
+#include "live/viewcontext.h"
+
 QGeometry::QGeometry(QObject *parent)
     : QObject(parent)
 {
 }
 
 QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
-    if ( !input )
+    if ( !input || size.width() == 0)
         return nullptr;
     QMat* m = new QMat;
     cv::resize(input->internal(), m->internal(), cv::Size(size.width(), size.height()), 0, 0, interpolation);
@@ -16,8 +25,16 @@ QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
 QMat *QGeometry::scale(QMat *input, double fx, double fy, int interpolation){
     if ( !input )
         return nullptr;
+    if ( fx <= 0 || fy <= 0 )
+        return nullptr;
+
     QMat* m = new QMat;
-    cv::resize(input->internal(), m->internal(), cv::Size(), fx, fy, interpolation);
+    try {
+        cv::resize(input->internal(), m->internal(), cv::Size(), fx, fy, interpolation);
+    } catch (cv::Exception& e) {
+        qWarning("%s", e.what());
+    }
+
     return m;
 }
 
@@ -39,6 +56,42 @@ QMat *QGeometry::resizeBy(QMat *input, QJSValue ob, int interpolation){
     return nullptr;
 }
 
+QMat *QGeometry::rotate(QMat *m, double degrees){
+    if ( !m )
+        return nullptr;
+
+    QMat* r = new QMat;
+    cv::Point2f ptCp(
+        static_cast<float>(m->internal().cols * 0.5),
+        static_cast<float>(m->internal().rows * 0.5));
+
+    cv::Mat M = cv::getRotationMatrix2D(ptCp, degrees, 1.0);
+    cv::warpAffine(m->internal(), r->internal(), M, m->internal().size(), cv::INTER_CUBIC);
+
+    return r;
+}
+
+QMat *QGeometry::transform(QMat *input, QMat *m){
+    if ( !input || !m )
+        return nullptr;
+
+    QMat* r = new QMat;
+    try {
+        cv::transform(input->internal(), *r->internalPtr(), m->internal());
+    } catch (cv::Exception& e) {
+        THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
+        delete r;
+        return nullptr;
+    }
+
+    return r;
+}
+
+QMat *QGeometry::getPerspectiveTransform(QJSValue src, QJSValue dst)
+{
+    return getPerspectiveTransform(src.toVariant().toList(), dst.toVariant().toList());
+}
+
 /**
  * @brief QGeometry::getPerspectiveTransform
  * @param Four source points (QVariantList with four QPointF's)
@@ -58,9 +111,89 @@ QMat *QGeometry::getPerspectiveTransform(QVariantList src, QVariantList dst)
         dstPts.push_back(cv::Point2f(dst.at(i).toPoint().x(), dst.at(i).toPoint().y()));
     }
 
-    QMat* result = new QMat(new cv::Mat(cv::getPerspectiveTransform(srcPts, dstPts)), this);
+    return getPerspectiveTransform(srcPts, dstPts);
+}
 
-    return result;
+QMat *QGeometry::getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst)
+{
+    return new QMat(new cv::Mat(cv::getPerspectiveTransform(src, dst)), this);
+}
+
+QMat *QGeometry::perspectiveProjection(QMat *input, QMat *background, QJSValue points)
+{
+    if (!background) return nullptr;
+    if (!input) return background;
+    QVariantList dst = points.toVariant().toList();
+    if (dst.empty() || dst.length() != 4) return background;
+
+    try {
+        // repack original points
+        std::vector<cv::Point2f> dstPts;
+        for (int i = 0; i < 4; ++i)
+        {
+            if (dst.at(i).userType() != QVariant::PointF) return background;
+            dstPts.push_back(cv::Point2f(dst.at(i).toPoint().x(), dst.at(i).toPoint().y()));
+        }
+
+        // transform input to shape
+        std::vector<cv::Point2f> srcPts;
+        srcPts.push_back(cv::Point2f(0, 0));
+        srcPts.push_back(cv::Point2f(input->dimensions().width(), 0));
+        srcPts.push_back(cv::Point2f(input->dimensions().width(),input->dimensions().height()));
+        srcPts.push_back(cv::Point2f(0, input->dimensions().height()));
+
+        QMat* transform1 = getPerspectiveTransform(srcPts, dstPts);
+        QMat* transformed = warpPerspective(input, transform1, background->dimensions(), INTER_LINEAR, BORDER_CONSTANT);
+        delete transform1;
+
+        // create mask to shape
+        srcPts.clear();
+        srcPts.push_back(cv::Point2f(0, 0));
+        srcPts.push_back(cv::Point2f(background->dimensions().width(), 0));
+        srcPts.push_back(cv::Point2f(background->dimensions().width(),background->dimensions().height()));
+        srcPts.push_back(cv::Point2f(0, background->dimensions().height()));
+        QMat* transform2 = getPerspectiveTransform(srcPts, dstPts);
+        cv::Mat* m = new cv::Mat(background->dimensions().height(), background->dimensions().width(),
+                                 CV_MAKETYPE(background->depth(), 1));
+        m->setTo(cv::Scalar(255, 255, 255));
+        QMat* white = new QMat(m);
+        QMat* mask = warpPerspective(white, transform2, background->dimensions(), INTER_LINEAR, BORDER_CONSTANT);
+        delete white;
+        delete transform2;
+
+
+        QTransformations t;
+        QMat* result = t.blend(transformed, background, mask);
+        delete transformed;
+        delete mask;
+        return result;
+
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Geometry: ").jsThrow();
+    }
+
+}
+
+QMat *QGeometry::warpPerspective(QMat *input, QMat *transform, QSize size, int flags, int borderMode)
+{
+    QMat* output = new QMat(
+        size.width(),
+        size.height(),
+        static_cast<QMat::Type>(input->internal().type()),
+        input->internal().channels()
+    );
+
+    cv::warpPerspective(
+        input->internal(),
+        output->internal(),
+        transform->internal(),
+        output->internal().size(),
+        flags,
+        borderMode,
+        cv::Scalar()
+    );
+
+    return output;
 }
 
 /**
@@ -83,7 +216,7 @@ QVariantList QGeometry::applyPerspectiveTransform(QVariantList points, QMat *war
 
     warpedPoints.resize(pointsToWarp.size());
 
-    cv::perspectiveTransform(pointsToWarp, warpedPoints, *warp->cvMat());
+    cv::perspectiveTransform(pointsToWarp, warpedPoints, *warp->internalPtr());
 
     QVariantList result;
     for (unsigned i = 0; i < warpedPoints.size(); ++i)
@@ -97,8 +230,8 @@ void QGeometry::warpTriangles(QMat *src, QMat *dst, QVariantList triangles1, QVa
 {
     if (triangles1.size() != triangles2.size()) return;
 
-    cv::Mat& img1 = *src->cvMat();
-    cv::Mat& img2 = *dst->cvMat();
+    cv::Mat& img1 = *src->internalPtr();
+    cv::Mat& img2 = *dst->internalPtr();
 
     img1.convertTo(img1, CV_32F);
     img2.convertTo(img2, CV_32F);

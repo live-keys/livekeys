@@ -38,14 +38,14 @@ Item{
         id: chosenItem
         width: parent.width
         height: root.height
-        radius: height/2
+        radius: height / 2
         color: chosenItemMouse.containsMouse ? root.highlightColor : root.backgroundColor
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 10
             anchors.verticalCenter: parent.verticalCenter
             id: chosenItemText
-            text: root.model ? root.model[0] : ''
+            text: root.model && root.model.length ? root.model[0] : ''
             font.family: "Open Sans, sans-serif"
             font.weight: Font.Light
             font.pixelSize: 12

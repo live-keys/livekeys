@@ -28,7 +28,7 @@ class QDraw : public QObject{
     Q_OBJECT
 
 public:
-    explicit QDraw(QObject *parent = 0);
+    explicit QDraw(QObject *parent = nullptr);
     virtual ~QDraw();
 
 public slots:

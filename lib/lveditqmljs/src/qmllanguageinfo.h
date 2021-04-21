@@ -142,9 +142,9 @@ class LV_EDITQMLJS_EXPORT QmlDocumentReference{
 public:
     bool isValid() const{ return !path.isEmpty(); }
 
-    QMap<QString, QString> watchers;
-    QString                path;
-    QStringList            dependencies;
+    QMap<QString, QString>          watchers;
+    QString                         path;
+    QList<QPair<QString, QString> > dependencies;
 };
 
 // QmlTypeInfo
@@ -180,6 +180,8 @@ public:
     QmlPropertyInfo propertyAt(int index) const;
     QmlPropertyInfo propertyAt(const QString& name) const;
     void appendProperty(const QmlPropertyInfo& prop);
+    void updateProperty(int index, const QmlPropertyInfo& prop);
+
 
     int totalFunctions() const;
     QmlFunctionInfo functionAt(int index) const;
@@ -196,11 +198,13 @@ public:
     bool isDeclaredInQml() const;
     bool isDeclaredInCpp() const;
 
+    const QString& defaultProperty() const;
     bool isSingleton() const;
     bool isComposite() const;
     bool isCreatable() const;
 
     static bool isObject(const QString& declarationType);
+    static bool isQmlBasicType(const QString& declarationType);
     static QmlTypeReference toQmlPrimitive(const QmlTypeReference &cppPrimitive);
     static QString typeDefaultValue(const QString& typeString);
 
@@ -213,6 +217,7 @@ private:
     QmlTypeReference       m_classType;
     QmlTypeReference       m_inherits;
     QmlDocumentReference   m_document;
+    QString                m_defaultProperty;
     bool                   m_isSingleton;
     bool                   m_isCreatable;
     bool                   m_isComposite;
@@ -231,6 +236,7 @@ public:
     void join(const QmlInheritanceInfo& path);
     void append(const QmlTypeInfo::Ptr& tr);
     bool isEmpty() const;
+    QmlPropertyInfo defaultProperty() const;
 
     QmlTypeReference languageType() const;
 public:

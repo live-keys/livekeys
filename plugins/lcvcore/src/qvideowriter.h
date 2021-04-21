@@ -21,57 +21,52 @@
 #include <QQmlParserStatus>
 #include <QJSValue>
 #include "qmat.h"
+#include "live/qmlwritablestream.h"
 
 class QVideoWriterThread;
 /// \private
-class QVideoWriter : public QQuickItem{
+class QVideoWriter : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QMat* input       READ input         WRITE  setInput      NOTIFY inputChanged)
-    Q_PROPERTY(int framesWritten READ framesWritten NOTIFY framesWrittenChanged)
+    Q_PROPERTY(QJSValue options              READ options       WRITE setOptions NOTIFY optionsChanged)
+    Q_PROPERTY(lv::QmlWritableStream* stream READ stream        CONSTANT)
+    Q_PROPERTY(int framesWritten             READ framesWritten NOTIFY framesWrittenChanged)
 
     friend class QVideoWriterThread;
 
 public:
-    explicit QVideoWriter(QQuickItem *parent = 0);
+    explicit QVideoWriter(QObject *parent = 0);
     virtual ~QVideoWriter();
 
-    QMat* input() const;
+    QJSValue options() const;
     int framesWritten() const;
+    lv::QmlWritableStream* stream() const;
 
-    QString getKey(const QString& filename, int fourcc, double fps, const cv::Size frameSize) const;
-
-protected:
-    void componentComplete();
+    static void onInStream(QObject* that, const QJSValue& val);
 
 signals:
-    void inputChanged();
     void framesWrittenChanged();
+    void optionsChanged();
 
 public slots:
-    void staticLoad(const QJSValue& params);
-    void setInput(QMat* input);
     void save();
-
     void write(QMat* image);
+    void setOptions(QJSValue options);
 
 private:
     QVideoWriterThread* createThread(const QString& filename, int fourcc, double fps, const cv::Size frameSize, bool isColor);
 
-    QMat*    m_input;
-    QVideoWriterThread* m_thread;
+    QVideoWriterThread*    m_thread;
+    QJSValue               m_options;
+    lv::QmlWritableStream* m_stream;
 };
 
-inline QMat *QVideoWriter::input() const{
-    return m_input;
+inline QJSValue QVideoWriter::options() const{
+    return m_options;
 }
 
-inline void QVideoWriter::setInput(QMat *input){
-    m_input = input;
-    emit inputChanged();
-    write(input);
+inline lv::QmlWritableStream *QVideoWriter::stream() const{
+    return m_stream;
 }
-
-
 
 #endif // QVIDEOWRITER_H

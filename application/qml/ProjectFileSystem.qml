@@ -21,6 +21,7 @@ import QtQuick.Controls.Styles 1.4
 import base 1.0
 import editor 1.0
 import editor.private 1.0
+import workspace 1.0
 
 Pane{
     id: root
@@ -201,72 +202,27 @@ Pane{
         }
     }
 
-    Rectangle{
+    PaneMenu{
         id: projectMenu
         visible: false
         anchors.right: root.right
         anchors.topMargin: 30
         anchors.top: root.top
-        property int buttonHeight: 30
-        property int buttonWidth: 180
-        opacity: visible ? 1.0 : 0
-        z: 1000
-        color : "#03070b"
 
-        Behavior on opacity{ NumberAnimation{ duration: 200 } }
+        style: root.currentTheme.popupMenuStyle
 
-        Rectangle{
-            id: newWindowEditorButton
-            anchors.top: parent.top
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text {
-                id: newWindowEditorText
-                text: qsTr("Move to new window")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: newWindowEditorArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : newWindowEditorArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    projectMenu.visible = false
-                    root.panes.movePaneToNewWindow(root)
-                }
+        PaneMenuItem{
+            text: qsTr("Move to new window")
+            onClicked: {
+                projectMenu.visible = false
+                root.panes.movePaneToNewWindow(root)
             }
         }
-
-        Rectangle{
-            id: removeProjectViewButton
-            anchors.top: newWindowEditorButton.bottom
-            anchors.right: parent.right
-            width: parent.buttonWidth
-            height: parent.buttonHeight
-            color : "#03070b"
-            Text{
-                text: qsTr("Remove Project View")
-                font.family: "Open Sans, sans-serif"
-                font.pixelSize: 12
-                anchors.left: parent.left
-                anchors.leftMargin: 10
-                anchors.verticalCenter: parent.verticalCenter
-                color: removeProjectViewArea.containsMouse ? "#969aa1" : "#808691"
-            }
-            MouseArea{
-                id : removeProjectViewArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    projectMenu.visible = false
-                    root.panes.removePane(root)
-                }
+        PaneMenuItem{
+            text: qsTr("Remove Project View")
+            onClicked: {
+                projectMenu.visible = false
+                root.panes.removePane(root)
             }
         }
     }
@@ -524,7 +480,7 @@ Pane{
         }
         Connections{
             target: project.fileModel
-            onProjectNodeChanged : {
+            function onProjectNodeChanged(index){
                 view.expand(index)
             }
         }

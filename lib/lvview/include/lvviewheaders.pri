@@ -1,11 +1,12 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/live/componentdeclaration.h \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
     $$PWD/live/metainfo.h \
-    $$PWD/live/qmlact.h \
-    $$PWD/live/qmlstreamfilter.h \
+    $$PWD/live/qmlbuild.h \
+    $$PWD/live/qmlerror.h \
     $$PWD/live/qmlwritablestream.h \
     $$PWD/live/settings.h \
     $$PWD/live/visuallogbasemodel.h \
@@ -19,12 +20,12 @@ HEADERS += \
     $$PWD/live/viewengine.h \
     $$PWD/live/shared.h \
     $$PWD/live/memory.h \
-    $$PWD/live/workerthread.h \
     $$PWD/live/qmlvariantlist.h \
     $$PWD/live/qmlobjectlist.h \
-    $$PWD/live/group.h \
     $$PWD/live/linemessage.h \
     $$PWD/live/linecapture.h \
+    $$PWD/live/qmlworkerpool.h \
+    $$PWD/live/group.h \
     $$PWD/live/layer.h \
     $$PWD/live/windowlayer.h \
     $$PWD/live/qmlpropertywatcher.h \

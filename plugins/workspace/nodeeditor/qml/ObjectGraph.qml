@@ -4,26 +4,111 @@ import QtQuick.Controls.Material 2.1
 import QtQuick.Layouts           1.3
 import live                      1.0
 
+import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
+import editqml 1.0
 
 Rectangle{
     id: root
     
     width: 500
     height: 700
-    color: '#000511'
     clip: true
-    radius: 5
-    border.width: 1
-    border.color: "#333"
+
+    objectName: "objectGraph"
+
+    color: root.style.backgroundColor
+    radius: root.style.radius
+    border.width: root.style.borderWidth
+    border.color: root.isInteractive ? root.style.highlightBorderColor : root.style.borderColor
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property QtObject theme: lk.layers.workspace.themes.current
+
+    property QtObject defaultStyle : QtObject{
+        property color backgroundColor: '#000511'
+        property color backgroundGridColor: '#222'
+
+        property color borderColor: '#333'
+        property color highlightBorderColor: '#555'
+        property double borderWidth: 1
+        property double radius: 5
+
+        property color connectorEdgeColor: '#666'
+        property color connectorColor: '#666'
+
+        property color selectionColor: "#fff"
+        property double selectionWeight: 1
+
+        property QtObject objectNodeStyle : QtObject{
+            property color background: "yellow"
+            property double radius: 15
+            property color borderColor: "#555"
+            property double borderWidth: 1
+
+            property color titleBackground: "#666"
+            property double titleRadius: 5
+            property QtObject titleTextStyle : Workspace.TextStyle{}
+        }
+
+        property QtObject propertyDelegateStyle : QtObject{
+            property color background: "#333"
+            property double radius: 5
+            property QtObject textStyle: Workspace.TextStyle{}
+        }
+    }
+
+    function activateFocus(){
+        if ( activeFocus )
+            return
+
+        if ( lk.layers.workspace ){
+
+            var p = root
+            while ( p && !p.paneType ){
+                p = p.parent
+            }
+
+            if( p ){
+                lk.layers.workspace.panes.activateItem(root, p)
+            } else {
+                root.forceActiveFocus()
+            }
+        } else {
+            root.forceActiveFocus()
+        }
+    }
+
+    function redrawGrid(){
+        graphView.requestUpdateGrid()
+    }
+
+    Keys.onPressed: {
+        if ( lk.layers.workspace ){
+            var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
+            if ( command ){
+                lk.layers.workspace.commands.execute(command)
+            }
+            event.accepted = true
+        }
+    }
+
+    property QtObject style: defaultStyle
+
     
-    property Component resizeConnectionsFactory: Component{
+    property Component propertyDestructorFactory: Component {
         Connections {
+            id: pdf
             target: null
             property var node: null
             ignoreUnknownSignals: true
-            onWidthChanged: {
+            function onPropertyToBeDestroyed(name){
+                node.item.removePropertyName(name)
+                pdf.destroy()
+            }
+            function onWidthChanged(){
                 var maxWidth = 340
+                if (!node || !node.propertyContainer) return
                 for (var i=0; i < node.propertyContainer.children.length; ++i)
                 {
                     var child = node.propertyContainer.children[i]
@@ -31,25 +116,34 @@ Rectangle{
                 }
 
                 if (maxWidth !== node.width)
-                    node.width = maxWidth + 20
-            }
-        }
-    }
-    property Component propertyDestructorFactory: Component {
-        Connections {
-            target: null
-            property var node: null
-            ignoreUnknownSignals: true
-            onPropertyToBeDestroyed: {
-                node.item.removePropertyName(name)
+                    node.width = maxWidth
             }
         }
     }
 
-    property Component addBoxFactory: null
+    onActiveFocusChanged: {
+        checkFocus()
+    }
 
+    function checkFocus(){
+        var interac = false
+        if ( activeFocus ){
+            interac = true
+        }
+        if ( activeItem )
+            interac = true
+
+        isInteractive = interac
+    }
+
+    property var isInteractive: false
     property var connections: []
-    property Component propertyDelegate : ObjectNodeProperty{}
+    property Component propertyDelegate : ObjectNodeProperty{
+        style: root.style.propertyDelegateStyle
+    }
+
+    property Item activeItem: null
+
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
     property var documentHandler: null
@@ -59,18 +153,26 @@ Rectangle{
     property alias zoom: graphView.zoom
     property alias zoomOrigin: graphView.zoomOrigin
 
-    property int inPort: 1
-    property int outPort: 2
-    property int noPort : 0
-    property int inOutPort : 3
+    enum PortMode {
+        None = 0,
+        InPort = 1,
+        OutPort = 2
+    }
     
     property var selectedEdge: null
+    property var numOfSelectedNodes: 0
+    property var paletteListOpened: false
 
     signal userEdgeInserted(QtObject edge)
     signal nodeClicked(QtObject node)
     signal doubleClicked(var pos)
     signal rightClicked(var pos)
     signal edgeClicked(QtObject edge)
+    signal clicked()
+
+    onClicked: {
+        deselectEdge()
+    }
 
 
     onUserEdgeInserted: {
@@ -79,43 +181,56 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-        var name = srcPort.objectProperty.propertyName
+        if (dstPort.inEdge){
+            removeEdge(dstPort.inEdge)
+        }
 
-        if (name.substr(0,2) === "on" && name.substr(name.length-7,7) === "Changed")
+        if (dstPort.objectName === "objectNode"){
+            removeEdge(edge)
+            return
+        }
+
+        var name = ""
+        var value = ""
+        if (!srcPort.objectProperty.propertyName){
+            name = srcPort.objectProperty.id
+            value = name
+        }
+        else {
+            name = srcPort.objectProperty.propertyName
+            value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+        }
+
+        var srcLocation = srcPort.objectProperty.editingFragment.location
+
+        if (srcLocation === QmlEditFragment.Slot)
         {
             // source is event, different direction
             var nodeId = dstPort.objectProperty.node.item.id
-            if (!nodeId) return
-            if (dstPort.objectProperty.editingFragment) return
+
+            if (nodeId === "") return
+            // if (dstPort.objectProperty.editingFragment) return
 
             var funcName = dstPort.objectProperty.propertyName
-            var value = nodeId + "." + funcName + "()"
+            value = nodeId + "." + funcName + "()"
 
-            var result = root.palette.extension.bindExpressionForFragment(
-                srcPort.objectProperty.editingFragment,
-                value
-            )
+            if (!srcPort.objectProperty.editingFragment)
+                return
 
+            var result = srcPort.objectProperty.editingFragment.bindExpression(value)
             if ( result ){
-                root.palette.extension.writeForFragment(
-                    srcPort.objectProperty.editingFragment,
+                srcPort.objectProperty.editingFragment.write(
                     {'__ref': value}
                 )
             }
-
         } else {
-            var value =
-                    srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
-
-            var result = root.palette.extension.bindExpressionForFragment(
-                dstPort.objectProperty.editingFragment,
-                value
-            )
-            if ( result ){
-                root.palette.extension.writeForFragment(
-                    dstPort.objectProperty.editingFragment,
-                    {'__ref': value}
-                )
+            if (dstPort.objectProperty.editingFragment){
+                var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+                if ( result ){
+                    dstPort.objectProperty.editingFragment.write(
+                        {'__ref': value}
+                    )
+                }
             }
         }
 
@@ -124,60 +239,68 @@ Rectangle{
     }
 
     onEdgeClicked: {
-        if (selectedEdge)
-        {
-            selectedEdge.item.color = '#6a6a6a'
+        root.activateFocus()
+        if (selectedEdge){
+            selectedEdge.item.color = '#3f444d'
         }
         selectedEdge = edge
-        edge.item.color = '#ff0000'
+        edge.item.color = '#dbdede'
     }
 
     onNodeClicked: {
+        deselectEdge()
+    }
+
+    function deselectEdge(){
         if (selectedEdge)
-            selectedEdge.item.color = '#6a6a6a'
+            selectedEdge.item.color = '#3f444d'
         selectedEdge = null
     }
 
-    Keys.onDeletePressed: {
-        if (selectedEdge){
-            graph.removeEdge(selectedEdge)
-            selectedEdge = null
-        }
-    }
-
     onDoubleClicked: {
-        var addBoxItem = addBoxFactory.createObject()
+        var addBoxItem = paletteControls.createAddQmlBox(null)
+        if (!addBoxItem) return
         var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
         var addOptions = documentHandler.codeHandler.getAddOptions(position)
 
         addBoxItem.addContainer = addOptions
+        addBoxItem.codeQmlHandler = documentHandler.codeHandler
 
-        addBoxItem.objectsOnly = true
-        addBoxItem.assignFocus()
+        addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var cursorCoords = Qt.point(pos.x, pos.y + 30)
+        var coords = editor.mapGlobalPosition()
+        var cursorCoords = Qt.point(coords.x, coords.y)
         var addBox = lk.layers.editor.environment.createEditorBox(
             addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
         )
 
         addBoxItem.accept = function(type, data){
             var opos = documentHandler.codeHandler.addItem(
-                addBoxItem.addContainer.itemModel.addPosition, addBoxItem.addContainer.objectType, data
+                addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
             )
             documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
             var ef = documentHandler.codeHandler.openNestedConnection(
                 editingFragment, opos
             )
+            cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
             if (ef)
                 editingFragment.signalObjectAdded(ef, cursorCoords)
+            root.activateFocus()
 
+            addBoxItem.destroy()
             addBox.destroy()
         }
 
         addBoxItem.cancel = function(){
+            root.activateFocus()
+
+            addBoxItem.destroy()
             addBox.destroy()
         }
+
+        addBoxItem.assignFocus()
 
     }
 
@@ -188,6 +311,9 @@ Rectangle{
         var edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate)
         graph.bindEdge(edge, src, dst)
         
+        src.outEdges.push(edge)
+        dst.inEdge = edge
+
         return edge
     }
 
@@ -207,12 +333,46 @@ Rectangle{
     }
 
     function removeEdge(edge){
+        var item = edge.item
+
+        var srcPort = item.sourceItem
+        var dstPort = item.destinationItem
+
+
+
+        if (dstPort.objectProperty && dstPort.objectProperty.editingFragment){
+            var ef = dstPort.objectProperty.editingFragment
+            var value = ef.defaultValue()
+            var result = ef.bindExpression('null')
+            dstPort.objectProperty.editingFragment.write(
+                {'__ref': value}
+            )
+            ef.commit(value)
+        }
+
         graph.removeEdge(edge)
+        if ( edge === selectedEdge )
+            selectedEdge = null
     }
 
 
     function removeObjectNode(node){
         --palette.numOfObjects
+        if (node.item.selected)
+            --numOfSelectedNodes
+        if (numOfSelectedNodes === 0)
+            root.activateFocus()
+
+        // clear everything inside node
+
+        var children = node.item.propertyContainer.children
+        for (var i = 0; i < children.length; ++i){
+            children[i].destroyObjectNodeProperty()
+        }
+
+        if (node.item.outPort)
+            graph.removePort(node, node.item.outPort)
+
         graph.removeNode(node)
     }
     
@@ -229,11 +389,17 @@ Rectangle{
 
         node.item.documentHandler = documentHandler
         node.item.editor = editor
+        node.item.objectGraph = root
 
         var idx = label.indexOf('#')
-        if (idx !== -1)
-        {
+        if (idx !== -1){
             node.item.id = label.substr(idx+1)
+
+            var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
+            node.item.outPort = port
+            port.label = node.item.id + " Out"
+            port.y = 7
+            port.objectProperty = node.item
         }
         
         return node
@@ -247,17 +413,14 @@ Rectangle{
         propertyItem.node = node
 
         propertyItem.editingFragment = editingFragment
+        var isForObject = propertyItem.isForObject
+        propertyItem.width = node.item.width - (isForObject ? 30 : 0)
+
         propertyItem.documentHandler = root.documentHandler
 
         if (editingFragment) editingFragment.incrementRefCount()
 
         propertyItem.editor = root.editor
-
-        var conn = resizeConnectionsFactory.createObject()
-        conn.target = propertyItem
-        conn.node = item
-
-        connections.push(conn)
 
         var pdestructor = propertyDestructorFactory.createObject()
         pdestructor.target = propertyItem
@@ -265,18 +428,33 @@ Rectangle{
 
         connections.push(pdestructor)
 
-        if ( ports === root.inPort || ports === root.inOutPort ){
+        if ( ports & ObjectGraph.PortMode.InPort ){
             var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
             port.label = propertyName + " In"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
+            port.y = Qt.binding(
+                function(){
+                    return node.item.paletteContainer.height +
+                           propertyItem.y +
+                           (propertyItem.propertyTitle.height / 2) +
+                           42
+                }
+            )
+
             propertyItem.inPort = port
             port.objectProperty = propertyItem
-            port.multiplicity = Qan.PortItem.Single
         }
-        if (ports === root.outPort || (node.item.id !== "" && ports === root.inOutPort) ){
+        if ((ports === ObjectGraph.PortMode.OutPort) || (node.item.id !== "" && ports === (ObjectGraph.PortMode.OutPort | ObjectGraph.PortMode.InPort)) ){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             port.label = propertyName + " Out"
-            port.y = Qt.binding(function(){ return propertyItem.y + 42 + (propertyItem.propertyTitle.height / 2) })
+            port.y = Qt.binding(
+                function(){
+                    if (!node || !node.item) return 0
+                    return node.item.paletteContainer.height +
+                           propertyItem.y +
+                           (propertyItem.propertyTitle.height / 2) +
+                           42
+                }
+            )
             propertyItem.outPort = port
             port.objectProperty = propertyItem
         }
@@ -289,16 +467,19 @@ Rectangle{
     Qan.GraphView {
         id: graphView
         anchors.fill: parent
+        anchors.margins: 1
         navigable   : true
-        gridThickColor: '#222'
+        gridThickColor: root.style.backgroundGridColor
         onDoubleClicked : root.doubleClicked(pos)
         onRightClicked : root.rightClicked(pos)
+        onPressed: { root.activateFocus() }
+        onClicked: root.clicked()
     
         graph: Qan.Graph {
             id: graph
             connectorEnabled: true
-            connectorEdgeColor: "#666"
-            connectorColor: "#666"
+            connectorEdgeColor: root.style.connectorEdgeColor
+            connectorColor: root.style.connectorColor
             edgeDelegate: Edge{}
             verticalDockDelegate : VerticalDock{}
             portDelegate: Port{}
@@ -311,16 +492,20 @@ Rectangle{
             selectionColor: "#fff"
             selectionWeight: 1
 
-            nodeDelegate: ObjectNode{}
+            nodeDelegate: ObjectNode{
+                nodeStyle: root.style.objectNodeStyle
+            }
             Component.onCompleted : {
-                styleManager.styles.at(1).lineColor = '#666'
+                graphView.navigable = Qt.binding(function(){ return root.isInteractive })
+                styleManager.styles.at(1).lineColor = root.style.connectorColor
             }
         }
     }  // Qan.GraphView
-    
+
     ResizeArea{
         minimumHeight: 200
         minimumWidth: 400
+        onResizeFinished: { graphView.redrawGrid() }
     }
 }
 

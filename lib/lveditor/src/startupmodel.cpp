@@ -8,6 +8,7 @@ StartupModel::StartupModel(): m_numberOfTitles(9)
     m_roles[Name]           = "name";
     m_roles[Label]          = "label";
     m_roles[Path]           = "path";
+    m_roles[Description]    = "description";
 }
 
 StartupModel::~StartupModel()
@@ -28,6 +29,8 @@ QVariant StartupModel::data(const QModelIndex &index, int role) const
             return m_entries[row].m_label;
         }  else if ( role == Path ){
             return m_entries[row].m_path;
+        } else if ( role == Description ){
+            return m_entries[row].m_description;
         }
     }
     return QVariant();

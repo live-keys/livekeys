@@ -26,6 +26,23 @@ void HookContainer::insertKey(const QString &file, const QString &id, QObject *o
     }
 
     idIt.value().append(obj);
+
+    emit entryAdded(file, id, obj);
+}
+
+void HookContainer::removeEntry(const QString &sourceFile, const QString &id, QObject *obj){
+    auto it = m_entries.find(sourceFile);
+    if ( it == m_entries.end() ){
+        return;
+    }
+
+    auto idIt = it.value().find(id);
+    if ( idIt == it.value().end() ){
+        return;
+    }
+
+    idIt.value().removeAll(obj);
+    emit entryRemoved(sourceFile, id, obj);
 }
 
 QMap<QString, QList<QObject *> > HookContainer::entriesForFile(const QString &sourceFile){

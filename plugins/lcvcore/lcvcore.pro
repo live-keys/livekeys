@@ -16,6 +16,7 @@ linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
+linkLocalPlugin(base, base, base/baseqml)
 linkLocalPlugin(live, live)
 linkLocalPlugin(timeline, timeline)
 
@@ -24,7 +25,6 @@ linkLocalPlugin(timeline, timeline)
 unix:!macx{
     QMAKE_LFLAGS += \
 	'-Wl,-rpath,\'\$$ORIGIN/../../link\''
-
 
     createlinkdir.commands += $${QMAKE_MKDIR_CMD} $$shell_path($${DEPLOY_PATH}/link)
     QMAKE_EXTRA_TARGETS    += createlinkdir
@@ -60,15 +60,49 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
+    palettes/DrawPalette.qml \
     palettes/GrayscaleViewPalette.json \
-    palettes/ImageFilePalette.qml \
+    palettes/ImageFilePalette.json \
+    palettes/ImageReadPalette.json \
+    palettes/BlankImagePalette.json \
+    palettes/DrawSurfacePalette.json \
+    palettes/PaperSurfacePalette.qml \
+    palettes/PerspectiveOnBackgroundPalette.qml \
+    palettes/PerspectiveOnBackgroundPropertiesPalette.json \
+    palettes/TransformPalette.qml \
     palettes/VideoDecoderViewPalette.json \
+    palettes/VideoFilePalette.qml \
+    palettes/VideoFilePropertiesPalette.json \
+    palettes/ImageViewPalette.json \
+    palettes/VideoPlayerPalette.qml \
+    qml/BlankImage.qml \
+    qml/BrushTool.qml \
+    qml/ColorHistogramView.qml \
+    qml/Crop.qml \
+    qml/CropTool.qml \
+    qml/DrawSurface.qml \
     qml/EditCvExtension.qml \
+    qml/GradientTool.qml \
     qml/GrayscaleView.qml \
+    qml/ImageRead.qml \
+    qml/ImageSegmentCreator.qml \
     qml/MatViewPane.qml \
+    qml/NavigableImageView.qml \
+    qml/PaperSurface.qml \
+    qml/Perspective.qml \
+    qml/PerspectiveOnBackground.qml \
+    qml/PerspectiveTool.qml \
+    qml/ScriptVideoSegmentCreator.qml \
+    qml/TransformImage.qml \
     qml/VideoCaptureSegmentCreator.qml \
+    qml/VideoCaptureSegmentEditor.qml \
     qml/VideoCaptureSegmentFactory.qml \
     qml/VideoDecoderView.qml \
+    qml/VideoSurfaceCreator.qml \
+    qml/VideoSurfaceFactory.qml \
+    qml/VideoSurfaceView.qml \
+    qml/VideoTrackExtension.qml \
+    qml/VideoTrackFactory.qml \
     qml/live.package.json \
     qml/live.plugin.json
 

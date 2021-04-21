@@ -15,7 +15,7 @@
 ****************************************************************************/
 
 #include "qmlidvisitor_p.h"
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 
 namespace lv{
 

@@ -22,6 +22,7 @@
 #include <QLinkedList>
 #include <QAbstractUndoItem>
 #include <QTextBlockUserData>
+#include <QJSValue>
 
 #include <functional>
 
@@ -258,12 +259,18 @@ public:
     static ProjectDocument* castFrom(Document* document);
 
     void resetCollapseSignal(int blockNumber){ emit resetCollapse(blockNumber); }
+
+
+    void addLineAtBlockNumber(QString line, int pos);
+    void removeLineAtBlockNumber(int pos);
+
 public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
 
     virtual void readContent() override;
     QString substring(int from, int length) const;
     void insert(int from, int length, const QString& text);
+    int offsetAtLine(int line) const;
 
 signals:
     /** shows if the format changed */

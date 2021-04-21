@@ -20,10 +20,14 @@
 
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
+#include "live/visuallogqt.h"
+#include "live/exception.h"
 
 #include <QFile>
 #include <QTimer>
 #include <QDebug>
+
+const int QVideoDecoder::FramesToGC = 10;
 
 // class QVideoDecoder::Properties
 // -------------------------------
@@ -47,6 +51,7 @@ QVideoDecoder::QVideoDecoder(QObject *parent)
     , m_worker(nullptr)
     , m_stream(nullptr)
     , m_properties(new QVideoDecoder::Properties)
+    , m_decodedFramesToGC(0)
 {
 }
 
@@ -109,7 +114,6 @@ void QVideoDecoder::seekTo(int frame){
     if ( m_properties->currentFrame == frame )
         return;
 
-    m_properties->currentFrame = frame;
     if ( m_worker && frame != m_properties->currentFrame ){
         m_worker->seekTo(frame);
     }
@@ -122,7 +126,14 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
         }
 
         if ( !QFile::exists(file) ){
-            qCritical("File does not exist: %s", qPrintable(file));
+            lv::ViewEngine* ve = lv::ViewEngine::grab(this);
+            if ( ve ){
+                lv::QmlError(
+                    ve,
+                    CREATE_EXCEPTION(lv::Exception, "VideoDecoder: File does not exist: " + file.toStdString() + ".", lv::Exception::toCode("~Mismatch")),
+                    this
+                ).jsThrow();
+            }
             return m_stream;
         }
 
@@ -151,8 +162,16 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
         emit streamChanged();
         emit totalFramesChanged();
 
-    } else
-        qCritical("Open CV Error: Could not open capture : %s", qPrintable(file));
+    } else {
+        lv::ViewEngine* ve = lv::ViewEngine::grab(this);
+        if ( ve ){
+            lv::QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "VideoDecoder: Could not decode file: " + file.toStdString() + ".", lv::Exception::toCode("~Mismatch")),
+                this
+            ).jsThrow();
+        }
+    }
 
     return m_stream;
 }
@@ -163,6 +182,12 @@ void QVideoDecoder::__matReady(){
         lv::Shared::ownJs(m);
         m_stream->push(m);
         emit currentFrameChanged();
+        ++m_decodedFramesToGC;
+        if ( m_decodedFramesToGC > QVideoDecoder::FramesToGC ){
+            lv::ViewEngine* engine = lv::ViewEngine::grab(this);
+            engine->engine()->collectGarbage();
+            m_decodedFramesToGC = 0;
+        }
         m_worker->processNextFrame();
     }
 }

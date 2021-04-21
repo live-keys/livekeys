@@ -2,10 +2,60 @@ import QtQuick 2.3
 import editor 1.0
 import editqml 1.0
 
-LiveExtension{
+WorkspaceExtension{
     id: root
 
-    globals : ProjectQmlExtension{}
+    property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
+
+    globals : ProjectQmlExtension{
+        property PaletteControls paletteControls: PaletteControls{}
+
+        function add(activeIndex, objectsOnly, forRoot){
+            root.add(activeIndex, objectsOnly, forRoot)
+        }
+
+        function shapeRootObject(editor, codeHandler, callback){
+            root.shapeRootObject(editor, codeHandler, callback)
+        }
+
+        function shapeLayout(editorPane, layout){
+            var codeHandler = editorPane.editor.documentHandler.codeHandler
+            var rootPosition = codeHandler.findRootPosition()
+            root.rootPosition = rootPosition
+            shapeRootObject(editorPane, codeHandler, function(){
+                lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
+                    editorPane,
+                    rootPosition,
+                    layout
+                )
+            })
+        }
+
+        function shapeAllInEditor(editor){
+            var codeHandler = editor.documentHandler.codeHandler
+
+            if (editor.loading){
+                editor.stopLoadingMode()
+                rootPosition = -1
+                return
+            }
+
+            shapeImports(editor, codeHandler)
+            rootPosition = codeHandler.findRootPosition()
+
+            if ( rootPosition >= 0){
+                shapeRootObject(editor, codeHandler)
+            } else {
+                editor.editor.addRootButton.visible = true
+            }
+        }
+
+
+        function shapeImports(editor, codeHandler){
+            root.shapeImports(editor, codeHandler)
+        }
+        property alias rootPosition: root.rootPosition
+    }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
 
@@ -18,12 +68,6 @@ LiveExtension{
     }
 
     objectName : "editqml"
-
-    property Component addBoxFactory: Component{ AddQmlBox{} }
-    property Component paletteGroupFactory: Component{ PaletteGroup{} }
-    property Component objectContainerFactory: Component{ ObjectContainer{} }
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
-    property Component paletteListFactory : Component{ PaletteListView{} }
 
     property int rootPosition: -1
 
@@ -47,199 +91,8 @@ LiveExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-
-            var ef = codeHandler.openConnection(editor.textEdit.cursorPosition)
-            var palette = codeHandler.edit(ef)
-
-            var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-            var paletteGroup = root.paletteGroupFactory.createObject(lk.layers.editor.environment.content)
-            editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteGroup.x = 5
-            paletteGroup.editingFragment = ef
-            paletteGroup.codeHandler = codeHandler
-            ef.visualParent = paletteGroup
-            editorBox.color = "black"
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
-
-            var paletteBox = root.paletteContainerFactory.createObject(paletteGroup)
-
-            palette.item.x = 5
-            palette.item.y = 7
-
-            paletteBox.child = palette.item
-            paletteBox.palette = palette
-
-            paletteBox.title = 'Edit'
-            paletteBox.titleLeftMargin = 10
-            paletteBox.paletteSwapVisible = false
-            paletteBox.paletteAddVisible = false
-            paletteBox.documentHandler = editor.documentHandler
-            paletteBox.cursorRectangle = rect
-            paletteBox.editorPosition = cursorCoords
-            paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
-
-            editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            ef.incrementRefCount()
+            globals.paletteControls.edit(activePane)
         }
-    }
-
-    function shapePalette(editor, palettes, index){
-        var codeHandler = editor.documentHandler.codeHandler
-
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
-
-        var ef = codeHandler.openConnection(palettes.position())
-        var forAnObject = codeHandler.isForAnObject(ef)
-        var forImports = false
-
-        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
-        if (codeHandler.isInImports(palettes.position())){
-            palette.item.model = codeHandler.importsModel()
-            palette.item.editor = editor.editor
-            forImports = true
-        }
-
-        if (!ef){
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette of a non-running program"
-            console.error("Error: Can't shape palette of a non-running program")
-            return
-        }
-
-        ef.incrementRefCount()
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-        var forAnObject = codeHandler.isForAnObject(ef)
-
-        if ( paletteBoxGroup === null ){
-            editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
-            var objectContainer = null
-
-            if (forAnObject)
-            {
-                objectContainer = root.objectContainerFactory.createObject(lk.layers.editor.environment.content)
-                objectContainer.editor = editor
-                objectContainer.editingFragment = ef
-                objectContainer.title = ef.typeName()
-            }
-
-            paletteBoxGroup = root.paletteGroupFactory.createObject(forAnObject ? objectContainer.groupsContainer : lk.layers.editor.environment.content)
-            paletteBoxGroup.editingFragment = ef
-            ef.visualParent = paletteBoxGroup
-
-            paletteBoxGroup.codeHandler = codeHandler
-
-            if (forAnObject)
-                objectContainer.paletteGroup = paletteBoxGroup;
-
-            editorBox.setChild(forAnObject ? objectContainer : paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-
-            editorBox.color = "black"
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
-
-            if (forAnObject){
-                if ( palette && !palette.item ){
-                    objectContainer.expandOptions(palette)
-                }
-                objectContainer.expand()
-
-            }
-        }
-
-        if ( palette || !forAnObject ){
-
-            if ( palette.item ){
-                var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
-                palette.item.x = 5
-                palette.item.y = 7
-                paletteBox.documentHandler = editor.documentHandler
-
-                if (palette.type === "qml/Object")
-                {
-                    palette.documentHandler = editor.documentHandler
-                    palette.editor = editor
-                    editor.documentHandler.codeHandler.populateNestedObjectsForFragment(ef)
-                    palette.editingFragment = ef
-                }
-
-                paletteBox.child = palette.item
-                paletteBox.palette = palette
-
-                paletteBox.name = palette.name
-                paletteBox.type = palette.type
-                paletteBox.moveEnabledSet = false
-                paletteBox.cursorRectangle = rect
-                paletteBox.editorPosition = cursorCoords
-                paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
-            }
-        }
-
-        codeHandler.frameEdit(editorBox, ef)
-        if (forImports) editor.editor.importsShaped = true
-
-        if (forAnObject){
-            var rootPos = codeHandler.findRootPosition()
-            if (ef.position() === rootPos)
-                editor.editor.rootShaped = true
-        }
-    }
-
-    function loadPalette(editor, palettes, index){
-        var codeHandler = editor.documentHandler.codeHandler
-
-        var rect = editor.editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
-
-        var ef = codeHandler.openConnection(palettes.position())
-
-        if (!ef)
-        {
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't create a palette in a non-compiled program"
-            console.error("Error: Can't create a palette in a non-compiled program")
-            return
-        }
-        ef.incrementRefCount()
-
-        var palette = codeHandler.openPalette(ef, palettes, index)
-
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-
-        if ( paletteBoxGroup === null ){
-            editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-            paletteBoxGroup = root.paletteGroupFactory.createObject(lk.layers.editor.environment.content)
-            editorBox.setChild(paletteBoxGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-            paletteBoxGroup.editingFragment = ef
-            paletteBoxGroup.codeHandler = codeHandler
-            ef.visualParent = paletteBoxGroup
-            editorBox.color = "black"
-            editorBox.border.width = 1
-            editorBox.border.color = "#141c25"
-        }
-
-        var paletteBox = root.paletteContainerFactory.createObject(paletteBoxGroup)
-
-        palette.item.x = 5
-        palette.item.y = 7
-
-        paletteBox.child = palette.item
-        paletteBox.palette = palette
-
-        paletteBox.name = palette.name
-        paletteBox.type = palette.type
-        paletteBox.documentHandler = editor.documentHandler
-        paletteBox.cursorRectangle = rect
-        paletteBox.editorPosition = cursorCoords
-        paletteBox.paletteContainerFactory = function(arg){ return root.paletteContainerFactory.createObject(arg) }
-
-        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
     }
 
     function palette(){
@@ -249,38 +102,7 @@ LiveExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-            if ( palettes.size() === 1 ){
-                root.loadPalette(editor, palettes, 0)
-            } else {
-                //Palette list box
-                var palList      = paletteListFactory.createObject()
-                var palListBox   = lk.layers.editor.environment.createEditorBox(
-                    palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
-                )
-                palListBox.color = 'transparent'
-                palList.model    = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-                    root.loadPalette(editor, palettes, index)
-                })
-            }
+            globals.paletteControls.palette(activePane)
         }
     }
 
@@ -291,41 +113,53 @@ LiveExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true, true)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-
-            if ( !palettes || palettes.size() === 0 ){
-                root.shapePalette(editor, palettes, -1)
-
-            } else if ( palettes.size() === 1 ){
-                root.shapePalette(editor, palettes, 0)
-            } else {
-                //Palette list box
-                var palList      = paletteListFactory.createObject()
-                var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-                palListBox.color = 'transparent'
-                palList.model    = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-                    root.shapePalette(editor, palettes, index)
-                })
-            }
+            globals.paletteControls.shape(activePane)
         }
+    }
+
+    function shapeImports(editor, codeHandler){
+        var importsPosition = codeHandler.findImportsPosition()
+        var paletteImports = codeHandler.findPalettes(importsPosition)
+        if (paletteImports) {
+            var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
+            pc.item.width = Qt.binding(function(){
+                if (!pc.item.parent || !pc.item.parent.parent) return
+                var editorSize = editor.width - editor.editor.lineSurfaceWidth - 30 - pc.item.parent.parent.headerWidth
+                return editorSize > 280 ? editorSize : 280
+            })
+        }
+    }
+
+    function shapeRootObject(editor, codeHandler, callback){
+
+        editor.startLoadingMode()
+
+        codeHandler.removeSyncImportsListeners()
+        codeHandler.onImportsScanned(function(){
+
+            editor.stopLoadingMode()
+
+            if (rootPosition === -1){
+                return
+            }
+
+            var paletteRoot = codeHandler.findPalettes(rootPosition)
+            if (paletteRoot){
+                if (callback)
+                    callback()
+                else {
+                    var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
+                    oc.contentWidth = Qt.binding(function(){
+                        return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                    })
+
+                    editor.editor.rootShaped = true
+                }
+            } else {
+                throw linkError(new Error("Failed to shape root object."), null)
+            }
+        })
+
     }
 
     function shapeAll(){
@@ -343,100 +177,84 @@ LiveExtension{
             return
         }
 
-        var imports = codeHandler.importsModel()
-        var importsPosition = codeHandler.findImportsPosition(imports.firstBlock())
-        var paletteImports = codeHandler.findPalettes(importsPosition, true)
-        if (paletteImports) root.shapePalette(editor, paletteImports, 0)
-
+        shapeImports(editor, codeHandler)
         rootPosition = codeHandler.findRootPosition()
 
         if ( rootPosition >= 0){
-            var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-            if (paletteRoot){
-                root.shapePalette(editor, paletteRoot, 0)
-                editor.editor.rootShaped = true
-            }
-            else {
-                editor.startLoadingMode()
-                var shapeTrigger = shapeAllTrigger.createObject()
-                shapeTrigger.target = codeHandler
-                shapeTrigger.editor = editor
-            }
-        }
-    }
-
-    property Component shapeAllTrigger: Component {
-        Connections {
-            target: null
-            property var editor: null
-            ignoreUnknownSignals: true
-            onStoppedProcessing: {
-                if (rootPosition === -1) return
-                var codeHandler = editor.documentHandler.codeHandler
-                var paletteRoot = codeHandler.findPalettes(rootPosition, true)
-                if (paletteRoot){
-                    root.shapePalette(editor, paletteRoot, 0)
-                    editor.stopLoadingMode()
-                    rootPosition = -1
-
-                    editor.editor.rootShaped = true
-                }
-            }
+            shapeRootObject(editor, codeHandler)
+        } else {
+            editor.editor.addRootButton.visible = true
         }
     }
 
     function addProperty(){
-        add(0)
-    }
-
-    function addObject(){
         add(1)
     }
 
-    function addEvent(){
+    function addObject(){
         add(2)
     }
 
-    function add(activeIndex){
+    function addEvent(){
+        add(3)
+    }
+
+    function add(activeIndex, objectsOnly, forRoot){
         var activePane = lk.layers.workspace.panes.activePane
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition)
+            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, CodeQmlHandler.NoReadOnly)
             if ( !addContainer )
                 return
 
             var rect = activePane.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-            var addBoxItem = addBoxFactory.createObject()
+            var paneCoords = activePane.mapGlobalPosition()
+            var addBoxItem = globals.paletteControls.createAddQmlBox(null)
+            if (!addBoxItem) return
+
             addBoxItem.assignFocus()
             addBoxItem.addContainer = addContainer
             addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
+            if (objectsOnly)
+                addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
             var addBox = lk.layers.editor.environment.createEditorBox(
-                addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+                addBoxItem, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
             )
             addBox.color = 'transparent'
             addBoxItem.cancel = function(){
+                addBoxItem.destroy()
                 addBox.destroy()
             }
             addBoxItem.accept = function(type, data){
-                if ( addBoxItem.activeIndex === 0 ){
+                if ( addBoxItem.activeIndex === 1 ){
                     activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.propertyModel.addPosition, addContainer.objectType, type, data, true
-                    )
-                } else if ( addBoxItem.activeIndex === 1 ){
-                    activePane.documentHandler.codeHandler.addItem(
-                        addContainer.itemModel.addPosition, addContainer.objectType, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data, true
                     )
                 } else if ( addBoxItem.activeIndex === 2 ){
+                    if (forRoot){
+                        var position = activePane.documentHandler.codeHandler.insertRootItem(data)
+                        if (position === -1){
+                            lk.layers.workspace.messages.pushError("Error: Can't create object with name " + data, 1)
+                        } else {
+                            root.rootPosition = position
+                            shapeRootObject(activePane, activePane.documentHandler.codeHandler)
+                        }
+                    }
+                    else
+                        activePane.documentHandler.codeHandler.addItem(
+                            addContainer.model.addPosition, addContainer.objectType, data
+                        )
+                } else if ( addBoxItem.activeIndex === 3 ){
                     activePane.documentHandler.codeHandler.addEvent(
-                        addContainer.itemModel.addPosition, addContainer.objectType, type, data
+                        addContainer.model.addPosition, addContainer.objectType, type, data
                     )
                 }
+                addBoxItem.destroy()
                 addBox.destroy()
             }
 
@@ -452,41 +270,7 @@ LiveExtension{
              activePane.document &&
              canBeQml(activePane.document) )
         {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, false)
-            var rect = editor.editor.getCursorRectangle()
-            var cursorCoords = activePane.cursorWindowCoords()
-            if ( palettes.size() === 1 ){
-                var ef = codeHandler.openConnection(palettes.position())
-                ef.incrementRefCount()
-                codeHandler.openBinding(ef, palettes, 0)
-            } else {
-                var palList      = paletteListFactory.createObject()
-                var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-                palListBox.color = 'transparent'
-                palList.model = palettes
-                editor.internalFocus = false
-                palList.forceActiveFocus()
-                lk.layers.workspace.panes.setActiveItem(palList, editor)
-
-                palList.cancelled.connect(function(){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-                })
-                palList.paletteSelected.connect(function(index){
-                    palList.focus = false
-                    editor.editor.forceFocus()
-                    palListBox.destroy()
-
-                    var ef = codeHandler.openConnection(palettes.position())
-                    ef.incrementRefCount()
-
-                    codeHandler.openBinding(ef, palettes, index)
-                })
-            }
+            globals.paletteControls.bind(activePane)
         }
     }
 
@@ -507,6 +291,14 @@ LiveExtension{
         }
     }
 
+    function objectContainerAdd(){
+        var activePane = lk.layers.workspace.panes.activePane
+        var activeItem = lk.layers.workspace.panes.activeItem
+        if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false)
+        }
+    }
+
     commands : {
         "edit" :  [edit, "Edit Property Under Cursor"],
         "palette" : [palette, "Pallete for Property Under Cursor"],
@@ -517,66 +309,75 @@ LiveExtension{
         'bind' : [bind, "Bind to Property Under Cursor"],
         'unbind' : [unbind, "Unbind Properties Under Cursor"],
         'shape' : [shape, "Shape This Property Into a Palette"],
-        'shape_all' : [shapeAll, "Shape all the code"]
+        'shape_all' : [shapeAll, "Shape all the code"],
+        'object_container_add' : [objectContainerAdd, "EditQml - Object Container: Open add menu."]
     }
 
     keyBindings : {
         "alt+a" : "editqml.palette",
         "alt+z" : "editqml.add",
-        "alt+x" : "editqml.shape"
+        "alt+x" : "editqml.shape",
+        "alt+s" : { command: "editqml.object_container_add", whenPane: "editor", whenItem: "objectContainerFrame" }
     }
 
-    interceptMenu : function(item){
-        if ( item.objectName === 'editorType' && item.document ){
+    menuInterceptors : [
+        {
+            whenPane: 'editor',
+            whenItem: 'editorType',
+            intercept: function(pane, item){
 
-            if ( canBeQml(item.document) ){
+                if ( item.document ){
 
-                var codeHandler = item.documentHandler.codeHandler
-                var cursorInfo = codeHandler.cursorInfo(
-                    item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
-                );
+                    if ( canBeQml(item.document) ){
 
-                return [
-                    {
-                        name : "Edit",
-                        action : root.commands['edit'][0],
-                        enabled : cursorInfo.canEdit
-                    }, {
-                        name : "Palette",
-                        action : root.commands['palette'][0],
-                        enabled : cursorInfo.canAdjust
-                    }, {
-                        name : "Shape",
-                        action : root.commands['shape'][0],
-                        enabled : cursorInfo.canShape
-                    }, {
-                        name : "Bind",
-                        action : root.commands['bind'][0],
-                        enabled : cursorInfo.canBind
-                    }, {
-                        name : "Unbind",
-                        action : root.commands['unbind'][0],
-                        enabled : cursorInfo.canUnbind
-                    }, {
-                        name : "Add Property",
-                        action : root.commands['add_property'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Object",
-                        action : root.commands['add_object'][0],
-                        enabled : true
-                    }, {
-                        name : "Add Event",
-                        action : root.commands['add_event'][0],
-                        enabled : true
-                    }, {
-                        name: "Shape all",
-                        action: root.commands['shape_all'][0],
-                        enabled: true
+                        var codeHandler = item.documentHandler.codeHandler
+                        var declarationInfo = codeHandler.declarationInfo(
+                            item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
+                        );
+
+                        return [
+                            {
+                                name : "Edit",
+                                action : root.commands['edit'][0],
+                                enabled : declarationInfo ? true : false
+                            }, {
+                                name : "Palette",
+                                action : root.commands['palette'][0],
+                                enabled : declarationInfo ? true : false
+                            }, {
+                                name : "Shape",
+                                action : root.commands['shape'][0],
+                                enabled : declarationInfo ? true : false
+                            }, {
+                                name : "Bind",
+                                action : root.commands['bind'][0],
+                                enabled : declarationInfo ? true : false
+                            }, {
+                                name : "Unbind",
+                                action : root.commands['unbind'][0],
+                                enabled : declarationInfo ? true : false
+                            }, {
+                                name : "Add Property",
+                                action : root.commands['add_property'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Object",
+                                action : root.commands['add_object'][0],
+                                enabled : true
+                            }, {
+                                name : "Add Event",
+                                action : root.commands['add_event'][0],
+                                enabled : true
+                            }, {
+                                name: "Shape all",
+                                action: root.commands['shape_all'][0],
+                                enabled: true
+                            }
+                        ]
                     }
-                ]
+                }
+                return null
             }
         }
-        return null
-    }
+    ]
 }

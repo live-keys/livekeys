@@ -134,6 +134,31 @@ QmlScopeSnap::QmlScopeSnap(const ProjectQmlScope::Ptr &p, const DocumentQmlInfo:
 {
 }
 
+/// Checks wether libraries imported or accessed by this document are scanned
+
+bool QmlScopeSnap::areDocumentLibrariesReady() const{
+    QmlLibraryInfo::Ptr lib = project->libraryInfo(document->path());
+    if ( lib->status() != QmlLibraryInfo::Done ){
+        return false;
+    }
+
+    foreach( const DocumentQmlInfo::Import& imp, document->imports() ){
+        QmlLibraryInfo::Ptr lib = project->libraryInfo(imp.uri());
+        if ( !lib || lib->status() != QmlLibraryInfo::Done ){
+            return false;
+        }
+    }
+
+    foreach( const QString& defaultLibrary, project->defaultLibraries() ){
+        QmlLibraryInfo::Ptr lib = project->libraryInfo(defaultLibrary);
+        if ( !lib || lib->status() != QmlLibraryInfo::Done ){
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /// Retrieve a type from any available libraries to the document scope
 
 QmlTypeInfo::Ptr QmlScopeSnap::getType(const QString &name) const{
@@ -203,12 +228,30 @@ QmlTypeInfo::Ptr QmlScopeSnap::getType(const QString &importNamespace, const QSt
     return nullptr;
 }
 
-QmlTypeInfo::Ptr QmlScopeSnap::getType(const QStringList &typeAndImport){
+QmlTypeInfo::Ptr QmlScopeSnap::getType(const QStringList &typeAndImport) const{
     if ( typeAndImport.isEmpty() )
         return nullptr;
     if ( typeAndImport.size() == 1 )
         return getType(typeAndImport[0]);
     return getType(typeAndImport[0], typeAndImport[1]);
+}
+
+QmlTypeInfo::Ptr QmlScopeSnap::getType(const QmlTypeReference &typeReference) const{
+    QmlInheritanceInfo typePath;
+
+    if ( typeReference.language() == QmlTypeReference::Unknown )
+        return getType(typeReference.name()); // get type from document
+
+    QmlLibraryInfo::Ptr lib = project->libraryInfo(typeReference.path());
+    if ( lib ){
+        if ( typeReference.language() == QmlTypeReference::Qml ){
+            return lib->typeInfoByName(typeReference.name());
+        } else {
+            return lib->typeInfoByClassName(typeReference.name());
+        }
+    }
+
+    return nullptr;
 }
 
 QmlTypeInfo::Ptr QmlScopeSnap::getTypeFromContextLibrary(
@@ -279,23 +322,10 @@ QmlInheritanceInfo QmlScopeSnap::getTypePath(const QStringList& typeAndImport) c
 QmlInheritanceInfo QmlScopeSnap::getTypePath(const QmlTypeReference &languageType) const{
     QmlInheritanceInfo typePath;
 
-    if ( languageType.language() == QmlTypeReference::Unknown )
-        return getTypePath(languageType.name());
-
-    QmlLibraryInfo::Ptr lib = project->libraryInfo(languageType.path());
-
-    if ( lib ){
-        QmlTypeInfo::Ptr ti;
-        if ( languageType.language() == QmlTypeReference::Qml ){
-            ti = lib->typeInfoByName(languageType.name());
-        } else {
-            ti = lib->typeInfoByClassName(languageType.name());
-        }
-
-        if ( ti ){
-            typePath.append(ti);
-            typePath.join(generateTypePathFromObject(ti));
-        }
+    QmlTypeInfo::Ptr ti = getType(languageType);
+    if ( ti ){
+        typePath.append(ti);
+        typePath.join(generateTypePathFromObject(ti));
     }
 
     return typePath;
@@ -466,9 +496,23 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
             return QmlScopeSnap::PropertyReference(
                 prop,
                 prop.typeName.language() == QmlTypeReference::Cpp,
-                prop.isPointer ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path()) : QmlInheritanceInfo(),
+                prop.isPointer
+                    ? generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path())
+                    : QmlInheritanceInfo(),
                 contextTypePath
             );
+        }
+
+        if ( propertyName.indexOf('(') > 0 ){
+            QmlFunctionInfo func = currentType->functionAt(propertyName.mid(0, propertyName.indexOf('(')));
+            if ( func.isValid() ){
+                return QmlScopeSnap::PropertyReference(
+                    func,
+                    false,
+                    prop.isPointer ? getTypePath(func.returnType.name()) : QmlInheritanceInfo(),
+                    contextTypePath
+                );
+            }
         }
     }
 

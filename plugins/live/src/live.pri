@@ -23,7 +23,6 @@ HEADERS += \
     $$PWD/remotelineresponse.h \
     $$PWD/scriptcommandlineparser_p.h \
     $$PWD/valuehistory.h \
-    $$PWD/triangle.h \
     $$PWD/licensesettings.h \
     $$PWD/loglistener.h \
     $$PWD/loglistenersocket.h \
@@ -53,7 +52,6 @@ SOURCES += \
     $$PWD/remotelineresponse.cpp \
     $$PWD/scriptcommandlineparser.cpp \
     $$PWD/valuehistory.cpp \
-    $$PWD/triangle.cpp \
     $$PWD/licensesettings.cpp \
     $$PWD/loglistener.cpp \
     $$PWD/loglistenersocket.cpp \

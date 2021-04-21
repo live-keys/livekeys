@@ -4,6 +4,13 @@ plugin lcvimgproc
 depends QtQuick 2.3
 depends lcvcore 1.0
 
-PanAndZoom 1.0 PanAndZoom.qml
-
-
+PanAndZoom       1.0 PanAndZoom.qml
+Resize           1.0 Resize.qml
+ResizeWithAspect 1.0 ResizeWithAspect.qml
+Scale            1.0 Scale.qml
+Rotate           1.0 Rotate.qml
+ResizeTool       1.0 ResizeTool.qml
+RotateTool       1.0 RotateTool.qml
+Threshold        1.0 Threshold.qml
+Blend            1.0 Blend.qml
+FaceDetection    1.0 FaceDetection.qml

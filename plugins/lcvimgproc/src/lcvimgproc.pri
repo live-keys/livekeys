@@ -1,6 +1,7 @@
 HEADERS += \
     $$PWD/qblur.h \
     $$PWD/qcanny.h \
+    $$PWD/qcascadeclassifier.h \
     $$PWD/qchannelselect.h \
     $$PWD/qcopymakeborder.h \
     $$PWD/qcvtcolor.h \
@@ -10,14 +11,12 @@ HEADERS += \
     $$PWD/qgaussianblur.h \
     $$PWD/qhoughlines.h \
     $$PWD/qhoughlinesp.h \
-    $$PWD/qmatresize.h \
     $$PWD/qshapedescriptors.h \
     $$PWD/qsobel.h \
     $$PWD/qstructuringelement.h \
-    $$PWD/qthreshold.h \
     $$PWD/lcvimgproc_plugin.h \
-    $$PWD/qgetperspectivetransform.h \
-    $$PWD/qwarpperspective.h \
+    $$PWD/qtransformations.h \
+    $$PWD/qtransformimage.h \
     $$PWD/qcachedwarpperspective.h \
     $$PWD/qdraw.h \
     $$PWD/qgeometry.h
@@ -27,6 +26,7 @@ SOURCES += \
     $$PWD/lcvimgproc_plugin.cpp \
     $$PWD/qblur.cpp \
     $$PWD/qcanny.cpp \
+    $$PWD/qcascadeclassifier.cpp \
     $$PWD/qchannelselect.cpp \
     $$PWD/qcopymakeborder.cpp \
     $$PWD/qcvtcolor.cpp \
@@ -36,13 +36,11 @@ SOURCES += \
     $$PWD/qgaussianblur.cpp \
     $$PWD/qhoughlines.cpp \
     $$PWD/qhoughlinesp.cpp \
-    $$PWD/qmatresize.cpp \
     $$PWD/qshapedescriptors.cpp \
     $$PWD/qsobel.cpp \
     $$PWD/qstructuringelement.cpp \
-    $$PWD/qthreshold.cpp \
-    $$PWD/qgetperspectivetransform.cpp \
-    $$PWD/qwarpperspective.cpp \
+    $$PWD/qtransformations.cpp \
+    $$PWD/qtransformimage.cpp \
     $$PWD/qcachedwarpperspective.cpp \
     $$PWD/qdraw.cpp \
     $$PWD/qgeometry.cpp

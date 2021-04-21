@@ -23,5 +23,6 @@ DISTFILES += \
     qml/live.package.json
 
 SUBDIRS += \
+    icons \
     quickqanava \
     nodeeditor

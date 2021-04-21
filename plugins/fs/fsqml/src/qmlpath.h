@@ -26,6 +26,7 @@ public slots:
     QString completeSuffix(QJSValue path);
     QString absolutePath(QJSValue path);
     QString dir(const QString& str);
+    QString relativePath(const QString& referencePath, const QString& path);
 
     bool hasExtensions(const QString& path, QJSValue extensions);
 

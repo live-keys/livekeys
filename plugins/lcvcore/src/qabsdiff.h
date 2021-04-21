@@ -52,7 +52,7 @@ inline void QAbsDiff::setInput2(QMat *mat){
 
     m_in2 = mat;
     emit input2Changed();
-    if ( m_in2->cvMat()->size() == inputMat()->cvMat()->size() )
+    if ( m_in2->internalPtr()->size() == inputMat()->internalPtr()->size() )
         QMatFilter::transform();
 }
 

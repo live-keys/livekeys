@@ -30,7 +30,7 @@
 
 #include "qmljsutils.h"
 
-#include "parser/qmljsast_p.h"
+#include "parser/qqmljsast_p.h"
 
 #include <QColor>
 #include <QDir>
@@ -199,7 +199,7 @@ UiQualifiedId *QmlJS::qualifiedTypeNameId(Node *node)
 
 DiagnosticMessage QmlJS::errorMessage(const AST::SourceLocation &loc, const QString &message)
 {
-    return DiagnosticMessage(Severity::Error, loc, message);
+    return DiagnosticMessage(DiagnosticMessage::Error, loc, message);
 }
 
 namespace {

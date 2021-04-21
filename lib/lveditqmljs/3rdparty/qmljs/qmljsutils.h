@@ -33,8 +33,8 @@
 
 #include "qmljs/qmljs_global.h"
 #include "qmljsconstants.h"
-#include "parser/qmljsastfwd_p.h"
-#include "parser/qmljsengine_p.h"
+#include "parser/qqmljsastfwd_p.h"
+#include "parser/qqmljsengine_p.h"
 
 QT_FORWARD_DECLARE_CLASS(QColor)
 
@@ -74,7 +74,7 @@ AST::SourceLocation locationFromRange(const T *node)
 template <class T>
 DiagnosticMessage errorMessage(const T *node, const QString &message)
 {
-    return DiagnosticMessage(QmlJS::Severity::Error,
+    return DiagnosticMessage(DiagnosticMessage::Error,
                              locationFromRange(node),
                              message);
 }

@@ -1,6 +1,7 @@
 #include "palettelist.h"
 #include "palettecontainer.h"
 #include <QQmlEngine>
+#include "palettecontainer.h"
 
 /**
  * \class lv::PaletteList
@@ -72,6 +73,18 @@ QJSValue PaletteList::contentAt(int index){
         return m_paletteContainer->paletteContent(m_palettes[index]);
     }
     return QJSValue();
+}
+
+void PaletteList::filterOut(const QStringList &names)
+{
+    decltype (m_palettes) result;
+    for (auto it = m_palettes.begin(); it != m_palettes.end(); ++it){
+        auto paletteLoader = *it;
+        if (!names.contains(m_paletteContainer->paletteName(paletteLoader))){
+            result.push_back(*it);
+        }
+    }
+    m_palettes = result;
 }
 
 

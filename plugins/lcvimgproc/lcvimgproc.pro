@@ -13,6 +13,7 @@ DEFINES += Q_LCV
 linkLocalLibrary(lvbase, lvbase)
 linkLocalLibrary(lvview, lvview)
 
+linkLocalPlugin(base,    base, base/baseqml)
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
@@ -46,8 +47,19 @@ OTHER_FILES *= \
     qml/qmldir \
     qml/plugins.qmltypes \
     doc/*.md \
-    samples/*.qml
+    samples/*.qml \
+    qml/palettes/*.qml \
+    qml/palettes/*.json
 
 DISTFILES += \
+    qml/Blend.qml \
+    qml/FaceDetection.qml \
+    qml/Resize.qml \
+    qml/ResizeTool.qml \
+    qml/ResizeWithAspect.qml \
+    qml/Rotate.qml \
+    qml/RotateTool.qml \
+    qml/Scale.qml \
+    qml/Threshold.qml \
     qml/live.package.json \
     qml/live.plugin.json

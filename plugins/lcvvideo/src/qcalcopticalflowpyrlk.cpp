@@ -284,7 +284,7 @@ void QCalcOpticalFlowPyrLK::transform(const Mat& in, Mat&){
  */
 QSGNode* QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*nodeData){
     Q_D(QCalcOpticalFlowPyrLK);
-    d->draw( *(inputMat()->cvMat()), *(output()->cvMat()) );
+    d->draw( *(inputMat()->internalPtr()), *(output()->internalPtr()) );
 
     return QMatDisplay::updatePaintNode(node, nodeData);
 }

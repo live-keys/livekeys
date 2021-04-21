@@ -29,18 +29,18 @@ class QmlFileReader : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QString source  READ source  WRITE setSource  NOTIFY sourceChanged)
+    Q_PROPERTY(QString file    READ file    WRITE setFile    NOTIFY fileChanged)
     Q_PROPERTY(bool monitor    READ monitor WRITE setMonitor NOTIFY monitorChanged)
     Q_PROPERTY(QByteArray data READ data    NOTIFY dataChanged)
 
 public:
     explicit QmlFileReader(QObject *parent = nullptr);
-    virtual ~QmlFileReader();
+    virtual ~QmlFileReader() override;
 
     const QByteArray& data() const;
 
-    void setSource(QString source);
-    QString source() const;
+    void setFile(QString file);
+    QString file() const;
 
     void classBegin() Q_DECL_OVERRIDE{}
     void componentComplete() Q_DECL_OVERRIDE;
@@ -54,14 +54,14 @@ public slots:
 
 signals:
     void dataChanged(const QByteArray& data);
-    void sourceChanged(QString source);
+    void fileChanged(QString file);
     void monitorChanged();
 
 private:
     void resync();
 
     QByteArray m_data;
-    QString    m_source;
+    QString    m_file;
     bool       m_componentComplete;
 
     QFileSystemWatcher* m_watcher;
@@ -71,8 +71,8 @@ inline const QByteArray &QmlFileReader::data() const{
     return m_data;
 }
 
-inline QString QmlFileReader::source() const{
-    return m_source;
+inline QString QmlFileReader::file() const{
+    return m_file;
 }
 
 inline void QmlFileReader::componentComplete(){

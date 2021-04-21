@@ -31,6 +31,7 @@
 #include <QFileInfo>
 #include <QFile>
 #include <QUrl>
+#include <QTimer>
 
 namespace lv{
 
@@ -39,7 +40,8 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_projectEnvironment(nullptr)
     , m_panes(nullptr)
     , m_viewRoot(nullptr)
-    , m_commands(new Commands)
+    , m_messageStack(new lv::WorkspaceMessageStack(this))
+    , m_commands(nullptr)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
@@ -47,17 +49,25 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_documentation(nullptr)
     , m_tutorials(new StartupModel())
     , m_samples(new StartupModel())
+    , m_tooltipTimer(new QTimer)
+    , m_tooltip(nullptr)
 {
+    m_engine = ViewContext::instance().engine();
+    m_commands = new Commands(m_engine, this);
+
+    m_tooltipTimer->setInterval(500);
+    m_tooltipTimer->setSingleShot(true);
+    connect(m_tooltipTimer, &QTimer::timeout, this, &WorkspaceLayer::__tooltipTimeout);
+
     Settings* settings = ViewContext::instance().settings();
 
-    m_keymap = new KeyMap(settings->path());
+    m_keymap = new KeyMap(settings->path(), this);
     settings->addConfigFile("keymap", m_keymap);
     m_commands->setModel(new CommandsModel(m_commands, m_keymap));
 
     m_extensions = new Extensions(lv::ViewContext::instance().engine(), settings->path());
     settings->addConfigFile("extensions", m_extensions);
 
-    m_engine = lv::ViewContext::instance().engine();
     QQmlEngine* engine = m_engine->engine();
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
     m_project = qobject_cast<lv::Project*>(probject);
@@ -89,9 +99,11 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 }
 
 WorkspaceLayer::~WorkspaceLayer(){
+    delete m_messageStack;
     delete m_themes;
     delete m_tutorials;
     delete m_samples;
+    delete m_tooltipTimer;
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
@@ -104,8 +116,10 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
-        m_commands->add(le, le->commands());
-        m_keymap->store(le->keyBindings());
+        if ( le->commands().isObject() )
+            m_commands->add(le, le->commands());
+        if ( le->keyBindings().isObject() )
+            m_keymap->store(le->keyBindings());
 
         QJSValue themesArray = le->themes();
 
@@ -157,7 +171,7 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
 
     m_keymap->store(0, Qt::Key_O,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.openFile");
     m_keymap->store(0, Qt::Key_Backslash, lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.toggleVisibility");
-    m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
+//    m_keymap->store(0, Qt::Key_T,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleMaximizedRuntime");
     m_keymap->store(0, Qt::Key_K,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleNavigation");
     m_keymap->store(0, Qt::Key_L,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.toggleLog");
     m_keymap->store(0, Qt::Key_F1,        0,                              "window.workspace.help");
@@ -190,6 +204,11 @@ QObject *WorkspaceLayer::viewRoot(){
     return m_viewRoot;
 }
 
+WorkspaceMessageStack *WorkspaceLayer::messages() const
+{
+    return m_messageStack;
+}
+
 StartupModel *WorkspaceLayer::recents() const
 {
     return m_workspace->recents();
@@ -205,25 +224,52 @@ StartupModel *WorkspaceLayer::samples() const
     return m_samples;
 }
 
-QJSValue WorkspaceLayer::interceptMenu(QJSValue context){
-    QJSValueList interceptorArgs;
-    interceptorArgs << context;
+QJSValue WorkspaceLayer::interceptMenu(QJSValue pane, QJSValue item){
+    QObject* paneObject = pane.toQObject();
+    QObject* itemObject = item.toQObject();
+
+    QString paneType = paneObject ? paneObject->property("paneType").toString() : "";
+    QString itemType = itemObject ? itemObject->property("objectName").toString() : "";
 
     QJSValueList result;
 
+    QJSValueList interceptorArgs;
+    interceptorArgs << pane << item;
+
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
-        if ( le->hasMenuInterceptor() ){
-            QJSValue v = le->callMenuInterceptor(interceptorArgs);
-            if ( v.isArray() ){
-                QJSValueIterator vit(v);
-                while ( vit.hasNext() ){
-                    vit.next();
-                    if ( vit.name() != "length" ){
-                        result << vit.value();
+        if ( le->hasMenuInterceptors() ){
+            QJSValue im = le->menuInterceptors();
+            QJSValueIterator imIt(im);
+            while ( imIt.next() ){
+                if ( imIt.name() != "length" ){
+                    QJSValue menuConfig = imIt.value();
+
+                    QString whenActivePane = menuConfig.hasProperty("whenPane") ? menuConfig.property("whenPane").toString() : "";
+                    QString whenActiveItem = menuConfig.hasProperty("whenItem") ? menuConfig.property("whenItem").toString() : "";
+
+                    if ( !whenActivePane.isEmpty() ){
+                        if ( whenActivePane != paneType )
+                            continue;
+                    }
+                    if ( !whenActiveItem.isEmpty() ){
+                        if ( whenActiveItem != itemType )
+                            continue;
+                    }
+
+                    QJSValue model = menuConfig.property("intercept").call(interceptorArgs);
+                    if ( model.isArray() ){
+                        QJSValueIterator modelit(model);
+                        while ( modelit.hasNext() ){
+                            modelit.next();
+                            if ( modelit.name() != "length" ){
+                                result << modelit.value();
+                            }
+                        }
                     }
                 }
             }
+
         }
     }
 
@@ -295,11 +341,18 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 
     QMap<QByteArray, ProjectDocument*> openDocuments;
 
+    std::vector<std::string> removedDocuments;
+
     if ( layout.hasKey("documents") && layout["documents"].type() == MLNode::Array ){
         for ( auto it = layout["documents"].begin(); it != layout["documents"].end(); ++it ){
             QString path = QString::fromStdString((*it).asString());
-            ProjectDocument* doc = m_project->openTextFile(path);
-            openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
+            QFileInfo pathInfo(path);
+            if ( pathInfo.exists() ){
+                ProjectDocument* doc = m_project->openTextFile(path);
+                openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
+            } else {
+                removedDocuments.push_back(path.toStdString());
+            }
         }
     }
 
@@ -324,10 +377,15 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
             m_project->setActive(it.value()->file()->path());
         }
     }
+
+    // notify removed documents
+    for ( const std::string& removedDocument : removedDocuments ){
+        workspace->documentWasRemoved(removedDocument);
+    }
 }
 
 void WorkspaceLayer::whenProjectClose(){
-    QJSValue v = m_panes->property("__clearPanes").value<QJSValue>();
+    QJSValue v = m_panes->property("__clearAll").value<QJSValue>();
     QJSValue res = v.call();
     if ( res.isError() ){
         m_engine->throwError(res, this);
@@ -346,6 +404,41 @@ bool WorkspaceLayer::wasRecentsFileFound() const{
 QString WorkspaceLayer::pluginsPath() const
 {
     return QString::fromStdString(lv::ApplicationContext::instance().pluginPath());
+}
+
+void WorkspaceLayer::triggerTooltip(QObject *tooltip){
+    if ( m_tooltip ){
+        disconnect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+    }
+
+    m_tooltip = tooltip;
+    m_tooltipTimer->start();
+
+    connect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+
+}
+
+void WorkspaceLayer::cancelTooltip(QObject *tooltip){
+    if ( m_tooltip == tooltip ){
+        m_tooltipTimer->stop();
+        disconnect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
+        m_tooltip = nullptr;
+    }
+}
+
+void WorkspaceLayer::__tooltipDestroyed(){
+    if ( m_tooltip ){
+        QObject* contentBox = m_tooltip->property("contentBox").value<QObject*>();
+        if ( contentBox )
+            contentBox->deleteLater();
+    }
+    m_tooltip = nullptr;
+}
+
+void WorkspaceLayer::__tooltipTimeout(){
+    if ( m_tooltip ){
+        QQmlProperty(m_tooltip, "active").write(true);
+    }
 }
 
 void WorkspaceLayer::initializePanes(ProjectWorkspace *workspace, QJSValue panes){
@@ -449,7 +542,6 @@ void WorkspaceLayer::loadConfigurations(){
 
     for ( auto it = extensionArray.begin(); it != extensionArray.end(); ++it ){
         MLNode currentExt = *it;
-
         bool isEnabled = currentExt["enabled"].asBool();
         if ( isEnabled ){
             std::string packageName = currentExt["package"].asString();
@@ -482,7 +574,7 @@ void WorkspaceLayer::loadConfigurations(){
                         StartupModel::StartupEntry(
                             true,
                             QString::fromStdString(p->name()),
-                            QString::fromStdString(p->workspaceTutorialsLabel()),
+                            QString::fromStdString(p->workspaceLabel()),
                             ""
                         )
                     );
@@ -513,12 +605,17 @@ void WorkspaceLayer::loadConfigurations(){
                 Package::Ptr p = Package::createFromPath(packagePath);
                 if ( p ){
                     QString name = QString::fromStdString(p->name());
-                    m_samples->addStartupEntry(StartupModel::StartupEntry(true, name, name, ""));
+
+                    QString label = p->workspaceLabel().empty() ? name : QString::fromStdString(p->workspaceLabel());
+
+                    m_samples->addStartupEntry(StartupModel::StartupEntry(true, name, label, ""));
+
+
                     for ( auto sample : p->workspaceSamples() ){
-                        QString path = QString::fromStdString(p->path() + "/" + sample);
-                        QFileInfo f(path);
-                        QString name = f.baseName();
-                        m_samples->addStartupEntry(StartupModel::StartupEntry(false, name, name, path));
+                        QString path = QString::fromStdString(p->path() + "/" + sample.path().data());
+                        QString name = QString::fromStdString(sample.label().data());
+                        QString description = QString::fromStdString(sample.description().data());
+                        m_samples->addStartupEntry(StartupModel::StartupEntry(false, name, name, path, description));
                     }
                 }
             }
@@ -544,7 +641,7 @@ WorkspaceExtension *WorkspaceLayer::loadPackageExtension(const Package::Ptr &pac
 
     WorkspaceExtension* le = qobject_cast<WorkspaceExtension*>(component.create());
     if ( !le ){
-        THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to LiveExtension type in: " + path, 3);
+        THROW_EXCEPTION(lv::Exception, "Extension failed to create or cast to WorkspaceExtension type in: " + path, 3);
     }
 
     le->setIdentifiers(package->name(), path);

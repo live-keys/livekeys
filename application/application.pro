@@ -5,7 +5,6 @@ QT      += qml quick webengine
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
-linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 !isEmpty(BUILD_ELEMENTS){
     DEFINES += BUILD_ELEMENTS
@@ -39,6 +38,17 @@ macx{
 
 DESTDIR = $$BUILD_PATH/bin
 
+# Os Specific
+# -----------
+
+
+macx{
+    VERSION = $${LIVEKEYS_VERSION}
+    OTHER_FILES += $$PWD/os/ios/Info.plist
+    QMAKE_INFO_PLIST = $$PWD/os/ios/Info.plist
+}
+
+
 # Application
 # -----------
 
@@ -60,6 +70,8 @@ DISTFILES += \
     qml/MessageDialogMain.qml \
     qml/LogView.qml \
     qml/CommandsMenu.qml \
+    qml/MessagesContainer.qml \
+    qml/Viewer.qml \
     qml/editorlayer.qml \
     qml/PaneSplitView.qml \
     qml/LiveKeysTheme.qml \

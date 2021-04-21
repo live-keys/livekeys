@@ -3,42 +3,90 @@ import editor 1.0
 import editor.private 1.0
 import editqml 1.0
 
+import workspace 1.0 as Workspace
+
 Item{
     id: propertyItem
     property string propertyName : ''
     
+    property QtObject theme: lk.layers.workspace.themes.current
+    objectName: "objectNodeProperty"
+
     property Item inPort : null
     property Item outPort : null
     property QtObject node : null
+    property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
     property var documentHandler: null
     property alias propertyTitle: propertyTitle
-    property Component paletteContainerFactory: Component{ PaletteContainer{} }
+    property alias paletteContainer: paletteContainer
 
-    property var isForObject: editingFragment && editingFragment.isForObject()
+    property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
+
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
     signal propertyToBeDestroyed(var name)
 
+    signal updateContentWidth()
+
+    onUpdateContentWidth:
+        paletteContainer.updateContentWidth()
+
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
-    width: Math.max(340 - anchors.leftMargin, paletteContainer.width) + 20
     height: propertyTitle.height + paletteContainer.height
+
+
+    property int contentWidth: 355 - anchors.leftMargin
+
+    property QtObject defaultStyle : QtObject{
+        property color background: "#333"
+        property double radius: 5
+        property QtObject textStyle: Workspace.TextStyle{}
+    }
+
+    property QtObject style: defaultStyle
     
+    z: -1
+
+    function destroyObjectNodeProperty(){
+        propertyItem.propertyToBeDestroyed(propertyName)
+        var graph = node.graph
+        if (propertyItem.inPort) {
+
+            if (propertyItem.inPort.inEdge)
+                graph.removeEdge(propertyItem.inPort.inEdge)
+
+            graph.removePort(node, propertyItem.inPort)
+        }
+        if (propertyItem.outPort) {
+            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
+                graph.removeEdge(propertyItem.outPort.outEdges[i])
+
+            graph.removePort(node, propertyItem.outPort)
+        }
+
+        var children = propertyItem.paletteContainer.children
+        for (var idx = 0; idx < children.length; ++idx)
+            children[idx].destroy()
+
+        propertyItem.destroy()
+    }
+
     Rectangle {
         id: propertyTitle
-        radius: 5
-        color: "#333"
-        width: parent.width
+        radius: propertyItem.style.radius
+        color: propertyItem.style.background
+        width: parent.width - 10
         height: 30
-        Text{
-            color: 'white'
-            font.family: "Open Sans"
-            font.pixelSize: 12
+
+        Workspace.Label{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             text: propertyItem.propertyName
+            textStyle: propertyItem.style.textStyle
         }
 
         Item{
@@ -57,55 +105,22 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
-                    if (!propertyItem.editingFragment) return
+                    var coords = propertyItem.mapToItem(node.item, 0, 0)
+                    var paletteList = paletteControls.addPaletteList(
+                        propertyItem,
+                        paletteContainer,
+                        Qt.rect(coords.x, coords.y ,1,1),
+                        PaletteControls.PaletteListMode.NodeEditor,
+                        PaletteControls.PaletteListSwap.NoSwap,
+                        node.item
+                    )
 
-                    var palettes = propertyItem.documentHandler.codeHandler.findPalettes(
-                        propertyItem.editingFragment.position(), true)
-
-                    if (palettes.size() ){
-                        paletteHeaderList.forceActiveFocus()
-                        paletteHeaderList.model = palettes
-
-                        paletteHeaderList.cancelledHandler = function(){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-                        }
-                        paletteHeaderList.selectedHandler = function(index){
-                            paletteHeaderList.focus = false
-                            paletteHeaderList.model = null
-
-
-
-                            if ( paletteContainer &&
-                                 paletteContainer.objectName === 'paletteGroup' )
-                            {
-                                var palette = documentHandler.codeHandler.openPalette(propertyItem.editingFragment, palettes, index)
-
-                                var newPaletteBox = paletteContainerFactory.createObject(paletteContainer)
-
-                                palette.item.x = 5
-                                palette.item.y = 7
-
-                                newPaletteBox.child = palette.item
-                                newPaletteBox.palette = palette
-                                newPaletteBox.moveEnabledSet = false
-                                newPaletteBox.width = Qt.binding(function(){ return paletteContainer.width })
-
-                                newPaletteBox.name = palette.name
-                                newPaletteBox.type = palette.type
-                                newPaletteBox.documentHandler = documentHandler
-                                newPaletteBox.cursorRectangle = editor.getCursorRectangle()
-                                newPaletteBox.editorPosition = editor.cursorWindowCoords()
-                                newPaletteBox.paletteContainerFactory = function(arg){
-                                    return propertyContainer.paletteContainerFactory.createObject(arg)
-                                }
-
-                            }
-
-
-                        }
+                    if (paletteList){
+                        paletteList.anchors.topMargin = coords.y + 30
+                        paletteList.anchors.left = node.item.left
+                        paletteList.anchors.leftMargin = coords.x
+                        paletteList.width = Qt.binding(function(){return propertyItem.width})
                     }
-
                 }
             }
         }
@@ -132,22 +147,7 @@ Item{
                     documentHandler.codeHandler.removeConnection(editingFragment)
                     if (editingFragment.refCount > 0)
                     {
-                        propertyItem.propertyToBeDestroyed(propertyName)
-                        var graph = node.graph
-                        if (propertyItem.inPort) {
-
-                            if (propertyItem.inPort.inEdge)
-                                graph.removeEdge(propertyItem.inPort.inEdge)
-
-                            graph.removePort(node, propertyItem.inPort)
-                        }
-                        if (propertyItem.outPort) {
-                            for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
-                                graph.removeEdge(propertyItem.outPort.outEdges[i])
-
-                            graph.removePort(node, propertyItem.outPort)
-                        }
-                        propertyItem.destroy()
+                        destroyObjectNodeProperty()
                     }
                 }
             }
@@ -158,46 +158,27 @@ Item{
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
         id: paletteContainer
-    }
+        function updateContentWidth(){
+            var max = 355
+            for (var i=0; i<children.length; ++i){
+                if (children[i].width + 10 > max)
+                    max = children[i].width + 10
+            }
+            propertyItem.contentWidth = max + propertyItem.anchors.leftMargin
+            if (node)
+                node.item.resizeNode()
+        }
+        onChildrenChanged: {
+            updateContentWidth()
+        }
+        editingFragment: propertyItem.editingFragment
 
-    PaletteListView{
-        id: paletteHeaderList
-        visible: model ? true:false
-        anchors.top: parent.top
-        anchors.topMargin: propertyTitle.height
-        width: parent.width
-        color: "#0a141c"
-        selectionColor: "#0d2639"
-        fontSize: 10
-        fontFamily: "Open Sans, sans-serif"
-        onFocusChanged : if ( !focus ) model = null
-
-        property var selectedHandler : function(){}
-        property var cancelledHandler : function(index){}
-
-        onPaletteSelected: selectedHandler(index)
-        onCancelled : cancelledHandler()
     }
     
     Connections {
         target: editingFragment
-        onAboutToBeRemoved: {
-            propertyItem.propertyToBeDestroyed(propertyName)
-            var graph = node.graph
-            if (propertyItem.inPort) {
-
-                if (propertyItem.inPort.inEdge)
-                    graph.removeEdge(propertyItem.inPort.inEdge)
-
-                graph.removePort(node, propertyItem.inPort)
-            }
-            if (propertyItem.outPort) {
-                for (var i=0; i< propertyItem.outPort.outEdges.length; ++i)
-                    graph.removeEdge(propertyItem.outPort.outEdges[i])
-
-                graph.removePort(node, propertyItem.outPort)
-            }
-            propertyItem.destroy()
+        function onAboutToBeRemoved(){
+            destroyObjectNodeProperty()
         }
         ignoreUnknownSignals: true
     }

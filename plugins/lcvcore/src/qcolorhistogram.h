@@ -139,9 +139,11 @@ inline QMat *QColorHistogram::output() const{
 }
 
 inline void QColorHistogram::setInput(QMat *input){
-    m_input = input;
-    emit inputChanged();
-    createHistogram();
+    if ( input != nullptr ){
+        m_input = input;
+        emit inputChanged();
+        createHistogram();
+    }
 }
 
 inline void QColorHistogram::setChannel(int channel){

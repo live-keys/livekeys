@@ -11,7 +11,6 @@ QtObject{
             throw linkError(new Error("Path does not exist"), this)
         }
         while ( !file.isEof() ){
-            console.log("NEW LINE READ")
             __writableStream.push(file.readLine())
         }
     }

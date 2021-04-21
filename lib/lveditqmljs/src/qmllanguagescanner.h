@@ -44,12 +44,13 @@ public:
 
     QmlLibraryInfo::Ptr libraryInfo(const QString& uri) const;
 
+    int plannedQueueSize();
+
 public slots:
     void processQueue();
     void scanDocument(const QString& path, const QString& content, CodeQmlHandler* handler);
 
 signals:
-    void isProcessingChanged(bool isProcessing);
     void documentScanReady(DocumentTransport* transport);
 
 private:
@@ -66,10 +67,12 @@ private:
     void scanQmlDirForExports(const QmlDirParser& dir, const QmlLibraryInfo::Ptr& lib);
     void scanPathForExports(const QString& path, const QmlLibraryInfo::Ptr& lib);
 
+    void updateLibraryUnknownTypes(const QmlLibraryInfo::Ptr& lib);
+
     void insertNewLibrary(const QmlLibraryInfo::Ptr& lib);
 
-    QMutex                           m_queueMutex;
-    QLinkedList<QmlLibraryInfo::Ptr> m_queue;
+    QMutex                           m_plannedQueueMutex;
+    QLinkedList<QmlLibraryInfo::Ptr> m_plannedQueue;
 
     std::function<void(QmlLibraryInfo::Ptr, int)>    m_updateListener;
     std::function<void()>                            m_queueFinished;

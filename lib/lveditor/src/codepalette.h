@@ -24,14 +24,16 @@
 
 namespace lv{
 
+class QmlEditFragment;
+
 class LV_EDITOR_EXPORT CodePalette : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QQuickItem* item    READ item       WRITE setItem       NOTIFY itemChanged)
-    Q_PROPERTY(QString type        READ type       WRITE setType       NOTIFY typeChanged)
-    Q_PROPERTY(QVariant value      READ value      WRITE setValue      NOTIFY valueChanged)
-    Q_PROPERTY(QString name        READ name       CONSTANT)
-    Q_PROPERTY(QObject* extension  READ extension  NOTIFY extensionChanged)
+    Q_PROPERTY(QQuickItem* item                  READ item           WRITE setItem       NOTIFY itemChanged)
+    Q_PROPERTY(QString type                      READ type           WRITE setType       NOTIFY typeChanged)
+    Q_PROPERTY(QVariant value                    READ value          WRITE setValue      NOTIFY valueChanged)
+    Q_PROPERTY(QString name                      READ name           CONSTANT)
+    Q_PROPERTY(lv::QmlEditFragment* editFragment READ editFragment   CONSTANT)
 
 public:
     explicit CodePalette(QObject *parent = nullptr);
@@ -46,6 +48,8 @@ public:
     const QVariant &value() const;
     void setValue(const QVariant& value);
     void setValueFromBinding(const QVariant &value);
+    void initValue(const QVariant& value);
+    void initViaSource();
 
     /** Palette name */
     QString name() const;
@@ -54,8 +58,8 @@ public:
     const QString &path() const;
 
     /** Returns extension for palette */
-    QObject* extension() const;
-    void setExtension(QObject* extension, bool own = false);
+    QmlEditFragment* editFragment() const;
+    void setEditFragment(QmlEditFragment* extension);
 
     /** Palette type */
     QString type() const;
@@ -69,27 +73,27 @@ signals:
     void itemChanged();
     /** Value changed */
     void valueChanged();
-    /** Extension changed */
-    void extensionChanged();
+    /** Edit fragment changed */
+    void editFragmentChanged();
     /** Type changed */
     void typeChanged();
 
     /** Value was initialized */
     void init(const QVariant& value);
-    /** Code changed */
-    void codeChanged(const QVariant& value);
+    void sourceInit();
 
+    void valueFromBindingChanged(const QVariant& value);
 
 private:
     Q_DISABLE_COPY(CodePalette)
 
-    bool        m_bindingChange;
-    QQuickItem* m_item;
-    QVariant    m_value;
-    QString     m_path;
-    QObject*    m_extension;
-    bool        m_ownExtension;
-    QString     m_type;
+    bool             m_isChangingValue; // the current palette is changing the value
+    bool             m_bindingChange;
+    QQuickItem*      m_item;
+    QVariant         m_value;
+    QString          m_path;
+    QString          m_type;
+    QmlEditFragment* m_editFragment;
 };
 
 inline QQuickItem *CodePalette::item(){
@@ -119,16 +123,6 @@ inline const QVariant& CodePalette::value() const{
 }
 
 /**
- * \brief Value setter for palette
- */
-inline void CodePalette::setValue(const QVariant &value){
-    if ( (value.canConvert<QObject*>() || m_value != value) && !m_bindingChange ){
-        m_value = value;
-        emit valueChanged();
-    }
-}
-
-/**
  * \brief Path setter for palette
  */
 inline void CodePalette::setPath(const QString &path){
@@ -143,23 +137,19 @@ inline const QString& CodePalette::path() const{
 }
 
 
-inline QObject *CodePalette::extension() const{
-    return m_extension;
+inline QmlEditFragment *CodePalette::editFragment() const{
+    return m_editFragment;
 }
 
 /**
  * \brief Extension setter for palette
  */
-inline void CodePalette::setExtension(QObject *extension, bool own){
-    if (m_extension == extension)
+inline void CodePalette::setEditFragment(QmlEditFragment *editFragment){
+    if (m_editFragment == editFragment)
         return;
 
-    if ( m_ownExtension && m_extension )
-        delete m_extension;
-
-    m_extension = extension;
-    m_ownExtension = own;
-    emit extensionChanged();
+    m_editFragment = editFragment;
+    emit editFragmentChanged();
 }
 
 inline QString CodePalette::type() const{

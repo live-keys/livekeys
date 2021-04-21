@@ -208,7 +208,7 @@ WorkspaceControl{
                     var coords = objectContainer.mapToItem(editor, 0, 0)
                     var editorCoords = editorPane.mapGlobalPosition()
                     highlight = createHighlight(state)
-                    highlight.boxX = coords.x + editorCoords.x + objectContainer.width - 38
+                    highlight.boxX = coords.x + editorCoords.x + objectContainer.width - 47
                     highlight.boxY = coords.y + editorCoords.y + 28
                     highlight.box.width = 35
                     highlight.box.height = 35
@@ -232,8 +232,8 @@ WorkspaceControl{
                         var coords = addBox.mapToItem(container, 0, 0)
 
                         highlight = createHighlight(state)
-                        highlight.boxX = coords.x + addBox.width - 140
-                        highlight.boxY = coords.y + 35
+                        highlight.boxX = coords.x + addBox.width - 241
+                        highlight.boxY = coords.y + 61
                         highlight.box.width = 75
                         highlight.box.height = 30
                     }
@@ -258,7 +258,7 @@ WorkspaceControl{
 
                         highlight = createHighlight(state)
                         highlight.boxX = coords.x
-                        highlight.boxY = coords.y + 90
+                        highlight.boxY = coords.y + 120
                         highlight.box.width = addBox.width
                         highlight.box.height = 30
                     }
@@ -298,8 +298,8 @@ WorkspaceControl{
                                             var editorCoords = editorPane.mapGlobalPosition()
 
                                             highlight = createHighlight(state)
-                                            highlight.boxX = coords.x + editorCoords.x + palette.item.width - 35
-                                            highlight.boxY = coords.y + editorCoords.y + 30
+                                            highlight.boxX = coords.x + editorCoords.x + palette.item.width - 32
+                                            highlight.boxY = coords.y + editorCoords.y + 27
                                             highlight.box.width = 35
                                             highlight.box.height = 35
                                         }
@@ -359,6 +359,10 @@ WorkspaceControl{
                     }
                 }
             }
+        } else if (fragment === 'logo'){
+            highlight = createHighlight(state)
+            highlight.boxX = 5
+            highlight.boxY = -10
         }
     }
 

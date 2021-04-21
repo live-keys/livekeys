@@ -156,9 +156,9 @@ void QFeatureDetector::initializeDetector(cv::Ptr<cv::FeatureDetector> detector)
 
 /// \private
 void QFeatureDetector::detect(){
-    if ( m_detector != nullptr && !m_in->cvMat()->empty() && isComponentComplete() ){
-        m_detector->detect(*m_in->cvMat(), m_keypoints->keypoints(), *m_mask->cvMat());
-        cv::Mat inClone = m_in->cvMat()->clone();
+    if ( m_detector != nullptr && !m_in->internalPtr()->empty() && isComponentComplete() ){
+        m_detector->detect(*m_in->internalPtr(), m_keypoints->keypoints(), *m_mask->internalPtr());
+        cv::Mat inClone = m_in->internalPtr()->clone();
         m_keypoints->setMat(inClone);
         emit keypointsChanged();
         m_outputDirty = true;
@@ -197,11 +197,11 @@ QSGNode* QFeatureDetector::updatePaintNode(QSGNode* node, QQuickItem::UpdatePain
 }
 
 void QFeatureDetector::drawKeypoints(){
-    if ( !inputMat()->cvMat()->empty() ){
+    if ( !inputMat()->internalPtr()->empty() ){
         cv::drawKeypoints(
-            *m_in->cvMat(),
+            *m_in->internalPtr(),
              m_keypoints->keypoints(),
-            *m_output->cvMat(),
+            *m_output->internalPtr(),
              cv::Scalar::all(-1),
              cv::DrawMatchesFlags::DEFAULT
         );

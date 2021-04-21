@@ -2,10 +2,21 @@
     "name": "lcvcore",
     "package" : ".",
     "palettes" : {
-        "palettes/MatPalette.qml" : "qml/lcvcore#Mat",
+        "palettes/ImagePalette.qml" : "qml/lcvcore#Mat",
+        "palettes/PaperSurfacePalette.qml" : "qml/lcvcore#PaperSurface",
+        "palettes/DrawPalette.qml" : "qml/lcvcore#DrawSurface",
+        "palettes/DrawSurfacePalette.json" : "qml/lcvcore#DrawSurface",
+        "palettes/ImageViewPalette.json" : "qml/lcvcore#ImageView",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
-        "palettes/ImageFilePalette.qml" : "qml/lcvcore#ImageFile",
+        "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",
+        "palettes/VideoFilePalette.qml": "qml/lcvcore#VideoFile",
+        "palettes/VideoFilePropertiesPalette.json": "qml/lcvcore#VideoFile",
         "palettes/VideoDecoderViewPalette.json" : "qml/lcvcore#VideoDecoderView",
-        "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView"
+        "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView",
+        "palettes/ImageReadPalette.json" : "qml/lcvcore#ImageRead",
+        "palettes/ImageFilePalette.json" : "qml/lcvcore#ImageFile",
+        "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage",
+        "palettes/PerspectiveOnBackgroundPalette.qml": "qml/lcvcore#PerspectiveOnBackground",
+        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground"
     }
 }

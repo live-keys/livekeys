@@ -1,13 +1,14 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/documentqmlchannels.h \
     $$PWD/documentqmlinfo.h \
     $$PWD/documentqmlranges_p.h \
     $$PWD/qmlbindingchannel.h \
+    $$PWD/qmlbindingchannelsdispatcher.h \
     $$PWD/qmlbindingpath.h \
-    $$PWD/qmlbindingspan.h \
+    $$PWD/qmleditfragmentcontainer.h \
     $$PWD/qmlimportsmodel.h \
-    $$PWD/qmlbindingspanmodel.h \
     $$PWD/qmlidvisitor_p.h \
     $$PWD/qmljshighlighter_p.h \
     $$PWD/qmlcompletioncontext.h \
@@ -23,27 +24,29 @@ HEADERS += \
     $$PWD/lveditqmljsglobal.h \
     $$PWD/projectqmlextension.h \
     $$PWD/qmljsbuiltintypes_p.h \
+    $$PWD/qmlmetainfo_p.h \
     $$PWD/qmlprojectmonitor_p.h \
     $$PWD/qmladdcontainer.h \
-    $$PWD/qmlcodeconverter.h \
     $$PWD/qmleditfragment.h \
     $$PWD/qmldeclaration.h \
     $$PWD/qmllanguagescanner.h \
-    $$PWD/qmlbuilder.h \
+    $$PWD/qmlsyntax_p.h \
+    $$PWD/qmltokenizer_p.h \
     $$PWD/qmlwatcher.h \
+    $$PWD/qmlbuilder.h \
     $$PWD/qmllanguagescanmonitor.h\
     $$PWD/qmlscopesnap_p.h \
     $$PWD/qmlsuggestionmodel.h \
-    $$PWD/qmlusagegraphscanner.h \
-    $$PWD/qmlwatcherbackground.h
+    $$PWD/qmlusagegraphscanner.h
 
 SOURCES += \
+    $$PWD/documentqmlchannels.cpp \
     $$PWD/documentqmlinfo.cpp \
     $$PWD/documentqmlranges.cpp \
     $$PWD/qmlbindingchannel.cpp \
+    $$PWD/qmlbindingchannelsdispatcher.cpp \
     $$PWD/qmlbindingpath.cpp \
-    $$PWD/qmlbindingspan.cpp \
-    $$PWD/qmlbindingspanmodel.cpp \
+    $$PWD/qmleditfragmentcontainer.cpp \
     $$PWD/qmlidvisitor.cpp \
     $$PWD/qmlcompletioncontext.cpp \
     $$PWD/qmllanguageinfo.cpp \
@@ -57,17 +60,20 @@ SOURCES += \
     $$PWD/codeqmlhandler.cpp \
     $$PWD/projectqmlextension.cpp \
     $$PWD/qmljsbuiltintypes.cpp \
+    $$PWD/qmlmetainfo.cpp \
     $$PWD/qmlprojectmonitor.cpp \
     $$PWD/qmladdcontainer.cpp \
-    $$PWD/qmlcodeconverter.cpp \
     $$PWD/qmleditfragment.cpp \
     $$PWD/qmldeclaration.cpp \
     $$PWD/qmlimportsmodel.cpp \
     $$PWD/qmllanguagescanner.cpp \
     $$PWD/qmllanguagescanmonitor.cpp \
-    $$PWD/qmlbuilder.cpp \
+    $$PWD/qmlsyntax.cpp \
+    $$PWD/qmltokenizer.cpp \
     $$PWD/qmlwatcher.cpp \
+    $$PWD/qmlbuilder.cpp \
     $$PWD/qmlscopesnap.cpp \
     $$PWD/qmlsuggestionmodel.cpp \
-    $$PWD/qmlusagegraphscanner.cpp \
-    $$PWD/qmlwatcherbackground.cpp
+    $$PWD/qmlusagegraphscanner.cpp
+
+DISTFILES +=

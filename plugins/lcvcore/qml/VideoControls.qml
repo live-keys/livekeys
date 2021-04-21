@@ -16,6 +16,7 @@
 
 import QtQuick 2.3
 import live 1.0
+import visual.shapes 1.0
 
 Rectangle{
     id : root
@@ -24,11 +25,7 @@ Rectangle{
     width : 100
     color: '#000d18'
 
-    property Item videoCapture : Item{
-        property bool paused : true
-        property int totalFrames : 0
-        property int currentFrame : 0
-    }
+    property var videoCapture : null
 
     signal playPauseTriggered(bool paused)
     signal seekTriggered(int currentFrame)
@@ -71,17 +68,18 @@ Rectangle{
         anchors.verticalCenter: parent.verticalCenter
         width  : parent.width - 70
         height : 8
-        color  : "#0d1a2a"
+        color  : "#141b20"
         Rectangle{
             height : parent.height
-            width : root.videoCapture ? root.videoCapture.totalFrames > 0 ?
-                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0 : 0
+            width : root.videoCapture && root.videoCapture.totalFrames > 0 ?
+                Math.round( (parent.width / root.videoCapture.totalFrames) * root.videoCapture.currentFrame ) : 0
             color : "#aeaeae"
         }
 
         MouseArea{
             anchors.fill : parent
             onClicked : {
+                if (!root.videoCapture) return
                 root.videoCapture.seekTo(mouse.x * (root.videoCapture.totalFrames / parent.width))
                 root.seekTriggered(mouse.x * (root.videoCapture.totalFrames / parent.width))
             }

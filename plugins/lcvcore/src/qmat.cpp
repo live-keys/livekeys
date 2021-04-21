@@ -20,6 +20,8 @@
 #include <QQmlEngine>
 #include "live/memory.h"
 #include "live/visuallog.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
 
 /**
  *\class QMat
@@ -130,13 +132,6 @@ QMat::~QMat(){
     lv::Memory::free(this, m_internal);
 }
 
-/**
- * \brief Returns the matrix internal data.
- */
-const cv::Mat &QMat::data() const{
-    return *m_internal;
-}
-
 QMat* QMat::m_nullMat = nullptr;
 
 /**
@@ -144,21 +139,14 @@ QMat* QMat::m_nullMat = nullptr;
  */
 QMat*QMat::nullMat(){
     if ( !m_nullMat ){
-        m_nullMat = new QMat;
-        atexit(&QMat::cleanUp);
+        m_nullMat = new QMat(lv::ViewContext::instance().engine());
+        Shared::ownCpp(m_nullMat);
     }
     return m_nullMat;
 }
 
-/**
- *\brief Internal method used to clean up the null matrix.
- */
-void QMat::cleanUp(){
-    delete m_nullMat;
-}
-
 cv::Mat *QMat::memoryAlloc(int width, int height, int type, int channels){
-    return new cv::Mat(width, height, CV_MAKETYPE(type, channels));
+    return new cv::Mat(height, width, CV_MAKETYPE(type, channels));
 }
 
 size_t QMat::memorySize(int width, int height, int type, int channels){
@@ -211,6 +199,7 @@ const cv::Mat &QMat::internal() const{
 cv::Mat &QMat::internal(){
     return *m_internal;
 }
+
 /**
 *\brief Memory allocation
 */
@@ -219,7 +208,7 @@ void QMat::recycleSize(int){
 }
 
 /*!
-  \fn cv::Mat* QMat::cvMat()
+  \fn cv::Mat* QMat::internalPtr()
   \brief Returns the contained open cv mat.
  */
 

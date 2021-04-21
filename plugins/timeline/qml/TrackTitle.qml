@@ -1,14 +1,15 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import timeline 1.0
-import workspace 1.0
+import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 Item{
     id: root
     width: parent.width
     height: 25
 
-    property TimelineStyle timelineStyle : null
+    property QtObject timelineStyle : null
     property int trackIndex : 0
 
     signal addSegment(int index)
@@ -32,7 +33,7 @@ Item{
         height: parent.height - 1
         color: 'transparent'
 
-        MenuIcon{
+        Icons.MenuIcon{
             id: menuIcon
             width: 5
             height: 6
@@ -49,13 +50,13 @@ Item{
         }
     }
 
-    EditableLabel{
+    Workspace.EditableLabel{
         id: editableLabel
         anchors.left: parent.left
         anchors.leftMargin: 20
         height: parent.height
         text: track.name
-        textColor: root.timelineStyle.textColor
+        style: root.timelineStyle.inputStyle
         onTextChanged: {
             track.name = text
         }
@@ -64,16 +65,23 @@ Item{
     Menu{
         id: contextMenu
         MenuItem {
-            text: qsTr("Add Segment...")
-            onTriggered: root.addSegment(root.trackIndex)
-        }
-        MenuItem {
-            text: qsTr("Insert Track")
-            onTriggered: timelineArea.timeline.addTrack()
-        }
-        MenuItem {
             text: qsTr("Remove Track")
             onTriggered: timelineArea.timeline.removeTrack(index)
+        }
+    }
+
+    Component.onCompleted: {
+        // load menu for this track type
+        var menuOptions = timelineArea.timeline.config.trackMenu(track)
+        if ( !menuOptions )
+            return
+
+        var tr = track
+
+        for ( var i = 0; i < menuOptions.length; ++i ){
+            var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
+            menuitem.enabled = menuOptions[i].enabled
+            menuitem.triggered.connect(menuOptions[i].action.bind(this, track))
         }
     }
 }

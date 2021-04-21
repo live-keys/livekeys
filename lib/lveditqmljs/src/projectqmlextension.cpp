@@ -26,16 +26,33 @@
 #include "qmlbuilder.h"
 #include "qmlwatcher.h"
 #include "qmljssettings.h"
-#include "qmlcodeconverter.h"
 #include "qmlprojectmonitor_p.h"
 #include "qmladdcontainer.h"
 #include "qmleditfragment.h"
-#include "qmlbindingspanmodel.h"
+#include "qmleditfragmentcontainer.h"
+#include "documentqmlchannels.h"
+#include "qmlbindingchannelsdispatcher.h"
+#include "qmltokenizer_p.h"
+#include "qmlsyntax_p.h"
+#include "qmlmetainfo_p.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
 
 namespace lv{
+
+static QObject* qmlTokenizerProvider(QQmlEngine* engine, QJSEngine*){
+    return new QmlTokenizer(engine);
+}
+
+static QObject* qmlMetaInfoProvider(QQmlEngine* engine, QJSEngine*){
+    return new QmlMetaInfo(engine);
+}
+
+static QObject* qmlSyntaxProvider(QQmlEngine* engine, QJSEngine*){
+    return new QmlSyntax(engine);
+}
+
 
 /**
  * \class lv::ProjectQmlExtension
@@ -58,6 +75,7 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
     , m_settings(nullptr)
     , m_scanMonitor(nullptr)
     , m_paletteContainer(nullptr)
+    , m_channelDispatcher(nullptr)
 {
 }
 
@@ -111,13 +129,12 @@ void ProjectQmlExtension::componentComplete(){
 /**
  * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
  */
-void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *, void* data){
-    ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
-
-    for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
-        CodeQmlHandler* h = *it;
-        h->updateRuntimeBindings();
-    }
+void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *, void* /*data*/){
+//    ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
+//    for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
+//        CodeQmlHandler* h = *it;
+////        h->updateRuntimeBindings();
+//    }
 }
 
 /**
@@ -143,21 +160,25 @@ void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
  */
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
-    qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
     qmlRegisterType<lv::QmlWatcher>(         uri, 1, 0, "Watcher");
+    qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
     qmlRegisterUncreatableType<lv::CodeQmlHandler>(
-        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler.");
-    qmlRegisterUncreatableType<lv::QmlCodeConverter>(
-        uri, 1, 0, "QmlCodeConverter", "QmlCodeConverter can only be accessed through the Palette.attachment.");
+        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler");
+    qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(
+        uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.documentHandler.codeHandler.editContainer");
+    qmlRegisterUncreatableType<lv::DocumentQmlChannels>(
+        uri, 1, 0, "DocumentQmlChannels", "DocumentQmlChannels can only be accessed through the Editor.documentHandler.codeHandler.bindingChannels");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
         uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
-    qmlRegisterUncreatableType<lv::QmlBindingSpanModel>(
-        uri, 1, 0, "BindingSpanModel", "BindingSpanModel can only be accessed through the qmledit extension.");
+
+    qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
+    qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);
+    qmlRegisterSingletonType<lv::QmlMetaInfo>( uri, 1, 0, "MetaInfo", &qmlMetaInfoProvider);
 }
 
 /**
@@ -182,6 +203,7 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     }
 
     m_paletteContainer = editor->paletteContainer();
+    m_channelDispatcher = new QmlBindingChannelsDispatcher(m_project, this);
 }
 
 bool ProjectQmlExtension::pluginTypesEnabled(){

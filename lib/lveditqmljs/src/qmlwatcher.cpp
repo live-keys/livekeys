@@ -1,5 +1,4 @@
 #include "qmlwatcher.h"
-#include "qmlwatcherbackground.h"
 
 #include <QQuickItem>
 #include <QQmlComponent>
@@ -7,152 +6,143 @@
 #include <QQmlProperty>
 #include <QQmlEngine>
 
-#include <QThread>
-
 #include "live/hookcontainer.h"
 #include "live/project.h"
 #include "live/projectdocument.h"
 #include "live/viewengine.h"
 #include "live/visuallogqt.h"
+#include "live/componentdeclaration.h"
 
 namespace lv{
 
 QmlWatcher::QmlWatcher(QObject *parent)
     : QObject(parent)
-    , m_scanner(nullptr)
-    , m_worker(nullptr)
+    , m_isEnabled(true)
     , m_componentComplete(false)
+    , m_target(nullptr)
 {
 }
 
 QmlWatcher::~QmlWatcher(){
-    if ( m_worker ){
-        m_worker->exit();
-        if ( !m_worker->wait(100) ){
-            m_worker->terminate();
-            m_worker->wait();
-        }
-        delete m_worker;
+    if ( m_target ){
+        QQmlContext* ctx = qmlContext(this);
+        if ( !ctx )
+            return;
+
+        HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
+        if ( !hk )
+            return;
+        hk->removeEntry(m_referencedFile, m_declaredId, this);
     }
 }
 
-QObject *QmlWatcher::scanner(){
-    if ( !m_scanner ){
-        QQmlEngine* engine = qmlEngine(this);
-        QQmlComponent component(engine);
-        component.setData(
-            "import QtQuick 2.3\n"
-            "QtObject{ "
-            "function capture(){ try{ throw new Error() } catch (e){ return e } return null; }"
-            "}",
-            QUrl("file:///Watcher.qml")
-        );
-        m_scanner = component.create();
-    }
+void QmlWatcher::initialize(ViewEngine *, HookContainer *hooks, const QString &refFile, const QString &declaredId){
+    if ( m_componentComplete )
+        return;
 
-    return m_scanner;
+    m_referencedFile = refFile;
+    m_declaredId     = declaredId;
+
+    hooks->insertKey(m_referencedFile, m_declaredId, this);
+    m_componentComplete = true;
 }
 
 void QmlWatcher::componentComplete(){
     m_componentComplete = true;
 
-    scanner();
+    if ( !m_target )
+        m_target = parent();
+    if ( !m_target )
+        return;
 
-    if ( m_fileLine >= 0 && !m_filePath.isEmpty() ){
+    resolveTarget();
+}
 
-        //Find document/file, get contents, create capture thread
-        QQmlContext* ctx = qmlContext(this);
-        if ( ctx ){
-            Project* pr = qobject_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
-            if ( pr ){
-                ProjectDocument* doc = qobject_cast<ProjectDocument*>(pr->isOpened(m_filePath));
-                QString docContent;
-                if ( doc ){
-                    docContent = doc->contentString();
-                } else {
-                    docContent = QString::fromStdString(pr->lockedFileIO()->readFromFile(m_filePath.toStdString()));
-                }
+void QmlWatcher::resolveTarget(){
+    if ( !m_componentComplete )
+        return;
 
-                m_worker = new QmlWatcherBackground(
-                    m_filePath, m_fileLine, docContent, this
-                );
-                connect(m_worker, &QThread::finished, this, &QmlWatcher::__workerResultReady);
-                m_worker->start();
-            }
-        }
+    if ( !m_referencedFile.isEmpty() ) // skip if already initialized
+        return;
+
+    ViewEngine* ve = ViewEngine::grab(this);
+
+    QQmlContext* ctx = qmlContext(this);
+    if ( !ctx )
+        return;
+
+    if ( m_declaredId.isEmpty() )
+        m_declaredId = ctx->nameForObject(m_target);
+
+    if ( m_declaredId.isEmpty() )
+        return;
+
+    ComponentDeclaration cd = ve->rootDeclaration(m_target);
+    m_referencedFile = cd.url().toLocalFile();
+
+    if ( checkChildDeclarations() ){
+        HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
+        hk->insertKey(m_referencedFile, m_declaredId, this);
     }
 
     emit ready();
 }
 
-const QJSValue& QmlWatcher::position() const{
-    return m_position;
-}
-
-const QString &QmlWatcher::fileReference() const{
-    return m_worker->result();
-}
-
-void QmlWatcher::setPosition(QJSValue position){
-    QQmlContext* ctx = qmlContext(this);
-    ViewEngine* engine = nullptr;
-    if ( ctx ){
-        QObject* lk = ctx->contextProperty("lk").value<QObject*>();
-        if ( lk ){
-            engine = qobject_cast<ViewEngine*>(lk->property("engine").value<QObject*>());
+bool QmlWatcher::checkChildDeclarations(){
+    // children of the target need to be declared in the file being watched, not
+    // where the watcher was set
+    QQmlProperty pp(m_target);
+    if ( pp.propertyTypeCategory() == QQmlProperty::List ){
+        QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(pp.read());
+        for ( int i = 0; i < assignmentList.count(); ++i ){
+            QObject* obj = assignmentList.at(i);
+            QString localUrl = qmlContext(obj)->baseUrl().toLocalFile();
+            if ( m_referencedFile != localUrl )
+                return false;
         }
     }
-
-    if ( !position.hasProperty("stack") ){
-        Exception e = CREATE_EXCEPTION(Exception, "Cannot obtain position through 'stack'.", Exception::toCode("~Stack"));
-        engine->throwError(&e, this);
-        return;
-    }
-
-    QString stack = position.property("stack").toString();
-    QString lastStack = stack.mid(stack.lastIndexOf('\n'));
-    if ( lastStack.isEmpty() || !lastStack.contains("position") ){
-        Exception e = CREATE_EXCEPTION(Exception, "Cannot obtain position through 'stack'.", Exception::toCode("~Stack"));
-        engine->throwError(&e, this);
-        return;
-    }
-
-    QString lastStackContent = lastStack.mid(lastStack.indexOf('@') + 1);
-    if ( lastStackContent.isEmpty() || !lastStackContent.contains(':') ){
-        Exception e = CREATE_EXCEPTION(Exception, "Cannot obtain position through 'stack'.", Exception::toCode("~Stack"));
-        engine->throwError(&e, this);
-        return;
-    }
-
-    bool ok;
-    m_fileLine = lastStackContent.mid(lastStackContent.lastIndexOf(':') + 1).toInt(&ok);
-    QUrl file = lastStackContent.mid(0, lastStackContent.lastIndexOf(':'));
-
-    if ( file.scheme() == "memory" || file.scheme() == "file" ){
-        m_filePath = file.path();
-    }
-
-    if ( m_filePath.isEmpty() || !ok ){
-        Exception e = CREATE_EXCEPTION(Exception, "Cannot obtain position through 'stack'.", Exception::toCode("~Stack"));
-        engine->throwError(&e, this);
-        return;
-    }
-
-    m_position = position;
-    emit positionChanged();
+    return true;
 }
 
-void QmlWatcher::__workerResultReady(){
-    if ( m_worker->result().isEmpty() )
+void QmlWatcher::setSingleton(QObject *singleton){
+    if ( m_target ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( ve ){
+            QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already has a target. Cannot overwrite with new singleton.", Exception::toCode("Completed")),
+                this
+            ).jsThrow();
+        }
         return;
+    }
 
-    QQmlContext* ctx = qmlContext(this);
-    QString id = ctx->nameForObject(parent());
-    if ( id.isEmpty() )
+    m_target = singleton;
+    m_declaredId = "__singleton__";
+    emit targetChanged();
+
+    resolveTarget();
+}
+
+void QmlWatcher::setTarget(QObject *target){
+    if ( m_target ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( ve ){
+            QmlError(
+                ve,
+                CREATE_EXCEPTION(lv::Exception, "QmlWatcher: Watcher already has a target. Cannot overwrite with new target.", Exception::toCode("Completed")),
+                this
+            ).jsThrow();
+        }
         return;
+    }
 
-    HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
-    hk->insertKey(m_worker->result(), id, this);
+
+    m_target = target;
+    emit targetChanged();
+
+    resolveTarget();
 }
 
 }// namespace
+

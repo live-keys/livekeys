@@ -29,6 +29,8 @@ class QmlAct;
 
 class LV_VIEW_EXPORT Shared : public QObject{
 
+    Q_OBJECT
+
 public:
     /**
      * \brief Blocks shared data for reading until destroyed.
@@ -103,14 +105,17 @@ inline void Shared::ownJs(Shared *data){
 }
 
 inline void Shared::ref(Shared *data){
+    if ( !data )
+        return;
+
     if ( data->m_refs == 0){
         ownCpp(data);
-        data->m_refs++;
     }
+    data->m_refs++;
 }
 
 inline void Shared::unref(Shared *data){
-    if ( --data->m_refs == 0 ){
+    if ( data && --data->m_refs == 0 ){
         ownJs(data);
     }
 }

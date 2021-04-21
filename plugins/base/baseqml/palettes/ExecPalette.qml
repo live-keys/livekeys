@@ -20,26 +20,31 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import base 1.0
+import workspace 1.0 as Workspace
 
 CodePalette{
     id: palette
 
-    type : "qml/Exec"
+    type: "qml/Exec"
+
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: execBox
         width: 100
-        height: 30
+        height: 25
 
         property var current : null
 
-        TextButton{
+        Workspace.TextButton{
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             height: 28
             width: 80
-            radius: 5
+            style: theme.formButtonStyle
+
+
             text: "Run"
             onClicked: {
                 execBox.current.run()
@@ -47,11 +52,14 @@ CodePalette{
         }
     }
 
+    onValueFromBindingChanged: {
+        execBox.current = value
+    }
     onInit: {
         execBox.current = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){}
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){}
     }
 }

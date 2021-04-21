@@ -31,14 +31,26 @@
 
 #include <QQmlContext>
 #include <QQmlProperty>
+#include <QFileInfo>
 #include <QQmlListReference>
 
 namespace lv{
 
 namespace{
 
+
+    class TraversalNodeResult{
+    public:
+        TraversalNodeResult(QmlBindingPath::Node* pBindingNode = nullptr, DocumentQmlValueObjects::RangeItem* pRange = nullptr)
+            : bindingNode(pBindingNode), range(pRange)
+        {}
+
+        QmlBindingPath::Node* bindingNode;
+        DocumentQmlValueObjects::RangeItem* range;
+    };
+
     /// \private
-    QmlBindingPath::Node* findDeclarationPathImpl(
+    TraversalNodeResult findDeclarationPathImpl(
         DocumentQmlValueObjects::RangeObject *object,
         QmlDeclaration::Ptr declaration)
     {
@@ -50,7 +62,7 @@ namespace{
             if ( object->properties[i]->begin == position ){
 
                 if ( declaration->identifierChain().isEmpty() )
-                    return nullptr;
+                    return TraversalNodeResult();
 
                 // iterate property chain (eg. border.size => (border, size))
                 QmlBindingPath::Node* currentParent = nullptr;
@@ -65,12 +77,15 @@ namespace{
                     currentParent = n;
                 }
 
-                // found property
                 declaration->setValuePositionOffset(
                     object->properties[i]->valueBegin -
                     object->properties[i]->begin -
                     declaration->identifierLength()
                 );
+
+                if ( object->properties[i]->child ){
+                    declaration->setValueObjectScopeOffset(object->properties[i]->child->identifierEnd - declaration->valuePosition());
+                }
 
                 declaration->setValueLength(
                     object->properties[i]->end - object->properties[i]->valueBegin
@@ -79,7 +94,12 @@ namespace{
                 QmlBindingPath::Node* n = currentParent;
                 while ( n->parent != nullptr )
                     n = n->parent;
-                return n;
+
+                TraversalNodeResult dpr;
+                dpr.bindingNode = n;
+                dpr.range = object->properties[i];
+
+                return dpr;
 
             } else if ( object->properties[i]->child &&
                         object->properties[i]->begin < position &&
@@ -99,20 +119,20 @@ namespace{
                     currentParent = n;
                 }
 
-                QmlBindingPath::Node* n = findDeclarationPathImpl(
+                TraversalNodeResult dpr = findDeclarationPathImpl(
                     object->properties[i]->child, declaration
                 );
-                if ( !n ){
+                if ( !dpr.bindingNode ){
                     delete currentParent;
-                    return nullptr;
+                    return TraversalNodeResult();
                 }
 
-                n->parent = currentParent;
-                currentParent->child = n;
+                dpr.bindingNode->parent = currentParent;
+                currentParent->child = dpr.bindingNode;
 
-                while ( n->parent != nullptr )
-                    n = n->parent;
-                return n;
+                while ( dpr.bindingNode->parent != nullptr )
+                    dpr.bindingNode = dpr.bindingNode->parent;
+                return dpr;
             }
         } // properties end
 
@@ -124,19 +144,20 @@ namespace{
                 QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
                 indexNode->index = i;
 
-                QmlBindingPath::Node* n = findDeclarationPathImpl(
+                TraversalNodeResult dpr = findDeclarationPathImpl(
                     object->children[i], declaration
                 );
 
-                if ( !n ){
+                if ( !dpr.bindingNode ){
                     delete indexNode;
-                    return nullptr;
+                    return TraversalNodeResult();
                 }
 
-                indexNode->child = n;
-                n->parent = indexNode;
+                indexNode->child = dpr.bindingNode;
+                dpr.bindingNode->parent = indexNode;
 
-                return indexNode;
+                dpr.bindingNode = indexNode;
+                return dpr;
 
             } else if ( position == object->children[i]->begin ){ // found object
 
@@ -147,67 +168,14 @@ namespace{
                 QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
                 indexNode->index = i;
 
-                return indexNode;
+                TraversalNodeResult dpr;
+                dpr.bindingNode = indexNode;
+                dpr.range = object->children[i];
+                return dpr;
             }
         }
 
-        return nullptr;
-    }
-
-    /// \private
-    QmlBindingChannel::Ptr traversePath(QmlBindingPath::Ptr path, Runnable* r, QmlBindingPath::Node* n, QObject* object){
-        if ( n == nullptr || object == nullptr)
-            return QmlBindingChannel::Ptr(nullptr);
-
-        if ( n->type() == QmlBindingPath::Node::Property ){
-            QmlBindingPath::PropertyNode* pn = static_cast<QmlBindingPath::PropertyNode*>(n);
-
-            QQmlProperty prop(object, pn->propertyName);
-            if ( !prop.isValid() ){
-                int findex = pn->propertyName.indexOf('(');
-                if ( findex == -1 )
-                    return QmlBindingChannel::Ptr(nullptr);
-
-                QByteArray upname = pn->propertyName.toUtf8();
-                int methodIndex = object->metaObject()->indexOfMethod(upname.data());
-                if ( methodIndex >= 0 ){
-                    return QmlBindingChannel::create(path, r, QQmlProperty(object, "objectName"), object->metaObject()->method(methodIndex));
-                }
-            }
-
-            if ( n->child == nullptr ){
-                return QmlBindingChannel::create(path, r, prop);
-            } else {
-                return traversePath(path, r, n->child, prop.read().value<QObject*>());
-            }
-        } else if ( n->type() == QmlBindingPath::Node::Index ){
-            QmlBindingPath::IndexNode* in = static_cast<QmlBindingPath::IndexNode*>(n);
-
-            QQmlProperty prop(object);
-            if ( !prop.isValid() )
-                return QmlBindingChannel::Ptr(nullptr);
-            if ( prop.propertyTypeCategory() == QQmlProperty::Object && in->index != 0 )
-                return QmlBindingChannel::Ptr(nullptr);
-
-            if ( n->child == nullptr ){
-                return QmlBindingChannel::create(path, r, prop, in->index);
-            } else {
-                if ( prop.propertyTypeCategory() == QQmlProperty::Object ){
-                    return traversePath(path, r, n->child, prop.read().value<QObject*>());
-                } else if ( prop.propertyTypeCategory() == QQmlProperty::List ){
-                    QQmlListReference ppref = qvariant_cast<QQmlListReference>(prop.read());
-                    if ( ppref.canAt() && ppref.canCount() && ppref.count() > in->index ){
-                        return traversePath(path, r, n->child, ppref.at(in->index));
-                    } else
-                        return QmlBindingChannel::Ptr(nullptr);
-                }
-            }
-        } else if ( n->type() == QmlBindingPath::Node::File ){
-            return traversePath(path, r, n->child, object);
-        } else if ( n->type() == QmlBindingPath::Node::Component ){
-            return traversePath(path, r, n->child, object);
-        }
-        return QmlBindingChannel::Ptr(nullptr);
+        return TraversalNodeResult();
     }
 
 } // namespace
@@ -552,6 +520,36 @@ const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int pos
     return DocumentQmlInfo::ASTReference(range.ast);
 }
 
+QString DocumentQmlInfo::propertySourceFromObjectId(const QString &componentId, const QString &propertyName){
+    Q_D(const DocumentQmlInfo);
+
+    DocumentQmlInfo::ValueReference vr = valueForId(componentId);
+
+    int begin, end;
+    extractRange(vr, begin, end);
+
+    if ( begin > -1 && end > 0){
+
+        QString sourceData = "Worker" + d->internalDoc->source().mid(begin, end - begin);
+
+        lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create("Worker.qml");
+
+        if ( !docinfo->parse(sourceData) )
+            return "";
+
+        lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+        for ( auto pit = objects->root()->properties.begin(); pit != objects->root()->properties.end(); ++pit ){
+            lv::DocumentQmlValueObjects::RangeProperty* p = *pit;
+            QString propertyName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
+            if ( propertyName == "run" ){
+                QString propertyContent = sourceData.mid(p->valueBegin, p->end - p->valueBegin);
+                return propertyContent;
+            }
+        }
+    }
+    return "";
+}
+
 /**
  * \brief Check wether the value reference is null.
  *
@@ -584,11 +582,8 @@ bool DocumentQmlInfo::parse(const QString &source){
     foreach( const QmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
         DocumentQmlInfo::Message::Severity severity = DocumentQmlInfo::Message::Hint;
         switch( message.kind ){
-        case QmlJS::Severity::Hint: severity = DocumentQmlInfo::Message::Hint; break;
-        case QmlJS::Severity::MaybeWarning: severity = DocumentQmlInfo::Message::MaybeWarning; break;
-        case QmlJS::Severity::Warning: severity = DocumentQmlInfo::Message::Warning; break;
-        case QmlJS::Severity::MaybeError: severity = DocumentQmlInfo::Message::MaybeError; break;
-        case QmlJS::Severity::Error: severity = DocumentQmlInfo::Message::Error; break;
+        case QmlJS::DiagnosticMessage::Error: severity = DocumentQmlInfo::Message::Error; break;
+        case QmlJS::DiagnosticMessage::Warning: severity = DocumentQmlInfo::Message::Warning; break;
         }
 
         d->messages.append(
@@ -636,9 +631,14 @@ QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
         imports << Import(
            importType,
            (importType == Import::Library ? it->name() : it->path()),
+           it->name(),
            it->as(),
            it->version().majorVersion(),
-           it->version().minorVersion()
+           it->version().minorVersion(),
+           it->ast()
+                ? Document::Location(static_cast<int>(it->ast()->importToken.startLine), static_cast<int>(it->ast()->importToken.startColumn))
+                : Document::Location()
+
        );
     }
     return imports;
@@ -666,6 +666,66 @@ QString DocumentQmlInfo::source() const{
 }
 
 /**
+ * \brief Tries to extract imports from a document that was not correcly parsed
+ */
+void DocumentQmlInfo::tryExtractImports(){
+    Q_D(DocumentQmlInfo);
+    if ( d->imports.isEmpty() ){
+        QList<DocumentQmlInfo::Import> result;
+
+        QString content = d->internalDoc->source();
+        auto lines = content.split('\n');
+        QList<std::pair<QStringList, int>> mid;
+
+        for (int i = 0; i < lines.size(); ++i)
+        {
+            if (lines[i].length() == 0)
+                continue;
+            QStringList fragments = lines[i].split(';');
+            for (auto fragment: fragments){
+                auto parts = fragment.split(' ',  QString::SkipEmptyParts);
+
+                if (parts.size() != 3 && parts.size() != 5)
+                    return;
+
+                if (parts[0] != "import")
+                    return;
+
+                if (parts.size() == 5 && parts[3] != "as")
+                    return;
+
+                auto p = std::make_pair(QStringList(), i);
+
+                p.first.push_back(parts[1]);
+                p.first.push_back(parts[2]);
+                p.first.push_back(parts.size() == 5 ? parts[4] : "");
+
+                mid.push_back(p);
+            }
+        }
+
+        for (auto p: mid){
+            QString major = "1"; QString minor = "0";
+            QStringList version = p.first[1].split(".");
+            if ( version.length() == 2 ){
+                major = version[0];
+                minor = version[1];
+            }
+
+            d->imports.append(DocumentQmlInfo::Import(
+               DocumentQmlInfo::Import::Library,
+               p.first[0], // path or name
+               p.first[0], //name
+               p.first[2], // as
+               major.toInt(),
+               minor.toInt(),
+               Document::Location(p.second, 0)
+           ));
+        }
+    }
+}
+
+/**
  * \brief Visit the AST and create the objects defined in this document
  * \returns A pointer to the lv::DocumentQmlValueObjects
  */
@@ -690,60 +750,6 @@ DocumentQmlValueObjects::Ptr DocumentQmlInfo::createObjects(const DocumentQmlInf
 }
 
 /**
- * \brief Match the binding \p path with the application value and update it's connection
- *
- * This function traverses the binding path recursively starting from the \p root of
- * the application and tries to match the \p path with an application value.
- *
- * If the match is set, then the \p path value will be udpated.
- */
-QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPointer<QmlBindingPath> path, Runnable *r){
-    if ( !path->root() || !r || !r->viewRoot())
-        return nullptr;
-
-    QmlBindingPath::Node* root = path->root();
-
-    QObject* viewRoot = r->viewRoot();
-
-    if ( root && root->type() == QmlBindingPath::Node::Watcher ){
-        QmlBindingPath::WatcherNode* wnode = static_cast<QmlBindingPath::WatcherNode*>(path->root());
-
-        HookContainer* hooks = qobject_cast<HookContainer*>(
-            r->viewContext()->contextProperty("hooks").value<QObject*>()
-        );
-
-        if ( !hooks )
-            return nullptr;
-
-        QList<QObject*> watchers = hooks->entriesFor(wnode->filePath, wnode->objectId);
-
-        if ( watchers.isEmpty() )
-            return nullptr;
-
-        QmlWatcher* watcher = qobject_cast<QmlWatcher*>(watchers.first());
-        viewRoot = watcher->parent();
-
-        root = root->child;
-    }
-
-    while ( root && (root->type() == QmlBindingPath::Node::File || root->type() == QmlBindingPath::Node::Component) ){
-        root = root->child;
-    }
-
-    if ( !root )
-        return nullptr;
-
-    if ( root->child == nullptr ){
-        QQmlProperty prop(viewRoot->parent());
-        if( !prop.isValid() )
-            return QmlBindingChannel::Ptr();
-        return QmlBindingChannel::create(path, r, prop, 0);
-    }
-
-    return traversePath(path, r, root->child, viewRoot);
-}
-
-/**
  * \brief Finds the binding path associated with a declaration within a range object
  *
  * To call this method, parse the document first, then get the values:
@@ -757,37 +763,41 @@ QSharedPointer<QmlBindingChannel> DocumentQmlInfo::traverseBindingPath(QSharedPo
  *
  * \returns The found binding path on success, nullptr otherwise
  */
-QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
+DocumentQmlInfo::TraversalResult DocumentQmlInfo::findDeclarationPath(
         ProjectDocument* document,
         DocumentQmlValueObjects::RangeObject *root,
         QmlDeclaration::Ptr declaration)
 {
     if ( !root )
-        return nullptr;
+        return DocumentQmlInfo::TraversalResult();
 
+
+    DocumentQmlInfo::TraversalResult tr;
+    DocumentQmlValueObjects::RangeItem* range = nullptr;
     QmlBindingPath::Node* n = nullptr;
 
     if ( root->begin == declaration->position() ){ // cover the case of root being the actual object
         declaration->setValuePositionOffset(0);
         declaration->setValueLength(root->end - root->begin);
 
-        QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
-        indexNode->index = 0;
-        n = indexNode;
-
+        QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+        componentNode->name = document->file()->name();
+        n = componentNode;
+        range = root;
     } else {
-        QmlBindingPath::Node* result = findDeclarationPathImpl(root, declaration);
-        if ( result ){
-            QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
-            indexNode->index = 0;
-            indexNode->child = result;
-            result->parent = indexNode;
-            n = indexNode;
+        TraversalNodeResult result = findDeclarationPathImpl(root, declaration);
+        if ( result.bindingNode ){
+            QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+            componentNode->name = document->file()->name();
+            componentNode->child = result.bindingNode;
+            result.bindingNode->parent = componentNode;
+            n = componentNode;
+            range = result.range;
         }
     }
 
     if ( !n )
-        return nullptr;
+        return DocumentQmlInfo::TraversalResult();
 
     QmlBindingPath::Ptr path = QmlBindingPath::create();
 
@@ -799,7 +809,10 @@ QmlBindingPath::Ptr DocumentQmlInfo::findDeclarationPath(
 
     path->updatePath(fnode);
 
-    return path;
+    tr.range = range;
+    tr.bindingPath = path;
+
+    return tr;
 }
 
 /**
@@ -833,14 +846,70 @@ DocumentQmlInfo::Import::Import(
         const QString &path,
         const QString& as,
         int vMajor,
-        int vMinor)
+        int vMinor,
+        Document::Location location)
     : m_type(importType)
     , m_uri(path)
     , m_relativeUri(path)
     , m_as(as)
     , m_versionMajor(vMajor)
     , m_versionMinor(vMinor)
+    , m_location(location)
 {
+}
+
+DocumentQmlInfo::Import::Import(
+        DocumentQmlInfo::Import::Type importType,
+        const QString &uri,
+        const QString &relativeUri,
+        const QString &as,
+        int vMajor,
+        int vMinor,
+        Document::Location location)
+    : m_type(importType)
+    , m_uri(uri)
+    , m_relativeUri(relativeUri)
+    , m_as(as)
+    , m_versionMajor(vMajor)
+    , m_versionMinor(vMinor)
+    , m_location(location)
+{
+}
+
+QString DocumentQmlInfo::Import::toString() const{
+    if ( m_type == DocumentQmlInfo::Import::Library ){
+        return "import " + m_relativeUri  +
+                (m_versionMajor >= 0
+                    ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
+                    : "");
+    } else if ( m_type == DocumentQmlInfo::Import::Invalid || m_relativeUri.isEmpty() ){
+        return "";
+    } else {
+        return "import \"" + m_relativeUri + "\"" +
+                  (m_versionMajor >= 0
+                      ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
+                      : "");
+    }
+}
+
+QString DocumentQmlInfo::Import::versionString() const{
+    return QString::number(m_versionMajor) + "." + QString::number(m_versionMinor);
+}
+
+void DocumentQmlInfo::Import::setLocation(const Document::Location &location){
+    m_location = location;
+}
+
+const Document::Location &DocumentQmlInfo::Import::location() const{
+    return m_location;
+}
+
+QString DocumentQmlInfo::Import::join(const QList<DocumentQmlInfo::Import> &imports){
+    QString result;
+    for( auto import : imports ){
+        result += (result.isEmpty() ? "" : "\n") + import.toString();
+    }
+    return result;
 }
 
 bool DocumentQmlInfo::hasImport(const DocumentQmlInfo::Import &key) const{

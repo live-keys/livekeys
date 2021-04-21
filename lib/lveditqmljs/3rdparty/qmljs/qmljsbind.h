@@ -31,7 +31,7 @@
 #ifndef QMLJSBIND_H
 #define QMLJSBIND_H
 
-#include <qmljs/parser/qmljsastvisitor_p.h>
+#include <qmljs/parser/qqmljsastvisitor_p.h>
 #include <qmljs/qmljsvalueowner.h>
 
 #include <QHash>

@@ -11,6 +11,7 @@ namespace lv{
 
 class ViewEngine;
 class RunnableContainer;
+class QmlBuild;
 
 namespace el{
     class Engine;
@@ -63,6 +64,10 @@ public:
 
     Type type() const;
 
+    QQmlContext* createContext();
+
+    void swapViewRoot(QObject* object);
+
 public slots:
     void engineObjectAcquired(const QUrl& file, QObject* ref);
     void engineObjectReady(QObject* object, const QUrl& file, QObject* ref, QQmlContext* context);
@@ -78,7 +83,7 @@ public slots:
     void _documentSaved();
 
     void setRunTrigger(int runTrigger);
-
+    void clearRoot();
 signals:
     void nameChanged();
     void runTriggerChanged();
@@ -90,7 +95,6 @@ private:
     void runLv();
 
     QObject *createObject(const QByteArray& code, const QUrl& file, QQmlContext* context);
-    QQmlContext* createContext();
     void emptyRunSpace();
 
     QString               m_name;

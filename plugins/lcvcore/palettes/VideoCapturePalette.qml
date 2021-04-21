@@ -33,9 +33,15 @@ CodePalette{
 
         Connections{
             target: captureContainer.videoCapture
-            onFpsChanged: extension.updateBindings()
-            onCurrentFrameChanged: extension.updateBindings()
-            onPausedChanged: extension.updateBindings()
+            function onFpsChanged(){
+                editFragment.updateBindings()
+            }
+            function onCurrentFrameChanged(){
+                editFragment.updateBindings()
+            }
+            function onPausedChanged(){
+                editFragment.updateBindings()
+            }
         }
 
         width: 290
@@ -53,7 +59,7 @@ CodePalette{
                 if ( !parent || !parent.videoCapture )
                     return
                 parent.videoCapture.fps = fpsSlider.value
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'fps' : fpsSlider.value
                 })
             }
@@ -82,12 +88,12 @@ CodePalette{
             videoCapture : parent.videoCapture
             width: 290
             onSeekTriggered: {
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'currentFrame' : videoCapture.currentFrame
                 })
             }
             onPlayPauseTriggered: {
-                extension.writeProperties({
+                editFragment.writeProperties({
                     'paused' : videoCapture.paused
                 })
             }
@@ -99,10 +105,13 @@ CodePalette{
     onInit: {
         captureContainer.videoCapture = value
     }
+    onValueFromBindingChanged: {
+        captureContainer.videoCapture = value
+    }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'fps' : palette.value.fps,
                 'currentFrame' : palette.value.currentFrame,
                 'paused' : palette.value.paused

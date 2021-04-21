@@ -6,14 +6,16 @@
 
 namespace lv {
 
-class QmlColor : public QObject
-{
+class QmlColor : public QObject{
+
     Q_OBJECT
+
 public:
     explicit QmlColor(QObject *parent = nullptr);
 
 public slots:
     QColor RgbToHsv(QColor rgb);
+    QString toHex(QColor rgb);
 };
 
 }

@@ -50,7 +50,7 @@ WebEngineView{
     property var hoverState : { return {} }
 
     property string prevUrl: ''
-
+    signal runJavaScriptCallbackError(var e)
     property WebEngineScript injectStyleScript : WebEngineScript{
         name: "injectStyleScript"
         sourceCode: styleSourceCode
@@ -148,7 +148,11 @@ WebEngineView{
                             lk.engine.throwError(new Error("Error creating object from component: " + currentInitializerPath), root)
                             return
                         }
-                        initializerControl.run(lk.layers.workspace, project)
+                        try {
+                            initializerControl.run(lk.layers.workspace, project)
+                        } catch (e){
+                            root.runJavaScriptCallbackError(e)
+                        }
                     } else if (component.status === Component.Error) {
                         lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                         return
@@ -157,6 +161,11 @@ WebEngineView{
             });
         }
     }
+
+    onRunJavaScriptCallbackError: {
+        lk.engine.throwError(e, root)
+    }
+
     onNewViewRequested: {
         if ( request.userInitiated && request.destination === WebEngineView.NewViewInTab){
 

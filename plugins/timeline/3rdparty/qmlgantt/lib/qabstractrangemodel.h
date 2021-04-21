@@ -55,7 +55,7 @@ public:
     virtual ~QAbstractRangeModel();
 
     qint64 contentWidth() const;
-    void setContentWidth(qint64 contentWidth);
+    void setContentLength(qint64 contentWidth);
 
     virtual QAbstractRangeModelIterator* dataBetween(qint64 startPosition, qint64 endPosition) = 0;
 
@@ -112,7 +112,7 @@ inline qint64 QAbstractRangeModel::contentWidth() const{
     return m_contentWidth;
 }
 
-inline void QAbstractRangeModel::setContentWidth(qint64 contentWidth){
+inline void QAbstractRangeModel::setContentLength(qint64 contentWidth){
     if ( m_contentWidth != contentWidth ){
         m_contentWidth = contentWidth;
         emit contentWidthChanged();

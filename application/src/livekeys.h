@@ -30,7 +30,7 @@
 // ----------
 
 #define LIVEKEYS_VERSION_MAJOR 1
-#define LIVEKEYS_VERSION_MINOR 7
+#define LIVEKEYS_VERSION_MINOR 9
 #define LIVEKEYS_VERSION_PATCH 0
 
 // Forward declarations
@@ -67,7 +67,6 @@ class Livekeys : public QObject{
     Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
     Q_PROPERTY(lv::ViewEngine*     engine         READ engine     CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
-    Q_PROPERTY(lv::Memory*         mem            READ memory     CONSTANT)
     Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
 
 public:
@@ -106,7 +105,6 @@ public:
     Settings*   settings();
     ViewEngine* engine();
     Project*    project();
-    Memory*     memory();
     VisualLogModel* log();
     QQmlPropertyMap* layers();
 
@@ -146,7 +144,6 @@ private:
     lv::VisualLogModel*    m_log;
     lv::VisualLogQmlObject*m_vlog;
     lv::PackageGraph*      m_packageGraph;
-    lv::Memory*            m_memory;
 
     QQmlPropertyMap*       m_layers;
     QMap<QString, QString> m_storedLayers;
@@ -195,10 +192,6 @@ inline Project *Livekeys::project(){
 
 inline VisualLogModel *Livekeys::log(){
     return m_log;
-}
-
-inline Memory *Livekeys::memory(){
-    return m_memory;
 }
 
 inline QString Livekeys::header(){

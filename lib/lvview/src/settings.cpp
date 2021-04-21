@@ -19,6 +19,9 @@
 #include <QDir>
 #include <QQmlEngine>
 
+#include <QtDebug>
+#include "live/viewcontext.h"
+
 /**
  * \class lv::Settings
  * \brief General settings (on top of Editor settings) that uses a settings folder

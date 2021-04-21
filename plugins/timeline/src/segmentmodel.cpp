@@ -248,7 +248,7 @@ int SegmentModel::insertItemImpl(Segment* item){
 
     int prevIndex = index - 1;
     int nextIndex = index;
-    if ( prevIndex >= 0 ){ // check snap before
+    if ( prevIndex >= 0 ){ // check snap after
         Segment* prevSegm = d->items[prevIndex];
         if ( prevSegm->position() + prevSegm->length() > item->position() ){
             qint64 diff = prevSegm->position() + prevSegm->length() - item->position();
@@ -316,9 +316,56 @@ void SegmentModel::clearSegments(){
     endDataChange();
 }
 
+int SegmentModel::firstIndex(qint64 position){
+    Q_D(SegmentModel);
+    return d->searchFirstIndex(position);
+}
+
+QPair<int, int> SegmentModel::indexesBetween(qint64 l1, qint64 l2){
+    qint64 from = l1 > l2 ? l2 : l1;
+    qint64 to = l1 > l2 ? l1 : l2;
+
+    Q_D(SegmentModel);
+    int index = d->searchFirstIndex(from);
+    if ( index >= d->items.size() ){
+        return QPair<int, int>(-1, -1);
+    }
+
+    Segment* segm = d->items[index];
+    if ( segm->contains(to) ){
+        ++index;
+    }
+
+    if ( index >= d->items.size() )
+        return QPair<int, int>(-1, -1);
+    segm = d->items[index];
+    if ( segm->position() >= to || segm->contains(to) )
+        return QPair<int, int>(-1, -1);
+
+
+    int fromIndex = index;
+    while ( index < d->items.size() ){
+        Segment* segm = d->items[index];
+        if ( segm->position() >= to ){
+            break;
+        }
+        ++index;
+    }
+
+    return QPair<int, int>(fromIndex, index - 1);
+
+}
+
+int SegmentModel::segmentIndex(Segment *segment){
+    Q_D(SegmentModel);
+    return d->searchFirstIndex(segment->position());
+}
+
 Segment *SegmentModel::segmentThatWraps(qint64 position){
     Q_D(SegmentModel);
+
     int index = d->searchFirstIndex(position);
+
     while ( index > 0 ){
         --index;
         if ( d->items[index]->position() + d->items[index]->length() < position ){

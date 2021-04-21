@@ -27,6 +27,7 @@ include($$PWD/src/fsqml.pri)
 
 OTHER_FILES += \
     qml/*.qml \
+    qml/palettes/* \
     qml/qmldir
 
 # Handling the palette
@@ -34,8 +35,21 @@ OTHER_FILES += \
 OTHER_FILES *= \
     palettes/*.qml
 
+
+# Deploy
+
+samplescopy.commands = $$deployDirCommand($$PWD/samples, $$PLUGIN_DEPLOY_PATH/$$PLUGIN_PATH/samples)
+first.depends = $(first) samplescopy
+export(first.depends)
+export(samplescopy.commands)
+QMAKE_EXTRA_TARGETS += first samplescopy
+
+
 DISTFILES += \
+    qml/ExtensionPass.qml \
     qml/FileLineReader.qml \
+    qml/FileReader.qml \
+    qml/VisualFileSelector.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/plugins.qmltypes

@@ -59,6 +59,7 @@ ApplicationWindow{
             fileOpenDialog.title = title
             fileOpenDialog.nameFilters = filters
             fileOpenDialog.callback = callback
+            fileOpenDialog.folder = ""
 
             fileOpenDialog.open()
         }
@@ -68,6 +69,7 @@ ApplicationWindow{
 
             dirOpenDialog.title = title
             dirOpenDialog.callback = callback
+            fileOpenDialog.folder = ""
 
             dirOpenDialog.open()
         }
@@ -83,6 +85,11 @@ ApplicationWindow{
             var ob = overlayBoxFactory.createObject(root)
             ob.box = object
             return ob
+        }
+
+        function newWindow(){
+            var w = windowFactory.createObject(root)
+            return w
         }
     }
 
@@ -144,6 +151,7 @@ ApplicationWindow{
         Component.onCompleted: {
             if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
+
             visible = false
             close()
         }
@@ -212,6 +220,12 @@ ApplicationWindow{
     }
 
     Component{
+        id: windowFactory
+
+        Window{}
+    }
+
+    Component{
         id: overlayBoxFactory
 
         OverlayBox{
@@ -242,12 +256,11 @@ ApplicationWindow{
 
         Connections{
             target: lk
-            onLayerReady: {
+            function onLayerReady(layer){
                 if ( layer.name === 'workspace' ){
                     logo.opacity = 1.0
                 }
             }
         }
     }
-
 }

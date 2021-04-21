@@ -155,12 +155,12 @@ void QDrawMatches::drawExtractedMatches(const std::vector<cv::DMatch> matches){
             m_keypoints2->cvMat(),
             m_keypoints2->keypoints(),
             matches,
-            *(output()->cvMat()),
+            *(output()->internalPtr()),
             cv::Scalar::all(-1),
             cv::Scalar::all(-1),
             m_mask
         );
-        setImplicitSize(output()->cvMat()->cols, output()->cvMat()->rows);
+        setImplicitSize(output()->internalPtr()->cols, output()->internalPtr()->rows);
 
     } catch(cv::Exception& e){
         qWarning("%s", e.what());

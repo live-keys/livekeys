@@ -23,6 +23,8 @@
 
 namespace lv{
 
+class VisualLog;
+
 class LV_VIEW_EXPORT VisualLogQmlObject : public QObject{
 
     Q_OBJECT
@@ -30,6 +32,8 @@ class LV_VIEW_EXPORT VisualLogQmlObject : public QObject{
 public:
     VisualLogQmlObject(QObject* parent = nullptr);
     ~VisualLogQmlObject();
+
+    static void logValue(VisualLog& vl, const QJSValue& message);
 
 public slots:
     void f(const QJSValue& messageOrCategory, const QJSValue& message = QJSValue());

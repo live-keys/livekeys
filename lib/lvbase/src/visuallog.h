@@ -98,11 +98,12 @@ public:
 
         std::string sourceRemoteLocation() const;
         std::string sourceFileName() const;
-        int     sourceLineNumber() const;
+        int         sourceLineNumber() const;
         std::string sourceFunctionName() const;
         const QDateTime& stamp() const;
         std::string prefix(const VisualLog::Configuration* configuration) const;
         std::string tag(const VisualLog::Configuration* configuration) const;
+        Level       level() const;
 
     private:
         MessageInfo();

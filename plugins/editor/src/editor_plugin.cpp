@@ -41,7 +41,7 @@ void EditorPlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
     qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");
-    qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "LiveExtension");
+    qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "WorkspaceExtension");
     qmlRegisterType<lv::Theme>(uri, 1, 0, "Theme");
     qmlRegisterType<lv::DocumentationLoader>(uri, 1, 0, "DocumentationLoader");
 

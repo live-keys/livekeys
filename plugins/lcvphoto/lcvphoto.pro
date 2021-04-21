@@ -13,7 +13,6 @@ DEFINES += Q_LCV
 linkLocalLibrary(lvbase,      lvbase)
 linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
-linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
@@ -60,9 +59,16 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 # Distfiles
 
 DISTFILES += \
+    palettes/HueSaturationLightnessPalette.qml \
+    qml/BrightnessAndContrast.qml \
     qml/FastNlMeansDenoising_.qml \
+    qml/HueSaturationLightness.qml \
+    qml/Levels.qml \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
+    qml/Sepia.qml \
+    qml/Temperature.qml \
     qml/live.package.json \
     qml/live.plugin.json \
-    palettes/LevelsPalette.qml
+    palettes/LevelsPalette.qml \
+    palettes/LevelsDefaultPalette.json

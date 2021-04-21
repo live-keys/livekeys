@@ -22,6 +22,22 @@
 
 namespace lv{
 
+/**
+  \brief lv::QmlLanguageScanner::QmlLanguageScanner
+
+  Language scanner stores everything to be scanned in a queue. You can query the size
+  of the queue via the function lv::QmlLanugageScanner::plannedQueueSize
+
+  To consume the planned queue, you will need to run lv::QmlLanguageScanner::processQueue function.
+  The function will scan each library in the queue, and scan all of its dependencies as well.
+
+  Capturing the scanned libraries is achieved via callbacks. There are 2 main callbacks to use:
+
+   * lv::QmlLanguageScanner::onLibraryUpdate : sent whenever a library has been updated
+   * lv::QmlLanguageScanner::onQueueFinished: sent whenever the assigned queue has finished
+
+ */
+
 QmlLanguageScanner::QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList &importPaths, QObject *parent)
     : QObject(parent)
     , m_defaultImportPaths(importPaths)
@@ -53,16 +69,15 @@ QmlLanguageScanner::~QmlLanguageScanner(){
   */
 void QmlLanguageScanner::processQueue(){
     m_isProcessing = true;
-    emit isProcessingChanged(true);
 
     QLinkedList<QmlLibraryInfo::Ptr> queue;
 
-    m_queueMutex.lock();
-    for ( auto it = m_queue.begin(); it != m_queue.end(); ++it ){
+    m_plannedQueueMutex.lock();
+    for ( auto it = m_plannedQueue.begin(); it != m_plannedQueue.end(); ++it ){
         queue.append(*it);
     }
-    m_queue.clear();
-    m_queueMutex.unlock();
+    m_plannedQueue.clear();
+    m_plannedQueueMutex.unlock();
 
     while ( !queue.isEmpty() && !m_stopRequest ){
         QmlLibraryInfo::Ptr lib = queue.front();
@@ -133,15 +148,19 @@ void QmlLanguageScanner::processQueue(){
             }
 
         } else if ( lib->status() == QmlLibraryInfo::NoPrototypeLink ){
-
+            updateLibraryUnknownTypes(lib);
+            lib->setStatus(QmlLibraryInfo::Done);
+            if ( m_updateListener ){
+                m_updateListener(lib, queue.size());
+            }
         }
     }
 
-    if ( m_queueFinished )
+    if ( m_queueFinished ){
         m_queueFinished();
+    }
 
     m_isProcessing = false;
-    emit isProcessingChanged(false);
 }
 
 void QmlLanguageScanner::scanDocument(const QString &path, const QString &content, CodeQmlHandler *handler){
@@ -190,17 +209,25 @@ void QmlLanguageScanner::scanDocument(const QString &path, const QString &conten
 }
 
 void QmlLanguageScanner::queueLibrary(const QmlLibraryInfo::Ptr &lib){
-    m_queueMutex.lock();
+    m_plannedQueueMutex.lock();
 
     QmlLibraryInfo::Ptr copy = QmlLibraryInfo::create(lib->uri());
     copy->setPath(lib->path());
-    m_queue.append(copy);
+    m_plannedQueue.append(copy);
 
-    m_queueMutex.unlock();
+    m_plannedQueueMutex.unlock();
 }
 
 void QmlLanguageScanner::onMessage(std::function<void(int, const QString &)> listener){
     m_messageListener = listener;
+}
+
+int QmlLanguageScanner::plannedQueueSize(){
+    int result = 0;
+    m_plannedQueueMutex.lock();
+    result = m_plannedQueue.size();
+    m_plannedQueueMutex.unlock();
+    return result;
 }
 
 /// In qml some libraries do not have a plugins.qmlinfo file since their
@@ -331,6 +358,9 @@ QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoStream(
                 if ( !expt.package.startsWith(lib->uri()) && expt.package != "<cpp>" ){
                     childModule = false;
                     typeModule = "";
+                } else if ( expt.package == lib->uri() ){
+                    typeModule = expt.package;
+                    break;
                 } else if ( expt.package.startsWith(lib->uri()) && childModule ){
                     typeModule = expt.package;
                 } else if ( typeModule.isEmpty() && childModule ){
@@ -366,7 +396,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
         return nullptr;
 
     QList<DocumentQmlInfo::Import> imports = documentInfo->imports();
-    QStringList dependencies;
+    QList<QPair<QString, QString> > dependencies;
 
     foreach( const DocumentQmlInfo::Import import, imports ){
         if (import.importType() == DocumentQmlInfo::Import::Directory){
@@ -380,7 +410,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
                 insertNewLibrary(lib);
             }
             lib->addDependency(import.uri());
-            dependencies.append(import.uri());
+            dependencies.append(qMakePair(import.uri(), import.as()));
         }
         if (import.importType() == DocumentQmlInfo::Import::Library) {
             if ( !m_libraries.contains(import.uri()) ){
@@ -393,7 +423,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
                 insertNewLibrary(depLib);
             }
             lib->addDependency(import.uri());
-            dependencies.append(import.uri());
+            dependencies.append(qMakePair(import.uri(), import.as()));
         }
     }
 
@@ -452,6 +482,50 @@ void QmlLanguageScanner::scanPathForExports(const QString &path, const QmlLibrar
         QmlTypeInfo::Ptr fileType = scanObjectFile(lib, info.filePath(), info.baseName(), fileContent);
         if ( fileType ){
             lib->addType(fileType);
+        }
+    }
+}
+
+void QmlLanguageScanner::updateLibraryUnknownTypes(const QmlLibraryInfo::Ptr &lib){
+
+    const QMap<QString, QmlTypeInfo::Ptr>& exp = lib->exports();
+
+    for ( auto it = exp.begin(); it != exp.end(); ++it ){
+        QmlTypeInfo::Ptr ti = it.value();
+        if ( ti->document().isValid() ){
+            for ( int i = 0; i < ti->totalProperties(); ++i ){
+
+                if ( ti->propertyAt(i).typeName.language() == QmlTypeReference::Unknown ){
+
+                    QString importAs = "";
+                    QString lookedUpType = ti->propertyAt(i).typeName.name();
+
+
+                    int splitIndex = lookedUpType.indexOf('.');
+                    if ( splitIndex != -1 ){
+                        importAs = lookedUpType.mid(0, splitIndex);
+                        lookedUpType = lookedUpType.mid(splitIndex + 1);
+                    }
+
+                    const QList<QPair<QString, QString> > dependencies = ti->document().dependencies;
+                    for ( auto depIt = dependencies.begin(); depIt != dependencies.end(); ++depIt ){
+                        if ( depIt->second == importAs ){
+                            QmlLibraryInfo::Ptr lib = m_libraries[depIt->first];
+                            if ( lib ){
+                                for ( auto typeIt = lib->exports().begin(); typeIt != lib->exports().end(); ++typeIt ){
+                                    if ( typeIt.value()->exportType().name() == lookedUpType ){
+
+                                        QmlPropertyInfo newProp = ti->propertyAt(i);
+                                        newProp.typeName = typeIt.value()->exportType();
+                                        ti->updateProperty(i, newProp);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
         }
     }
 }

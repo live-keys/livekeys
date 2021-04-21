@@ -81,7 +81,7 @@ Item{
 
     Connections{
         target: project
-        onActiveChanged : {
+        function onActiveChanged(){
             if (project.active){
                 if ( pathChange ){
                     var fe = root.panes.focusPane('editor')
@@ -104,8 +104,8 @@ Item{
 
                         var containerPanes = containerUsed.panes
                         if ( (containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width) || containerUsed.width === 0 ){
-                            containerPanes[0].width = containerPanes[0].width * 2
-                            fe.width = 400
+                            containerUsed.resizePane(containerPanes[0], containerPanes[0].width * 2)
+                            containerUsed.resizePane(fe, 400)
                         }
                     }
                     if ( !fe.document ){
@@ -118,12 +118,14 @@ Item{
 
         property bool pathChange: false
 
-        onPathChanged: pathChange = true
+        function onPathChanged(){
+            pathChange = true
+        }
     }
 
     Connections{
         target: project.documentModel
-        onDocumentChangedOutside : {
+        function onDocumentChangedOutside(document){
             lk.layers.window.dialogs.message(
                 'File \'' + document.file.path + '\' changed outside Livekeys. Would you like to reload it?',
                 {
@@ -149,10 +151,12 @@ Item{
 
     Connections{
         target: project.fileModel
-        onError : lk.layers.window.dialogs.message(message,{
-            button2Name : 'Ok',
-            button2Function : function(mbox){ mbox.close(); }
-        })
+        function onError(message){
+            lk.layers.window.dialogs.message(message,{
+                button2Name : 'Ok',
+                button2Function : function(mbox){ mbox.close(); }
+            })
+        }
     }
 
     function toggleVisibility(){
@@ -192,7 +196,7 @@ Item{
 
     Connections{
         target: lk
-        onLayerReady: {
+        function onLayerReady(layer){
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
                     'close' : [closeProject, "Close Project"],

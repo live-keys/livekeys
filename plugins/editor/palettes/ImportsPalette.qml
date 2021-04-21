@@ -3,35 +3,48 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
+import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 
 CodePalette{
     id: palette
     type : "qml/import"
 
-    item: Item{
+    property QtObject theme: lk.layers.workspace.themes.current
 
+    function commitImports(){
+        importsContainer.addImportVisible = false
+        importsContainer.model.commit(moduleInput.text, versionInput.text, qualifierInput.text)
+        moduleInput.text = ""
+        versionInput.text = ""
+        qualifierInput.text = ""
+    }
+
+    item: Rectangle{
         id: importsContainer
         visible: true
         objectName: "importsContainer"
         width: 280
         height: itemList.height + addImport.height + 5
+        color: palette.theme.colorScheme.middleground
 
         property alias model: itemList.model
-        property bool addImportVisible: true
+        property bool addImportVisible: false
         property var editor: null
 
         ListView{
             id : itemList
 
-            width: 280
-            height: model ? (model.count  * 25) : 50
+            width: parent.width - 6
+            height: model ? (model.count  * 22) : 44
 
-            anchors.rightMargin: 2
-            anchors.bottomMargin: 5
-            anchors.topMargin: 0
+            anchors.top: parent.top
+            anchors.topMargin: 2
+
+            anchors.left: parent.left
+            anchors.leftMargin: 3
+
             visible: true
-            property var fontSize: 12
-            property var fontFamily: "Open Sans, sans-serif"
 
             model: null
 
@@ -41,39 +54,31 @@ CodePalette{
             boundsBehavior : Flickable.StopAtBounds
             highlightMoveDuration: 100
 
-            delegate: Component{
+            delegate: Item{
+                width: itemList.width
+                height: 22
 
-                Item{
+                Rectangle{
                     width : itemList.width
-                    height : 25
+                    height : 20
+                    color: palette.theme.colorScheme.backgroundOverlay
 
-                    Item{
-                        anchors.left: parent.left
-                        anchors.leftMargin: 12
-
+                    Workspace.Label{
+                        id: moduleText
                         anchors.top: parent.top
-                        anchors.topMargin: 5
-
-                        width: 250
-                        height: 20
-                        Text{
-                            id: moduleText
-                            anchors.fill: parent
-
-                            font.family: itemList.fontFamily
-                            font.pixelSize: itemList.fontSize
-                            font.weight: Font.Light
-
-                            color: "#fafafa"
-                            text: model.module + ' ' + model.version + (model.qualifier !== '' ? ' as ' + model.qualifier : '')
-                        }
+                        anchors.topMargin: 3
+                        anchors.left: parent.left
+                        anchors.leftMargin: 3
+                        textStyle: palette.theme.selectableListView.labelStyle
+                        text: model.module + ' ' + model.version + (model.qualifier !== '' ? ' as ' + model.qualifier : '')
                     }
 
                     Image{
-                        anchors.right: parent.right
-                        anchors.rightMargin: 15
+                        anchors.left: moduleText.right
+                        anchors.leftMargin: 15
                         anchors.top: parent.top
-                        anchors.topMargin: 7
+                        anchors.topMargin: 3
+
                         source : "qrc:/images/palette-erase-object.png"
                         MouseArea {
                             anchors.fill: parent
@@ -83,10 +88,7 @@ CodePalette{
                         }
                     }
                 }
-
-
             }
-
         }
 
         Item{
@@ -96,100 +98,130 @@ CodePalette{
             height : visible ? 20 : 0
 
             anchors.bottom: parent.bottom
-            anchors.bottomMargin: 5
+            anchors.bottomMargin: 2
 
-            InputBox{
+            Workspace.InputBox{
                 id: moduleInput
-
                 anchors.left: parent.left
-                anchors.leftMargin: 10
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-                border.color : "#232427"
-
+                anchors.leftMargin: 3
                 anchors.top: parent.top
-                anchors.topMargin: 5
-
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                anchors.topMargin: 2
+                margins: 2
 
                 width: 140
                 height: 20
                 textHint: 'Path...'
+                prevFocusItem: qualifierInput
+                nextFocusItem: versionInput
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
+
+                style: theme.inputStyle
             }
 
-
-            InputBox{
+            Workspace.InputBox{
                 id: versionInput
                 anchors.left: parent.left
-                anchors.leftMargin: 152
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-                border.color : "#232427"
+                anchors.leftMargin: 149
                 anchors.top: parent.top
-                anchors.topMargin: 5
+                anchors.topMargin: 2
+                margins: 2
 
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                prevFocusItem: moduleInput
+                nextFocusItem: qualifierInput
 
                 width: 40
                 height: 20
                 textHint: '0.0'
+
+                style: theme.inputStyle
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
             }
 
-            InputBox{
+            Workspace.InputBox{
                 id: qualifierInput
                 anchors.left: parent.left
-                anchors.leftMargin: 194
-                margins: 2
-                radius: 3
-                color: 'transparent'
-
-                hintTextColor: "#494949"
-
-                border.color : "#232427"
+                anchors.leftMargin: 191
                 anchors.top: parent.top
-                anchors.topMargin: 5
+                anchors.topMargin: 2
+                margins: 2
 
-                font.family: "Open Sans"
-                font.pixelSize: 12
+                prevFocusItem: versionInput
+                nextFocusItem: moduleInput
+
+                onKeyPressed: {
+                    if ( event.key === Qt.Key_Return ){
+                        palette.commitImports()
+                        event.accepted = true
+                    }
+                }
 
                 width: 40
                 height: 20
                 textHint: 'As...'
+
+                style: theme.inputStyle
             }
 
-            Item{
-                id: commitImportButton
-                anchors.right: parent.right
-                anchors.rightMargin: 15
-                anchors.top: parent.top
-                anchors.topMargin: 7
-                width: 15
-                height: 15
 
-                Text{
+            Workspace.Button{
+                anchors.left: qualifierInput.right
+                anchors.leftMargin: 5
+                anchors.top: parent.top
+                anchors.topMargin: 2
+                width: 20
+                height: 20
+
+                content: theme.buttons.add
+                onClicked: {
+                    palette.commitImports()
+                }
+            }
+        }
+
+        Workspace.Button{
+            id: showAddImportsButton
+            anchors.top: parent.top
+            anchors.topMargin: 5
+            anchors.right: parent.right
+            anchors.rightMargin: 10
+            visible: !importsContainer.addImportVisible
+            width: 30
+            height: 30
+            content: Rectangle{
+                width: 30
+                height: 30
+                color: showAddImportsButtonArea.containsMouse
+                    ? palette.theme.colorScheme.middlegroundOverlayBorder
+                    : palette.theme.colorScheme.middlegroundOverlay
+                radius: 15
+
+                Icons.PlusIcon{
                     anchors.centerIn: parent
-                    text: '+'
-                    color: "white"
-                    font.pixelSize: 15
-                    font.family: "Open Sans"
-                    font.weight: Font.Normal
+                    width: 8
+                    height: 8
+                    strokeWidth: 1
+                    color: palette.theme.colorScheme.foregroundFaded
                 }
 
-                MouseArea {
+                MouseArea{
+                    id : showAddImportsButtonArea
+                    hoverEnabled: true
                     anchors.fill: parent
                     onClicked: {
-                        importsContainer.model.commit(moduleInput.text, versionInput.text, qualifierInput.text)
-                        moduleInput.text = ""
-                        versionInput.text = ""
-                        qualifierInput.text = ""
+                        importsContainer.addImportVisible = true
+                        moduleInput.forceFocus()
                     }
                 }
             }
@@ -197,14 +229,9 @@ CodePalette{
 
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
-    }
-
-    onInit: {
-        intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
     }
 }

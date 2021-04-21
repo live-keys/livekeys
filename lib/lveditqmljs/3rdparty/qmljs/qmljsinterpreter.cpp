@@ -28,7 +28,7 @@
 **
 ****************************************************************************/
 
-#include "parser/qmljsast_p.h"
+#include "parser/qqmljsast_p.h"
 #include "qmljsconstants.h"
 #include "qmljsinterpreter.h"
 #include "qmljstypedescriptionreader.h"
@@ -1852,7 +1852,7 @@ ASTObjectValue::ASTObjectValue(UiQualifiedId *typeName,
         for (UiObjectMemberList *it = m_initializer->members; it; it = it->next) {
             UiObjectMember *member = it->member;
             if (UiPublicMember *def = cast<UiPublicMember *>(member)) {
-                if (def->type == UiPublicMember::Property && !def->name.isEmpty() && !def->memberType.isEmpty()) {
+                if (def->type == UiPublicMember::Property && !def->name.isEmpty() && !def->memberType->name.isEmpty()) {
                     ASTPropertyReference *ref = new ASTPropertyReference(def, m_doc, valueOwner);
                     m_properties.append(ref);
                     if (def->defaultToken.isValid())
@@ -2137,7 +2137,7 @@ const Value *ASTPropertyReference::value(ReferenceContext *) const
 //        return evaluator(m_ast->statement);
 //    }
 
-    const QString memberType = m_ast->memberType.toString();
+    const QString memberType = m_ast->memberType->name.toString();
 
     const Value *builtin = valueOwner()->defaultValueForBuiltinType(memberType);
     if (!builtin->asUndefinedValue())
@@ -2162,7 +2162,7 @@ ASTSignal::ASTSignal(UiPublicMember *ast, const Document *doc, ValueOwner *value
     ObjectValue *v = valueOwner->newObject(/*prototype=*/0);
     for (UiParameterList *it = ast->parameters; it; it = it->next) {
         if (!it->name.isEmpty())
-            v->setMember(it->name.toString(), valueOwner->defaultValueForBuiltinType(it->type.toString()));
+            v->setMember(it->name.toString(), valueOwner->defaultValueForBuiltinType(it->type->name.toString()));
     }
     m_bodyScope = v;
 }
@@ -2189,9 +2189,9 @@ const Value *ASTSignal::argument(int index) const
     UiParameterList *param = m_ast->parameters;
     for (int i = 0; param && i < index; ++i)
         param = param->next;
-    if (!param || param->type.isEmpty())
+    if (!param || !param->type || param->type->name.isEmpty())
         return valueOwner()->unknownValue();
-    return valueOwner()->defaultValueForBuiltinType(param->type.toString());
+    return valueOwner()->defaultValueForBuiltinType(param->type->name.toString());
 }
 
 QString ASTSignal::argumentName(int index) const

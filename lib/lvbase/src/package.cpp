@@ -39,9 +39,9 @@ public:
     std::map<std::string, Package::Library*>   libraries;
     std::vector<std::string> internalLibraries;
 
-    std::string workspaceTutorialLabel;
+    std::string workspaceLabel;
     std::vector<std::pair<std::string, std::string> > workspaceTutorialSections;
-    std::vector<std::string> workspaceSamples;
+    std::vector<Package::ProjectEntry> workspaceSamples;
 
     Package::Context* context;
 };
@@ -140,9 +140,11 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
 
     if ( m.hasKey("workspace") ){
         const MLNode& workspace = m["workspace"];
+        if ( workspace.hasKey("label") )
+            pt->m_d->workspaceLabel = workspace["label"].asString();
+
         if ( workspace.hasKey("tutorials") ){
             const MLNode& tutorials = workspace["tutorials"];
-            pt->m_d->workspaceTutorialLabel = tutorials["label"].asString();
 
             MLNode::ArrayType sections = tutorials["sections"].asArray();
             for ( auto it = sections.begin(); it != sections.end(); ++it ){
@@ -154,7 +156,19 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
         if ( workspace.hasKey("samples") ){
             MLNode::ArrayType sections = workspace["samples"].asArray();
             for ( auto it = sections.begin(); it != sections.end(); ++it ){
-                pt->m_d->workspaceSamples.push_back((*it)["link"].asString());
+                std::string link = (*it)["link"].asString();
+                std::string label = (*it).hasKey("label") ? (*it)["label"].asString() : "";
+                if ( label.empty() ){
+                    size_t pos = link.find_last_of('/');
+                    label = pos == std::string::npos ? link : link.substr(pos + 1);
+                }
+                std::string category = (*it).hasKey("category") ? (*it)["category"].asString() : "";
+                std::string description = (*it).hasKey("description") ? (*it)["description"].asString() : "";
+                std::string icon = (*it).hasKey("icon") ? (*it)["icon"].asString() : "";
+
+                pt->m_d->workspaceSamples.push_back(
+                    ProjectEntry(link, label, category, description, icon)
+                );
             }
         }
     }
@@ -233,15 +247,15 @@ bool Package::hasWorkspace() const{
     return m_d->workspaceTutorialSections.size() > 0;
 }
 
-const std::string &Package::workspaceTutorialsLabel() const{
-    return m_d->workspaceTutorialLabel;
+const std::string &Package::workspaceLabel() const{
+    return m_d->workspaceLabel;
 }
 
 const std::vector<std::pair<std::string, std::string> > &Package::workspaceTutorialsSections() const{
     return m_d->workspaceTutorialSections;
 }
 
-const std::vector<std::string> &Package::workspaceSamples(){
+const std::vector<Package::ProjectEntry> &Package::workspaceSamples(){
     return m_d->workspaceSamples;
 }
 

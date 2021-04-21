@@ -5,6 +5,7 @@ import editor 1.0
 import base 1.0
 import live 1.0
 import fs 1.0 as Fs
+import workspace 1.0 as Workspace
 
 Pane{
     id: root
@@ -31,7 +32,7 @@ Pane{
         anchors.left: parent.left
         anchors.top: parent.top
 
-        width: parent.width
+        width: parent.width > 250 ? parent.width : 250
         height: 30
         color: root.topColor
 
@@ -46,8 +47,61 @@ Pane{
 
         Item{
             id: paneHeaderContent
-            anchors.leftMargin: 15
+            anchors.right: parent.right
+            anchors.rightMargin: 35
+            anchors.left: parent.left
+            anchors.leftMargin: 20
             anchors.fill: parent
+        }
+
+        Rectangle{
+            anchors.right: parent.right
+            width: 30
+            height: parent.height
+            color: 'transparent'
+
+            Image{
+                id : paneOptions
+                anchors.centerIn: parent
+                source : "qrc:/images/pane-menu.png"
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    objectPalettePaneMenu.visible = !objectPalettePaneMenu.visible
+                }
+            }
+        }
+    }
+
+    Workspace.PaneMenu{
+        id: objectPalettePaneMenu
+        visible: false
+        anchors.right: root.right
+        anchors.topMargin: 30
+        anchors.top: root.top
+
+        property bool supportsShaping: false
+
+        style: root.currentTheme.popupMenuStyle
+
+
+        Workspace.PaneMenuItem{
+            text: qsTr("Move to new window")
+            onClicked: {
+                objectPalettePaneMenu.visible = false
+                root.panes.movePaneToNewWindow(root)
+            }
+        }
+        Workspace.PaneMenuItem{
+            text: qsTr("Remove Pane")
+            onClicked: {
+                objectPalettePaneMenu.visible = false
+                if (objectContainer)
+                    objectContainer.closeAsPane()
+                else root.panes.clearPane(root)
+            }
         }
     }
 
@@ -88,7 +142,19 @@ Pane{
                 corner: Rectangle{color: root.backgroundColor}
             }
 
-            children : root.objectContainer ? [root.objectContainer] : []
+            flickableItem.contentHeight: root.objectContainer ? root.objectContainer.height: 0
+            flickableItem.contentWidth: root.objectContainer ? root.objectContainer.width : 0
+
+            Flickable {
+                Item {
+                    width: root.objectContainer ? root.objectContainer.width : 0
+                    height: root.objectContainer ? root.objectContainer.height: 0
+
+                    children : root.objectContainer ? [root.objectContainer] : []
+
+                }
+            }
+
         }
     }
 

@@ -1,33 +1,87 @@
 #include "qitemcapture.h"
+
 #include <QSGTextureProvider>
 #include <QQuickWindow>
+#include <QThread>
 
-QItemCapture::QItemCapture(QQuickItem *parent)
-    : QMatDisplay(parent)
-    , m_glFunctions(0)
-    , m_scheduledCapture(false)
-    , m_captureSource(0)
+#include "live/viewcontext.h"
+#include "live/viewengine.h"
+#include "live/exception.h"
+
+#include "qmatio.h"
+
+QItemCapture::QItemCapture(QObject *parent)
+    : QObject(parent)
+    , m_captureSource(nullptr)
+    , m_scheduleCapture(false)
+    , m_result(nullptr)
+    , m_glFunctions(nullptr)
 {
-    connect(this, SIGNAL(windowChanged(QQuickWindow*)), this, SLOT(windowAttached(QQuickWindow*)));
-    connect(this, SIGNAL(captureIsReady(QSize)), this, SLOT(captureReady(QSize)));
 }
 
 QItemCapture::~QItemCapture(){
+    lv::Shared::unref(m_result);
     delete m_glFunctions;
 }
 
-void QItemCapture::windowAttached(QQuickWindow *window){
-    disconnect(this, SLOT(grabImage()));
-    if ( m_scheduledCapture && m_captureSource ){
-        connect(window, SIGNAL(afterRendering()), this, SLOT(grabImage()), Qt::DirectConnection);
-        m_scheduledCapture = false;
+void QItemCapture::setCaptureSource(QQuickItem *captureSource){
+    if (m_captureSource == captureSource)
+        return;
+
+    if ( m_scheduleCapture ){
+        m_scheduleCapture = false;
+        disconnect(m_captureSource, &QQuickItem::windowChanged, this, &QItemCapture::__itemWindowAttached);
+        if ( m_captureSource->window() ){
+            disconnect(m_captureSource->window(), &QQuickWindow::afterRendering, this, &QItemCapture::__windowRendered);
+        }
     }
+
+    if ( captureSource && !captureSource->isTextureProvider() ){
+        captureSource->property("layer").value<QObject*>()->setProperty("enabled", true);
+    }
+
+    m_captureSource = captureSource;
+
+    if ( m_captureSource->window() ){
+        __itemWindowAttached(m_captureSource->window());
+    } else {
+        connect(m_captureSource, &QQuickItem::windowChanged, this, &QItemCapture::__itemWindowAttached);
+    }
+
+    emit captureSourceChanged();
 }
 
-void QItemCapture::grabImage(){
+void QItemCapture::componentComplete(){
+    emit ready();
+}
+
+void QItemCapture::capture(){
+    if ( !m_captureSource ){
+        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No capture source provided.", lv::Exception::toCode("~source"));
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+    if ( m_scheduleCapture )
+        return;
+
+    m_scheduleCapture = true;
+}
+
+void QItemCapture::__itemWindowAttached(QQuickWindow* window){
+    if ( window )
+        connect(window, &QQuickWindow::afterRendering, this, &QItemCapture::__windowRendered, Qt::DirectConnection);
+}
+
+void QItemCapture::__windowRendered(){
+    if ( !m_scheduleCapture )
+        return;
+
+    m_scheduleCapture = false;
+
     QQuickItem* cs = m_captureSource; // save this since we're in a different thread
     if ( !cs )
         return;
+
     if ( !cs->textureProvider() )
         return;
 
@@ -35,8 +89,6 @@ void QItemCapture::grabImage(){
         m_glFunctions = new QOpenGLFunctions_3_3_Core;
         m_glFunctions->initializeOpenGLFunctions();
     }
-
-    disconnect(window(), SIGNAL(afterRendering()), this, SLOT(grabImage()));
 
     QSGTexture *texture = cs->textureProvider()->texture();
     texture->bind();
@@ -46,38 +98,12 @@ void QItemCapture::grabImage(){
 
     QSize ts = texture->textureSize();
     if ( ts.isValid() ){
-        output()->cvMat()->create(cv::Size(ts.width(), ts.height()), CV_8UC4);
-        m_glFunctions->glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, output()->cvMat()->data);
-        emit captureIsReady(ts);
+        QMat* down = new QMat(new cv::Mat(cv::Size(ts.width(), ts.height()), CV_8UC4));
+        m_glFunctions->glGetTexImage(GL_TEXTURE_2D, 0, GL_BGRA, GL_UNSIGNED_BYTE, down->internal().data);
+        down->moveToThread(thread());
+
+        lv::Shared::ref(down);
+        m_result = down;
+        emit resultChanged();
     }
-}
-
-void QItemCapture::setCaptureSource(QQuickItem *captureSource){
-    if (m_captureSource == captureSource)
-        return;
-
-    m_captureSource = captureSource;
-    emit captureSourceChanged();
-
-    if ( m_scheduledCapture && m_captureSource ){
-        connect(window(), SIGNAL(afterRendering()), this, SLOT(grabImage()), Qt::DirectConnection);
-        m_scheduledCapture = false;
-    }
-}
-
-void QItemCapture::capture(){
-    if ( window() && m_captureSource ){
-        connect(window(), SIGNAL(afterRendering()), this, SLOT(grabImage()), Qt::DirectConnection);
-    } else {
-        m_scheduledCapture = true;
-    }
-}
-
-void QItemCapture::captureReady(QSize size){
-    if ( size.width() != implicitWidth() )
-        setImplicitWidth(size.width());
-    if ( size.height() != implicitHeight() )
-        setImplicitHeight(size.height());
-    emit outputChanged();
-    update();
 }

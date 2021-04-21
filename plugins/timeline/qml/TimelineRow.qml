@@ -5,7 +5,9 @@ import timeline 1.0
 Rectangle{
     id: root
 
+    signal segmentFocused(Segment segment)
     signal segmentDoubleClicked(Segment segment)
+    signal trackClicked(int position)
     signal trackDoubleClicked(int position)
 
     property variant model: SegmentModel{}
@@ -38,6 +40,9 @@ Rectangle{
 
         MouseArea {
             anchors.fill: parent
+            onClicked: {
+                root.trackClicked(mouse.x / root.zoomScale)
+            }
             onDoubleClicked: {
                 root.trackDoubleClicked(mouse.x / root.zoomScale)
             }

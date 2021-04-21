@@ -143,6 +143,7 @@ void CompletionContextFinder::checkBinding()
     bool identifierExpected = false;
     bool dotExpected = false;
     bool leftBraceFound = false;
+    int braceNesting = 0;
     while (!delimiterFound) {
         if (i < 0) {
             if (!readLine())
@@ -155,7 +156,7 @@ void CompletionContextFinder::checkBinding()
         const Token &token = yyLinizerState.tokens.at(i);
 //        qDebug() << "Token:" << yyLine->mid(token.begin(), token.length);
 
-        if ( leftBraceFound && token.kind != Token::Colon ){
+        if ( leftBraceFound && token.kind != Token::Colon && braceNesting < 0 ){
             m_bracePropertyBinding = false;
             delimiterFound = true;
             break;
@@ -163,7 +164,14 @@ void CompletionContextFinder::checkBinding()
 
         switch (token.kind) {
         case Token::RightBrace:
+            if ( braceNesting == 0 ){
+                delimiterFound = true;
+            } else {
+                braceNesting++;
+            }
+            break;
         case Token::LeftBrace:
+            braceNesting--;
             m_bracePropertyBinding = true;
             leftBraceFound = true;
             break;

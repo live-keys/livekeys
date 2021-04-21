@@ -14,25 +14,29 @@ public:
         IsGroupTitle = Qt::UserRole + 1,
         Name,
         Label,
-        Path
+        Path,
+        Description
     };
 
     StartupModel();
     ~StartupModel();
 
-    class StartupEntry
-    {
+    class StartupEntry{
+
     public:
         bool    m_isGroupTitle;
         QString m_name;
         QString m_label;
         QString m_path;
+        QString m_description;
 
-        StartupEntry(bool isTitle, QString name, QString label, QString path)
+        StartupEntry(bool isTitle, QString name, QString label, QString path, QString description = "")
             : m_isGroupTitle(isTitle)
             , m_name(name)
             , m_label(label)
-            , m_path(path) {}
+            , m_path(path)
+            , m_description(description)
+        {}
     };
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;

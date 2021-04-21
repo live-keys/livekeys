@@ -20,19 +20,18 @@
 #include "qmljs/qmljsscanner.h"
 #include "qmlprojectmonitor_p.h"
 
+#include "qmleditfragmentcontainer.h"
 #include "qmlcompletioncontextfinder.h"
 #include "documentqmlvaluescanner_p.h"
 #include "documentqmlvalueobjects.h"
 #include "qmljsbuiltintypes_p.h"
 #include "qmljshighlighter_p.h"
 #include "qmlbindingchannel.h"
-#include "qmlbindingspan.h"
-#include "qmlcodeconverter.h"
 #include "qmladdcontainer.h"
-#include "qmlscopesnap_p.h"
 #include "qmlusagegraphscanner.h"
+#include "documentqmlchannels.h"
 
-#include "qmljs/parser/qmljsast_p.h"
+#include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
 
 #include "live/documenthandler.h"
@@ -47,6 +46,7 @@
 #include "live/palettecontainer.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
+#include "live/shared.h"
 #include "live/hookcontainer.h"
 
 #include "qmlsuggestionmodel.h"
@@ -62,6 +62,8 @@
 #include <QQmlComponent>
 #include <QStringList>
 #include <QWaitCondition>
+#include <queue>
+#include <QSet>
 
 namespace lv{
 
@@ -76,11 +78,12 @@ public:
         : m_documentParseSync(false)
         , m_documentBackgroundParseSync(false)
         , m_documentValueObjectsSync(false)
+        , m_documentIsScanning(false)
+        , m_documentUpdatedFromBackground(false)
     {
         m_documentInfo = DocumentQmlInfo::createAndParse("", "");
     }
 
-    ProjectQmlExtension*  projectHandler;
 
     QmlScopeSnap snapScope() const{
         return QmlScopeSnap(projectHandler->scanMonitor()->projectScope(), m_documentInfo);
@@ -107,32 +110,39 @@ public:
     }
 
     void assignDocumentFromBackgroundSync(const DocumentQmlInfo::Ptr& document){
+        m_documentIsScanning = false;
         if ( !m_documentParseSync ){
             m_documentInfo = document;
             if ( m_documentBackgroundParseSync ){
                 m_documentParseSync        = true;
                 m_documentValueObjectsSync = false;
+                m_documentUpdatedFromBackground = true;
             }
+        }
+        if ( m_documentBackgroundParseSync ){
+            m_documentUpdatedFromBackground = true;
         }
     }
 
     void documentQueuedForScanning(){
+        m_documentIsScanning          = true;
         m_documentBackgroundParseSync = true;
     }
 
     void documentChanged(){
-        m_documentParseSync           = false;
-        m_documentBackgroundParseSync = false;
-        m_documentValueObjectsSync    = false;
+        m_documentParseSync             = false;
+        m_documentBackgroundParseSync   = false;
+        m_documentValueObjectsSync      = false;
+        m_documentUpdatedFromBackground = false;
     }
 
-    const DocumentQmlValueObjects::Ptr& documentObjects() const{
-        return m_documentObjects;
-    }
+    const DocumentQmlValueObjects::Ptr& documentObjects() const{ return m_documentObjects; }
+    const DocumentQmlInfo::Ptr documentInfo() const{ return m_documentInfo;}
+    bool wasDocumentUpdatedFromBackground() const{ return m_documentUpdatedFromBackground; }
+    bool isDocumentBeingScanned() const{ return m_documentIsScanning; }
+    bool isDocumentParsed() const{ return m_documentParseSync; }
 
-    const DocumentQmlInfo::Ptr documentInfo() const{
-        return m_documentInfo;
-    }
+    ProjectQmlExtension*  projectHandler;
 
 private:
     DocumentQmlInfo::Ptr         m_documentInfo;
@@ -141,6 +151,8 @@ private:
     bool                  m_documentParseSync;
     bool                  m_documentBackgroundParseSync;
     bool                  m_documentValueObjectsSync;
+    bool                  m_documentIsScanning;
+    bool                  m_documentUpdatedFromBackground;
 };
 
 namespace qmlhandler_helpers{
@@ -179,13 +191,13 @@ namespace qmlhandler_helpers{
                   m.functionType == QmlFunctionInfo::Slot) && suggestMethods ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "function", ti->prefereredType().name(), completion
+                    m.name + "(", "function", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestSignals ){
                 QString completion = m.name + "(";// + m.parameters.join(", ") + ")";
                 localSuggestions << CodeCompletionSuggestion(
-                    m.name + "()", "signal", ti->prefereredType().name(), completion
+                    m.name + "(", "signal", ti->prefereredType().name(), completion
                 );
             }
             if ( m.functionType == QmlFunctionInfo::Signal && suggestGeneratedSlots ){
@@ -289,10 +301,12 @@ CodeQmlHandler::CodeQmlHandler(
     , m_target(nullptr)
     , m_highlighter(new QmlJsHighlighter(settings, handler, nullptr))
     , m_settings(settings)
-    , m_engine(engine->engine())
+    , m_engine(engine)
     , m_completionContextFinder(new QmlCompletionContextFinder)
     , m_newScope(false)
     , m_editingFragment(nullptr)
+    , m_editContainer(new QmlEditFragmentContainer(this))
+    , m_bindingChannels(nullptr)
     , d_ptr(new CodeQmlHandlerPrivate)
 {
     Q_D(CodeQmlHandler);
@@ -302,15 +316,16 @@ CodeQmlHandler::CodeQmlHandler(
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(aboutToDelete()));
+    connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(__aboutToDelete()));
 
     d->projectHandler->addCodeQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
-
-    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::scannerProcessingChanged,
-            this, &CodeQmlHandler::processingChanged);
+    connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::libraryScanQueueCleared,
+            this, &CodeQmlHandler::__whenLibraryScanQueueCleared);
 
     setDocument(document);
+
+    m_bindingChannels = new DocumentQmlChannels(projectHandler->channelsDispatcher(), this);
 }
 
 /**
@@ -537,13 +552,7 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
             this, &CodeQmlHandler::__cursorWritePositionChanged
         );
 
-        auto it = m_edits.begin();
-        while( it != m_edits.end() ){
-            QmlEditFragment* edit = *it;
-            it = m_edits.erase(it);
-            edit->emitRemoval();
-            edit->deleteLater();
-        }
+        m_editContainer->clearAllFragments();
     }
 
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
@@ -604,7 +613,7 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
  */
 void CodeQmlHandler::updateScope(){
     Q_D(CodeQmlHandler);
-    if ( d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
+    if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
@@ -771,6 +780,171 @@ QString CodeQmlHandler::getHelpEntity(int position){
     return "";
 }
 
+void CodeQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, QmlSuggestionModel *model, bool isForNode)
+{
+    for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+        const QmlTypeInfo::Ptr& ti = *it;
+
+        for (int i = 0; i < ti->totalFunctions(); ++i)
+        {
+            auto method = ti->functionAt(i);
+            if (method.functionType == QmlFunctionInfo::Signal)
+            {
+                auto name = method.name;
+                name = QString("on") + name[0].toUpper() + name.mid(1);
+
+                model->addItem(QmlSuggestionModel::ItemData(
+                    name,
+                    ti->prefereredType().name(),
+                    "method",
+                    "",
+                    ti->exportType().join() + "." + name,
+                    name,
+                    QmlSuggestionModel::ItemData::Event)
+                );
+            } else if (isForNode) {
+                auto name = method.name;
+
+                model->addItem(QmlSuggestionModel::ItemData(
+                    name,
+                    ti->prefereredType().name(),
+                    "method",
+                    "",
+                    ti->exportType().join() + "." + name,
+                    name,
+                    QmlSuggestionModel::ItemData::Function)
+                );
+
+            }
+        }
+
+        for ( int i = 0; i < ti->totalProperties(); ++i ){
+            QString propertyName = ti->propertyAt(i).name;
+            if ( !propertyName.startsWith("__")){
+                model->addItem(
+                    QmlSuggestionModel::ItemData(
+                        propertyName,
+                        ti->prefereredType().name(),
+                        ti->propertyAt(i).typeName.name(),
+                        "",
+                        ti->exportType().join() + "." + propertyName,
+                        propertyName,
+                        QmlSuggestionModel::ItemData::Property,
+                        ti->propertyAt(i).isPointer)
+                );
+            }
+
+
+            if ( propertyName.size() > 0 )
+                propertyName[0] = propertyName[0].toUpper();
+
+            if (propertyName != "ObjectName"){
+                propertyName = "on" + propertyName + "Changed";
+                model->addItem(
+                    QmlSuggestionModel::ItemData(
+                        propertyName,
+                        ti->prefereredType().name(),
+                        "method",
+                        "",
+                        "", //TODO: Find library path
+                        propertyName,
+                        QmlSuggestionModel::ItemData::Event)
+                );
+            }
+        }
+        model->updateFilters();
+    }
+}
+
+void CodeQmlHandler::addObjectsToModel(const QmlScopeSnap &scope, QmlSuggestionModel *model)
+{
+    // import global objects
+
+    QStringList exports;
+    QmlLibraryInfo::Ptr lib = scope.project->libraryInfo(scope.document->path());
+    if ( lib ){
+        exports = lib->listExports();
+    }
+
+    foreach( const QString& e, exports ){
+        if ( e != scope.document->componentName() ){
+            model->addItem(
+                QmlSuggestionModel::ItemData(
+                    e,
+                    "",
+                    "",
+                    "implicit",
+                    scope.document->path(),
+                    e,
+                    QmlSuggestionModel::ItemData::Object)
+            );
+        }
+    }
+
+    for( const QString& defaultLibrary: scope.project->defaultLibraries() ){
+        QmlLibraryInfo::Ptr defaultLib = scope.project->libraryInfo(defaultLibrary);
+        QStringList defaultExports;
+        if ( defaultLib ){
+            defaultExports = defaultLib->listExports();
+        }
+        for( const QString& de: defaultExports ){
+            if ( de != "Component"){
+                model->addItem(
+                    QmlSuggestionModel::ItemData(
+                        de,
+                        "",
+                        "",
+                        "QtQml",
+                        "QtQml",
+                        de,
+                        QmlSuggestionModel::ItemData::Object)
+                );
+            }
+        }
+    }
+
+    // import namespace objects
+
+    QSet<QString> imports;
+
+    foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
+        if ( imp.as() != "" ){
+            imports.insert(imp.as());
+        }
+    }
+    imports.insert("");
+
+    for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
+
+        foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
+            if ( imp.as() == *it ){
+                QStringList libexports;
+                QmlLibraryInfo::Ptr implib = scope.project->libraryInfo(imp.uri());
+                if ( !lib.isNull() ){
+                    libexports = implib->listExports();
+                }
+
+                for ( const QString& exp: libexports ){
+                    if ( exp != "Component"){
+                        model->addItem(
+                            QmlSuggestionModel::ItemData(
+                                exp,
+                                "",
+                                "",
+                                imp.uri(),
+                                imp.uri(),
+                                exp,
+                                QmlSuggestionModel::ItemData::Object)
+                        );
+                    }
+                }
+            }
+        }
+    }
+
+    model->updateFilters();
+}
+
 /**
  * \brief Calls a new rehighlight on the specified block
  */
@@ -780,235 +954,245 @@ void CodeQmlHandler::rehighlightBlock(const QTextBlock &block){
     }
 }
 
-/**
- * \brief Get a list of declarations from a specific cursor
- */
-QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(const QTextCursor& cursor){
-    Q_D(CodeQmlHandler);
+QmlDeclaration::Ptr CodeQmlHandler::getDeclarationViaCompletionContext(int position){
+    Q_D(const CodeQmlHandler);
 
-    QList<QmlDeclaration::Ptr> properties;
-    int length = cursor.selectionEnd() - cursor.selectionStart();
+    // get imports
 
-    if ( length == 0 ){
-        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+    QTextCursor cursor(m_document->textDocument());
+    cursor.setPosition(position);
 
-        QStringList expression;
-        int propertyPosition = ctx->propertyPosition();
-        int propertyLength   = 0;
+    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
 
-        QChar expressionEndDelimiter;
+    QStringList expression;
+    int propertyPosition = ctx->propertyPosition();
+    int propertyLength   = 0;
 
-        if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ){
-            expression = ctx->expressionPath();
+    QChar expressionEndDelimiter;
 
-            if ( propertyPosition == -1 ){
-                if ( m_target->characterAt(cursor.position()).isSpace() ){
-                    return properties;
-                }
-                else
-                    propertyPosition = cursor.position();
+    if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ){
+        expression = ctx->expressionPath();
+
+        if ( propertyPosition == -1 ){
+            if ( m_target->characterAt(cursor.position()).isSpace() ){
+                return nullptr;
             }
-
-            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-                m_target, cursor.position(), &expression, &expressionEndDelimiter
-            );
-
-            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
-
-        } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
-            expression     = ctx->propertyPath();
-            propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
-        } else if ( ctx->context() == 0 ){
-            expression = ctx->expressionPath();
-
-            QTextBlock cursorBlock = cursor.block();
-            QString cursorBlockText = cursorBlock.text();
-            propertyPosition = cursorBlock.position();
-            for ( auto it = cursorBlockText.begin(); it != cursorBlockText.end(); ++it ){
-                if ( !it->isSpace( ) )
-                    break;
-                ++propertyPosition;
-            }
-
-            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-                m_target, cursor.position(), &expression, &expressionEndDelimiter
-            );
-            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
-
-            if ( expressionEndDelimiter != '{' )
-                expression = QStringList();
+            else
+                propertyPosition = cursor.position();
         }
 
-        if ( expression.size() > 0 ){
-            if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object list declaration ( 'Object{' )
-
-                QmlScopeSnap scope = d->snapScope();
-
-                QmlInheritanceInfo ipath = scope.getTypePath(expression);
-
-                if ( !ipath.isEmpty() ){
-                    properties.append(QmlDeclaration::create(
-                        QStringList(),
-                        ipath.languageType(),
-                        QmlTypeReference(),
-                        propertyPosition,
-                        0,
-                        m_document
-                    ));
-                }
-
-
-            } else { // dealing with a property declaration
-                QmlScopeSnap scope = d->snapScope();
-
-                bool isSlot = false;
-                if ( expression.length() == 1 && expression.first().startsWith("on") ){
-                    QString signalName = expression.first().mid(2);
-                    if ( !signalName.isEmpty() ){
-                        signalName[0] = signalName[0].toLower();
-                    }
-
-                    QmlFunctionInfo associatedSignal = scope.getSignal(
-                        scope.quickObjectDeclarationType(ctx->objectTypePath()), signalName, cursor.position()
-                    );
-                    QmlScopeSnap::PropertyReference associatedPropertyInfo;
-
-                    if ( !associatedSignal.isValid() && signalName.endsWith("Changed") ){
-                        associatedPropertyInfo = scope.getProperty(
-                            scope.quickObjectDeclarationType(ctx->objectTypePath()),
-                            signalName.mid(0, signalName.length() - 7), cursor.position());
-
-                        if ( associatedPropertyInfo.isValid() ){
-                            associatedSignal.name = signalName;
-                            associatedSignal.accessType = QmlFunctionInfo::Public;
-                            associatedSignal.functionType = QmlFunctionInfo::Signal;
-                            associatedSignal.objectType = associatedPropertyInfo.classTypePath.languageType();
-                        }
-                    }
-
-                    if ( associatedSignal.isValid() ){
-                        isSlot = true;
-                        properties.append(QmlDeclaration::create(
-                            expression,
-                            QmlTypeReference(QmlTypeReference::Qml, "slot"),
-                            associatedSignal.objectType,
-                            propertyPosition,
-                            propertyLength,
-                            m_document
-                        ));
-                    }
-                }
-
-                if ( !isSlot ){
-                    QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                        scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, cursor.position()
-                    );
-
-                    if ( propChain.size() == expression.size() && propChain.size() > 0 ){
-                        QmlScopeSnap::PropertyReference& propref = propChain.last();
-                        QmlTypeReference qlt = propref.resultType();
-                        if ( !qlt.isEmpty() ){
-                            properties.append(QmlDeclaration::create(
-                                expression,
-                                propref.resultType(),
-                                propref.propertyObjectType(),
-                                propertyPosition,
-                                propertyLength,
-                                m_document
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-
-    } else { // multiple declarations were selected
-
-        d->syncParse(m_document);
-        d->syncObjects(m_document);
-
-        DocumentQmlInfo::Ptr docinfo = d->documentInfo();
-        DocumentQmlValueObjects::Ptr objects = d->documentObjects();
-
-        QList<DocumentQmlValueObjects::RangeProperty*> rangeProperties = objects->propertiesBetween(
-            cursor.selectionStart(), cursor.selectionEnd()
+        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+            m_target, cursor.position(), &expression, &expressionEndDelimiter
         );
 
-        if ( rangeProperties.size() > 0 ){
+        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+
+    } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
+        expression     = ctx->propertyPath();
+        propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
+    } else if ( ctx->context() & QmlCompletionContext::InImport || ctx->context() & QmlCompletionContext::InImportVersion ){
+        return createImportDeclaration();
+    } else if ( ctx->context() == 0 ){
+        expression = ctx->expressionPath();
+
+        QTextBlock cursorBlock = cursor.block();
+        QString cursorBlockText = cursorBlock.text();
+        propertyPosition = cursorBlock.position();
+        for ( auto it = cursorBlockText.begin(); it != cursorBlockText.end(); ++it ){
+            if ( !it->isSpace( ) )
+                break;
+            ++propertyPosition;
+        }
+
+        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+            m_target, cursor.position(), &expression, &expressionEndDelimiter
+        );
+        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+
+        if ( expressionEndDelimiter != '{' )
+            expression = QStringList();
+    }
+
+    if ( expression.size() > 0 ){
+        if ( expressionEndDelimiter == QChar('{') ){ // dealing with an object list declaration ( 'Object{' )
 
             QmlScopeSnap scope = d->snapScope();
 
-            for( auto it = rangeProperties.begin(); it != rangeProperties.end(); ++it ){
-                DocumentQmlValueObjects::RangeProperty* rp = *it;
-                QString propertyType = rp->type();
+            QmlInheritanceInfo ipath = scope.getTypePath(expression);
 
-                if ( propertyType.isEmpty() ){
-                    QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                        scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
+            if ( !ipath.isEmpty() ){
+                return QmlDeclaration::create(
+                    QStringList(),
+                    ipath.languageType(),
+                    QmlTypeReference(),
+                    propertyPosition,
+                    0,
+                    m_document
+                );
+            }
+
+        } else { // dealing with a property declaration
+            QmlScopeSnap scope = d->snapScope();
+
+            bool isSlot = false;
+            if ( expression.length() == 1 && expression.first().startsWith("on") ){
+                QString signalName = expression.first().mid(2);
+                if ( !signalName.isEmpty() ){
+                    signalName[0] = signalName[0].toLower();
+                }
+
+                QmlFunctionInfo associatedSignal = scope.getSignal(
+                    scope.quickObjectDeclarationType(ctx->objectTypePath()), signalName, cursor.position()
+                );
+                QmlScopeSnap::PropertyReference associatedPropertyInfo;
+
+                if ( !associatedSignal.isValid() && signalName.endsWith("Changed") ){
+                    associatedPropertyInfo = scope.getProperty(
+                        scope.quickObjectDeclarationType(ctx->objectTypePath()),
+                        signalName.mid(0, signalName.length() - 7), position);
+
+                    if ( associatedPropertyInfo.isValid() ){
+                        associatedSignal.name = signalName;
+                        associatedSignal.accessType = QmlFunctionInfo::Public;
+                        associatedSignal.functionType = QmlFunctionInfo::Signal;
+                        associatedSignal.objectType = associatedPropertyInfo.classTypePath.languageType();
+                    }
+                }
+
+                if ( associatedSignal.isValid() ){
+                    isSlot = true;
+                    return QmlDeclaration::create(
+                        expression,
+                        QmlTypeReference(QmlTypeReference::Qml, "slot"),
+                        associatedSignal.objectType,
+                        propertyPosition,
+                        propertyLength,
+                        m_document
                     );
+                }
+            }
 
-                    if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
-                        QmlScopeSnap::PropertyReference& propref = propChain.last();
-                        properties.append(QmlDeclaration::create(
-                            rp->name(),
+            if ( !isSlot ){
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(ctx->objectTypePath()), expression, position
+                );
+
+                if ( propChain.size() == expression.size() && propChain.size() > 0 ){
+                    QmlScopeSnap::PropertyReference& propref = propChain.last();
+                    QmlTypeReference qlt = propref.resultType();
+
+                    if ( !qlt.isEmpty() ){
+                        return QmlDeclaration::create(
+                            expression,
                             propref.resultType(),
                             propref.propertyObjectType(),
-                            rp->begin,
-                            rp->propertyEnd - rp->begin,
+                            propertyPosition,
+                            propertyLength,
                             m_document
-                        ));
+                        );
                     }
+                }
+            }
+        }
+    } else { // check if this might be in imports
+        if (position == 0){
+            return createImportDeclaration();
+        } else {
+            bool isBlank = true;
+            for (int i = 0; i<position; i++)
+            {
+                if (!m_document->textDocument()->characterAt(i).isSpace())
+                {
+                    isBlank = false;
+                    break;
+                }
+            }
+            if (isBlank){
+                return createImportDeclaration();
+            }
+        }
+    }
+    return nullptr;
+}
+
+QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarationsViaParsedDocument(int position, int length){
+    Q_D(CodeQmlHandler);
+
+    QList<QmlDeclaration::Ptr> declarations;
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
+
+    //TODO: Get objects as well, and imports
+
+    DocumentQmlInfo::Ptr docinfo = d->documentInfo();
+    DocumentQmlValueObjects::Ptr objects = d->documentObjects();
+
+    QList<DocumentQmlValueObjects::RangeProperty*> rangeProperties = objects->propertiesBetween(
+        position, length
+    );
+
+    if ( rangeProperties.size() > 0 ){
+
+        QmlScopeSnap scope = d->snapScope();
+
+        for( auto it = rangeProperties.begin(); it != rangeProperties.end(); ++it ){
+            DocumentQmlValueObjects::RangeProperty* rp = *it;
+            QString propertyType = rp->type();
+
+            if ( propertyType.isEmpty() ){
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
+                );
+
+                if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
+                    QmlScopeSnap::PropertyReference& propref = propChain.last();
+                    declarations.append(QmlDeclaration::create(
+                        rp->name(),
+                        propref.resultType(),
+                        propref.propertyObjectType(),
+                        rp->begin,
+                        rp->propertyEnd - rp->begin,
+                        m_document
+                    ));
+                }
+            } else {
+                QmlTypeReference qlt;
+                if ( QmlTypeInfo::isObject(propertyType) ){
+                    QmlTypeInfo::Ptr tr = scope.getType(propertyType);
+                    qlt = tr->prefereredType();
                 } else {
-                    QmlTypeReference qlt;
-                    if ( QmlTypeInfo::isObject(propertyType) ){
-                        QmlTypeInfo::Ptr tr = scope.getType(propertyType);
-                        qlt = tr->prefereredType();
-                    } else {
-                        qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
-                    }
-                    if ( !qlt.isEmpty() ){
-                        QmlTypeInfo::Ptr tr = scope.getType(rp->object());
-                        properties.append(QmlDeclaration::create(
-                            rp->name(), qlt, tr->prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
-                        ));
-                    }
+                    qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
+                }
+                if ( !qlt.isEmpty() ){
+                    QmlTypeInfo::Ptr tr = scope.getType(rp->object());
+                    declarations.append(QmlDeclaration::create(
+                        rp->name(), qlt, tr->prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                    ));
                 }
             }
         }
     }
 
-    return properties;
+    return declarations;
 }
 
 /**
- * \brief Given a declaration identifier \p position and \p length, get the \p valuePosition and \p valueEnd
- * for that declaration
+ * \brief Get a list of declarations from a specific cursor
  */
-bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePosition, int &valueEnd){
-    if ( length > 0 ){
-        DocumentQmlValueScanner vs(m_document, position, length);
-        if ( vs() ){
-            valuePosition = vs.valuePosition();
-            valueEnd      = vs.valueEnd();
-            return true;
-        } else {
-            valuePosition = -1;
-            valueEnd      = -1;
-            return false;
-        }
-    } else {
-        DocumentQmlValueScanner vs(m_document, position, length);
-        int valueLength = vs.getBlockExtent(position);
-        if ( valueLength != -1 ){
-            valuePosition = position;
-            valueEnd      = valueLength + position;
-            return true;
-        } else {
-            valuePosition = -1;
-            valueEnd      = -1;
-            return false;
-        }
+QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int length){
+    QList<QmlDeclaration::Ptr> properties;
+//    int length = position.selectionEnd() - position.selectionStart();
+
+    if ( length == 0 ){
+        QmlDeclaration::Ptr declaration = getDeclarationViaCompletionContext(position);
+        if ( declaration )
+            properties << declaration;
+
+    } else { // multiple declarations were selected
+        return getDeclarationsViaParsedDocument(position, length);
     }
+
+    return properties;
 }
 
 /**
@@ -1019,84 +1203,62 @@ bool CodeQmlHandler::findDeclarationValue(int position, int length, int &valuePo
  * each component resides, and use those binding paths to connect the position of the
  * code structure to the same values within the runtime.
  */
-QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration){
+QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
     Q_D(CodeQmlHandler);
     Project* project = d->projectHandler->project();
 
     if ( m_document ){
         d->syncParse(m_document);
         d->syncObjects(m_document);
-        QmlBindingPath::Ptr bp = DocumentQmlInfo::findDeclarationPath(m_document, d->documentObjects()->root(), declaration);
+
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+            m_document, d->documentObjects()->root(), declaration
+        );
+        QmlBindingPath::Ptr bp = tr.bindingPath;
+
         if ( !bp )
             return nullptr;
 
-        QmlEditFragment* ef = new QmlEditFragment(declaration);
-
-        Runnable* r = project->runnables()->runnableAt(bp->rootFile());
-        if (r && r->type() != Runnable::LvFile ){
-            QmlBindingChannel::Ptr bc = DocumentQmlInfo::traverseBindingPath(bp, r);
-            if ( bc && bc->hasConnection() ){
-                bc->setEnabled(true);
-                ef->bindingSpan()->setExpressionPath(bp);
-                ef->bindingSpan()->addChannel(bc);
-                ef->bindingSpan()->setConnectionChannel(bc);
-            }
+        QString id = "";
+        DocumentQmlValueObjects::RangeObject* rangeObject = nullptr;
+        if ( tr.range && tr.range->rangeType() == DocumentQmlValueObjects::RangeItem::Object ){
+            rangeObject = static_cast<DocumentQmlValueObjects::RangeObject*>(tr.range);
+        } else if ( tr.range && tr.range->rangeType() == DocumentQmlValueObjects::RangeItem::Property ){
+            DocumentQmlValueObjects::RangeProperty* rangeProperty = static_cast<DocumentQmlValueObjects::RangeProperty*>(tr.range);
+            if ( rangeProperty->child )
+                rangeObject = rangeProperty->child;
         }
 
-        QString fileName = declaration->document()->file()->name();
-        if ( fileName.length() && fileName.front().isUpper() ){ // if component
-            RunnableContainer* rc = project->runnables();
-            int totalRunnables = rc->rowCount();
-            for ( int i = 0; i < totalRunnables; ++i ){
-                Runnable* run = rc->runnableAt(i);
-                if ( !run->name().isEmpty() && run->type() == Runnable::QmlFile ){
-                    HookContainer* hooks = qobject_cast<HookContainer*>(
-                        run->viewContext()->contextProperty("hooks").value<QObject*>()
-                    );
-
-                    if ( hooks ){
-                        QString filePath = declaration->document()->file()->path();
-                        QMap<QString, QList<QObject*> > entries = hooks->entriesForFile(filePath);
-                        for ( auto entryIt = entries.begin(); entryIt != entries.end(); ++entryIt ){
-                            QString objectId = entryIt.key();
-                            QObject* first = entryIt.value().size() ? entryIt.value().first() : nullptr;
-                            if ( qobject_cast<QmlWatcher*>(first) ){
-                                QmlWatcher* w = qobject_cast<QmlWatcher*>(first);
-
-                                QmlBindingPath::Ptr watcherBp = QmlBindingPath::create();
-                                watcherBp->appendWatcher(w->fileReference(), objectId);
-
-                                QmlBindingPath::Ptr fullBp = QmlBindingPath::join(watcherBp, bp, false);
-
-                                QmlBindingChannel::Ptr bpChannel = DocumentQmlInfo::traverseBindingPath(fullBp, run);
-                                if (bpChannel){
-                                    bpChannel->setEnabled(true);
-                                    ef->bindingSpan()->setExpressionPath(bp);
-                                    if ( ef->bindingSpan()->channels().size() == 0 )
-                                        ef->bindingSpan()->setConnectionChannel(bpChannel);
-                                    ef->bindingSpan()->addChannel(bpChannel);
-                                }
-
-                            } else if ( qobject_cast<QmlBuilder*>(first) ){
-                                QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
-                                builderBp->appendFile(filePath);
-                                builderBp->appendComponent(objectId, objectId);
-                                QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
-                                builderC->setIsBuilder(true);
-                                builderC->setEnabled(true);
-                                ef->bindingSpan()->setExpressionPath(bp);
-                                if ( ef->bindingSpan()->channels().size() == 0 )
-                                    ef->bindingSpan()->setConnectionChannel(builderC);
-                                ef->bindingSpan()->addChannel(builderC);
-                            }
-
-                        }
-                    }
+        if ( rangeObject ){
+            for (int k = 0; k < rangeObject->properties.size(); ++k){
+                auto prop = rangeObject->properties[k];
+                if (prop->name().size() == 1 && prop->name()[0] == "id"){
+                    id = m_document->substring(prop->valueBegin, prop->end - prop->valueBegin);
+                    break;
                 }
             }
         }
 
-        if ( ef->bindingSpan()->channels().size() == 0 ){
+        QmlEditFragment* ef = new QmlEditFragment(declaration, this);
+        if ( !id.isEmpty() )
+            ef->setObjectId(id);
+
+        if ( declaration->isForProperty() ){
+            if ( declaration->valueObjectScopeOffset() > -1 ){
+                // in case a property also initializes an object, capture the object type
+                int objectInitStart = declaration->valuePosition();
+                QStringList initType = m_document->substring(objectInitStart, declaration->valueObjectScopeOffset()).trimmed().split('.');
+                QmlScopeSnap scope = d->snapScope();
+                QmlTypeInfo::Ptr ti = scope.getType(initType);
+                if ( ti ){
+                    ef->setObjectInitializeType(ti->prefereredType());
+                }
+            }
+        }
+
+        createChannelForFragment(parentEdit, ef, bp);
+
+        if ( !ef->channel() ){
             delete ef;
             return nullptr;
         }
@@ -1106,17 +1268,71 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     return nullptr;
 }
 
-void CodeQmlHandler::aboutToDelete()
+void CodeQmlHandler::__aboutToDelete()
 {
     cancelEdit();
 
     if ( m_document ){
-        auto it = m_edits.begin();
-        while( it != m_edits.end() ){
-            QmlEditFragment* edit = *it;
-            it = m_edits.erase(it);
-            edit->emitRemoval();
-            edit->deleteLater();
+        m_editContainer->clearAllFragments();
+    }
+}
+
+void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype){
+    Q_D(CodeQmlHandler);
+
+    if ( !edit )
+        return;
+
+    QString type; QString id;
+    if (ctype.contains('#'))
+    {
+        auto spl = ctype.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = ctype;
+
+    QmlBindingChannel::Ptr bc = edit->channel();
+
+    if ( bc->canModify() ){
+        QQmlProperty& p = bc->property();
+
+        QString creationPath = m_document->file()->path();
+        creationPath.replace(".qml", "_a.qml");
+        QObject* result = QmlEditFragment::createObject(
+            d->documentInfo(), type + "{}", creationPath
+        );
+        if ( !result )
+            THROW_EXCEPTION(lv::Exception, "Failed to create object: " + type.toStdString(), Exception::toCode("~CreateObject"));
+
+        if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
+
+            QObject* obat = bc->object();
+
+            QQmlProperty assignmentProperty(obat);
+            if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
+                QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
+                vlog("editqmljs-codehandler").v() <<
+                    "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                    "property " << assignmentProperty.name();
+
+                QQmlEngine::setObjectOwnership(result, QQmlEngine::CppOwnership);
+                if ( assignmentList.canAppend() ){
+                    result->setParent(obat);
+                    assignmentList.append(result);
+
+                    m_bindingChannels->desyncInactiveChannels();
+
+                    return;
+                }
+            } else {
+                vlog("editqmljs-codehandler").v() <<
+                    "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
+                    "property " << assignmentProperty.name();
+                assignmentProperty.write(QVariant::fromValue(result));
+                return;
+            }
+        } else {
+            edit->channel()->property().write(QVariant::fromValue(result));
         }
     }
 }
@@ -1126,98 +1342,69 @@ QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
     return ef->nestedObjectsInfo();
 }
 
-QJSValue CodeQmlHandler::createCursorInfo(bool canBind, bool canUnbind, bool canEdit, bool canAdjust, bool canShape, bool inImports)
-{
-    QJSValue result = m_engine->newObject();
-    result.setProperty("canBind", canBind);
-    result.setProperty("canUnbind", canUnbind);
-    result.setProperty("canEdit", canEdit);
-    result.setProperty("canAdjust", canAdjust);
-    result.setProperty("canShape", canShape);
-    result.setProperty("inImports", inImports);
-    return result;
+QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
+
+    DocumentQmlInfo::Ptr docinfo = d->documentInfo();
+    if ( !docinfo->isParsedCorrectly() ){
+        docinfo->tryExtractImports();
+    }
+
+    int identifierPosition = 0;
+    int identifierLength = 0;
+
+    if ( !docinfo->imports().isEmpty() ){
+        int blockStart = docinfo->imports()[0].location().line() - 1;
+        int blockEnd = docinfo->imports()[docinfo->imports().size()-1].location().line() - 1;
+
+        identifierPosition = m_target->findBlockByNumber(blockStart).position();
+        auto lastBlock = m_target->findBlockByNumber(blockEnd);
+        identifierLength = lastBlock.position() + lastBlock.length() - 1 - identifierPosition;
+    }
+
+    return QmlDeclaration::create(
+        QStringList(),
+        QmlTypeReference(QmlTypeReference::Qml, "import"),
+        QmlTypeReference(),
+        identifierPosition, identifierLength,
+        m_document
+    );
 }
 
 /**
  * \brief Adds an editing fragment to the current document
  */
 bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
-    auto it = m_edits.begin();
-    while ( it != m_edits.end() ){
-        QmlEditFragment* itEdit = *it;
-
-        if ( itEdit->declaration()->position() < edit->declaration()->position() ){
-            break;
-
-        } else if ( itEdit->declaration()->position() == edit->declaration()->position() ){
-            qWarning("Multiple editing fragments at the same position: %d", edit->position());
-            return false;
-        }
-        ++it;
-    }
-
-    m_edits.insert(it, edit);
-    emit numberOfConnectionsChanged();
-
-    return true;
+    //TOMOVE
+    return m_editContainer->addEdit(edit);
 }
 
 /**
  * \brief Removes an editing fragment from this document
  */
 void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
-    if (!edit)
-        return;
-
-    QObject* parent = edit->parent();
-    if ( parent == this ){
-        auto it = m_edits.begin();
-
-        while( it != m_edits.end() ){
-            QmlEditFragment* itEdit = *it;
-
-            if ( itEdit->declaration()->position() < edit->declaration()->position() )
-                break;
-
-            if ( itEdit == edit ){
-                m_edits.erase(it);
-
-                for (auto child: edit->childFragments())
-                    removeConnection(child);
-                emit numberOfConnectionsChanged();
-
-                if ( m_editingFragment == edit ){
-                    m_document->removeEditingState(ProjectDocument::Overlay);
-                    m_editingFragment = nullptr;
-                }
-                edit->emitRemoval();
-                edit->deleteLater();
-                return;
-            }
-
-            ++it;
-        }
-    } else {
-        QmlEditFragment* parentEf = static_cast<QmlEditFragment*>(parent);
-        if ( parentEf ){
-            parentEf->removeChildFragment(edit);
-        }
-    }
+    //TOMOVE
+    m_editContainer->removeEdit(edit);
 }
 
-void CodeQmlHandler::removeAllEditingFragments()
-{
-    while (!m_edits.empty())
-    {
-        removeConnection(*m_edits.begin());
-    }
-}
+int CodeQmlHandler::findImportsPosition(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
 
-int CodeQmlHandler::findImportsPosition(int blockPos)
-{
-    if (blockPos == -1) return 0;
-    auto block = m_document->textDocument()->findBlockByNumber(blockPos);
-    return block.position() + 7; // e.g. import ^QtQuick
+    DocumentQmlInfo::Ptr docinfo = d->documentInfo();
+    if ( !docinfo->isParsedCorrectly() ){
+        docinfo->tryExtractImports();
+    }
+
+    if ( !docinfo->imports().isEmpty() ){
+        return m_document->textDocument()->findBlockByNumber(
+            docinfo->imports().first().location().line() - 1
+        ).position() + docinfo->imports().first().location().column() + 7;
+
+    }
+
+    return 0;
 }
 
 int CodeQmlHandler::findRootPosition(){
@@ -1232,107 +1419,33 @@ int CodeQmlHandler::findRootPosition(){
     return -1;
 }
 
-QmlEditFragment *CodeQmlHandler::findEditFragment(CodePalette *palette){
-    auto it = m_edits.begin();
-    while( it != m_edits.end() ){
-        QmlEditFragment* edit = *it;
-        for ( auto eit = edit->begin(); eit != edit->end(); ++eit ){
-            CodePalette* cp = *eit;
-            if ( cp == palette )
-                return edit;
-        }
-
-        QmlEditFragment* recurseEdit = findEditFragmentIn(edit, palette);
-        if ( recurseEdit )
-            return recurseEdit;
-
-        ++it;
-
-    }
-    return nullptr;
-}
-
-QmlEditFragment *CodeQmlHandler::findEditFragmentIn(QmlEditFragment* parent, CodePalette *palette){
-    for ( auto it = parent->childFragments().begin(); it != parent->childFragments().end(); ++it ){
-        QmlEditFragment* edit = *it;
-        for ( auto paIt = edit->begin(); paIt != edit->end(); ++paIt ){
-            if ( *paIt == palette )
-                return edit;
-        }
-
-        QmlEditFragment* childEdit = findEditFragmentIn(edit, palette);
-        if ( childEdit )
-            return childEdit;
-    }
-    return nullptr;
-}
-
 lv::QmlEditFragment *CodeQmlHandler::findObjectFragmentByPosition(int position)
 {
-    QmlEditFragment* result = nullptr;
-    QLinkedList<QmlEditFragment*> q;
-    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
-    {
-        q.push_back(*it);
-    }
-
-    while (!q.empty())
-    {
-        auto edit = q.front(); q.pop_front();
-        int lower = edit->declaration()->position();
-        int upper = lower + edit->declaration()->length();
-        if (edit->declaration()->isForObject() && position >= lower && position <= upper)
-        {
-            q.clear();
-            result = edit;
-            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it)
-                q.push_back(*it);
-        }
-
-    }
-    return result;
+    //TOMOVE
+    return m_editContainer->findObjectFragmentByPosition(position);
 }
 
 lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
 {
-    QmlEditFragment* result = nullptr;
-
-    QLinkedList<QmlEditFragment*> q;
-    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
-    {
-        q.push_back(*it);
-    }
-
-    while (!q.empty())
-    {
-        auto edit = q.front(); q.pop_front();
-        int lower = edit->declaration()->position();
-        int upper = lower + edit->declaration()->length();
-        if (position >= lower && position <= upper) //tbd
-        {
-            q.clear();
-            result = edit;
-            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it){
-                q.push_back(*it);
-            }
-        }
-
-    }
-    return result;
+    //TOMOVE
+    return m_editContainer->findFragmentByPosition(position);
 }
 
 QJSValue CodeQmlHandler::editingFragments(){
-    QJSValue result = m_engine->newArray(static_cast<quint32>(m_edits.size()));
-    quint32 i = 0;
-    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-        result.setProperty(i++, m_engine->newQObject(*it));
-    }
-    return result;
+    //TOMOVE
+    return m_editContainer->allEdits();
+}
+
+lv::QmlEditFragment* CodeQmlHandler::findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const
+{
+    //TOMOVE
+    return m_editContainer->findChildPropertyFragmentByName(parent, name);
 }
 
 void CodeQmlHandler::toggleComment(int position, int length)
 {
-    if ( !m_document ) return;
+    if ( !m_document )
+        return;
 
     Q_D(CodeQmlHandler);
 
@@ -1444,6 +1557,8 @@ void CodeQmlHandler::suggestionsForProposedExpression(
 bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
     Q_D(CodeQmlHandler);
 
+    d->syncParse(m_document);
+    d->syncObjects(m_document);
     QmlScopeSnap scope = d->snapScope();
 
     QStringList expressionPathNotTrimmed = expression.split(".");
@@ -1452,15 +1567,21 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         expressionPath.append(expr.trimmed());
     }
 
+
     int cursorPosition = edit->declaration()->position();
 
     QmlScopeSnap::ExpressionChain expressionChain = scope.evaluateExpression(
         edit->declaration()->parentType(), expressionPath, cursorPosition
     );
 
-    if ( !expressionChain.isValid() ){
-        //TODO: Error
-        qWarning("ERROR: Failed to evaluate expression.");
+    if ( !expressionChain.isValid() && expression != "null" ){
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Invalid expression: \'" + expression.toStdString() + "\'", lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
     }
 
@@ -1469,8 +1590,6 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
     QmlBindingPath::Ptr bp = nullptr;
 
-
-
     if ( expressionChain.isId ){ // <id>.<property...>
         DocumentQmlInfo::ValueReference documentValue = scope.document->valueForId(expressionPath.first());
 
@@ -1478,17 +1597,25 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
         int end;
         scope.document->extractTypeNameRange(documentValue, begin, end);
 
-        QTextCursor cursor(m_document->textDocument());
-        cursor.setPosition(end);
-        QList<QmlDeclaration::Ptr> declarations = getDeclarations(cursor);
+        QList<QmlDeclaration::Ptr> declarations = getDeclarations(end);
 
-        d->syncParse(m_document);
-        d->syncObjects(m_document);
-        QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document,
-            d->documentObjects()->root(),
-            declarations.first());
+        if ( declarations.isEmpty() ){
+            QmlError(
+                m_engine,
+                CREATE_EXCEPTION(
+                    lv::Exception,
+                    "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Expression")),
+                    this
+            ).jsThrow();
+            return false;
+        }
 
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+                    m_document,
+                    d->documentObjects()->root(),
+                    declarations.first());
+
+        QmlBindingPath::Ptr newBp = tr.bindingPath;
         bp = newBp;
 
         QmlBindingPath::Node* n = bp->root();
@@ -1510,22 +1637,48 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
-        bp = edit->bindingSpan()->expressionPath()->parentObjectPath();
-        if ( !bp )
-            return false;
+        QmlBindingPath::Ptr editBp = edit->fullBindingPath();
 
+        bp = editBp->parentObjectPath();
+        if ( !bp ){
+            bool isViewRoot = false;
+            if ( edit->location() == QmlEditFragment::Property ){
+                QmlEditFragment* editIt = edit;
+                while ( true ){
+                    if ( editIt->location() != QmlEditFragment::Property && !editIt->isGroup() ){
+                        break;
+                    }
+                    if ( !editIt->parentFragment() )
+                        break;
 
-        for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
-            bp->appendProperty(
-                prop.property.name,
-                QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
-            );
+                    editIt = editIt->parentFragment();
+                }
+
+                if ( editIt->channel()->object() == edit->channel()->runnable()->viewRoot() ){
+                    isViewRoot = true;
+                }
+            }
+
+            if ( !isViewRoot)
+                return false;
+
+            bp = QmlBindingPath::create();
+            bp->appendContextValue("runSpace");
+
+        } else {
+            for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+                bp->appendProperty(
+                    prop.property.name,
+                    QStringList() << prop.classTypePath.nodes.first()->prefereredType().join()
+                );
+            }
         }
 
-    } else { // <property...>
+
+    } else if ( expressionChain.hasProperty() ){ // <property...>
         // clone current binding path, append properties to it
 
-        bp = edit->bindingSpan()->expressionPath()->clone();
+        bp = edit->fullBindingPath()->clone();
         QmlBindingPath::Node* n = bp->root();
         if ( n ){
             while ( n->child )
@@ -1553,46 +1706,137 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
                 n->child = pn;
             }
         }
+    } else if ( expression == "null" ){
+        // disable the binding
+        QmlBindingChannel::Ptr receivingChannel = edit->channel();
+        if ( !receivingChannel->isEnabled() )
+            return true;
+
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+        if ( !documentChannel )
+            return true;
+
+        if ( documentChannel->isBuilder() )
+            return true;
+
+        if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
+            QQmlProperty receivingProperty = receivingChannel->property();
+            QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+            QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+
+            if ( previousWatcherVariant.isValid() ){
+                QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                delete previousWatcher;
+                receivingProperty.object()->setProperty(watcherName, QVariant());
+            }
+
+            QVariant val = receivingProperty.read();
+            receivingProperty.write(val);
+
+            return true;
+        }
+    } else if ( expression == "modelData" ){
+        bp = QmlBindingPath::create();
+        bp->appendContextValue("modelData");
+    } else {
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Expression")),
+                this
+        ).jsThrow();
+        return false;
     }
 
-    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->channels();
-    for ( auto it = bchannels.begin(); it != bchannels.end(); ++it ){
-        QmlBindingChannel::Ptr receivingChannel = *it;
-        if ( receivingChannel->isEnabled() ){
-            QmlBindingChannel::Ptr writeChannel = DocumentQmlInfo::traverseBindingPath(bp, receivingChannel->runnable());
+    QmlBindingChannel::Ptr receivingChannel = edit->channel();
 
-            if ( !writeChannel->hasConnection() ){
-                qWarning("Failed to find binding channel at: %s", qPrintable(writeChannel->bindingPath()->toString()));
+    if ( receivingChannel->isEnabled() ){
+
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+
+        if ( documentChannel ){
+            if ( documentChannel->isBuilder() )
+                return true;
+
+            QmlBindingChannel::Ptr writeChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
+
+            if ( !writeChannel || !writeChannel->hasConnection() ){
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(
+                        lv::Exception,
+                        "Failed to find a binding channel at: " + bp->toString().toStdString(), lv::Exception::toCode("~Channel")),
+                        this
+                ).jsThrow();
+                return false;
             } else {
                 // width is the receiving, need to remove the previous listening channel
-                
-                if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
-                    QQmlProperty recivingProperty = receivingChannel->property();
 
-                    QByteArray watcherName = "__" + recivingProperty.name().toUtf8() + "Watcher";
-                    QVariant previousWatcherVariant = recivingProperty.object()->property(watcherName);
-                    if ( previousWatcherVariant.isValid() ){
-                        QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
-                        delete previousWatcher;
-                        recivingProperty.object()->setProperty(watcherName, QVariant());
+                if ( receivingChannel->property().isValid() && receivingChannel->property().object() ){
+
+                    if ( writeChannel->type() == QmlBindingChannel::Property ){
+
+                        QQmlProperty receivingProperty = receivingChannel->property();
+
+                        QByteArray watcherName = "__" + receivingProperty.name().toUtf8() + "Watcher";
+                        QVariant previousWatcherVariant = receivingProperty.object()->property(watcherName);
+                        if ( previousWatcherVariant.isValid() ){
+                            QObject* previousWatcher = previousWatcherVariant.value<QObject*>();
+                            delete previousWatcher;
+                            receivingProperty.object()->setProperty(watcherName, QVariant());
+                        }
+
+                        QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
+                        QVariant watcherValue = watcher->read();
+
+                        bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
+                        if ( watcherValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                            if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                QJSValue watcherJsValue = watcherValue.value<QJSValue>();
+                                QList<Shared*> sharedObjects;
+                                watcherValue = Shared::transfer(watcherJsValue, sharedObjects);
+                            }
+                        } else if ( receivingQJSValue ){ // wrap in QJSValue
+                            watcherValue = QVariant::fromValue(Shared::transfer(watcherValue, m_engine->engine()));
+                        }
+
+                        receivingProperty.write(watcherValue);
+
+                        QQmlEngine* captureEngine = m_engine->engine();
+
+                        watcher->onChange([receivingProperty, captureEngine](const QmlPropertyWatcher& ww){
+                            QVariant wwValue = ww.read();
+                            bool receivingQJSValue = QString(receivingProperty.property().typeName()) == "QJSValue";
+                            if ( wwValue.canConvert<QJSValue>() ){ // qjsvalue needs to be unwrapped
+                                if ( !receivingQJSValue ){ // unwrap if we don't need to receive QJSValue
+                                    QJSValue watcherJsValue = wwValue.value<QJSValue>();
+                                    QList<Shared*> sharedObjects;
+                                    wwValue = Shared::transfer(watcherJsValue, sharedObjects);
+                                }
+                            } else if ( receivingQJSValue ){ // wrap in QJSValue
+                                wwValue = QVariant::fromValue(Shared::transfer(wwValue, captureEngine));
+                            }
+                            receivingProperty.write(wwValue);
+                        });
+
+                        // delete the watcher with the receiving channel
+                        watcher->setParent(receivingChannel->property().object());
+                        receivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
+
+                    } else if ( writeChannel->type() == QmlBindingChannel::ListIndex ){
+                        QObject* writeValue = writeChannel->object();
+                        receivingChannel->property().write(QVariant::fromValue(writeValue));
+                    } else if ( writeChannel->type() == QmlBindingChannel::Object ){
+                        QObject* writeValue = writeChannel->object();
+                        receivingChannel->property().write(QVariant::fromValue(writeValue));
                     }
 
-                    QmlPropertyWatcher* watcher = new QmlPropertyWatcher(writeChannel->property());
-
-                    // receiving channel vs write channel
-                    // clearing up stuff
-                    recivingProperty.write(watcher->read());
-                    watcher->onChange([recivingProperty](const QmlPropertyWatcher& ww){
-                        recivingProperty.write(ww.read());
-                    });
-                    // delete the watcher with the receiving channel
-                    watcher->setParent(receivingChannel->property().object());
-
-                    recivingProperty.object()->setProperty(watcherName, QVariant::fromValue(watcher));
                 }
             }
         }
     }
+
     return true;
 }
 
@@ -1614,8 +1858,13 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
     );
 
     if ( !expressionChain.isValid() ){
-        //TODO: Error
-        qWarning("ERROR: Failed to evaluate expression.");
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Invalid expression: \'" + expression.toStdString() + "\'", lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
     }
 
@@ -1631,16 +1880,16 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
         int end;
         scope.document->extractTypeNameRange(documentValue, begin, end);
 
-        QTextCursor cursor(m_document->textDocument());
-        cursor.setPosition(end);
-        QList<QmlDeclaration::Ptr> declarations = getDeclarations(cursor);
+        QList<QmlDeclaration::Ptr> declarations = getDeclarations(end);
 
         d->syncParse(m_document);
         d->syncObjects(m_document);
-        QmlBindingPath::Ptr newBp = DocumentQmlInfo::findDeclarationPath(
-            m_document,
-            d->documentObjects()->root(),
-            declarations.first());
+        DocumentQmlInfo::TraversalResult tr = DocumentQmlInfo::findDeclarationPath(
+                    m_document,
+                    d->documentObjects()->root(),
+                    declarations.first());
+
+        QmlBindingPath::Ptr newBp = tr.bindingPath;
 
         bp = newBp;
 
@@ -1651,6 +1900,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
         }
 
         for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
+
             QmlBindingPath::PropertyNode* pn = new QmlBindingPath::PropertyNode;
             QString propertyName = prop.property.isValid() ? prop.property.name : prop.functionInfo.definition();
             pn->propertyName = propertyName;
@@ -1663,7 +1913,7 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
 
     } else if ( expressionChain.isParent ){ // <parent...>.<property...>
 
-        bp = edit->bindingSpan()->expressionPath()->parentObjectPath();
+        bp = edit->fullBindingPath()->parentObjectPath();
         if ( !bp )
             return false;
 
@@ -1676,10 +1926,10 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
             );
         }
 
-    } else { // <property...>
+    } else if ( expressionChain.hasProperty() ) { // <property...>
         // clone current binding path, append properties to it
 
-        bp = edit->bindingSpan()->expressionPath()->clone();
+        bp = edit->fullBindingPath()->clone();
         QmlBindingPath::Node* n = bp->root();
         if ( n ){
             while ( n->child )
@@ -1697,9 +1947,9 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
             }
         }
 
-
         for ( const QmlScopeSnap::PropertyReference& prop : expressionChain.propertyChain){
             QmlBindingPath::PropertyNode* pn = new QmlBindingPath::PropertyNode;
+
             QString propertyName = prop.property.isValid() ? prop.property.name : prop.functionInfo.definition();
             pn->propertyName = propertyName;
             pn->objectName = QStringList() << prop.classTypePath.nodes.first()->prefereredType().join();
@@ -1708,18 +1958,45 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
                 n->child = pn;
             }
         }
+    } else {
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to match expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
+        return false;
     }
 
-    if ( bp.isNull() )
+    if ( bp.isNull() ){
+        QmlError(
+            m_engine,
+            CREATE_EXCEPTION(
+                lv::Exception,
+                "Failed to find path for expression: " + expression.toStdString(), lv::Exception::toCode("~Exprssion")),
+                this
+        ).jsThrow();
         return false;
+    }
 
-    QList<QmlBindingChannel::Ptr> bchannels = edit->bindingSpan()->channels();
-    for ( auto it = bchannels.begin(); it != bchannels.end(); ++it ){
-        QmlBindingChannel::Ptr signalChannel = *it;
-        if ( signalChannel->isEnabled() ){
-            QmlBindingChannel::Ptr functionChannel = DocumentQmlInfo::traverseBindingPath(bp, signalChannel->runnable());
+    QmlBindingChannel::Ptr signalChannel = edit->channel();
+    if ( signalChannel->isEnabled() ){
+
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+        if ( documentChannel ){
+            if ( documentChannel->isBuilder() )
+                return true;
+
+            QmlBindingChannel::Ptr functionChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bp);
             if ( functionChannel.isNull() || !functionChannel->hasConnection() ){
-                qWarning("Failed to find binding channel at: %s", qPrintable(bp->toString()));
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(
+                        lv::Exception,
+                        "Failed to find a binding channel at: " + bp->toString().toStdString(), lv::Exception::toCode("~Channel")),
+                        this
+                ).jsThrow();
                 return false;
             } else {
                 if ( functionChannel->method().isValid() && functionChannel->property().object() ){
@@ -1740,17 +2017,13 @@ QmlUsageGraphScanner *CodeQmlHandler::createScanner(){
     return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
 }
 
-int CodeQmlHandler::numberOfConnections()
-{
-    return m_edits.size();
-}
-
 QList<int> CodeQmlHandler::languageFeatures() const{
     return {
         DocumentHandler::LanguageHelp,
         DocumentHandler::LanguageScope,
         DocumentHandler::LanguageHighlighting,
-        DocumentHandler::LanguageCodeCompletion
+        DocumentHandler::LanguageCodeCompletion,
+        DocumentHandler::LanguageLayout
     };
 }
 
@@ -1767,61 +2040,9 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-    QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-    bool inImports = isInImports(position);
-
-    if ( properties.isEmpty() && !inImports)
+    QList<QmlDeclaration::Ptr> properties = getDeclarations(position);
+    if ( properties.isEmpty() )
         return nullptr;
-
-    if (inImports)
-    {
-        QmlDeclaration::Ptr importDecl = QmlDeclaration::create(
-            QStringList(),
-            QmlTypeReference(QmlTypeReference::Qml, "import"),
-            QmlTypeReference(QmlTypeReference::Qml), m_document);
-        QmlEditFragment* ef = new QmlEditFragment(importDecl);
-
-        auto model = importsModel();
-
-        int startPosition = m_target->findBlockByNumber(model->firstBlock()).position();
-        auto lastBlock = m_target->findBlockByNumber(model->lastBlock()-1);
-        int length = lastBlock.position() + lastBlock.length() - startPosition;
-        ef->declaration()->setSection(
-            m_document->createSection(QmlEditFragment::Section, startPosition, length)
-        );
-        ef->declaration()->section()->setUserData(ef);
-
-        ef->declaration()->section()->onTextChanged(
-                    [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
-        {
-            auto projectDocument = section->document();
-            auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
-
-            if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
-
-                int editLength = editingFragment->declaration()->valueLength();
-                editingFragment->declaration()->setValueLength(editLength - charsRemoved + addedText.size());
-
-            } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-                removeEditingFragment(editingFragment);
-            } else {
-                int editLength = editingFragment->declaration()->valueLength();
-                editingFragment->declaration()->setValueLength(editLength - charsRemoved + addedText.size());
-            }
-
-        });
-
-        addEditingFragment(ef);
-        ef->setParent(this);
-        DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-        if ( dh )
-            dh->requestCursorPosition(ef->position());
-
-        return ef;
-    }
 
     QmlDeclaration::Ptr declaration = properties.first();
 
@@ -1831,15 +2052,24 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
         return test;
     }
 
-    QmlEditFragment* ef = createInjectionChannel(declaration);
-
-    if ( !ef ){
-        return nullptr;
+    QmlEditFragment* ef = nullptr;
+    if ( declaration->isForImports() ){
+        ef = new QmlEditFragment(declaration, this);
+    } else {
+        ef = createInjectionChannel(declaration);
     }
 
-    QTextCursor codeCursor(m_target);
-    codeCursor.setPosition(ef->valuePosition());
-    codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
+
+    if ( !ef ){
+        QmlError(m_engine, CREATE_EXCEPTION(
+            lv::Exception,
+            "Cannot create injection channel for declaration: " +
+            QString::number(declaration->position()).toStdString(),
+            lv::Exception::toCode("~Injection")),
+        this).jsThrow();
+
+        return nullptr;
+    }
 
     ef->declaration()->setSection(m_document->createSection(
         QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
@@ -1864,7 +2094,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
         }
     });
 
-    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
+    QmlBindingChannel::Ptr inputChannel = ef->channel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
@@ -1882,7 +2112,6 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 }
 
 QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParent, int position){
-    //TODO: Fix this with relative binding paths
     if ( !m_document || !editParent )
         return nullptr;
     Q_D(CodeQmlHandler);
@@ -1890,10 +2119,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-    QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+    QList<QmlDeclaration::Ptr> properties = getDeclarations(position);
     if ( properties.isEmpty() )
         return nullptr;
 
@@ -1905,7 +2131,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         return test;
     }
 
-    QmlEditFragment* ef = createInjectionChannel(declaration);
+    QmlEditFragment* ef = createInjectionChannel(declaration, editParent);
     if ( !ef ){
         return nullptr;
     }
@@ -1937,18 +2163,18 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         }
     });
 
-    QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
+    QmlBindingChannel::Ptr inputChannel = ef->channel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
-
-    if (ef->isForObject())
-        populateObjectInfoForFragment(ef);
-    if (ef->isForProperty())
-        populatePropertyInfoForFragment(ef);
     editParent->addChildFragment(ef);
     ef->setParent(editParent);
+
+    if (ef->location() == QmlEditFragment::Object)
+        populateObjectInfoForFragment(ef);
+    if (ef->location() == QmlEditFragment::Property)
+        populatePropertyInfoForFragment(ef);
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
@@ -1957,6 +2183,54 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         dh->requestCursorPosition(ef->valuePosition());
 
     return ef;
+}
+
+lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
+{
+    if ( !m_document )
+        return nullptr;
+    Q_D(CodeQmlHandler);
+    d->syncObjects(m_document);
+
+    QmlScopeSnap scope = d->snapScope();
+
+    int position = parentFragment->valuePosition() + parentFragment->valueLength() - 1;
+    QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+        parentFragment->declaration()->type(), QStringList() << propertyName, position
+    );
+
+    if ( propChain.length() != 1 )
+        return nullptr;
+
+    QmlScopeSnap::PropertyReference& propref = propChain.last();
+    QmlTypeReference qlt = propref.resultType();
+
+    if ( qlt.isEmpty() )
+        return nullptr;
+
+    auto declaration = QmlDeclaration::create(
+        QStringList() << propertyName,
+        propref.resultType(),
+        propref.propertyObjectType(),
+        -1,
+        0,
+        m_document
+    );
+    declaration->setValuePositionOffset(0);
+
+    QmlBindingPath::Ptr bp = parentFragment->fullBindingPath()->clone();
+    bp->appendProperty(propertyName, QStringList() << parentFragment->type());
+
+    auto result = new QmlEditFragment(declaration, this);
+    createChannelForFragment(parentFragment, result, bp);
+
+    result->checkIfGroup();
+
+    result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
+    parentFragment->addChildFragment(result);
+    result->setParent(parentFragment);
+
+    return result;
 }
 
 QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
@@ -1984,17 +2258,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
 
             QmlInheritanceInfo obPath = scope.getTypePath(obNs, obName);
 
-            QString id;
-            // find id
-            for (int k = 0; k < child->properties.size(); ++k)
-            {
-                auto prop = child->properties[k];
-                if (prop->name().size() == 1 && prop->name()[0] == "id"){
-                    id = docString.mid(prop->valueBegin, prop->end - prop->valueBegin);
-                    break;
-                }
-            }
-
             if ( !obPath.isEmpty() ){
 
                 QmlDeclaration::Ptr declaration = QmlDeclaration::create(
@@ -2011,12 +2274,21 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 QmlBindingPath::Ptr bp = QmlBindingPath::create();
                 bp->appendIndex(i);
 
-                QmlEditFragment* ef = new QmlEditFragment(declaration);
+                auto test = findFragmentByPosition(declaration->position());
+                if (test && test->declaration()->position() == declaration->position()) // it was already opened
+                {
+                    fragments.append(test);
+                    continue;
+                }
+
+                QmlEditFragment* ef = createInjectionChannel(declaration, edit);
+                if ( !ef ){
+                    continue;
+                }
                 ef->declaration()->setSection(m_document->createSection(
                     QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
                 ));
 
-                ef->setObjectId(id);
                 ef->declaration()->section()->setUserData(ef);
                 ef->declaration()->section()->onTextChanged(
                             [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
@@ -2037,15 +2309,13 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                     }
                 });
 
-                if (ef->isForObject())
-                    populateObjectInfoForFragment(ef);
                 edit->addChildFragment(ef);
                 ef->setParent(edit);
 
-                ef->setRelativeBinding(bp);
+                if (ef->location() == QmlEditFragment::Object)
+                    populateObjectInfoForFragment(ef);
 
                 fragments.append(ef);
-
             }
         }
     }
@@ -2053,8 +2323,7 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
     return fragments;
 }
 
-QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
-{
+QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
     Q_D(CodeQmlHandler);
 
     QList<QObject*> fragments;
@@ -2062,125 +2331,133 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
     d->syncObjects(m_document);
     QmlScopeSnap scope = d->snapScope();
 
+    if (edit->isGroup()){
+        auto children = edit->childFragments();
+        for (auto child: children)
+            fragments.push_back(qobject_cast<QObject*>(child));
+        return fragments;
+    }
+
     QString source = m_document->contentString();
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(m_document->file()->path());
     docinfo->parse(source);
 
     DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
+    DocumentQmlValueObjects::RangeObject* currentOb = d->documentObjects()->objectAtPosition(edit->position());
 
-    if ( currentOb ){
-        for ( int i = 0; i < currentOb->properties.size(); ++i ){
-            DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
+    if ( !currentOb ) return fragments;
 
-            auto test = findFragmentByPosition(rp->begin);
-            if (test && test->isForProperty() && test->declaration()->position() == rp->begin) // it was already opened
-            {
-                fragments.push_back(test);
-                continue;
-            }
+    for ( int i = 0; i < currentOb->properties.size(); ++i ){
+        DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
-            QTextCursor cursor(m_target);
-            cursor.setPosition(rp->begin);
+        if (rp->name().size() == 1 && rp->name()[0] == "id"){
+            continue;
+        }
 
-            QString propertyType = rp->type();
+        QmlEditFragment* p = edit;
+        for (int n = 0; n < rp->name().length(); ++n){
+            QString propName = rp->name()[n];
+            auto child = findChildPropertyFragmentByName(p, propName);
+            if (!child) {
+                if ( n == rp->name().length()-1 ){
 
-            if (rp->name().size() == 1 && rp->name()[0] == "id"){
-                const QString& document = m_document->contentString();
-                QString id = document.mid(rp->valueBegin, rp->end-rp->valueBegin);
-                edit->setObjectId(id);
-                continue;
-            }
+                    QString propertyType = rp->type();
 
-            QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-            if ( properties.isEmpty() )
-                continue;
+                    QList<QmlDeclaration::Ptr> properties = getDeclarations(rp->begin);
+                    if ( properties.isEmpty() )
+                        continue;
+                    QmlDeclaration::Ptr property = properties.first();
 
-            QmlDeclaration::Ptr property = properties.first();
+                    if ( propertyType.isEmpty() ){
 
-            if ( propertyType.isEmpty() ){
+                        QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                            scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
+                        );
 
-                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                    scope.quickObjectDeclarationType(rp->object()), rp->name(), rp->begin
-                );
+                        if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
+                            QmlScopeSnap::PropertyReference& propref = propChain.last();
+                            property = QmlDeclaration::create(
+                                rp->name(),
+                                propref.resultType(),
+                                propref.propertyObjectType(),
+                                rp->begin,
+                                rp->propertyEnd - rp->begin,
+                                m_document
+                            );
+                        }
+                    } else {
+                        QmlTypeReference qlt;
+                        if ( !QmlTypeInfo::isObject(propertyType) ){
+                            qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
+                        }
+                        if ( !qlt.isEmpty() ){
+                            QmlTypeInfo::Ptr tr = scope.getType(rp->object());
 
-                if ( propChain.size() == rp->name().size() && propChain.size() > 0 ){
-                    QmlScopeSnap::PropertyReference& propref = propChain.last();
-                    property = QmlDeclaration::create(
-                        rp->name(),
-                        propref.resultType(),
-                        propref.propertyObjectType(),
-                        rp->begin,
-                        rp->propertyEnd - rp->begin,
-                        m_document
-                    );
-                }
-            } else {
-                QmlTypeReference qlt;
-//                if ( QmlTypeInfo::isObject(propertyType) ){
-//                    QmlTypeInfo::Ptr tr = scope.getType(propertyType);
-//                } else {
-//                    qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
-//                }
-                if ( !QmlTypeInfo::isObject(propertyType) ){
-                    qlt = QmlTypeReference(QmlTypeReference::Qml, rp->type());
-                }
-                if ( !qlt.isEmpty() ){
-                    QmlTypeInfo::Ptr tr = scope.getType(rp->object());
+                            property = QmlDeclaration::create(
+                                rp->name(), qlt, tr->prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
+                            );
+                        }
+                    }
 
-                    property = QmlDeclaration::create(
-                        rp->name(), qlt, tr->prefereredType(), rp->begin, rp->propertyEnd - rp->begin, m_document
-                    );
-                }
-            }
+                    QmlEditFragment* ef = createInjectionChannel(property, edit);
 
-            QmlEditFragment* ef = createInjectionChannel(property);
-            if (!ef) continue;
+                    if (!ef)
+                        continue;
 
-            QTextCursor codeCursor(m_target);
-            codeCursor.setPosition(ef->valuePosition());
-            codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
+                    QTextCursor codeCursor(m_target);
+                    codeCursor.setPosition(ef->valuePosition());
+                    codeCursor.setPosition(ef->valuePosition() + ef->valueLength(), QTextCursor::KeepAnchor);
 
-            ef->declaration()->setSection(m_document->createSection(
-                QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
-            ));
-            ef->declaration()->section()->setUserData(ef);
-            ef->declaration()->section()->onTextChanged(
-                        [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
-            {
-                auto projectDocument = section->document();
-                auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+                    ef->declaration()->setSection(m_document->createSection(
+                        QmlEditFragment::Section, ef->declaration()->position(), ef->declaration()->length()
+                    ));
+                    ef->declaration()->section()->setUserData(ef);
+                    ef->declaration()->section()->onTextChanged(
+                                [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
+                    {
+                        auto projectDocument = section->document();
+                        auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
-                if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
+                        if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
 
-                    int length = editingFragment->declaration()->valueLength();
-                    editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                            int length = editingFragment->declaration()->valueLength();
+                            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
 
-                } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-                    removeEditingFragment(editingFragment);
+                        } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
+                            removeEditingFragment(editingFragment);
+                        } else {
+                            int length = editingFragment->declaration()->valueLength();
+                            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                        }
+                    });
+
+                    QmlBindingChannel::Ptr inputChannel = ef->channel();
+                    if ( inputChannel && inputChannel->listIndex() == -1 ){
+                        inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
+                    }
+
+                    if (ef->location() == QmlEditFragment::Property)
+                        populatePropertyInfoForFragment(ef);
+
+                    p->addChildFragment(ef);
+                    ef->setParent(p);
+
+                    rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
+
+                    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+                    if ( dh )
+                        dh->requestCursorPosition(ef->valuePosition());
                 } else {
-                    int length = editingFragment->declaration()->valueLength();
-                    editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                    child = createReadOnlyPropertyFragment(p, propName);
                 }
-            });
-
-            QmlBindingChannel::Ptr inputChannel = ef->bindingSpan()->connectionChannel();
-            if ( inputChannel && inputChannel->listIndex() == -1 ){
-                inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
             }
+            else {
+            }
+            if ( n == 0 )
+                fragments.push_back(child);
 
-            if (ef->isForProperty())
-                populatePropertyInfoForFragment(ef);
-            edit->addChildFragment(ef);
-            ef->setParent(edit);
+            p = child;
 
-            rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
-
-            DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-            if ( dh )
-                dh->requestCursorPosition(ef->valuePosition());
-
-            fragments.push_back(ef);
         }
     }
 
@@ -2188,37 +2465,93 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit)
 }
 
 void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
-    edit->decrementRefCount();
-    if (edit->refCount() == 0)
-        removeEditingFragment(edit);
+    m_editContainer->derefEdit(edit);
 }
 
-void CodeQmlHandler::deleteObject(QmlEditFragment *edit){
+void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     QList<QObject*> toRemove;
-    QList<QmlBindingChannel::Ptr> channels = edit->bindingSpan()->channels();
-    for ( auto it = channels.begin(); it != channels.end(); ++it ){
-        const QmlBindingChannel::Ptr& bc = *it;
-        if ( bc->isEnabled() ){
-            if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
-                QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
-                if (ppref.canAt()){
-                    toRemove.append(ppref.at(bc->listIndex()));
+
+    bool objectProperty = false;
+    const QmlBindingChannel::Ptr& bc = edit->channel();
+    if ( bc->isEnabled() && !bc->isBuilder() ){
+
+        if ( bc->property().propertyTypeCategory() == QQmlProperty::List ){
+            QQmlListReference ppref = qvariant_cast<QQmlListReference>(bc->property().read());
+            if (ppref.canAt()){
+                QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                // create correct order for list reference
+                QObjectList ordered;
+                for (auto child: parent->children())
+                {
+                    bool found = false;
+                    for (int i = 0; i < ppref.count(); ++i)
+                        if (child == ppref.at(i)){
+                            found = true;
+                            break;
+                        }
+                    if (found)
+                        ordered.push_back(child);
+                }
+
+                toRemove.append(ordered[bc->listIndex()]);
+
+                auto parentFrag = edit->parentFragment();
+                if (parentFrag){
+                    for (auto cf: parentFrag->childFragments()){
+                        if (!cf->channel()) continue;
+                        if (cf->channel()->listIndex() <= bc->listIndex()) continue;
+                        cf->channel()->updateConnection(cf->channel()->listIndex()-1);
+                    }
                 }
             }
+        } else if ( bc->type() == QmlBindingChannel::Property ){
+            objectProperty = (bc->property().propertyTypeCategory() != QQmlProperty::InvalidCategory);
+            bc->property().write(QVariant::fromValue(nullptr));
+        } else if ( bc->type() == QmlBindingChannel::Object ){
+            bool isWatcher = false;
+            QmlBindingPath::Ptr bp = m_bindingChannels->selectedChannel()->bindingPath();
+            QmlBindingPath::Node* n = bp->root();
+            while ( n ){
+                if ( n->type() == QmlBindingPath::Node::Watcher ){
+                    isWatcher = true;
+                    break;
+                }
+                n = n->child;
+            }
+            if ( isWatcher ){
+                QmlError(
+                    m_engine,
+                    CREATE_EXCEPTION(Exception, "QmlWatcher: Cannot erase an object that is part of a watcher. You need to delete the watcher first.", Exception::toCode("HasWatcher")),
+                    this
+                ).jsThrow();
+                return;
+            }
+
+            // remove dangling pointer from binding channels
+            if ( bc->object() == m_bindingChannels->selectedChannel()->object() ) {
+                m_bindingChannels->selectedChannel()->clearConnection();
+            }
+
+            objectProperty = false;
+            toRemove.append(bc->object());
         }
     }
 
-    int pos = edit->declaration()->valuePosition();
-    int len = edit->declaration()->valueLength();
+    edit->writeCode(objectProperty ? "null" : "");
+    edit->updateValue();
+
+    if (!removeFragment)
+        return;
 
     removeEditingFragment(edit);
 
-    m_document->addEditingState(ProjectDocument::Runtime);
-    m_document->insert(pos, len, "");
-    m_document->removeEditingState(ProjectDocument::Runtime);
-
-    for ( QObject* o : toRemove )
-        o->deleteLater();
+    if ( !toRemove.isEmpty() ){
+        for ( QObject* o : toRemove ){
+            o->deleteLater();
+        }
+        m_bindingChannels->desyncInactiveChannels();
+    }
 }
 
 QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &propertyName){
@@ -2234,69 +2567,23 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
     return "";
 }
 
+lv::PaletteList* CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeLayoutConfigurations){
+    if (!fragment || !fragment->declaration())
+        return nullptr;
+
+    return findPalettesForDeclaration(fragment->declaration(), includeLayoutConfigurations);
+}
+
 /**
  * \brief Finds the available list of palettes at the current \p cursor position
- *
- * The \p unrepeated parameter makes sure the palettes that are found at that
- * \p position are not already opened.
  */
-lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool unrepeated, bool includeExpandables){
-    Q_D(CodeQmlHandler);
+lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool includeLayoutConfigurations){
     if ( !m_document )
         return nullptr;
-
     cancelEdit();
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-    QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
-    bool inImports = isInImports(position);
-    if ( properties.isEmpty() && !inImports )
-        return nullptr;
-
-    if (inImports){
-        PaletteList* importList = d->projectHandler->paletteContainer()->findPalettes("qml/import");
-        importList->setPosition(position);
-        return importList;
-    }
-
-    QmlDeclaration::Ptr declaration = properties.first();
-
-    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), includeExpandables);
-
-    if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml)
-    {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", includeExpandables, lpl);
-    }
-    if ( declaration->isListDeclaration() ){
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", includeExpandables, lpl);
-    } else {
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", includeExpandables, lpl);
-    }
-
-    lpl->setPosition(declaration->position());
-    if ( unrepeated ){
-        for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-            QmlEditFragment* edit = *it;
-            if ( edit->declaration()->position() < declaration->position() ){
-                break;
-            } else if ( edit->declaration()->position() == declaration->position()  ){
-
-                for ( auto it = edit->begin(); it != edit->end(); ++it ){
-                    CodePalette* loadedPalette = *it;
-
-                    for ( int i = 0; i < lpl->size(); ++i ){
-                        PaletteLoader* loader = lpl->loaderAt(i);
-                        if ( PaletteContainer::palettePath(loader) == loadedPalette->path() ){
-                            lpl->remove(loader);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return lpl;
+    QList<QmlDeclaration::Ptr> declarations = getDeclarations(position);
+    return declarations.isEmpty() ? nullptr : findPalettesForDeclaration(declarations.first(), includeLayoutConfigurations);
 }
 
 /**
@@ -2309,27 +2596,18 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
     // check if duplicate
     PaletteLoader* paletteLoader = paletteList->loaderAt(index);
 
-    for ( auto it = edit->begin(); it != edit->end(); ++it ){
-        CodePalette* loadedPalette = *it;
-        if ( loadedPalette->path() == PaletteContainer::palettePath(paletteLoader) ){
-            return m_engine->newQObject(loadedPalette);
-        }
-    }
-
     if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
         edit->addPalette(edit->bindingPalette());
-        return m_engine->newQObject(edit->bindingPalette());
+        return m_engine->engine()->newQObject(edit->bindingPalette());
     }
 
-    if ( PaletteContainer::hasItem(paletteLoader) ){
+    if ( !PaletteContainer::configuresLayout(paletteLoader) ){
         CodePalette* palette = paletteList->loadAt(index);
-        QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-        palette->setExtension(cvt, true);
+        palette->setEditFragment(edit);
         edit->addPalette(palette);
-        edit->updatePaletteValue(palette);
+        edit->initializePaletteValue(palette);
 
-
-        connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+        connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
         rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2337,7 +2615,7 @@ QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList 
         if ( dh )
             dh->requestCursorPosition(edit->valuePosition());
 
-        return m_engine->newQObject(palette);
+        return m_engine->engine()->newQObject(palette);
     } else {
         return paletteList->contentAt(index);
     }
@@ -2354,7 +2632,7 @@ lv::QmlEditFragment *CodeQmlHandler::removePalette(lv::CodePalette *palette){
     if ( !palette )
         return nullptr;
 
-    lv::QmlEditFragment* edit = findEditFragment(palette);
+    lv::QmlEditFragment* edit = palette->editFragment();
     if ( edit ){
         edit->removePalette(palette);
     }
@@ -2366,11 +2644,19 @@ QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
         return nullptr;
 
     QString result;
-    if ( fragment->isForProperty() ){
+    if ( fragment->location() == QmlEditFragment::Property ){
         result = m_settings->defaultPalette(fragment->declaration()->parentType().join() + "." + fragment->identifier());
     }
     if ( result.isEmpty() ){
         result = m_settings->defaultPalette(fragment->type());
+    }
+
+    for ( auto it = fragment->begin(); it != fragment->end(); ++it ){
+        CodePalette* loadedPalette = *it;
+        if (loadedPalette->name() == result){
+            result = "";
+            break;
+        }
     }
 
     return result;
@@ -2398,12 +2684,12 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
     }
 
     CodePalette* palette = paletteList->loadAt(index);
-    QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-    palette->setExtension(cvt, true);
-    edit->setBindingPalette(palette);
-    edit->updatePaletteValue(palette);
+    palette->setEditFragment(edit);
 
-    connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+    edit->setBindingPalette(palette);
+    edit->initializePaletteValue(palette);
+
+    connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
     rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2416,22 +2702,6 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
 }
 
 /**
- * \brief Integrates a given palette box within the editor
- */
-void CodeQmlHandler::frameEdit(QQuickItem *box, lv::QmlEditFragment *edit){
-    if (!edit)
-        return;
-
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-
-    int pos = edit->declaration()->position();
-    QTextBlock tb = m_document->textDocument()->findBlock(pos);
-    QTextBlock tbend = m_document->textDocument()->findBlock(pos + edit->declaration()->length());
-
-    dh->lineBoxAdded(tb.blockNumber() + 1, tbend.blockNumber() + 1, static_cast<int>(box->height()), box);
-}
-
-/**
  * \brief Finds the boundaries of the code block containing the cursor position
  *
  * Mostly used for fragments
@@ -2440,7 +2710,7 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
     DocumentQmlValueScanner vs(m_document, position, 0);
     int start = vs.getBlockStart(position);
     int end   = vs.getBlockEnd(start + 1);
-    QJSValue ob = m_engine->newObject();
+    QJSValue ob = m_engine->engine()->newObject();
 
     ob.setProperty("start", m_target->findBlock(start).blockNumber());
     ob.setProperty("end", m_target->findBlock(end).blockNumber());
@@ -2451,176 +2721,47 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
 lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     Q_D(CodeQmlHandler);
 
-    lv::QmlImportsModel* result = new lv::QmlImportsModel(this);
-    d->syncParse(m_document);
+    lv::QmlImportsModel* result = new QmlImportsModel(m_engine, this);
+    d->syncObjects(m_document);
+
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();
-
-    auto imports = docinfo->internalBind()->imports();
-    for ( QList<QmlJS::ImportInfo>::iterator it = imports.begin(); it != imports.end(); ++it ){
-
-        QString module = it->name();
-        QString version = it->version().majorVersion() != -1 ? (QString::number(it->version().majorVersion()) + "." + QString::number(it->version().minorVersion())) : "";
-        QString qual = it->as();
-        int line = it->ast()? static_cast<int>(it->ast()->importToken.startLine-1) : -1;
-
-        result->addItem(module, version, qual, line);
+    if ( !docinfo->isParsedCorrectly() ){
+        docinfo->tryExtractImports();
     }
+
+    result->setImports(docinfo->imports());
 
     return result;
 }
 
-void CodeQmlHandler::addLineAtPosition(QString line, int pos)
-{
-    if (!m_target) return;
-
-    m_document->addEditingState(ProjectDocument::Palette);
-
-    QTextCursor c(m_target);
-    if (pos == 0)
-    {
-        c.beginEditBlock();
-        c.insertText(line + "\n");
-        c.endEditBlock();
-    } else {
-        auto block = m_target->findBlockByNumber(pos-1);
-        c = QTextCursor(block);
-        c.beginEditBlock();
-        c.movePosition(QTextCursor::EndOfBlock);
-        c.insertText("\n" + line);
-        c.endEditBlock();
-    }
-
-    m_document->removeEditingState(ProjectDocument::Palette);
-}
-
-void CodeQmlHandler::removeLineAtPosition(int pos)
-{
-    if (!m_target) return;
-    auto block = m_target->findBlockByNumber(pos);
-    m_document->addEditingState(ProjectDocument::Palette);
-    QTextCursor c(block);
-    c.beginEditBlock();
-    c.select(QTextCursor::BlockUnderCursor);
-    c.removeSelectedText();
-    c.endEditBlock();
-    m_document->removeEditingState(ProjectDocument::Palette);
-}
-
-/**
- * \brief Receive different qml based information about a given cursor position
- */
-QJSValue CodeQmlHandler::cursorInfo(int position, int length){
-    Q_D(CodeQmlHandler);
-    bool canBind = false, canUnbind = false, canEdit = false, canAdjust = false, canShape = false;
-
+QJSValue CodeQmlHandler::declarationInfo(int position, int length){
     if ( !m_document )
-        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
+        return QJSValue();
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-    if ( length != 0 )
-        cursor.setPosition(position + length, QTextCursor::KeepAnchor);
+    QList<QmlDeclaration::Ptr> properties = getDeclarations(position, length);
+    if ( properties.isEmpty() )
+        return QJSValue();
 
-    QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+    auto declaration = properties.first();
 
-    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
-    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
-        canShape = true;
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", declaration->position());
+    result.setProperty("length", declaration->length());
+    result.setProperty("type", declaration->type().join());
+    result.setProperty("parentType", declaration->parentType().join());
+    if ( declaration->isForComponent() ){
+        result.setProperty("type", "component");
+    } else if ( declaration->isForImports() ){
+        result.setProperty("type", "imports");
+    } else if ( declaration->isForList() ){
+        result.setProperty("type", "list");
+    } else if ( declaration->isForProperty() ){
+        result.setProperty("type", "property");
+    } else if ( declaration->isForSlot() ){
+        result.setProperty("type", "slot");
     }
-
-    if (qcc->context() == 0 && importsModel()->rowCount() == 0)
-    {
-        // check if blank
-        if (position == 0) canShape = true;
-        else {
-            bool isBlank = true;
-            for (int i = 0; i<position; i++)
-            {
-                if (!m_document->textDocument()->characterAt(i).isSpace())
-                {
-                    isBlank = false;
-                    break;
-                }
-            }
-            if (isBlank) canShape = true;
-        }
-
-    }
-
-    if ( properties.isEmpty())
-        return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
-
-    if ( properties.size() == 1 ){
-        QmlDeclaration::Ptr firstdecl = properties.first();
-
-        if ( isForAnObject(firstdecl) )
-            canShape = true;
-
-        canEdit = true;
-
-        int paletteCount = d->projectHandler->paletteContainer()->countPalettes(firstdecl->type().join());
-        if ( paletteCount > 0 ){
-            int totalLoadedPalettes = 0;
-            canBind = true;
-            canShape = true;
-
-            for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-                QmlEditFragment* edit = *it;
-                if ( edit->declaration()->position() == firstdecl->position() ){
-                    if ( edit->bindingPalette() ){
-                        canBind = false;
-                        canUnbind = true;
-                    }
-
-                    for ( auto paIt = edit->begin(); paIt != edit->end(); ++paIt ){
-                        CodePalette* cp = *paIt;
-                        if ( cp->type() == "edit/qml" )
-                            canEdit = false;
-                        else
-                            ++totalLoadedPalettes;
-                    }
-                }
-            }
-
-            if ( totalLoadedPalettes < paletteCount ){
-                canAdjust = true;
-            }
-        }
-    }
-    return createCursorInfo(canBind, canUnbind, canEdit, canAdjust, canShape);
-}
-
-bool CodeQmlHandler::isInImports(int position)
-{
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-
-
-    QmlCompletionContext::ConstPtr qcc = m_completionContextFinder->getContext(cursor);
-    if ( qcc->context() & QmlCompletionContext::InImport || qcc->context() & QmlCompletionContext::InImportVersion ){
-        return true;
-    }
-
-    if (qcc->context() == 0 && importsModel()->rowCount() == 0)
-    {
-        // check if blank
-        if (position == 0) return true;
-        else {
-            bool isBlank = true;
-            for (int i = 0; i<position; i++)
-            {
-                if (!m_document->textDocument()->characterAt(i).isSpace())
-                {
-                    isBlank = false;
-                    break;
-                }
-            }
-            if (isBlank) return true;
-        }
-
-    }
-
-    return false;
+    result.setProperty("hasObject", declaration->isForObject());
+    return result;
 }
 
 /**
@@ -2630,33 +2771,15 @@ void CodeQmlHandler::closeBinding(int position, int length){
     if ( !m_document )
         return;
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-    if ( length != 0 )
-        cursor.setPosition(position + length, QTextCursor::KeepAnchor);
-
-    QList<QmlDeclaration::Ptr> properties = getDeclarations(cursor);
+    QList<QmlDeclaration::Ptr> properties = getDeclarations(position, length);
     for ( QList<QmlDeclaration::Ptr>::iterator it = properties.begin(); it != properties.end(); ++it ){
         int position = (*it)->position();
 
-        auto editIt = m_edits.begin();
-        while ( editIt != m_edits.end() ){
-            QmlEditFragment* edit = *editIt;
-
-            if ( edit->declaration()->position() == position ){
-                if ( edit->bindingPalette() ){
-
-                    edit->removeBindingPalette();
-
-                    if ( edit->totalPalettes() == 0 ){
-                        editIt = m_edits.erase(editIt);
-                        edit->emitRemoval();
-                        edit->deleteLater();
-                    }
-                    break;
-                }
-            } else {
-                ++editIt;
+        QmlEditFragment* edit = m_editContainer->topEditAtPosition(position);
+        if ( edit ){
+            edit->removeBindingPalette();
+            if ( edit->totalPalettes() == 0 ){
+                m_editContainer->removeEdit(edit);
             }
         }
     }
@@ -2680,29 +2803,29 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
             for ( auto it = edit->begin(); it != edit->end(); ++it ){
                 CodePalette* loadedPalette = *it;
                 if ( loadedPalette->path() == PaletteContainer::palettePath(paletteLoader) ){
-                    return m_engine->newQObject(loadedPalette);
+                    return m_engine->engine()->newQObject(loadedPalette);
                 }
             }
 
             if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
                 edit->addPalette(edit->bindingPalette());
-                return m_engine->newQObject(edit->bindingPalette());
+                return m_engine->engine()->newQObject(edit->bindingPalette());
             }
 
-            if ( PaletteContainer::hasItem(paletteLoader) ){
+            if ( !PaletteContainer::configuresLayout(paletteLoader) ){
                 CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteLoader);
-                m_engine->setObjectOwnership(palette, QQmlEngine::CppOwnership);
+                m_engine->engine()->setObjectOwnership(palette, QQmlEngine::CppOwnership);
 
-                QmlCodeConverter* cvt = new QmlCodeConverter(edit, palette);
-                palette->setExtension(cvt, true);
+                palette->setEditFragment(edit);
+
                 edit->addPalette(palette);
-                edit->updatePaletteValue(palette);
+                edit->initializePaletteValue(palette);
 
-                connect(palette, &CodePalette::valueChanged, cvt, &QmlCodeConverter::updateFromPalette);
+                connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
 
                 rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
-                return m_engine->newQObject(palette);
+                return m_engine->engine()->newQObject(palette);
             } else {
                 return d->projectHandler->paletteContainer()->paletteContent(paletteLoader);
             }
@@ -2721,21 +2844,18 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
 
     QList<QmlEditFragment*> toRemove;
 
-    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
-        QmlEditFragment* curentEdit = *it;
-        if ( curentEdit->declaration()->position() < edit->declaration()->position() ){
-            break;
-        } else if ( curentEdit->declaration()->position() == edit->declaration()->position() ){
-            if ( curentEdit->totalPalettes() == 1 && (*curentEdit->begin())->type() == "edit/qml" )
-                 return nullptr;
+    QmlEditFragment* currentEdit = m_editContainer->topEditAtPosition(edit->declaration()->position());
 
-            vlog("editqmljs-codehandler").v() <<
-                "Removing editing frag  with no of palettes \'" << curentEdit->totalPalettes() << "\' at " <<
-                edit->declaration()->position() << " due to edit.";
+    if ( currentEdit ){
+        if ( currentEdit->totalPalettes() == 1 && (*currentEdit->begin())->type() == "edit/qml" )
+             return nullptr;
 
-            if ( curentEdit != edit )
-                toRemove.append(curentEdit);
-        }
+        vlog("editqmljs-codehandler").v() <<
+            "Removing editing frag  with no of palettes \'" << currentEdit->totalPalettes() << "\' at " <<
+            edit->declaration()->position() << " due to edit.";
+
+        if ( currentEdit != edit )
+            toRemove.append(currentEdit);
     }
 
 
@@ -2757,12 +2877,12 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
         editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
     });
 
-    palette->setExtension(new QmlCodeConverter(edit, this), true);
+    palette->setEditFragment(edit);
 
     connect(palette, &CodePalette::valueChanged, [this, edit](){
         if ( edit->totalPalettes() > 0 ){
             CodePalette* cp = *edit->begin();
-            edit->bindingSpan()->commit(cp->value());
+            edit->commit(cp->value());
         }
         m_document->removeEditingState(ProjectDocument::Overlay);
         removeEditingFragment(edit);
@@ -2795,206 +2915,116 @@ void CodeQmlHandler::cancelEdit(){
  *
  * Returns an lv::QmlAddContainer for all the options
  */
-QmlAddContainer *CodeQmlHandler::getAddOptions(int position){
+QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::QmlEditFragment* fragment){
     Q_D(CodeQmlHandler);
     if ( !m_document || !m_target )
         return nullptr;
 
-    QTextCursor cursor(m_target);
-    cursor.setPosition(position);
-    QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
-
-    ctx->expressionPath();
-
-    QStringList expression;
-    int propertyPosition = -1;
-    int propertyLength   = 0;
-
-    QChar expressionEndDelimiter;
-
-    if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ||
-         ctx->context() & QmlCompletionContext::InAfterOnLhsOfBinding){
-        expression = ctx->expressionPath();
-
-        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-            m_target, cursor.position(), &expression, &expressionEndDelimiter
-        );
-        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
-        propertyPosition = cursor.position();
-
-    } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding )
-    {
-        expression     = ctx->propertyPath();
-        propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
-        propertyPosition = ctx->propertyPosition();
-    }
-
-    if ( propertyPosition == -1 )
-        return nullptr;
-
-    QmlAddContainer* addContainer = new QmlAddContainer(propertyPosition, ctx->objectTypePath());
     QmlScopeSnap scope = d->snapScope();
 
-    if ( !ctx->objectTypePath().empty() ){
-        QString type = ctx->objectTypeName();
-        QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-        QmlInheritanceInfo typePath = scope.getTypePath(typeNamespace, type);
+    int insertionPosition = 0;
+    QmlDeclaration::Ptr declaration = nullptr;
 
-        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
-            const QmlTypeInfo::Ptr& ti = *it;
+    if ( fragment ){
 
-            for (int i = 0; i < ti->totalFunctions(); ++i)
+        declaration = fragment->declaration();
+
+        QmlInheritanceInfo typePath;
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(declaration->position() + 1);
+        // get declared type in the document first
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+        if ( !declaration->type().isEmpty() ){
+            typePath.join(scope.getTypePath(declaration->type()));
+        }
+
+        auto p = fragment;
+        if (filter & AddOptionsFilter::ReadOnly){
+            while (p && p->isOfFragmentType(QmlEditFragment::ReadOnly))
             {
-                auto method = ti->functionAt(i);
-                if (method.functionType == QmlFunctionInfo::Signal)
-                {
-                    auto name = method.name;
-                    name = QString("on") + name[0].toUpper() + name.mid(1);
-
-                    addContainer->eventModel()->addItem(QmlSuggestionModel::ItemData(
-                        name,
-                        ti->prefereredType().name(),
-                        "method",
-                        "",
-                        ti->exportType().join() + "." + name,
-                        name
-                    ));
-                } else {
-                    auto name = method.name;
-
-                    addContainer->functionModel()->addItem(QmlSuggestionModel::ItemData(
-                        name,
-                        ti->prefereredType().name(),
-                        "method",
-                        "",
-                        ti->exportType().join() + "." + name,
-                        name
-                    ));
-
-                }
+                p = p->parentFragment();
             }
-
-            for ( int i = 0; i < ti->totalProperties(); ++i ){
-                QString propertyName = ti->propertyAt(i).name;
-                if ( !propertyName.startsWith("__") ){
-                    addContainer->propertyModel()->addItem(
-                        QmlSuggestionModel::ItemData(
-                            propertyName,
-                            ti->prefereredType().name(),
-                            ti->propertyAt(i).typeName.name(),
-                            "", 
-                            ti->exportType().join() + "." + propertyName,
-                            propertyName
-                        )
-                    );
-                }
-
-
-                if ( propertyName.size() > 0 )
-                    propertyName[0] = propertyName[0].toUpper();
-
-                if (propertyName != "ObjectName"){
-                    propertyName = "on" + propertyName + "Changed";
-                    addContainer->eventModel()->addItem(
-                        QmlSuggestionModel::ItemData(
-                            propertyName,
-                            ti->prefereredType().name(),
-                            "method",
-                            "",
-                            "", //TODO: Find library path
-                            propertyName
-                        )
-                    );
-                }
-            }
-            addContainer->propertyModel()->updateFilters();
-            addContainer->eventModel()->updateFilters();
-            addContainer->functionModel()->updateFilters();
-
         }
-    }
 
-    // import global objects
+        insertionPosition = p->valuePosition() + p->valueLength() - 1;
 
-    QStringList exports;
-    QmlLibraryInfo::Ptr lib = scope.project->libraryInfo(scope.document->path());
-    if ( lib ){
-        exports = lib->listExports();
-    }
+        QmlAddContainer* addContainer = new QmlAddContainer(insertionPosition, declaration->type());
 
-    foreach( const QString& e, exports ){
-        if ( e != scope.document->componentName() ){
-            addContainer->itemModel()->addItem(
-                QmlSuggestionModel::ItemData(
-                    e,
-                    "",
-                    "",
-                    "implicit",
-                    scope.document->path(),
-                    e
-                )
+        addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
+
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && addContainer->model()->supportsObjectNesting()){
+            addContainer->model()->addObjectsToModel(scope);
+        }
+        return addContainer;
+    } else {
+        QTextCursor cursor(m_target);
+        cursor.setPosition(position);
+        QmlInheritanceInfo typePath;
+        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+
+        ctx->expressionPath();
+
+        QStringList expression;
+        QStringList objectTypePath;
+        int propertyPosition = 0;
+        int propertyLength   = 0;
+        QChar expressionEndDelimiter;
+
+        if ( ctx->context() & QmlCompletionContext::InLhsOfBinding ||
+             ctx->context() & QmlCompletionContext::InAfterOnLhsOfBinding){
+            expression = ctx->expressionPath();
+
+            int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
+                m_target, cursor.position(), &expression, &expressionEndDelimiter
             );
+            propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+            propertyPosition = cursor.position();
+
         }
+        else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
+            expression     = ctx->propertyPath();
+            propertyLength = DocumentQmlValueScanner::getExpressionExtent(m_target, ctx->propertyPosition());
+            propertyPosition = ctx->propertyPosition();
+        }
+        else propertyPosition = position;
+
+        if ( propertyPosition == -1 )
+            return nullptr;
+
+        objectTypePath = ctx->objectTypePath();
+
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(position);
+        // get declared type in the document first
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+
+        QmlTypeReference objectType = typePath.languageType();
+
+        if (!ctx->objectTypePath().empty()){
+            QString type = ctx->objectTypeName();
+            QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
+
+            QmlInheritanceInfo libtypePath = scope.getTypePath(typeNamespace, type);
+
+            objectType = libtypePath.languageType();
+
+            typePath.join(libtypePath);
+        }
+
+        QmlAddContainer* addContainer = new QmlAddContainer(position, objectType);
+
+        addContainer->model()->addPropertiesAndFunctionsToModel(typePath, filter);
+        if ((filter & AddOptionsFilter::ReadOnly) == 0 && (addContainer->model()->supportsObjectNesting() || findRootPosition() == -1)){
+            addContainer->model()->addObjectsToModel(scope);
+        }
+        return addContainer;
     }
 
-    for( const QString& defaultLibrary: scope.project->defaultLibraries() ){
-        QmlLibraryInfo::Ptr defaultLib = scope.project->libraryInfo(defaultLibrary);
-        QStringList defaultExports;
-        if ( defaultLib ){
-            defaultExports = defaultLib->listExports();
-        }
-        for( const QString& de: defaultExports ){
-            addContainer->itemModel()->addItem(
-                QmlSuggestionModel::ItemData(
-                    de,
-                    "",
-                    "",
-                    "QtQml",
-                    "QtQml",
-                    de)
-            );
-        }
-    }
-
-    // import namespace objects
-
-    QSet<QString> imports;
-
-    foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
-        if ( imp.as() != "" ){
-            imports.insert(imp.as());
-        }
-    }
-    imports.insert("");
-
-    for ( QSet<QString>::iterator it = imports.begin(); it != imports.end(); ++it ){
-
-        foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
-            if ( imp.as() == *it ){
-                QStringList libexports;
-                QmlLibraryInfo::Ptr implib = scope.project->libraryInfo(imp.uri());
-                if ( !lib.isNull() ){
-                    libexports = implib->listExports();
-                }
-
-                for ( const QString& exp: libexports ){
-                    addContainer->itemModel()->addItem(
-                        QmlSuggestionModel::ItemData(
-                            exp,
-                            "",
-                            "",
-                            imp.uri(),
-                            imp.uri(),
-                            exp)
-                    );
-                }
-            }
-        }
-    }
-
-    addContainer->itemModel()->updateFilters();
-
-    return addContainer;
+    return nullptr;
 }
 
 /**
@@ -3005,7 +3035,8 @@ int CodeQmlHandler::addProperty(
         const QString &object,
         const QString &type,
         const QString &name,
-        bool assignDefault)
+        bool assignDefault,
+        lv::QmlEditFragment* parentGroup)
 {
     Q_D(CodeQmlHandler);
 
@@ -3023,13 +3054,29 @@ int CodeQmlHandler::addProperty(
     int insertionPosition = position;
     int cursorPosition = position;
 
+    QString fullName = name;
+    if (parentGroup){
+        auto p=parentGroup;
+        while (p){
+            QmlEditFragment *group = qobject_cast<QmlEditFragment*>(p);
+
+            if (group && group->isGroup()){
+                fullName = group->identifier() + "." + fullName;
+                p = p->parentFragment();
+            } else break;
+        }
+    }
+
+
     // Check wether the property is already added
 
     QTextCursor sourceSelection(m_target);
     sourceSelection.setPosition(blockStart);
     sourceSelection.setPosition(blockEnd, QTextCursor::KeepAnchor);
 
-    QString source = object + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
+    QString objecType = QmlTypeReference::split(object).name();
+
+    QString source = objecType + "{" + sourceSelection.selectedText().replace(QChar(QChar::ParagraphSeparator), "\n") + "}";
 
     lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(m_document->file()->path());
     if ( docinfo->parse(source) ){
@@ -3038,12 +3085,12 @@ int CodeQmlHandler::addProperty(
 
         for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
             lv::DocumentQmlValueObjects::RangeProperty* p = *it;
-            QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
+            QString propertyName = p->name().join(".");
 
-            if ( propertyName == name ){ // property already exists, simply position the cursor accordingly
+            if ( propertyName == fullName ){ // property already exists, simply position the cursor accordingly
                 lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
 
-                int sourceOffset = blockStart - 1 - object.size();
+                int sourceOffset = blockStart - 1 - objecType.size();
 
                 if ( dh ){
                     dh->requestCursorPosition(sourceOffset + p->valueBegin);
@@ -3057,8 +3104,8 @@ int CodeQmlHandler::addProperty(
 
     if ( tbStart == tbEnd ){ // inline object declaration
         insertionPosition = blockEnd;
-        insertionText = "; " + name + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "");
-        cursorPosition = insertionPosition + name.size() + 4;
+        insertionText = "; " + fullName + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "");
+        cursorPosition = insertionPosition + fullName.size() + 4;
     } else { // multiline object declaration
         QString indent = getBlockIndent(tbStart);
         insertionPosition = tbEnd.position();
@@ -3074,8 +3121,8 @@ int CodeQmlHandler::addProperty(
             tbIt = tbIt.previous();
         }
 
-        insertionText = indent + (found ? "" : "    ")+ name + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "") + "\n";
-        cursorPosition = insertionPosition + indent.size() + (found ? 0:4) + name.size() + 2;
+        insertionText = indent + (found ? "" : "    ")+ fullName + ": " + (assignDefault ? QmlTypeInfo::typeDefaultValue(type) : "") + "\n";
+        cursorPosition = insertionPosition + indent.size() + (found ? 0:4) + fullName.size() + 2;
     }
 
 
@@ -3095,7 +3142,7 @@ int CodeQmlHandler::addProperty(
         dh->requestCursorPosition(cursorPosition);
     }
 
-    return cursorPosition - name.size() - 2;
+    return cursorPosition - fullName.size() - 2;
 }
 
 int CodeQmlHandler::addEvent(
@@ -3199,6 +3246,8 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
 
+    if (blockEnd == 0) blockEnd = m_target->characterCount() -1;
+
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);
 
@@ -3264,73 +3313,92 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     return cursorPosition - 1 - type.size();
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *currentApp){
-    Q_D(CodeQmlHandler);
-    if ( !edit || !currentApp )
+void CodeQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
+{
+    if (!propertyFragment)
         return;
 
-    QString type; QString id;
-    if (ctype.contains('#'))
-    {
-        auto spl = ctype.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = ctype;
-
-    const QList<QmlBindingChannel::Ptr>& outputChannels = edit->bindingSpan()->channels();
-    for ( auto it = outputChannels.begin(); it != outputChannels.end(); ++it ){
-        QmlBindingChannel::Ptr bc = *it;
-
-        if ( bc->canModify() ){
-            QQmlProperty& p = bc->property();
-
-            QObject* result = QmlCodeConverter::create(
-                d->documentInfo(), type + "{}", "temp"
-            );
-
-            if ( p.propertyTypeCategory() == QQmlProperty::List ){
-                QQmlListReference ppref = qvariant_cast<QQmlListReference>(p.read());
-                QObject* obat = ppref.at(bc->listIndex());
-
-                QQmlProperty assignmentProperty(obat);
-                if ( assignmentProperty.propertyTypeCategory() == QQmlProperty::List ){
-                    QQmlListReference assignmentList = qvariant_cast<QQmlListReference>(assignmentProperty.read());
-                    vlog("editqmljs-codehandler").v() <<
-                        "Adding : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                        "property " << assignmentProperty.name();
-                    if ( assignmentList.canAppend() ){
-                        assignmentList.append(result);
-                        return;
-                    }
-                } else {
-                    vlog("editqmljs-codehandler").v() <<
-                        "Assigning : " << result->metaObject()->className() << " to " << obat->metaObject()->className() << ", "
-                        "property " << assignmentProperty.name();
-                    assignmentProperty.write(QVariant::fromValue(result));
-                    return;
-                }
-            } else {
-                //TODO: Property based asignment
-            }
-        }
-    }
+    QString typeName = propertyFragment->typeName();
+    auto block = m_target->findBlock(propertyFragment->position());
+    QString indent = getBlockIndent(block);
+    QString codeToWrite = typeName + "{\n" + indent + "    \n" + indent + "}\n";
+    propertyFragment->writeCode(codeToWrite);
+    m_scopeTimer.stop();
+    updateScope();
 }
 
-/**
- * \brief Update palette binding channels for a new runtime root.
- */
-void CodeQmlHandler::updateRuntimeBindings(){
-    QList<QmlEditFragment*> toRemove;
-    for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
-        removeEditingFragment(*it);
+int CodeQmlHandler::insertRootItem(const QString &name)
+{
+    Q_D(CodeQmlHandler);
+    d->syncObjects(m_document);
+
+    // add the root via code
+
+    QString type; QString id;
+    if (name.contains('#'))
+    {
+        auto spl = name.split('#');
+        type = spl[0];
+        id = spl[1];
+    } else type = name;
+
+    int insertionPosition = m_target->characterCount() - 1;
+
+    QString insertionText = "\n" + type + "{\n";
+    if (id != "") insertionText += "    id: " + id;
+    insertionText += "\n}\n";
+
+    m_document->addEditingState(ProjectDocument::Palette);
+    QTextCursor cs(m_target);
+    cs.setPosition(insertionPosition);
+    cs.beginEditBlock();
+    cs.insertText(insertionText);
+    cs.endEditBlock();
+    m_document->removeEditingState(ProjectDocument::Palette);
+    m_scopeTimer.stop();
+    updateScope();
+
+    d->syncObjects(m_document);
+
+    QmlBindingChannel::Ptr channel = m_bindingChannels->selectedChannel();
+    if ( !channel )
+        return -1;
+
+    Runnable* r = channel->runnable();
+    if ( !r )
+        return -1;
+
+    QObject* newRoot = QmlEditFragment::createObject(
+        d->documentInfo(), type + "{}", "temp", r->viewContext()
+    );
+
+    if ( !newRoot )
+        return -1;
+
+    r->swapViewRoot(newRoot);
+    channel->updateConnection(newRoot);
+
+    return insertionPosition + 2;
+}
+
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *){
+    try{
+        addItemToRunTimeImpl(edit, ctype);
+    } catch ( lv::Exception& e ){
+        m_engine->throwError(&e, this);
     }
 }
 
 QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *currentApp)
 {
-    int opos = addItem(position, "", type);
-    addItemToRuntime(parent, type, currentApp);
-    return openNestedConnection(parent, opos);
+    try{
+        int opos = addItem(position, "", type);
+        addItemToRunTimeImpl(parent, type);
+        return openNestedConnection(parent, opos);
+    } catch ( lv::Exception& e ){
+        m_engine->throwError(&e, this);
+    }
+    return nullptr;
 }
 
 QJSValue CodeQmlHandler::getDocumentIds(){
@@ -3338,7 +3406,7 @@ QJSValue CodeQmlHandler::getDocumentIds(){
     QmlScopeSnap scope = d->snapScope();
     QStringList ids = scope.document->extractIds();
 
-    QJSValue result = m_engine->newArray(static_cast<quint32>(ids.length()));
+    QJSValue result = m_engine->engine()->newArray(static_cast<quint32>(ids.length()));
 
     for ( int i = 0; i < ids.length(); ++i ){
         result.setProperty(static_cast<quint32>(i), ids[i]);
@@ -3363,6 +3431,16 @@ void CodeQmlHandler::suggestCompletion(int cursorPosition){
     );
 }
 
+int CodeQmlHandler::checkPragma(int position)
+{
+    QString content = m_document->contentString();
+    QString sub = content.left(position);
+    int find = sub.lastIndexOf("pragma Singleton");
+    if (find != -1)
+        return find;
+    return position;
+}
+
 /**
  * \brief Handler for when a new document scope is ready
  */
@@ -3374,18 +3452,72 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
 
     d->assignDocumentFromBackgroundSync(documentInfo);
     m_newScope = true;
+
+    QJSValueList args;
+    args << d->wasDocumentUpdatedFromBackground();
+
+    QLinkedList<QJSValue> callbacks = m_documentParseListeners;
+    m_documentParseListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            m_engine->throwError(res, this);
+        }
+    }
 }
 
-void CodeQmlHandler::processingChanged(bool value)
-{
-    if (!value)
-        emit stoppedProcessing();
+void CodeQmlHandler::__whenLibraryScanQueueCleared(){
+    QLinkedList<QJSValue> callbacks = m_importsScannedListeners;
+    m_importsScannedListeners.clear();
+
+    for ( QJSValue cb : callbacks ){
+        QJSValue res = cb.call();
+        if ( res.isError() ){
+            m_engine->throwError(res, this);
+        }
+    }
+}
+
+bool CodeQmlHandler::areImportsScanned(){
+    Q_D(CodeQmlHandler);
+    d->syncParse(m_document);
+    QmlScopeSnap scope = d->snapScope();
+    return scope.areDocumentLibrariesReady();
+}
+
+void CodeQmlHandler::onDocumentParse(QJSValue callback){
+    Q_D(CodeQmlHandler);
+    if ( d->wasDocumentUpdatedFromBackground() ){
+        callback.call(QJSValueList() << true);
+    } else {
+        m_documentParseListeners.append(callback);
+        if ( !d->isDocumentBeingScanned() ){
+            d->documentQueuedForScanning();
+            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+        }
+    }
+}
+
+void CodeQmlHandler::onImportsScanned(QJSValue callback){
+    if ( areImportsScanned() ){
+        QJSValue res = callback.call();
+        if ( res.isError() ){
+            m_engine->throwError(res, this);
+        }
+    } else {
+        m_importsScannedListeners.append(callback);
+    }
+}
+
+void CodeQmlHandler::removeSyncImportsListeners(){
+    m_importsScannedListeners.clear();
 }
 
 /**
  * \brief Handler for when a new project scope is ready
  */
-void CodeQmlHandler::newProjectScopeReady(){
+void CodeQmlHandler::__newProjectScopeReady(){
     m_newScope = true;
 }
 
@@ -3394,15 +3526,14 @@ void CodeQmlHandler::suggestionsForGlobalQmlContext(
         QList<CodeCompletionSuggestion> &suggestions
 ){
     suggestions << CodeCompletionSuggestion("import", "", "", "import ");
-    suggestions << CodeCompletionSuggestion("pragma singleton", "", "", "pragma singleton");
+    suggestions << CodeCompletionSuggestion("pragma Singleton", "", "", "pragma Singleton");
 }
 
 void CodeQmlHandler::suggestionsForImport(
         const QmlCompletionContext& context,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-
-    foreach (const QString& importPath, m_engine->importPathList()){
+    foreach (const QString& importPath, m_engine->engine()->importPathList()){
         suggestionsForRecursiveImport(0, importPath, context.expressionPath(), suggestions);
     }
     std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
@@ -3685,6 +3816,76 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     return QmlTypeInfo::isObject(declaration->type().name());
 }
 
+PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration, bool includeLayoutConfigurations)
+{
+    // every fragment has a declaration -> should end up here
+
+    Q_D(CodeQmlHandler);
+
+    PaletteContainer::PaletteSearch configurations = includeLayoutConfigurations ? PaletteContainer::IncludeLayoutConfigurations : PaletteContainer::Empty;
+
+    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), configurations);
+
+    if (declaration->isForComponent()){
+        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Component", configurations, lpl);
+    } else {
+        if ( declaration->isForObject())
+        if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", configurations, lpl);
+        }
+
+        if ( declaration->isForList() ){
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", configurations, lpl);
+        } else {
+            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", configurations, lpl);
+        }
+    }
+
+
+    lpl->setPosition(declaration->position() + (declaration->isForImports() ? 7 : 0));
+    return lpl;
+}
+
+void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
+    QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+
+    if ( documentChannel ){
+
+        if ( parentFragment ){
+            auto parentBp = parentFragment->fullBindingPath();
+
+            int copyLength = bindingPath->length() - parentBp->length();
+            QmlBindingPath::Ptr relativeBp = QmlBindingPath::create();
+
+            while ( copyLength > 0){
+                relativeBp = QmlBindingPath::join(bindingPath->tailPath(), relativeBp);
+                bindingPath = bindingPath->headPath();
+                copyLength--;
+            }
+
+            QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentFragment->channel(), relativeBp);
+            if ( !newChannel ){
+                //TODO
+                qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
+            } else {
+                newChannel->setEnabled(true);
+                fragment->setChannel(newChannel);
+            }
+
+        } else {
+            QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(documentChannel, bindingPath);
+            if ( !newChannel ){
+                //TODO
+                qWarning("Warning: Failed to get new channel from document at: %s", qPrintable(bindingPath->toString()));
+            } else {
+                newChannel->setEnabled(true);
+                fragment->setChannel(newChannel);
+            }
+        }
+    }
+
+}
+
 void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 {
     Q_D(CodeQmlHandler);
@@ -3720,12 +3921,18 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
 
 
             QVariantList propertiesList;
+            QSet<QString> setOfNames;
             auto properties = object->properties;
             for (int p = 0; p < properties.length(); ++p)
             {
                 auto property = properties[p];
                 QVariantMap propMap;
-                propMap.insert("name", property->name());
+
+                QString propName = property->name()[0];
+                if (setOfNames.contains(propName)) continue;
+
+
+                setOfNames.insert(propName);
 
                 QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 
@@ -3734,8 +3941,30 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     continue;
                 }
 
-                auto fragment = openNestedConnection(conn, property->begin);
+                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
+                    scope.quickObjectDeclarationType(property->object()), QStringList(propName), property->begin
+                );
 
+                if ( propChain.isEmpty() ){
+                    continue;
+                }
+
+                QmlScopeSnap::PropertyReference& propref = propChain.last();
+                propMap.insert("isWritable", propref.property.isWritable);
+
+
+
+                propMap.insert("name", propName);
+
+
+
+                QmlEditFragment* fragment = nullptr;
+                if (propref.property.isWritable)
+                    fragment = openNestedConnection(conn, property->begin);
+                else {
+                    fragment = createReadOnlyPropertyFragment(conn, propName);
+
+                }
                 auto fcast = qobject_cast<QObject*>(fragment);
                 propMap.insert("connection", QVariant::fromValue(fcast));
 
@@ -3752,16 +3981,7 @@ void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)
                     propMap.insert("value", value);
                 }
 
-                QList<QmlScopeSnap::PropertyReference> propChain = scope.getProperties(
-                    scope.quickObjectDeclarationType(property->object()), property->name(), property->begin
-                );
 
-
-
-                if ( propChain.size() == property->name().size() && propChain.size() > 0 ){
-                    QmlScopeSnap::PropertyReference& propref = propChain.last();
-                    propMap.insert("isWritable", propref.property.isWritable);
-                }
 
                 propertiesList.push_back(propMap);
 
@@ -3936,18 +4156,31 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
+    auto cast = qobject_cast<QObject*>(edit);
+    propMap.insert("connection", QVariant::fromValue(cast));
+
     QmlScopeSnap scope = d->snapScope();
+
+    if (edit->isGroup()){
+
+        propMap.insert("name", edit->identifier());
+        propMap.insert("isWritable", false);
+
+        edit->setObjectInfo(propMap);
+        return;
+    }
 
     DocumentQmlValueObjects::Ptr objects = d->documentObjects();
     auto set = objects->propertiesBetween(edit->declaration()->position(), edit->declaration()->position() + edit->declaration()->length());
 
-    if (set.size() != 1) edit->setObjectInfo(propMap);
+    if (set.size() != 1) {
+        edit->setObjectInfo(propMap);
+        return;
+    }
 
     auto property = set[0];
-    propMap.insert("name", property->name());
 
-    auto cast = qobject_cast<QObject*>(edit);
-    propMap.insert("connection", QVariant::fromValue(cast));
+    propMap.insert("name", property->name());
 
     QString value = m_document->substring(property->valueBegin, property->end - property->valueBegin);
 
@@ -3977,9 +4210,51 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
     edit->setObjectInfo(propMap);
 }
 
-void CodeQmlHandler::testFunction(QVariantList list)
+QVariantMap CodeQmlHandler::propertiesWritable(QmlEditFragment *ef)
 {
-    QVariantMap a = list.first().toMap();
+    Q_D(CodeQmlHandler);
+    QVariantMap result;
+
+    if ( !m_document || !m_target )
+        return result;
+
+    if (ef->location() != QmlEditFragment::Object) return result;
+
+    d->syncObjects(m_document);
+
+
+    QmlScopeSnap scope = d->snapScope();
+
+    QmlInheritanceInfo typePath;
+
+    if (ef->isGroup()){
+        typePath = scope.generateTypePathFromClassName(ef->declaration()->type().name(), ef->declaration()->type().path());
+    }
+    else {
+        QTextCursor cursor(m_target);
+        cursor.setPosition(ef->valuePosition() + ef->valueLength()-1);
+        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
+
+        ctx->expressionPath();
+        if (!ctx->objectTypePath().empty()){
+            QString type = ctx->objectTypeName();
+            QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
+            typePath = scope.getTypePath(typeNamespace, type);
+        }
+
+    }
+
+    for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+        const QmlTypeInfo::Ptr& ti = *it;
+        for ( int i = 0; i < ti->totalProperties(); ++i ){
+            QString propertyName = ti->propertyAt(i).name;
+            if ( !propertyName.startsWith("__") ){
+                result.insert(propertyName, ti->propertyAt(i).isWritable);
+            }
+        }
+    }
+
+    return result;
 }
 
 }// namespace

@@ -2,7 +2,7 @@ import QtQuick 2.3
 import editor 1.0
 import editjson 1.0 as Ej
 
-LiveExtension{
+WorkspaceExtension{
     id: root
 
     property var settings: {

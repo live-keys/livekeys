@@ -30,11 +30,13 @@ namespace lv{
 /// \private
 class LV_VIEW_EXPORT VisualLogEntry{
 public:
-    VisualLogEntry(const QString& tag, const QString& prefix, const QString& data);
-    VisualLogEntry(const QString& tag, const QString& prefix, QVariant* objectData, QQmlComponent* component);
+    VisualLogEntry(const QString& tag, quint8 level, const QString& prefix, const QString& location, const QString& data);
+    VisualLogEntry(const QString& tag, quint8 level, const QString& prefix, const QString& location, QVariant* objectData, QQmlComponent* component);
 
     QString                prefix;
     QString                tag;
+    quint8                 level;
+    QString                location;
     QString                data;
     QVariant*              objectData;
     mutable QQmlComponent* component;
@@ -49,6 +51,7 @@ public:
     /** Role names */
     enum Roles{
         Msg = Qt::UserRole + 1,
+        Location,
         Prefix
     };
 
