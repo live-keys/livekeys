@@ -93,7 +93,7 @@ WorkspaceControl{
             highlight.box.width = 100
             highlight.box.height = 20
         } else if ( fragment === 'play-button' ){
-            highlight = createTimelineHighlight(state, 31, 31)
+            highlight = createTimelineHighlight(state, 40, 31)
             highlight.box.width = 35
             highlight.box.height = 35
         } else if ( fragment === 'options-button' ){
@@ -148,7 +148,7 @@ WorkspaceControl{
             var coords = viewerPane.mapGlobalPosition()
             highlight = createHighlight(state)
             highlight.boxX = coords.x
-            highlight.boxY = coords.y 
+            highlight.boxY = coords.y + 30
             highlight.box.width = 600
             highlight.box.height = 400
             highlight.box.border.width = 5
@@ -197,7 +197,7 @@ WorkspaceControl{
                                     for ( var pi = 0; pi < palettes.length; ++pi ){
 
                                         var palette = palettes[pi]
-                                        if ( palette.name === 'PathPalette' ){
+                                        if ( palette.name === 'FilePathPalette' ){
                                             var coords = palette.item.mapToItem(editor, 0, 0)
                                             var editorCoords = editorPane.mapGlobalPosition()
                                             editor.makePositionVisible(coords.y + editorCoords.y + 25 - 80)                            

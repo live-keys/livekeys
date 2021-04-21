@@ -21,7 +21,7 @@ WorkspaceControl{
                             "properties": [
                                 {
                                     "name": "source",
-                                    "palettes": ["PathPalette"]
+                                    "palettes": ["FilePathPalette"]
                                 }
                             ]
                         },

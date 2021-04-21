@@ -307,7 +307,7 @@ WorkspaceControl{
             highlight = createHighlight(state)
 
             highlight.boxX = viewerCoords.x - 10
-            highlight.boxY = viewerCoords.y - 10
+            highlight.boxY = viewerCoords.y + 20
             highlight.box.width = 460
             highlight.box.height = 35
             highlight.box.border.width = 5
