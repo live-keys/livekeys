@@ -98,12 +98,12 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          python-version: 3.7
           
       - name: Setup Qt MacOS
         if: runner.os == 'macOS'
         run: |
-          pip3 install aqtinstall
+          pip3 install aqtinstall==1.1.4
           aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d
           aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine
           export QTDIR=/opt/qt/5.14.2/clang_64
@@ -112,7 +112,7 @@ jobs:
       - name: Setup Qt Linux
         if: runner.os == 'Linux'
         run: |
-          pip3 install aqtinstall
+          pip3 install aqtinstall==1.1.4
           echo "Installed aqtinstall"
           aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d
           aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine
