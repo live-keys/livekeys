@@ -69,7 +69,7 @@ ApplicationWindow{
 
             dirOpenDialog.title = title
             dirOpenDialog.callback = callback
-            fileOpenDialog.folder = ""
+            dirOpenDialog.folder = ""
 
             dirOpenDialog.open()
         }
