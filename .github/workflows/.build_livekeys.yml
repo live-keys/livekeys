@@ -179,14 +179,27 @@ jobs:
           path: build/*.tar.gz
 
 
-      - name: Get Release
-        id: get_release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Get Release MacOS
+        id: get_release_macos
+        if: github.ref == 'refs/heads/master' && runner.os == 'macOS'
         run : |
           cd build
           RELEASE_NAME="$(ls -1 *.dmg)"
           echo $RELEASE_NAME
           echo ::set-output name=RELEASE_NAME::$RELEASE_NAME
+
+      - name: Get Release Linux
+        id: get_release_linux
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+        run : |
+          cd build
+          ls
+          RELEASE_NAME_1="$(ls live*.tar.gz | tail -n +1 | head -1)"
+          RELEASE_NAME_2="$(ls live*.tar.gz | tail -n +2 | head -1)"
+          echo $RELEASE_NAME_1
+          echo $RELEASE_NAME_2
+          echo ::set-output name=RELEASE_NAME_1::$RELEASE_NAME_1
+          echo ::set-output name=RELEASE_NAME_2::$RELEASE_NAME_2
 
 #       - name: Create Release
 #         id: create_release
@@ -207,14 +220,25 @@ jobs:
 #           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
      
-      - name: Do Release
-        id: do_release
-        if: startsWith(github.ref, 'refs/tags/v')
+      - name: Do Release MacOS
+        id: do_release_macos
+        if: startsWith(github.ref, 'refs/tags/v') && runner.os == 'macOS'
         uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          files: build/${{ steps.get_release.outputs.RELEASE_NAME }}
+          files: build/${{ steps.get_release_macos.outputs.RELEASE_NAME }}
+
+      - name: Do Release Linux
+        id: do_release_linux
+        if: startsWith(github.ref, 'refs/tags/v') && runner.os == 'Linux'
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: |
+            build/${{ steps.get_release_linux.outputs.RELEASE_NAME_1 }}
+            build/${{ steps.get_release_linux.outputs.RELEASE_NAME_2 }}
 
 #       - name: Upload Release Asset
 #         id: upload-release-asset 
