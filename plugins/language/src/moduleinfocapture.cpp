@@ -56,7 +56,7 @@ void ModuleInfoCapture::readModule(){
     Object::ArrayAccessor lokeysArray(engine(), lokeys);
 
     for ( int i = 0; i < lokeysArray.length(); ++i ){
-        ScopedValue exportValue = lo.get(lokeysArray.get(engine(), i));
+        ScopedValue exportValue = lo.get(engine(), lokeysArray.get(engine(), i));
         if ( exportValue.isElement() ){
             TypeInfo::Ptr ti = TypeInfo::extract(
                 exportValue.toElement(engine())->typeMetaObject(), m_current->importUri(), true, false

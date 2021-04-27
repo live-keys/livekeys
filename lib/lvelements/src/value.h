@@ -182,12 +182,9 @@ public:
         return ScopedValue(engine, val);
     }
 
-    Engine *engine() const;
-
 private:
     LocalValuePrivate* m_d;
     int*               m_ref;
-    Engine*            m_engine;
 };
 
 // Type Conversions

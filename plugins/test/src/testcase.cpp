@@ -22,7 +22,7 @@ ScopedValue TestCase::children(){
     Object o = Object::createArray(engine(), static_cast<int>(m_data.size()));
     Object::ArrayAccessor la(o);
     for ( int i = 0; i < static_cast<int>(m_data.size()); ++i ){
-        la.set(i, ScopedValue(engine(), m_data[static_cast<size_t>(i)]));
+        la.set(engine(), i, ScopedValue(engine(), m_data[static_cast<size_t>(i)]));
     }
     return ScopedValue(engine(), o);
 }

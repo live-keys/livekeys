@@ -304,32 +304,32 @@ ScopedValue Object::Accessor::get(Engine* engine, int index){
     return ScopedValue(m_d->data->Get(engine->isolate()->GetCurrentContext(), static_cast<uint32_t>(index)).ToLocalChecked());
 }
 
-ScopedValue Object::Accessor::get(const ScopedValue &key){
-    return m_d->data->Get(key.engine()->isolate()->GetCurrentContext(), key.data()).ToLocalChecked();
+ScopedValue Object::Accessor::get(Engine* engine, const ScopedValue &key){
+    return m_d->data->Get(engine->isolate()->GetCurrentContext(), key.data()).ToLocalChecked();
 }
 
 ScopedValue Object::Accessor::get(Engine *engine, const std::string &str){
-    return get(ScopedValue(engine, str));
+    return get(engine, ScopedValue(engine, str));
 }
 
-void Object::Accessor::set(int index, const ScopedValue &value){
+void Object::Accessor::set(Engine* engine, int index, const ScopedValue &value){
     m_d->data->Set(
-        value.engine()->isolate()->GetCurrentContext(),
+        engine->isolate()->GetCurrentContext(),
         static_cast<uint32_t>(index),
         value.data()
     ).IsNothing();
 }
 
-void Object::Accessor::set(const ScopedValue &key, const ScopedValue &value){
+void Object::Accessor::set(Engine* engine, const ScopedValue &key, const ScopedValue &value){
     m_d->data->Set(
-        value.engine()->isolate()->GetCurrentContext(),
+        engine->isolate()->GetCurrentContext(),
         key.data(),
         value.data()
     ).IsNothing();
 }
 
 void Object::Accessor::set(Engine *engine, const std::string &key, const ScopedValue &value){
-    set(ScopedValue(engine, key), value);
+    set(engine, ScopedValue(engine, key), value);
 }
 
 bool Object::Accessor::has(Engine* engine, const ScopedValue &key) const{
@@ -374,8 +374,8 @@ ScopedValue Object::ArrayAccessor::get(Engine *engine, int index){
     return m_d->data->Get(engine->isolate()->GetCurrentContext(), static_cast<uint32_t>(index)).ToLocalChecked();
 }
 
-void Object::ArrayAccessor::set(int index, const ScopedValue &value){
-    m_d->data->Set(value.engine()->isolate()->GetCurrentContext(), static_cast<uint32_t>(index), value.data()).IsNothing();
+void Object::ArrayAccessor::set(Engine* engine, int index, const ScopedValue &value){
+    m_d->data->Set(engine->isolate()->GetCurrentContext(), static_cast<uint32_t>(index), value.data()).IsNothing();
 }
 
 

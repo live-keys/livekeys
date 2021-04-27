@@ -45,10 +45,10 @@ public:
         ~Accessor();
 
         ScopedValue get(Engine* engine, int index);
-        ScopedValue get(const ScopedValue& key);
+        ScopedValue get(Engine* engine, const ScopedValue& key);
         ScopedValue get(Engine* engine, const std::string& str);
-        void set(int index, const ScopedValue& value);
-        void set(const ScopedValue& key, const ScopedValue& value);
+        void set(Engine* engine, int index, const ScopedValue& value);
+        void set(Engine* engine, const ScopedValue& key, const ScopedValue& value);
         void set(Engine* engine, const std::string& key, const ScopedValue& value);
 
         bool has(Engine* engine, const ScopedValue& key) const;
@@ -73,7 +73,7 @@ public:
         int length() const;
 
         ScopedValue get(Engine *engine, int index);
-        void set(int index, const ScopedValue& value);
+        void set(Engine* engine, int index, const ScopedValue& value);
 
     private:
         DISABLE_COPY(ArrayAccessor);

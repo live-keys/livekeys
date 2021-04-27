@@ -27,7 +27,6 @@ public:
 ScopedValue::ScopedValue(Engine *engine)
     : m_d(new LocalValuePrivate(v8::Undefined(engine->isolate())))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -35,7 +34,6 @@ ScopedValue::ScopedValue(Engine *engine)
 ScopedValue::ScopedValue(Engine *engine, bool val)
     : m_d(new LocalValuePrivate(v8::Boolean::New(engine->isolate(), val)))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -43,7 +41,6 @@ ScopedValue::ScopedValue(Engine *engine, bool val)
 ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -51,7 +48,6 @@ ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
 ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
     : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -59,7 +55,6 @@ ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
 ScopedValue::ScopedValue(Engine *engine, Value::Number val)
     : m_d(new LocalValuePrivate(v8::Number::New(engine->isolate(), val)))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -67,7 +62,6 @@ ScopedValue::ScopedValue(Engine *engine, Value::Number val)
 ScopedValue::ScopedValue(Engine *engine, const std::string &val)
     : m_d(nullptr)
     , m_ref(new int)
-    , m_engine(engine)
 {
     v8::Local<v8::Value> s = v8::String::NewFromUtf8(engine->isolate(), val.c_str()).ToLocalChecked();
     m_d = new LocalValuePrivate(s);
@@ -77,7 +71,6 @@ ScopedValue::ScopedValue(Engine *engine, const std::string &val)
 ScopedValue::ScopedValue(Engine *engine, Callable val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -85,7 +78,6 @@ ScopedValue::ScopedValue(Engine *engine, Callable val)
 ScopedValue::ScopedValue(Engine *engine, Object val)
     : m_d(new LocalValuePrivate(val.data()))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -93,7 +85,6 @@ ScopedValue::ScopedValue(Engine *engine, Object val)
 ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
     : m_d(new LocalValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -101,7 +92,6 @@ ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
 ScopedValue::ScopedValue(Engine *engine, Element* val)
     : m_d(new LocalValuePrivate(ElementPrivate::localObject(val)))
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -109,7 +99,6 @@ ScopedValue::ScopedValue(Engine *engine, Element* val)
 ScopedValue::ScopedValue(Engine *engine, const Value &value)
     : m_d(nullptr)
     , m_ref(new int)
-    , m_engine(engine)
 {
     ++(*m_ref);
     switch ( value.type() ){
@@ -142,7 +131,6 @@ ScopedValue::ScopedValue(Engine *engine, const Value &value)
 ScopedValue::ScopedValue(Engine *engine, const ScopedValue &other)
     : m_d(other.m_d)
     , m_ref(other.m_ref)
-    , m_engine(engine)
 {
     ++(*m_ref);
 }
@@ -294,11 +282,6 @@ bool ScopedValue::isElement() const{
 
     v8::Local<v8::Object> vo = m_d->data.As<v8::Object>();
     return vo->InternalFieldCount() == 1;
-}
-
-Engine *ScopedValue::engine() const
-{
-    return m_engine;
 }
 
 ScopedValue::ScopedValue(const v8::Local<v8::Value> &data)
