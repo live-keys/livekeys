@@ -33,6 +33,7 @@ class MemberExpressionNode;
 class SubscriptExpressionNode;
 class StatementBlockNode;
 class ArgumentsNode;
+class ObjectNode;
 
 class BaseNode{
     friend class JsBlockNode;
@@ -101,6 +102,7 @@ private:
     static void visitNewExpression(BaseNode* parent, const TSNode& node);
     static void visitReturnStatement(BaseNode* parent, const TSNode& node);
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
+    static void visitObject(BaseNode* parent, const TSNode& node);
 
     BaseNode*              m_parent;
     TSNode                 m_node;
@@ -114,10 +116,10 @@ public:
     NumberNode(const TSNode& node, const std::string& typeString = "Number") : BaseNode(node, typeString){}
 };
 
-class ArrowFunctionNode: public BaseNode {
+class ObjectNode: public BaseNode {
     friend class BaseNode;
 public:
-    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : BaseNode(node, typeString){}
+    ObjectNode(const TSNode& node, const std::string& typeString = "Object") : BaseNode(node, typeString){}
 };
 
 class FunctionDeclarationNode: public BaseNode {
@@ -145,6 +147,12 @@ public:
     const std::vector<IdentifierNode*>& identifiers() const { return m_declarations; }
 private:
     std::vector<IdentifierNode*> m_declarations;
+};
+
+class ArrowFunctionNode: public JsBlockNode {
+    friend class BaseNode;
+public:
+    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : JsBlockNode(node, typeString){}
 };
 
 class ProgramNode : public JsBlockNode {
@@ -184,12 +192,13 @@ public:
 class VariableDeclarationNode : public BaseNode{
     friend class BaseNode;
 public:
-    VariableDeclarationNode(const TSNode& node) : BaseNode(node, "VariableDeclaration"){}
+    VariableDeclarationNode(const TSNode& node) : BaseNode(node, "VariableDeclaration"), m_hasSemicolon(false){}
     virtual std::string toString(int indent = 0) const;
     virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0);
 
 private:
     std::vector<VariableDeclaratorNode*> m_declarators;
+    bool m_hasSemicolon;
 };
 
 
@@ -319,6 +328,7 @@ public:
 
 class PropertyAssignmentNode : public JsBlockNode{
     friend class BaseNode;
+    friend class ComponentDeclarationNode;
 public:
     PropertyAssignmentNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;

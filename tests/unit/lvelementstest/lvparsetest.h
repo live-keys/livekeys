@@ -32,8 +32,18 @@ private slots:
     void testScenarioTest();
     void nestedLanguageScannerTest();
     void nestedFunctionAssignment();
+    void arrowFunctionElement();
+    void todoListItemSmall();
+    void todoList();
+    void todoListItem();
+    void todoForm();
+    void todoApp();
+    void complexTernaryOperator();
+    void doublyNestedElement();
 
 private:
+    void parseTestTemplate(std::string name);
+
     lv::LockedFileIOSession::Ptr m_fileSession;
     std::string                  m_scriptPath;
 };
