@@ -1205,7 +1205,6 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int len
  */
 QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
     Q_D(CodeQmlHandler);
-    Project* project = d->projectHandler->project();
 
     if ( m_document ){
         d->syncParse(m_document);
@@ -3457,6 +3456,10 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
             m_engine->throwError(res, this);
         }
     }
+}
+
+DocumentHandler *CodeQmlHandler::documentHandler() const{
+    return qobject_cast<DocumentHandler*>(parent());
 }
 
 void CodeQmlHandler::__whenLibraryScanQueueCleared(){
