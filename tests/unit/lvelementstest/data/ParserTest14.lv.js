@@ -1,11 +1,11 @@
 imports.require('test')
 imports.require('language')
 
+var LanguageScanner = imports.get('LanguageScanner')
 var Scenario = imports.get('Scenario')
 var TestCase = imports.get('TestCase')
-var LanguageScanner = imports.get('LanguageScanner')
 
-module.exports["languagetest"] = (function(parent){
+module.exports["ParserTest14"] = (function(parent){
     this.setParent(parent)
     Element.addProperty(this, 'ls', { type: 'LanguageScanner', notify: 'lsChanged' })
     this.ls = (function(parent){
