@@ -26,6 +26,7 @@ signals:
 public slots:
     void __newQmlBuild(Runnable* runnable, QmlBuild* build);
     void __qmlBuildReady();
+    void __hookEntryAdded(Runnable* runnable, const QString& file, const QString& id, QObject* object);
 
 
 private:
