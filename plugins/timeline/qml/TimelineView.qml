@@ -237,6 +237,7 @@ Rectangle{
     signal mouseDoubleClicked(int position, int trackIndex)
     signal segmentSelected(Track track, Segment segment)
     signal segmentDoubleClicked(Track track, Segment segment, Item delegate)
+    signal segmentRightClicked(Track track, Segment segment, Item delegate)
 
     Rectangle{
         id: timelineOptionsContainer
@@ -468,6 +469,9 @@ Rectangle{
 
                         segmentDelegate: root.segmentDelegate
 
+                        onSegmentRightClicked: {
+                            root.segmentRightClicked(track, segment, delegate)
+                        }
                         onSegmentDoubleClicked: {
                             root.segmentDoubleClicked(track, segment, timelineRow)
                         }
@@ -510,7 +514,7 @@ Rectangle{
                 }
 
                 if ( availableSpace < segment.length ){
-                    segment.length = avialableSpace
+                    segment.length = availableSpace
                 }
 
                 segment.position = root.timeline.cursorPosition

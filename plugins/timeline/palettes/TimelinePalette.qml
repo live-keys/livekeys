@@ -24,6 +24,23 @@ CodePalette{
             focus : true
             timelineStyle: theme.timelineStyle
 
+            onSegmentRightClicked: {
+                var pane = null
+                var p = parent
+                while ( p ){
+                    if ( p.paneType !== undefined ){
+                        break
+                    }
+                    p = p.parent
+                }
+
+                if ( p ){
+                    lk.layers.workspace.panes.activateItem(delegate, p)
+                    lk.layers.workspace.panes.openContextMenu(delegate, p)
+
+                }
+            }
+
             onSegmentDoubleClicked: {
                 var trackProperties = track.configuredProperties(segment)
 
