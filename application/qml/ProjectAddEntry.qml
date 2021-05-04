@@ -18,6 +18,8 @@ import QtQuick 2.3
 import editor 1.0
 import editor.private 1.0
 import base 1.0
+import visual.input 1.0 as Input
+import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -28,66 +30,101 @@ Rectangle{
     signal accepted(ProjectEntry entry, string name, bool isFile)
     signal canceled()
 
+    property QtObject style: QtObject{
+        property color background: "#02070b"
+        property double borderWidth: 1
+        property color borderColor: "#0f1921"
+        property double radius: 5
+
+        property QtObject headerStyle: Input.TextStyle{}
+        property QtObject inputStyle: Input.InputBoxStyle{}
+
+        property QtObject applyButton: Item{}
+    }
+
     clip: true
     width: 500
-    height: 80
-    radius: 5
-    color:"#02070b"
-    border.width: 1
-    border.color: "#0f1921"
+    height: 60 + heading.height
+
+    radius: style.radius
+    color: style.background
+    border.width: style.borderWidth
+    border.color: style.borderColor
+
+    property string heading: 'Add ' + (root.isFile ? 'file' : 'directory') + ' in ' + (root.entry ? root.entry.path : '')
+    property string extension: ''
+
+    function __accept(){
+        if ( inputBox.text === '' ){
+            root.__cancel()
+        } else {
+            var txt = inputBox.text
+            if ( root.extension.length > 0 ){
+                if ( !txt.endsWith('.' + root.extension) ){
+                    txt += '.' + root.extension
+                }
+            }
+
+            root.accepted(root.entry, txt, root.isFile)
+            inputBox.text = ''
+            root.extension = ''
+            root.parent.parent.box = null
+        }
+    }
+
+    function __cancel(){
+        root.parent.parent.box = null
+        inputBox.text = ''
+        root.canceled()
+    }
+
+    function setInitialValue(value){
+        inputBox.text = value
+    }
 
     opacity: root.visible ? 1 : 0
     Behavior on opacity{ NumberAnimation{ duration: 250} }
 
-    Text{
+    Input.Label{
+        id: heading
         anchors.top: parent.top
         anchors.topMargin: 14
         anchors.left: parent.left
         anchors.leftMargin: 14
-        text: 'Add ' + (root.isFile ? 'file' : 'directory') + ' in ' + (root.entry ? root.entry.path : '')
-        font.family: 'Open Sans, Arial, sans-serif'
-        font.pixelSize: 12
-        font.weight: Font.Normal
-        color: "#afafaf"
+        anchors.right: parent.right
+        anchors.rightMargin: 14
+        text: root.heading
+        wrapMode: Text.WordWrap
+        textStyle: root.style.headerStyle
     }
-    Rectangle{
+
+    Input.InputBox{
+        id: inputBox
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 10
         anchors.left: parent.left
         anchors.leftMargin: 14
-        width: parent.width - 28
+        width: parent.width - 55
         height: 28
-        color: "#0b1319"
-        border.width: 1
-        border.color: "#0c1720"
+        style: root.style.inputStyle
 
-        TextInput{
-            id: addEntryInput
-            anchors.left: parent.left
-            anchors.leftMargin: 10
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            anchors.verticalCenter: parent.verticalCenter
-            color: '#aaa'
-            text: ''
-            font.family: 'Open Sans, Arial, sans-serif'
-            font.pixelSize: 12
-            font.weight: Font.Normal
-            selectByMouse: true
-
-            Keys.onReturnPressed: {
-                root.accepted(root.entry, text, root.isFile)
-                root.parent.parent.box = null
-            }
-            Keys.onEscapePressed: {
-                root.parent.parent.box = null
-                root.canceled()
-            }
-            MouseArea{
-                anchors.fill: parent
-                acceptedButtons: Qt.NoButton
-                cursorShape: Qt.IBeamCursor
+        Keys.onPressed: {
+            if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
+                root.__accept()
+            } else if ( event.key === Qt.Key_Escape ){
+                root.__cancel()
             }
         }
+    }
+
+    Workspace.Button{
+        anchors.right: parent.right
+        anchors.rightMargin: 10
+        anchors.bottom: parent.bottom
+        anchors.bottomMargin: 12
+        width: 30
+        height: 25
+        content: root.style.applyButton
+        onClicked: root.__accept()
     }
 }
