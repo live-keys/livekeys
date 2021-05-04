@@ -6,6 +6,7 @@ CONFIG  += console testcase
 linkLocalLibrary(lvbase,     lvbase)
 linkLocalLibrary(lvelements, lvelements)
 
+include($$PROJECT_ROOT/project/3rdparty/v8.pri)
 include($$PWD/lvelementsstubs/lvelementsstubs.pri)
 
 HEADERS += \

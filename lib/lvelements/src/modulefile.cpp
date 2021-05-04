@@ -140,18 +140,20 @@ ScopedValue ModuleFile::createObject(Engine* engine) const{
     v8::Local<v8::Object> obj = v8::Object::New(engine->isolate());
     v8::Local<v8::Value> exports = ScopedValue(engine, *m_d->exports).data();
 
+    auto isolate = engine->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(
-        engine->isolate(), "exports", v8::String::kInternalizedString
-    );
+        engine->isolate(), "exports", v8::NewStringType::kInternalized
+    ).ToLocalChecked();
     v8::Local<v8::String> pathKey = v8::String::NewFromUtf8(
-        engine->isolate(), "path", v8::String::kInternalizedString
-    );
+        engine->isolate(), "path", v8::NewStringType::kInternalized
+    ).ToLocalChecked();
     v8::Local<v8::String> pathStr = v8::String::NewFromUtf8(
-        engine->isolate(), filePath().c_str(), v8::String::kInternalizedString
-    );
+        engine->isolate(), filePath().c_str(), v8::NewStringType::kInternalized
+    ).ToLocalChecked();
 
-    obj->Set(exportsKey, exports);
-    obj->Set(pathKey, pathStr);
+    obj->Set(context, exportsKey, exports).IsNothing();
+    obj->Set(context, pathKey, pathStr).IsNothing();
 
     return ScopedValue(obj);
 }

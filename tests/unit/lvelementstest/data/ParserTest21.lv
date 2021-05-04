@@ -1,0 +1,24 @@
+component TodoApp < Div{
+    id: main
+
+    var todoItems: todoItems
+
+    TodoHeader{}
+    TodoList{ 
+        items: this.todoItems
+        on remove: (index) => { this.todoItems.splice(index, 1); this.todoItemsChanged() }
+        on markTodoDone: (index) => { 
+            var todo = todoItems[itemIndex];
+            todoItems.splice(itemIndex, 1);
+            todo.done = !todo.done;
+            todo.done ? todoItems.push(todo) : todoItems.unshift(todo);
+            this.todoItemsChanged()
+        } 
+    }
+    
+    TodoForm{
+        onAddItem(name) => {
+            this.todoItems.unshift({ index: todoItems.length+1, value: name, done: false })
+        }
+    }
+}

@@ -13,7 +13,11 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
         for ( auto it = n.begin(); it != n.end(); ++it ){
             v8::Local<v8::Value> result;
             toJs(it.value(), result, engine);
-            lo->Set(v8::String::NewFromUtf8(engine->isolate(), it.key().c_str()), result);
+            lo->Set(
+                engine->isolate()->GetCurrentContext(),
+                v8::String::NewFromUtf8(engine->isolate(), it.key().c_str()).ToLocalChecked(),
+                result
+            ).IsNothing();
         }
         v = lo;
         break;
@@ -25,7 +29,7 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
         for ( auto it = n.begin(); it != n.end(); ++it ){
             v8::Local<v8::Value> result;
             toJs(it.value(), result, engine);
-            la->Set(index, result);
+            la->Set(engine->isolate()->GetCurrentContext(), index, result).IsNothing();
             ++index;
         }
         v = la;
@@ -36,7 +40,7 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
         break;
     }
     case MLNode::Type::String:{
-        v = v8::String::NewFromUtf8(engine->isolate(), n.asString().c_str());
+        v = v8::String::NewFromUtf8(engine->isolate(), n.asString().c_str()).ToLocalChecked();
         break;
     }
     case MLNode::Type::Boolean:{
@@ -58,27 +62,29 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
 }
 
 void fromJs(const v8::Local<v8::Value> v, MLNode& n, el::Engine* engine){
+    auto isolate = engine->isolate();
+    auto context = isolate->GetCurrentContext();
     if ( v->IsArray() ){
         v8::Local<v8::Array> va = v8::Local<v8::Array>::Cast(v);
         n = MLNode(MLNode::Type::Array);
         for ( unsigned int i = 0; i < va->Length(); ++i ){
             MLNode result;
-            fromJs(va->Get(i), result, engine);
+            fromJs(va->Get(context, i).ToLocalChecked(), result, engine);
             n.append(result);
         }
     } else if ( v->IsString() || v->IsStringObject() ){
-        n = MLNode(*v8::String::Utf8Value(v->ToString(engine->isolate())));
+        n = MLNode(*v8::String::Utf8Value(isolate, v->ToString(context).ToLocalChecked()));
     } else if ( v->IsObject() ){
         v8::Local<v8::Object> vo = v8::Local<v8::Object>::Cast(v);
         n = MLNode(MLNode::Type::Object);
 
-        v8::Local<v8::Array> pn = vo->GetOwnPropertyNames();
+        v8::Local<v8::Array> pn = vo->GetOwnPropertyNames(context, v8::ALL_PROPERTIES).ToLocalChecked();
 
         for (uint32_t i = 0; i < pn->Length(); ++i) {
-            v8::Local<v8::Value> key = pn->Get(i);
-            v8::Local<v8::Value> value = vo->Get(key);
+            v8::Local<v8::Value> key = pn->Get(context, i).ToLocalChecked();
+            v8::Local<v8::Value> value = vo->Get(context, key).ToLocalChecked();
 
-            v8::String::Utf8Value utf8Key(key);
+            v8::String::Utf8Value utf8Key(isolate, key);
             MLNode result;
             fromJs(value, result, engine);
 
@@ -87,11 +93,11 @@ void fromJs(const v8::Local<v8::Value> v, MLNode& n, el::Engine* engine){
         }
 
     } else if ( v->IsBoolean() ){
-        n = MLNode(v->BooleanValue());
+        n = MLNode(v->BooleanValue(isolate));
     } else if ( v->IsInt32() ){
-        n = MLNode(v->IntegerValue());
+        n = MLNode(v->IntegerValue(context).ToChecked());
     } else if ( v->IsNumber() ){
-        n = MLNode(v->NumberValue());
+        n = MLNode(v->NumberValue(context).ToChecked());
     } else {
         n = MLNode();
     }
