@@ -261,7 +261,7 @@ Rectangle{
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                project.openProject(model.path)
+                                lk.layers.workspace.wizards.openProject(model.path)
                             }
                         }
 

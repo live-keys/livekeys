@@ -246,8 +246,39 @@ Item{
         function openProject(url, callback){
             root.wizards.checkUnsavedFiles(function(){
                 project.closeProject()
-                project.openProject(url)
+
                 var path = Fs.UrlInfo.toLocalFile(url)
+
+                project.openProject(url)
+
+                if ( !project.active ){
+                    var message = 'Project has no file to run. Would you like to create one?'
+                    var createFile = function(mbox){
+                        root.wizards.addFile(
+                            project.dir(),
+                            {
+                                'extension': 'qml',
+                                'heading' : 'Add main file in ' + project.dir()
+                            },
+                            function(file){
+                                project.setActive(file.path)
+                            }
+                        )
+                        mbox.close()
+                    }
+
+                    lk.layers.window.dialogs.message(message, {
+                        button1Name : 'Yes',
+                        button1Function : createFile,
+                        button3Name : 'No',
+                        button3Function : function(mbox){ mbox.close() },
+                        returnPressed : createFile
+                    })
+
+                }
+
+
+
                 if ( callback )
                     callback(path)
     //                lk.openProjectInstance(url)
