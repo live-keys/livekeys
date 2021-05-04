@@ -3,6 +3,7 @@
     "package" : ".",
     "libraryModules" : ["lvbase"],
     "palettes" : {
-        "palettes/ExecPalette.qml" : "qml/base#Exec"
+        "palettes/ExecPalette.qml" : "qml/base#Exec",
+        "palettes/StreamValuePalette.json" : "qml/base#StreamValue"
     }
 }

@@ -33,7 +33,6 @@
 #include "windowlayer.h"
 #include "qmlstream.h"
 #include "qmlwritablestream.h"
-#include "qmlstreamiterator.h"
 #include "qmlclipboard.h"
 
 #include "private/qqmlcontext_p.h"
@@ -287,7 +286,6 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
     qmlRegisterType<lv::QmlWritableStream>(     uri, 1, 0, "WritableStream");
-    qmlRegisterType<lv::QmlStreamIterator>(     uri, 1, 0, "StreamIterator");
 
     qmlRegisterUncreatableType<lv::Shared>(
         uri, 1, 0, "Shared", "Shared is of abstract type.");
