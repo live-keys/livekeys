@@ -388,9 +388,16 @@ Item{
         runSpace: root.runSpace
     }
 
-    property color paneSplitterColor: "transparent"
+    property Component messageDialogButton: Workspace.TextButton{
+        height: 28
+        width: 100
+        style: lk.layers.workspace.themes.current.formButtonStyle
+        onClicked: parent.clicked()
+    }
 
+    property color paneSplitterColor: "transparent"
     property bool documentsReloaded : false
+
     Connections{
         target: lk.layers.window
         function onIsActiveChanged(isActive){
@@ -411,6 +418,7 @@ Item{
 
     Connections{
         target: lk
+
         function onLayerReady(layer){
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
@@ -437,6 +445,14 @@ Item{
                 removePaneBox.style.iconColorAlternate = layer.themes.current.colorScheme.topIconColorAlternate
                 paneSplitterColor = layer.themes.current.paneSplitterColor
                 contextMenu.style = layer.themes.current.popupMenuStyle
+
+                var messageDialogStyle = lk.layers.window.dialogs.messageStyle
+                messageDialogStyle.box.background = layer.themes.current.colorScheme.middleground
+                messageDialogStyle.box.borderColor = layer.themes.current.colorScheme.middlegroundBorder
+                messageDialogStyle.box.borderWidth = 1
+                messageDialogStyle.box.textColor = layer.themes.current.colorScheme.foreground
+                messageDialogStyle.box.font = layer.themes.current.inputLabelStyle.textStyle.font
+                messageDialogStyle.button = root.messageDialogButton
             }
         }
     }
