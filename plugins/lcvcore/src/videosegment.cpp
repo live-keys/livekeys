@@ -230,7 +230,9 @@ void VideoSegment::addWatcher(){
     ViewEngine* ve = ViewContext::instance().engine();
 
     QmlWatcher* watcher = new QmlWatcher(m_filtersObject);
+
     //TODO: Generate unique name
+    watcher->setTarget(m_filtersObject);
     watcher->initialize(ve, hooks, m_filters, m_videoTrack->name() + "_" + QString::number(position()));
 }
 
