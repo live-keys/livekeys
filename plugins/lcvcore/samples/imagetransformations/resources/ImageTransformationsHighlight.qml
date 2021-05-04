@@ -77,6 +77,8 @@ WorkspaceControl{
             highlight = highlightTransformButton(state, 24,60)
         } else if ( fragment === 'rotate-button' ){
             highlight = highlightTransformButton(state, -2,86)
+        } else if ( fragment === 'warp-button' ){
+            highlight = highlightTransformButton(state, 24,86)
         } else if ( fragment === 'transformation' ){
             var editorPane = lk.layers.workspace.panes.focusPane('editor')
             if ( !editorPane )

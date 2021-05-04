@@ -90,8 +90,7 @@ Tool{
                 imageContainer.writableImage,
                 Qt.point(root.lastX, root.lastY),
                 Qt.point(event.imageX, event.imageY),
-                toolbox.foreground,
-                toolbox.background
+                [[0, toolbox.foreground], [1, toolbox.background]]
             )
 
             root.lastX = event.imageX
