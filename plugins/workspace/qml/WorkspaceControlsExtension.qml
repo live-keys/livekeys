@@ -175,7 +175,51 @@ WorkspaceExtension{
                     ]
                 }
             }
-        }
+        },
+        {
+            whenItem: 'timelineTrackTitle',
+            intercept: function(pane, item){
+                var track = item.timelineArea.timeline.trackList.trackAt(item.trackIndex)
+
+                var optionsConverted = []
+
+                for ( var i = 0; i < item.menuOptions.length; ++i ){
+                    var option = item.menuOptions[i]
+                    optionsConverted.push({
+                        name : option.name,
+                        action : option.action.bind(item, track),
+                        enabled: option.enabled
+                    })
+                }
+
+                optionsConverted.push({
+                    name : "Remove Track",
+                    action : function(){ item.timelineArea.timeline.removeTrack(item.trackIndex) },
+                    enabled: true
+                })
+
+                return optionsConverted
+            }
+        },
+        {
+            whenItem: 'timelineOptions',
+            intercept: function(pane, item){
+                var optionsConverted = []
+
+                var menuOptions = item.timelineArea.headerContextMenu
+
+                for ( var i = 0; i < menuOptions.length; ++i ){
+                    var option = menuOptions[i]
+                    optionsConverted.push({
+                        name : option.name,
+                        action : option.action,
+                        enabled: option.enabled
+                    })
+                }
+
+                return optionsConverted
+            }
+        },
     ]
 
 }

@@ -23,6 +23,25 @@ CodePalette{
             anchors.fill: parent
             focus : true
             timelineStyle: theme.timelineStyle
+            handleContextMenu: function(item){
+                if ( item.objectName === 'timelineTrackTitle' ){
+                    timelineArea.trackTitleRightClicked(item.trackIndex, item)
+                } else if ( item.objectName === 'timelineOptions' ){
+                    var pane = null
+                    var p = parent
+                    while ( p ){
+                        if ( p.paneType !== undefined ){
+                            break
+                        }
+                        p = p.parent
+                    }
+
+                    if ( p ){
+                        lk.layers.workspace.panes.activateItem(item, p)
+                        lk.layers.workspace.panes.openContextMenu(item, p)
+                    }
+                }
+            }
 
             onSegmentRightClicked: {
                 var pane = null
@@ -37,7 +56,22 @@ CodePalette{
                 if ( p ){
                     lk.layers.workspace.panes.activateItem(delegate, p)
                     lk.layers.workspace.panes.openContextMenu(delegate, p)
+                }
+            }
 
+            onTrackTitleRightClicked: {
+                var pane = null
+                var p = parent
+                while ( p ){
+                    if ( p.paneType !== undefined ){
+                        break
+                    }
+                    p = p.parent
+                }
+
+                if ( p ){
+                    lk.layers.workspace.panes.activateItem(delegate, p)
+                    lk.layers.workspace.panes.openContextMenu(delegate, p)
                 }
             }
 

@@ -239,7 +239,7 @@ Item{
                             if (child.objectName !== "propertyContainer") continue
                             if (child.title !== propName) continue
 
-                            if (child.valueContainer.palettesOpened.indexOf(propPalette) !== -1) break
+                            if (child.valueContainer.palettesOpened && child.valueContainer.palettesOpened.indexOf(propPalette) !== -1) break
                             paletteControls.openPaletteByName(propPalette, ef, editor, child.valueContainer)
                             break
                         }

@@ -74,7 +74,7 @@ Item{
         visible: false
         onOpen: {
             root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
-            projectEnvironment.openFile(path, ProjectDocument.EditIfNotOpen)
+            root.wizards.openFile(path, ProjectDocument.EditIfNotOpen)
         }
         onCloseFile: {
             root.wizards.closeFile(path)

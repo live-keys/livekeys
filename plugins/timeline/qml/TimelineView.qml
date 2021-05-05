@@ -26,7 +26,142 @@ Rectangle{
     property int zoom : 1
     property bool interactive: true
 
+
+    signal mouseHover(int position, int trackIndex)
+    signal mouseLeave(int position)
+    signal mouseDoubleClicked(int position, int trackIndex)
+    signal segmentSelected(Track track, Segment segment)
+    signal segmentDoubleClicked(Track track, Segment segment, Item delegate)
+    signal segmentRightClicked(Track track, Segment segment, Item delegate)
+    signal trackTitleRightClicked(int index, Item delegate)
+
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
+
+    property var headerContextMenu: {
+
+        function addTrack(){
+            var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
+            var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+            var objectComponent = Qt.createComponent(objectPathUrl);
+            if ( objectComponent.status === Component.Error ){
+                throw linkError(new Error(objectComponent.errorString()), timelineArea)
+            }
+
+            var object = objectComponent.createObject();
+
+            var videoTrack = object.create()
+            videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+            root.timeline.appendTrack(videoTrack)
+        }
+
+        var menuOptions = [{
+            name: "Add Video Track",
+            enabled: true,
+            action: function(){
+                if ( !root.timeline.properties.videoSurface ){
+
+                    var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoSurfaceCreator.qml'
+                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+                    var objectComponent = Qt.createComponent(objectPathUrl);
+                    if ( objectComponent.status === Component.Error ){
+                        throw linkError(new Error(objectComponent.errorString()), this)
+                    }
+
+                    var object = objectComponent.createObject();
+                    var overlay = lk.layers.window.dialogs.overlayBox(object)
+
+                    object.surfaceCreated.connect(function(videoSurface){
+                        root.timeline.properties.videoSurface = videoSurface
+                        addTrack()
+                        overlay.closeBox()
+                        object.destroy()
+                    })
+
+                    object.cancelled.connect(function(){
+                        overlay.closeBox()
+                        object.destroy()
+                    })
+                } else {
+                    addTrack()
+                }
+            }
+        }, {
+            name: "Add Keyframe Track",
+            enabled: true,
+            action: function(){
+
+               var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeTrackFactory.qml'
+               var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+               var objectComponent = Qt.createComponent(objectPathUrl);
+               if ( objectComponent.status === Component.Error ){
+                   throw linkError(new Error(objectComponent.errorString()), timelineArea)
+               }
+
+               var object = objectComponent.createObject();
+
+               var keyframeTrack = object.create()
+               keyframeTrack.name = 'Keyframe Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+               root.timeline.appendTrack(keyframeTrack)
+            }
+        },{
+            name: "Save",
+            enabled: true,
+            action: function(){
+                root.timeline.save()
+            }
+        }, {
+            name: "Save As...",
+            enabled: true,
+            action: function(){
+               lk.layers.window.dialogs.saveFile({filters : "Json files (*.json)"}, function(path){
+                   var localFile = Fs.UrlInfo.toLocalFile(path)
+                   root.timeline.saveAs(localFile)
+               })
+            }
+        }]
+
+        return menuOptions
+    }
+
+    property var handleContextMenu: function(item){
+        if ( item.objectName === 'timelineTrackTitle' ){
+            var track = item.timelineArea.timeline.trackList.trackAt(item.trackIndex)
+            var tr = track
+
+            for ( var i = 0; i < trackTitleContextMenu.toClear.length; ++i ){
+                trackTitleContextMenu.removeItem(trackTitleContextMenu.toClear[i])
+            }
+
+            for ( var i = 0; i < item.menuOptions.length; ++i ){
+                var menuitem = trackTitleContextMenu.insertItem(i, item.menuOptions[i].name)
+                menuitem.enabled = item.menuOptions[i].enabled
+                menuitem.triggered.connect(item.menuOptions[i].action.bind(this, track))
+                trackTitleContextMenu.toClear.push(menuitem)
+            }
+            trackTitleContextMenu.popup()
+
+        } else if ( item.objectName === 'timelineOptions' ){
+
+            var menuOptions = headerContextMenu
+
+            for ( var i = 0; i < contextMenu.toClear.length; ++i ){
+                contextMenu.removeItem(contextMenu.toClear[i])
+            }
+
+            for ( var i = 0; i < menuOptions.length; ++i ){
+                var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
+                menuitem.enabled = menuOptions[i].enabled
+                menuitem.triggered.connect(menuOptions[i].action)
+                contextMenu.toClear.push(menuitem)
+            }
+            contextMenu.popup()
+        }
+    }
 
     property QtObject timelineStyle : TimelineStyle{}
     property Timeline timeline : Timeline{
@@ -55,13 +190,17 @@ Rectangle{
     property Component trackTitleDelegate : TrackTitle{
         trackIndex: index
         timelineStyle: root.timelineStyle
+        timelineArea: root
         onAddSegment: {
             segmentInsertMenu.currentTrack = root.timeline.trackList.trackAt(index)
         }
+        onRightClicked: root.trackTitleRightClicked(index, trackTitleItem)
     }
 
     property Item timelineOptions : Item{
+        objectName: "timelineOptions"
         anchors.fill: parent
+        property Item timelineArea: root
         Icons.MenuIcon{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -72,7 +211,7 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    contextMenu.popup()
+                    root.handleContextMenu(root.timelineOptions)
                 }
             }
         }
@@ -146,98 +285,19 @@ Rectangle{
         }
 
         Menu{
-            id: contextMenu
+            id: trackTitleContextMenu
+            property var toClear: []
             MenuItem {
-                text: qsTr("Add Video Track")
-
-                function addTrack(){
-                    var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
-                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
-
-                    var objectComponent = Qt.createComponent(objectPathUrl);
-                    if ( objectComponent.status === Component.Error ){
-                        throw linkError(new Error(objectComponent.errorString()), timelineArea)
-                    }
-
-                    var object = objectComponent.createObject();
-
-                    var videoTrack = object.create()
-                    videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
-
-                    root.timeline.appendTrack(videoTrack)
-                }
-
-                onTriggered: {
-                    if ( !root.timeline.properties.videoSurface ){
-
-                        var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoSurfaceCreator.qml'
-                        var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
-
-                        var objectComponent = Qt.createComponent(objectPathUrl);
-                        if ( objectComponent.status === Component.Error ){
-                            throw linkError(new Error(objectComponent.errorString()), this)
-                        }
-
-                        var object = objectComponent.createObject();
-                        var overlay = lk.layers.window.dialogs.overlayBox(object)
-
-                        object.surfaceCreated.connect(function(videoSurface){
-                            root.timeline.properties.videoSurface = videoSurface
-                            addTrack()
-                            overlay.closeBox()
-                            object.destroy()
-                        })
-
-                        object.cancelled.connect(function(){
-                            overlay.closeBox()
-                            object.destroy()
-                        })
-                    } else {
-                        addTrack()
-                    }
-                }
-            }
-            MenuItem {
-                text: qsTr("Add Keyframe Track")
-                onTriggered: {
-                    var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeTrackFactory.qml'
-                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
-
-                    var objectComponent = Qt.createComponent(objectPathUrl);
-                    if ( objectComponent.status === Component.Error ){
-                        throw linkError(new Error(objectComponent.errorString()), timelineArea)
-                    }
-
-                    var object = objectComponent.createObject();
-
-                    var keyframeTrack = object.create()
-                    keyframeTrack.name = 'Keyframe Track #' + (root.timeline.trackList.totalTracks() + 1)
-
-                    root.timeline.appendTrack(keyframeTrack)
-                }
-            }
-            MenuItem {
-                text: qsTr("Save")
-                onTriggered: root.timeline.save()
-            }
-            MenuItem {
-                text: qsTr("Save As...")
-                onTriggered: {
-                    lk.layers.window.dialogs.saveFile({filters : "Json files (*.json)"}, function(path){
-                        var localFile = Fs.UrlInfo.toLocalFile(path)
-                        root.timeline.saveAs(localFile)
-                    })
-                }
+                text: qsTr("Remove Track")
+                onTriggered: root.timeline.removeTrack(index)
             }
         }
-    }
 
-    signal mouseHover(int position, int trackIndex)
-    signal mouseLeave(int position)
-    signal mouseDoubleClicked(int position, int trackIndex)
-    signal segmentSelected(Track track, Segment segment)
-    signal segmentDoubleClicked(Track track, Segment segment, Item delegate)
-    signal segmentRightClicked(Track track, Segment segment, Item delegate)
+        Menu{
+            id: contextMenu
+            property var toClear: []
+        }
+    }
 
     Rectangle{
         id: timelineOptionsContainer
