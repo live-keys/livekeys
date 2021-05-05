@@ -58,7 +58,7 @@ WorkspaceExtension{
         {
             whenItem: 'timelineResizableSegment',
             intercept: function(pane, item){
-                if ( item.currentSegment instanceof Cv.VideoSegment ){
+                if ( item.currentSegment instanceof Cv.VideoSegment || item.currentSegment instanceof Cv.ImageSegment ){
                     var segment = item.currentSegment
                     return [{
                         name : "Adjust",
