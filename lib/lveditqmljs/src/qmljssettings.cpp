@@ -67,6 +67,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
     m_defaultPalettes["qml/fs#VisualFileSelector"] = "VisualFileSelectorPropertiesPalette";
     m_defaultPalettes["qml/lcvimgproc#Blend"] = "BlendPalette";
+    m_defaultPalettes["qml/lcvimgproc#Pad"] = "PadPalette";
     m_defaultPalettes["qml/lcvcore#ImageRead"] = "ImageReadPalette";
     m_defaultPalettes["qml/lcvcore#ImageFile"] = "ImageFilePalette";
     m_defaultPalettes["qml/lcvcore#BlankImage"] = "BlankImagePalette";

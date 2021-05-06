@@ -4,6 +4,7 @@
     "palettes" : {
         "palettes/TransformPalette.qml" : "qml/lcvimgproc#TransformImage",
         "palettes/ThresholdPalette.qml" : "qml/lcvimgproc#Threshold",
-        "palettes/BlendPalette.json" : "qml/lcvimgproc#Blend"
+        "palettes/BlendPalette.json" : "qml/lcvimgproc#Blend",
+        "palettes/PadPalette.json" : "qml/lcvimgproc#Pad"
     }
 }
