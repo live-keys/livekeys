@@ -113,13 +113,19 @@ Item{
                 w.paneDropArea.visible = true
             }
 
-            paneDropArea.currentPane = pane
+            if (typeof pane === 'function') {
+                paneDropArea.paneFactory = pane
+            } else {
+                paneDropArea.currentPane = pane
+            }
+
             paneDropArea.model = mainSplit.createPositioningModel()
             paneDropArea.visible = true
         }
 
         function __dragFinished(pane){
             paneDropArea.currentPane = null
+            paneDropArea.paneFactory = null
             paneDropArea.model = []
             for ( var i = 0; i < openWindows.length; ++i ){
                 var w = openWindows[i]
@@ -696,8 +702,14 @@ Item{
             if ( data.pane === currentPane )
                 return
 
-            var clone = currentPane
-            root.panes.removePane(currentPane)
+            var clone = null
+            if ( currentPane ){
+                clone = currentPane
+                root.panes.removePane(currentPane)
+            } else {
+                clone = paneFactory()
+            }
+
 
             var parentSplitter = data.pane.parentSplitter
             var paneIndex = data.pane.parentSplitterIndex()
