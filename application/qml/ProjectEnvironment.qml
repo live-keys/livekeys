@@ -221,11 +221,7 @@ Item{
         function openProjectDirViaDialog(callback){
             root.wizards.checkUnsavedFiles(function(){
                 lk.layers.window.dialogs.openDir({}, function(url){
-                    project.closeProject()
-                    project.openProject(url)
-                    var path = Fs.UrlInfo.toLocalFile(url)
-                    if ( callback )
-                        callback(path)
+                    root.wizards.openProject(url, callback)
     //                lk.openProjectInstance(url)
                 })
             })
@@ -262,6 +258,8 @@ Item{
                             },
                             function(file){
                                 project.setActive(file.path)
+                                if ( callback )
+                                    callback(path)
                             }
                         )
                         mbox.close()
@@ -275,12 +273,10 @@ Item{
                         returnPressed : createFile
                     })
 
+                } else {
+                    if ( callback )
+                        callback(path)
                 }
-
-
-
-                if ( callback )
-                    callback(path)
     //                lk.openProjectInstance(url)
             })
         }
