@@ -84,6 +84,7 @@ WorkspaceExtension{
                                             'import QtQuick 2.3\n' +
                                             'import base 1.0\n' +
                                             'import lcvcore 1.0\n' +
+                                            'import lcvimgproc 1.0\n' +
                                             'import lcvphoto 1.0\n' +
                                             '\n' +
                                             'StreamFilter{\n' +

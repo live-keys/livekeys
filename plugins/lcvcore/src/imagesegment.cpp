@@ -101,7 +101,7 @@ void ImageSegment::deserialize(Track *track, QQmlEngine *engine, const MLNode &n
 void ImageSegment::assignTrack(Track *track){
     VideoTrack* nt = qobject_cast<VideoTrack*>(track);
     if ( !nt ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "NumberAnimationSegment needs NumberTrack at '" + track->name().toStdString() + "'.", Exception::toCode("~Track") );
+        Exception e = CREATE_EXCEPTION(lv::Exception, "ImageSegment needs NumberTrack at '" + track->name().toStdString() + "'.", Exception::toCode("~Track") );
         lv::ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
@@ -203,6 +203,11 @@ void ImageSegment::createFilters(){
 
 void ImageSegment::addWatcher(){
     HookContainer* hooks = qobject_cast<HookContainer*>(m_videoTrack->timelineContext()->contextProperty("hooks").value<QObject*>());
+    if ( !hooks ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "ImageSegment cannot access the hook container.", Exception::toCode("~hooks"));
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
     ViewEngine* ve = ViewContext::instance().engine();
 
     QmlWatcher* watcher = new QmlWatcher(m_filtersObject);

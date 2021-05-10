@@ -1,0 +1,9 @@
+{
+    "type": "qml/lcvimgproc#TranformImage",
+    "palettes" : ["TransformPalette"],
+    "properties" : [
+        ["input"],
+        ["result", "", "true"]
+    ]
+}
+

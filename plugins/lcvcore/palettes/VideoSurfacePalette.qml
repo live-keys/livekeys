@@ -27,7 +27,7 @@ import workspace 1.0 as Workspace
 CodePalette{
     id: palette
 
-    type : "qml/lcvcore#Mat"
+    type : "qml/lcvcore#VideoSurfaceView"
 
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -45,10 +45,20 @@ CodePalette{
         width: 500
         height: 300
 
-        property QtObject image: null
-        onImageChanged: {
-            imageView.image = image
-            imageView.autoScale()
+        property QtObject videoSurfaceView: null
+        onVideoSurfaceViewChanged: {
+            videoSurface = Qt.binding(function(){ return videoSurfaceView.timeline.properties.videoSurface })
+            imageView.image = Qt.binding(function(){ return videoSurfaceView.image })
+        }
+
+        property var videoSurface: null
+        onVideoSurfaceChanged: {
+            if ( videoSurface ){
+                var scaleW = (imageView.maxWidth - 10) / videoSurface.imageWidth
+                var scaleH = (imageView.maxHeight - 10) / videoSurface.imageHeight
+                var scale = scaleW > scaleH ? scaleH : scaleW
+                imageView.setScale(scale)
+            }
         }
 
         Rectangle{
@@ -146,9 +156,9 @@ CodePalette{
     }
 
     onInit: {
-        paletteItem.image = value
+        paletteItem.videoSurfaceView = value
     }
     onValueFromBindingChanged: {
-        paletteItem.image = value
+        paletteItem.videoSurfaceView = value
     }
 }
