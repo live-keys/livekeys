@@ -95,16 +95,6 @@ public:
         ComponentResult& operator=(const ComponentResult&);
     };
 
-    /** Callback function type to be run after the engine finishes compiling */
-    typedef void(*CompileHook)(const QString&, const QUrl&, QObject*, void*);
-
-private:
-    class CompileHookEntry{
-    public:
-        CompileHook m_hook;
-        void*       m_userData;
-    };
-
 public:
     explicit ViewEngine(QQmlEngine* engine, QObject *parent = nullptr);
     ~ViewEngine();
@@ -128,9 +118,6 @@ public:
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
     void removeErrorHandler(QObject* object);
-
-    void addCompileHook(CompileHook ch, void* userData);
-    void removeCompileHook(CompileHook ch, void* userData);
 
     template<typename T> MetaInfo::Ptr registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
@@ -225,8 +212,6 @@ private:
     IncubationController* m_incubationController;
     QJSValue              m_errorType;
     PackageGraph*         m_packageGraph;
-
-    QLinkedList<CompileHookEntry> m_compileHooks;
 
     QList<QQmlError>              m_lastErrors;
     int                           m_errorCounter;
