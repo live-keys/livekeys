@@ -22,7 +22,8 @@ QmlPropertyWatcher::~QmlPropertyWatcher(){
 }
 
 void QmlPropertyWatcher::propertyChanged() const{
-    m_propertyChange(*this);
+    if ( m_propertyChange )
+        m_propertyChange(*this);
 }
 
 }// namespace
