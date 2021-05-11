@@ -1302,7 +1302,7 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
         if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
             QObject* creationObj = bc->object();
             if ( creationObj )
-                creationCtx = qmlContext(creationObj);
+                creationCtx = new QQmlContext(qmlContext(creationObj));
         }
 
         QObject* result = QmlEditFragment::createObject(
