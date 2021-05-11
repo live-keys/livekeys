@@ -296,7 +296,7 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
 
     try{
         timeline->m_contentLength = node["length"].asInt();
-        timeline->m_fps = node["fps"].asFloat();
+        timeline->setFps(node["fps"].asFloat());
 
         TimelineProperties* properties = new TimelineProperties(timeline);
         timeline->m_properties = properties;
