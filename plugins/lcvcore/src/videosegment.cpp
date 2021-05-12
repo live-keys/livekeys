@@ -25,6 +25,9 @@ VideoSegment::VideoSegment(QObject *parent)
     : Segment(parent)
     , m_videoTrack(nullptr)
     , m_capture(new cv::VideoCapture)
+    , m_videoStart(0)
+    , m_videoPosition(-1)
+    , m_videoLength(0)
     , m_filtersObject(nullptr)
     , m_filtersPosition(-1)
 {
@@ -39,7 +42,10 @@ void VideoSegment::openFile(){
         return;
 
     setLabel(m_file.mid(m_file.lastIndexOf('/') + 1));
-    m_capture->open(m_file.toStdString());
+    if ( m_capture->open(m_file.toStdString()) ){
+        m_videoLength = static_cast<qint64>(m_capture->get(cv::CAP_PROP_FRAME_COUNT));
+        updateStrechLimits();
+    }
 }
 
 void VideoSegment::serialize(QQmlEngine *engine, MLNode &node) const{
@@ -111,22 +117,7 @@ void VideoSegment::cursorEnter(qint64 pos){
     if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
-    if ( pos == 0 ){
-        if ( m_capture->grab() ){
-            cv::Mat* frame = new cv::Mat;
-            m_capture->retrieve(*frame);
-            QMat* mat = new QMat(frame);
-            frameCaptured(mat, position() + pos);
-        }
-    } else {
-        m_capture->set(cv::CAP_PROP_POS_FRAMES, pos);
-        if ( m_capture->grab() ){
-            cv::Mat* frame = new cv::Mat;
-            m_capture->retrieve(*frame);
-            QMat* mat = new QMat(frame);
-            frameCaptured(mat, position() + pos);
-        }
-    }
+    captureFrame(pos);
 }
 
 void VideoSegment::cursorExit(qint64){
@@ -138,26 +129,14 @@ void VideoSegment::cursorNext(qint64 pos){
     if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
-    if ( m_capture->grab() ){
-        cv::Mat* frame = new cv::Mat;
-        m_capture->retrieve(*frame);
-        QMat* mat = new QMat(frame);
-        frameCaptured(mat, position() + pos);
-    }
+    captureFrame(pos);
 }
 
 void VideoSegment::cursorMove(qint64 pos){
     if ( !m_videoTrack || !m_videoTrack->surface() )
         return;
 
-    m_capture->set(cv::CAP_PROP_POS_FRAMES, pos);
-    cv::Mat frame;
-    if ( m_capture->grab() ){
-        cv::Mat* frame = new cv::Mat;
-        m_capture->retrieve(*frame);
-        QMat* mat = new QMat(frame);
-        frameCaptured(mat, position() + pos);
-    }
+    captureFrame(pos);
 }
 
 void VideoSegment::filtersStreamHandler(QObject *that, const QJSValue &val){
@@ -182,6 +161,46 @@ void VideoSegment::streamUpdate(const QJSValue &val){
 
 }
 
+void VideoSegment::stretchLeftTo(unsigned int pos){
+    m_videoStart += static_cast<qint64>(pos) - static_cast<qint64>(position());
+    Segment::stretchLeftTo(pos);
+    updateStrechLimits();
+}
+
+void VideoSegment::stretchRightTo(unsigned int pos){
+    Segment::stretchRightTo(pos);
+    updateStrechLimits();
+}
+
+void VideoSegment::captureFrame(qint64 segmentPosition){
+    qint64 nextPosition = segmentToVideoPosition(segmentPosition);
+
+    if ( nextPosition == m_videoPosition + 1 ){
+        if ( m_capture->grab() ){
+            m_videoPosition = nextPosition;
+
+            cv::Mat* frame = new cv::Mat;
+            m_capture->retrieve(*frame);
+            QMat* mat = new QMat(frame);
+            frameCaptured(mat, position() + segmentPosition);
+        }
+    } else {
+        m_capture->set(cv::CAP_PROP_POS_FRAMES, nextPosition);
+        if ( m_capture->grab() ){
+            m_videoPosition = nextPosition;
+
+            cv::Mat* frame = new cv::Mat;
+            m_capture->retrieve(*frame);
+            QMat* mat = new QMat(frame);
+            frameCaptured(mat, position() + segmentPosition);
+        }
+    }
+}
+
+qint64 VideoSegment::segmentToVideoPosition(qint64 segmentPosition){
+    return segmentPosition + m_videoStart;
+}
+
 void VideoSegment::frameCaptured(QMat *frame, qint64 position){
     if ( m_filtersObject ){
         setIsProcessing(true);
@@ -190,6 +209,11 @@ void VideoSegment::frameCaptured(QMat *frame, qint64 position){
     } else {
         m_videoTrack->surface()->updateSurface(position, frame);
     }
+}
+
+void VideoSegment::updateStrechLimits(){
+    setMaxStretchLeft(m_videoStart);
+    setMaxStretchRight(m_videoLength - m_videoStart);
 }
 
 void VideoSegment::createFilters(){
