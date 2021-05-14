@@ -248,7 +248,7 @@ Item{
                 project.openProject(url)
 
                 if ( !project.active ){
-                    var message = 'Project has no file to run. Would you like to create one?'
+                    var message = 'Folder doesn\'t have a main project file. Would you like to create one?'
                     var createFile = function(mbox){
                         root.wizards.addFile(
                             project.dir(),
