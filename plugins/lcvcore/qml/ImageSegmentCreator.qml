@@ -7,7 +7,9 @@ import workspace 1.0 as Workspace
 Rectangle{
     width: 300
     height: 80
-    color: '#03070a'
+    color: '#141b20'
+    border.width: 1
+    border.color: '#232b30'
 
     signal segmentCreated(Segment segment)
     signal cancelled()
@@ -45,14 +47,19 @@ Rectangle{
         }
     }
 
-
-    TextButton{
+    Workspace.TextButton{
         anchors.right: parent.right
         anchors.rightMargin: 10
         radius: 5
         width: 30
         height: 30
         text: 'X'
+        style:  Workspace.TextButtonStyle{
+            backgroundColor: '#3f444d'
+            backgroundHoverColor: Qt.lighter('#3f444d', 1.2)
+            borderColor: '#575b63'
+        }
+
         onClicked: {
             parent.cancelled()
         }

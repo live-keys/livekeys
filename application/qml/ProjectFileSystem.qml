@@ -35,30 +35,13 @@ Pane{
 
     property Theme currentTheme : lk.layers.workspace.themes.current
 
-    property Item addEntryOverlay : ProjectAddEntry{
-        onAccepted: {
-            if ( isFile ){
-                var f = project.fileModel.addFile(entry, name)
-                lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
-            } else {
-                project.fileModel.addDirectory(entry, name)
-            }
-        }
-    }
-
-    function addEntry(parentEntry, isFile){
-        root.addEntryOverlay.entry = parentEntry
-        root.addEntryOverlay.isFile = isFile
-
-        lk.layers.window.dialogs.overlayBox(root.addEntryOverlay)
-    }
     function openEntry(entry, monitor){
-        lk.layers.workspace.project.openFile(
+        lk.layers.workspace.wizards.openFile(
             entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        lk.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
+        lk.layers.workspace.wizards.openFile(entry.path, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''
@@ -151,6 +134,10 @@ Pane{
 
     function renameEntry(entry, newName){
         project.fileModel.renameEntry(entry, newName)
+    }
+
+    property QtObject delegateOperations: QtObject{
+
     }
 
     Rectangle{
@@ -405,13 +392,19 @@ Pane{
                         if( mouse.button === Qt.RightButton ){
                             if ( styleData.value.isFile ){
                                 view.setContextDelegate(entryDelegate)
-                                fileContextMenu.popup()
+                                lk.layers.workspace.panes.activateItem(entryDelegate, root)
+                                lk.layers.workspace.panes.openContextMenu(entryDelegate, root)
+//                                fileContextMenu.popup()
                             } else if ( styleData.value.path === project.rootPath ){
                                 view.setContextDelegate(entryDelegate)
-                                projectContextMenu.popup()
+                                lk.layers.workspace.panes.activateItem(entryDelegate, root)
+                                lk.layers.workspace.panes.openContextMenu(entryDelegate, root)
+//                                projectContextMenu.popup()
                             } else {
                                 view.setContextDelegate(entryDelegate)
-                                dirContextMenu.popup()
+                                lk.layers.workspace.panes.activateItem(entryDelegate, root)
+                                lk.layers.workspace.panes.openContextMenu(entryDelegate, root)
+//                                dirContextMenu.popup()
                             }
                         } else if ( mouse.button === Qt.LeftButton ) {
                             if ( entryDelegate.editMode){
@@ -482,132 +475,6 @@ Pane{
             target: project.fileModel
             function onProjectNodeChanged(index){
                 view.expand(index)
-            }
-        }
-
-        Menu {
-            id: fileContextMenu
-
-            style: ContextMenuStyle{}
-
-            MenuItem{
-                text: "Edit File"
-                onTriggered: {
-                    view.contextDelegate.openFile()
-                }
-            }
-            MenuItem{
-                text: "Monitor file"
-                onTriggered: {
-                    view.contextDelegate.monitorFile()
-                }
-            }
-
-            MenuItem{
-                text: "Set As Active"
-                onTriggered: {
-                    view.contextDelegate.setActive()
-                }
-            }
-            MenuItem{
-                text: "Add As Runnable"
-                onTriggered: {
-                    view.contextDelegate.addRunnable()
-                }
-            }
-            MenuItem {
-                text: "Rename"
-                onTriggered: {
-                    view.contextDelegate.editMode = true
-                    view.contextDelegate.focusText()
-                }
-            }
-            MenuItem {
-                text: "Delete"
-                onTriggered: {
-                    root.removeEntry(view.contextDelegate.entry(), false)
-                }
-            }
-        }
-
-        Menu {
-            id: dirContextMenu
-            style: ContextMenuStyle{}
-            MenuItem{
-                text: "Show in Explorer"
-                onTriggered: {
-                    view.contextDelegate.openExternally()
-                }
-            }
-            MenuItem {
-                text: "Rename"
-                onTriggered: {
-                    view.contextDelegate.editMode = true
-                    view.contextDelegate.focusText()
-                }
-            }
-            MenuItem{
-                text: "Delete"
-                onTriggered: {
-                    root.removeEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add File"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add Directory"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), false)
-                }
-            }
-        }
-
-        Menu {
-            id: projectContextMenu
-            style: ContextMenuStyle{}
-            MenuItem{
-                text: "Show in Explorer"
-                onTriggered: {
-                    view.contextDelegate.openExternally()
-                }
-            }
-            MenuItem{
-                text: "Close Project"
-                onTriggered: {
-                    lk.layers.workspace.commands.execute('window.workspace.project.close')
-                }
-            }
-            MenuItem{
-                text: "New Document"
-                onTriggered: {
-                    var fe = project.fileModel.addTemporaryFile()
-                    lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
-                }
-            }
-
-            MenuItem{
-                text: "New Runnable"
-                onTriggered: {
-                    var fe = project.fileModel.addTemporaryFile()
-                    lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
-                    project.openRunnable(fe.path, [fe.path])
-                }
-            }
-            MenuItem {
-                text: "Add File"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), true)
-                }
-            }
-            MenuItem {
-                text: "Add Directory"
-                onTriggered: {
-                    root.addEntry(view.contextDelegate.entry(), false)
-                }
             }
         }
     }

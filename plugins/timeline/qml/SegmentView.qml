@@ -27,6 +27,11 @@ Loader{
         if ( root.parent )
             root.parent.segmentDoubleClicked(segment)
     }
+    signal segmentRightClicked(Item delegate, Segment segment)
+    onSegmentRightClicked: {
+        if ( root.parent )
+            root.parent.segmentRightClicked(delegate, segment)
+    }
 
     sourceComponent: segment
         ? (segment instanceof Keyframe) ? keyframe : resizableSegment
@@ -69,6 +74,9 @@ Loader{
         Item{
             id: rootItem
             anchors.fill: parent
+            objectName: "timelineResizableSegment"
+
+            property var currentSegment: segment
 
             Keys.onPressed: {
                 if (event.key === Qt.Key_Delete || event.key === Qt.Key_Backspace) {
@@ -136,10 +144,15 @@ Loader{
                     drag.axis: Drag.XAndYAxis
                     drag.minimumX: 0
                     drag.maximumX: segment ? segment.segmentModel().contentWidth - root.width : 0
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
 
                     onPressed: {
-                        rootItem.forceActiveFocus()
-                        root.__segmentFocused(segment)
+                        if ( mouse.button === Qt.LeftButton ){
+                            rootItem.forceActiveFocus()
+                            root.__segmentFocused(segment)
+                        } else if ( mouse.button === Qt.RightButton ){
+                            root.segmentRightClicked(rootItem, segment)
+                        }
                     }
                     onDoubleClicked: {
                         root.segmentDoubleClicked(segment)

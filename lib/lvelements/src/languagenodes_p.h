@@ -159,6 +159,12 @@ public:
     ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : JsBlockNode(node, typeString){}
 };
 
+class ArrowFunctionNode: public JsBlockNode {
+    friend class BaseNode;
+public:
+    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : JsBlockNode(node, typeString){}
+};
+
 class ProgramNode : public JsBlockNode {
     friend class BaseNode;
 public:

@@ -303,6 +303,7 @@ Rectangle{
             NewTextEdit {
                 id : textEdit
 
+
                 anchors.left: parent.left
                 anchors.leftMargin: 2
                 viewport: Qt.rect(flick.flickableItem.contentX,flick.flickableItem.contentY,flick.width,flick.height)
@@ -319,6 +320,7 @@ Rectangle{
                     }
                 }
 
+                function getEditor(){ return root }
 
                 property int lastLength: 0
 

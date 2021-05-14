@@ -19,6 +19,7 @@ Qan.NodeItem{
     property string label: ''
     property var properties: []
     property var propertiesOpened: []
+    property var outPort: null
     property alias propertyContainer: propertyContainer
     property alias paletteContainer: paletteContainer
 

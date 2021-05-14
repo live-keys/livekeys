@@ -24,7 +24,7 @@
 namespace lv{
 
 namespace{
-    static const int WAIT_NOTRACK = -1;
+    static const int INDEX_NOTRACK = -1;
 }
 
 Timeline::Timeline(QObject *parent)
@@ -35,7 +35,8 @@ Timeline::Timeline(QObject *parent)
     , m_loop(false)
     , m_isRecording(false)
     , m_isRunning(false)
-    , m_waitingForTrackAt(WAIT_NOTRACK)
+    , m_processingTrackAt(INDEX_NOTRACK)
+    , m_waitingForTrackAt(INDEX_NOTRACK)
     , m_isComponentComplete(false)
     , m_config(new TimelineConfig(this))
     , m_trackList(new TrackListModel())
@@ -148,7 +149,7 @@ QString Timeline::positionToLabel(qint64 frameNumber, bool shortZero){
 }
 
 void Timeline::__tick(){
-    if ( m_waitingForTrackAt != WAIT_NOTRACK ){
+    if ( m_waitingForTrackAt != INDEX_NOTRACK ){
         m_timer.stop();
 
     } else {
@@ -162,7 +163,7 @@ void Timeline::__tick(){
 }
 
 void Timeline::__trackCursorProcessed(Track* track, qint64 position){
-    if ( m_waitingForTrackAt == WAIT_NOTRACK )
+    if ( m_waitingForTrackAt == INDEX_NOTRACK )
         return;
 
     if ( position != m_waitingForTrackAt ){
@@ -200,7 +201,7 @@ void Timeline::__trackCursorProcessed(Track* track, qint64 position){
         --i;
     }
 
-    m_waitingForTrackAt = WAIT_NOTRACK;
+    m_waitingForTrackAt = INDEX_NOTRACK;
 
     for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
         m_trackList->trackAt(i)->cursorPositionProcessed(position);
@@ -210,6 +211,8 @@ void Timeline::__trackCursorProcessed(Track* track, qint64 position){
         __tick();
         m_timer.start();
     }
+
+    m_processingTrackAt = INDEX_NOTRACK;
 
     emit cursorPositionProcessed(position);
 }
@@ -293,7 +296,7 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
 
     try{
         timeline->m_contentLength = node["length"].asInt();
-        timeline->m_fps = node["fps"].asFloat();
+        timeline->setFps(node["fps"].asFloat());
 
         TimelineProperties* properties = new TimelineProperties(timeline);
         timeline->m_properties = properties;
@@ -382,7 +385,9 @@ void Timeline::signalTrackNameChanged(Track *track){
 }
 
 void Timeline::refreshPosition(){
-    updateCursorPosition(m_cursorPosition);
+    // Make sure no tracks are being processed to avoid an infinite loop
+    if ( m_processingTrackAt == INDEX_NOTRACK )
+        updateCursorPosition(m_cursorPosition);
 }
 
 void Timeline::load(){
@@ -452,6 +457,8 @@ void Timeline::updateCursorPosition(qint64 position){
     if ( m_waitingForTrackAt >= 0 )
         return;
 
+    m_processingTrackAt = m_cursorPosition;
+
     int i = m_trackList->totalTracks() - 1;
     while ( i >= 0 ){
         Track* tr = m_trackList->trackAt(i);
@@ -470,6 +477,8 @@ void Timeline::updateCursorPosition(qint64 position){
         tr->cursorPositionProcessed(position);
         --i;
     }
+
+    m_processingTrackAt = INDEX_NOTRACK;
 
     emit cursorPositionProcessed(position);
 }

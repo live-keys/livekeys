@@ -188,6 +188,7 @@ private:
 class LV_EDITOR_EXPORT ProjectDocument : public Document{
 
     Q_OBJECT
+    Q_ENUMS(EditingState)
 
 public:
     /** Iterator through sections */
@@ -268,8 +269,9 @@ public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
 
     virtual void readContent() override;
+    virtual int contentLength() override;
     QString substring(int from, int length) const;
-    void insert(int from, int length, const QString& text);
+    void insert(int from, int length, const QString& text, int editingState = ProjectDocument::Assisted);
     int offsetAtLine(int line) const;
 
 signals:

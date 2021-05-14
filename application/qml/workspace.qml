@@ -113,13 +113,19 @@ Item{
                 w.paneDropArea.visible = true
             }
 
-            paneDropArea.currentPane = pane
+            if (typeof pane === 'function') {
+                paneDropArea.paneFactory = pane
+            } else {
+                paneDropArea.currentPane = pane
+            }
+
             paneDropArea.model = mainSplit.createPositioningModel()
             paneDropArea.visible = true
         }
 
         function __dragFinished(pane){
             paneDropArea.currentPane = null
+            paneDropArea.paneFactory = null
             paneDropArea.model = []
             for ( var i = 0; i < openWindows.length; ++i ){
                 var w = openWindows[i]
@@ -388,9 +394,16 @@ Item{
         runSpace: root.runSpace
     }
 
-    property color paneSplitterColor: "transparent"
+    property Component messageDialogButton: Workspace.TextButton{
+        height: 28
+        width: 100
+        style: lk.layers.workspace.themes.current.formButtonStyle
+        onClicked: parent.clicked()
+    }
 
+    property color paneSplitterColor: "transparent"
     property bool documentsReloaded : false
+
     Connections{
         target: lk.layers.window
         function onIsActiveChanged(isActive){
@@ -411,6 +424,7 @@ Item{
 
     Connections{
         target: lk
+
         function onLayerReady(layer){
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
@@ -437,6 +451,14 @@ Item{
                 removePaneBox.style.iconColorAlternate = layer.themes.current.colorScheme.topIconColorAlternate
                 paneSplitterColor = layer.themes.current.paneSplitterColor
                 contextMenu.style = layer.themes.current.popupMenuStyle
+
+                var messageDialogStyle = lk.layers.window.dialogs.messageStyle
+                messageDialogStyle.box.background = layer.themes.current.colorScheme.middleground
+                messageDialogStyle.box.borderColor = layer.themes.current.colorScheme.middlegroundBorder
+                messageDialogStyle.box.borderWidth = 1
+                messageDialogStyle.box.textColor = layer.themes.current.colorScheme.foreground
+                messageDialogStyle.box.font = layer.themes.current.inputLabelStyle.textStyle.font
+                messageDialogStyle.button = root.messageDialogButton
             }
         }
     }
@@ -680,8 +702,14 @@ Item{
             if ( data.pane === currentPane )
                 return
 
-            var clone = currentPane
-            root.panes.removePane(currentPane)
+            var clone = null
+            if ( currentPane ){
+                clone = currentPane
+                root.panes.removePane(currentPane)
+            } else {
+                clone = paneFactory()
+            }
+
 
             var parentSplitter = data.pane.parentSplitter
             var paneIndex = data.pane.parentSplitterIndex()

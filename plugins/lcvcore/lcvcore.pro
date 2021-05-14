@@ -75,6 +75,8 @@ DISTFILES += \
     palettes/VideoFilePropertiesPalette.json \
     palettes/ImageViewPalette.json \
     palettes/VideoPlayerPalette.qml \
+    palettes/VideoSurfacePalette.qml \
+    palettes/VideoSurfacePropertiesPalette.json \
     qml/BlankImage.qml \
     qml/BrushTool.qml \
     qml/ColorHistogramView.qml \

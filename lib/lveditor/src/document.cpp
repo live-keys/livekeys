@@ -48,6 +48,13 @@ void Document::readContent(){
 }
 
 /**
+ * \brief Returns the content legnth of this document
+ */
+int Document::contentLength(){
+    return m_content.length();
+}
+
+/**
  * \brief Save modified document to its respective file
  */
 bool Document::save(){

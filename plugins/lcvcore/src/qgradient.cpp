@@ -3,29 +3,44 @@
 #include "qwritablemat.h"
 #include "opencv2/core.hpp"
 #include <opencv2/core/matx.hpp>
+#include <QVariant>
 
 QGradient::QGradient(QObject *parent) : QObject(parent)
 {
 
 }
 
-void QGradient::draw(QWritableMat* result, QPointF p1, QPointF p2, QColor c1, QColor c2)
+void QGradient::draw(QWritableMat *result, QPointF p1, QPointF p2, QJSValue list)
 {
     if (p1 == p2) return;
 
     auto mat = result->internal();
     if (mat.rows == 0 || mat.cols == 0) return;
 
+    QVariantList vList = list.toVariant().toList();
+    if (vList.empty()) return;
 
-    start = p1; end = p2;
-    startColor = c1; endColor = c2;
+    double prev = -1.0;
+    colorList.clear();
+    for (int i = 0; i < vList.length(); ++i)
+    {
+        auto elem = vList.at(i);
+        QVariantList pvList = elem.toList();
+        if (pvList.empty() || pvList.length() != 2) return;
 
-    calculateLineParams();
+        double t = pvList.at(0).toDouble();
+        if (t < prev || qFuzzyCompare(t, prev)) return; // the array should be increasing
+        prev = t;
+        QColor c = pvList.at(1).value<QColor>();
 
-    linearSC = linearFromRGB(startColor);
-    linearEC = linearFromRGB(endColor);
-    brightness1 = pow(linearSC.x()+linearSC.y()+linearSC.z(), Gamma);
-    brightness2 = pow(linearEC.x()+linearEC.y()+linearEC.z(), Gamma);
+        colorList.push_back(std::make_pair(t, c));
+    }
+
+    if (colorList.size() < 2) return;
+    if (!qFuzzyCompare(colorList[0].first, 0.0)) return; // the first array element should be 0
+    if (!qFuzzyCompare(colorList[colorList.size() - 1].first, 1.0)) return; // the last array element should be 1
+
+    calculateLineParams(p2, p1);
 
     for (int y = 0; y < mat.rows; ++y)
     for (int x = 0; x < mat.cols; ++x)
@@ -42,7 +57,7 @@ void QGradient::draw(QWritableMat* result, QPointF p1, QPointF p2, QColor c1, QC
     }
 }
 
-void QGradient::calculateLineParams()
+void QGradient::calculateLineParams(QPointF start, QPointF end)
 {
 
     A = end.x() - start.x();
@@ -103,10 +118,26 @@ qreal QGradient::weightedValue(qreal v1, qreal v2, qreal t)
 
 QColor QGradient::weightedColor(qreal t)
 {
-    qreal brightness = pow(weightedValue(brightness1, brightness2, t), 1/Gamma);
-    qreal c1 = weightedValue(linearSC.x(), linearEC.x(), t);
-    qreal c2 = weightedValue(linearSC.y(), linearEC.y(), t);
-    qreal c3 = weightedValue(linearSC.z(), linearEC.z(), t);
+    int i = 0;
+    for (; i < colorList.size() - 1; ++i)
+        if (colorList[i].first <= t && t <= colorList[i+1].first) break;
+
+    QColor startColor = colorList[i].second;
+    QColor endColor = colorList[i+1].second;
+    double t1 = colorList[i].first;
+    double t2 = colorList[i+1].first;
+
+    QVector3D linearSC = linearFromRGB(startColor);
+    QVector3D linearEC = linearFromRGB(endColor);
+    qreal brightness1 = pow(linearSC.x()+linearSC.y()+linearSC.z(), Gamma);
+    qreal brightness2 = pow(linearEC.x()+linearEC.y()+linearEC.z(), Gamma);
+
+    qreal scaledT = (t-t2)/(t1 - t2);
+
+    qreal brightness = pow(weightedValue(brightness1, brightness2, scaledT), 1/Gamma);
+    qreal c1 = weightedValue(linearSC.x(), linearEC.x(), scaledT);
+    qreal c2 = weightedValue(linearSC.y(), linearEC.y(), scaledT);
+    qreal c3 = weightedValue(linearSC.z(), linearEC.z(), scaledT);
 
     qreal total = c1 + c2 + c3;
     if (total != 0){
