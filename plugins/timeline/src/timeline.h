@@ -125,6 +125,7 @@ private:
     bool   m_loop;
     bool   m_isRecording;
     bool   m_isRunning;
+    qint64 m_processingTrackAt;
     qint64 m_waitingForTrackAt;
     bool   m_isComponentComplete;
 

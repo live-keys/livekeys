@@ -31,9 +31,6 @@ In the left part of the header, you will find the buttons to manage your project
  * [Change settings]({livekeys-hover:livekeys://open/resources/MenuIconHighlight.qml#settings-view;livekeys://open/resources/MenuRemoveHighlight.qml#settings-view}). View and edit the settings file.
  * [Manage licenses]({livekeys-hover:livekeys://open/resources/MenuIconHighlight.qml#license-view;livekeys://open/resources/MenuRemoveHighlight.qml#license-view}). Manage licenses for different plugins.
 
-The right part of the header shows the [active file]({livekeys-hover:livekeys://open/resources/MenuIconHighlight.qml#active-file;livekeys://open/resources/MenuRemoveHighlight.qml#active-file}) (or main file) used by the project. A project can have more than one file,
-and users are free to organize the project structure depending on what they need. We will cover these in detail later.
-
 Below the header you will find the [pane area]({livekeys-hover:livekeys://open/resources/MenuIconHighlight.qml#pane-area;livekeys://open/resources/MenuRemoveHighlight.qml#pane-area}), a customizable workspace where you can open, close and manage different types of
 views depending on what you are looking to achieve.
 

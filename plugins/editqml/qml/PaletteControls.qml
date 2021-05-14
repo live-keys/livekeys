@@ -136,7 +136,8 @@ QtObject{
             newPaletteBox.name = palette.name
             newPaletteBox.type = palette.type
 
-            paletteBoxParent.palettesOpened.push(palette.name)
+            if ( paletteBoxParent.palettesOpened )
+                paletteBoxParent.palettesOpened.push(palette.name)
             newPaletteBox.documentHandler = editor.documentHandler
             newPaletteBox.cursorRectangle = editor.getCursorRectangle()
             newPaletteBox.editorPosition = editor.cursorWindowCoords()

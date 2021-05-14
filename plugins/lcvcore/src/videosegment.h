@@ -51,19 +51,31 @@ public slots:
     void setFile(const QString& file);
     void setFilters(const QString& filters);
 
+    virtual void stretchLeftTo(unsigned int position) override;
+    virtual void stretchRightTo(unsigned int position) override;
+
 signals:
     void fileChanged();
     void filtersChanged();
     void filtersObjectChanged();
 
 private:
+    qint64 segmentToVideoPosition(qint64 segmentPosition);
+
+    void captureFrame(qint64 segmentPosition);
     void frameCaptured(QMat* frame, qint64 position);
+
+    void updateStrechLimits();
+
     void createFilters();
     void addWatcher();
 
     VideoTrack*       m_videoTrack;
     QString           m_file;
     cv::VideoCapture* m_capture;
+    qint64            m_videoStart;
+    qint64            m_videoPosition;
+    qint64            m_videoLength;
     QString           m_filters;
     QmlStreamFilter*  m_filtersObject;
     qint64            m_filtersPosition;

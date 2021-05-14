@@ -38,11 +38,29 @@ Rectangle{
     Keys.onEscapePressed: root.escapePressed(root)
 
     anchors.centerIn: parent
-    color: "#fff"
+    color: style.background
+    border.width: style.borderWidth
+    border.color: style.borderColor
+    radius: style.radius
+
     width: 400
     height: messageLabel.height < 100 ? messageLabel.height + 100 : 200
     focus: true
     opacity: root.visible ? 1 : 0
+
+    property QtObject style: QtObject{
+        property color background: "#02070b"
+        property color borderColor: "#0c151c"
+        property int borderWidth: 1
+        property int radius: 5
+        property color textColor: "#fff"
+        property font font : Qt.font({
+            family: 'Open Sans, sans-serif',
+            weight: Font.Normal,
+            italic: false,
+            pixelSize: 12
+        })
+    }
 
     Behavior on opacity{ NumberAnimation{ duration: 250} }
 
@@ -87,10 +105,8 @@ Rectangle{
 
             wrapMode: Text.WordWrap
 
-            color: "#ccc"
-            font.pixelSize: 12
-            font.family: "Open Sans, sans-serif"
-            font.weight: Font.Light
+            color: root.style.textColor
+            font: root.style.font
         }
     }
 

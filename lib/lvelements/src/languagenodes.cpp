@@ -110,6 +110,11 @@ void BaseNode::moveToDeclarations(BaseNode *parent, IdentifierNode *idNode)
         if (jsbn)
         {
             jsbn->m_declarations.push_back(idNode);
+
+            if (jsbn->typeString() == "StatementBlock"){
+                auto sb = dynamic_cast<StatementBlockNode*>(jsbn);
+                sb->m_localVariables.push_back(idNode);
+            }
             break;
         }
         p = p->parent();

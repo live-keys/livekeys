@@ -421,6 +421,11 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "workspace"},
                      {"enabled", true},
                      {"component", "WorkspaceControlsExtension.qml"}
+                 },
+                 {
+                     {"package", "lcvcore"},
+                     {"enabled", true},
+                     {"component", "EditCvExtension.qml"}
                  }/*,
                  {
                      {"package", "editlv"},

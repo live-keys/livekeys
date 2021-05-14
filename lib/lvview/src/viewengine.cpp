@@ -33,7 +33,6 @@
 #include "windowlayer.h"
 #include "qmlstream.h"
 #include "qmlwritablestream.h"
-#include "qmlstreamiterator.h"
 #include "qmlclipboard.h"
 
 #include "private/qqmlcontext_p.h"
@@ -201,25 +200,6 @@ void ViewEngine::removeErrorHandler(QObject *object){
     m_errorHandlers.remove(object);
 }
 
-/** Added after the compilation is finished, to be run as a callback */
-void ViewEngine::addCompileHook(ViewEngine::CompileHook ch, void *userData){
-    CompileHookEntry che;
-    che.m_hook = ch;
-    che.m_userData = userData;
-
-    m_compileHooks.append(che);
-}
-
-/** Removes the given compile hook */
-void ViewEngine::removeCompileHook(ViewEngine::CompileHook ch, void *userData){
-    for ( auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it ){
-        if ( it->m_hook == ch && it->m_userData == userData ){
-            m_compileHooks.erase(it);
-            return;
-        }
-    }
-}
-
 /** Returns the type info for a given meta-object*/
 MetaInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
     auto it = m_types.find(key);
@@ -287,7 +267,6 @@ void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::QmlClipboard>(          uri, 1, 0, "Clipboard");
     qmlRegisterType<lv::QmlStream>(             uri, 1, 0, "Stream");
     qmlRegisterType<lv::QmlWritableStream>(     uri, 1, 0, "WritableStream");
-    qmlRegisterType<lv::QmlStreamIterator>(     uri, 1, 0, "StreamIterator");
 
     qmlRegisterUncreatableType<lv::Shared>(
         uri, 1, 0, "Shared", "Shared is of abstract type.");
@@ -411,9 +390,6 @@ void ViewEngine::createObjectAsync(
     if (parentItem && item){
         item->setParentItem(parentItem);
     }
-
-    for (auto it = m_compileHooks.begin(); it != m_compileHooks.end(); ++it)
-        (it->m_hook)(qmlCode, url, obj, it->m_userData);
 
     setIsLoading(false);
 

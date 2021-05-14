@@ -31,7 +31,7 @@ public:
     QList<QObject*> entriesFor(const QString& file, const QString& id);
 
 signals:
-    void entryAdded(const QString& file, const QString& id, QObject* object);
+    void entryAdded(Runnable* runnable, const QString& file, const QString& id, QObject* object);
     void entryRemoved(const QString& file, const QString& id, QObject* object);
 
 private:

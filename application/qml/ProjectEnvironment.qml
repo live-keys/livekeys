@@ -22,6 +22,7 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
 Item{
     id: root
@@ -30,8 +31,41 @@ Item{
     property QtObject panes: null
     property QtObject runSpace: null
 
+    property QtObject theme: lk.layers.workspace.themes.current
+
     property var documentationViewFactory : Component{
         DocumentationView{}
+    }
+
+    property Item addEntryOverlay : ProjectAddEntry{
+
+        property var callbackFunction: null
+
+        style: QtObject{
+            property color background: root.theme.colorScheme.middlegroundOverlay
+            property double borderWidth: 1
+            property color borderColor: root.theme.colorScheme.middlegroundBorder
+            property double radius: 5
+
+            property QtObject headerStyle: root.theme.inputLabelStyle.textStyle
+            property QtObject inputStyle: root.theme.inputStyle
+
+            property QtObject applyButton: root.theme.buttons.apply
+        }
+
+        onAccepted: {
+            if ( isFile ){
+                var f = project.fileModel.addFile(entry, name)
+                if ( callbackFunction ){
+                    callbackFunction(f)
+                }
+            } else {
+                var e = project.fileModel.addDirectory(entry, name)
+                if ( callbackFunction ){
+                    callbackFunction(e)
+                }
+            }
+        }
     }
 
     property Item navigation : ProjectNavigation{
@@ -40,44 +74,17 @@ Item{
         visible: false
         onOpen: {
             root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
-            projectEnvironment.openFile(path, ProjectDocument.EditIfNotOpen)
+            root.wizards.openFile(path, ProjectDocument.EditIfNotOpen)
         }
         onCloseFile: {
-            var doc = project.documentModel.isOpened(path)
-            if ( doc ){
-                if ( doc.isDirty ){
-                    lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
-                    {
-                        button1Name : 'Yes',
-                        button1Function : function(mbox){
-                            doc.save()
-                            project.closeFile(path)
-                            mbox.close()
-                        },
-                        button2Name : 'No',
-                        button2Function : function(mbox){
-                            project.closeFile(path)
-                            mbox.close()
-                        },
-                        button3Name : 'Cancel',
-                        button3Function : function(mbox){
-                            mbox.close()
-                        },
-                        returnPressed : function(mbox){
-                            doc.save()
-                            project.closeFile(path)
-                            mbox.close()
-                        }
-                    })
-                } else
-                    project.closeFile(path)
-            }
+            root.wizards.closeFile(path)
         }
         onCancel: {
             if ( lk.layers.workspace.panes.activeItem )
                 lk.layers.workspace.panes.activeItem.forceActiveFocus()
         }
     }
+
 
     Connections{
         target: project
@@ -199,231 +206,407 @@ Item{
         function onLayerReady(layer){
             if ( layer.name === 'workspace' ){
                 layer.commands.add(root, {
-                    'close' : [closeProject, "Close Project"],
-                    'open' : [openProject, "Open Project"],
-                    'new' : [newProject, "New Project"],
-                    'openFile' : [openFileDialog, "Open File"],
-                    'toggleVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
+                    'close' : [wizards.closeProject, "Close Project"],
+                    'open' : [wizards.openProjectViaDialog, "Open Project"],
+                    'new' : [wizards.newProject, "New Project"],
+                    'openFile' : [wizards.openFileViaDialog, "Open File"],
+                    'toggleProjectVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
                 })
             }
         }
     }
 
-    function checkUnsavedFiles(callback){
-        var documentList = project.documentModel.listUnsavedDocuments()
-        callback = callback ? callback : function(){}
-        var message = ''
-        if ( documentList.length === 0 ){
-            callback()
-            return;
-        } else if ( !project.isDirProject() ){
-            message = "Your project file has unsaved changes. Would you like to save them before closing it?";
-        } else {
-            var unsavedFiles = '';
-            for ( var i = 0; i < documentList.length; ++i ){
-                unsavedFiles += documentList[i] + "\n";
-            }
+    property QtObject wizards : QtObject{
 
-            message = "The following files have unsaved changes:\n";
-            message += unsavedFiles
-            message += "Would you like to save them before closing the project?\n"
+        function openProjectDirViaDialog(callback){
+            root.wizards.checkUnsavedFiles(function(){
+                lk.layers.window.dialogs.openDir({}, function(url){
+                    root.wizards.openProject(url, callback)
+    //                lk.openProjectInstance(url)
+                })
+            })
         }
-        lk.layers.window.dialogs.message(message, {
-            button1Name : 'Yes',
-            button1Function : function(box){
-                box.close()
 
-                if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ':/0'){
-                    var closeCallback = callback;
-                    var untitledDocument = project.documentModel.isOpened(documentList[0])
+        function openProjectFileViaDialog(callback){
+            root.wizards.checkUnsavedFiles(function(){
+                lk.layers.window.dialogs.openFile({}, function(url){
+                    project.closeProject()
+                    project.openProject(url)
+                    var path = Fs.UrlInfo.toLocalFile(url)
+                    if ( callback )
+                        callback(path)
+                })
+            })
+        }
 
-                    lk.layers.window.dialogs.saveFile(
-                        { filters: [ "Qml files (*.qml)", "All files (*)" ] },
-                        function(url){
-                            if ( !untitledDocument.saveAs(url) ){
-                                lk.layers.window.dialogs.message(
-                                    'Failed to save file to: ' + url,
-                                    {
-                                        button3Name : 'Ok',
-                                        button3Function : function(mbox){ mbox.close() }
-                                    }
-                                )
-                                return;
+        function openProject(url, callback){
+            root.wizards.checkUnsavedFiles(function(){
+                project.closeProject()
+
+                var path = Fs.UrlInfo.toLocalFile(url)
+
+                project.openProject(url)
+
+                if ( !project.active ){
+                    var message = 'Folder doesn\'t have a main project file. Would you like to create one?'
+                    var createFile = function(mbox){
+                        root.wizards.addFile(
+                            project.dir(),
+                            {
+                                'extension': 'qml',
+                                'heading' : 'Add main file in ' + project.dir()
+                            },
+                            function(file){
+                                project.setActive(file.path)
+                                if ( callback )
+                                    callback(path)
                             }
-                            project.closeProject()
-                            closeCallback()
-                        }
-                    )
-                } else if ( !project.documentModel.saveDocuments() ){
-                    var unsavedList = project.documentModel.listUnsavedDocuments()
-                    unsavedFiles = '';
-                    for ( var i = 0; i < unsavedList.length; ++i ){
-                        unsavedFiles += project.fileModel.printableName(unsavedList[i]) + "\n";
+                        )
+                        mbox.close()
                     }
 
-                    message = 'Failed to save the following files:\n'
-                    message += unsavedFiles
-                    box.close()
-                    lk.layers.window.dialogs.message(message,{
-                        button1Name : 'Close',
+                    lk.layers.window.dialogs.message(message, {
+                        button1Name : 'Yes',
+                        button1Function : createFile,
+                        button3Name : 'No',
+                        button3Function : function(mbox){ mbox.close() },
+                        returnPressed : createFile
+                    })
+
+                } else {
+                    if ( callback )
+                        callback(path)
+                }
+    //                lk.openProjectInstance(url)
+            })
+        }
+
+        function newProject(callback){
+            root.wizards.closeProject(function(){
+                project.newProject()
+                if ( callback )
+                    callback()
+    //            lk.newProjectInstance()
+            })
+        }
+
+        function closeProject(callback){
+            root.wizards.checkUnsavedFiles(function(){
+                project.closeProject()
+                if ( callback )
+                    callback()
+            })
+        }
+
+
+        function openFileViaDialog(callback){
+            var openCallback = function(url){
+                if ( project.rootPath === '' ){
+                    project.openProject(url)
+                    var path = Fs.UrlInfo.toLocalFile(url)
+                    if ( callback )
+                        callback(path)
+                } else if ( project.isFileInProject(url) ){
+                    root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
+                } else {
+                    var fileUrl = url
+                    lk.layers.window.dialogs.message(
+                        'File is outside project scope. Would you like to open it as a new project?',
+                    {
+                        button1Name : 'Open as project',
                         button1Function : function(mbox){
+                            var projectUrl = fileUrl
+                            root.wizards.closeProject(function(){
+                                project.openProject(projectUrl)
+                                var path = Fs.UrlInfo.toLocalFile(projectUrl)
+                                if ( callback )
+                                    callback(path)
+                            })
                             mbox.close()
-                            callback()
                         },
                         button3Name : 'Cancel',
                         button3Function : function(mbox){
                             mbox.close()
                         },
                         returnPressed : function(mbox){
+                            var projectUrl = fileUrl
+                            root.wizards.closeProject(function(){
+                                project.openProject(projectUrl)
+                                var path = Fs.UrlInfo.toLocalFile(projectUrl)
+                                if ( callback )
+                                    callback(path)
+                            })
                             mbox.close()
+                        }
+                    })
+                }
+            }
+
+            if ( !project.isDirProject() ){
+                root.wizards.checkUnsavedFiles(function(){
+                    lk.layers.window.dialogs.openFile(
+                        { filters: ["Qml files (*.qml)", "All files (*)"] },
+                        function(url){
+                            project.closeProject()
+                            project.openProject(url)
+                            var path = Fs.UrlInfo.toLocalFile(url)
+                            if ( callback )
+                                callback(path)
+                        }
+                    )
+                })
+            } else {
+                lk.layers.window.dialogs.openFile(
+                    { filters: ["Qml files (*.qml)", "All files (*)"] },
+                    openCallback
+                )
+            }
+        }
+
+        /// callback will receive: path, document, pane
+        function openFile(path, mode, callback){
+            var pane = lk.layers.workspace.interceptFile(path, mode)
+            if ( pane )
+                return pane
+
+            if ( Fs.Path.hasExtensions(path, 'html')){
+                if ( Fs.Path.hasExtensions(path, 'doc.html')){
+                    var docItem = documentationViewFactory.createObject()
+                    if ( docItem ){
+                        docItem.loadDocumentationHtml(path)
+                        var docPane = mainSplit.findPaneByType('documentation')
+                        if ( !docPane ){
+                            var storeWidth = root.width
+                            docPane = root.panes.createPane('documentation', {}, [400, 400])
+                            root.panes.container.splitPane(0, docPane)
+                        }
+                        docPane.pageTitle = Fs.Path.baseName(path)
+                        docPane.page = docItem
+
+                        if ( callback )
+                            callback(path, null, docPane)
+
+                        return docPane
+                    }
+                }
+            }
+
+            var doc = project.openTextFile(path, mode)
+            if ( !doc )
+                return;
+            var fe = root.panes.focusPane('editor')
+            if ( !fe ){
+                fe = root.panes.createPane('editor', {}, [400, 0])
+                root.panes.container.splitPane(0, fe)
+
+                var containerPanes = root.panes.container.panes
+                if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                    containerPanes[0].width = containerPanes[0].width * 2
+                    fe.width = 400
+                }
+            }
+            if ( callback )
+                callback(path, doc, fe)
+            fe.document = doc
+            return fe
+        }
+
+        function closeFile(path, callback){
+            var doc = project.documentModel.isOpened(path)
+            if ( doc ){
+                if ( doc.isDirty ){
+                    lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+                    {
+                        button1Name : 'Yes',
+                        button1Function : function(mbox){
+                            doc.save()
+                            project.closeFile(path)
                             callback()
+                            mbox.close()
+                        },
+                        button2Name : 'No',
+                        button2Function : function(mbox){
+                            project.closeFile(path)
+                            callback()
+                            mbox.close()
+                        },
+                        button3Name : 'Cancel',
+                        button3Function : function(mbox){
+                            mbox.close()
+                        },
+                        returnPressed : function(mbox){
+                            doc.save()
+                            project.closeFile(path)
+                            callback()
+                            mbox.close()
                         }
                     })
                 } else {
-                    box.close()
+                    project.closeFile(path)
                     callback()
                 }
-            },
-            button2Name : 'No',
-            button2Function : function(mbox){
-                mbox.close()
-                callback()
-            },
-            button3Name : 'Cancel',
-            button3Function : function(mbox){
-                mbox.close()
-            },
-            returnPressed : function(mbox){
-                mbox.close()
-                callback()
             }
-        })
-    }
+        }
 
-    function closeProject(callback){
-        root.checkUnsavedFiles(function(){
-            project.closeProject()
-            if ( callback )
-                callback()
-        })
+        function addFile(path, opt, callback){
 
-    }
-    function openProject(){
-        root.checkUnsavedFiles(function(){
-            lk.layers.window.dialogs.openDir({}, function(url){
-                project.closeProject()
-                project.openProject(url)
-//                lk.openProjectInstance(url)
-            })
-        })
-    }
-    function openProjectPath(url){
-        root.checkUnsavedFiles(function(){
-            project.closeProject()
-            project.openProject(url)
-//                lk.openProjectInstance(url)
-        })
-    }
+            var entry = project.fileModel.findPath(path)
+            if ( !entry ){
+                //TODO: Enable if directory is outside the project
+                lk.layers.workspace.messages.pushError("Path not found in project: " + path, 100)
+                return
+            }
 
-    function newProject(){
-        closeProject(function(){
-            project.newProject()
-//            lk.newProjectInstance()
-        })
-    }
-
-    function openFileDialog(){
-        var openCallback = function(url){
-            if ( project.rootPath === '' ){
-                project.openProject(url)
-            } else if ( project.isFileInProject(url) ){
-                openFile(url, ProjectDocument.EditIfNotOpen)
+            root.addEntryOverlay.isFile = true
+            root.addEntryOverlay.entry = entry
+            if ( opt.hasOwnProperty('heading') ){
+                root.addEntryOverlay.heading = opt['heading']
             } else {
-                var fileUrl = url
-                lk.layers.window.dialogs.message(
-                    'File is outside project scope. Would you like to open it as a new project?',
-                {
-                    button1Name : 'Open as project',
-                    button1Function : function(mbox){
-                        var projectUrl = fileUrl
-                        root.closeProject(function(){
-                            project.openProject(projectUrl)
-                        })
-                        mbox.close()
-                    },
-                    button3Name : 'Cancel',
-                    button3Function : function(mbox){
-                        mbox.close()
-                    },
-                    returnPressed : function(mbox){
-                        var projectUrl = fileUrl
-                        root.closeProject(function(){
-                            project.openProject(projectUrl)
-                        })
-                        mbox.close()
-                    }
-                })
+                root.addEntryOverlay.heading = 'Add file in ' + entry.path
             }
+            if ( opt.hasOwnProperty('suggestion') ){
+                root.addEntryOverlay.setInitialValue(opt['suggestion'])
+            } else {
+                root.addEntryOverlay.setInitialValue('')
+            }
+            if ( opt.hasOwnProperty('extension') ){
+                root.addEntryOverlay.extension = opt['extension']
+            } else {
+                root.addEntryOverlay.extension = ''
+            }
+
+            root.addEntryOverlay.callbackFunction = function(file){
+                if ( callback )
+                    callback(file)
+            }
+
+            lk.layers.window.dialogs.overlayBox(root.addEntryOverlay)
         }
 
-        if ( !project.isDirProject() ){
-            root.checkUnsavedFiles(function(){
-                lk.layers.window.dialogs.openFile(
-                    { filters: ["Qml files (*.qml)", "All files (*)"] },
-                    function(url){
-                        project.closeProject()
-                        project.openProject(url)
-                    }
-                )
-            })
-        } else {
-            lk.layers.window.dialogs.openFile(
-                { filters: ["Qml files (*.qml)", "All files (*)"] },
-                openCallback
-            )
+        function addDirectory(path, opt, callback){
+            var entry = project.fileModel.findPath(path)
+            if ( !entry ){
+                //TODO: Enable if directory is outside the project
+                lk.layers.workspace.messages.pushError("Path not found in project: " + path, 100)
+            }
+
+            root.addEntryOverlay.isFile = false
+            root.addEntryOverlay.entry = entry
+            if ( opt.hasOwnProperty('heading') ){
+                root.addEntryOverlay.heading = opt['heading']
+            } else {
+                root.addEntryOverlay.heading = 'Add file in ' + entry.path
+            }
+            if ( opt.hasOwnProperty('suggestion') ){
+                root.addEntryOverlay.setInitialValue(opt['suggestion'])
+            } else {
+                root.addEntryOverlay.setInitialValue('')
+            }
+            if ( opt.hasOwnProperty('extension') ){
+                root.addEntryOverlay.extension = opt['extension']
+            } else {
+                root.addEntryOverlay.extension = ''
+            }
+
+            root.addEntryOverlay.callbackFunction = function(dir){
+                if ( callback )
+                    callback(dir)
+            }
+
+            lk.layers.window.dialogs.overlayBox(root.addEntryOverlay)
         }
-    }
 
-    function openFile(path, mode){
-        var pane = lk.layers.workspace.interceptFile(path, mode)
-        if ( pane )
-            return pane
-
-        if ( Fs.Path.hasExtensions(path, 'html')){
-            if ( Fs.Path.hasExtensions(path, 'doc.html')){
-                var docItem = documentationViewFactory.createObject()
-                if ( docItem ){
-                    docItem.loadDocumentationHtml(path)
-                    var docPane = mainSplit.findPaneByType('documentation')
-                    if ( !docPane ){
-                        var storeWidth = root.width
-                        docPane = root.panes.createPane('documentation', {}, [400, 400])
-                        root.panes.container.splitPane(0, docPane)
-                    }
-                    docPane.pageTitle = Fs.Path.baseName(path)
-                    docPane.page = docItem
-
-                    return docPane
+        function checkUnsavedFiles(callback){
+            var documentList = project.documentModel.listUnsavedDocuments()
+            callback = callback ? callback : function(){}
+            var message = ''
+            if ( documentList.length === 0 ){
+                callback()
+                return;
+            } else if ( !project.isDirProject() ){
+                message = "Your project file has unsaved changes. Would you like to save them before closing it?";
+            } else {
+                var unsavedFiles = '';
+                for ( var i = 0; i < documentList.length; ++i ){
+                    unsavedFiles += documentList[i] + "\n";
                 }
-            }
-        }
 
-        var doc = project.openTextFile(path, mode)
-        if ( !doc )
-            return;
-        var fe = root.panes.focusPane('editor')
-        if ( !fe ){
-            fe = root.panes.createPane('editor', {}, [400, 0])
-            root.panes.container.splitPane(0, fe)
-
-            var containerPanes = root.panes.container.panes
-            if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
-                containerPanes[0].width = containerPanes[0].width * 2
-                fe.width = 400
+                message = "The following files have unsaved changes:\n";
+                message += unsavedFiles
+                message += "Would you like to save them before closing the project?\n"
             }
+            lk.layers.window.dialogs.message(message, {
+                button1Name : 'Yes',
+                button1Function : function(box){
+                    box.close()
+
+                    if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ':/0'){
+                        var closeCallback = callback;
+                        var untitledDocument = project.documentModel.isOpened(documentList[0])
+
+                        lk.layers.window.dialogs.saveFile(
+                            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                            function(url){
+                                if ( !untitledDocument.saveAs(url) ){
+                                    lk.layers.window.dialogs.message(
+                                        'Failed to save file to: ' + url,
+                                        {
+                                            button3Name : 'Ok',
+                                            button3Function : function(mbox){ mbox.close() }
+                                        }
+                                    )
+                                    return;
+                                }
+                                project.closeProject()
+                                closeCallback()
+                            }
+                        )
+                    } else if ( !project.documentModel.saveDocuments() ){
+                        var unsavedList = project.documentModel.listUnsavedDocuments()
+                        unsavedFiles = '';
+                        for ( var i = 0; i < unsavedList.length; ++i ){
+                            unsavedFiles += project.fileModel.printableName(unsavedList[i]) + "\n";
+                        }
+
+                        message = 'Failed to save the following files:\n'
+                        message += unsavedFiles
+                        box.close()
+                        lk.layers.window.dialogs.message(message,{
+                            button1Name : 'Close',
+                            button1Function : function(mbox){
+                                mbox.close()
+                                callback()
+                            },
+                            button3Name : 'Cancel',
+                            button3Function : function(mbox){
+                                mbox.close()
+                            },
+                            returnPressed : function(mbox){
+                                mbox.close()
+                                callback()
+                            }
+                        })
+                    } else {
+                        box.close()
+                        callback()
+                    }
+                },
+                button2Name : 'No',
+                button2Function : function(mbox){
+                    mbox.close()
+                    callback()
+                },
+                button3Name : 'Cancel',
+                button3Function : function(mbox){
+                    mbox.close()
+                },
+                returnPressed : function(mbox){
+                    mbox.close()
+                    callback()
+                }
+            })
         }
-        fe.document = doc
-        return fe
     }
+
 }
 

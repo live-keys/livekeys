@@ -260,7 +260,7 @@ void QmlAct::setReturns(QString returns){
         return;
 
     if ( m_isComponentComplete ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set run method after component is complete.", Exception::toCode("~ActFnConfig"));
+        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set return type after component is complete.", Exception::toCode("~ActConfig"));
         ViewContext::instance().engine()->throwError(&e, this);
         return;
     }

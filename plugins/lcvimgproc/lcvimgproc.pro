@@ -54,6 +54,7 @@ OTHER_FILES *= \
 DISTFILES += \
     qml/Blend.qml \
     qml/FaceDetection.qml \
+    qml/Pad.qml \
     qml/Resize.qml \
     qml/ResizeTool.qml \
     qml/ResizeWithAspect.qml \
@@ -62,4 +63,6 @@ DISTFILES += \
     qml/Scale.qml \
     qml/Threshold.qml \
     qml/live.package.json \
-    qml/live.plugin.json
+    qml/live.plugin.json \
+    qml/palettes/PadPalette.json \
+    qml/palettes/TransformPaletteProperties.json
