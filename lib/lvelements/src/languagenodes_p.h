@@ -31,9 +31,9 @@ class NewComponentExpressionNode;
 class BindableExpressionNode;
 class MemberExpressionNode;
 class SubscriptExpressionNode;
-class StatementBlockNode;
 class ArgumentsNode;
 class ObjectNode;
+class RootNewComponentExpressionNode;
 
 class BaseNode{
     friend class JsBlockNode;
@@ -142,11 +142,15 @@ public:
 
 class JsBlockNode : public BaseNode{
     friend class BaseNode;
+    friend class ComponentDeclarationNode;
+    friend class NewComponentExpressionNode;
 public:
     JsBlockNode(const TSNode& node, const std::string& typeString = "JSScope") : BaseNode(node, typeString){}
     const std::vector<IdentifierNode*>& identifiers() const { return m_declarations; }
-private:
+protected:
     std::vector<IdentifierNode*> m_declarations;
+    std::vector<NewComponentExpressionNode*> m_idComponents;
+
 };
 
 class ArrowFunctionNode: public JsBlockNode {
@@ -172,8 +176,6 @@ private:
     std::vector<ComponentDeclarationNode*> m_exports;
     std::set<std::string> m_undeclared;
     std::string m_fileName;
-
-    std::vector<NewComponentExpressionNode*> m_idComponents;
 
 };
 
@@ -279,7 +281,7 @@ public:
     void setSuperCall(CallExpressionNode* super) { m_superCall = super; }
     // virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments);
 private:
-    StatementBlockNode* m_block;
+    JsBlockNode* m_block;
     CallExpressionNode* m_superCall;
     FormalParametersNode* m_formalParameters;
 
@@ -297,7 +299,7 @@ public:
     IdentifierNode* type() const{ return m_type; }
     IdentifierNode* name() const{ return m_name; }
     BindableExpressionNode* expression() const{ return m_expression; }
-    StatementBlockNode* statementBlock() const {return m_statementBlock; }
+    JsBlockNode* statementBlock() const {return m_statementBlock; }
     ComponentDeclarationNode* componentDeclaration() const { return m_componentDeclaration; }
 
     void pushToBindings(BaseNode* bn) { m_bindings.push_back(bn); }
@@ -307,7 +309,7 @@ private:
     IdentifierNode* m_type;
     IdentifierNode* m_name;
     BindableExpressionNode* m_expression;
-    StatementBlockNode* m_statementBlock;
+    JsBlockNode* m_statementBlock;
     ComponentDeclarationNode* m_componentDeclaration;
     std::vector<BaseNode*> m_bindings;
 };
@@ -338,7 +340,7 @@ private:
     std::vector<IdentifierNode*> m_property;
     BindableExpressionNode* m_expression;
     std::vector<BaseNode*> m_bindings;
-    StatementBlockNode* m_statementBlock;
+    JsBlockNode* m_statementBlock;
 
     friend class BaseNode;
     friend class NewComponentExpressionNode;
@@ -387,14 +389,13 @@ private:
     std::vector<EventDeclarationNode*> m_events;
     std::vector<ListenerDeclarationNode*> m_listeners;
     std::vector<BaseNode*> m_default;
-    std::vector<NewComponentExpressionNode*> m_idComponents;
     std::vector<PropertyAssignmentNode*> m_assignments;
 };
 
 class NewComponentExpressionNode : public JsBlockNode{
     friend class ComponentBodyNode;
 public:
-    NewComponentExpressionNode(const TSNode& node);
+    NewComponentExpressionNode(const TSNode& node, const std::string& typeString = "NewComponentExpression");
     virtual std::string toString(int indent = 0) const override;
     virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
@@ -422,6 +423,12 @@ private:
 
 };
 
+class RootNewComponentExpressionNode: public NewComponentExpressionNode {
+    friend class BaseNode;
+public:
+    RootNewComponentExpressionNode(const TSNode& node) : NewComponentExpressionNode(node, "RootNewComponentExpression"){}
+};
+
 class ExpressionStatementNode : public BaseNode{
 public:
     ExpressionStatementNode(const TSNode& node) : BaseNode(node, "ExpressionStatement"){}
@@ -431,12 +438,6 @@ public:
 class BindableExpressionNode : public BaseNode{
 public:
     BindableExpressionNode(const TSNode& node) : BaseNode(node, "BindableExpression"){}
-};
-
-class StatementBlockNode : public JsBlockNode{
-public:
-    StatementBlockNode(const TSNode& node) : JsBlockNode(node, "StatementBlock"){}
-    std::vector<IdentifierNode*> m_localVariables;
 };
 
 class MemberExpressionNode : public BaseNode{

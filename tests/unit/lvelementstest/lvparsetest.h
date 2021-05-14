@@ -40,6 +40,9 @@ private slots:
     void todoApp();
     void complexTernaryOperator();
     void doublyNestedElement();
+    void idObjectInJsScope();
+    void nestedObjectsInJsScope();
+    void sameIdInBothScopes();
 
 private:
     void parseTestTemplate(std::string name);

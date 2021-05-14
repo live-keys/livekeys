@@ -110,11 +110,6 @@ void BaseNode::moveToDeclarations(BaseNode *parent, IdentifierNode *idNode)
         if (jsbn)
         {
             jsbn->m_declarations.push_back(idNode);
-
-            if (jsbn->typeString() == "StatementBlock"){
-                auto sb = dynamic_cast<StatementBlockNode*>(jsbn);
-                sb->m_localVariables.push_back(idNode);
-            }
             break;
         }
         p = p->parent();
@@ -316,7 +311,27 @@ void BaseNode::visitComponentBody(BaseNode *parent, const TSNode &node){
 }
 
 void BaseNode::visitNewComponentExpression(BaseNode *parent, const TSNode &node){
-    NewComponentExpressionNode* enode = new NewComponentExpressionNode(node);
+
+    NewComponentExpressionNode* enode = nullptr;
+
+    if (parent->typeString() == "ExpressionStatement"
+        && parent->parent()
+        && parent->parent()->typeString() == "Program"){
+        enode = new RootNewComponentExpressionNode(node);
+    } else {
+        BaseNode* p = parent;
+        while (p && dynamic_cast<JsBlockNode*>(p) == nullptr)
+        {
+            p = p->parent();
+        }
+        if (p && p->typeString() == "JSScope"){
+            enode = new RootNewComponentExpressionNode(node);
+        } else {
+            enode = new NewComponentExpressionNode(node);
+        }
+
+    }
+
     parent->insert(enode);
     uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
@@ -347,10 +362,9 @@ void BaseNode::visitNewComponentExpression(BaseNode *parent, const TSNode &node)
 
     // for id components
     BaseNode* p = parent;
-    while (enode->m_id && p)
+    while (enode->m_id && p && enode->typeString() != "RootNewComponentExpression")
     {
-        if (p->typeString() == "ComponentBody")
-        {
+        if (p->typeString() == "ComponentBody"){
             auto body = p->as<ComponentBodyNode>();
             if (body->parent()->typeString() == "ComponentDeclaration")
             {
@@ -358,9 +372,10 @@ void BaseNode::visitNewComponentExpression(BaseNode *parent, const TSNode &node)
                 decl->pushToIdComponents(enode);
                 break;
             }
-        } else if (p->typeString() == "Program"){
-            auto prog = p->as<ProgramNode>();
-            prog->m_idComponents.push_back(enode);
+        } else if (p->typeString() == "RootNewComponentExpression"){
+                auto rnce = p->as<RootNewComponentExpressionNode>();
+                rnce->m_idComponents.push_back(enode);
+                break;
         }
 
         p = p->parent();
@@ -377,7 +392,7 @@ void BaseNode::visitNewComponentExpression(BaseNode *parent, const TSNode &node)
             decl->pushToDefault(enode);
 
         }
-        else if (body->parent()->typeString() == "NewComponentExpression")
+        else if (body->parent()->typeString() == "NewComponentExpression" || body->parent()->typeString() == "RootNewComponentExpression")
         {
             auto expr = body->parent()->as<NewComponentExpressionNode>();
             expr->pushToDefault(enode);
@@ -405,7 +420,7 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
             enode->m_expression->setParent(enode);
             visitChildren(enode->m_expression, child);
         } else if (strcmp(ts_node_type(child),"statement_block") == 0) {
-            enode->m_statementBlock = new StatementBlockNode(child);
+            enode->m_statementBlock = new JsBlockNode(child);
             enode->m_statementBlock->setParent(enode);
             visitChildren(enode->m_statementBlock, child);
         } else if (strcmp(ts_node_type(child),"component_declaration") == 0) {
@@ -419,7 +434,7 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
         parent->parent()->as<ComponentDeclarationNode>()->pushToProperties(enode);
     }
 
-    if (parent->parent() && parent->parent()->typeString() == "NewComponentExpression")
+    if (parent->parent() && (parent->parent()->typeString() == "NewComponentExpression" || parent->parent()->typeString() == "RootNewComponentExpression"))
     {
         parent->parent()->as<NewComponentExpressionNode>()->pushToProperties(enode);
     }
@@ -494,7 +509,7 @@ void BaseNode::visitPropertyAssignment(BaseNode *parent, const TSNode &node){
             enode->m_expression->setParent(enode);
             visitChildren(enode->m_expression, rhs);
         } else if (strcmp(ts_node_type(rhs),"statement_block") == 0) {
-            enode->m_statementBlock = new StatementBlockNode(rhs);
+            enode->m_statementBlock = new JsBlockNode(rhs);
             enode->m_statementBlock->setParent(enode);
             visitChildren(enode->m_statementBlock, rhs);
         }
@@ -505,7 +520,7 @@ void BaseNode::visitPropertyAssignment(BaseNode *parent, const TSNode &node){
         parent->parent()->as<ComponentDeclarationNode>()->pushToAssignments(enode);
     }
 
-    if (parent->parent() && parent->parent()->typeString() == "NewComponentExpression")
+    if (parent->parent() && (parent->parent()->typeString() == "NewComponentExpression" || parent->parent()->typeString() == "RootNewComponentExpression"))
     {
         parent->parent()->as<NewComponentExpressionNode>()->pushToAssignments(enode);
     }
@@ -523,7 +538,7 @@ void BaseNode::visitIdentifierAssignment(BaseNode *parent, const TSNode &node){
         cdn->m_id = new IdentifierNode(idChild);
         // provide id to outside scope
         moveToDeclarations(componentParent, cdn->m_id);
-    } else if ( componentParent->typeString() == "NewComponentExpression" ){
+    } else if ( componentParent->typeString() == "NewComponentExpression" || componentParent->typeString() == "RootNewComponentExpression"){
         NewComponentExpressionNode* ncen = componentParent->as<NewComponentExpressionNode>();
         ncen->m_id = new IdentifierNode(idChild);
         // provide id to outside scope
@@ -694,7 +709,7 @@ void BaseNode::visitConstructorDefinition(BaseNode *parent, const TSNode &node)
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
         if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
-            cdnode->m_block = new StatementBlockNode(child);
+            cdnode->m_block = new JsBlockNode(child);
             cdnode->m_block->setParent(cdnode);
             visitChildren(cdnode->m_block, child);
             // enode->m_name = new IdentifierNode(child);
@@ -761,7 +776,7 @@ void BaseNode::visitNewTaggedComponentExpression(BaseNode *parent, const TSNode 
             decl->pushToDefault(tagnode);
 
         }
-        else if (body->parent()->typeString() == "NewComponentExpression")
+        else if (body->parent()->typeString() == "NewComponentExpression" || body->parent()->typeString() == "RootNewComponentExpression")
         {
             auto expr = body->parent()->as<NewComponentExpressionNode>();
             expr->pushToDefault(tagnode);
@@ -992,31 +1007,6 @@ void ProgramNode::convertToJs(const std::string &source, std::vector<ElementsIns
     for (auto it = m_undeclared.begin(); it != m_undeclared.end(); ++it)
         *compose << ("var " + *it + " = imports.get('" + *it + "')\n");
 
-    if (!m_idComponents.empty())
-    {
-        for (int i = 0; i < m_idComponents.size();++i)
-        {
-            *compose << "var " << slice(source, m_idComponents[i]->id()) << " = new " << slice(source, m_idComponents[i]->name());
-            checkIdentifierDeclared(source, m_idComponents[i]->name(), slice(source, m_idComponents[i]->name()));
-            if (m_idComponents[i]->arguments()) *compose << slice(source, m_idComponents[i]->arguments()) << "\n";
-            else *compose << "()\n";
-        }
-
-        for (int i = 0; i < m_idComponents.size();++i)
-        {
-            std::string id = slice(source, m_idComponents[i]->id());
-            auto properties = m_idComponents[i]->properties();
-
-            for (int idx = 0; idx<properties.size(); ++idx)
-            {
-                *compose << "Element.addProperty(" << id << ", '" << slice(source, properties[idx]->name())
-                         << "', { type: '" << slice(source, properties[idx]->type()) << "', notify: '"
-                         << slice(source, properties[idx]->name()) << "Changed' })\n";
-            }
-
-        }
-    }
-
     fragments.insert(iter, compose);
 
 }
@@ -1139,6 +1129,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
     for (int i = 0; i < m_idComponents.size();++i)
     {
         *compose << indent(indentValue + 1) << "var " << slice(source, m_idComponents[i]->id()) << " = new " << slice(source, m_idComponents[i]->name());
+        checkIdentifierDeclared(source, m_idComponents[i]->name(), slice(source, m_idComponents[i]->name()));
         if (m_idComponents[i]->arguments()) *compose << slice(source, m_idComponents[i]->arguments()) << "\n";
         else *compose << "()\n";
         *compose << indent(indentValue + 1) << "this.ids[\"" << slice(source, m_idComponents[i]->id()) << "\"] = " << slice(source, m_idComponents[i]->id()) << "\n\n";
@@ -1239,18 +1230,20 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                     bool skip = false;
 
 
-                    auto sb = men->parent();
-                    while (sb && sb->typeString() != "StatementBlock"){
-                        sb = sb->parent();
+                    auto p = men->parent();
+                    JsBlockNode* sb = nullptr;
+                    while (p){
+                        sb = dynamic_cast<JsBlockNode*>(p);
+                        if (sb) break;
+                        p = p->parent();
                     }
 
                     if (sb){
-                        auto sbc = dynamic_cast<StatementBlockNode*>(sb);
-                        auto localVars = sbc->m_localVariables;
+                        auto decl = sb->m_declarations;
                         if (men->children()[0]->typeString() == "Identifier"){
                             auto ident = dynamic_cast<IdentifierNode*>(men->children()[0]);
                             auto ids = slice(source, ident->startByte(), ident->endByte());
-                            for (auto ch: localVars){
+                            for (auto ch: decl){
                                 auto localVar = slice(source, ch->startByte(), ch->endByte());
 
                                 if (localVar == ids){
@@ -1291,7 +1284,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
             *compose << "this." << slice(source,m_properties[i]->name())
                      << " = ";
             if (m_properties[i]->expression() && m_properties[i]->expression()->children().size() == 1
-                    && m_properties[i]->expression()->children()[0]->typeString() == "NewComponentExpression")
+                    && (m_properties[i]->expression()->children()[0]->typeString() == "NewComponentExpression" || m_properties[i]->expression()->children()[0]->typeString() == "RootNewComponentExpression"))
             {
                 auto nce = m_properties[i]->expression()->children()[0]->as<NewComponentExpressionNode>();
 
@@ -1516,15 +1509,53 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
     }
     *compose << ("(function(parent){\n    this.setParent(parent)\n");
 
-    if (!m_id)
-    for (int i = 0; i<m_properties.size(); ++i)
-    {
-        *compose << "Element.addProperty(this, '" << slice(source, m_properties[i]->name())
-                 << "', { type: '" << slice(source, m_properties[i]->type()) << "', notify: '"
-                 << slice(source, m_properties[i]->name()) << "Changed' })\n";
-    }
-    else {
+    std::string id_root = "this";
+    bool isRoot = (dynamic_cast<RootNewComponentExpressionNode*>(this) != nullptr);
+    if (m_id) {
         *compose << "Element.assignId(" << slice(source,m_id) << ", \"" << slice(source,m_id) << "\")\n";
+        if (isRoot){
+            id_root = slice(source,m_id);
+            *compose << "var " << id_root << " = this\n\n";
+        }
+    }
+
+
+    if (isRoot && !m_idComponents.empty()){
+        for (int i = 0; i < m_idComponents.size();++i)
+        {
+            auto type = slice(source, m_idComponents[i]->name());
+
+            *compose << "var " << slice(source, m_idComponents[i]->id()) << " = new " << type;
+            checkIdentifierDeclared(source, m_idComponents[i]->name(), type);
+            if (m_idComponents[i]->arguments()) *compose << slice(source, m_idComponents[i]->arguments()) << "\n";
+            else *compose << "()\n";
+        }
+    }
+
+    if (isRoot || !m_id){
+        for (int i = 0; i<m_properties.size(); ++i)
+        {
+            *compose << "Element.addProperty(" + id_root + ", '" << slice(source, m_properties[i]->name())
+                     << "', { type: '" << slice(source, m_properties[i]->type()) << "', notify: '"
+                     << slice(source, m_properties[i]->name()) << "Changed' })\n";
+        }
+    }
+
+    if (isRoot && !m_idComponents.empty()){
+        for (int i = 0; i < m_idComponents.size();++i)
+        {
+            std::string id = slice(source, m_idComponents[i]->id());
+            auto properties = m_idComponents[i]->properties();
+
+            for (int idx = 0; idx<properties.size(); ++idx)
+            {
+                *compose << "Element.addProperty(" << id << ", '" << slice(source, properties[idx]->name())
+                         << "', { type: '" << slice(source, properties[idx]->type()) << "', notify: '"
+                         << slice(source, properties[idx]->name()) << "Changed' })\n";
+            }
+
+        }
+
     }
 
     for (int i=0; i<m_properties.size(); ++i)
@@ -1586,18 +1617,20 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
 
                         bool skip = false;
 
-                        auto sb = men->parent();
-                        while (sb && sb->typeString() != "StatementBlock"){
-                            sb = sb->parent();
+                        auto p = men->parent();
+                        JsBlockNode* sb = nullptr;
+                        while (p){
+                            sb = dynamic_cast<JsBlockNode*>(p);
+                            if (sb) break;
+                            p = p->parent();
                         }
 
                         if (sb){
-                            auto sbc = dynamic_cast<StatementBlockNode*>(sb);
-                            auto localVars = sbc->m_localVariables;
+                            auto decl = sb->m_declarations;
                             if (men->children()[0]->typeString() == "Identifier"){
                                 auto ident = dynamic_cast<IdentifierNode*>(men->children()[0]);
                                 auto ids = slice(source, ident->startByte(), ident->endByte());
-                                for (auto ch: localVars){
+                                for (auto ch: decl){
                                     auto localVar = slice(source, ch->startByte(), ch->endByte());
 
                                     if (localVar == ids){
@@ -1830,7 +1863,7 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
 
     *compose << "return this\n}.bind(";
 
-    if (!m_id)
+    if (!m_id || isRoot)
     {
         *compose << "new " << slice(source, m_name);
         checkIdentifierDeclared(source, m_name, slice(source, m_name));
@@ -1860,8 +1893,8 @@ void NewComponentExpressionNode::convertToJs(const std::string &source, std::vec
 }
 
 
-NewComponentExpressionNode::NewComponentExpressionNode(const TSNode &node)
-    : JsBlockNode(node, "NewComponentExpression")
+NewComponentExpressionNode::NewComponentExpressionNode(const TSNode &node, const std::string& typeString)
+    : JsBlockNode(node, typeString)
     , m_name(nullptr)
     , m_id(nullptr)
     , m_body(nullptr)
@@ -1887,7 +1920,7 @@ std::string NewComponentExpressionNode::toString(int indent) const{
     if (m_arguments)
         args = "(args " + m_arguments->rangeString() + ")";
 
-    result += "NewComponentExpression " + name + identifier +args + rangeString() + "\n";
+    result += typeString() + " " + name + identifier +args + rangeString() + "\n";
     if ( m_body ){
         result += m_body->toString(indent >= 0 ? indent + 1 : indent);
     }
@@ -2250,7 +2283,7 @@ void VariableDeclarationNode::convertToJs(const std::string &source, std::vector
             continue;
         }
 
-        if (children[0]->typeString() == "Identifier" && children[1]->typeString() == "NewComponentExpression"){
+        if (children[0]->typeString() == "Identifier" && (children[1]->typeString() == "NewComponentExpression" || children[1]->typeString() == "RootNewComponentExpression")){
             *compose << "\nvar " << slice(source, children[0]->startByte(), children[0]->endByte()) << " = ";
 
             el::JSSection* section = new el::JSSection;
