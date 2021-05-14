@@ -66,6 +66,8 @@ DISTFILES += \
     palettes/ImageReadPalette.json \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \
+    palettes/ImageSegmentFactoryPalette.qml \
+    palettes/ImageSegmentFactoryPropertiesPalette.json \
     palettes/PaperSurfacePalette.qml \
     palettes/PerspectiveOnBackgroundPalette.qml \
     palettes/PerspectiveOnBackgroundPropertiesPalette.json \
@@ -88,6 +90,7 @@ DISTFILES += \
     qml/GrayscaleView.qml \
     qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
+    qml/ImageSegmentFactory.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
     qml/PaperSurface.qml \

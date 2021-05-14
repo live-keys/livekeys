@@ -19,6 +19,8 @@
         "palettes/ImageFilePalette.json" : "qml/lcvcore#ImageFile",
         "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage",
         "palettes/PerspectiveOnBackgroundPalette.qml": "qml/lcvcore#PerspectiveOnBackground",
-        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground"
+        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground",
+        "palettes/ImageSegmentFactoryPalette.qml": "qml/lcvcore#ImageSegmentFactory",
+        "palettes/ImageSegmentFactoryPropertiesPalette.json": "qml/lcvcore#ImageSegmentFactory"
     }
 }
