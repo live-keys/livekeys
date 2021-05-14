@@ -153,7 +153,7 @@ Pane{
         visible: loadingAnimation.visible
         anchors.fill: parent
         anchors.topMargin: 30
-        color: "#030609"
+        color: currentTheme ? currentTheme.colorScheme.background : 'black'
         opacity: loadingAnimation.visible ? 0.95 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
         z: 900
