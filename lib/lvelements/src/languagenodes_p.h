@@ -149,20 +149,13 @@ public:
     const std::vector<IdentifierNode*>& identifiers() const { return m_declarations; }
 protected:
     std::vector<IdentifierNode*> m_declarations;
-    std::vector<NewComponentExpressionNode*> m_idComponents;
 
 };
 
 class ArrowFunctionNode: public JsBlockNode {
     friend class BaseNode;
 public:
-    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : JsBlockNode(node, typeString){}
-};
-
-class ArrowFunctionNode: public JsBlockNode {
-    friend class BaseNode;
-public:
-    ArrowFunctionNode(const TSNode& node, const std::string& typeString = "ArrowFunction") : JsBlockNode(node, typeString){}
+    ArrowFunctionNode(const TSNode& node) : JsBlockNode(node, "ArrowFunction"){}
 };
 
 class ProgramNode : public JsBlockNode {
@@ -182,7 +175,7 @@ private:
     std::vector<ComponentDeclarationNode*> m_exports;
     std::set<std::string> m_undeclared;
     std::string m_fileName;
-
+    std::vector<NewComponentExpressionNode*> m_idComponents;
 };
 
 class IdentifierNode : public BaseNode{
@@ -396,12 +389,13 @@ private:
     std::vector<ListenerDeclarationNode*> m_listeners;
     std::vector<BaseNode*> m_default;
     std::vector<PropertyAssignmentNode*> m_assignments;
+    std::vector<NewComponentExpressionNode*> m_idComponents;
 };
 
 class NewComponentExpressionNode : public JsBlockNode{
     friend class ComponentBodyNode;
 public:
-    NewComponentExpressionNode(const TSNode& node, const std::string& typeString = "NewComponentExpression");
+    NewComponentExpressionNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const override;
     virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0) override;
 
@@ -414,6 +408,8 @@ public:
     std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 
     void pushToDefault(BaseNode* nce){ m_default.push_back(nce); }
+protected:
+    NewComponentExpressionNode(const TSNode& node, const std::string& typeString);
 private:
     IdentifierNode* m_name;
     IdentifierNode* m_id;
@@ -424,6 +420,7 @@ private:
     std::vector<BaseNode*> m_default;
     std::vector<PropertyDeclarationNode*> m_properties;
     std::vector<PropertyAssignmentNode*> m_assignments;
+    std::vector<NewComponentExpressionNode*> m_idComponents;
 
     friend class BaseNode;
 
