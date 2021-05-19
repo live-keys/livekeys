@@ -92,4 +92,21 @@ void QmlExec::closeInput(){
     m_process->closeWriteChannel();
 }
 
+void QmlExec::stop()
+{
+    if ( m_process->state() == QProcess::NotRunning){
+        Exception e = CREATE_EXCEPTION(Exception, "Process has already stopped.", Exception::toCode("~Process"));
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+
+    if ( m_out ){
+        disconnect(m_process, &QProcess::readyRead, this, &QmlExec::__processRead);
+    }
+
+    closeInput();
+
+    m_process->kill();
+}
+
 }// namespace
