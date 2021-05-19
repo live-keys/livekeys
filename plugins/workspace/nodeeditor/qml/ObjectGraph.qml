@@ -25,6 +25,8 @@ Rectangle{
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
     property QtObject theme: lk.layers.workspace.themes.current
 
+    property var lastTargetPort: null
+
     property QtObject defaultStyle : QtObject{
         property color backgroundColor: '#000511'
         property color backgroundGridColor: '#222'
@@ -168,6 +170,7 @@ Rectangle{
     property var paletteListOpened: false
 
     signal userEdgeInserted(QtObject edge)
+    signal requestEdgeCreation(var src, var dst)
     signal nodeClicked(QtObject node)
     signal doubleClicked(var pos)
     signal rightClicked(var pos)
@@ -308,11 +311,23 @@ Rectangle{
 
     }
 
+    onRequestEdgeCreation: {
+        var srcPort = graph.connector.sourcePort
+        var dstPort = lastTargetPort
+
+        bindPorts(srcPort, dstPort)
+    }
+
     function bindPorts(src, dst){
         var srcNode = src.objectProperty.node
         var dstNode = dst.objectProperty.node
-        
-        var edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate)
+        var edge = null
+        if (srcNode === dstNode){
+            edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegateCurved)
+        } else {
+            edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate )
+        }
+
         graph.bindEdge(edge, src, dst)
         
         src.outEdges.push(edge)
@@ -478,6 +493,7 @@ Rectangle{
             connectorEdgeColor: root.style.connectorEdgeColor
             connectorColor: root.style.connectorColor
             edgeDelegate: Edge{}
+            property Component edgeDelegateCurved: Edge { lineType: Qan.EdgeStyle.Curved }
             verticalDockDelegate : VerticalDock{}
             portDelegate: Port{}
             selectionDelegate: Selection{}
@@ -485,10 +501,10 @@ Rectangle{
             onEdgeClicked: root.edgeClicked(edge)
             onNodeClicked : root.nodeClicked(node)
             onConnectorEdgeInserted : root.userEdgeInserted(edge)
-
+            onConnectorRequestEdgeCreation: root.requestEdgeCreation(src, dst)
             selectionColor: "#fff"
             selectionWeight: 1
-
+            connectorCreateDefaultEdge: false
             nodeDelegate: ObjectNode{
                 nodeStyle: root.style.objectNodeStyle
             }
