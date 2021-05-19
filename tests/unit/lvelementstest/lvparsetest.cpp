@@ -130,6 +130,22 @@ void LvParseTest::doublyNestedElement()
     parseTestTemplate("ParserTest23");
 }
 
+void LvParseTest::idObjectInJsScope()
+{
+    parseTestTemplate("ParserTest24");
+}
+
+void LvParseTest::nestedObjectsInJsScope()
+{
+    parseTestTemplate("ParserTest25");
+}
+
+void LvParseTest::sameIdInBothScopes()
+{
+    parseTestTemplate("ParserTest26");
+
+}
+
 void LvParseTest::parseTestTemplate(std::string name)
 {
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");

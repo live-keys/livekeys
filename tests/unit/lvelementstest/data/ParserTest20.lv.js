@@ -1,5 +1,6 @@
 var Button = imports.get('Button')
 var Form = imports.get('Form')
+var Input = imports.get('Input')
 
 module.exports["TodoForm"] = class TodoForm extends Form{
 
