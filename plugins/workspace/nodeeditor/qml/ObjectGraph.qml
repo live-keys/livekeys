@@ -25,8 +25,6 @@ Rectangle{
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
     property QtObject theme: lk.layers.workspace.themes.current
 
-    property var lastTargetPort: null
-
     property QtObject defaultStyle : QtObject{
         property color backgroundColor: '#000511'
         property color backgroundGridColor: '#222'
@@ -170,7 +168,6 @@ Rectangle{
     property var paletteListOpened: false
 
     signal userEdgeInserted(QtObject edge)
-    signal requestEdgeCreation(var src, var dst)
     signal nodeClicked(QtObject node)
     signal doubleClicked(var pos)
     signal rightClicked(var pos)
@@ -309,13 +306,6 @@ Rectangle{
 
         addBoxItem.assignFocus()
 
-    }
-
-    onRequestEdgeCreation: {
-        var srcPort = graph.connector.sourcePort
-        var dstPort = lastTargetPort
-
-        bindPorts(srcPort, dstPort)
     }
 
     function bindPorts(src, dst){
@@ -501,14 +491,18 @@ Rectangle{
             onEdgeClicked: root.edgeClicked(edge)
             onNodeClicked : root.nodeClicked(node)
             onConnectorEdgeInserted : root.userEdgeInserted(edge)
-            onConnectorRequestEdgeCreation: root.requestEdgeCreation(src, dst)
             selectionColor: "#fff"
             selectionWeight: 1
-            connectorCreateDefaultEdge: false
             nodeDelegate: ObjectNode{
                 nodeStyle: root.style.objectNodeStyle
             }
             Component.onCompleted : {
+                graph.connector.edgeComponent = graph.edgeDelegate
+                graph.connector.createEdgeHook = function(src, dst){
+                    if (src === dst)
+                        return graph.edgeDelegateCurved
+                    return graph.edgeDelegate
+                }
                 graphView.navigable = Qt.binding(function(){ return root.isInteractive })
                 styleManager.styles.at(1).lineColor = root.style.connectorColor
             }

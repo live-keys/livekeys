@@ -27,7 +27,7 @@
 import QtQuick 2.7
 
 import workspace.quickqanava 2.0 as Qan
-import workspace.nodeeditor 1.0 as Ne
+
 /*! \brief Droppable node control that allow direct mouse/touch edge creation between nodes.
  *
  * \image html VisualConnector.png
@@ -72,7 +72,9 @@ Qan.Connector {
     //! True when the connector item is currently dragged.
     property bool   connectorDragged: dropDestArea.drag.active
 
-    edgeComponent: Component{ Ne.Edge{} }
+    property var    createEdgeHook: null
+
+    edgeComponent: Component{ Qan.Edge{} }
     onEdgeColorChanged: {
         if (edgeItem)
             edgeItem.color = edgeColor
@@ -214,15 +216,7 @@ Qan.Connector {
         enabled: true
         onReleased: {
             if ( connectorItem.state === "HILIGHT" ) {
-                var par = visualConnector
-                while (par && par.objectName !== "objectGraph"){
-                    par= par.parent
-                }
-                if (par){
-                    par.lastTargetPort = visualConnector.Drag.target
-                }
-
-                connectorReleased(visualConnector.Drag.target)
+                connectorReleased(visualConnector.Drag.target, createEdgeHook)
             }
             configureConnectorPosition()
             if (edgeItem)       // Hide the edgeItem after a mouse release or it could

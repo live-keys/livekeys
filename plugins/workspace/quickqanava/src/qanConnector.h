@@ -100,7 +100,7 @@ signals:
 
 protected:
     //! Should be called from QML when connector draggable item is released other a target.
-    Q_INVOKABLE void    connectorReleased(QQuickItem* target) noexcept;
+    Q_INVOKABLE void    connectorReleased(QQuickItem* target, QJSValue callback) noexcept;
     //! Should be called from QML when connector draggable item is pressed.
     Q_INVOKABLE void    connectorPressed() noexcept;
 
