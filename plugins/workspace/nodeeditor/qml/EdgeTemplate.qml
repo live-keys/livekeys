@@ -49,6 +49,22 @@ Item {
     property var    lineType: edgeItem.style ? edgeItem.style.lineType : Qan.EdgeStyle.Straight
     property var    dashed  : edgeItem.style && style.dashed ? ShapePath.DashLine : ShapePath.SolidLine
 
+    property var k: {
+        if (!edgeItem || edgeItem.p2.x === edgeItem.p1.x) return 0
+        return (edgeItem.p2.y - edgeItem.p1.y)/(edgeItem.p2.x - edgeItem.p1.x)
+    }
+    property var n: {
+        if (!edgeItem || edgeItem.p2.x === edgeItem.p1.x) return 0
+        return edgeItem.p2.y - k*edgeItem.p2.x
+    }
+
+    function lineYValue(x){
+        if (edgeItem.p2.x === edgeItem.p1.x)
+            return (edgeItem.p1.y + edgeItem.p2.y)/2
+
+        return k*x+n
+    }
+
     Shape {
         id: arrowHead
         transformOrigin: Item.TopLeft
@@ -56,7 +72,7 @@ Item {
         x: edgeItem.p2.x
         y: edgeItem.p2.y
         visible: ((edgeItem.dstShape === Qan.EdgeStyle.Arrow) || (edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen))
-                 && edgeItem.visible && !edgeItem.hidden
+                 && edgeItem.visible && !edgeItem.hidden && edgeTemplate.lineType === Qan.EdgeStyle.Straight
         ShapePath {
             strokeColor: edgeTemplate.color
             fillColor: edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen ? Qt.rgba(0.,0.,0.,0.) : edgeTemplate.color
@@ -65,6 +81,24 @@ Item {
             PathLine { x: edgeItem.dstA3.x; y: edgeItem.dstA3.y }
             PathLine { x: edgeItem.dstA2.x; y: edgeItem.dstA2.y }
             PathLine { x: edgeItem.dstA1.x; y: edgeItem.dstA1.y }
+        }
+    }
+
+    Shape {
+        id: arrowHeadCurved
+        visible: ((edgeItem.dstShape === Qan.EdgeStyle.Arrow) || (edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen))
+                 && edgeItem.visible && !edgeItem.hidden && edgeTemplate.lineType === Qan.EdgeStyle.Curved
+        ShapePath {
+            id: shapePathCurved
+            strokeColor: edgeTemplate.color
+            fillColor: edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen ? Qt.rgba(0.,0.,0.,0.) : edgeTemplate.color
+            strokeWidth: edgeItem.style ? edgeItem.style.lineWidth : 2
+            property var dx: 12
+            property var dy: k*dx
+            startX: edgeItem.p2.x - shapePathCurved.dx;   startY: edgeItem.p2.y - shapePathCurved.dy
+            PathLine { x: edgeItem.p2.x - 15 - shapePathCurved.dx; y: lineYValue(x) + 5 - shapePathCurved.dy}
+            PathLine { x: edgeItem.p2.x - 15 - shapePathCurved.dx; y: lineYValue(x) - 5 - shapePathCurved.dy}
+            PathLine { x: edgeItem.p2.x - shapePathCurved.dx;   y: edgeItem.p2.y - shapePathCurved.dy }
         }
     }
     Shape {
@@ -217,40 +251,30 @@ Item {
             dashPattern: edgeItem.style ? style.dashPattern : [4, 2]
             fillColor: Qt.rgba(0,0,0,0)
 
-
-
-            function lineYValue(x){
-                if (edgeItem.p2.x === edgeItem.p1.x)
-                    return (edgeItem.p1.y + edgeItem.p2.y)/2
-
-                var k = (edgeItem.p2.y - edgeItem.p1.y)/(edgeItem.p2.x - edgeItem.p1.x)
-                var n = edgeItem.p2.y - k*edgeItem.p2.x
-
-                return k*x+n
-            }
-
-            property point pt1: Qt.point(edgeItem.p1.x + 40, lineYValue(edgeItem.p1.x + 40) + 40)
-            property point pt2: Qt.point(edgeItem.p1.x, edgeItem.p1.y + 40)
-            property point pt3: Qt.point(edgeItem.p2.x, edgeItem.p2.y + 40)
-            property point pt4: Qt.point(edgeItem.p2.x - 40, lineYValue(edgeItem.p2.x - 40) + 40)
-
-            PathQuad {
-                x: pt2.x
-                y: pt2.y
-                controlX: pt1.x
-                controlY: pt1.y
+            PathLine {
+                x: edgeItem.p1.x + 30
+                y: edgeTemplate.lineYValue(x)
             }
 
             PathLine {
-                x: pt3.x
-                y: pt3.y
+                x: edgeItem.p1.x + 30
+                y: edgeTemplate.lineYValue(x) + 30
             }
 
-            PathQuad {
+            PathLine {
+                x: edgeItem.p2.x - 40
+                y: edgeTemplate.lineYValue(x) + 30
+            }
+
+            PathLine {
+                x: edgeItem.p2.x - 40
+                y: edgeTemplate.lineYValue(x)
+            }
+
+
+            PathLine {
                 x: edgeItem.p2.x
                 y: edgeItem.p2.y
-                controlX: pt4.x
-                controlY: pt4.y
             }
 
         }
