@@ -308,8 +308,13 @@ Rectangle{
     function bindPorts(src, dst){
         var srcNode = src.objectProperty.node
         var dstNode = dst.objectProperty.node
-        
-        var edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate)
+        var edge = null
+        if (srcNode === dstNode){
+            edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegateCurved)
+        } else {
+            edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegate )
+        }
+
         graph.bindEdge(edge, src, dst)
         
         src.outEdges.push(edge)
@@ -482,6 +487,7 @@ Rectangle{
             connectorEdgeColor: root.style.connectorEdgeColor
             connectorColor: root.style.connectorColor
             edgeDelegate: Edge{}
+            property Component edgeDelegateCurved: Edge { lineType: Qan.EdgeStyle.Curved }
             verticalDockDelegate : VerticalDock{}
             portDelegate: Port{}
             selectionDelegate: Selection{}
@@ -489,14 +495,18 @@ Rectangle{
             onEdgeClicked: root.edgeClicked(edge)
             onNodeClicked : root.nodeClicked(node)
             onConnectorEdgeInserted : root.userEdgeInserted(edge)
-
             selectionColor: "#fff"
             selectionWeight: 1
-
             nodeDelegate: ObjectNode{
                 nodeStyle: root.style.objectNodeStyle
             }
             Component.onCompleted : {
+                graph.connector.edgeComponent = graph.edgeDelegate
+                graph.connector.createEdgeHook = function(src, dst){
+                    if (src === dst)
+                        return graph.edgeDelegateCurved
+                    return graph.edgeDelegate
+                }
                 graphView.navigable = Qt.binding(function(){ return root.isInteractive })
                 styleManager.styles.at(1).lineColor = root.style.connectorColor
             }
