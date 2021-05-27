@@ -20,6 +20,7 @@ Workspace.SelectableListView{
         model = wdlist
     }
 
+    signal itemHighlighted(int index)
     signal itemSelected(int index)
     onItemSelected: {
         var item = model[index]
@@ -99,6 +100,7 @@ Workspace.SelectableListView{
                         }
                     } else {
                         root.selectedIndexes = [index]
+                        root.itemHighlighted(index)
                     }
                     root.forceActiveFocus()
                 }

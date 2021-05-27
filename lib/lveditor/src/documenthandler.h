@@ -79,8 +79,6 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    /** Returns the TextEdit */
-    TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
     int currentCursorPosition() const;
@@ -111,6 +109,9 @@ public slots:
     void insertTab(int position);
 
     void frameBox(QQuickItem *box, int position, int length);
+
+    /** Returns the TextEdit */
+    lv::TextEdit* textEdit();
 
     bool has(int feature);
 

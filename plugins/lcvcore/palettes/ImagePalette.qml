@@ -40,10 +40,11 @@ CodePalette{
         property Component saveButton: theme.buttons.save
     }
 
-    item: Item{
+    item: Rectangle{
         id: paletteItem
         width: 500
         height: 300
+        color: '#111'
 
         property QtObject image: null
         onImageChanged: {
@@ -137,7 +138,6 @@ CodePalette{
                 }
             }
         }
-
 
         ResizeArea{
             minimumWidth: 400

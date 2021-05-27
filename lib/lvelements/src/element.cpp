@@ -82,19 +82,19 @@ void Element::setLifeTimeWithObject(const v8::Local<v8::Object> &obj){
         if ( p->isWritable() ){
             obj->SetAccessor(
                 context,
-                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(engine()->isolate(), p->name().c_str())),
+                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(engine()->isolate(), p->name().c_str()).ToLocalChecked()),
                 &Property::ptrGetImplementation,
                 &Property::ptrSetImplementation,
                 pdata
-            );
+            ).IsNothing();
         } else {
             obj->SetAccessor(
                 context,
-                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(engine()->isolate(), p->name().c_str())),
+                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(engine()->isolate(), p->name().c_str()).ToLocalChecked()),
                 &Property::ptrGetImplementation,
                 0,
                 pdata
-            );
+            ).IsNothing();;
         }
     }
 
@@ -135,7 +135,9 @@ void Element::unref(){
 bool Element::hasScriptReference() const{
     if ( m_d->persistent.IsEmpty() )
         return false;
-    return !m_d->persistent.IsNearDeath();
+
+    return true;
+    // return !m_d->persistent.IsNearDeath();
 }
 
 void Element::destroy(Element *e){
@@ -256,14 +258,19 @@ void Element::addEvent(Element *e, const std::string &ekey, const std::vector<st
         v8::Local<v8::External> fdata = v8::External::New(d->engine->isolate(), ie);
 
         v->Set(
-            v8::String::NewFromUtf8(d->engine->isolate(), ekey.c_str()),
-            v8::FunctionTemplate::New(d->engine->isolate(), &InstanceEvent::callbackImplementation, fdata)->GetFunction());
+            d->engine->isolate()->GetCurrentContext(),
+            v8::String::NewFromUtf8(d->engine->isolate(), ekey.c_str()).ToLocalChecked(),
+            v8::FunctionTemplate::New(d->engine->isolate(), &InstanceEvent::callbackImplementation, fdata)->GetFunction(d->engine->isolate()->GetCurrentContext()).ToLocalChecked()
+        ).IsNothing();
     }
 }
 
 void Element::addEvent(Element *e, ScopedValue eventKey, ScopedValue types){
     ElementPrivate* d = e->m_d;
     std::string ekey = eventKey.toStdString(e->engine());
+
+    auto isolate = e->engine()->isolate();
+    auto context = isolate->GetCurrentContext();
 
     if ( d->instanceEvents.find(ekey) != d->instanceEvents.end() )
     {
@@ -284,8 +291,10 @@ void Element::addEvent(Element *e, ScopedValue eventKey, ScopedValue types){
         v8::Local<v8::External> fdata = v8::External::New(d->engine->isolate(), ie);
 
         v->Set(
-            v8::String::NewFromUtf8(d->engine->isolate(), ekey.c_str()),
-            v8::FunctionTemplate::New(d->engine->isolate(), &InstanceEvent::callbackImplementation, fdata)->GetFunction());
+            context,
+            v8::String::NewFromUtf8(isolate, ekey.c_str()).ToLocalChecked(),
+            v8::FunctionTemplate::New(isolate, &InstanceEvent::callbackImplementation, fdata)->GetFunction(context).ToLocalChecked()
+        ).IsNothing();
     }
 }
 
@@ -318,35 +327,39 @@ void Element::addProperty(Element *e, ScopedValue propertyName, ScopedValue prop
     bool isWritable  = true;
     std::string notifyEvent;
 
+    auto isolate = e->engine()->isolate();
+    auto context = isolate->GetCurrentContext();
+
     std::list<std::pair<Element*, std::string> > bindings;
 
-    v8::Local<v8::Object> options = propertyOptions.data()->ToObject();
+    v8::Local<v8::Object> options = propertyOptions.data()->ToObject(context).ToLocalChecked();
 
-    v8::Local<v8::String> typeKey       = v8::String::NewFromUtf8(e->engine()->isolate(), "type");
-    if ( options->Has(typeKey) ){
-        type = *v8::String::Utf8Value(options->Get(typeKey)->ToString());
+    v8::Local<v8::String> typeKey       = v8::String::NewFromUtf8(e->engine()->isolate(), "type").ToLocalChecked();
+    if ( options->Has(context, typeKey).ToChecked() ){
+        type = *v8::String::Utf8Value(isolate, options->Get(context, typeKey).ToLocalChecked()->ToString(context).ToLocalChecked());
     }
 
-    v8::Local<v8::String> isDefaultKey  = v8::String::NewFromUtf8(e->engine()->isolate(), "isDefault");
-    if ( options->Has(isDefaultKey) ){
-        isDefault = options->Get(isDefaultKey)->BooleanValue();
+    v8::Local<v8::String> isDefaultKey  = v8::String::NewFromUtf8(isolate, "isDefault").ToLocalChecked();
+    if ( options->Has(context, isDefaultKey).ToChecked() ){
+        isDefault = options->Get(context, isDefaultKey).ToLocalChecked()->BooleanValue(isolate);
     }
-    v8::Local<v8::String> isWritableKey = v8::String::NewFromUtf8(e->engine()->isolate(), "isWritable");
-    if ( options->Has(isWritableKey) ){
-        isWritable = options->Get(isWritableKey)->BooleanValue();
+    v8::Local<v8::String> isWritableKey = v8::String::NewFromUtf8(isolate, "isWritable").ToLocalChecked();
+    if ( options->Has(context, isWritableKey).ToChecked() ){
+        isWritable = options->Get(context, isWritableKey).ToLocalChecked()->BooleanValue(isolate);
     }
     if ( isWritable ){
-        v8::Local<v8::String> notifyKey = v8::String::NewFromUtf8(e->engine()->isolate(), "notify");
-        notifyEvent = *v8::String::Utf8Value(options->Get(notifyKey)->ToString());
+        v8::Local<v8::String> notifyKey = v8::String::NewFromUtf8(isolate, "notify").ToLocalChecked();
+        notifyEvent = *v8::String::Utf8Value(isolate, options->Get(context, notifyKey).ToLocalChecked()->ToString(context).ToLocalChecked());
     }
 
-    v8::Local<v8::String> valueKey      = v8::String::NewFromUtf8(e->engine()->isolate(), "value");
-    if ( options->Has(valueKey) ){
-        v8::Local<v8::Value> v = options->Get(valueKey);
-        v8::Local<v8::String> bindingsKey = v8::String::NewFromUtf8(e->engine()->isolate(), "bindings");
-        if ( v->IsFunction() && options->Has(bindingsKey) ){
+    v8::Local<v8::String> valueKey      = v8::String::NewFromUtf8(e->engine()->isolate(), "value").ToLocalChecked();
+    if ( options->Has(context, valueKey).ToChecked() ){
+        v8::Local<v8::Value> v = options->Get(context, valueKey).ToLocalChecked();
+        v8::Local<v8::String> bindingsKey = v8::String::NewFromUtf8(e->engine()->isolate(), "bindings").ToLocalChecked();
+        if ( v->IsFunction() && options->Has(context, bindingsKey).ToChecked() ){
             e->addProperty(name, type, value, isDefault, isWritable, notifyEvent);
-            assignPropertyExpression(e, propertyName, ScopedValue(v), ScopedValue(options->Get(bindingsKey)));
+            assignPropertyExpression(e, propertyName, ScopedValue(v),
+                ScopedValue(options->Get(context, bindingsKey).ToLocalChecked()));
         } else {
             value = ScopedValue(e->engine(), v);
             e->addProperty(name, type, value, isDefault, isWritable, notifyEvent);
@@ -367,6 +380,9 @@ void Element::assignPropertyExpression(
     std::string name    = propertyName.toStdString(e->engine());
     Callable expression = propertyExpression.toCallable(e->engine());
     Property* p = e->property(name);
+
+    auto isolate = e->engine()->isolate();
+    auto context = isolate->GetCurrentContext();
 
     auto it = d->boundPropertyExpressions.find(name);
     if ( it != d->boundPropertyExpressions.end() ){
@@ -404,7 +420,7 @@ void Element::assignPropertyExpression(
 
     v8::Local<v8::Array> bindingsArray = v8::Local<v8::Array>::Cast(bindings.data());
     for ( uint32_t i = 0; i < bindingsArray->Length(); ++i ){
-        v8::Local<v8::Array> baItem = v8::Local<v8::Array>::Cast(bindingsArray->Get(i));
+        v8::Local<v8::Array> baItem = v8::Local<v8::Array>::Cast(bindingsArray->Get(context, i).ToLocalChecked());
         if ( baItem->Length() != 2 ){
             lv::Exception exc = CREATE_EXCEPTION(
                 lv::Exception, "Bindings require array of dual arrays: [[object, name]].", Exception::toCode("~Binding")
@@ -413,10 +429,10 @@ void Element::assignPropertyExpression(
             return;
         }
 
-        ScopedValue bindingElementValue = ScopedValue(e->engine(), baItem->Get(0));
+        ScopedValue bindingElementValue = ScopedValue(e->engine(), baItem->Get(context, 0).ToLocalChecked());
         if ( bindingElementValue.isElement() ){
             Element* bindingElement  = bindingElementValue.toElement(e->engine());
-            std::string bindingEvent = ScopedValue(e->engine(), baItem->Get(1)).toStdString(e->engine());
+            std::string bindingEvent = ScopedValue(e->engine(), baItem->Get(context, 1).ToLocalChecked()).toStdString(e->engine());
 
             try {
                 EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
@@ -478,6 +494,8 @@ InstanceProperty* Element::addProperty(
 {
     ElementPrivate* d = m_d;
 
+    auto isolate = engine()->isolate();
+    auto context = isolate->GetCurrentContext();
     if ( d->instanceProperties.find(name) != d->instanceProperties.end() )
     {
         auto exc = CREATE_EXCEPTION(lv::Exception, "A property under such name already exists", lv::Exception::toCode("~Element"));
@@ -512,19 +530,19 @@ InstanceProperty* Element::addProperty(
         if ( isWritable ){
             v->SetAccessor(
                 context,
-                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(d->engine->isolate(), name.c_str())),
+                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(d->engine->isolate(), name.c_str()).ToLocalChecked()),
                 &Property::ptrGetImplementation,
                 &Property::ptrSetImplementation,
                 pdata
-            );
+            ).IsNothing();
         } else {
             v->SetAccessor(
                 context,
-                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(d->engine->isolate(), name.c_str())),
+                v8::Local<v8::Name>::Cast(v8::String::NewFromUtf8(d->engine->isolate(), name.c_str()).ToLocalChecked()),
                 &Property::ptrGetImplementation,
                 0,
                 pdata
-            );
+            ).IsNothing();
         }
     }
 

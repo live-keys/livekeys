@@ -12,13 +12,13 @@
 [![Build Status](https://travis-ci.com/live-keys/livekeys.svg?branch=master)](https://travis-ci.com/live-keys/livekeys)
 [![Build status](https://ci.appveyor.com/api/projects/status/3l5t69h7q3gpkec1?svg=true)](https://ci.appveyor.com/project/dinusv/livekeys)
 
- * **Version**: 1.8.0
+ * **Version**: 1.9.0
  * **License**: LGPL
  * **Website**: [livekeys.io](https://livekeys.io)
  * **Demo**: [www.youtube.com/watch?v=ZPt5KSy1wh0](https://www.youtube.com/watch?v=ZPt5KSy1wh0)
  * **Documentation**: [livekeys.io/docs](https://livekeys.io/docs)
  * **Build Requirements**:
-   * Qt 5.11 or higher
+   * Qt 5.12 or higher
    * Open CV 4.1 or higher
 
 Livekeys is a platform that automates content creation in real time by combining visual scripting with live coding.
@@ -79,9 +79,8 @@ can also share their own as easily as possible. To do this, it needs to be scala
 easy to use build system, and a place to access and share plugins. Our goal is to reach this in version 2.0 of the
 application.
 
- * Version 1.8 - MultiThreading Module
-    * Executing components in separate threads
-    * Automatic assignment of components to threads according to their execution time
+ * Version 1.10 - MultiThreading Module
+    * Async execution
  * Version 2.0 - Package Manager Details
     * Plugin and sample showroom on Live Keys's website
     * Support for fetching plugins and samples from within the application

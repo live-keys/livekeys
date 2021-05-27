@@ -3,7 +3,6 @@
         <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
         <file alias="ProjectEnvironment.qml">qml/ProjectEnvironment.qml</file>
-        <file alias="MessageDialogButton.qml">qml/MessageDialogButton.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
         <file alias="ProjectNavigation.qml">qml/ProjectNavigation.qml</file>
         <file alias="ProjectAddEntry.qml">qml/ProjectAddEntry.qml</file>

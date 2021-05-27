@@ -1205,7 +1205,6 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int len
  */
 QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
     Q_D(CodeQmlHandler);
-    Project* project = d->projectHandler->project();
 
     if ( m_document ){
         d->syncParse(m_document);
@@ -1298,8 +1297,16 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
 
         QString creationPath = m_document->file()->path();
         creationPath.replace(".qml", "_a.qml");
+
+        QQmlContext* creationCtx = nullptr;
+        if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
+            QObject* creationObj = bc->object();
+            if ( creationObj )
+                creationCtx = new QQmlContext(qmlContext(creationObj));
+        }
+
         QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", creationPath
+            d->documentInfo(), type + "{}", creationPath, nullptr, creationCtx
         );
         if ( !result )
             THROW_EXCEPTION(lv::Exception, "Failed to create object: " + type.toStdString(), Exception::toCode("~CreateObject"));
@@ -3457,6 +3464,10 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
             m_engine->throwError(res, this);
         }
     }
+}
+
+DocumentHandler *CodeQmlHandler::documentHandler() const{
+    return qobject_cast<DocumentHandler*>(parent());
 }
 
 void CodeQmlHandler::__whenLibraryScanQueueCleared(){

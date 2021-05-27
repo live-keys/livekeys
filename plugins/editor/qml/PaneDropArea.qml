@@ -16,6 +16,8 @@ Rectangle{
     property int leftPosition: 3
 
     property Item currentPane : null
+    property var paneFactory: null
+
     property alias model: repeater.model
 
     Repeater{

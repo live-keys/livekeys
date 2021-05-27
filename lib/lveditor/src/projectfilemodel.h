@@ -76,6 +76,7 @@ public slots:
     lv::ProjectFile* addFile(lv::ProjectEntry* parentEntry, const QString& name);
     lv::ProjectFile* addTemporaryFile();
     lv::ProjectEntry* addDirectory(lv::ProjectEntry* parentEntry, const QString& name);
+    lv::ProjectEntry* findPath(const QString& path);
     bool removeEntry(lv::ProjectEntry* entry);
 
     void expandEntry(lv::ProjectEntry* entry) const;

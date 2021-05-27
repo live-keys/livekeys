@@ -16,22 +16,25 @@ void ErrorHandler::setTarget(Element *target){
     if ( target == m_target )
         return;
 
+    auto isolate = engine()->isolate();
+    auto context = isolate->GetCurrentContext();
+
     if ( m_target != nullptr ){
         v8::Local<v8::Object> lo = ElementPrivate::localObject(m_target);
         v8::Local<v8::String> ehKey = v8::String::NewFromUtf8(
-            engine()->isolate(), "__errorhandler__", v8::String::kInternalizedString
-        );
+            engine()->isolate(), "__errorhandler__", v8::NewStringType::kInternalized
+        ).ToLocalChecked();
 
-        if ( lo->Has(ehKey) )
-            lo->Delete(ehKey);
+        if ( lo->Has(context, ehKey).ToChecked() )
+            lo->Delete(context, ehKey).IsNothing();
     }
     if ( target != nullptr ){
         v8::Local<v8::Object> lo = ElementPrivate::localObject(target);
         v8::Local<v8::String> ehKey = v8::String::NewFromUtf8(
-            engine()->isolate(), "__errorhandler__", v8::String::kInternalizedString
-        );
+            engine()->isolate(), "__errorhandler__", v8::NewStringType::kInternalized
+        ).ToLocalChecked();
 
-        lo->Set(ehKey, ElementPrivate::localObject(this));
+        lo->Set(context, ehKey, ElementPrivate::localObject(this)).IsNothing();
     }
 
     m_target = target;
@@ -43,14 +46,16 @@ void ErrorHandler::rethrow(ScopedValue e){
     if ( current )
         current = m_target->parent();
 
+    auto isolate = engine()->isolate();
+    auto context = isolate->GetCurrentContext();
     v8::Local<v8::String> ehKey = v8::String::NewFromUtf8(
-        engine()->isolate(), "__errorhandler__", v8::String::kInternalizedString
-    );
+        engine()->isolate(), "__errorhandler__", v8::NewStringType::kInternalized
+    ).ToLocalChecked();
 
     while ( current ){
         v8::Local<v8::Object> lo = ElementPrivate::localObject(current);
-        if ( lo->Has(ehKey) ){
-            Element* elem = ElementPrivate::elementFromObject(lo->Get(ehKey)->ToObject());
+        if ( lo->Has(context, ehKey).ToChecked() ){
+            Element* elem = ElementPrivate::elementFromObject(lo->Get(context, ehKey).ToLocalChecked()->ToObject(context).ToLocalChecked());
             ErrorHandler* ehandler = elem->cast<ErrorHandler>();
             ehandler->handlerError(e.data(), m_lastError);
             break;

@@ -40,6 +40,10 @@ QtObject{
                     if ( segment.surface )
                         segment.surface = timeline.properties.videoSurface
                     currentTrack.addSegment(segment)
+                    if ( timeline.cursorPosition === segment.position ){
+                        timeline.cursorPosition += segment.length
+                    }
+
                     overlay.closeBox()
                 })
 
@@ -83,6 +87,9 @@ QtObject{
 
                     if ( segment.surface )
                         segment.surface = timeline.properties.videoSurface
+                    if ( timeline.cursorPosition === segment.position ){
+                        timeline.cursorPosition += segment.length
+                    }
                     currentTrack.addSegment(segment)
                     overlay.closeBox()
                 })
@@ -126,6 +133,9 @@ QtObject{
 
                     if ( segment.surface )
                         segment.surface = timeline.properties.videoSurface
+                    if ( timeline.cursorPosition === segment.position ){
+                        timeline.cursorPosition += segment.length
+                    }
                     currentTrack.addSegment(segment)
                     overlay.closeBox()
                 })

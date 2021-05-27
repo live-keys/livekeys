@@ -62,7 +62,9 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
                 QmlBindingPath::Ptr watcherBp = QmlBindingPath::create();
                 watcherBp->appendFile(run->path());
                 watcherBp->appendWatcher(w->referencedFile(), objectId);
+
                 QmlBindingChannel::Ptr bpChannel = DocumentQmlChannels::traverseBindingPath(watcherBp, run);
+
                 if ( bpChannel ){
                     documentChannels->updateChannel(bpChannel);
                 }
@@ -80,11 +82,43 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
                 }
             }
         }
-
     }
 
-    //HERE: Add connection to hook container
-    // Define scenario first
+    // For watchers that initialize after the build is ready, connect them later
+    connect(hooks, &HookContainer::entryAdded, this, &QmlBindingChannelsDispatcher::__hookEntryAdded);
+}
+
+void QmlBindingChannelsDispatcher::__hookEntryAdded(Runnable *runnable, const QString &file, const QString &id, QObject *object){
+    for ( auto it = m_channeledDocuments.begin(); it != m_channeledDocuments.end(); ++it ){
+        DocumentQmlChannels* documentChannels = *it;
+        QString filePath = documentChannels->document()->file()->path();
+        if ( filePath == file ){
+            if ( qobject_cast<QmlWatcher*>(object) ){
+
+                QmlWatcher* w = qobject_cast<QmlWatcher*>(object);
+
+                QmlBindingPath::Ptr watcherBp = QmlBindingPath::create();
+                watcherBp->appendFile(runnable->path());
+                watcherBp->appendWatcher(w->referencedFile(), id);
+                QmlBindingChannel::Ptr bpChannel = DocumentQmlChannels::traverseBindingPath(watcherBp, runnable);
+                if ( bpChannel ){
+                    documentChannels->updateChannel(bpChannel);
+                }
+
+            } else if ( qobject_cast<QmlBuilder*>(object) ){
+
+                QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
+                builderBp->appendFile(filePath);
+                builderBp->appendComponent(id, id);
+                QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, runnable);
+                if ( builderC ){
+                    builderC->setIsBuilder(true);
+                    builderC->setEnabled(true);
+                    documentChannels->updateChannel(builderC);
+                }
+            }
+        }
+    }
 }
 
 void QmlBindingChannelsDispatcher::removeDocumentChannels(DocumentQmlChannels *documentChannels){

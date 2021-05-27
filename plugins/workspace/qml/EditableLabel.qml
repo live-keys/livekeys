@@ -17,6 +17,8 @@ Item{
     property alias boxBackgroundColor: inputBox.color
     
     property bool isEditing : false
+
+    signal rightClicked(var mouse)
     
     Workspace.Label{
         id: labelText
@@ -50,11 +52,17 @@ Item{
     MouseArea{
         anchors.fill: parent
         visible: !parent.isEditing
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
         onDoubleClicked: {
             parent.isEditing = !parent.isEditing
             if ( parent.isEditing )
                 inputBox.selectAll()
         }
+        onClicked: {
+            if ( mouse.button === Qt.RightButton)
+                root.rightClicked(mouse)
+        }
+
     }
 }
 

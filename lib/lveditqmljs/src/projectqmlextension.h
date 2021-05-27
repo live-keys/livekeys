@@ -52,8 +52,6 @@ public:
     QmlProjectMonitor* scanMonitor();
     QmlBindingChannelsDispatcher* channelsDispatcher();
 
-    static void engineHook(const QString& code, const QUrl& file, QObject* result, void *data);
-
     void addCodeQmlHandler(CodeQmlHandler* handler);
     void removeCodeQmlHandler(CodeQmlHandler* handler);
 

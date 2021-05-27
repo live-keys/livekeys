@@ -58,6 +58,7 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
+    Q_PROPERTY(lv::DocumentHandler* documentHandler        READ documentHandler CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
 
@@ -116,11 +117,13 @@ public:
         GroupOnly = 4,
         NoReadOnly = 8
     };
+    Q_ENUMS(AddOptionsFilter);
 
     QmlEditFragmentContainer *editContainer();
     DocumentQmlChannels* bindingChannels() const;
+    DocumentHandler* documentHandler() const;
 
-    Q_ENUMS(AddOptionsFilter);
+
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
@@ -320,6 +323,7 @@ private:
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 
     Q_DECLARE_PRIVATE(CodeQmlHandler)
+    lv::DocumentHandler* m_documentHandler;
 };
 
 inline ProjectDocument *CodeQmlHandler::document() const{
