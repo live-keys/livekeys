@@ -49,21 +49,9 @@ Item {
     property var    lineType: edgeItem.style ? edgeItem.style.lineType : Qan.EdgeStyle.Straight
     property var    dashed  : edgeItem.style && style.dashed ? ShapePath.DashLine : ShapePath.SolidLine
 
-    property var k: {
-        if (!edgeItem || edgeItem.p2.x === edgeItem.p1.x) return 0
-        return (edgeItem.p2.y - edgeItem.p1.y)/(edgeItem.p2.x - edgeItem.p1.x)
-    }
-    property var n: {
-        if (!edgeItem || edgeItem.p2.x === edgeItem.p1.x) return 0
-        return edgeItem.p2.y - k*edgeItem.p2.x
-    }
-
-    function lineYValue(x){
-        if (edgeItem.p2.x === edgeItem.p1.x)
-            return (edgeItem.p1.y + edgeItem.p2.y)/2
-
-        return k*x+n
-    }
+    property var rightSideHeight: 0
+    property var nodeWidth: 0
+    property var padWidth: 0
 
     Shape {
         id: arrowHead
@@ -93,12 +81,10 @@ Item {
             strokeColor: edgeTemplate.color
             fillColor: edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen ? Qt.rgba(0.,0.,0.,0.) : edgeTemplate.color
             strokeWidth: edgeItem.style ? edgeItem.style.lineWidth : 2
-            property var dx: 12
-            property var dy: k*dx
-            startX: edgeItem.p2.x - shapePathCurved.dx;   startY: edgeItem.p2.y - shapePathCurved.dy
-            PathLine { x: edgeItem.p2.x - 15 - shapePathCurved.dx; y: lineYValue(x) + 5 - shapePathCurved.dy}
-            PathLine { x: edgeItem.p2.x - 15 - shapePathCurved.dx; y: lineYValue(x) - 5 - shapePathCurved.dy}
-            PathLine { x: edgeItem.p2.x - shapePathCurved.dx;   y: edgeItem.p2.y - shapePathCurved.dy }
+            startX: edgeItem.p2.x - 15;   startY: edgeItem.p2.y
+            PathLine { x: edgeItem.p2.x - 30; y: edgeItem.p2.y + 5}
+            PathLine { x: edgeItem.p2.x - 30; y: edgeItem.p2.y - 5}
+            PathLine { x: edgeItem.p2.x - 15;   y: edgeItem.p2.y }
         }
     }
     Shape {
@@ -252,23 +238,24 @@ Item {
             fillColor: Qt.rgba(0,0,0,0)
 
             PathLine {
-                x: edgeItem.p1.x + 30
-                y: edgeTemplate.lineYValue(x)
+                x: edgeItem.p1.x + edgeTemplate.padWidth
+                y: edgeItem.p1.y
+
             }
 
             PathLine {
-                x: edgeItem.p1.x + 30
-                y: edgeTemplate.lineYValue(x) + 30
+                x: edgeItem.p1.x + edgeTemplate.padWidth
+                y: edgeItem.p1.y + edgeTemplate.rightSideHeight
             }
 
             PathLine {
-                x: edgeItem.p2.x - 40
-                y: edgeTemplate.lineYValue(x) + 30
+                x: edgeItem.p1.x - edgeTemplate.padWidth - edgeTemplate.nodeWidth
+                y: edgeItem.p1.y + edgeTemplate.rightSideHeight
             }
 
             PathLine {
-                x: edgeItem.p2.x - 40
-                y: edgeTemplate.lineYValue(x)
+                x: edgeItem.p1.x - edgeTemplate.padWidth - edgeTemplate.nodeWidth
+                y: edgeItem.p2.y
             }
 
 
@@ -277,6 +264,29 @@ Item {
                 y: edgeItem.p2.y
             }
 
+        }
+    }
+
+    Connections {
+        target: edgeItem
+        ignoreUnknownSignals: false
+        function onSourceItemChanged(){
+            if (!edgeItem.sourceItem) return
+            var p = edgeItem.sourceItem
+
+            while (p && p.objectName !== "objectNode"){
+                p = p.parent
+            }
+            if (p){
+                edgeTemplate.padWidth = 25 + (edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
+
+                edgeTemplate.rightSideHeight = Qt.binding(function(){
+                    return p.height - edgeItem.p1.y + (edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
+                })
+                edgeTemplate.nodeWidth = Qt.binding(function(){
+                    return p.width
+                })
+            }
         }
     }
 
