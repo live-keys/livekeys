@@ -15,5 +15,4 @@ Threshold           1.0 Threshold.qml
 Blend               1.0 Blend.qml
 FaceDetection       1.0 FaceDetection.qml
 DrawDetectedFaces   1.0 DrawDetectedFaces.qml
-DrawFaceLandmarks   1.0 DrawFaceLandmarks.qml
 Pad                 1.0 Pad.qml

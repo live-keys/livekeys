@@ -54,7 +54,6 @@ OTHER_FILES *= \
 DISTFILES += \
     qml/Blend.qml \
     qml/DrawDetectedFaces.qml \
-    qml/DrawFaceLandmarks.qml \
     qml/FaceDetection.qml \
     qml/Pad.qml \
     qml/Resize.qml \
