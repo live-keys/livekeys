@@ -40,6 +40,7 @@ Rectangle{
     property var editorPosition : null
     property var editor: null
     property Item pane: null
+    property Item dragPane: null
 
     property bool paletteSwapVisible: false
     property bool paletteAddVisible: false
@@ -239,6 +240,25 @@ Rectangle{
                 })
                 item.moveToNewPane.connect(function(){
                     paletteContainer.paletteToPane()
+                })
+                item.dragToNewPaneStarted.connect(function(){
+                    lk.layers.workspace.panes.__dragStarted(function(){
+                        var palettePane = lk.layers.workspace.panes.createPane('palette', {}, [400, 400])
+                        paletteContainer.dragPane = palettePane
+                        return palettePane
+                    })
+                })
+                item.dragToNewPaneFinished.connect(function(){
+                    lk.layers.workspace.panes.__dragFinished()
+
+                    var palettePane = paletteContainer.dragPane
+                    paletteContainer.dragPane = null
+
+                    paletteContainer.pane = palettePane
+
+                    palettePane.paletteContainer = paletteChild
+                    palettePane.title = paletteContainer.title
+                    paletteChild.y = 0
                 })
             }
         }

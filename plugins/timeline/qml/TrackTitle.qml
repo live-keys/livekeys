@@ -9,10 +9,16 @@ Item{
     width: parent.width
     height: 25
 
+    objectName: "timelineTrackTitle"
+
+    property Item timelineArea: null
     property QtObject timelineStyle : null
     property int trackIndex : 0
 
+    property var menuOptions: null
+
     signal addSegment(int index)
+    signal rightClicked(int index, Item trackTitleItem)
 
     property alias labelColor: editableLabel.textColor
     property alias borderColor: borderBottom.color
@@ -35,8 +41,8 @@ Item{
 
         Icons.MenuIcon{
             id: menuIcon
-            width: 5
-            height: 6
+            width: 2
+            height: 10
             anchors.centerIn: parent
             color: root.timelineStyle.iconColor
         }
@@ -45,7 +51,7 @@ Item{
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                contextMenu.popup()
+                root.timelineArea.handleContextMenu(root)
             }
         }
     }
@@ -60,28 +66,11 @@ Item{
         onTextChanged: {
             track.name = text
         }
-    }
-
-    Menu{
-        id: contextMenu
-        MenuItem {
-            text: qsTr("Remove Track")
-            onTriggered: timelineArea.timeline.removeTrack(index)
-        }
+        onRightClicked: root.rightClicked(root.trackIndex, root)
     }
 
     Component.onCompleted: {
         // load menu for this track type
-        var menuOptions = timelineArea.timeline.config.trackMenu(track)
-        if ( !menuOptions )
-            return
-
-        var tr = track
-
-        for ( var i = 0; i < menuOptions.length; ++i ){
-            var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
-            menuitem.enabled = menuOptions[i].enabled
-            menuitem.triggered.connect(menuOptions[i].action.bind(this, track))
-        }
+        root.menuOptions = timelineArea.timeline.config.trackMenu(track)
     }
 }

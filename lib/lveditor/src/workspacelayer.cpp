@@ -38,6 +38,7 @@ namespace lv{
 WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
     , m_projectEnvironment(nullptr)
+    , m_wizards(nullptr)
     , m_panes(nullptr)
     , m_viewRoot(nullptr)
     , m_messageStack(new lv::WorkspaceMessageStack(this))
@@ -165,6 +166,7 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
         );
 
     m_projectEnvironment = m_viewRoot->property("projectEnvironment").value<QObject*>();
+    m_wizards            = m_projectEnvironment->property("wizards").value<QObject*>();
     m_panes              = m_viewRoot->property("panes").value<QObject*>();
     m_nextViewParent     = m_viewRoot->property("runSpace").value<QObject*>();
     QJSValue paneFactories = m_panes->property("factories").value<QJSValue>();

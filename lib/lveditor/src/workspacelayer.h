@@ -29,6 +29,7 @@ class WorkspaceLayer : public Layer{
 
     Q_OBJECT
     Q_PROPERTY(QObject* project                     READ project       NOTIFY projectChanged)
+    Q_PROPERTY(QObject* wizards                     READ wizards       NOTIFY wizardsChanged)
     Q_PROPERTY(QObject* panes                       READ panes         NOTIFY panesChanged)
     Q_PROPERTY(lv::WorkspaceMessageStack* messages  READ messages      CONSTANT)
     Q_PROPERTY(lv::Commands* commands               READ commands      CONSTANT)
@@ -49,6 +50,7 @@ public:
     QObject * viewRoot() override;
 
     QObject* project() const;
+    QObject* wizards() const;
     QObject* panes() const;
     lv::WorkspaceMessageStack* messages() const;
 
@@ -87,6 +89,7 @@ public slots:
 
 signals:
     void projectChanged();
+    void wizardsChanged();
     void panesChanged();
 
 private:
@@ -100,6 +103,7 @@ private:
     QObject* m_nextViewParent;
 
     QObject* m_projectEnvironment;
+    QObject* m_wizards;
     QObject* m_panes;
     QObject* m_viewRoot;
 
@@ -124,6 +128,10 @@ private:
 
 inline QObject *WorkspaceLayer::project() const{
     return m_projectEnvironment;
+}
+
+inline QObject *WorkspaceLayer::wizards() const{
+    return m_wizards;
 }
 
 inline QObject *WorkspaceLayer::panes() const{

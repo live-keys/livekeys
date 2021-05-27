@@ -150,6 +150,20 @@ ProjectFile *ProjectFileModel::openFile(const QString &file){
     return openExternalFile(absolutePath);
 }
 
+ProjectEntry *ProjectFileModel::findPath(const QString &path){
+    QString absolutePath = QFileInfo(path).absoluteFilePath();
+    if ( m_root->childCount() == 0 )
+        return nullptr;
+    ProjectEntry* projectEntry = m_root->child(0);
+    if ( absolutePath.indexOf(projectEntry->path()) == 0 ){
+        QString pathLeft = absolutePath.mid(projectEntry->path().size());
+        pathLeft.prepend(pathLeft.startsWith("/") ? projectEntry->name() : (projectEntry->name() + "/"));
+        return findPathInEntry(projectEntry, pathLeft);
+    }
+
+    return nullptr;
+}
+
 ProjectEntry *ProjectFileModel::findPathInEntry(ProjectEntry *entry, const QString &path){
     if ( path.indexOf(entry->name()) == 0 ){
         QString pathLeft = path.mid(entry->name().size());

@@ -24,6 +24,8 @@ Rectangle{
     signal addPalette()
     signal viewConnections()
     signal moveToNewPane()
+    signal dragToNewPaneStarted()
+    signal dragToNewPaneFinished()
     signal collapse()
     signal rebuild()
     signal close()
@@ -32,21 +34,39 @@ Rectangle{
         id: paletteBoxMoveArea
         anchors.fill: parent
 
-        enabled: root.enableMove
-        cursorShape: enabled ? Qt.SizeAllCursor : Qt.ArrowCursor
+        enabled: root.enableMove || root.canMoveToNewPane
+        cursorShape: enabled && !root.canMoveToNewPane ? Qt.SizeAllCursor : Qt.ArrowCursor
 
         property point lastMousePos : Qt.point(0, 0)
         onPressed: {
-            root.handleMovePress(mouse)
-            lastMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
+            if ( !root.canMoveToNewPane ){
+                root.handleMovePress(mouse)
+                lastMousePos = paletteBoxMoveArea.mapToGlobal(mouse.x, mouse.y)
+            }
+
         }
         onPositionChanged: {
-            if ( mouse.buttons & Qt.LeftButton ){
+            if ( mouse.buttons & Qt.LeftButton && !root.canMoveToNewPane){
                 var currentMousePos = item.mapToGlobal(mouse.x, mouse.y)
                 root.handleMovePositionChanged(mouse, currentMousePos, lastMousePos)
                 lastMousePos = currentMousePos
             }
         }
+
+        drag.target: root.canMoveToNewPane ? draggable : undefined
+        drag.onActiveChanged: draggable.Drag.active = drag.active
+    }
+
+    Item {
+        id: draggable
+        anchors.fill: parent
+        visible: root.canMoveToNewPane
+        Drag.hotSpot.x: 0
+        Drag.hotSpot.y: 0
+        Drag.mimeData: { "text/plain": root.title }
+        Drag.dragType: Drag.Automatic
+        Drag.onDragStarted: root.dragToNewPaneStarted()
+        Drag.onDragFinished: root.dragToNewPaneFinished()
     }
 
     Item{

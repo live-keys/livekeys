@@ -1,0 +1,13 @@
+component A {
+    function c(){
+        return Element {
+            var x: {
+                var d = Element {
+                    var y : 10
+                }
+                
+                return d.y
+            }
+        }
+    }
+}

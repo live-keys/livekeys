@@ -27,7 +27,7 @@ void HookContainer::insertKey(const QString &file, const QString &id, QObject *o
 
     idIt.value().append(obj);
 
-    emit entryAdded(file, id, obj);
+    emit entryAdded(m_runnable, file, id, obj);
 }
 
 void HookContainer::removeEntry(const QString &sourceFile, const QString &id, QObject *obj){

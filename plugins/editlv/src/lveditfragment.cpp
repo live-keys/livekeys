@@ -251,8 +251,8 @@ void LvEditFragment::updateValue(){
         }
         if ( m_bindingPalette ){
             // m_bindingPalette->setValueFromBinding(inputPath->property().read()); // TODO: ELEMENTS #381
-            CodeConverter* cvt = static_cast<CodeConverter*>(m_bindingPalette->extension());
-            cvt->whenBinding().call();
+            // CodeConverter* cvt = static_cast<CodeConverter*>(m_bindingPalette->extension());
+            // cvt->whenBinding().call();
         }
     }
 }

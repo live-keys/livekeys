@@ -66,6 +66,8 @@ DISTFILES += \
     palettes/ImageReadPalette.json \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \
+    palettes/ImageSegmentFactoryPalette.qml \
+    palettes/ImageSegmentFactoryPropertiesPalette.json \
     palettes/PaperSurfacePalette.qml \
     palettes/PerspectiveOnBackgroundPalette.qml \
     palettes/PerspectiveOnBackgroundPropertiesPalette.json \
@@ -75,6 +77,8 @@ DISTFILES += \
     palettes/VideoFilePropertiesPalette.json \
     palettes/ImageViewPalette.json \
     palettes/VideoPlayerPalette.qml \
+    palettes/VideoSurfacePalette.qml \
+    palettes/VideoSurfacePropertiesPalette.json \
     qml/BlankImage.qml \
     qml/BrushTool.qml \
     qml/ColorHistogramView.qml \
@@ -86,6 +90,7 @@ DISTFILES += \
     qml/GrayscaleView.qml \
     qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
+    qml/ImageSegmentFactory.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
     qml/PaperSurface.qml \

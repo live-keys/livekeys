@@ -2,6 +2,7 @@
 #include "element_p.h"
 #include "modulefile.h"
 #include "live/elements/value.h"
+#include "context_p.h"
 
 namespace lv{ namespace el{
 
@@ -9,7 +10,8 @@ Imports::Imports(Engine *engine, ModuleFile *mf)
     : m_engine(engine)
     , m_moduleFile(mf)
 {
-    v8::Local<v8::Object> obj = engine->importsTemplate()->InstanceTemplate()->NewInstance();
+    v8::Local<v8::Object> obj =
+            engine->importsTemplate()->InstanceTemplate()->NewInstance(engine->currentContext()->asLocal()).ToLocalChecked();
     obj->SetInternalField(0, v8::External::New(engine->isolate(), this));
 
     m_object.Reset(engine->isolate(), obj);
@@ -55,12 +57,13 @@ v8::Local<v8::Value> Imports::get(const std::string &key){
         mf = currentPluginExportSearch->second;
     }
 
-    v8::Local<v8::String> v8key = v8::String::NewFromUtf8(m_engine->isolate(), key.c_str());
+    v8::Local<v8::String> v8key = v8::String::NewFromUtf8(m_engine->isolate(), key.c_str()).ToLocalChecked();
 
     for ( auto it = m_libraryExports.begin(); it != m_libraryExports.end(); ++it ){
         v8::Local<v8::Object> vo = it->data();
-        if ( vo->Has(v8key) ){
-            return vo->Get(v8key);
+        auto context = m_engine->currentContext()->asLocal();
+        if ( vo->Has(context, v8key).ToChecked() ){
+            return vo->Get(context, v8key).ToLocalChecked();
         }
     }
 
@@ -86,14 +89,14 @@ void Imports::get(const v8::FunctionCallbackInfo<v8::Value> &info){
 
     if ( info.Length() != 1 ){
         info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(
-            info.GetIsolate(), "\'imports.get()\' needs one argument.")
+            info.GetIsolate(), "\'imports.get()\' needs one argument.").ToLocalChecked()
         );
         return;
     }
 
     try{
-        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate());
-        v8::Local<v8::Value> val = imports->get(*v8::String::Utf8Value(arg));
+        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked();
+        v8::Local<v8::Value> val = imports->get(*v8::String::Utf8Value(info.GetIsolate(), arg));
         info.GetReturnValue().Set(val);
     } catch ( lv::Exception& e ){
         engine->throwError(&e, nullptr);
@@ -107,13 +110,13 @@ void Imports::require(const v8::FunctionCallbackInfo<v8::Value> &info){
     Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
     if ( info.Length() != 1 ){
         info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(
-            info.GetIsolate(), "\'imports.require()\' needs one argument.")
+            info.GetIsolate(), "\'imports.require()\' needs one argument.").ToLocalChecked()
         );
         return;
     }
     try{
-        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate());
-        imports->require(*v8::String::Utf8Value(arg));
+        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked();
+        imports->require(*v8::String::Utf8Value(info.GetIsolate(), arg));
     } catch ( lv::Exception& e ){
         engine->throwError(&e, nullptr);
     }
@@ -125,12 +128,12 @@ void Imports::requireAs(const v8::FunctionCallbackInfo<v8::Value> &info){
     Imports* imports = reinterpret_cast<Imports*>(wrap->Value());
     Engine* engine = reinterpret_cast<Engine*>(info.GetIsolate()->GetData(0));
     if ( info.Length() != 1 ){
-        info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(info.GetIsolate(), "\'imports.requireAs()\' needs one argument."));
+        info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(info.GetIsolate(), "\'imports.requireAs()\' needs one argument.").ToLocalChecked());
         return;
     }
     try{
-        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate());
-        v8::Local<v8::Object> obj = imports->requireAs(*v8::String::Utf8Value(arg));
+        v8::Local<v8::String> arg = info[0]->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked();
+        v8::Local<v8::Object> obj = imports->requireAs(*v8::String::Utf8Value(info.GetIsolate(), arg));
         info.GetReturnValue().Set(obj);
     } catch ( lv::Exception& e ){
         engine->throwError(&e, nullptr);
@@ -144,13 +147,13 @@ void Imports::getImport(v8::Local<v8::Name> name, const v8::PropertyCallbackInfo
 
     if ( !name->IsString() ){
         info.GetIsolate()->ThrowException(v8::String::NewFromUtf8(
-            info.GetIsolate(), "imports object accessor must be a string.")
+            info.GetIsolate(), "imports object accessor must be a string.").ToLocalChecked()
         );
         return;
     }
 
-    v8::Local<v8::String> nameString = name->ToString();
-    std::string n = *v8::String::Utf8Value(nameString);
+    v8::Local<v8::String> nameString = name->ToString(info.GetIsolate()->GetCurrentContext()).ToLocalChecked();
+    std::string n = *v8::String::Utf8Value(info.GetIsolate(), nameString);
 
     if ( n == "require" || n == "requireAs" || n == "get" ){
         return;
@@ -166,13 +169,13 @@ void Imports::getImport(v8::Local<v8::Name> name, const v8::PropertyCallbackInfo
 v8::Local<v8::FunctionTemplate> Imports::functionTemplate(v8::Isolate *isolate){
     v8::Local<v8::FunctionTemplate> localTpl;
     localTpl = v8::FunctionTemplate::New(isolate);
-    localTpl->SetClassName(v8::String::NewFromUtf8(isolate, "Imports"));
+    localTpl->SetClassName(v8::String::NewFromUtf8(isolate, "Imports").ToLocalChecked());
 
     v8::Local<v8::Template> tplPrototype = localTpl->PrototypeTemplate();
 
-    tplPrototype->Set(v8::String::NewFromUtf8(isolate, "get"), v8::FunctionTemplate::New(isolate, &Imports::get));
-    tplPrototype->Set(v8::String::NewFromUtf8(isolate, "require"), v8::FunctionTemplate::New(isolate, &Imports::require));
-    tplPrototype->Set(v8::String::NewFromUtf8(isolate, "requireAs"), v8::FunctionTemplate::New(isolate, &Imports::requireAs));
+    tplPrototype->Set(isolate, "get", v8::FunctionTemplate::New(isolate, &Imports::get));
+    tplPrototype->Set(isolate, "require", v8::FunctionTemplate::New(isolate, &Imports::require));
+    tplPrototype->Set(isolate, "requireAs", v8::FunctionTemplate::New(isolate, &Imports::requireAs));
 
     v8::Local<v8::ObjectTemplate> tplInstance = localTpl->InstanceTemplate();
     tplInstance->SetInternalFieldCount(1);

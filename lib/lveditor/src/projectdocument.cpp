@@ -105,6 +105,10 @@ void ProjectDocument::readContent(){
     }
 }
 
+int ProjectDocument::contentLength(){
+    return m_textDocument->characterCount();
+}
+
 /**
  * @brief ProjectDocument::updateSections
  *
@@ -481,18 +485,31 @@ QString ProjectDocument::substring(int from, int length) const{
     return tc.selectedText();
 }
 
-void ProjectDocument::insert(int from, int length, const QString &text){
-    addEditingState(ProjectDocument::Assisted);
+void ProjectDocument::insert(int from, int length, const QString &text, int editingState){
+    if ( editingState == ProjectDocument::Assisted || editingState == ProjectDocument::Palette || editingState == ProjectDocument::Runtime ){
+        auto es = static_cast<ProjectDocument::EditingState>(editingState);
+        addEditingState(es);
 
-    QTextCursor tc(m_textDocument);
-    tc.beginEditBlock();
-    tc.setPosition(from);
-    tc.setPosition(from + length, QTextCursor::KeepAnchor);
-    tc.removeSelectedText();
-    tc.insertText(text);
-    tc.endEditBlock();
+        QTextCursor tc(m_textDocument);
+        tc.beginEditBlock();
+        tc.setPosition(from);
+        tc.setPosition(from + length - 1, QTextCursor::KeepAnchor);
+        tc.removeSelectedText();
+        tc.insertText(text);
+        tc.endEditBlock();
 
-    removeEditingState(ProjectDocument::Assisted);
+        removeEditingState(es);
+    } else {
+        QTextCursor tc(m_textDocument);
+        tc.beginEditBlock();
+        tc.setPosition(from);
+        tc.setPosition(from + length, QTextCursor::KeepAnchor);
+        tc.removeSelectedText();
+        tc.insertText(text);
+        tc.endEditBlock();
+    }
+
+
 }
 
 int ProjectDocument::offsetAtLine(int line) const{
