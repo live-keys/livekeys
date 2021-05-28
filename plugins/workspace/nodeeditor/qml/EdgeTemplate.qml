@@ -53,6 +53,9 @@ Item {
     property var nodeWidth: 0
     property var padWidth: 0
 
+    property var p1y: edgeItem.p1.y + (edgeItem.p1.y > edgeItem.p2.y ?   8 : -8)
+    property var p2y: edgeItem.p2.y + (edgeItem.p1.y > edgeItem.p2.y ? -10 : 10)
+
     Shape {
         id: arrowHead
         transformOrigin: Item.TopLeft
@@ -81,10 +84,10 @@ Item {
             strokeColor: edgeTemplate.color
             fillColor: edgeItem.dstShape === Qan.EdgeStyle.ArrowOpen ? Qt.rgba(0.,0.,0.,0.) : edgeTemplate.color
             strokeWidth: edgeItem.style ? edgeItem.style.lineWidth : 2
-            startX: edgeItem.p2.x - 15;   startY: edgeItem.p2.y
-            PathLine { x: edgeItem.p2.x - 30; y: edgeItem.p2.y + 5}
-            PathLine { x: edgeItem.p2.x - 30; y: edgeItem.p2.y - 5}
-            PathLine { x: edgeItem.p2.x - 15;   y: edgeItem.p2.y }
+            startX: edgeItem.p2.x - 15;   startY: edgeTemplate.p2y
+            PathLine { x: edgeItem.p2.x - 30; y: edgeTemplate.p2y + 5}
+            PathLine { x: edgeItem.p2.x - 30; y: edgeTemplate.p2y - 5}
+            PathLine { x: edgeItem.p2.x - 15;   y: edgeTemplate.p2y }
         }
     }
     Shape {
@@ -229,7 +232,7 @@ Item {
         ShapePath {
             id: edgeShapePath
             startX: edgeItem.p1.x
-            startY: edgeItem.p1.y
+            startY: edgeTemplate.p1y
             capStyle: ShapePath.FlatCap
             strokeWidth: edgeItem.style ? edgeItem.style.lineWidth : 2
             strokeColor: edgeTemplate.color
@@ -239,29 +242,29 @@ Item {
 
             PathLine {
                 x: edgeItem.p1.x + edgeTemplate.padWidth
-                y: edgeItem.p1.y
+                y: edgeTemplate.p1y
 
             }
 
             PathLine {
                 x: edgeItem.p1.x + edgeTemplate.padWidth
-                y: edgeItem.p1.y + edgeTemplate.rightSideHeight
+                y: edgeTemplate.p1y + edgeTemplate.rightSideHeight
             }
 
             PathLine {
                 x: edgeItem.p1.x - edgeTemplate.padWidth - edgeTemplate.nodeWidth
-                y: edgeItem.p1.y + edgeTemplate.rightSideHeight
+                y: edgeTemplate.p1y + edgeTemplate.rightSideHeight
             }
 
             PathLine {
                 x: edgeItem.p1.x - edgeTemplate.padWidth - edgeTemplate.nodeWidth
-                y: edgeItem.p2.y
+                y: edgeTemplate.p2y
             }
 
 
             PathLine {
                 x: edgeItem.p2.x
-                y: edgeItem.p2.y
+                y: edgeTemplate.p2y
             }
 
         }
