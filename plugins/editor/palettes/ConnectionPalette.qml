@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import editqml 1.0 as QmlEdit
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -72,7 +72,7 @@ CodePalette{
         height: 25
         color: 'transparent'
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: input
             anchors.left: parent.left
             anchors.right: parent.right
@@ -166,7 +166,7 @@ CodePalette{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             id: commitButton
             anchors.right: parent.right
             width: 30

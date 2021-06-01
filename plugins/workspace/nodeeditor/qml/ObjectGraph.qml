@@ -4,9 +4,9 @@ import QtQuick.Controls.Material 2.1
 import QtQuick.Layouts           1.3
 import live                      1.0
 
-import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
 import editqml 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -48,13 +48,13 @@ Rectangle{
 
             property color titleBackground: "#666"
             property double titleRadius: 5
-            property QtObject titleTextStyle : Workspace.TextStyle{}
+            property QtObject titleTextStyle : Input.TextStyle{}
         }
 
         property QtObject propertyDelegateStyle : QtObject{
             property color background: "#333"
             property double radius: 5
-            property QtObject textStyle: Workspace.TextStyle{}
+            property QtObject textStyle: Input.TextStyle{}
         }
     }
 

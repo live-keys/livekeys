@@ -1,12 +1,13 @@
 import QtQuick 2.3
 import workspace 1.0
+import visual.input 1.0 as Input
 
 Tool{
     id: root
 
     toolLabel: 'Perspective'
 
-    property QtObject labelInfoStyle: TextStyle{}
+    property QtObject labelInfoStyle: Input.TextStyle{}
     property Component applyButton : null
     property Component cancelButton : null
 
@@ -21,7 +22,7 @@ Tool{
     infoBarContent: Item {
         anchors.fill: parent
 
-        Label {
+        Input.Label{
             id: pointsInfo
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -43,7 +44,7 @@ Tool{
             }
         }
 
-        Button{
+        Input.Button{
             id: applyBttn
             anchors.left: pointsInfo.right
             anchors.leftMargin: 5
@@ -52,7 +53,7 @@ Tool{
             content: root.applyButton
             onClicked: root.apply(root.p1, root.p2, root.p3, root.p4)
         }
-        Button{
+        Input.Button{
             id: cancelBttn
             anchors.left: applyBttn.right
             anchors.leftMargin: 5
@@ -101,7 +102,7 @@ Tool{
             onWheel: parent.wheel(wheel)
         }
 
-        ConvexQuadSelection {
+        Input.ConvexQuadSelection {
             id: cqSelection
 
             onRegionModified: {

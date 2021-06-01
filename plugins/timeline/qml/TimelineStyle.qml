@@ -1,7 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 QtObject{
     id: root
@@ -23,8 +23,8 @@ QtObject{
     property color markerLabelColor: "#999"
 
     property QtObject inputStyle: QtObject{
-        property QtObject textStyle: Workspace.TextStyle{}
-        property QtObject hintTextStyle: Workspace.TextStyle{}
+        property QtObject textStyle: Input.TextStyle{}
+        property QtObject hintTextStyle: Input.TextStyle{}
         property color backgroundColor: '#070b0f'
         property color borderColor: '#323232'
         property double borderThickness: 1
@@ -32,7 +32,7 @@ QtObject{
         property double radius: 3
     }
 
-    property QtObject timeLabelStyle: Workspace.TextStyle{}
+    property QtObject timeLabelStyle: Input.TextStyle{}
 
     property Component scrollStyle: ScrollViewStyle {
         transientScrollBars: false

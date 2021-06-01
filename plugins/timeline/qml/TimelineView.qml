@@ -4,8 +4,8 @@ import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import timeline 1.0
 import fs 1.0 as Fs
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -259,7 +259,7 @@ Rectangle{
             }
         }
 
-        Workspace.PlayPause{
+        Input.PlayPause{
             width: 15
             height: 15
             anchors.verticalCenter: parent.verticalCenter
@@ -276,7 +276,7 @@ Rectangle{
             }
         }
 
-        Workspace.Label{
+        Input.Label{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 80

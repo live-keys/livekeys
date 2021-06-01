@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import base 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -36,7 +36,7 @@ CodePalette{
 
         property var current : null
 
-        Workspace.TextButton{
+        Input.TextButton{
             id: textButton
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left

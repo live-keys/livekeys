@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import live 1.0
 import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Item{
     id: root
@@ -9,18 +10,18 @@ Item{
 
     property QtObject defaultStyle: inputBox.defaultStyle
     property QtObject style: defaultStyle
-    
+
     property alias font: inputBox.font
     property string text: 'label'
     property real margins: 6
     property color textColor: 'white'
     property alias boxBackgroundColor: inputBox.color
-    
+
     property bool isEditing : false
 
     signal rightClicked(var mouse)
-    
-    Workspace.Label{
+
+    Input.Label{
         id: labelText
         anchors.fill: parent
         anchors.margins: parent.margins
@@ -28,8 +29,8 @@ Item{
         text: parent.text
         textStyle: root.style.textStyle
     }
-    
-    Workspace.InputBox{
+
+    Input.InputBox{
         id: inputBox
         text: parent.text
         visible: parent.isEditing
@@ -48,7 +49,7 @@ Item{
             }
         }
     }
-    
+
     MouseArea{
         anchors.fill: parent
         visible: !parent.isEditing

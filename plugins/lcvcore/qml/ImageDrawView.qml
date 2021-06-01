@@ -37,16 +37,16 @@ Item{
         property real boxRadius: 3
         property color toolHighlightColor: "#444"
         property QtObject labelStyle: colorPicker.style.labelStyle
-        property QtObject labelBoxStyle: Workspace.LabelOnRectangleStyle{}
-        property QtObject formButtonStyle: Workspace.RectangleButtonStyle{}
+        property QtObject labelBoxStyle: Input.LabelOnRectangleStyle{}
+        property QtObject formButtonStyle: Input.RectangleButtonStyle{}
 
-        property Component saveButton: Workspace.TextButton{
+        property Component saveButton: Input.TextButton{
             width: 50
             height: 25
             text: 'Save'
             onClicked: parent.clicked()
         }
-        property Component brushSizeButton: Workspace.TextButton{
+        property Component brushSizeButton: Input.TextButton{
             width: 30
             height: 25
             text: 'B'
@@ -317,7 +317,7 @@ Item{
         visible: root.image ? true : false
         color: root.style.toolbarColor
 
-        Workspace.Button{
+        Input.Button{
             anchors.left: parent.left
             anchors.leftMargin: 5
             anchors.verticalCenter: parent.verticalCenter
@@ -338,7 +338,7 @@ Item{
             width: zoomInfo.width
             anchors.left: parent.left
             anchors.leftMargin: 35
-            Workspace.Label{
+            Input.Label{
                 id: zoomInfo
                 anchors.verticalCenter: parent.verticalCenter
                 textStyle: root.style.labelStyle.textStyle
@@ -361,7 +361,7 @@ Item{
             width: imageInfo.width
             anchors.right: parent.right
             anchors.rightMargin: 10
-            Workspace.Label{
+            Input.Label{
                 id: imageInfo
                 anchors.verticalCenter: parent.verticalCenter
                 textStyle: root.style.labelStyle.textStyle

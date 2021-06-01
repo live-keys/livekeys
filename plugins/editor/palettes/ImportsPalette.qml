@@ -3,8 +3,8 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -63,7 +63,7 @@ CodePalette{
                     height : 20
                     color: palette.theme.colorScheme.backgroundOverlay
 
-                    Workspace.Label{
+                    Input.Label{
                         id: moduleText
                         anchors.top: parent.top
                         anchors.topMargin: 3
@@ -100,7 +100,7 @@ CodePalette{
             anchors.bottom: parent.bottom
             anchors.bottomMargin: 2
 
-            Workspace.InputBox{
+            Input.InputBox{
                 id: moduleInput
                 anchors.left: parent.left
                 anchors.leftMargin: 3
@@ -124,7 +124,7 @@ CodePalette{
                 style: theme.inputStyle
             }
 
-            Workspace.InputBox{
+            Input.InputBox{
                 id: versionInput
                 anchors.left: parent.left
                 anchors.leftMargin: 149
@@ -149,7 +149,7 @@ CodePalette{
                 }
             }
 
-            Workspace.InputBox{
+            Input.InputBox{
                 id: qualifierInput
                 anchors.left: parent.left
                 anchors.leftMargin: 191
@@ -175,7 +175,7 @@ CodePalette{
             }
 
 
-            Workspace.Button{
+            Input.Button{
                 anchors.left: qualifierInput.right
                 anchors.leftMargin: 5
                 anchors.top: parent.top
@@ -190,7 +190,7 @@ CodePalette{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             id: showAddImportsButton
             anchors.top: parent.top
             anchors.topMargin: 5
