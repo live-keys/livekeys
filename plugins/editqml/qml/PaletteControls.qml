@@ -379,7 +379,11 @@ QtObject{
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                container.nodeParent.item.addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null)
+                container.nodeParent.item.addSubobject(
+                    container.nodeParent,
+                    data,
+                    container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node,
+                    null)
             }
 
             if (isForNode) objectGraph.activateFocus()
