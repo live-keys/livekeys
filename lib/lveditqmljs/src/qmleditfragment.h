@@ -121,6 +121,8 @@ public:
 
     QSharedPointer<QmlBindingPath> fullBindingPath();
 
+    Location location() const;
+
 public slots:
     int fragmentType() const;
     bool isOfFragmentType(FragmentType type) const;
@@ -177,8 +179,6 @@ public slots:
     void removeChildFragment(QmlEditFragment* edit);
     void setObjectId(QString id);
     QString objectId();
-
-    Location location() const;
 
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
