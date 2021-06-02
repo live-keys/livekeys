@@ -21,6 +21,7 @@
         "palettes/PerspectiveOnBackgroundPalette.qml": "qml/lcvcore#PerspectiveOnBackground",
         "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground",
         "palettes/ImageSegmentFactoryPalette.qml": "qml/lcvcore#ImageSegmentFactory",
-        "palettes/ImageSegmentFactoryPropertiesPalette.json": "qml/lcvcore#ImageSegmentFactory"
+        "palettes/ImageSegmentFactoryPropertiesPalette.json": "qml/lcvcore#ImageSegmentFactory",
+        "palettes/GalleryFileSelectorPalette.qml": "qml/lcvcore#GalleryFileSelector"
     }
 }
