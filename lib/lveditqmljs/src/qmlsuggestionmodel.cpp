@@ -167,7 +167,7 @@ void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
                     name,
                     QmlSuggestionModel::ItemData::Event)
                 );
-            } else if (filter & CodeQmlHandler::ForNode) {
+            } else if ( method.functionType != QmlFunctionInfo::SlotGenerated && (filter & CodeQmlHandler::ForNode)){
                 auto name = method.name;
 
                 addItem(QmlSuggestionModel::ItemData(
