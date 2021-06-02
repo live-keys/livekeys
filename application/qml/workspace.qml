@@ -22,9 +22,9 @@ import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
 import live 1.0
+import visual.input 1.0 as Input
 
 Item{
     id: root
@@ -394,7 +394,7 @@ Item{
         runSpace: root.runSpace
     }
 
-    property Component messageDialogButton: Workspace.TextButton{
+    property Component messageDialogButton: Input.TextButton{
         height: 28
         width: 100
         style: lk.layers.workspace.themes.current.formButtonStyle

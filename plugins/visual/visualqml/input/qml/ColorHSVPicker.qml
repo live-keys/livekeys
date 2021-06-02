@@ -21,7 +21,7 @@ import QtGraphicalEffects 1.0
 import live 1.0
 import editor 1.0
 import workspace 1.0 as Workspace
-
+import visual.input 1.0 as Input
 
 Item{
     id: root
@@ -85,7 +85,7 @@ Item{
         anchors.left: parent.left
         anchors.leftMargin: colorDisplay.width + 2
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: input
             height: 25
             anchors.top: parent.top
@@ -215,7 +215,7 @@ Item{
                 }
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 id: hueLabelLeft
                 width: 35
                 height: 22
@@ -224,7 +224,7 @@ Item{
                 style: root.style.labelStyle
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 width: 35
@@ -288,7 +288,7 @@ Item{
                 }
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 anchors.top: parent.top
                 width: 35
                 height: 22
@@ -296,7 +296,7 @@ Item{
                 style: root.style.labelStyle
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 width: 35
@@ -361,7 +361,7 @@ Item{
                 }
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 anchors.top: parent.top
                 text: valueSlider.minimumValue
                 width: 35
@@ -370,7 +370,7 @@ Item{
                 style: root.style.labelStyle
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 anchors.top: parent.top
                 anchors.right: parent.right
                 text: valueSlider.maximumValue

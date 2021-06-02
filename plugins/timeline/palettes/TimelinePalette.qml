@@ -5,7 +5,6 @@ import editor 1.0
 import live 1.0
 import lcvcore 1.0
 import timeline 1.0
-import workspace 1.0 as Workspace
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
 
@@ -84,7 +83,7 @@ CodePalette{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 text: "Ready"
                 style: theme.formButtonStyle
                 anchors.top: parent.top

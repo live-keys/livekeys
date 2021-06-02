@@ -4,6 +4,7 @@ import lcvcore 1.0
 import live 1.0
 import editor 1.0
 import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -31,7 +32,7 @@ Rectangle{
         color: "#afafaf"
     }
 
-    Workspace.InputBox{
+    Input.InputBox{
         id: inputBox
         anchors.right: parent.right
         anchors.rightMargin: 60
@@ -42,7 +43,7 @@ Rectangle{
         text: currentSegment ? currentSegment.value : 0
     }
 
-    Workspace.Button{
+    Input.Button{
         anchors.top: parent.top
         anchors.topMargin: 4
         anchors.right: parent.right

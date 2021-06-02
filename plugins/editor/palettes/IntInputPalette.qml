@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -19,7 +19,7 @@ CodePalette{
         property alias path: pathInput.text
         property alias font: pathInput.font
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: pathInput
             anchors.left: parent.left
             width: parent.width - 30
@@ -38,7 +38,7 @@ CodePalette{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             anchors.right: parent.right
             width: 30
             height: 25

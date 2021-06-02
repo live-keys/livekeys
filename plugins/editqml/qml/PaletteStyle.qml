@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls.Styles 1.2
 import workspace 1.0
+import visual.input 1.0 as Input
 
 QtObject{
 
@@ -13,13 +14,13 @@ QtObject{
     property color scrollbarColor: "#555"
     property QtObject colorScheme: QtObject{}
 
-    property QtObject labelStyle : LabelOnRectangleStyle{}
-    property QtObject inputStyle : InputBoxStyle{}
-    property QtObject monoInputStyle : InputBoxStyle{
-        textStyle: TextStyle{ font.family : 'Source Code Pro, Ubuntu Mono, Courier New, Courier' }
-        hintTextStyle: TextStyle{ font.family : 'Source Code Pro, Ubuntu Mono, Courier New, Courier'}
+    property QtObject labelStyle : Input.LabelOnRectangleStyle{}
+    property QtObject inputStyle : Input.InputBoxStyle{}
+    property QtObject monoInputStyle : Input.InputBoxStyle{
+        textStyle: Input.TextStyle{ font.family : 'Source Code Pro, Ubuntu Mono, Courier New, Courier' }
+        hintTextStyle: Input.TextStyle{ font.family : 'Source Code Pro, Ubuntu Mono, Courier New, Courier'}
     }
-    property QtObject buttonStyle : TextButtonStyle{}
+    property QtObject buttonStyle : Input.TextButtonStyle{}
 
     property QtObject propertyLabelStyle : QtObject{
         property color background: '#555'
@@ -29,7 +30,7 @@ QtObject{
 
     property QtObject buttons : QtObject{}
     property QtObject nodeEditor: QtObject{}
-    property QtObject selectableListView: SelectableListViewStyle{}
+    property QtObject selectableListView: Input.SelectableListViewStyle{}
     property QtObject timelineStyle: QtObject{}
 
 }

@@ -1,7 +1,7 @@
 import QtQuick 2.3
 import fs 1.0 as Fs
 import workspace 1.0
-
+import visual.input 1.0 as Input
 Item{
     id: root
     height: 30
@@ -65,7 +65,7 @@ Item{
         }
     }
 
-    TextButton{
+    Input.TextButton{
         anchors.right: parent.right
         radius: 5
         width: 30

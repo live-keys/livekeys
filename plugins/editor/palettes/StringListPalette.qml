@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -113,7 +113,7 @@ CodePalette{
             anchors.bottom: parent.bottom
             anchors.bottomMargin: updateButton.height + 10
 
-            Workspace.InputBox{
+            Input.InputBox{
                 id: inputBox
                 anchors.left: parent.left
                 anchors.leftMargin: 10
@@ -157,7 +157,7 @@ CodePalette{
             }
         }
 
-        Workspace.TextButton{
+        Input.TextButton{
             id: updateButton
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
