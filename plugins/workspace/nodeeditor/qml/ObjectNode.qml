@@ -325,7 +325,9 @@ Qan.NodeItem{
             propertiesOpened.push(name)
             var portState = ObjectGraph.PortMode.OutPort
 
-            if (prop.isWritable) portState = portState | ObjectGraph.PortMode.InPort
+            if (prop.isWritable || ef.location === QmlEditFragment.Slot) {
+                portState = portState | ObjectGraph.PortMode.InPort
+            }
             addSubobject(nodeParent, name, portState, prop.connection)
         }
 

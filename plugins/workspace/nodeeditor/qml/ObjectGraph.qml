@@ -217,7 +217,7 @@ Rectangle{
             if (!srcPort.objectProperty.editingFragment)
                 return
 
-            var result = srcPort.objectProperty.editingFragment.bindExpression(value)
+            var result = srcPort.objectProperty.editingFragment.bindFunctionExpression(value)
             if ( result ){
                 srcPort.objectProperty.editingFragment.write(
                     {'__ref': value}
