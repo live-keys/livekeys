@@ -28,3 +28,5 @@ Perspective                1.0 Perspective.qml
 PaperSurface               1.0 PaperSurface.qml
 PerspectiveOnBackground    1.0 PerspectiveOnBackground.qml
 GalleryFileSelector        1.0 GalleryFileSelector.qml
+ChannelSelect              1.0 ChannelSelect.qml
+CopyMakeBorder             1.0 CopyMakeBorder.qml

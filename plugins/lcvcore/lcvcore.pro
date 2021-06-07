@@ -83,7 +83,9 @@ DISTFILES += \
     palettes/VideoSurfacePropertiesPalette.json \
     qml/BlankImage.qml \
     qml/BrushTool.qml \
+    qml/ChannelSelect.qml \
     qml/ColorHistogramView.qml \
+    qml/CopyMakeBorder.qml \
     qml/Crop.qml \
     qml/CropTool.qml \
     qml/DrawSurface.qml \

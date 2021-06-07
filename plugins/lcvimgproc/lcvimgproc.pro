@@ -53,8 +53,18 @@ OTHER_FILES *= \
 
 DISTFILES += \
     qml/Blend.qml \
+    qml/Blur.qml \
+    qml/Canny.qml \
+    qml/ChannelSelect.qml \
+    qml/CvtColor.qml \
+    qml/Dilate.qml \
     qml/DrawDetectedFaces.qml \
+    qml/Erode.qml \
     qml/FaceDetection.qml \
+    qml/Filter2D.qml \
+    qml/GaussianBlur.qml \
+    qml/HoughLines.qml \
+    qml/HoughLinesP.qml \
     qml/Pad.qml \
     qml/Resize.qml \
     qml/ResizeTool.qml \
@@ -62,6 +72,8 @@ DISTFILES += \
     qml/Rotate.qml \
     qml/RotateTool.qml \
     qml/Scale.qml \
+    qml/Sobel.qml \
+    qml/StructuringElement.qml \
     qml/Threshold.qml \
     qml/live.package.json \
     qml/live.plugin.json \
