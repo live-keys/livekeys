@@ -69,44 +69,157 @@
  */
 namespace lv{
 
+class ProjectDocumentPrivate {
+public:
+    QTextDocument*                                      textDocument;
+
+    std::list<ProjectDocumentSection::Ptr>              sections;
+    std::list<ProjectDocumentMarker::Ptr>               markers;
+
+    std::list<ProjectDocumentSection::Ptr>              sectionsToRemove;
+    bool                                                iteratingSections;
+
+    std::list<ProjectDocumentAction>                    changes;
+    mutable std::list<ProjectDocumentAction>::iterator  lastChange;
+
+    QString                                             contentString;
+    bool                                                contentStringDirty;
+
+    mutable int                                         editingState;
+    mutable bool                                        isSynced;
+    int                                                 lastCursorPosition;
+};
+
+/**
+ * \brief Begin-iterator of the sections
+ */
+inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
+    return d_ptr->sections.begin();
+}
+
+/**
+ * \brief End-iterator of the sections
+ */
+inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
+    return d_ptr->sections.end();
+}
+
+
+/**
+ * \brief Const begin-iterator of the sections
+ */
+inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
+    return d_ptr->sections.begin();
+}
+
+
+/**
+ * \brief Const end-iterator of the sections
+ */
+inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
+    return d_ptr->sections.end();
+}
+
+/**
+ * \brief Number of sections
+ */
+inline int ProjectDocument::totalSections() const{
+    return d_ptr->sections.size();
+}
+
+
+/**
+ * \brief Shows if the object has any sections
+ */
+inline bool ProjectDocument::hasSections() const{
+    return totalSections() > 0;
+}
+
+
+inline void ProjectDocument::resetSync() const{
+    d_ptr->isSynced = false;
+}
+
+/**
+ * \brief Text document which is wrapped inside the ProjectDocument
+ */
+inline QTextDocument *ProjectDocument::textDocument(){
+    return d_ptr->textDocument;
+}
+
+/**
+ * \brief Adds editing state flag
+ */
+inline void ProjectDocument::addEditingState(EditingState state){
+    d_ptr->editingState |= state;
+}
+
+/**
+ * \brief Removes the given editing state flag
+ */
+inline void ProjectDocument::removeEditingState(EditingState state){
+    if ( d_ptr->editingState & state ){
+        bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
+        d_ptr->editingState = d_ptr->editingState & ~state;
+        if ( restoreSilent ){
+            d_ptr->editingState |= ProjectDocument::Silent;
+        }
+    }
+}
+
+/**
+ * \brief Shows if the editing state includes the given flags
+ */
+inline bool ProjectDocument::editingStateIs(int flag) const{
+    return (flag & d_ptr->editingState) == flag;
+}
+
+/**
+ * \brief Resets all of the editing state flags
+ */
+inline void ProjectDocument::resetEditingState(){
+    d_ptr->editingState = 0;
+}
+
 /**
   Default constructor
 */
 ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
     : Document(file, parent)
-    , m_textDocument(new QTextDocument(this))
-    , m_iteratingSections(false)
-    , m_lastChange(m_changes.end())
-    , m_editingState(0)
-    , m_isSynced(true)
-    , m_lastCursorPosition(-1)
-    , m_contentStringDirty(true)
+    , d_ptr(new ProjectDocumentPrivate)
 {
+    d_ptr->textDocument = new QTextDocument(this);
+    d_ptr->iteratingSections = false;
+    d_ptr->lastChange = d_ptr->changes.end();
+    d_ptr->editingState = 0;
+    d_ptr->isSynced = true;
+    d_ptr->lastCursorPosition = -1;
+    d_ptr->contentStringDirty = true;
     setIsMonitored(isMonitored);
-    m_textDocument->setDocumentMargin(0);
-    m_textDocument->setDocumentLayout(new TextDocumentLayout(m_textDocument));
+    d_ptr->textDocument->setDocumentMargin(0);
+    d_ptr->textDocument->setDocumentLayout(new TextDocumentLayout(d_ptr->textDocument));
     readContent();
-    connect(m_textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
+    connect(d_ptr->textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
 }
 
 void ProjectDocument::readContent(){
     if ( file()->exists() ){
         addEditingState(ProjectDocument::Read);
-        m_textDocument->setPlainText(
+        d_ptr->textDocument->setPlainText(
             QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(file()->path().toStdString()))
         );
         removeEditingState(ProjectDocument::Read);
-        m_textDocument->setModified(false);
+        d_ptr->textDocument->setModified(false);
         setLastModified(QFileInfo(file()->path()).lastModified());
-        m_changes.clear();
-        m_lastChange = m_changes.end();
-        m_isSynced = true;
+        d_ptr->changes.clear();
+        d_ptr->lastChange = d_ptr->changes.end();
+        d_ptr->isSynced = true;
         emit contentChanged();
     }
 }
 
 int ProjectDocument::contentLength(){
-    return m_textDocument->characterCount();
+    return d_ptr->textDocument->characterCount();
 }
 
 /**
@@ -120,17 +233,17 @@ int ProjectDocument::contentLength(){
  * @param addedText
  */
 void ProjectDocument::updateSections(int position, int charsRemoved, const QString &addedText){
-    if ( m_sections.isEmpty() )
+    if ( d_ptr->sections.empty() )
         return;
 
     // Invalidation scenario
 
-    m_iteratingSections = true;
+    d_ptr->iteratingSections = true;
 
     int charsAdded = addedText.length();
 
-    ProjectDocument::SectionIterator it = m_sections.begin();
-    while( it != m_sections.end() ){
+    ProjectDocument::SectionIterator it = d_ptr->sections.begin();
+    while( it != d_ptr->sections.end() ){
         ProjectDocumentSection::Ptr& section = *it;
         if ( section->position() + section->length() <= position ){
             ++it;
@@ -163,8 +276,8 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
                 // update other bindings positions
                 section->m_position = section->position() - charsRemoved + charsAdded;
 
-                if ( charsRemoved > 0 && m_textDocument && !section->parentBlock() ){
-                    QTextBlock block = m_textDocument->findBlock(section->position());
+                if ( charsRemoved > 0 && d_ptr->textDocument && !section->parentBlock() ){
+                    QTextBlock block = d_ptr->textDocument->findBlock(section->position());
                     ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
                     if ( !bd ){
                         bd = new ProjectDocumentBlockData;
@@ -177,19 +290,20 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
 
         if ( !section->isValid() ){
 
-            it = m_sections.erase(it);
+            it = d_ptr->sections.erase(it);
 
-            QTextBlock tb = m_textDocument->findBlock(sectionPosition);
+            QTextBlock tb = d_ptr->textDocument->findBlock(sectionPosition);
             emit formatChanged(tb.position(), tb.length());
         } else {
             ++it;
         }
     }
 
-    m_iteratingSections = false;
+    d_ptr->iteratingSections = false;
 
-    while ( !m_sectionsToRemove.isEmpty() ){
-        ProjectDocumentSection::Ptr se = m_sectionsToRemove.takeLast();
+    while ( !d_ptr->sectionsToRemove.empty() ){
+        ProjectDocumentSection::Ptr se = d_ptr->sectionsToRemove.back();
+        d_ptr->sectionsToRemove.pop_back();
         removeSection(se);
     }
 
@@ -198,18 +312,18 @@ void ProjectDocument::updateSections(int position, int charsRemoved, const QStri
 }
 
 void ProjectDocument::updateMarkers(int position, int charsRemoved, int charsAdded){
-    if ( m_markers.isEmpty() )
+    if ( d_ptr->markers.empty() )
         return;
 
-    auto it = m_markers.begin();
-    while ( it != m_markers.end() ){
+    auto it = d_ptr->markers.begin();
+    while ( it != d_ptr->markers.end() ){
         ProjectDocumentMarker::Ptr& marker = *it;
         if ( marker->m_position <= position )
             break;
 
         if ( charsRemoved > 0 && marker->position() <= position + charsRemoved ){
             marker->invalidate();
-            it = m_markers.erase(it);
+            it = d_ptr->markers.erase(it);
         } else {
             marker->m_position = marker->m_position - charsRemoved + charsAdded;
         }
@@ -218,10 +332,10 @@ void ProjectDocument::updateMarkers(int position, int charsRemoved, int charsAdd
 }
 
 void ProjectDocument::updateSectionBlocks(int position, const QString &addedText){
-    QTextBlock block = m_textDocument->findBlock(position);
-    QTextBlock otherBlock = m_textDocument->findBlock(position + addedText.length());
-    if ( m_sections.size() > 0 &&
-         m_textDocument &&
+    QTextBlock block = d_ptr->textDocument->findBlock(position);
+    QTextBlock otherBlock = d_ptr->textDocument->findBlock(position + addedText.length());
+    if ( d_ptr->sections.size() > 0 &&
+         d_ptr->textDocument &&
        // ( addedText.contains(QChar(QChar::ParagraphSeparator)) ||
        //  addedText.contains(QChar(QChar::LineFeed))))
         block.blockNumber() != otherBlock.blockNumber())
@@ -241,7 +355,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
 
                 if ( itSection->position() >= blockEnd ){
                     if ( !bddestination ){
-                        destinationBlock = m_textDocument->findBlock(position + addedText.length());
+                        destinationBlock = d_ptr->textDocument->findBlock(position + addedText.length());
                         bddestination = static_cast<ProjectDocumentBlockData*>(destinationBlock.userData());
                         if ( !bddestination ){
                             bddestination = new ProjectDocumentBlockData;
@@ -266,7 +380,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
 QString ProjectDocument::getCharsRemoved(int position, int count){
     if ( count > 0 ){
         syncContent();
-        QTextCursor c(m_textDocument);
+        QTextCursor c(d_ptr->textDocument);
         c.setPosition(position);
         c.setPosition(position + count, QTextCursor::MoveMode::KeepAnchor);
         return c.selectedText();
@@ -279,14 +393,14 @@ QString ProjectDocument::getCharsRemoved(int position, int count){
  */
 ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
     // markers are added in descending order according to their position
-    auto it = m_markers.begin();
-    while( it != m_markers.end() ){
+    auto it = d_ptr->markers.begin();
+    while( it != d_ptr->markers.end() ){
         if ( (*it)->position() <= position )
             break;
         ++it;
     }
     ProjectDocumentMarker::Ptr result(new ProjectDocumentMarker(position));
-    m_markers.insert(it, result);
+    d_ptr->markers.insert(it, result);
     return result;
 }
 
@@ -294,10 +408,10 @@ ProjectDocumentMarker::Ptr ProjectDocument::addMarker(int position){
  * \brief Removes a given marker
  */
 void ProjectDocument::removeMarker(ProjectDocumentMarker::Ptr marker){
-    auto it = m_markers.begin();
-    while ( it != m_markers.end() ){
+    auto it = d_ptr->markers.begin();
+    while ( it != d_ptr->markers.end() ){
         if ( (*it).data() == marker.data() ){
-            m_markers.erase(it);
+            d_ptr->markers.erase(it);
             return;
         }
         ++it;
@@ -313,9 +427,9 @@ ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int positio
     ProjectDocumentSection::Ptr section = ProjectDocumentSection::create(this, type, position, length);
 
     // sections are added in descending order according to their position
-    SectionIterator it = m_sections.begin();
+    SectionIterator it = d_ptr->sections.begin();
 
-    while( it != m_sections.end() ){
+    while( it != d_ptr->sections.end() ){
         ProjectDocumentSection::Ptr& itSection = *it;
 
         if ( itSection->position() < section->position() )
@@ -323,10 +437,10 @@ ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int positio
 
         ++it;
     }
-    m_sections.insert(it, section);
+    d_ptr->sections.insert(it, section);
 
-    if ( m_textDocument ){
-        QTextBlock bl = m_textDocument->findBlock(section->position());
+    if ( d_ptr->textDocument ){
+        QTextBlock bl = d_ptr->textDocument->findBlock(section->position());
         ProjectDocumentBlockData* blockdata = static_cast<ProjectDocumentBlockData*>(bl.userData());
         if ( !blockdata ){
             blockdata = new ProjectDocumentBlockData;
@@ -342,8 +456,8 @@ ProjectDocumentSection::Ptr ProjectDocument::createSection(int type, int positio
  * \brief Returns the section at the given position
  */
 ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
-    SectionIterator it = m_sections.begin();
-    while( it != m_sections.end() ){
+    SectionIterator it = d_ptr->sections.begin();
+    while( it != d_ptr->sections.end() ){
         ProjectDocumentSection::Ptr& section = *it;
         if ( section->position() == position )
             return section;
@@ -361,13 +475,13 @@ ProjectDocumentSection::Ptr ProjectDocument::sectionAt(int position){
  * \brief Removes section at given position
  */
 bool ProjectDocument::removeSectionAt(int position){
-    SectionIterator it = m_sections.begin();
-    while( it != m_sections.end() ){
+    SectionIterator it = d_ptr->sections.begin();
+    while( it != d_ptr->sections.end() ){
         ProjectDocumentSection::Ptr& section = *it;
 
         if ( section->position() == position ){
             section->invalidate();
-            m_sections.erase(it);
+            d_ptr->sections.erase(it);
             return true;
         }
 
@@ -385,17 +499,17 @@ bool ProjectDocument::removeSectionAt(int position){
 void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
     int sectionPosition = section->position();
     section->invalidate();
-    if ( m_iteratingSections ){
-        m_sectionsToRemove.append(section);
+    if ( d_ptr->iteratingSections ){
+        d_ptr->sectionsToRemove.push_back(section);
     } else {
-        SectionIterator it = m_sections.begin();
-        while( it != m_sections.end() ){
+        SectionIterator it = d_ptr->sections.begin();
+        while( it != d_ptr->sections.end() ){
             ProjectDocumentSection::Ptr& currentSection = *it;
             if ( currentSection.data() == section.data() ){
-                m_sections.erase(it);
+                d_ptr->sections.erase(it);
 
-                if ( m_textDocument ){
-                    QTextBlock tb = m_textDocument->findBlock(sectionPosition);
+                if ( d_ptr->textDocument ){
+                    QTextBlock tb = d_ptr->textDocument->findBlock(sectionPosition);
                     emit formatChanged(tb.position(), tb.length());
                 }
 
@@ -437,15 +551,15 @@ QByteArray ProjectDocument::content(){
  * \brief Overrides Document::setContent
  */
 void ProjectDocument::setContent(const QByteArray &content){
-    m_textDocument->setPlainText(QString::fromUtf8(content));
+    d_ptr->textDocument->setPlainText(QString::fromUtf8(content));
 }
 
 const QString& ProjectDocument::contentString(){
-    if ( m_contentStringDirty ){
-        m_contentString = m_textDocument->toPlainText();
-        m_contentStringDirty = false;
+    if ( d_ptr->contentStringDirty ){
+        d_ptr->contentString = d_ptr->textDocument->toPlainText();
+        d_ptr->contentStringDirty = false;
     }
-    return m_contentString;
+    return d_ptr->contentString;
 }
 
 /**
@@ -453,10 +567,10 @@ const QString& ProjectDocument::contentString(){
  */
 QString ProjectDocument::peekContent(int position) const{
     QString result = "";
-    if ( position >= m_textDocument->characterCount() )
+    if ( position >= d_ptr->textDocument->characterCount() )
         return result;
 
-    QTextBlock bl = m_textDocument->findBlock(position);
+    QTextBlock bl = d_ptr->textDocument->findBlock(position);
     QString linePointer;
     int positionInBlock = position - bl.position();
 
@@ -479,7 +593,7 @@ QString ProjectDocument::peekContent(int position) const{
 }
 
 QString ProjectDocument::substring(int from, int length) const{
-    QTextCursor tc(m_textDocument);
+    QTextCursor tc(d_ptr->textDocument);
     tc.setPosition(from);
     tc.setPosition(from + length, QTextCursor::KeepAnchor);
     return tc.selectedText();
@@ -490,7 +604,7 @@ void ProjectDocument::insert(int from, int length, const QString &text, int edit
         auto es = static_cast<ProjectDocument::EditingState>(editingState);
         addEditingState(es);
 
-        QTextCursor tc(m_textDocument);
+        QTextCursor tc(d_ptr->textDocument);
         tc.beginEditBlock();
         tc.setPosition(from);
         tc.setPosition(from + length - 1, QTextCursor::KeepAnchor);
@@ -500,7 +614,7 @@ void ProjectDocument::insert(int from, int length, const QString &text, int edit
 
         removeEditingState(es);
     } else {
-        QTextCursor tc(m_textDocument);
+        QTextCursor tc(d_ptr->textDocument);
         tc.beginEditBlock();
         tc.setPosition(from);
         tc.setPosition(from + length, QTextCursor::KeepAnchor);
@@ -513,17 +627,17 @@ void ProjectDocument::insert(int from, int length, const QString &text, int edit
 }
 
 int ProjectDocument::offsetAtLine(int line) const{
-    return m_textDocument->findBlockByLineNumber(line - 1).position();
+    return d_ptr->textDocument->findBlockByLineNumber(line - 1).position();
 }
 
 int ProjectDocument::lastCursorPosition()
 {
-    return m_lastCursorPosition;
+    return d_ptr->lastCursorPosition;
 }
 
 void ProjectDocument::setLastCursorPosition(int pos)
 {
-    m_lastCursorPosition = pos;
+    d_ptr->lastCursorPosition = pos;
 }
 
 ProjectDocument *ProjectDocument::castFrom(Document *document){
@@ -562,18 +676,18 @@ void ProjectDocument::removeLineAtBlockNumber(int pos){
  * \brief Slot for tracking text document changes which updates markers and sections
  */
 void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, int charsAdded){
-    m_contentStringDirty = true;
+    d_ptr->contentStringDirty = true;
     emit contentsChange(position, charsRemoved, charsAdded);
     //m_isDirty = true;
 
     QString addedText = "";
     if ( charsAdded == 1 ){
-        QChar c = m_textDocument->characterAt(position);
+        QChar c = d_ptr->textDocument->characterAt(position);
         if ( c == DocumentHandler::ParagraphSeparator )
             c = DocumentHandler::NewLine;
         addedText = c;
     } else if ( charsAdded > 0 ){
-        QTextCursor cursor(m_textDocument);
+        QTextCursor cursor(d_ptr->textDocument);
         cursor.setPosition(position);
         cursor.movePosition(QTextCursor::NextCharacter, QTextCursor::KeepAnchor, charsAdded);
         addedText = cursor.selection().toPlainText();
@@ -582,21 +696,22 @@ void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, 
     updateMarkers(position, charsRemoved, addedText.size());
     updateSections(position, charsRemoved, addedText);
 
-    setIsDirty(m_textDocument->isModified());
+    setIsDirty(d_ptr->textDocument->isModified());
 }
 
 void ProjectDocument::syncContent() const{
-    while ( m_lastChange != m_changes.end() ){
-        m_lastChange->redo();
-        ++m_lastChange;
+    while ( d_ptr->lastChange != d_ptr->changes.end() ){
+        d_ptr->lastChange->redo();
+        ++d_ptr->lastChange;
     }
-    m_isSynced = true;
+    d_ptr->isSynced = true;
 }
 
 /**
  * \brief ProjectDocument destructor
  */
 ProjectDocument::~ProjectDocument(){
+    delete d_ptr;
 }
 
 /**
