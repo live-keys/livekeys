@@ -8,7 +8,8 @@ Act{
     property size size: "0x0"
     property double sigmaX: 0.0
     property double sigmaY: 0.0
+    property int borderType: Img.FilteringOperations.BORDER_DEFAULT
 
     run: Img.FilteringOperations.gaussianBlur
-    args: ["$input", "$size", "$sigmaX", "$sigmaY"]
+    args: ["$input", "$size", "$sigmaX", "$sigmaY", "$borderType"]
 }

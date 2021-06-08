@@ -7,7 +7,9 @@ Act{
     property Mat input: null
     property double threshold1: 0
     property double threshold2: 1
+    property int apertureSize: 3
+    property bool l2gradient: false
 
     run: Img.FilteringOperations.canny
-    args: ["$input", "$threshold1", "$threshold2"]
+    args: ["$input", "$threshold1", "$threshold2", "$apertureSize", "$l2gradient"]
 }
