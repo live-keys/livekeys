@@ -4,8 +4,8 @@ import editor 1.0
 import editor.private 1.0
 import editqml 1.0
 
-import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
+import visual.input 1.0 as Input
 
 Qan.NodeItem{
     id: root
@@ -178,7 +178,7 @@ Qan.NodeItem{
 
         property color titleBackground: "#666"
         property double titleRadius: 5
-        property QtObject titleTextStyle : Workspace.TextStyle{}
+        property QtObject titleTextStyle : Input.TextStyle{}
     }
 
     property QtObject nodeStyle : defaultStyle
@@ -201,7 +201,7 @@ Qan.NodeItem{
             color: root.nodeStyle.titleBackground
             radius: root.nodeStyle.titleRadius
             
-            Workspace.Label{
+            Input.Label{
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 15

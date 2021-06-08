@@ -5,9 +5,9 @@ import base 1.0
 import live 1.0
 import editor 1.0
 import editor.private 1.0
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
 import visual.shapes 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -32,8 +32,8 @@ Rectangle{
 
     property QtObject editingFragment: null
 
-    property Workspace.TextStyle labelStyle: theme.inputLabelStyle.textStyle
-    property Workspace.TextStyle smallLabelStyle: theme.smallLabelStyle
+    property Input.TextStyle labelStyle: theme.inputLabelStyle.textStyle
+    property Input.TextStyle smallLabelStyle: theme.smallLabelStyle
 
     property int maxHeight: 160
 
@@ -103,7 +103,7 @@ Rectangle{
         height: 23
         width: parent.width - 5
         color: root.theme.colorScheme.middleground
-        Workspace.Label{
+        Input.Label{
             id: componentLabel
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -164,7 +164,7 @@ Rectangle{
                         }
                     }
 
-                    Workspace.Label{
+                    Input.Label{
                         id: pathText
                         anchors.left: pathIconLoader.right
                         anchors.leftMargin: pathIconLoader.visible ? 8 : 0
@@ -200,7 +200,7 @@ Rectangle{
         height: 23
         width: parent.width - 5
         color: root.theme.colorScheme.middleground
-        Workspace.Label{
+        Input.Label{
             id: fileLabel
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -285,7 +285,7 @@ Rectangle{
                         color: root.connectionRunnableColor
                         anchors.verticalCenter: parent.verticalCenter
 
-                        Workspace.Label{
+                        Input.Label{
                             id: label
                             anchors.left: parent.left
                             anchors.leftMargin: 15
@@ -353,7 +353,7 @@ Rectangle{
                                         }
                                     }
 
-                                    Workspace.Label{
+                                    Input.Label{
                                         id: pathText
                                         anchors.left: pathIconLoader.right
                                         anchors.leftMargin: pathIconLoader.visible ? 8 : 0

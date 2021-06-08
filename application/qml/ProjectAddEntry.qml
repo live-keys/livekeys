@@ -19,7 +19,6 @@ import editor 1.0
 import editor.private 1.0
 import base 1.0
 import visual.input 1.0 as Input
-import workspace 1.0 as Workspace
 
 Rectangle{
     id: root
@@ -117,7 +116,7 @@ Rectangle{
         }
     }
 
-    Workspace.Button{
+    Input.Button{
         anchors.right: parent.right
         anchors.rightMargin: 10
         anchors.bottom: parent.bottom

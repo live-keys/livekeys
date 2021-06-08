@@ -2,7 +2,7 @@ import QtQuick 2.0
 import timeline 1.0
 import lcvcore 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     width: 300
@@ -33,7 +33,7 @@ Rectangle{
         color: "#afafaf"
     }
 
-    Workspace.PathInputBox{
+    Input.PathInputBox{
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.top: parent.top
@@ -47,14 +47,14 @@ Rectangle{
         }
     }
 
-    Workspace.TextButton{
+    Input.TextButton{
         anchors.right: parent.right
         anchors.rightMargin: 10
         radius: 5
         width: 30
         height: 30
         text: 'X'
-        style:  Workspace.TextButtonStyle{
+        style:  Input.TextButtonStyle{
             backgroundColor: '#3f444d'
             backgroundHoverColor: Qt.lighter('#3f444d', 1.2)
             borderColor: '#575b63'

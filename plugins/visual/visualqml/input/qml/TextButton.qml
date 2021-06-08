@@ -1,11 +1,11 @@
 import QtQuick 2.3
 import workspace 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
 
-    property QtObject defaultStyle : RectangleButtonStyle{}
-    property QtObject style: defaultStyle
+    property QtObject style: Input.TextButtonStyle{}
 
     signal clicked()
 
@@ -15,12 +15,18 @@ Rectangle{
     border.color: buttonMouseArea.containsMouse ? style.borderHoverColor : style.borderColor
     clip: true
 
-    property Component content: null
+    property alias containsMouse: buttonMouseArea.containsMouse
+    property alias label: label
 
-    Loader{
-        id: loader
+    property string text: 'Button'
+
+    gradient: buttonMouseArea.containsMouse ? style.backgroundHoverGradient : style.backgroundGradient
+
+    Input.Label{
+        id: label
+        textStyle: buttonMouseArea.containsMouse ? root.style.hoverTextStyle : root.style.textStyle
+        text: root.text
         anchors.centerIn: parent
-        sourceComponent: root.content
     }
 
     MouseArea{

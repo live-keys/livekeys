@@ -22,7 +22,7 @@ import editor 1.0
 import fs 1.0 as Fs
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -68,7 +68,7 @@ CodePalette{
             height: 30
             color: palette.style.toolbarColor
 
-            Workspace.Button{
+            Input.Button{
                 anchors.left: parent.left
                 anchors.leftMargin: 30
                 anchors.verticalCenter: parent.verticalCenter
@@ -89,7 +89,7 @@ CodePalette{
                 width: zoomInfo.width
                 anchors.left: parent.left
                 anchors.leftMargin: 70
-                Workspace.Label{
+                Input.Label{
                     id: zoomInfo
                     anchors.verticalCenter: parent.verticalCenter
                     text: Math.floor(imageView.scale * 100) + '%'
@@ -101,7 +101,7 @@ CodePalette{
                 width: imageInfo.width
                 anchors.right: parent.right
                 anchors.rightMargin: 10
-                Workspace.Label{
+                Input.Label{
                     id: imageInfo
                     anchors.verticalCenter: parent.verticalCenter
                     text: {

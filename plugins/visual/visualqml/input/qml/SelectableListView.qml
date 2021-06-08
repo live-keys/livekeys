@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import workspace 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -21,7 +22,7 @@ Rectangle{
     property alias currentIndex: listView.currentIndex
     property alias currentItem: listView.currentItem
 
-    property QtObject defaultStyle: SelectableListViewStyle{}
+    property QtObject defaultStyle: Input.SelectableListViewStyle{}
     property QtObject style: defaultStyle
 
     signal triggered(int index)

@@ -1,8 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import timeline 1.0
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Item{
     id: root
@@ -56,7 +56,7 @@ Item{
         }
     }
 
-    Workspace.EditableLabel{
+    Input.EditableLabel{
         id: editableLabel
         anchors.left: parent.left
         anchors.leftMargin: 20

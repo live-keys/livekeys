@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.2
 import base 1.0
 import live 1.0
 import editor.private 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -103,7 +103,7 @@ Rectangle{
         height: title.height + buttonsContainer.height
         anchors.top: parent.top
 
-        Workspace.Label{
+        Input.Label{
             id: title
             anchors.top: parent.top
             anchors.topMargin: 5
@@ -134,7 +134,7 @@ Rectangle{
             height: 30
             spacing: 2
 
-            Workspace.TextButton{
+            Input.TextButton{
                 visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'All'
                 height: 22
@@ -148,7 +148,7 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'Property'
                 height: 22
@@ -162,7 +162,7 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 text: 'Object'
                 height: 22
                 width: 70
@@ -178,7 +178,7 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
                 text: 'Event'
                 height: 22
@@ -193,7 +193,7 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 visible: mode & AddQmlBox.DisplayMode.WithFunctions
                 text: 'Function'
                 height: 22
@@ -263,7 +263,7 @@ Rectangle{
             anchors.rightMargin: 0
             color: "transparent"
 
-            Workspace.InputBox {
+            Input.InputBox {
 
                 id : idInput
 
@@ -347,7 +347,7 @@ Rectangle{
         color: "transparent"
         height: 28
 
-        Workspace.InputBox {
+        Input.InputBox {
             id : searchInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -439,7 +439,7 @@ Rectangle{
         anchors.rightMargin: 1
         anchors.bottomMargin: 1
 
-        Workspace.SelectableListView {
+        Input.SelectableListView {
             id: categoryList
             anchors.top : parent.top
             anchors.left: parent.left
@@ -471,7 +471,7 @@ Rectangle{
 
                     height : 25
                     color : ListView.isCurrentItem ? root.theme.selectableListView.selectionBackgroundColor : "transparent"
-                    Workspace.Label{
+                    Input.Label{
                         id: label
                         anchors.left: parent.left
                         anchors.leftMargin: 10
@@ -523,7 +523,7 @@ Rectangle{
             }
         }
 
-        Workspace.SelectableListView {
+        Input.SelectableListView {
             id: listView
             anchors.top : parent.top
             anchors.right: parent.right

@@ -75,7 +75,7 @@ Theme{
         borderWidth: 1
         radius: 2
 
-        textStyle: TextStyle{
+        textStyle: Input.TextStyle{
             color: colorScheme.foregroundFaded
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -84,7 +84,7 @@ Theme{
                 pixelSize: 11
             })
         }
-        highlightTextStyle: TextStyle{
+        highlightTextStyle: Input.TextStyle{
             color: Qt.lighter(colorScheme.foregroundFaded)
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -138,7 +138,7 @@ Theme{
 
     // Labels
 
-    property QtObject monoTextStyle : TextStyle{
+    property QtObject monoTextStyle : Input.TextStyle{
         color: colorScheme.foreground
         font : Qt.font({
             family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
@@ -148,7 +148,7 @@ Theme{
         })
     }
 
-    property QtObject smallLabelStyle: TextStyle{
+    property QtObject smallLabelStyle: Input.TextStyle{
         color: colorScheme.foregroundFaded
         font : Qt.font({
             family: 'Open Sans, sans-serif',
@@ -160,10 +160,10 @@ Theme{
 
     // Forms
 
-    property QtObject inputLabelStyle: LabelOnRectangleStyle{
+    property QtObject inputLabelStyle: Input.LabelOnRectangleStyle{
         background: colorScheme.middleground
         radius: 3
-        textStyle: TextStyle{
+        textStyle: Input.TextStyle{
             color: colorScheme.foregroundFaded
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -174,8 +174,8 @@ Theme{
         }
     }
 
-    property QtObject inputStyle: InputBoxStyle{
-        textStyle: TextStyle{
+    property QtObject inputStyle: Input.InputBoxStyle{
+        textStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -185,7 +185,7 @@ Theme{
             })
         }
         radius: 2
-        hintTextStyle: TextStyle{
+        hintTextStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -201,8 +201,8 @@ Theme{
     }
 
 
-    property QtObject monoInputStyle: InputBoxStyle{
-        textStyle: TextStyle{
+    property QtObject monoInputStyle: Input.InputBoxStyle{
+        textStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
@@ -212,7 +212,7 @@ Theme{
             })
         }
         radius: 3
-        hintTextStyle: TextStyle{
+        hintTextStyle: Input.TextStyle{
             color: 'white'
             font : Qt.font({
                 family: 'Source Code Pro, Ubuntu Mono, Courier New, Courier',
@@ -228,8 +228,8 @@ Theme{
     }
 
 
-    property QtObject formButtonStyle : TextButtonStyle{
-        textStyle: TextStyle{
+    property QtObject formButtonStyle : Input.TextButtonStyle{
+        textStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -238,7 +238,7 @@ Theme{
                 pixelSize: 11
             })
         }
-        hoverTextStyle: TextStyle{
+        hoverTextStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -256,7 +256,7 @@ Theme{
     }
 
 
-    property QtObject iconButtonStyle : RectangleButtonStyle{
+    property QtObject iconButtonStyle : Input.RectangleButtonStyle{
         backgroundColor: 'transparent'
         backgroundHoverColor: 'transparent'
         borderColor: 'transparent'
@@ -265,7 +265,7 @@ Theme{
         radius: 3
     }
 
-    property QtObject minimalIconButtonStyle : RectangleButtonStyle{
+    property QtObject minimalIconButtonStyle : Input.RectangleButtonStyle{
         backgroundColor: 'transparent'
         backgroundHoverColor: 'transparent'
         borderColor: 'transparent'
@@ -331,7 +331,7 @@ Theme{
 
     property QtObject buttons: QtObject{
 
-        property Component apply: RectangleButton{
+        property Component apply: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -345,7 +345,7 @@ Theme{
             }
             onClicked: parent.clicked()
         }
-        property Component cancel: RectangleButton{
+        property Component cancel: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -359,7 +359,7 @@ Theme{
             }
             onClicked: parent.clicked()
         }
-        property Component add: RectangleButton{
+        property Component add: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -374,7 +374,7 @@ Theme{
             onClicked: parent.clicked()
         }
 
-        property Component save: RectangleButton{
+        property Component save: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -387,7 +387,7 @@ Theme{
             onClicked: parent.clicked()
         }
 
-        property Component connect: RectangleButton{
+        property Component connect: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -400,7 +400,7 @@ Theme{
             onClicked: parent.clicked()
         }
 
-        property Component penSize: RectangleButton{
+        property Component penSize: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -413,7 +413,7 @@ Theme{
             onClicked: parent.clicked()
         }
 
-        property Component editorCode: RectangleButton{
+        property Component editorCode: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -428,7 +428,7 @@ Theme{
             onClicked: parent.clicked()
         }
 
-        property Component editorShape: RectangleButton{
+        property Component editorShape: Input.RectangleButton{
             width: parent ? parent.width : 20
             height: parent ? parent.height: 20
 
@@ -445,7 +445,7 @@ Theme{
     // Tooltip
 
     property QtObject tooltip: QtObject{
-        property QtObject labelStyle: TextStyle{
+        property QtObject labelStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -463,8 +463,8 @@ Theme{
 
     // Lists
 
-    property QtObject selectableListView: SelectableListViewStyle{
-        labelStyle: TextStyle{
+    property QtObject selectableListView: Input.SelectableListViewStyle{
+        labelStyle: Input.TextStyle{
             color: colorScheme.foreground
             font : Qt.font({
                 family: 'Open Sans, sans-serif',
@@ -507,13 +507,13 @@ Theme{
 
             property color titleBackground: root.colorScheme.middlegroundOverlayDominant
             property double titleRadius: 3
-            property QtObject titleTextStyle : TextStyle{}
+            property QtObject titleTextStyle : Input.TextStyle{}
         }
 
         property QtObject propertyDelegateStyle : QtObject{
             property color background: root.colorScheme.middlegroundOverlay
             property double radius: 5
-            property QtObject textStyle: TextStyle{}
+            property QtObject textStyle: Input.TextStyle{}
         }
     }
 
@@ -528,7 +528,7 @@ Theme{
 
         inputStyle: root.inputStyle
 
-        timeLabelStyle: TextStyle{
+        timeLabelStyle: Input.TextStyle{
             color: root.colorScheme.foregroundFaded
             font.family: "Source Code Pro, Ubuntu Mono"
             font.pixelSize: 14

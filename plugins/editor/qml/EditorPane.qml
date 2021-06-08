@@ -22,6 +22,7 @@ import editor.private 1.0
 import workspace 1.0 as Workspace
 import base 1.0
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
 Pane{
     id : root
@@ -263,7 +264,7 @@ Pane{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             id: shapeAllButton
             anchors.right: parent.right
             anchors.rightMargin: 110

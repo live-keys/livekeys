@@ -23,6 +23,8 @@ import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
 import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
+
 
 CodePalette{
     id: palette
@@ -336,7 +338,7 @@ CodePalette{
             border.color: palette.style.toolbarBorder
             border.width: 1
 
-            Workspace.Button{
+            Input.Button{
                 anchors.left: parent.left
                 anchors.verticalCenter: parent.verticalCenter
                 width: 25
@@ -365,7 +367,7 @@ CodePalette{
                 width: zoomInfo.width
                 anchors.right: dimensionsPanel.left
                 anchors.rightMargin: 20
-                Workspace.Label{
+                Input.Label{
                     id: zoomInfo
                     textStyle: palette.style.labelStyle.textStyle
                     anchors.verticalCenter: parent.verticalCenter
@@ -380,7 +382,7 @@ CodePalette{
                 width: imageInfo.width
                 anchors.right: parent.right
                 anchors.rightMargin: 10
-                Workspace.Label{
+                Input.Label{
                     id: imageInfo
                     textStyle: palette.style.labelStyle.textStyle
                     anchors.verticalCenter: parent.verticalCenter

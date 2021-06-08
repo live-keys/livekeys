@@ -1,4 +1,5 @@
 import QtQuick 2.11
+import visual.input 1.0 as Input
 
 QtObject{
     property color backgroundColor: "#1b242c"
@@ -7,6 +8,6 @@ QtObject{
     property double borderSize: 1
     property double radius: 3
 
-    property QtObject textStyle: TextStyle{}
+    property QtObject textStyle: Input.TextStyle{}
 
 }

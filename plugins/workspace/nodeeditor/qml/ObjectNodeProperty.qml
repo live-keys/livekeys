@@ -4,6 +4,7 @@ import editor.private 1.0
 import editqml 1.0
 
 import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Item{
     id: propertyItem
@@ -43,7 +44,7 @@ Item{
     property QtObject defaultStyle : QtObject{
         property color background: "#333"
         property double radius: 5
-        property QtObject textStyle: Workspace.TextStyle{}
+        property QtObject textStyle: Input.TextStyle{}
     }
 
     property QtObject style: defaultStyle
@@ -81,7 +82,7 @@ Item{
         width: parent.width - 10
         height: 30
 
-        Workspace.Label{
+        Input.Label{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10

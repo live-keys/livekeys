@@ -61,6 +61,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
     palettes/DrawPalette.qml \
+    palettes/GalleryFileSelectorPalette.qml \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.json \
     palettes/ImageReadPalette.json \
@@ -86,6 +87,7 @@ DISTFILES += \
     qml/CropTool.qml \
     qml/DrawSurface.qml \
     qml/EditCvExtension.qml \
+    qml/GalleryFileSelector.qml \
     qml/GradientTool.qml \
     qml/GrayscaleView.qml \
     qml/ImageRead.qml \
