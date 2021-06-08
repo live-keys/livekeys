@@ -83,6 +83,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/lcvphoto#BrightnessAndContrast"] = "BrightnessAndContrastPalette";
     m_defaultPalettes["qml/lcvcore#PerspectiveOnBackground"] = "PerspectiveOnBackgroundPropertiesPalette";
     m_defaultPalettes["qml/lcvcore#ImageSegmentFactory"] = "ImageSegmentFactoryPropertiesPalette";
+    m_defaultPalettes["qml/lcvcore#GalleryFileSelector"] = "GalleryFileSelectorPropertiesPalette";
 
     if (parent){
         MLNode s = parent->readFor("qmljs");

@@ -62,6 +62,7 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 DISTFILES += \
     palettes/DrawPalette.qml \
     palettes/GalleryFileSelectorPalette.qml \
+    palettes/GalleryFileSelectorPropertiesPalette.json \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFilePalette.json \
     palettes/ImageReadPalette.json \
@@ -82,7 +83,9 @@ DISTFILES += \
     palettes/VideoSurfacePropertiesPalette.json \
     qml/BlankImage.qml \
     qml/BrushTool.qml \
+    qml/ChannelSelect.qml \
     qml/ColorHistogramView.qml \
+    qml/CopyMakeBorder.qml \
     qml/Crop.qml \
     qml/CropTool.qml \
     qml/DrawSurface.qml \
