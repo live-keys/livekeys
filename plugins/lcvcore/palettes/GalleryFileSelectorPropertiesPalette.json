@@ -1,0 +1,8 @@
+{
+    "type": "qml/lcvcore#GalleryFileSelector",
+    "palettes": ["GalleryFileSelectorPalette"],
+    "properties" : [
+        ["workingDirectory", "FolderPathPalette"],
+        ["selectedFile", "", "true"]
+    ]
+}

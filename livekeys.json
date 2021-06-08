@@ -455,8 +455,8 @@
                 }
             ]
         },
-        "msvc2017_64": {
-            "compiler": "msvc2017_64",
+        "msvc2019_64": {
+            "compiler": "msvc2019_64",
             "environment": {
                 "OPENCV_DIR": "opencv_dir",
                 "QTDIR": "qtdir",
@@ -714,51 +714,51 @@
                     "populate": {
                         "plugins/base/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editor/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editqml/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/fs/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/live/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvcore/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvimgproc/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvvideo/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvfeatures2d/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvphoto/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/timeline/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/workspace/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         }
                     }
                 },
