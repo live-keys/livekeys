@@ -1,32 +1,14 @@
-/****************************************************************************
-**
-** Copyright (C) 2014-2019 Dinu SV.
-** (contact: mail@dinusv.com)
-** This file is part of Livekeys Application.
-**
-** GNU Lesser General Public License Usage
-** This file may be used under the terms of the GNU Lesser
-** General Public License version 3 as published by the Free Software
-** Foundation and appearing in the file LICENSE.LGPLv3 included in the
-** packaging of this file. Please review the following information to
-** ensure the GNU Lesser General Public License version 3 requirements
-** will be met: https://www.gnu.org/licenses/lgpl.html.
-**
-****************************************************************************/
+#ifndef COLORSPACE_H
+#define COLORSPACE_H
 
-#ifndef QCVTCOLOR_H
-#define QCVTCOLOR_H
+#include <QObject>
+#include "qmat.h"
+#include "opencv2/imgproc.hpp"
 
-#include "qmatfilter.h"
-
-class QCvtColor : public QMatFilter{
-
+class ColorSpace: public QObject
+{
     Q_OBJECT
-    Q_PROPERTY(CvtType code  READ code  WRITE setCode  NOTIFY codeChanged)
-    Q_PROPERTY(int     dstCn READ dstCn WRITE setDstCn NOTIFY dstCnChanged)
-
     Q_ENUMS(CvtType)
-
 public:
     enum CvtType{
         CV_BGR2BGRA    =0,
@@ -255,50 +237,9 @@ public:
 
         CV_COLORCVT_MAX  = 127
     };
-
-public:
-    explicit QCvtColor(QQuickItem *parent = 0);
-
-    virtual void transform(const cv::Mat &in, cv::Mat&);
-
-    CvtType code() const;
-    void setCode(CvtType arg);
-
-    int dstCn() const;
-    void setDstCn(int arg);
-
-
-signals:
-    void codeChanged();
-    void dstCnChanged();
-
-private:
-    CvtType m_code;
-    int m_dstCn;
+    ColorSpace(QObject* parent = nullptr);
+public slots:
+    QMat* cvtColor(QMat* input, int code, int dstCn);
 };
 
-inline QCvtColor::CvtType QCvtColor::code() const{
-    return m_code;
-}
-
-inline void QCvtColor::setCode(QCvtColor::CvtType arg){
-    if (m_code != arg) {
-        m_code = arg;
-        emit codeChanged();
-        QMatFilter::transform();
-    }
-}
-
-inline int QCvtColor::dstCn() const{
-    return m_dstCn;
-}
-
-inline void QCvtColor::setDstCn(int arg){
-    if (m_dstCn != arg) {
-        m_dstCn = arg;
-        emit dstCnChanged();
-        QMatFilter::transform();
-    }
-}
-
-#endif // QCVTCOLOR_H
+#endif // COLORSPACE_H

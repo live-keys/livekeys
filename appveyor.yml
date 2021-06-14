@@ -43,8 +43,8 @@ build_script:
   - npm audit fix
   - SET LIVEDOC=%APPVEYOR_BUILD_FOLDER%\build\live-doc-master\live-doc.js
   - cd ..
-  - python livepm/main.py build .. msvc2017_64
-  - python livepm/main.py deploy .. msvc2017_64
+  - python livepm/main.py build .. msvc2019_64
+  - python livepm/main.py deploy .. msvc2019_64
   - dir
 
 artifacts:

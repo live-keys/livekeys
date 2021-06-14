@@ -143,9 +143,10 @@ CodePalette{
             }
 
             highlight: Rectangle {
-                color: "#66cccccc"
+                color: palette.theme.colorScheme.middlegroundOverlayDominant
             }
             highlightFollowsCurrentItem: true
+            highlightMoveDuration: 0
             focus: true
             clip: true
 

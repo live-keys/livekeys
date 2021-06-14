@@ -9,31 +9,6 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: []
     Component {
-        name: "QBlur"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Blur 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "ksize"; type: "QSize" }
-        Property { name: "anchor"; type: "QPoint" }
-        Property { name: "borderType"; type: "int" }
-        Method { name: "ksize" }
-        Method {
-            name: "setKsize"
-            Parameter { name: "ksize"; type: "QSize" }
-        }
-        Method { name: "anchor" }
-        Method {
-            name: "setAnchor"
-            Parameter { name: "anchor"; type: "QPoint" }
-        }
-        Method { name: "borderType"; type: "int" }
-        Method {
-            name: "setBorderType"
-            Parameter { name: "borderType"; type: "int" }
-        }
-    }
-    Component {
         name: "QCachedWarpPerspective"
         defaultProperty: "data"
         prototype: "QQuickItem"
@@ -43,51 +18,6 @@ Module {
         Property { name: "input"; type: "QMat"; isPointer: true }
         Property { name: "m"; type: "QMat"; isPointer: true }
         Property { name: "interpolation"; type: "int" }
-    }
-    Component {
-        name: "QCanny"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Canny 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "threshold1"; type: "double" }
-        Property { name: "threshold2"; type: "double" }
-        Property { name: "apertureSize"; type: "int" }
-        Property { name: "l2gradient"; type: "bool" }
-    }
-    Component {
-        name: "QChannelSelect"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/ChannelSelect 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "channel"; type: "int" }
-    }
-    Component {
-        name: "QCopyMakeBorder"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/CopyMakeBorder 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "BorderType"
-            values: {
-                "BORDER_REPLICATE": 1,
-                "BORDER_CONSTANT": 0,
-                "BORDER_REFLECT": 2,
-                "BORDER_WRAP": 3,
-                "BORDER_REFLECT_101": 4,
-                "BORDER_TRANSPARENT": 5,
-                "BORDER_DEFAULT": 4,
-                "BORDER_ISOLATED": 16
-            }
-        }
-        Property { name: "top"; type: "int" }
-        Property { name: "bottom"; type: "int" }
-        Property { name: "left"; type: "int" }
-        Property { name: "right"; type: "int" }
-        Property { name: "borderType"; type: "int" }
-        Property { name: "color"; type: "QColor" }
     }
     Component {
         name: "QCvtColor"
@@ -282,18 +212,6 @@ Module {
         Property { name: "dstCn"; type: "int" }
     }
     Component {
-        name: "QDilate"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Dilate 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "kernel"; type: "QMat"; isPointer: true }
-        Property { name: "anchor"; type: "QPoint" }
-        Property { name: "iterations"; type: "int" }
-        Property { name: "borderType"; type: "int" }
-        Property { name: "borderValue"; type: "QColor" }
-    }
-    Component {
         name: "QDraw"
         prototype: "QObject"
         exports: ["lcvimgproc/Draw 1.0"]
@@ -478,41 +396,6 @@ Module {
         }
     }
     Component {
-        name: "QErode"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Erode 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "kernel"; type: "QMat"; isPointer: true }
-        Property { name: "anchor"; type: "QPoint" }
-        Property { name: "iterations"; type: "int" }
-        Property { name: "borderType"; type: "int" }
-        Property { name: "borderValue"; type: "QColor" }
-    }
-    Component {
-        name: "QFilter2D"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Filter2D 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "ddepth"; type: "int" }
-        Property { name: "kernel"; type: "QMat"; isPointer: true }
-        Property { name: "anchor"; type: "QPoint" }
-        Property { name: "delta"; type: "double" }
-        Property { name: "borderType"; type: "int" }
-    }
-    Component {
-        name: "QGaussianBlur"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/GaussianBlur 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "ksize"; type: "QSize" }
-        Property { name: "sigmaX"; type: "double" }
-        Property { name: "sigmaY"; type: "double" }
-        Property { name: "borderType"; type: "int" }
-    }
-    Component {
         name: "QGeometry"
         prototype: "QObject"
         exports: ["lcvimgproc/Geometry 1.0"]
@@ -689,40 +572,6 @@ Module {
             Parameter { name: "size"; type: "QSize" }
             Parameter { name: "depth"; type: "int" }
         }
-    }
-    Component {
-        name: "QSobel"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvimgproc/Sobel 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "ddepth"; type: "QMat::Type" }
-        Property { name: "xorder"; type: "int" }
-        Property { name: "yorder"; type: "int" }
-        Property { name: "ksize"; type: "int" }
-        Property { name: "scale"; type: "double" }
-        Property { name: "delta"; type: "double" }
-        Property { name: "borderType"; type: "int" }
-        Signal { name: "scaleChagned" }
-    }
-    Component {
-        name: "QStructuringElement"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["lcvimgproc/StructuringElement 1.0"]
-        exportMetaObjectRevisions: [0]
-        Enum {
-            name: "ElementShape"
-            values: {
-                "MORPH_RECT": 0,
-                "MORPH_ELLIPSE": 2,
-                "MORPH_CROSS": 1
-            }
-        }
-        Property { name: "shape"; type: "ElementShape" }
-        Property { name: "ksize"; type: "QSize" }
-        Property { name: "anchor"; type: "QPoint" }
-        Property { name: "output"; type: "QMat"; isPointer: true }
     }
     Component {
         name: "QWarpPerspective"

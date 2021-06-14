@@ -14,8 +14,21 @@ class QMatOp : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QMat* nullMat READ nullMat CONSTANT)
-
+    Q_ENUMS(BorderType)
 public:
+    enum BorderType {
+        BORDER_CONSTANT    = cv::BORDER_CONSTANT,
+        BORDER_REPLICATE   = cv::BORDER_REPLICATE,
+        BORDER_REFLECT     = cv::BORDER_REFLECT,
+        BORDER_WRAP        = cv::BORDER_WRAP,
+        BORDER_REFLECT_101 = cv::BORDER_REFLECT_101,
+        BORDER_TRANSPARENT = cv::BORDER_TRANSPARENT,
+
+        BORDER_REFLECT101  = BORDER_REFLECT_101,
+        BORDER_DEFAULT     = BORDER_REFLECT_101,
+        BORDER_ISOLATED    = cv::BORDER_ISOLATED
+    };
+
     explicit QMatOp(QObject *parent = nullptr);
 
     static cv::Scalar toScalar(const QColor& color);
@@ -66,6 +79,10 @@ public slots:
     QMat* bitwiseAnd(QMat* arg1, QMat* arg2);
     QMat* bitwiseNot(QMat* arg);
 
+    QMat* selectChannel(QMat* input, int channel);
+    QMat* copyMakeBorder(QMat* input,
+                         int top, int bottom, int left, int right,
+                         int borderType = BORDER_DEFAULT, const QColor& color = QColor());
 private:
     lv::ViewEngine* engine();
 };
