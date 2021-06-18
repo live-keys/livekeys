@@ -788,6 +788,10 @@ bool QmlEditFragment::isNull()
     return readValueText() == "null";
 }
 
+bool QmlEditFragment::isMethod(){
+    return m_channel ? m_channel->type() == QmlBindingChannel::Method : false;
+}
+
 void QmlEditFragment::__channelObjectErased(){
     if ( !m_channel )
         return;
