@@ -25,6 +25,7 @@ namespace lv{
 QmlAct::QmlAct(QObject *parent)
     : QObject(parent)
     , m_isComponentComplete(false)
+    , m_trigger(QmlAct::PropertyChange)
     , m_worker(nullptr)
     , m_source(nullptr)
     , m_currentTask(nullptr)
@@ -68,9 +69,16 @@ void QmlAct::componentComplete(){
     for ( int i = 0; i < meta->propertyCount(); i++ ){
         QMetaProperty property = meta->property(i);
         QByteArray name = property.name();
-        if ( name != "objectName" && name != "result" ){
+        if ( name != "objectName" &&
+             name != "run" &&
+             name != "args" &&
+             name != "returns" &&
+             name != "result" &&
+             name != "trigger" &&
+             name != "worker")
+        {
             QQmlProperty pp(this, name);
-            pp.connectNotifySignal(this, SLOT(exec()));
+            pp.connectNotifySignal(this, SLOT(__propertyChange()));
         }
     }
 
@@ -79,7 +87,7 @@ void QmlAct::componentComplete(){
 
 void QmlAct::setArgs(QJSValue args){
     if ( m_isComponentComplete ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot configure arguments after component is complete.", Exception::toCode("~ActFnConfig"));
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Act: Cannot configure arguments after component is complete.", Exception::toCode("~ActFnConfig"));
         ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
@@ -208,6 +216,12 @@ void QmlAct::exec(){
             QJSValue r = run.call(currentArgs);
             setResult(r);
         }
+    }
+}
+
+void QmlAct::__propertyChange(){
+    if ( m_trigger == QmlAct::PropertyChange ){
+        exec();
     }
 }
 
