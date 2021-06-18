@@ -428,6 +428,10 @@ void WorkspaceLayer::cancelTooltip(QObject *tooltip){
     }
 }
 
+void WorkspaceLayer::saveRecentsToFile(){
+    m_workspace->saveRecents();
+}
+
 void WorkspaceLayer::__tooltipDestroyed(){
     if ( m_tooltip ){
         QObject* contentBox = m_tooltip->property("contentBox").value<QObject*>();

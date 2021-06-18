@@ -84,6 +84,8 @@ public slots:
     void triggerTooltip(QObject* tooltip);
     void cancelTooltip(QObject* tooltip);
 
+    void saveRecentsToFile();
+
     void __tooltipDestroyed();
     void __tooltipTimeout();
 

@@ -167,7 +167,6 @@ Rectangle{
                 font.weight: Font.Light
             }
 
-
             Rectangle {
                 width: parent.width
                 height: 5
@@ -588,6 +587,7 @@ Rectangle{
                     hoverEnabled: true
                     onClicked: {
                         noThanks = true
+                        lk.layers.workspace.saveRecentsToFile()
                     }
                 }
 

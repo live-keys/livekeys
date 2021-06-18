@@ -73,7 +73,7 @@ Workspace::Workspace(Project *project, WorkspaceLayer *parent)
 
 Workspace::~Workspace(){
     delete m_currentProjectWorkspace;
-    saveRecents();
+    saveRecentsIfChanged();
     delete m_recentsModel;
 
 }
@@ -122,26 +122,13 @@ void Workspace::whenProjectPathChange(const QString &path){
     }
 }
 
-void Workspace::saveRecents(){
-    QString recentsPath = absolutePath("workspaces.json");
-    QFile recentsFile(recentsPath);
-    int modelSize = m_recentsModel->rowCount(QModelIndex());
-    if ( (m_recentsChanged || modelSize == 0) && recentsFile.open(QIODevice::WriteOnly) ){
-        MLNode recents(MLNode::Array);
-        for (int i = 0; i < modelSize; ++i)
-            recents.append(MLNode(m_recentsModel->entryAt(i).m_path.toStdString()));
+//HERE
 
-        MLNode n(MLNode::Object);
-        n["projects"] = recents;
+void Workspace::saveRecentsIfChanged(){
+    if ( !m_recentsChanged )
+        return;
 
-        std::string result;
-        ml::toJson(n, result);
-
-        vlog("appdata").v() << "Saving projects to: " << recentsPath;
-
-        recentsFile.write(result.c_str());
-        recentsFile.close();
-    }
+    saveRecents();
 }
 
 
@@ -175,6 +162,28 @@ Workspace *Workspace::getFromContext(QQmlContext *ctx){
 StartupModel *Workspace::recents()
 {
     return m_recentsModel;
+}
+
+void Workspace::saveRecents(){
+    QString recentsPath = absolutePath("workspaces.json");
+    QFile recentsFile(recentsPath);
+    int modelSize = m_recentsModel->rowCount(QModelIndex());
+    if ( recentsFile.open(QIODevice::WriteOnly) ){
+        MLNode recents(MLNode::Array);
+        for (int i = 0; i < modelSize; ++i)
+            recents.append(MLNode(m_recentsModel->entryAt(i).m_path.toStdString()));
+
+        MLNode n(MLNode::Object);
+        n["projects"] = recents;
+
+        std::string result;
+        ml::toJson(n, result);
+
+        vlog("appdata").v() << "Saving projects to: " << recentsPath;
+
+        recentsFile.write(result.c_str());
+        recentsFile.close();
+    }
 }
 
 }// namespace
