@@ -21,7 +21,7 @@ macx{
     QMAKE_SONAME_PREFIX = @rpath/Live.framework/Libraries
 }
 
-ENABLE_PLUGINTYPES = true
+#ENABLE_PLUGINTYPES = true
 
 !isEmpty(ENABLE_PLUGINTYPES){
     message(Plugin Types Enabled: Livekeys will use private libraries)
