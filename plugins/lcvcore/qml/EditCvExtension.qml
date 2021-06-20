@@ -237,7 +237,13 @@ WorkspaceExtension{
                                         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
                                             var paletteRoot = codeHandler.findPalettes(rootPosition)
-                                            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(editor, paletteRoot, 0)
+                                            var poss = paletteRoot.pop()
+                                            paletteRoot = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(paletteRoot)
+                                            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                                editor,
+                                                paletteRoot.length > 0 ? paletteRoot[0].name: "",
+                                                poss
+                                            )
                                             oc.contentWidth = Qt.binding(function(){
                                                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                             })
@@ -286,7 +292,13 @@ WorkspaceExtension{
                                 lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                 lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
                                     var paletteRoot = codeHandler.findPalettes(rootPosition)
-                                    var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(editor, paletteRoot, 0)
+                                    var poss = paletteRoot.pop()
+                                    paletteRoot = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(paletteRoot)
+                                    var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                        editor,
+                                        paletteRoot.length > 0 ? paletteRoot[0].name: "",
+                                        poss
+                                    )
                                     oc.contentWidth = Qt.binding(function(){
                                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                     })

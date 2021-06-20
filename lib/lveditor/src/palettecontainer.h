@@ -29,7 +29,6 @@ class QQmlComponent;
 namespace lv{
 
 class CodePalette;
-class PaletteList;
 class PaletteLoader;
 class PaletteContainerPrivate;
 class LV_EDITOR_EXPORT PaletteContainer{
@@ -50,7 +49,7 @@ public:
 
     PaletteLoader* findPaletteByName(const QString& name) const;
     PaletteLoader* findPalette(const QString& type) const;
-    PaletteList* findPalettes(const QString& type, PaletteSearch searchType, PaletteList* list = nullptr);
+    QList<PaletteLoader*> findPalettes(const QString& type);
     int countPalettes(const QString& type) const;
 
     static QString paletteName(PaletteLoader* loader);
@@ -58,6 +57,7 @@ public:
     CodePalette* createPalette(PaletteLoader* loader);
     QJSValue paletteContent(PaletteLoader* loader);
     static bool configuresLayout(PaletteLoader* loader);
+    QJSValue paletteData(PaletteLoader* loader);
 
     int size() const;
 
