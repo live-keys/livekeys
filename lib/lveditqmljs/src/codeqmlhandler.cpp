@@ -2176,7 +2176,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     }
 
     editParent->addChildFragment(ef);
-    ef->setParent(editParent);
 
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
@@ -2235,7 +2234,6 @@ lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragm
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
     parentFragment->addChildFragment(result);
-    result->setParent(parentFragment);
 
     return result;
 }
@@ -2317,7 +2315,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 });
 
                 edit->addChildFragment(ef);
-                ef->setParent(edit);
 
                 if (ef->location() == QmlEditFragment::Object)
                     populateObjectInfoForFragment(ef);
@@ -2447,7 +2444,6 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                         populatePropertyInfoForFragment(ef);
 
                     p->addChildFragment(ef);
-                    ef->setParent(p);
 
                     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
