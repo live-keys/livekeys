@@ -28,7 +28,7 @@ Rectangle{
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                lk.layers.workspace.panes.removeStartupBox()
+                lk.layers.workspace.startup.close()
             }
         }
     }

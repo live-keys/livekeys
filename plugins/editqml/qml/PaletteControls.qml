@@ -816,8 +816,8 @@ QtObject{
 
         var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            objectContainer.editor.parentSplitter,
-            objectContainer.editor.parentSplitterIndex(),
+            objectContainer.editor.parentSplitView,
+            objectContainer.editor.parentSplitViewIndex(),
             objectPane
         )
 

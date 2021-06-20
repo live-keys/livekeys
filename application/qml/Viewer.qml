@@ -241,8 +241,12 @@ Pane{
         id: error
         anchors.bottom: parent.bottom
         width : parent.width
-        color : root.style.errorBackgroundColor
-        font: root.style.errorFont
+        color : "#000"
+        font: Qt.font({
+            family: "Source Code Pro, Ubuntu Mono, Courier New, Courier",
+            pixelSize: 12,
+            weight: Font.Normal
+        })
     }
 
     RunnablesMenu{

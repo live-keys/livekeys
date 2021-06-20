@@ -31,6 +31,7 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(QObject* project                     READ project       NOTIFY projectChanged)
     Q_PROPERTY(QObject* wizards                     READ wizards       NOTIFY wizardsChanged)
     Q_PROPERTY(QObject* panes                       READ panes         NOTIFY panesChanged)
+    Q_PROPERTY(QObject* startup                     READ startup       NOTIFY startupChanged)
     Q_PROPERTY(lv::WorkspaceMessageStack* messages  READ messages      CONSTANT)
     Q_PROPERTY(lv::Commands* commands               READ commands      CONSTANT)
     Q_PROPERTY(lv::KeyMap* keymap                   READ keymap        CONSTANT)
@@ -52,6 +53,7 @@ public:
     QObject* project() const;
     QObject* wizards() const;
     QObject* panes() const;
+    QObject* startup() const;
     lv::WorkspaceMessageStack* messages() const;
 
     lv::Commands* commands() const;
@@ -93,6 +95,7 @@ signals:
     void projectChanged();
     void wizardsChanged();
     void panesChanged();
+    void startupChanged();
 
 private:
     void initializePanes(ProjectWorkspace* workspace, QJSValue panes);
@@ -107,6 +110,7 @@ private:
     QObject* m_projectEnvironment;
     QObject* m_wizards;
     QObject* m_panes;
+    QObject* m_startup;
     QObject* m_viewRoot;
 
     lv::WorkspaceMessageStack* m_messageStack;
@@ -138,6 +142,10 @@ inline QObject *WorkspaceLayer::wizards() const{
 
 inline QObject *WorkspaceLayer::panes() const{
     return m_panes;
+}
+
+inline QObject *WorkspaceLayer::startup() const{
+    return m_startup;
 }
 
 inline Commands *WorkspaceLayer::commands() const{
