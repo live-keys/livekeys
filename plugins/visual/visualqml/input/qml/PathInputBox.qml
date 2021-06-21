@@ -52,8 +52,8 @@ Item{
 
     InputBox{
         id: pathInput
-        anchors.left: parent ? parent.left : undefined
-        width: parent ? parent.width - 31 : 0
+        anchors.left: parent.left
+        width: parent.width - 31
         height: root.height
 
         style: root.style.inputBoxStyle
@@ -66,7 +66,7 @@ Item{
     }
 
     Input.TextButton{
-        anchors.right: parent ? parent.right : undefined
+        anchors.right: parent.right
         radius: 5
         width: 30
         height: root.height
