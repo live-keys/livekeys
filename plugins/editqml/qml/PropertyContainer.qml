@@ -1,6 +1,8 @@
 import QtQuick 2.0
 import editor 1.0
 import editor.private 1.0
+import editqml 1.0 as EditQml
+import workspace.icons 1.0 as Icons
 
 Item{
     id: propertyContainer
@@ -13,6 +15,7 @@ Item{
     property Item paletteGroup : null
     property alias groupsContainer: container
     property QtObject editingFragment : null
+
     property QtObject documentHandler : null
     property Item editor: null
     property Item valueContainer : null
@@ -23,6 +26,9 @@ Item{
     property var childObjectContainer: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    property Component methodIcon: Icons.MenuIcon{}
+    property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.middlegroundOverlayDominantBorder; width: 15; height: 15 }
 
     property Connections editingFragmentRemovals: Connections{
         target: editingFragment
@@ -56,11 +62,27 @@ Item{
         radius: 3
         border.width: theme.inputStyle.borderThickness
         border.color: theme.colorScheme.middlegroundBorder
+
+        Loader{
+            id: iconLoader
+            anchors.top: parent.top
+            anchors.topMargin: 6
+            anchors.right: parent.right
+            anchors.rightMargin: 20
+            sourceComponent: {
+                if ( !propertyContainer.editingFragment )
+                    return null
+                return propertyContainer.editingFragment.location === EditQml.QmlEditFragment.Slot
+                    ? propertyContainer.eventIcon
+                    : propertyContainer.editingFragment.isMethod() ? propertyContainer.methodIcon : null
+            }
+        }
+
         Text{
             anchors.left: parent.left
             anchors.leftMargin: 25
             anchors.right: parent.right
-            anchors.rightMargin: 15
+            anchors.rightMargin: iconLoader.sourceComponent ? 38 : 20
             anchors.top: parent.top
             anchors.topMargin: 6
             text: propertyContainer.title
@@ -108,16 +130,18 @@ Item{
 
         Item{
             anchors.left: parent.left
-            anchors.leftMargin: 8
+            anchors.leftMargin: 4
             anchors.top: parent.top
-            anchors.topMargin: 2
+            anchors.topMargin: 4
             width: 15
             height: 20
-            Text{
-                anchors.verticalCenter: parent.verticalCenter
-                text: 'x'
-                color: '#ffffff'
+            Icons.XIcon{
+                width: 6
+                height: 6
+                strokeWidth: 1
+                color: propertyContainer.theme.colorScheme.foregroundFaded
             }
+
             MouseArea{
                 id: propertyCloseArea
                 anchors.fill: parent

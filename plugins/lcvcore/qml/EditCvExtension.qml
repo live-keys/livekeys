@@ -25,7 +25,7 @@ WorkspaceExtension{
                 var editor = lk.layers.workspace.panes.focusPane('editor')
                 if ( editor ){
                     lk.layers.workspace.panes.splitPaneHorizontallyWith(
-                        editor.parentSplitter, editor.parentSplitterIndex(), fe
+                        editor.parentSplitView, editor.parentSplitViewIndex(), fe
                     )
                 } else {
                     lk.layers.workspace.panes.container.splitPane(0, fe)
@@ -46,12 +46,15 @@ WorkspaceExtension{
     }
 
     panes: {
-        "matImage" : function(p, s){
-            var pane = root.imagePaneFactory.createObject(p)
-            if ( s )
-                pane.paneInitialize(s)
-            return pane
-        },
+        "matImage" : {
+            create: function(p, s){
+                var pane = root.imagePaneFactory.createObject(p)
+                if ( s )
+                    pane.paneInitialize(s)
+                return pane
+            },
+            single: false
+        }
     }
 
     menuInterceptors: [
@@ -107,9 +110,9 @@ WorkspaceExtension{
                                         var panes = lk.layers.workspace.panes.findPanesByType('editor')
                                         if ( panes.length === 0 ){
                                             var foundPane = panes[0]
-                                            var foundPaneIndex = foundPane.parentSplitterIndex
+                                            var foundPaneIndex = foundPane.parentSplitViewIndex
 
-                                            lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitter, foundPaneIndex, pane)
+                                            lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitView, foundPaneIndex, pane)
                                         } else {
                                             var containerUsed = lk.layers.workspace.panes.container
                                             if ( containerUsed.orientation === Qt.Vertical ){
@@ -142,8 +145,8 @@ WorkspaceExtension{
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')
                                 if ( panes.length === 0 ){
                                     var foundPane = panes[0]
-                                    var foundPaneIndex = foundPane.parentSplitterIndex
-                                    lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitter, foundPaneIndex, pane)
+                                    var foundPaneIndex = foundPane.parentSplitViewIndex
+                                    lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitView, foundPaneIndex, pane)
                                 } else {
                                     var containerUsed = lk.layers.workspace.panes.container
                                     if ( containerUsed.orientation === Qt.Vertical ){
@@ -210,9 +213,9 @@ WorkspaceExtension{
                                         var panes = lk.layers.workspace.panes.findPanesByType('editor')
                                         if ( panes.length === 0 ){
                                             var foundPane = panes[0]
-                                            var foundPaneIndex = foundPane.parentSplitterIndex
+                                            var foundPaneIndex = foundPane.parentSplitViewIndex
 
-                                            lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitter, foundPaneIndex, pane)
+                                            lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitView, foundPaneIndex, pane)
                                         } else {
                                             var containerUsed = lk.layers.workspace.panes.container
                                             if ( containerUsed.orientation === Qt.Vertical ){
@@ -267,8 +270,8 @@ WorkspaceExtension{
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')
                                 if ( panes.length === 0 ){
                                     var foundPane = panes[0]
-                                    var foundPaneIndex = foundPane.parentSplitterIndex
-                                    lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitter, foundPaneIndex, pane)
+                                    var foundPaneIndex = foundPane.parentSplitViewIndex
+                                    lk.layers.workspace.panes.splitPaneVerticallyWith(foundPane.parentSplitView, foundPaneIndex, pane)
                                 } else {
                                     var containerUsed = lk.layers.workspace.panes.container
                                     if ( containerUsed.orientation === Qt.Vertical ){

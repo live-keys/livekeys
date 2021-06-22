@@ -3,6 +3,7 @@ module workspace
 depends QtQuick 2.3
 
 Highlighter             1.0 Highlighter.qml
+ContextMenu             1.0 ContextMenu.qml
 PaneMenu                1.0 PaneMenu.qml
 PaneMenuItem            1.0 PaneMenuItem.qml
 PopupMenuStyle          1.0 PopupMenuStyle.qml

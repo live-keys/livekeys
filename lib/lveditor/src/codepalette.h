@@ -32,6 +32,7 @@ class LV_EDITOR_EXPORT CodePalette : public QObject{
     Q_PROPERTY(QQuickItem* item                  READ item           WRITE setItem       NOTIFY itemChanged)
     Q_PROPERTY(QString type                      READ type           WRITE setType       NOTIFY typeChanged)
     Q_PROPERTY(QVariant value                    READ value          WRITE setValue      NOTIFY valueChanged)
+    Q_PROPERTY(QJSValue writer                   READ writer         WRITE setWriter     NOTIFY writerChanged)
     Q_PROPERTY(QString name                      READ name           CONSTANT)
     Q_PROPERTY(lv::QmlEditFragment* editFragment READ editFragment   CONSTANT)
 
@@ -65,8 +66,12 @@ public:
     QString type() const;
     void setType(QString type);
 
+    const QJSValue& writer() const;
+
 public slots:
     bool isBindingChange() const;
+
+    void setWriter(QJSValue writer);
 
 signals:
     /** Item changed */
@@ -77,12 +82,15 @@ signals:
     void editFragmentChanged();
     /** Type changed */
     void typeChanged();
+    /** Writer changed */
+    void writerChanged();
 
     /** Value was initialized */
     void init(const QVariant& value);
     void sourceInit();
 
     void valueFromBindingChanged(const QVariant& value);
+
 
 private:
     Q_DISABLE_COPY(CodePalette)
@@ -93,6 +101,7 @@ private:
     QVariant         m_value;
     QString          m_path;
     QString          m_type;
+    QJSValue         m_writer;
     QmlEditFragment* m_editFragment;
 };
 
@@ -166,12 +175,23 @@ inline void CodePalette::setType(QString type){
     m_type = type;
     emit typeChanged();
 }
+/**
+ * \brief  Returns the writer function set by this palette
+ */
+inline const QJSValue &CodePalette::writer() const{
+    return m_writer;
+}
 
 /**
  * \brief Shows if palette is currently in the middle of a binding change
  */
 inline bool CodePalette::isBindingChange() const{
     return m_bindingChange;
+}
+
+inline void CodePalette::setWriter(QJSValue writer){
+    m_writer = writer;
+    emit writerChanged();
 }
 
 }// namespace
