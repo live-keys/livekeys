@@ -48,6 +48,7 @@ jobs:
       - name: Download dependencies Linux
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update
           sudo apt-get install -y gcc-7 g++-7 build-essential cmake cmake-data libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
           sudo apt-get install -y python-dev python-numpy python3 python3-pip libtbb2 libtbb-dev libjpeg-dev libpng-dev libdc1394-22-dev libgl1-mesa-dev unzip
           sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm
