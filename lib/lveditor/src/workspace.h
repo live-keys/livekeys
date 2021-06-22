@@ -63,6 +63,8 @@ public:
     bool wasRecentsFileFound() const;
     StartupModel* recents();
 
+    void saveRecents();
+
 signals:
     void projectOpen(const QString& path);
     void projectInitialized(const QString& path, ProjectWorkspace* workspace);
@@ -73,7 +75,7 @@ public slots:
 
 
 private:
-    void saveRecents();
+    void saveRecentsIfChanged();
 
     Project*             m_project;
     ProjectWorkspace*    m_currentProjectWorkspace;

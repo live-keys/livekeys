@@ -28,6 +28,10 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
     item: Item{
         width: 330
         height: 25
@@ -297,6 +301,7 @@ CodePalette{
     }
 
     onInit: {
+        console.log("ON INTIALIZE:" + value)
         if (isNaN(value)){
             palette.value = NaN
             numberInput.text = 'NaN'

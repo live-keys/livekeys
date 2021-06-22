@@ -4,6 +4,7 @@ import editor.private 1.0
 import editqml 1.0
 
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
 import visual.input 1.0 as Input
 
 Item{
@@ -24,6 +25,10 @@ Item{
 
     property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
+    property bool isMethod: false
+
+    property Component methodIcon: Icons.FunctionIcon{ color: theme.colorScheme.foregroundFaded; width: 15; height: 15 }
+    property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.foregroundFaded; width: 15; height: 15 }
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
@@ -37,7 +42,6 @@ Item{
     anchors.left: parent.left
     anchors.leftMargin: isForObject ? 30 : 0
     height: propertyTitle.height + paletteContainer.height
-
 
     property int contentWidth: 355 - anchors.leftMargin
 
@@ -83,12 +87,26 @@ Item{
         height: 30
 
         Input.Label{
+            id: propertyLabel
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             text: propertyItem.propertyName
             textStyle: propertyItem.style.textStyle
         }
+
+        Loader{
+            id: iconLoader
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: propertyLabel.right
+            anchors.leftMargin: 5
+            sourceComponent: {
+                return propertyItem.editingFragment && propertyItem.editingFragment.location === QmlEditFragment.Slot
+                    ? propertyItem.eventIcon
+                    : propertyItem.isMethod ? propertyItem.methodIcon : null
+            }
+        }
+
 
         Item{
             visible:!isForObject
