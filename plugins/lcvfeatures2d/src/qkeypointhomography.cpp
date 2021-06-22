@@ -116,8 +116,8 @@ QKeypointHomography::~QKeypointHomography(){
 QSGNode *QKeypointHomography::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeData *nodeData){
     if ( m_keypointsToScene && m_queryImage ){
 
-        cv::Mat* surface = output()->cvMat();
-        m_queryImage->cvMat()->copyTo(*surface);
+        cv::Mat* surface = output()->internalPtr();
+        m_queryImage->internalPtr()->copyTo(*surface);
 
         for ( int i = 0; i < m_keypointsToScene->size(); ++i ){
             if ( i >= m_objectCorners.size() )

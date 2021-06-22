@@ -20,10 +20,6 @@
 #include <QQmlEngine>
 
 #include "qdenoisetvl1.h"
-#include "qhuesaturationlightness.h"
-#include "qlevels.h"
-#include "qautolevels.h"
-#include "qbrightnessandcontrast.h"
 #include "qstitcher.h"
 
 #include "qalignmtb.h"
@@ -38,18 +34,20 @@
 #include "qtonemapreinard.h"
 
 #include "qdenoising.h"
+#include "qadjustments.h"
 
 static QObject* denoisingProvider(QQmlEngine* engine, QJSEngine*){
     return new QDenoising(engine);
 }
 
+static QObject* adjustmentsProvider(QQmlEngine* engine, QJSEngine*){
+    return new QAdjustments(engine);
+}
+
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
     qmlRegisterType<QDenoiseTvl1>(                    uri, 1, 0, "DenoiseTvl1");
-    qmlRegisterType<QHueSaturationLightness>(         uri, 1, 0, "HueSaturationLightness");
-    qmlRegisterType<QLevels>(                         uri, 1, 0, "Levels");
-    qmlRegisterType<QAutoLevels>(                     uri, 1, 0, "AutoLevels");
-    qmlRegisterType<QBrightnessAndContrast>(          uri, 1, 0, "BrightnessAndContrast");
+
     qmlRegisterType<QStitcher>(                       uri, 1, 0, "Stitcher");
 
     qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "AlignMTB");
@@ -63,4 +61,5 @@ void LcvphotoPlugin::registerTypes(const char *uri){
     qmlRegisterType<QTonemapReinard>(                 uri, 1, 0, "TonemapReinard");
 
     qmlRegisterSingletonType<QDenoising>(             uri, 1, 0, "Denoising", &denoisingProvider);
+    qmlRegisterSingletonType<QAdjustments>(           uri, 1, 0, "Adjustments", &adjustmentsProvider);
 }

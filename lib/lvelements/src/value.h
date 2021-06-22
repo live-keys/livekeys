@@ -176,6 +176,8 @@ public:
     bool isArray() const;
     bool isElement() const;
 
+
+
     template <typename T> static ScopedValue createValue(Engine* engine, const T& val){
         return ScopedValue(engine, val);
     }

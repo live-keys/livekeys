@@ -54,7 +54,7 @@ public:
     QJSValue getContent(QQmlEngine* engine);
     const QString& path() const{ return m_path; }
     const QString& name() const{ return m_name; }
-    bool hasItem() const{ return m_hasItem; }
+    bool configuresLayout() const{ return m_configuresLayout; }
 
 private:
     void handleError(const QQmlComponent &component) const;
@@ -64,7 +64,7 @@ private:
     QString m_name;
     QString m_path;
     QString m_type;
-    bool    m_hasItem;
+    bool    m_configuresLayout;
 };
 
 PaletteLoader::PaletteLoader(const QString &path, const QString &type)
@@ -73,7 +73,7 @@ PaletteLoader::PaletteLoader(const QString &path, const QString &type)
     , m_type(type)
 {
     m_name = QFileInfo(m_path).baseName();
-    m_hasItem = !m_path.endsWith(".json");
+    m_configuresLayout = m_path.endsWith(".json");
 }
 
 PaletteLoader::~PaletteLoader(){
@@ -118,7 +118,7 @@ CodePalette *PaletteLoader::getItem(QQmlEngine *engine){
 }
 
 QJSValue PaletteLoader::getContent(QQmlEngine *engine){
-    if ( m_hasItem )
+    if ( !m_configuresLayout )
         return QJSValue();
 
     QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
@@ -259,7 +259,7 @@ PaletteLoader *PaletteContainer::findPalette(const QString &type) const{
  *
  * This list is Javascript-owned!
  */
-PaletteList *PaletteContainer::findPalettes(const QString &type, bool includeExpandables, lv::PaletteList *l){
+PaletteList *PaletteContainer::findPalettes(const QString &type, PaletteContainer::PaletteSearch searchType, lv::PaletteList *l){
     Q_D(PaletteContainer);
 
     if ( !l ){
@@ -270,7 +270,7 @@ PaletteList *PaletteContainer::findPalettes(const QString &type, bool includeExp
     PaletteContainerPrivate::PaletteHash::Iterator it = d->items.find(type);
 
     while ( it != d->items.end() && it.key() == type ){
-        if ( it.value()->hasItem() || includeExpandables ){
+        if ( !it.value()->configuresLayout() || (searchType & IncludeLayoutConfigurations ) ){
             l->append(it.value());
         }
         ++it;
@@ -331,8 +331,8 @@ QJSValue PaletteContainer::paletteContent(PaletteLoader *loader){
     return loader->getContent(d->engine);
 }
 
-bool PaletteContainer::hasItem(PaletteLoader *loader){
-    return loader->hasItem();
+bool PaletteContainer::configuresLayout(PaletteLoader *loader){
+    return loader->configuresLayout();
 }
 
 /**

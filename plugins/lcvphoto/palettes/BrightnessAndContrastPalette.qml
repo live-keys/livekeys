@@ -20,19 +20,21 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import lcvphoto 1.0
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
 
     type : "qml/BrightnessAndContrast"
 
-    item: Rectangle{
+    property QtObject theme: lk.layers.workspace.themes.current
+
+    item: Item{
         id: adjustmentBox
         width: 280
-        height: 68
-        color: 'transparent'
+        height: 55
 
-        property BrightnessAndContrast bandc: null
+        property QtObject bandc: null
 
         Slider{
             id: brightnessSlider
@@ -40,16 +42,20 @@ CodePalette{
             anchors.topMargin: 1
             anchors.left: parent.left
             anchors.leftMargin: 40
-            width: parent.width - 80
+            width: parent.width - 40
             height: 15
             minimumValue: -200
             value: adjustmentBox.bandc ? adjustmentBox.bandc.brightness : 0
             onValueChanged: {
-                adjustmentBox.bandc.brightness = value
                 if ( !isBindingChange() ){
-                    extension.writeProperties({
-                        'brightness' : adjustmentBox.bandc.brightness
-                    })
+                    if ( adjustmentBox.bandc && adjustmentBox.bandc.input ){
+                        adjustmentBox.bandc.brightness = value
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'brightness' :  value
+                        })
+                    }
                 }
             }
             stepSize: 1.0
@@ -71,14 +77,12 @@ CodePalette{
             }
         }
 
-        Label{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
+            width: 35
+            height: 22
             text: brightnessSlider.minimumValue
-        }
-        Label{
-            anchors.top: parent.top
-            anchors.right: parent.right
-            text: brightnessSlider.maximumValue
+            style: theme.inputLabelStyle
         }
 
         Slider{
@@ -89,17 +93,21 @@ CodePalette{
             anchors.top: parent.top
             anchors.topMargin: 31
 
-            width: parent.width - 80
+            width: parent.width - 40
 
             height: 15
             minimumValue: 0
             value: adjustmentBox.bandc ? adjustmentBox.bandc.contrast : 0
             onValueChanged: {
-                adjustmentBox.bandc.contrast = value
                 if ( !isBindingChange() ){
-                    extension.writeProperties({
-                        'contrast' : adjustmentBox.bandc.contrast
-                    })
+                    if ( adjustmentBox.bandc && adjustmentBox.bandc.input ){
+                        adjustmentBox.bandc.contrast = value.toFixed(2)
+                    }
+                    if ( editFragment ){
+                        editFragment.writeProperties({
+                            'contrast' :  value
+                        })
+                    }
                 }
             }
             stepSize: 0.01
@@ -121,26 +129,27 @@ CodePalette{
             }
         }
 
-        Label{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             anchors.topMargin: 30
-            text: contrastSlider.minimumValue
+            width: 35
+            height: 22
+            text: contrastSlider.value.toFixed(2)
+            style: theme.inputLabelStyle
         }
-        Label{
-            anchors.top: parent.top
-            anchors.topMargin: 30
-            anchors.right: parent.right
-            text: contrastSlider.maximumValue
-        }
+
     }
 
     onInit: {
         adjustmentBox.bandc = value
     }
+    onValueFromBindingChanged: {
+        adjustmentBox.bandc = value
+    }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
                 'contrast' : palette.value.contrast
             })

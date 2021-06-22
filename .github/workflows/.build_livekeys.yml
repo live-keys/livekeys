@@ -1,0 +1,230 @@
+name: Livekeys build matrix
+
+on: [push, pull_request]
+
+env:
+  BUILD_TYPE: Release
+
+jobs:
+  build:
+    name: ${{ matrix.name }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-18.04]
+        include:
+        - os: macos-latest
+          NAME: macos
+          TARGET: x86_64-apple-darwin
+          COMPILER: clang
+          LINKER: clang
+        - os: ubuntu-18.04
+          NAME: ubuntu
+          TARGET: x86_64-linux
+          COMPILER: g++
+          LINKER: g++
+
+    steps:
+      - uses: actions/checkout@v1
+        
+      - name: Branch name
+        id: branch_name
+        run: |
+          echo ::set-output name=SOURCE_NAME::${GITHUB_REF#refs/*/}
+          echo ::set-output name=SOURCE_BRANCH::${GITHUB_REF#refs/heads/}
+          echo ::set-output name=SOURCE_TAG::${GITHUB_REF#refs/tags/}
+      
+      - name: Download dependencies MacOS
+        if: runner.os == 'macOS'
+        run: |
+          brew tap live-keys/opencv
+          brew update
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install openssl
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install wget
+          wget --help
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install doxygen
+          
+      - name: Download dependencies Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get install -y gcc-7 g++-7 build-essential cmake cmake-data libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
+          sudo apt-get install -y python-dev python-numpy python3 python3-pip libtbb2 libtbb-dev libjpeg-dev libpng-dev libdc1394-22-dev libgl1-mesa-dev unzip
+          sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm
+      
+      - name: Setup python and numpy MacOS
+        if: runner.os == 'macOS'
+        run: |
+          sudo mkdir /opt/qt
+          sudo chmod 777 /opt/qt
+          sudo ln -s /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild /Applications/Xcode.app/Contents/Developer/usr/bin/xcrun
+          rm -r '/usr/local/lib/python2.7/site-packages/numpy' || true
+          rm '/usr/local/bin/f2py' || true
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install numpy
+          
+      - name: Build OpenCV MacOS
+        if: runner.os == 'macOS'
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install --verbose live-keys/opencv/opencv
+          echo "Open CV environment"
+          ls /usr/local/Cellar
+          echo "/usr/local/opt"
+          ls /usr/local/opt
+          ls /usr/local/opt/opencv/lib
+          OPENCV_VERSION="$(ls -1 /usr/local/Cellar/opencv)"
+          echo $OPENCV_VERSION
+          export OPENCV_DIR=/usr/local/Cellar/opencv/$OPENCV_VERSION
+          export PKG_CONFIG_PATH=$OPENCV_DIR/lib/pkgconfig
+          echo $OPENCV_DIR
+          echo $PKG_CONFIG_PATH
+          echo $PWD
+          echo "OPENCV_DIR=$OPENCV_DIR" >> $GITHUB_ENV
+          echo "PKG_CONFIG_PATH=$PKG_CONFIG_PATH" >> $GITHUB_ENV
+          
+      - name: Build OpenCV Linux
+        if: runner.os == 'Linux'
+        run: |
+          git clone --single-branch -b 4.1.1 https://github.com/opencv/opencv.git
+          cd opencv
+          mkdir build
+          cd build
+          cmake -D CMAKE_BUILD_TYPE=RELEASE -D OPENCV_GENERATE_PKGCONFIG=YES -D BUILD_EXAMPLES=OFF -D BUILD_opencv_apps=OFF -D BUILD_DOCS=OFF -D BUILD_PERF_TESTS=OFF -D BUILD_TESTS=OFF ..
+          make -j8
+          sudo make -j8 install
+          export OPENCV_DIR=/usr/local/lib
+          cd ../..
+          echo "OPENCV_DIR=$OPENCV_DIR" >> $GITHUB_ENV
+                  
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+          
+      - name: Setup Qt MacOS
+        if: runner.os == 'macOS'
+        run: |
+          pip3 install aqtinstall==1.1.4
+          aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d
+          aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine
+          export QTDIR=/opt/qt/5.14.2/clang_64
+          echo "QTDIR=$QTDIR" >> $GITHUB_ENV
+          
+      - name: Setup Qt Linux
+        if: runner.os == 'Linux'
+        run: |
+          pip3 install aqtinstall==1.1.4
+          echo "Installed aqtinstall"
+          aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d
+          aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine
+          export QTDIR=/opt/qt/5.14.2/gcc_64
+          echo "QTDIR=$QTDIR" >> $GITHUB_ENV
+          
+      - name: Setup Livepm MacOS
+        if: runner.os == 'macOS'
+        run: |
+          pip --version
+          python --version
+          python -m pip install --upgrade pip
+          cd build
+          wget https://github.com/livecv/live-pm/archive/master.zip
+          unzip master.zip
+          mv live-pm-master/* .
+          git clone https://github.com/live-keys/live-doc.git
+          cd live-doc
+          npm install
+          cd ..
+          npm install --global create-dmg
+          export LIVEDOC=$PWD/live-doc/live-doc.js
+          echo "LIVEDOC=$LIVEDOC" >> $GITHUB_ENV
+          pip install -r requirements.txt
+          python livepm/main.py build .. macos_clang_64
+          python livepm/main.py deploy .. macos_clang_64
+          
+      - name: Setup Livepm Linux
+        if: runner.os == 'Linux'
+        run: |
+          cd build
+          echo $PWD
+          ls
+          wget https://github.com/livecv/live-pm/archive/master.zip
+          unzip master.zip
+          mv live-pm-master/* .
+          git clone https://github.com/live-keys/live-doc.git
+          cd live-doc
+          npm install
+          cd ..
+          export LIVEDOC=$PWD/live-doc/live-doc.js
+          pip3 install -r requirements.txt
+          echo "CWD:"
+          echo $PWD
+          ls
+          ls ..
+          python3 livepm/main.py build .. gcc_64
+          python3 livepm/main.py deploy .. gcc_64
+          python3 livepm/main.py deploy .. gcc_64_standalone
+      
+          
+      - name: Upload Artifact MacOS
+        uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/master' && runner.os == 'macOS'
+        with:
+          name: Release
+          path: build/*.dmg
+          
+      - name: Upload Artifact Linux
+        uses: actions/upload-artifact@v2
+        if: github.ref == 'refs/heads/master' && runner.os == 'Linux'
+        with:
+          name: Release
+          path: build/*.tar.gz
+
+
+      - name: Get Release
+        id: get_release
+        if: startsWith(github.ref, 'refs/tags/v')
+        run : |
+          cd build
+          RELEASE_NAME="$(ls -1 *.dmg)"
+          echo $RELEASE_NAME
+          echo ::set-output name=RELEASE_NAME::$RELEASE_NAME
+
+#       - name: Create Release
+#         id: create_release
+#         if: startsWith(github.ref, 'refs/tags/v')
+#         uses: actions/create-release@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           tag_name: ${{ github.ref }}
+#           release_name: Release ${{ github.ref }}
+#           draft: false
+#           prerelease: false
+
+#       - name: Get Release Info
+#         id: get_release_info
+#         uses: bruceadams/get-release@v1.2.2
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+     
+      - name: Do Release
+        id: do_release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          files: build/${{ steps.get_release.outputs.RELEASE_NAME }}
+
+#       - name: Upload Release Asset
+#         id: upload-release-asset 
+#         if: startsWith(github.ref, 'refs/tags/v')
+#         uses: actions/upload-release-asset@v1
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#         with:
+#           upload_url: ${{ steps.get_release_info.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+#           asset_path: build/${{ steps.get_release.outputs.RELEASE_NAME }}
+#           asset_name: ${{ steps.get_release.outputs.RELEASE_NAME }}
+#           asset_content_type: application/x-apple- diskimage
+          

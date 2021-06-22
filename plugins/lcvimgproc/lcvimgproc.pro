@@ -13,6 +13,7 @@ DEFINES += Q_LCV
 linkLocalLibrary(lvbase, lvbase)
 linkLocalLibrary(lvview, lvview)
 
+linkLocalPlugin(base,    base, base/baseqml)
 linkLocalPlugin(live,    live)
 linkLocalPlugin(lcvcore, lcvcore)
 
@@ -46,8 +47,35 @@ OTHER_FILES *= \
     qml/qmldir \
     qml/plugins.qmltypes \
     doc/*.md \
-    samples/*.qml
+    samples/*.qml \
+    qml/palettes/*.qml \
+    qml/palettes/*.json
 
 DISTFILES += \
+    qml/Blend.qml \
+    qml/Blur.qml \
+    qml/Canny.qml \
+    qml/ChannelSelect.qml \
+    qml/CvtColor.qml \
+    qml/Dilate.qml \
+    qml/DrawDetectedFaces.qml \
+    qml/Erode.qml \
+    qml/FaceDetection.qml \
+    qml/Filter2D.qml \
+    qml/GaussianBlur.qml \
+    qml/HoughLines.qml \
+    qml/HoughLinesP.qml \
+    qml/Pad.qml \
+    qml/Resize.qml \
+    qml/ResizeTool.qml \
+    qml/ResizeWithAspect.qml \
+    qml/Rotate.qml \
+    qml/RotateTool.qml \
+    qml/Scale.qml \
+    qml/Sobel.qml \
+    qml/StructuringElement.qml \
+    qml/Threshold.qml \
     qml/live.package.json \
-    qml/live.plugin.json
+    qml/live.plugin.json \
+    qml/palettes/PadPalette.json \
+    qml/palettes/TransformPaletteProperties.json

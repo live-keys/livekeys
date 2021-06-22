@@ -18,6 +18,7 @@
 #define LVDOCUMENTQMLINFO_H
 
 #include "live/lveditqmljsglobal.h"
+#include "live/document.h"
 #include "live/documentqmlobject.h"
 #include "live/documentqmlvalueobjects.h"
 #include "live/qmldeclaration.h"
@@ -51,7 +52,7 @@ class LV_EDITQMLJS_EXPORT DocumentQmlInfo{
     Q_DISABLE_COPY(DocumentQmlInfo)
 
 public:
-    class Import{
+    class LV_EDITQMLJS_EXPORT Import{
 
     public:
         static const int NoVersion;
@@ -77,7 +78,17 @@ public:
             const QString& uri,
             const QString& as = "",
             int vMajor = NoVersion,
-            int vMinor = NoVersion
+            int vMinor = NoVersion,
+            Document::Location location = Document::Location()
+        );
+        Import(
+            Type importType,
+            const QString& uri,
+            const QString& relativeUri,
+            const QString& as = "",
+            int vMajor = NoVersion,
+            int vMinor = NoVersion,
+            Document::Location location = Document::Location()
         );
 
         void updateUri(const QString& uri);
@@ -91,6 +102,12 @@ public:
         int versionMajor() const;
         int versionMinor() const;
         bool isVersionValid() const;
+        QString toString() const;
+        QString versionString() const;
+        void setLocation(const Document::Location& location);
+        const Document::Location& location() const;
+
+        static QString join(const QList<Import>& imports);
 
         bool operator ==(const Import& other) const;
 
@@ -101,6 +118,15 @@ public:
         QString m_as;
         int     m_versionMajor;
         int     m_versionMinor;
+        Document::Location m_location;
+    };
+
+    class TraversalResult{
+    public:
+        TraversalResult() : bindingPath(), range(nullptr){}
+
+        QSharedPointer<QmlBindingPath> bindingPath;
+        DocumentQmlValueObjects::RangeItem* range;
     };
 
     /** List of import entries */
@@ -209,6 +235,8 @@ public:
     const ValueReference valueAtPosition(int position, int& begin, int& end) const;
     const ASTReference astObjectAtPosition(int position);
 
+    QString propertySourceFromObjectId(const QString& componentId, const QString& propertyName);
+
     bool isValueNull(const ValueReference &vr) const;
 
     bool isParsedCorrectly() const;
@@ -222,11 +250,12 @@ public:
 
     QString source() const;
 
+    void tryExtractImports();
+
     DocumentQmlValueObjects::Ptr createObjects() const;
     DocumentQmlValueObjects::Ptr createObjects(const ASTReference& ast) const;
 
-    static QSharedPointer<QmlBindingChannel> traverseBindingPath(QSharedPointer<QmlBindingPath> path, Runnable* r);
-    static QSharedPointer<QmlBindingPath> findDeclarationPath(
+    static TraversalResult findDeclarationPath(
             ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,
             QmlDeclaration::Ptr declaration);

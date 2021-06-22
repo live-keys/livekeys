@@ -18,7 +18,9 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import editqml 1.0 as QmlEdit
 import live 1.0
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -30,32 +32,61 @@ CodePalette{
         weight: Font.Normal
     })
 
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    property QtObject theme: lk.layers.workspace.themes.current
+
     property CodeCompletionModel codeModel : CodeCompletionModel{}
+
+    property var qmlSuggestionBox: null
+
+    function writeBinding(){
+        var text = input.text
+
+        var ef = palette.editFragment
+
+        try{
+            var result = ef.bindExpression(text)
+            if ( !result ){
+                lk.layers.workspace.messages.pushError("Failed to match expression: " + text)
+                return
+            }
+
+            ef.write({'__ref': text ? text : ef.defaultValue()})
+
+            input.autoTextChange = true
+            input.text = text
+            input.autoTextChange = false
+
+            commitButton.visible = false
+
+        } catch (e){
+            var error = lk.engine.unwrapError(e)
+            lk.layers.workspace.messages.pushError(error.message, error.code)
+        }
+    }
 
     item: Rectangle{
 
         width: 280
-        height: 40
+        height: 25
         color: 'transparent'
 
-        //TODO: ErrorBox when not binding
-
-        InputBox{
+        Input.InputBox{
             id: input
             anchors.left: parent.left
-            anchors.leftMargin: 20
             anchors.right: parent.right
             anchors.rightMargin: 35
             anchors.top: parent.top
-            anchors.topMargin: 5
             height: 25
-            border.width: 1
-            border.color: "#031728"
-            text: ''
+
+            style: theme.inputStyle
+
             onTextChanged: {
                 if ( !autoTextChange ){
-                   extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                   editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                }
+                commitButton.visible = true
             }
 
             property bool autoTextChange : false
@@ -95,83 +126,122 @@ CodePalette{
                         autoTextChange = false
                         event.accepted = true
                     } else {
-                        var result = extension.bindExpression(input.text)
-                        if ( result ){
-                            extension.write({'__ref': input.text})
-                        }
+                        palette.writeBinding()
                     }
 
                 } else if ( event.key === Qt.Key_Space && event.modifiers & Qt.AltModifier ){
-                    extension.suggestionsForExpression(input.text, palette.codeModel, false)
+                    editFragment.suggestionsForExpression(input.text, palette.codeModel, false)
                     event.accepted = true
-                }
-            }
+                } else {
+                    var activePane = lk.layers.workspace.panes.activePane
+                    var paneCoords = activePane.mapGlobalPosition()
+                    var coords = input.mapToItem(activePane, 0, 0)
 
-            color: '#050e15'
+                    var rect = Qt.rect(coords.x, coords.y, input.width, input.height)
 
-            font.family: palette.inputFont.family
-            font.pixelSize: palette.inputFont.pixelSize
-        }
-
-        SuggestionBox{
-            id: qmlSuggestionBox
-            anchors.left: input.left
-            anchors.top: input.bottom
-            width: input.width
-
-            fontFamily: palette.inputFont.family
-            fontSize: palette.inputFont.pixelSize
-            smallFontSize: palette.inputFont.pixelSize - 2
-            visible: palette.codeModel.isEnabled
-            opacity: visible ? 0.95 : 0
-
-            model: palette.codeModel
-
-            Behavior on opacity {
-                NumberAnimation { duration: 150 }
-            }
-        }
-
-        Rectangle{
-            id: connectionsButton
-            anchors.top: parent.top
-            anchors.topMargin: 5
-            anchors.right: parent.right
-            anchors.rightMargin: 10
-            width: 25
-            height: 25
-            radius: 5
-
-            property color backgroundHoverColor : "#213355"
-            property color backgroundColor : "#212a4b"
-
-            color: connectionsButtonArea.containsMouse ? backgroundHoverColor : backgroundColor
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-connections.png"
-            }
-            MouseArea{
-                id: connectionsButtonArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    var ef = extension.editingFragment()
-                    var result = extension.bindExpression(input.text)
-                    if ( result ){
-                        extension.write({'__ref': input.text ? input.text : ef.defaultValue()})
+                    if (qmlSuggestionBox){
+                        qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x + 113, paneCoords.y - 75), lk.layers.editor.environment.placement.bottom)
+                        return
                     }
+                    qmlSuggestionBox = paletteControls.createSuggestionBox()
+                    qmlSuggestionBox.width = Qt.binding(function(){ return input.width })
+                    qmlSuggestionBox.height = 200
+                    qmlSuggestionBox.x = 0
+
+                    qmlSuggestionBox.fontFamily = palette.inputFont.family
+                    qmlSuggestionBox.fontSize = palette.inputFont.pixelSize
+                    qmlSuggestionBox.smallFontSize = palette.inputFont.pixelSize - 2
+                    qmlSuggestionBox.visible = Qt.binding(function(){ return palette.codeModel.isEnabled })
+
+                    qmlSuggestionBox.opacity = Qt.binding(function(){
+                        return palette.codeModel.isEnabled ? 0.95 : 0
+                    })
+                    qmlSuggestionBox.model = Qt.binding(function(){ return palette.codeModel })
+
+                    var editorBox = lk.layers.editor.environment.createEditorBox(
+                        qmlSuggestionBox, rect, Qt.point(paneCoords.x + 120, paneCoords.y - 32), lk.layers.editor.environment.placement.bottom
+                    )
+                    editorBox.color = 'transparent'
                 }
+            }
+        }
+
+        Input.Button{
+            id: commitButton
+            anchors.right: parent.right
+            width: 30
+            height: 25
+            content: theme.buttons.connect
+            visible: false
+            onClicked: {
+                palette.writeBinding()
             }
         }
     }
 
     onInit: {
+        var contents = editFragment.readValueText()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.dot &&
+                 tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                isBindingExpression = false
+            } else {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            }
+        }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
         input.forceActiveFocus()
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onSourceInit: {
+        var contents = editFragment.readValueText()
+        var tokens = QmlEdit.Tokenizer.scan(contents)
+
+        var parsedContents = ''
+
+        var isBindingExpression = true
+        for ( var i = 0; i < tokens.length; ++i ){
+            if ( tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.dot &&
+                 tokens[i].kind !== QmlEdit.Tokenizer.tokenKind.identifier )
+            {
+                isBindingExpression = false
+            } else {
+                parsedContents += contents.substr(tokens[i].position, tokens[i].length)
+            }
         }
+
+        if ( isBindingExpression ){
+            input.autoTextChange = true
+            input.text = parsedContents
+            input.autoTextChange = false
+        }
+
+        input.forceActiveFocus()
+    }
+
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
+    }
+
+    Component.onDestruction: {
+        if (!qmlSuggestionBox) return
+        var par = qmlSuggestionBox.parent
+        qmlSuggestionBox.destroy()
+        qmlSuggestionBox = null
+        par.destroy()
     }
 }

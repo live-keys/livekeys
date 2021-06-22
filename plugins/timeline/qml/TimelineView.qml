@@ -3,7 +3,9 @@ import QtQuick.Controls 1.2
 import QtQuick.Layouts 1.1
 import QtQuick.Controls.Styles 1.2
 import timeline 1.0
-import workspace 1.0
+import fs 1.0 as Fs
+import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -12,6 +14,7 @@ Rectangle{
     color: timelineStyle.borderColor
 
     Keys.onPressed: {
+        if (!root.timeline) return
         if ( event.key === Qt.Key_Space ){
             if ( root.timeline.isRunning )
                 root.timeline.stop()
@@ -22,16 +25,153 @@ Rectangle{
 
     property var surface : null
     property int zoom : 1
+    property bool interactive: true
+
+
+    signal mouseHover(int position, int trackIndex)
+    signal mouseLeave(int position)
+    signal mouseDoubleClicked(int position, int trackIndex)
+    signal segmentSelected(Track track, Segment segment)
+    signal segmentDoubleClicked(Track track, Segment segment, Item delegate)
+    signal segmentRightClicked(Track track, Segment segment, Item delegate)
+    signal trackTitleRightClicked(int index, Item delegate)
 
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
 
-    property TimelineStyle timelineStyle : TimelineStyle{}
+    property var headerContextMenu: {
+
+        function addTrack(){
+            var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoTrackFactory.qml'
+            var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+            var objectComponent = Qt.createComponent(objectPathUrl);
+            if ( objectComponent.status === Component.Error ){
+                throw linkError(new Error(objectComponent.errorString()), timelineArea)
+            }
+
+            var object = objectComponent.createObject();
+
+            var videoTrack = object.create()
+            videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+            root.timeline.appendTrack(videoTrack)
+        }
+
+        var menuOptions = [{
+            name: "Add Video Track",
+            enabled: true,
+            action: function(){
+                if ( !root.timeline.properties.videoSurface ){
+
+                    var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoSurfaceCreator.qml'
+                    var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+                    var objectComponent = Qt.createComponent(objectPathUrl);
+                    if ( objectComponent.status === Component.Error ){
+                        throw linkError(new Error(objectComponent.errorString()), this)
+                    }
+
+                    var object = objectComponent.createObject();
+                    var overlay = lk.layers.window.dialogs.overlayBox(object)
+
+                    object.surfaceCreated.connect(function(videoSurface){
+                        root.timeline.properties.videoSurface = videoSurface
+                        addTrack()
+                        overlay.closeBox()
+                        object.destroy()
+                    })
+
+                    object.cancelled.connect(function(){
+                        overlay.closeBox()
+                        object.destroy()
+                    })
+                } else {
+                    addTrack()
+                }
+            }
+        }, {
+            name: "Add Keyframe Track",
+            enabled: true,
+            action: function(){
+
+               var objectPath = lk.layers.workspace.pluginsPath() + '/timeline/KeyframeTrackFactory.qml'
+               var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+               var objectComponent = Qt.createComponent(objectPathUrl);
+               if ( objectComponent.status === Component.Error ){
+                   throw linkError(new Error(objectComponent.errorString()), timelineArea)
+               }
+
+               var object = objectComponent.createObject();
+
+               var keyframeTrack = object.create()
+               keyframeTrack.name = 'Keyframe Track #' + (root.timeline.trackList.totalTracks() + 1)
+
+               root.timeline.appendTrack(keyframeTrack)
+            }
+        },{
+            name: "Save",
+            enabled: true,
+            action: function(){
+                root.timeline.save()
+            }
+        }, {
+            name: "Save As...",
+            enabled: true,
+            action: function(){
+               lk.layers.window.dialogs.saveFile({filters : "Json files (*.json)"}, function(path){
+                   var localFile = Fs.UrlInfo.toLocalFile(path)
+                   root.timeline.saveAs(localFile)
+               })
+            }
+        }]
+
+        return menuOptions
+    }
+
+    property var handleContextMenu: function(item){
+        if ( item.objectName === 'timelineTrackTitle' ){
+            var track = item.timelineArea.timeline.trackList.trackAt(item.trackIndex)
+            var tr = track
+
+            for ( var i = 0; i < trackTitleContextMenu.toClear.length; ++i ){
+                trackTitleContextMenu.removeItem(trackTitleContextMenu.toClear[i])
+            }
+
+            for ( var i = 0; i < item.menuOptions.length; ++i ){
+                var menuitem = trackTitleContextMenu.insertItem(i, item.menuOptions[i].name)
+                menuitem.enabled = item.menuOptions[i].enabled
+                menuitem.triggered.connect(item.menuOptions[i].action.bind(this, track))
+                trackTitleContextMenu.toClear.push(menuitem)
+            }
+            trackTitleContextMenu.popup()
+
+        } else if ( item.objectName === 'timelineOptions' ){
+
+            var menuOptions = headerContextMenu
+
+            for ( var i = 0; i < contextMenu.toClear.length; ++i ){
+                contextMenu.removeItem(contextMenu.toClear[i])
+            }
+
+            for ( var i = 0; i < menuOptions.length; ++i ){
+                var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
+                menuitem.enabled = menuOptions[i].enabled
+                menuitem.triggered.connect(menuOptions[i].action)
+                contextMenu.toClear.push(menuitem)
+            }
+            contextMenu.popup()
+        }
+    }
+
+    property QtObject timelineStyle : TimelineStyle{}
     property Timeline timeline : Timeline{
         fps: 30
         contentLength: 100 * fps
         headerModel.scale: root.zoom
     }
     onTimelineChanged: {
+        if (!root.timeline) return
         root.timeline.headerModel.scale = Qt.binding(function(){return root.zoom })
         segmentInsertMenu.segmentSelection = root.timeline.config.loaders()
         segmentInsertMenu.model = Object.keys(segmentInsertMenu.segmentSelection)
@@ -52,14 +192,18 @@ Rectangle{
     property Component trackTitleDelegate : TrackTitle{
         trackIndex: index
         timelineStyle: root.timelineStyle
+        timelineArea: root
         onAddSegment: {
             segmentInsertMenu.currentTrack = root.timeline.trackList.trackAt(index)
         }
+        onRightClicked: root.trackTitleRightClicked(index, trackTitleItem)
     }
 
     property Item timelineOptions : Item{
+        objectName: "timelineOptions"
         anchors.fill: parent
-        MenuIcon{
+        property Item timelineArea: root
+        Icons.MenuIcon{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
@@ -69,18 +213,63 @@ Rectangle{
             MouseArea{
                 anchors.fill: parent
                 onClicked: {
-                    contextMenu.popup()
+                    root.handleContextMenu(root.timelineOptions)
                 }
             }
         }
-        PlayPause{
+        Item{
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: parent.left
+            anchors.leftMargin: 30
+            width: 15
+            height: 15
+            Icons.RecordIcon{
+                anchors.centerIn: parent
+                width: 12
+                height: 12
+                color: root.timelineStyle.iconColor
+                visible: root.timeline ? !root.timeline.isRunning: true
+            }
+            Icons.StopIcon{
+                anchors.centerIn: parent
+                width: 12
+                height: 12
+                padding: 2
+                color: root.timelineStyle.iconColor
+                visible: root.timeline ? root.timeline.isRecording: false
+            }
+
+            MouseArea{
+                anchors.fill: parent
+                onClicked: {
+                    if ( root.timeline.isRecording ){
+                        root.timeline.stop()
+                    } else {
+                        lk.layers.window.dialogs.saveFile({filters: ["Avi file (*.avi)"]}, function(url){
+                            var file = Fs.UrlInfo.toLocalFile(url)
+                            var writerOptions = {
+                                'filename': file,
+                                'fourcc' : 'DIVX',
+                                'fps' : root.timeline.fps
+                            }
+                            root.timeline.properties.videoSurface.setWriterOptions(writerOptions)
+                            root.timeline.startRecording()
+                        })
+
+                    }
+                }
+            }
+        }
+
+        Input.PlayPause{
             width: 15
             height: 15
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 40
-            isRunning: root.timeline.isRunning
+            anchors.leftMargin: 50
+            isRunning: root.timeline ? root.timeline.isRunning : false
             color: root.timelineStyle.iconColor
+            visible: root.timeline ? !root.timeline.isRecording : false
             onClicked : {
                 if ( value )
                     root.timeline.start()
@@ -88,35 +277,29 @@ Rectangle{
                     root.timeline.stop()
             }
         }
-        Text{
+
+        Input.Label{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 68
-            text: root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false)
-            color: root.timelineStyle.textColor
-            font.family : "Source Code Pro, Courier New, Courier"
-            font.pixelSize: 14
-            font.weight : Font.Normal
+            anchors.leftMargin: 80
+            text: root.timeline ? root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false): ""
+            textStyle: root.timelineStyle.timeLabelStyle
+        }
+
+        Menu{
+            id: trackTitleContextMenu
+            property var toClear: []
+            MenuItem {
+                text: qsTr("Remove Track")
+                onTriggered: root.timeline.removeTrack(index)
+            }
         }
 
         Menu{
             id: contextMenu
-            MenuItem {
-                text: qsTr("Insert Track")
-                onTriggered: root.timeline.addTrack()
-            }
-            MenuItem {
-                text: qsTr("Save")
-                onTriggered: root.timeline.save()
-            }
+            property var toClear: []
         }
     }
-
-    signal mouseHover(int position, int trackIndex)
-    signal mouseLeave(int position)
-    signal mouseDoubleClicked(int position, int trackIndex)
-    signal segmentSelected(Track track, Segment segment)
-    signal segmentDoubleClicked(Track track, Segment segment)
 
     Rectangle{
         id: timelineOptionsContainer
@@ -146,13 +329,21 @@ Rectangle{
             interactive: false
             contentY: timelineView.contentY
 
-            model: root.timeline.trackList
+            model: root.timeline ? root.timeline.trackList: null
             delegate: root.trackTitleDelegate
 
             MouseArea{
                 anchors.fill: parent
                 onWheel: {
+                    if ( !interactive )
+                        return
+
                     wheel.accepted = true
+
+                    if ( timelineView.height > timelineView.contentHeight ){
+                        return
+                    }
+
                     var newContentY = timelineView.contentY -= wheel.angleDelta.y / 6
                     if ( newContentY > timelineView.contentHeight - timelineView.height )
                         timelineView.contentY = timelineView.contentHeight - timelineView.height
@@ -190,7 +381,7 @@ Rectangle{
         Rectangle{
             id : timelineTopHeader
 
-            width : root.zoom * root.timeline.contentLength
+            width : root.zoom * (root.timeline ? root.timeline.contentLength : 10)
             height : 35
             color : root.timelineStyle.topHeaderBackgroundColor
 
@@ -198,7 +389,7 @@ Rectangle{
                 id: timelineHeaderView
                 height: parent.height
                 width: parent.width
-                model: root.timeline.headerModel
+                model: root.timeline ? root.timeline.headerModel: null
 
                 viewportX: timelineView.contentX
                 viewportWidth: timelineView.width
@@ -214,7 +405,7 @@ Rectangle{
                             anchors.left: isDelimiter ? parent.left : undefined
                             anchors.horizontalCenter: isDelimiter ? undefined : parent.horizontalCenter
 
-                            text: root.timeline.positionToLabel(label, true)
+                            text: root.timeline ? root.timeline.positionToLabel(label, true) : ""
                             color: root.timelineStyle.markerColor
                             font.pixelSize: 8
                             visible: hasLabel
@@ -248,7 +439,7 @@ Rectangle{
                 height : parent.height / 2
                 color: root.timelineStyle.cursorColor
 
-                x: root.timeline.cursorPosition * root.zoom
+                x: (root.timeline ? root.timeline.cursorPosition: 0) * root.zoom
                 onXChanged: {
                     if ( x > mainScroll.flickableItem.contentX + timeline.width - 10 ){
                         var newContentXForwardPos = x - 30
@@ -276,6 +467,7 @@ Rectangle{
 
         height: parent.height - 35
         width: parent.width - 150
+        color: timelineStyle.rowBackground
         x: 150
 
         ScrollView{
@@ -284,21 +476,34 @@ Rectangle{
 
             style: ScrollViewStyle {
                 transientScrollBars: false
-                handle: root.timelineStyle.scrollStyleHandle
-                scrollBarBackground: root.timelineStyle.scrollStyleBackground
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#1f2227"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: 'transparent'
+                    }
+                }
                 decrementControl: null
                 incrementControl: null
-                frame: root.timelineStyle.scrollStyleFrame
-                corner: root.timelineStyle.scrollStyleCorner
+                frame: Item{}
+                corner: Rectangle{color: 'transparent'}
             }
-
             ListView{
                 id: timelineView
                 boundsBehavior: Flickable.StopAtBounds
 
                 height: parent.height
-                contentWidth: root.timeline.contentLength * root.zoom + 5
-                model: root.timeline.trackList
+                contentWidth: (root.timeline ? root.timeline.contentLength: 0) * root.zoom + 5
+                model: root.timeline ? root.timeline.trackList : null
                 delegate: Rectangle{
                     objectName: "timelineRowDelegate"
                     height: 25
@@ -326,8 +531,11 @@ Rectangle{
 
                         segmentDelegate: root.segmentDelegate
 
+                        onSegmentRightClicked: {
+                            root.segmentRightClicked(track, segment, delegate)
+                        }
                         onSegmentDoubleClicked: {
-                            root.segmentDoubleClicked(track, segment)
+                            root.segmentDoubleClicked(track, segment, timelineRow)
                         }
                     }
 
@@ -335,7 +543,7 @@ Rectangle{
                         width : 1
                         height : parent.height
                         color: root.timelineStyle.cursorColor
-                        x: root.timeline.cursorPosition * root.zoom
+                        x: (root.timeline ? root.timeline.cursorPosition : 0) * root.zoom
                     }
                 }
             }
@@ -368,7 +576,7 @@ Rectangle{
                 }
 
                 if ( availableSpace < segment.length ){
-                    segment.length = avialableSpace
+                    segment.length = availableSpace
                 }
 
                 segment.position = root.timeline.cursorPosition

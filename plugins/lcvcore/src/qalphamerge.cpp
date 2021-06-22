@@ -24,7 +24,7 @@ QAlphaMerge::QAlphaMerge(QQuickItem *parent) :
 
 void QAlphaMerge::transform(const cv::Mat &in, cv::Mat &out){
     if ( mask() )
-        mergeMask(in, *mask()->cvMat(), out);
+        mergeMask(in, *mask()->internalPtr(), out);
 }
 
 void QAlphaMerge::mergeMask(const cv::Mat &input, cv::Mat &mask, cv::Mat &output){

@@ -160,6 +160,8 @@ public:
      */
     Q_INVOKABLE void    fitInView( );
 
+    Q_INVOKABLE void    requestUpdateGrid() noexcept;
+
 public:
     //! \brief Auto fitting mode.
     enum AutoFitMode
@@ -288,6 +290,7 @@ signals:
     void        zoomMinChanged( );
 
 signals:
+    void    pressed(QVariant pos); // LK
     //! Emitted whenever the mouse is clicked in the container.
     void    clicked( QVariant pos );
 

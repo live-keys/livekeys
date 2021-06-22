@@ -406,7 +406,7 @@ void JsPropertyTest::propertyTypes(){
             QVERIFY(!o.isNull());
             e->set("objectProperty", ScopedValue(engine, o));
             Object::Accessor lo(e->objectProperty());
-            QCOMPARE(lo.get(ScopedValue(engine, std::string("a"))).toInt32(engine), 2);
+            QCOMPARE(lo.get(engine, ScopedValue(engine, std::string("a"))).toInt32(engine), 2);
             QVERIFY(e->objectProperty() == o);
 
             e->set("localValueProperty", ScopedValue(engine, 200.0));
@@ -485,7 +485,7 @@ void JsPropertyTest::propertyTypes(){
             QVERIFY(e->stdStringProperty() == std::string("abcd"));
             QVERIFY(e->callableProperty().call(engine, Function::Parameters(0)).toInt32(engine) == 700);
             Object::Accessor lop(e->objectProperty());
-            QVERIFY(lop.get(ScopedValue(engine, std::string("b"))).toInt32(engine) == 7);
+            QVERIFY(lop.get(engine, ScopedValue(engine, std::string("b"))).toInt32(engine) == 7);
             QVERIFY(e->localValueProperty().toStdString(engine) == "abcd");
             QVERIFY(ScopedValue(engine, e->valueProperty()).toStdString(engine) == "abcd");
             QVERIFY(e->bufferProperty().size() == 8);

@@ -19,11 +19,21 @@ class QmlBindingChannel : public QObject{
     Q_OBJECT
 
 public:
+    enum Type{
+        Property,
+        ListIndex,
+        Method,
+        Object
+    };
+
     typedef QSharedPointer<QmlBindingChannel>       Ptr;
     typedef QSharedPointer<const QmlBindingChannel> ConstPtr;
 
 public:
-    static QmlBindingChannel::Ptr create(QmlBindingPath::Ptr bindingPath, Runnable* runnable);
+    static QmlBindingChannel::Ptr create(
+        QmlBindingPath::Ptr bindingPath,
+        Runnable* runnable,
+        QObject* object = nullptr);
     static QmlBindingChannel::Ptr create(
         QmlBindingPath::Ptr bindingPath,
         Runnable* runnable,
@@ -43,7 +53,11 @@ public:
     bool hasConnection() const;
     void updateConnection(const QQmlProperty& property, int listIndex = -1);
     void updateConnection(const QQmlProperty& property, const QMetaMethod &method);
+    void updateConnection(QObject* object);
+    void updateConnection(int listIndex);
     void clearConnection();
+
+    Type type() const;
 
     const QmlBindingPath::ConstPtr& bindingPath() const{ return m_bindingPath; }
     Runnable* runnable();
@@ -51,9 +65,11 @@ public:
     QQmlProperty& property(){ return m_property; }
     bool isEnabled() const{ return m_enabled; }
     bool canModify() const;
-    void setIsBuilder(bool isBuilder) { m_builder = isBuilder; }
-    bool isBuilder() const{ return m_builder; }
     void rebuild();
+    QObject* object() const;
+
+    bool isBuilder() const;
+    void setIsBuilder(bool isBuilder);
 
     const QMetaMethod& method() const;
 
@@ -61,24 +77,20 @@ public:
 
     void setEnabled(bool enable);
 
-public slots:
-    void __runableReady();
-
-signals:
-    void runnableObjectReady();
-
 private:
     QmlBindingPath::Ptr m_bindingPath;
     Runnable*           m_runnable;
+    QObject*            m_object;
     QQmlProperty        m_property;
     int                 m_listIndex;
     QMetaMethod         m_method;
     bool                m_enabled;
-    bool                m_builder;
+    bool                m_isBuilder;
+    Type                m_type;
 };
 
 inline bool QmlBindingChannel::hasConnection() const{
-    return m_property.isValid();
+    return m_property.isValid() || m_object;
 }
 
 inline Runnable *QmlBindingChannel::runnable(){
@@ -87,6 +99,14 @@ inline Runnable *QmlBindingChannel::runnable(){
 
 inline bool QmlBindingChannel::canModify() const{
     return m_enabled && hasConnection();
+}
+
+inline bool QmlBindingChannel::isBuilder() const{
+    return m_isBuilder;
+}
+
+inline void QmlBindingChannel::setIsBuilder(bool isBuilder){
+    m_isBuilder = isBuilder;
 }
 
 inline const QMetaMethod &QmlBindingChannel::method() const{
@@ -107,10 +127,27 @@ inline void QmlBindingChannel::updateConnection(const QQmlProperty &property, co
     m_method = method;
 }
 
+inline void QmlBindingChannel::updateConnection(QObject *object){
+    m_object = object;
+}
+
 inline void QmlBindingChannel::clearConnection(){
     m_property  = QQmlProperty();
     m_listIndex = -1;
     m_method = QMetaMethod();
+    m_object = nullptr;
+}
+
+
+inline QmlBindingChannel::Type QmlBindingChannel::type() const{
+    if ( m_listIndex > -1 ){
+        return QmlBindingChannel::ListIndex;
+    } else if ( m_method.isValid() ){
+        return QmlBindingChannel::Method;
+    } else if ( m_property.object() ){
+        return QmlBindingChannel::Property;
+    }
+    return QmlBindingChannel::Object;
 }
 
 }// namespace

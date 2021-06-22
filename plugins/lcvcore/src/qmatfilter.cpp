@@ -101,7 +101,7 @@ QMatFilter::~QMatFilter(){
 void QMatFilter::transform(){
     if ( isComponentComplete() ){
         try{
-            transform(*inputMat()->cvMat(), *output()->cvMat());
+            transform(*inputMat()->internalPtr(), *output()->internalPtr());
             emit outputChanged();
             update();
         } catch (cv::Exception& e ){

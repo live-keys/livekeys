@@ -58,8 +58,8 @@ The VideoDecoderView already started playing our video. Now we can connect other
 Let's try to add a conversion to grayscale to our video. Within the root item, click the
 ['add']({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#add-option;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#add-option})
 option, select [Object]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#add-option-object;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#add-option-object})
-then search and add the `GrayscaleView` item. Once added, in the input property, type
-'videoDecoderView.image', then hit the return key or click on the update button. You should see the grayscale version of our video playing.
+then search and add the `GrayscaleView` item. Once added, in the [input property]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#grayscale-input;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#grayscale-input}), type
+`videoDecoderView.image`, then hit the return key or click on the update button. You should see the grayscale version of our video playing.
 
 ## Looking over the hierarchy
 
@@ -68,6 +68,8 @@ Applications in Livekeys are build from a set of items. Each of them has its own
 that the generated output of one property becomes the input of the other, like we did between the `VideoDecoderView image` and
 the `GrayScaleView input`. These combinations become a powerful mechanism for automation, as we will see in tutorials to
 come.
+
+Clicking on the [logo]({livekeys-hover:livekeys://open/resources/FirstApplicationHighlight.qml#logo;livekeys://open/resources/FirstApplicationRemoveHighlight.qml#logo}) in the upper-right corner will open the start-up screen, which contains numerous other samples to experiment with.
 
 
 

@@ -26,8 +26,13 @@ public:
     ~HookContainer() override;
 
     void insertKey(const QString& sourceFile, const QString& id, QObject* obj);
+    void removeEntry(const QString& sourceFile, const QString& id, QObject* obj);
     QMap<QString, QList<QObject*> > entriesForFile(const QString& sourceFile);
     QList<QObject*> entriesFor(const QString& file, const QString& id);
+
+signals:
+    void entryAdded(Runnable* runnable, const QString& file, const QString& id, QObject* object);
+    void entryRemoved(const QString& file, const QString& id, QObject* object);
 
 private:
     Runnable* m_runnable;

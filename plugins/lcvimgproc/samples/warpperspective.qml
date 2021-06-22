@@ -16,6 +16,7 @@ Grid{
     
     GetPerspectiveTransform{
         id: persTransform
+
         src.items: [
             Qt.point(0, 0), Qt.point(800, 0),
             Qt.point(512, 384), Qt.point(0, 384)
@@ -28,16 +29,16 @@ Grid{
     
     // Empty matrix to apply the transformation on
     
-    Cv.MatView{
+    Cv.ImageView{
         id: bg
         visible: false
-        mat : Cv.MatOp.createFill("600x400", Cv.Mat.CV8U, 3, "#000")
+        image : Cv.MatOp.createFill(Qt.size(600, 400), Cv.Mat.CV8U, 3, "#000")
     }
     
     WarpPerspective{
         id: warpPerspective
         input: src.output
-        output: bg.mat
+        output: bg.image
         m: persTransform.output
     }
 }

@@ -9,35 +9,34 @@
 </p>
 
 [![Join the chat at https://gitter.im/live-keys/livekeys](https://badges.gitter.im/live-keys/livekeys.svg)](https://gitter.im/live-keys/livekeys?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Build Status](https://travis-ci.org/live-keys/livekeys.svg?branch=master)](https://travis-ci.org/live-keys/livekeys)
+[![Build Status](https://travis-ci.com/live-keys/livekeys.svg?branch=master)](https://travis-ci.com/live-keys/livekeys)
 [![Build status](https://ci.appveyor.com/api/projects/status/3l5t69h7q3gpkec1?svg=true)](https://ci.appveyor.com/project/dinusv/livekeys)
 
- * **Version**: 1.6.1
+ * **Version**: 1.9.0
  * **License**: LGPL
  * **Website**: [livekeys.io](https://livekeys.io)
  * **Demo**: [www.youtube.com/watch?v=ZPt5KSy1wh0](https://www.youtube.com/watch?v=ZPt5KSy1wh0)
  * **Documentation**: [livekeys.io/docs](https://livekeys.io/docs)
  * **Build Requirements**:
-   * Qt 5.7 or higher
+   * Qt 5.12 or higher
    * Open CV 4.1 or higher
 
+Livekeys is a platform that automates content creation in real time by combining visual scripting with live coding.
+Components are used to create pipelines for familiarized tasks (file reading, video editing, computer vision modules, etc), providing configuration via
+their user interfaces. To extend this pipeline, users can build their own components via live coding.
+Main features include:
 
-Livekeys is a live coding environment based on components. The application uses Qml as the main language, and can be used to create quick solutions within a wide variety of domains. Main features include:
+ * **Image and Video Processing**: Load image/video files and applying various filters
 
- * **Live coding**: Everything you type is compiled automatically
+ * **Node Editor** : Connect and configure components via nodes in a graph
 
- * **Palettes and bindings**: Palettes are visual items that provide a connection between the code and runtime. They
-   control values they bind to and also, in reverse, monitor the value within the application. They are customizable
-   per type.
+ * **Timeline Editor**: Schedule animations and organize video segments
 
- * **Component based**: Components, which can handle a variety of roles, are declarative and communicate with each other through connections, making them swappable depending on the context.
+ * **Code editor**: Syntax highlighting, code completion, live coding, and seamless switching between UI configuration and code
+
+ * **Interactive learning module**: Provides tutorials with interactions that guide you through the process of learning Livekeys.
    
- * **Extendable**: Components are wrapped in plugins, then packages, which are installable through a package manager.
-
-Although the main focus has been on integrating OpenCV for computer vision tasks, other libraries can be integrated
-easily using Livekeys's API.
-
-The project is the successor of [Live CV](https://www.youtube.com/watch?v=2zTY6CFhP_A).
+ * **Plugin support**: Components are wrapped in plugins, then packages, which are installable through a package manager.
 
 
 ## Installation and getting started
@@ -80,11 +79,8 @@ can also share their own as easily as possible. To do this, it needs to be scala
 easy to use build system, and a place to access and share plugins. Our goal is to reach this in version 2.0 of the
 application.
 
- * Version 1.7 - Editor Updates
-    * Component documentation from within the editor
- * Version 1.8 - MultiThreading Module
-    * Executing components in separate threads
-    * Automatic assignment of components to threads according to their execution time
+ * Version 1.10 - MultiThreading Module
+    * Async execution
  * Version 2.0 - Package Manager Details
     * Plugin and sample showroom on Live Keys's website
     * Support for fetching plugins and samples from within the application

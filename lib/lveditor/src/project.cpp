@@ -88,7 +88,7 @@ void Project::newProject(){
         ProjectDocument* document = createTextDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
         );
-	        
+
         document->addEditingState(ProjectDocument::Read);
         document->setContent("import QtQuick 2.3\n\nGrid{\n}");
         document->removeEditingState(ProjectDocument::Read);
@@ -507,6 +507,9 @@ Document *Project::createDocument(ProjectFile *file, bool isMonitored){
 }
 
 void Project::documentSaved(Document *document){
+    if ( m_runTrigger == Project::RunOnSave ){
+        scheduleRun();
+    }
     emit fileChanged(document->file()->path());
 }
 

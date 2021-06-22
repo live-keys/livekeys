@@ -9,6 +9,7 @@
 #include "tracklistmodel.h"
 #include "timelineconfig.h"
 #include "timelineheadermodel.h"
+#include "timelineproperties.h"
 
 namespace lv{
 
@@ -21,15 +22,16 @@ class Timeline : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(qint64 contentLength             READ contentLength  WRITE setContentLength NOTIFY contentLengthChanged)
-    Q_PROPERTY(qint64 cursorPosition            READ cursorPosition WRITE setCursor        NOTIFY cursorPositionChanged)
+    Q_PROPERTY(int contentLength                READ contentLength  WRITE setContentLength NOTIFY contentLengthChanged)
+    Q_PROPERTY(int cursorPosition               READ cursorPosition WRITE setCursor        NOTIFY cursorPositionChanged)
     Q_PROPERTY(bool isRunning                   READ isRunning      NOTIFY isRunningChanged)
     Q_PROPERTY(double fps                       READ fps            WRITE setFps           NOTIFY fpsChanged)
     Q_PROPERTY(bool loop                        READ loop           WRITE setLoop          NOTIFY loopChanged)
+    Q_PROPERTY(bool isRecording                 READ isRecording    NOTIFY isRecordingChanged)
     Q_PROPERTY(QJSValue properties              READ properties     WRITE setProperties    NOTIFY propertiesChanged)
     Q_PROPERTY(QString file                     READ file           WRITE setFile          NOTIFY fileChanged)
     Q_PROPERTY(lv::TimelineConfig* config       READ config         CONSTANT)
-    Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      CONSTANT)
+    Q_PROPERTY(lv::TrackListModel* trackList    READ trackList      NOTIFY trackListChanged)
     Q_PROPERTY(TimelineHeaderModel* headerModel READ headerModel    CONSTANT)
     Q_PROPERTY(QQmlListProperty<QObject> tracks READ tracks         CONSTANT)
     Q_CLASSINFO("DefaultProperty", "tracks")
@@ -41,21 +43,22 @@ public:
     TrackListModel* trackList();
     TimelineHeaderModel* headerModel();
 
-    qint64 contentLength() const;
-    void setContentLength(qint64 contentLength);
+    int contentLength() const;
+    void setContentLength(int contentLength);
 
     double fps() const;
     void setFps(double fps);
 
-    qint64 cursorPosition() const;
-    void setCursor(qint64 cursorPosition);
+    int cursorPosition() const;
+    void setCursor(int cursorPosition);
 
     bool isRunning() const;
 
     bool loop() const;
     void setLoop(bool loop);
 
-    QJSValue properties() const;
+    QJSValue properties();
+    TimelineProperties* propertiesObject();
     void setProperties(QJSValue properties);
 
     static void appendTrackToList(QQmlListProperty<QObject>*, QObject*);
@@ -75,11 +78,17 @@ public:
     void classBegin() override{}
     void componentComplete() override;
 
+    void signalTrackNameChanged(Track* track);
+
+    bool isRecording() const;
+    void refreshPosition();
+
 public slots:
-    lv::Track* addTrack();
+    void appendTrack(lv::Track* track);
     void removeTrack(int index);
 
     void start();
+    void startRecording();
     void stop();
 
     QString positionToLabel(qint64 frameNumber, bool shortZero = false);
@@ -89,38 +98,46 @@ public slots:
 
     void load();
     void save();
+    void saveAs(const QString& path);
+
+    void setRecord(bool isRecording);
 
 signals:
     void contentLengthChanged();
     void fpsChanged();
+    void waitingForTrack(qint64 position);
     void cursorPositionChanged(qint64 position);
     void cursorPositionProcessed(qint64 position);
     void isRunningChanged();
     void loopChanged();
     void propertiesChanged();
     void fileChanged();
+    void trackListChanged();
+    void trackNameChanged(Track* track);
+    void isRecordingChanged();
 
 private:
-    void appendTrack(Track* track);
     void updateCursorPosition(qint64 position);
 
     qint64 m_cursorPosition;
     qint64 m_contentLength;
     double m_fps;
     bool   m_loop;
+    bool   m_isRecording;
     bool   m_isRunning;
-    bool   m_waitingForTrack;
+    qint64 m_processingTrackAt;
+    qint64 m_waitingForTrackAt;
     bool   m_isComponentComplete;
 
     TimelineConfig*      m_config;
     TrackListModel*      m_trackList;
     TimelineHeaderModel* m_headerModel;
     QTimer               m_timer;
-    QJSValue             m_properties;
+    TimelineProperties*  m_properties;
     QString              m_file;
 };
 
-inline qint64 Timeline::contentLength() const{
+inline int Timeline::contentLength() const{
     return m_contentLength;
 }
 
@@ -154,11 +171,11 @@ inline void Timeline::setFps(double fps){
     emit fpsChanged();
 }
 
-inline qint64 Timeline::cursorPosition() const{
+inline int Timeline::cursorPosition() const{
     return m_cursorPosition;
 }
 
-inline void Timeline::setCursor(qint64 cursorPosition){
+inline void Timeline::setCursor(int cursorPosition){
     if (m_cursorPosition == cursorPosition)
         return;
     if (cursorPosition < 0 || cursorPosition > m_contentLength )
@@ -186,15 +203,6 @@ inline void Timeline::setLoop(bool loop){
     emit loopChanged();
 }
 
-inline QJSValue Timeline::properties() const{
-    return m_properties;
-}
-
-inline void Timeline::setProperties(QJSValue properties){
-    m_properties = properties;
-    emit propertiesChanged();
-}
-
 inline void Timeline::setFile(const QString &file){
     if (m_file == file)
         return;
@@ -205,6 +213,18 @@ inline void Timeline::setFile(const QString &file){
     if ( !m_file.isEmpty() && m_isComponentComplete ){
         load();
     }
+}
+
+inline bool Timeline::isRecording() const{
+    return m_isRecording;
+}
+
+inline void Timeline::setRecord(bool record){
+    if (m_isRecording == record)
+        return;
+
+    m_isRecording = record;
+    emit isRecordingChanged();
 }
 
 }// namespace

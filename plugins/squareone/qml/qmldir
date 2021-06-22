@@ -3,6 +3,7 @@ module workspace.nodeeditor
 depends QtQuick 2.3
 
 Edge               1.0 Edge.qml
+EdgeTemplate       1.0 EdgeTemplate.qml
 ObjectGraph        1.0 ObjectGraph.qml
 ObjectNode         1.0 ObjectNode.qml
 ObjectNodeProperty 1.0 ObjectNodeProperty.qml

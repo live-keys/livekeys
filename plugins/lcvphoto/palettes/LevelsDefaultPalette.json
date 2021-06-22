@@ -1,0 +1,9 @@
+{
+    "type": "qml/lcvphoto#Levels",
+    "palettes": ["LevelsPalette"],
+    "properties" : [
+        ["input"],
+        ["result", "", "true"]
+    ]
+}
+

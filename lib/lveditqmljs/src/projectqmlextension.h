@@ -35,6 +35,8 @@ class CodeQmlHandler;
 class ProjectQmlScanner;
 class QmlProjectMonitor;
 class QmlLanguageScanner;
+class QmlBindingChannelsDispatcher;
+
 class LV_EDITQMLJS_EXPORT ProjectQmlExtension : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
@@ -48,8 +50,7 @@ public:
     void componentComplete();
 
     QmlProjectMonitor* scanMonitor();
-
-    static void engineHook(const QString& code, const QUrl& file, QObject* result, void *data);
+    QmlBindingChannelsDispatcher* channelsDispatcher();
 
     void addCodeQmlHandler(CodeQmlHandler* handler);
     void removeCodeQmlHandler(CodeQmlHandler* handler);
@@ -75,12 +76,13 @@ public slots:
 private:
     Q_DISABLE_COPY(ProjectQmlExtension)
 
-    Project*               m_project;
-    ViewEngine*            m_engine;
-    QmlJsSettings*         m_settings;
-    QmlProjectMonitor*     m_scanMonitor;
-    QList<CodeQmlHandler*> m_codeHandlers;
-    PaletteContainer*      m_paletteContainer;
+    Project*                      m_project;
+    ViewEngine*                   m_engine;
+    QmlJsSettings*                m_settings;
+    QmlProjectMonitor*            m_scanMonitor;
+    QList<CodeQmlHandler*>        m_codeHandlers;
+    PaletteContainer*             m_paletteContainer;
+    QmlBindingChannelsDispatcher* m_channelDispatcher;
 };
 
 /// \brief Returns the lv::ProjectQmlScanMonitor associated with this object.
@@ -97,6 +99,12 @@ inline PaletteContainer *ProjectQmlExtension::paletteContainer(){
 inline Project *ProjectQmlExtension::project(){
     return m_project;
 }
+
+/// \brief Returns the channels dispatcher
+inline QmlBindingChannelsDispatcher *ProjectQmlExtension::channelsDispatcher(){
+    return m_channelDispatcher;
+}
+
 
 }// namespace
 

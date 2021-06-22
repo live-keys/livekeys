@@ -30,15 +30,13 @@ CodePalette{
     item: LevelsSliders{
         id: levelsSliders
 
-        property Levels levels: null
+        property QtObject levels: null
         onLevelsChanged: {
             if ( levels ){
-                input = levels.input
                 lightness = levels.lightness
                 levelByChannel = levels.channels ? levels.channels : {}
             } else {
-                input = Cv.MatOp.nullMat
-                lightnews = []
+                lightness = []
                 levelByChannel = {}
             }
 
@@ -46,34 +44,47 @@ CodePalette{
         }
 
         color: 'transparent'
-        input: Cv.MatOp.nullMat
+        input: levels ? levels.input : Cv.MatOp.nullMat
+
         onLightnessChanged: {
             if ( !isBindingChange() ){
-                levels.lightness = lightness
-                extension.writeProperties({
-                    'lightness' : lightness
-                })
+                if ( levels ){
+                    levels.lightness = lightness
+                }
+                if ( editFragment && lightness ){
+                    editFragment.writeProperties({
+                        'lightness' : lightness
+                    })
+                }
             }
         }
         onLevelByChannelChanged: {
             if ( !isBindingChange() ){
-                levels.channels = levelByChannel
-                extension.writeProperties({
-                    'channels' : levelByChannel
-                })
+                if ( levels ){
+                    levels.channels = levelByChannel
+                }
+                if ( editFragment && levelByChannel ){
+                    editFragment.writeProperties({
+                        'channels' : levelByChannel
+                    })
+                }
+
             }
         }
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.writeProperties({
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
                 'lightness' : palette.value.lightness,
                 'channels' : palette.value.channels
             })
         }
     }
 
+    onValueFromBindingChanged: {
+        levelsSliders.levels = value
+    }
     onInit: {
         levelsSliders.levels = value
     }

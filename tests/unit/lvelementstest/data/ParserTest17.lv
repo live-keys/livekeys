@@ -1,0 +1,10 @@
+component TodoListItem{
+    key: index
+    item: item
+    on remove: (index) => {
+        todoList.remove(index)
+    }
+    on markDone: (index) => {
+        todoList.markTodoDone(index) 
+    }
+}

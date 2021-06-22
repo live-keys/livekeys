@@ -4,13 +4,14 @@ PLUGIN_PATH = base
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
-DEFINES += LV_BASE_PLUGIN
+DEFINES += LV_BASEQML_LIB
 
 uri = base
 
-linkLocalLibrary(lvbase,   lvbase)
-linkLocalLibrary(lvview,   lvview)
-linkLocalLibrary(lveditor, lveditor)
+linkLocalLibrary(lvbase,      lvbase)
+linkLocalLibrary(lvview,      lvview)
+linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lveditqmljs, lveditqmljs)
 
 # Source
 
@@ -24,6 +25,7 @@ unix:!macx{
 }
 
 include($$PWD/src/baseqml.pri)
+include($$PWD/include/baseqmlheaders.pri)
 
 OTHER_FILES += \
     qml/*.qml \
@@ -32,7 +34,8 @@ OTHER_FILES += \
 # Handling the palette
 
 OTHER_FILES *= \
-    palettes/*.qml
+    palettes/*.qml \
+    samples/*.qml
 
 # Deploy
 
@@ -46,6 +49,14 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 
 DISTFILES += \
+    palettes/ActTriggerTypePalette.qml \
+    palettes/StreamValuePalette.json \
+    qml/ConvertToInt.qml \
+    qml/JsonDecoder.qml \
+    qml/JsonEncoder.qml \
+    qml/TextClip.qml \
+    qml/TextLineAtPosition.qml \
     qml/live.package.json \
     qml/live.plugin.json \
-    qml/plugins.qmltypes
+    qml/plugins.qmltypes \
+    samples/readjsonfile.qml

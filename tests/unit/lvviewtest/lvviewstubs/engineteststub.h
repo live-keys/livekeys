@@ -30,7 +30,6 @@ public:
 public slots:
     void throwException();
     void throwJsError();
-    void throwJsWarning();
 };
 
 #endif // ENGINETESTSTUB_H

@@ -36,15 +36,19 @@ void QDraw::line(
         int lineType,
         int shift)
 {
-    cv::line(
-        surface->internal(),
-        cv::Point(p1.x(), p1.y()),
-        cv::Point(p2.x(), p2.y()),
-        cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
-        thickness,
-        lineType,
-        shift
-    );
+    try {
+        cv::line(
+            surface->internal(),
+            cv::Point(p1.x(), p1.y()),
+            cv::Point(p2.x(), p2.y()),
+            cv::Scalar( color.blue(), color.green(), color.red(), color.alpha() ),
+            thickness,
+            lineType,
+            shift
+        );
+    } catch (cv::Exception& e) {
+        qWarning("%s", e.what());
+    }
 }
 
 void QDraw::rectangle(

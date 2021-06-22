@@ -13,6 +13,8 @@ linkLocalLibrary(lvview,      lvview)
 linkLocalLibrary(lveditor,    lveditor)
 linkLocalLibrary(lveditqmljs, lveditqmljs)
 
+linkLocalPlugin(base, base, base/baseqml)
+
 # Source
 
 unix:!macx{

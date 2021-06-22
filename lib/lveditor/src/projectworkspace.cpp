@@ -32,7 +32,8 @@ class ProjectWorkspace::State{
 public:
     void projectActiveChange(Runnable* runnable);
     void documentOpen(Document* document);
-    void documentClosed(Document* document);
+    void documentRemoved(Document* document);
+    void documentRemoved(const std::string& path);
 
     void windowOpen(QQuickWindow* window);
     void windowClose(QQuickWindow* window);
@@ -76,8 +77,12 @@ void ProjectWorkspace::State::documentOpen(Document *document){
     }
 }
 
-void ProjectWorkspace::State::documentClosed(Document *document){
+void ProjectWorkspace::State::documentRemoved(Document *document){
     std::string path = document->file()->path().toStdString();
+    documentRemoved(path);
+}
+
+void ProjectWorkspace::State::documentRemoved(const std::string &path){
     for ( int i = 0; i < currentWorkspaceLayout["documents"].size(); ++i ){
         if ( currentWorkspaceLayout["documents"][i].asString() == path ){
             currentWorkspaceLayout["documents"].remove(i);
@@ -433,6 +438,10 @@ QString ProjectWorkspace::projectPath() const{
         return m_project->dir();
 }
 
+void ProjectWorkspace::documentWasRemoved(const std::string &path){
+    m_state->documentRemoved(path);
+}
+
 ProjectWorkspace *ProjectWorkspace::create(Project *project, QObject *parent){
 
     ProjectWorkspace* pw = new ProjectWorkspace(project, parent);
@@ -611,7 +620,7 @@ void ProjectWorkspace::whenDocumentOpen(Document *document){
 }
 
 void ProjectWorkspace::whenDocumentClose(Document *document){
-    m_state->documentClosed(document);
+    m_state->documentRemoved(document);
     emit documentClose(document);
 }
 

@@ -5,9 +5,20 @@ import lcvcore 1.0
 ImageView{
     id: root
 
-    property VideoDecoder decoder : VideoDecoder{
+    VideoDecoder{
+        id: decoder
         loop: true
     }
+
+    property alias fps: decoder.fps
+    property alias paused: decoder.paused
+    property alias currentFrame: decoder.currentFrame
+    property alias totalFrames: decoder.totalFrames
+
+    function seekTo(value){
+        decoder.seekTo(value)
+    }
+
     property string file: ''
     onFileChanged: {
         if ( file.length > 0 )

@@ -22,12 +22,14 @@ public:
     QList<QmlLibraryInfo::Ptr> detachLibraries();
 
     void requestStop();
-    bool isProcessing() const;
 
     QmlLanguageScanner* languageScanner() const;
 
+    bool isProcessing() const;
+
 signals:
     void libraryUpdates();
+    void scannerQueueCleared();
 
 public slots:
     void processQueue();

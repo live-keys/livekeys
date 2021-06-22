@@ -18,8 +18,7 @@ CodePalette{
     property var numOfObjects: 0
     property var allObjects: []
 
-    property Component addBoxFactory: Component{ AddQmlBox{} }
-
+    property QtObject theme: lk.layers.workspace.themes.current
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
@@ -28,7 +27,6 @@ CodePalette{
     }
 
     function addObject(object, cursorCoords){
-
         var n
         if (cursorCoords){
             n = objectGraph.addObjectNode(cursorCoords.x, cursorCoords.y, (object.name + (object.id ? ("#" + object.id) : "")))
@@ -50,6 +48,7 @@ CodePalette{
             object.connection.incrementRefCount()
         }
 
+        n.item.expandDefaultPalette()
         return n
     }
 
@@ -58,6 +57,12 @@ CodePalette{
 
         width: objectGraph.width
         height: objectGraph.height
+
+        function resize(w, h){
+            objectGraph.width = w
+            objectGraph.height = h
+            objectGraph.redrawGrid()
+        }
 
         function init(){
             var objectList = editingFragment.nestedObjectsInfo()
@@ -69,13 +74,27 @@ CodePalette{
 
                 for (var j = 0; j < object.properties.length; ++j){
                     var property = object.properties[j]
-                    var p = objectGraph.addObjectNodeProperty(n, property.name, property.isWritable ? objectGraph.inOutPort : objectGraph.outPort, property.connection)
-                    n.item.propertyNames.push(property.name)
-                    p.z = 10000 - j
+
+                    var p = null
+                    if (n.item.propertiesOpened.indexOf(property.name) === -1){
+                        p = objectGraph.addObjectNodeProperty(n, property.name, ObjectGraph.PortMode.OutPort | (property.isWritable ? ObjectGraph.PortMode.InPort : 0), property.connection)
+                        n.item.propertiesOpened.push(property.name)
+                        p.z = 1000 - j
+                    } else {
+                        var children = n.item.propertyContainer.children
+                        for (var idx = 0; idx < children.length; ++idx)
+                            if (children[idx].propertyName === property.name){
+                                p = children[idx]
+                                break
+                            }
+                    }
+
                     if (property.value.length === 2)
                     {
-                        props.push({"port": p.inPort, "value": property.value})
-
+                        if (p.inPort)
+                            props.push({"port": p.inPort, "value": property.value})
+                        else
+                            props.push({"value": property.value})
                     }
                 }
 
@@ -83,7 +102,7 @@ CodePalette{
                 for (var so = 0; so < object.subobjects.length; ++so)
                 {
                     var subobject = object.subobjects[so]
-                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), objectGraph.noPort, subobject.connection)
+                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), ObjectGraph.PortMode.None, subobject.connection)
                 }
 
             }
@@ -97,9 +116,25 @@ CodePalette{
                     for (var pp = 0; pp < nodeProps.length; ++pp)
                     {
                         var propp = node.item.properties[pp]
+                        var found = false
                         if (propp.propertyName === props[k].value[1]){
                             objectGraph.bindPorts(propp.outPort, props[k].port)
+                            found = true
                             break
+                        }
+
+                    }
+                    if (!found){
+                        node.item.addPropertyToNodeByName(props[k].value[1])
+                        for (var ppx = 0; ppx < nodeProps.length; ++ppx)
+                        {
+                            var proppx = node.item.properties[ppx]
+                            if (proppx.propertyName === props[k].value[1]){
+                                if (props[k].port)
+                                    objectGraph.bindPorts(proppx.outPort, props[k].port)
+                                break
+                            }
+
                         }
                     }
                 }
@@ -128,14 +163,14 @@ CodePalette{
         }
 
         ObjectGraph {
+            id: objectGraph
             width: 600
             height: 300
-            id: objectGraph
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor
-            editingFragment: palette.editingFragment
-            addBoxFactory: palette.addBoxFactory
+            editingFragment: palette ? palette.editingFragment: null
+            style: theme.nodeEditor
         }
     }
 
@@ -143,10 +178,11 @@ CodePalette{
     property Connections connTest: Connections{
         id: efConnection
         target: editingFragment
-        onObjectAdded: {
+
+        function onObjectAdded(obj, cursorCoords){
             addObject(obj.objectInfo(), cursorCoords)
         }
-        onAboutToRemovePalette: {
+        function onAboutToRemovePalette(palette){
             nodeItem.clean()
         }
         ignoreUnknownSignals: true

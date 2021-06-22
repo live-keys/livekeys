@@ -8,6 +8,10 @@
 #include "live/project.h"
 #include "live/projectfile.h"
 #include "live/projectdocumentmodel.h"
+#include "live/qmlbuild.h"
+
+#include <QQmlProperty>
+#include <QQmlListReference>
 
 #include <QFileInfo>
 #include <QQmlComponent>
@@ -72,6 +76,8 @@ Runnable::~Runnable(){
     m_project->removeExcludedRunTriggers(m_activations);
 
     if ( m_viewRoot ){
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
         m_viewRoot->setParent(nullptr);
         auto item = qobject_cast<QQuickItem*>(m_viewRoot);
         if (item)
@@ -83,6 +89,8 @@ Runnable::~Runnable(){
 void Runnable::run(){
     if ( m_type == Runnable::QmlFile ){
 
+        RunnableContainer* runnableContainer = static_cast<RunnableContainer*>(parent());
+
         ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(m_path));
         if ( document ){
             auto documentList = m_project->documentModel()->listUnsavedDocuments();
@@ -90,6 +98,11 @@ void Runnable::run(){
             if ( m_project->active() == this ){
 
                 QQmlContext* ctx = createContext();
+
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
 
                 m_viewEngine->createObjectAsync(
                     document->content(),
@@ -101,6 +114,11 @@ void Runnable::run(){
                 );
             } else {
                 QQmlContext* ctx = createContext();
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
+
                 QObject* obj = createObject(document->content(), QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
@@ -109,6 +127,8 @@ void Runnable::run(){
 
                     m_viewContext = ctx;
                     m_viewRoot = obj;
+                    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -116,6 +136,9 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+
+                    build->setState(QmlBuild::Ready);
+
                 } else {
                     ctx->deleteLater();
                 }
@@ -127,10 +150,13 @@ void Runnable::run(){
             if ( !f.open(QFile::ReadOnly) )
                 THROW_EXCEPTION(Exception, "Failed to read file for running:" + m_path.toStdString(), Exception::toCode("~File"));
 
-            QByteArray contentBytes = f.readAll();;
+            QByteArray contentBytes = f.readAll();
 
             if ( m_project->active() == this ){
                 QQmlContext* ctx = createContext();
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
 
                 m_viewEngine->createObjectAsync(
                     contentBytes,
@@ -142,6 +168,11 @@ void Runnable::run(){
                 );
             } else {
                 QQmlContext* ctx = createContext();
+
+                QmlBuild* build = static_cast<QmlBuild*>(ctx->contextProperty("build").value<QObject*>());
+                runnableContainer->announceQmlBuild(this, build);
+                build->setState(QmlBuild::Compiling);
+
                 QObject* obj = createObject(contentBytes, QUrl::fromLocalFile(m_path), ctx);
 
                 if ( obj ){
@@ -149,6 +180,8 @@ void Runnable::run(){
 
                     m_viewContext = ctx;
                     m_viewRoot = obj;
+                    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
                     obj->setParent(m_runSpace);
 
                     QQuickItem *parentItem = qobject_cast<QQuickItem*>(m_runSpace);
@@ -156,6 +189,9 @@ void Runnable::run(){
                     if (parentItem && item){
                         item->setParentItem(parentItem);
                     }
+
+                    build->setState(QmlBuild::Ready);
+
                 } else {
                     ctx->deleteLater();
                 }
@@ -174,6 +210,8 @@ void Runnable::run(){
         emptyRunSpace();
 
         m_viewRoot = obj;
+        connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+
         obj->setParent(m_runSpace);
 
         QQuickItem* appRootItem = qobject_cast<QQuickItem*>(obj);
@@ -283,7 +321,7 @@ void Runnable::setRunTrigger(int runTrigger){
                 }
             }
 
-        } else if ( m_runTrigger == Project::RunOnSave ){
+        } else if ( runTrigger == Project::RunOnSave ){
             m_project->excludeRunTriggers(m_activations);
             m_scheduleTimer = new QTimer(this);
             m_scheduleTimer->setInterval(1000);
@@ -301,6 +339,14 @@ void Runnable::setRunTrigger(int runTrigger){
 
     m_runTrigger = runTrigger;
     emit runTriggerChanged();
+}
+
+void Runnable::clearRoot()
+{
+    if (m_viewRoot != sender()) return;
+    m_viewRoot = nullptr;
+    m_viewContext->deleteLater();
+    m_viewContext = nullptr;
 }
 
 void Runnable::runLv(){
@@ -331,11 +377,39 @@ QObject* Runnable::createObject(const QByteArray &code, const QUrl &file, QQmlCo
     return obj;
 }
 
+
 QQmlContext *Runnable::createContext(){
     QQmlContext* ctx = new QQmlContext(m_viewEngine->engine()->rootContext());
+
     HookContainer* hooks = new HookContainer(m_project->dir(), this, ctx);
+    QmlBuild* build      = new QmlBuild(this, ctx);
     ctx->setContextProperty("hooks", hooks);
+    ctx->setContextProperty("build", build);
     return ctx;
+}
+
+void Runnable::swapViewRoot(QObject *newViewRoot){
+    newViewRoot->setParent(m_runSpace);
+    QQuickItem* newRootItem = qobject_cast<QQuickItem*>(newViewRoot);
+    QQuickItem* runSpaceItem = qobject_cast<QQuickItem*>(m_runSpace);
+    if ( newRootItem && runSpaceItem ){
+        newRootItem->setParentItem(runSpaceItem);
+    }
+
+    if (m_viewRoot)
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
+    m_viewRoot = newViewRoot;
+
+    QQuickItem* rootItem = qobject_cast<QQuickItem*>(m_runSpace);
+    if ( rootItem ){
+        QQmlProperty pp(rootItem);
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+        if ( ppref.canAppend() ){
+            ppref.append(newViewRoot);
+        }
+    }
+
+    connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
 }
 
 void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
@@ -346,8 +420,25 @@ void Runnable::engineObjectAcquired(const QUrl &, QObject *ref){
 
 void Runnable::engineObjectReady(QObject *object, const QUrl &, QObject *ref, QQmlContext* context){
     if ( ref == this ){
+        if (m_viewRoot)
+            disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewRoot    = object;
+
+        QQuickItem* rootItem = qobject_cast<QQuickItem*>(m_runSpace);
+        if ( rootItem ){
+            QQmlProperty pp(rootItem);
+            QQmlListReference ppref = qvariant_cast<QQmlListReference>(pp.read());
+            if ( ppref.canAppend() ){
+                ppref.append(object);
+            }
+        }
+
         m_viewContext = context;
+
+        QmlBuild* build = static_cast<QmlBuild*>(context->contextProperty("build").value<QObject*>());
+        build->setState(QmlBuild::Ready);
+
+        connect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         emit objectReady(object);
     }
 }
@@ -365,6 +456,7 @@ void Runnable::emptyRunSpace(){
         if ( appRootItem ){
             appRootItem->setParentItem(nullptr);
         }
+        disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
         m_viewRoot->setParent(nullptr);
         m_viewRoot->deleteLater();
         m_viewRoot = nullptr;

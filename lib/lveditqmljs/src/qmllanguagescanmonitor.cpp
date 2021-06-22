@@ -13,7 +13,9 @@ QmlLanguageScanMonitor::QmlLanguageScanMonitor(QmlLanguageScanner *scanner, QObj
         if ( m_collectedLibraries.size() > 5 || queueSize == 0 ){
 
             m_librariesMutex.lock();
-            m_libraries = m_collectedLibraries;
+            for ( auto collectedLib : m_collectedLibraries ){
+                m_libraries.append(collectedLib);
+            }
             m_librariesMutex.unlock();
 
             m_collectedLibraries.clear();
@@ -23,16 +25,22 @@ QmlLanguageScanMonitor::QmlLanguageScanMonitor(QmlLanguageScanner *scanner, QObj
     });
 
     m_scanner->onQueueFinished([this](){
+
         if ( m_collectedLibraries.size() ){
 
             m_librariesMutex.lock();
-            m_libraries = m_collectedLibraries;
-            m_librariesMutex.unlock();
 
+            for ( auto collectedLib : m_collectedLibraries )
+                m_libraries.append(collectedLib);
+
+            m_librariesMutex.unlock();
             m_collectedLibraries.clear();
 
             emit libraryUpdates();
         }
+
+        if ( m_scanner->plannedQueueSize() == 0 )
+            emit scannerQueueCleared();
     });
 }
 

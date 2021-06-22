@@ -53,19 +53,26 @@ export(palettecopy.commands)
 QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
+    palettes/BooleanPalette.qml \
+    palettes/BuilderPalette.qml \
     palettes/ConnectionPalette.qml \
+    palettes/FilePathPalette.qml \
+    palettes/FolderPathPalette.qml \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/DoubleHistoryPlotPalette.qml \
+    palettes/IntInputPalette.qml \
     palettes/NodePalette.qml \
-    palettes/PathPalette.qml \
     palettes/RectangleSizePalette.json \
+    palettes/SizePalette.qml \
+    palettes/StringListPalette.qml \
     palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
     qml/DocumentationView.qml \
     qml/EditorPane.qml \
     qml/ObjectPalettePane.qml \
     qml/PaletteConnection.qml \
+    qml/PalettePane.qml \
     qml/WorkspaceControl.qml \
     qml/live.package.json \
     qml/live.plugin.json \

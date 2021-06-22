@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
+import workspace 1.0 as Workspace
 
 Rectangle{
     width: 1040
@@ -27,7 +28,7 @@ Rectangle{
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                lk.layers.workspace.panes.removeStartupBox()
+                lk.layers.workspace.startup.close()
             }
         }
     }
@@ -66,7 +67,7 @@ Rectangle{
                 id : newMArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: lk.layers.workspace.project.newProject()
+                onClicked: lk.layers.workspace.wizards.newProject()
             }
 
             Image {
@@ -105,7 +106,7 @@ Rectangle{
                 id : openProjectMArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: lk.layers.workspace.project.openProject()
+                onClicked: lk.layers.workspace.wizards.openProjectDirViaDialog()
             }
 
             Image {
@@ -146,7 +147,7 @@ Rectangle{
                 id : openMArea
                 anchors.fill: parent
                 hoverEnabled: true
-                onClicked: lk.layers.workspace.project.openFileDialog()
+                onClicked: lk.layers.workspace.wizards.openProjectFileViaDialog()
             }
 
             Image {
@@ -165,7 +166,6 @@ Rectangle{
                 font.pixelSize: 18
                 font.weight: Font.Light
             }
-
 
             Rectangle {
                 width: parent.width
@@ -260,7 +260,7 @@ Rectangle{
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                project.openProject(model.path)
+                                lk.layers.workspace.wizards.openProject(model.path)
                             }
                         }
 
@@ -491,13 +491,18 @@ Rectangle{
                             anchors.verticalCenter: parent.verticalCenter
                             anchors.left: parent.left
                             anchors.leftMargin: model.isGroupTitle? 0 : 15
-                            text: model.name
+                            text: model.label
                             clip: true
                             elide: Text.ElideRight
                             font.family: "Open Sans"
                             font.pixelSize: 16
                             font.weight: model.isGroupTitle ? Font.Bold : Font.Light
                             color: model.isGroupTitle ? "#5d59f7" : "white"
+                        }
+
+                        Workspace.Tooltip{
+                            mouseOver: samplesViewMA.containsMouse && !model.isGroupTitle
+                            text: model.label + '\n\n' + model.description
                         }
                     }
 
@@ -582,6 +587,7 @@ Rectangle{
                     hoverEnabled: true
                     onClicked: {
                         noThanks = true
+                        lk.layers.workspace.saveRecentsToFile()
                     }
                 }
 

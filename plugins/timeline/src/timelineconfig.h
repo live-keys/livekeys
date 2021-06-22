@@ -20,6 +20,8 @@ public slots:
     void addLoader(const QString& key, const QString& path);
     QJSValue loaders() const;
 
+    QJSValue trackMenu(QObject* track);
+
 private:
     TimelineSettings* m_settings;
 };

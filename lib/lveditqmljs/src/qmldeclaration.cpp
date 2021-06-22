@@ -48,6 +48,7 @@ QmlDeclaration::QmlDeclaration(const QStringList &identifierChain, ProjectDocume
     : m_section(ProjectDocumentSection::create(QmlDeclaration::Section))
     , m_identifierLength(0)
     , m_identifierChain(identifierChain)
+    , m_valueObjectScopeOffset(-1)
     , m_valueOffset(-1)
     , m_document(document)
 {
@@ -65,6 +66,7 @@ QmlDeclaration::QmlDeclaration(
     , m_identifierChain(identifierChain)
     , m_type(identifierType)
     , m_parentType(parentType)
+    , m_valueObjectScopeOffset(-1)
     , m_valueOffset(-1)
     , m_document(document)
 {
@@ -86,6 +88,7 @@ QmlDeclaration::QmlDeclaration(
     , m_identifierChain(identifierChain)
     , m_type(identifierType)
     , m_parentType(parentType)
+    , m_valueObjectScopeOffset(-1)
     , m_valueOffset(-1)
     , m_document(document)
 {
@@ -141,9 +144,24 @@ QmlDeclaration::Ptr QmlDeclaration::create(
 QmlDeclaration::~QmlDeclaration(){
 }
 
+/// \brief If this declaration is a property and initialises an object, this will return the start of the object scope
+int QmlDeclaration::valueObjectScopeOffset() const{
+    return m_valueObjectScopeOffset;
+}
+
+/// \brief If this declaration is a property and initialises an object, this will set the start of the object scope
+void QmlDeclaration::setValueObjectScopeOffset(int objectScopeOffset){
+    m_valueObjectScopeOffset = objectScopeOffset;
+}
+
 /// \brief Returns true if this declaration is for an object
 bool QmlDeclaration::isForObject() const{
     return m_valueOffset == 0;
+}
+
+/// \brief Returns true if this declaration is for a component
+bool QmlDeclaration::isForComponent() const{
+    return m_type.path() == "QtQuick" && m_type.name() == "Component";
 }
 
 /// \brief Returns true if this declaration is for a property
@@ -154,6 +172,11 @@ bool QmlDeclaration::isForProperty() const{
 /// \brief Returns true if this declaration is for a slot
 bool QmlDeclaration::isForSlot() const{
     return m_type.language() == QmlTypeReference::Qml && m_type.name() == "slot";
+}
+
+bool QmlDeclaration::isForImports() const
+{
+    return m_type.language() == QmlTypeReference::Qml && m_type.name() == "import";
 }
 
 }// namespace

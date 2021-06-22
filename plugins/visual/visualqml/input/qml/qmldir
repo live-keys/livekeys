@@ -1,0 +1,35 @@
+module visual.input
+
+depends QtQuick 2.3
+
+AlphaSlider                1.0 AlphaSlider.qml
+Button                     1.0 Button.qml
+CheckBox                   1.0 CheckBox.qml
+CheckBoxStyle              1.0 CheckBoxStyle.qml
+ColorPicker                1.0 ColorPicker.qml
+ColorHSVPicker             1.0 ColorHSVPicker.qml
+ColorPickerStyle           1.0 ColorPickerStyle.qml
+ConvexQuadSelection        1.0 ConvexQuadSelection.qml
+DropDown                   1.0 DropDown.qml
+DropDownStyle              1.0 DropDownStyle.qml
+EditableLabel              1.0 EditableLabel.qml
+HueSlider                  1.0 HueSlider.qml
+InputBox                   1.0 InputBox.qml
+InputBoxStyle              1.0 InputBoxStyle.qml
+Label                      1.0 Label.qml
+LabelOnRectangle           1.0 LabelOnRectangle.qml
+LabelOnRectangleStyle      1.0 LabelOnRectangleStyle.qml
+NumberLabel                1.0 NumberLabel.qml
+NumberSpinBox              1.0 NumberSpinBox.qml
+NumberSpinBoxStyle         1.0 NumberSpinBoxStyle.qml
+PathInputBox               1.0 PathInputBox.qml
+PlayPause                  1.0 PlayPause.qml
+RectangleButton            1.0 RectangleButton.qml
+RectangleButtonStyle       1.0 RectangleButtonStyle.qml
+RectangleSelection         1.0 RectangleSelection.qml
+SelectableListView         1.0 SelectableListView.qml
+SelectableListViewStyle    1.0 SelectableListViewStyle.qml
+SaturationBrightnessSlider 1.0 SaturationBrightnessSlider.qml
+TextButton                 1.0 TextButton.qml
+TextButtonStyle            1.0 TextButtonStyle.qml
+TextStyle                  1.0 TextStyle.qml

@@ -52,7 +52,8 @@ public:
         const QmlTypeReference& parentType,
         ProjectDocument* document = nullptr
     );
-    static QmlDeclaration::Ptr create(const QStringList &identifierChain,
+    static QmlDeclaration::Ptr create(
+        const QStringList &identifierChain,
         const QmlTypeReference &type,
         const QmlTypeReference &parentType,
         int identifierPosition,
@@ -79,17 +80,21 @@ public:
     int valueOffset() const;
     void setValuePositionOffset(int positionOffset);
 
+    int valueObjectScopeOffset() const;
+    void setValueObjectScopeOffset(int objectScopeOffset);
+
     int valueLength() const;
     void setValueLength(int valueLength);
-
-    bool isListDeclaration() const;
 
     ProjectDocumentSection::Ptr section();
     void setSection(ProjectDocumentSection::Ptr section);
 
+    bool isForList() const;
     bool isForObject() const;
+    bool isForComponent() const;
     bool isForProperty() const;
     bool isForSlot() const;
+    bool isForImports() const;
 
 private:
     QmlDeclaration(
@@ -120,6 +125,7 @@ private:
     QmlTypeReference m_type;
     QmlTypeReference m_parentType;
 
+    int             m_valueObjectScopeOffset;
     int             m_valueOffset;
 
     ProjectDocument* m_document;
@@ -195,7 +201,7 @@ inline void QmlDeclaration::setValueLength(int valueLength){
 }
 
 /// \brief Checks wether this is a list-child declaration instead of a property-based one
-inline bool QmlDeclaration::isListDeclaration() const{
+inline bool QmlDeclaration::isForList() const{
     return m_parentType.isEmpty();
 }
 

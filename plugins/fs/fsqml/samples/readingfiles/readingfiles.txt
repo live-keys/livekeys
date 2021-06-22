@@ -1,0 +1,6 @@
+Livekeys is split into 3 main modules:
+
+ * **The application**, containing the visual elements and the runtime types
+ * **The editor**, containing components for projects and editing
+ * **The plugins**, containing the plugins you can import, some of which can also be linked to as libraries in ordeer
+to provide common transferable types.

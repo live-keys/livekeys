@@ -4,6 +4,7 @@
 #include "live/mlnodetojson.h"
 #include "live/visuallogqt.h"
 
+#include "live/settings.h"
 #include "live/viewengine.h"
 #include "live/applicationcontext.h"
 
@@ -22,8 +23,57 @@ TimelineSettings::TimelineSettings(const QString &settingsPath, QObject *parent)
 TimelineSettings::~TimelineSettings(){
 }
 
+void TimelineSettings::addTrackType(const QString& typeReference, const QString &label, const QString &path, bool enabled, const QString& extension){
+    TimelineSettings::TrackType track;
+    track.label         = label;
+    track.typeReference = typeReference;
+    track.factory       = path;
+    track.extensionPath = extension;
+    track.enabled       = enabled;
+
+    m_trackTypes[typeReference] = track;
+}
+
+TimelineSettings::TrackType TimelineSettings::trackType(const QString &typeReference) const{
+    auto it = m_trackTypes.find(typeReference);
+    if ( it == m_trackTypes.end() )
+        return TimelineSettings::TrackType();
+
+    return it.value();
+}
+
+QJSValue TimelineSettings::trackMenu(const QString &typeReference, ViewEngine* ve){
+    if ( !ve )
+        return QJSValue();
+
+    auto it = m_trackTypes.find(typeReference);
+    if ( it == m_trackTypes.end() )
+        return QJSValue();
+
+    if ( it.value().extensionPath.isEmpty() )
+        return QJSValue();
+
+    ViewEngine::ComponentResult::Ptr cr = ve->createPluginObject(it.value().extensionPath + ".qml", this);
+    if ( cr->hasError() ){
+        cr->jsThrowError();
+        return QJSValue();
+    }
+
+    return ve->engine()->newQObject(cr->object).property("menu");
+}
+
 void TimelineSettings::addLoader(const QString &key, const QString &value){
     m_loaders[key] = value;
+}
+
+TimelineSettings *TimelineSettings::grabFrom(Settings *settings){
+    TimelineSettings* ts = qobject_cast<TimelineSettings*>(settings->file("timeline"));
+    if ( !ts ){
+        ts = new TimelineSettings(settings->path());
+        settings->addConfigFile("timeline", ts);
+    }
+    return ts;
+
 }
 
 void TimelineSettings::readFile(){

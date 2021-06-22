@@ -130,6 +130,10 @@ void    Navigable::fitInView( )
     }
 }
 
+void Navigable::requestUpdateGrid() noexcept{
+    updateGrid();
+}
+
 void    Navigable::setAutoFitMode( AutoFitMode autoFitMode )
 {
     if ( _autoFitMode != AutoFit &&
@@ -328,6 +332,7 @@ void    Navigable::mouseMoveEvent( QMouseEvent* event )
 
 void    Navigable::mousePressEvent( QMouseEvent* event )
 {
+    emit pressed(event->localPos()); // LK
     if ( getNavigable() ) {
         if ( event->button() == Qt::LeftButton ) {
             _leftButtonPressed = true;
@@ -374,6 +379,9 @@ void    Navigable::wheelEvent( QWheelEvent* event )
         zoomOn( QPointF{ static_cast<qreal>(event->x()),
                          static_cast<qreal>(event->y()) },
                 getZoom() + zoomFactor );
+    } else {
+        event->setAccepted(false);
+        return;
     }
     updateGrid();
 

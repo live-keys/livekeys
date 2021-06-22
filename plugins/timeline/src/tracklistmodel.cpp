@@ -78,8 +78,12 @@ QObject *TrackListModel::deserialize(ViewEngine *engine, const MLNode &node){
 }
 
 void TrackListModel::removeTrack(int index){
+    auto it = m_tracks.begin() + index;
+    emit trackAboutToBeRemoved(*it);
+
     beginRemoveRows(QModelIndex(), index, index);
-    delete m_tracks.takeAt(index);
+    m_tracks.erase(it);
+    delete *it;
     endRemoveRows();
 }
 
@@ -87,6 +91,7 @@ void TrackListModel::appendTrack(Track *track){
     beginInsertRows(QModelIndex(), m_tracks.length(), m_tracks.length());
     m_tracks.append(track);
     endInsertRows();
+    emit trackAdded(track);
 }
 
 }// namespace

@@ -56,10 +56,12 @@ ProjectQmlScope::ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine 
     m_scanTimer->setSingleShot(false);
 
     m_scanMonitor->moveToThread(m_monitorThread);
+    m_scanMonitor->languageScanner()->moveToThread(m_monitorThread);
 
     connect(this, &ProjectQmlScope::__processQueue, m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
     connect(m_scanTimer, &QTimer::timeout,          m_scanMonitor, &QmlLanguageScanMonitor::processQueue);
     connect(m_scanMonitor, &QmlLanguageScanMonitor::libraryUpdates, this, &ProjectQmlScope::__libraryUpdates);
+    connect(m_scanMonitor, &QmlLanguageScanMonitor::scannerQueueCleared, this, &ProjectQmlScope::libraryScanQueueCleared);
 
     m_scanTimer->start();
     m_monitorThread->start();
@@ -189,7 +191,13 @@ QmlLibraryInfo::Ptr ProjectQmlScope::findQmlLibraryInPath(
     QmlDirParser dirParser;
     dirParser.parse(QString::fromUtf8(dirFile.readAll()));
 
-    QmlLibraryInfo::Ptr linfo = QmlLibraryInfo::create(dirParser);
+    QmlLibraryInfo::Ptr linfo = nullptr;
+    if ( uri == fullPath ){
+        linfo = QmlLibraryInfo::create(uri);
+    } else {
+        linfo = QmlLibraryInfo::create(dirParser);
+    }
+
     linfo->setPath(fullPath);
     return linfo;
 }
@@ -248,7 +256,6 @@ void ProjectQmlScope::resetLibrariesInPath(const QString &path){
     for( auto it = m_libraries.begin(); it != m_libraries.end(); ++it ){
         if ( it.key().startsWith(path) ){
             it.value()->setStatus(QmlLibraryInfo::NotScanned);
-            //HERE
         }
     }
     m_libraryMutex.unlock();
@@ -256,7 +263,7 @@ void ProjectQmlScope::resetLibrariesInPath(const QString &path){
 
 void ProjectQmlScope::resetLibrary(const QString &path){
     m_libraryMutex.lock();
-    if ( m_libraries.contains(path) ){ //HERE
+    if ( m_libraries.contains(path) ){
         m_libraries[path]->setStatus(QmlLibraryInfo::NotScanned);
     }
     m_libraryMutex.unlock();

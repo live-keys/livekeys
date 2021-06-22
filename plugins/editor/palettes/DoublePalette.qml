@@ -18,39 +18,85 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
-import live 1.0
+import live 1.0 as L
+import visual.shapes 1.0 as Vs
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
     type : "qml/double"
 
-    item: Rectangle{
+    property QtObject theme: lk.layers.workspace.themes.current
+
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
+    item: Item{
         width: 330
-        height: 30
-        color: 'transparent'
+        height: 25
+
+        Input.InputBox{
+            id: numberInput
+            anchors.left: parent.left
+            width: 70
+            height: 25
+            style: palette.theme.inputStyle
+            text: "0.00"
+            Keys.onPressed: {
+                if ( event.key === Qt.Key_Return || event.key === Qt.Key_Enter ){
+                    if (!isNaN(numberInput.text)){
+
+                        intSlider.enabled = true
+                        fractionalSlider.enabled = true
+                        var val = parseFloat(numberInput.text)
+                        palette.value = val
+                        if ( !palette.isBindingChange() ){
+                            editFragment.write(palette.value)
+                        }
+                        updateSliders(val)
+                        event.accepted = true
+                    } else if (numberInput.text === 'NaN') {
+                        palette.value = NaN
+                        if ( !palette.isBindingChange() )
+                            editFragment.write(palette.value)
+                        intSlider.enabled = false
+                        fractionalSlider.enabled = false
+
+                    } else {
+                        lk.layers.workspace.messages.pushError('Non-numeric input for DoublePalette', 202)
+                    }
+                }
+            }
+        }
 
         Slider{
             id: intSlider
             anchors.top: parent.top
-            anchors.topMargin: 1
+            anchors.topMargin: 3
             anchors.left: parent.left
-            anchors.leftMargin: leftLabel.width + 3
-            width: parent.width - leftLabel.width - rightLabel.width - 10
+            anchors.leftMargin: numberInput.width + leftLabel.width + 5
+            width: parent.width - numberInput.width - leftLabel.width - rightLabel.width - 10
             height: 15
             minimumValue: 0
             value: 0
             onValueChanged: {
-                palette.value = intSlider.value + fractionalSlider.value
+                var roundValue = intSlider.value + fractionalSlider.value
+                roundValue = Math.round(roundValue * 100) / 100
+                palette.value = roundValue
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
+                roundValue = roundValue.toFixed(2)
+                numberInput.text = roundValue
+
             }
             stepSize: 1.0
-            maximumValue: 200
+            maximumValue: 25
 
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 5
-                    color: '#0b111c'
+                    color: theme.colorScheme.middleground
                 }
                 handle: Rectangle{
                     width: 11
@@ -59,15 +105,25 @@ CodePalette{
                     color: '#9b9da0'
                 }
             }
+            activeFocusOnPress: true
+            wheelEnabled: intSlider.activeFocus
+        }
+
+        MouseArea {
+            anchors.fill: intSlider
+            enabled: !intSlider.enabled
+            onClicked: {
+                lk.layers.workspace.messages.pushWarning('Please input a numeric value in the text field.', 200)
+            }
         }
 
         Slider{
             id: fractionalSlider
 
             anchors.left: parent.left
-            anchors.leftMargin: leftLabel.width + 3
+            anchors.leftMargin: numberInput.width + leftLabel.width + 5
             anchors.top: parent.top
-            anchors.topMargin: 15
+            anchors.topMargin: 17
 
             width: intSlider.width
 
@@ -75,43 +131,68 @@ CodePalette{
             minimumValue: 0
             value: 0
             onValueChanged: {
-                if (fractionalSlider.value !== 1.0)
-                    palette.value = intSlider.value + fractionalSlider.value
+                var roundValue = intSlider.value + fractionalSlider.value
+                roundValue = Math.round(roundValue * 100) / 100
+                if (fractionalSlider.value === 1.0) return
 
+                palette.value = roundValue
                 if ( !palette.isBindingChange() )
-                    extension.write(palette.value)
+                    editFragment.write(palette.value)
+
+                roundValue = roundValue.toFixed(2)
+                numberInput.text = roundValue
+
             }
             stepSize: 0.01
-            maximumValue: 1.0
+            maximumValue: 0.99
 
             style: SliderStyle{
                 groove: Rectangle {
                     implicitHeight: 1
                     color: 'transparent'
                 }
-                handle: Triangle{
+                handle: Vs.Triangle{
                     width: 8
                     height: 8
                     color: '#9b9da0'
-                    rotation: Triangle.Top
+                    rotation: Vs.Triangle.Top
                 }
+            }
+            activeFocusOnPress: true
+            wheelEnabled: fractionalSlider.activeFocus
+        }
+
+        MouseArea {
+            anchors.fill: fractionalSlider
+            enabled: !fractionalSlider.enabled
+            onClicked: {
+                lk.layers.workspace.messages.pushWarning('Please input a numeric value in the text field.', 201)
             }
         }
 
-        Label{
+        Input.NumberLabel{
             id: leftLabel
             mode: 1
             anchors.top: parent.top
             anchors.left: parent.left
+            anchors.leftMargin: numberInput.width + 2
+
+            width: 50
+            height: 25
+
+            style: theme.inputLabelStyle
+
             up: function(){
                 if (intSlider.minimumValue === 0 && intSlider.maximumValue > 25)
                     intSlider.minimumValue = 25
                 else if (intSlider.minimumValue === -25 && intSlider.maximumValue > 0)
                     intSlider.minimumValue = 0
-                else if (intSlider.minimumValue < 0 && intSlider.minimumValue / 2 < intSlider.maximumValue)
+                else if (intSlider.minimumValue < -25 && intSlider.minimumValue / 2 < intSlider.maximumValue)
                     intSlider.minimumValue = intSlider.minimumValue / 2
                 else if (intSlider.minimumValue > 0 && 2*intSlider.minimumValue < intSlider.maximumValue)
                     intSlider.minimumValue = 2*intSlider.minimumValue
+
+                if (intSlider.minimumValue > 25600) intSlider.minimumValue = 25600
 
                 if (intSlider.value < intSlider.minimumValue )
                     intSlider.value = intSlider.minimumValue
@@ -126,17 +207,29 @@ CodePalette{
                 else if (intSlider.minimumValue > 0)
                     intSlider.minimumValue = intSlider.minimumValue / 2
 
+
+                if (intSlider.minimumValue < -25600) intSlider.minimumValue = -25600
+
                 if (intSlider.value < intSlider.minimumValue )
                     intSlider.value = intSlider.minimumValue
             }
             text: intSlider.minimumValue
+            wheelEnabled: leftLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
+
         }
 
-        Label{
+
+
+        Input.NumberLabel{
             id: rightLabel
             mode: 2
             anchors.top: parent.top
             anchors.right: parent.right
+
+            width: 50
+            height: 25
+
+            style: theme.inputLabelStyle
 
             up: function(){
                 if (intSlider.maximumValue === 0)
@@ -148,6 +241,9 @@ CodePalette{
                 else if (intSlider.maximumValue < 0)
                     intSlider.maximumValue = intSlider.maximumValue / 2
 
+
+                if (intSlider.maximumValue > 25600) intSlider.maximumValue = 25600
+
                 if (intSlider.value > intSlider.maximumValue)
                     intSlider.value = intSlider.maximumValue
             }
@@ -158,26 +254,75 @@ CodePalette{
                     intSlider.maximumValue = 0
                 else if (intSlider.maximumValue < 0 && 2*intSlider.maximumValue > intSlider.minimumValue)
                     intSlider.maximumValue = 2*intSlider.maximumValue
-                else if (intSlider.maximumValue > 0 && intSlider.maximumValue / 2 > intSlider.minimumValue)
+                else if (intSlider.maximumValue > 25 && intSlider.maximumValue / 2 > intSlider.minimumValue)
                     intSlider.maximumValue = intSlider.maximumValue / 2
+
+                if (intSlider.maximumValue < -25600) intSlider.maximumValue = -25600
+
 
                 if (intSlider.value > intSlider.maximumValue)
                     intSlider.value = intSlider.maximumValue
             }
 
             text: intSlider.maximumValue
+            wheelEnabled: rightLabel.activeFocus || numberInput.inputActiveFocus || intSlider.activeFocus || fractionalSlider.activeFocus
         }
 
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){
-            extension.write(palette.value)
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
         }
+    }
+
+    function updateSliders(value){
+        if (value < intSlider.minimumValue || value > intSlider.maximumValue){
+            if (value > 0){
+                intSlider.minimumValue = 0
+                intSlider.maximumValue = 25
+                while (intSlider.maximumValue < value){
+                    intSlider.minimumValue = intSlider.maximumValue
+                    intSlider.maximumValue = 2*intSlider.maximumValue
+                }
+            } else if (value < 0){
+                intSlider.minimumValue = -25
+                intSlider.maximumValue = 0
+                while (intSlider.minimumValue > value){
+                    intSlider.maximumValue = intSlider.minimumValue
+                    intSlider.minimumValue = 2*intSlider.minimumValue
+
+                }
+            }
+        }
+
+        intSlider.value = Math.floor(value)
+        fractionalSlider.value = value - intSlider.value
     }
 
     onInit: {
-        intSlider.value = Math.floor(value)
-        fractionalSlider.value = value - intSlider.value
+        console.log("ON INTIALIZE:" + value)
+        if (isNaN(value)){
+            palette.value = NaN
+            numberInput.text = 'NaN'
+            intSlider.enabled = false
+            fractionalSlider.enabled = false
+
+            editFragment.writeCode('NaN')
+            return
+        }
+        updateSliders(value)
+    }
+    onValueFromBindingChanged: {
+        if (isNaN(value)){
+            palette.value = NaN
+            numberInput.text = 'NaN'
+            intSlider.enabled = false
+            fractionalSlider.enabled = false
+
+            editFragment.writeCode('NaN')
+            return
+        }
+        updateSliders(value)
     }
 }

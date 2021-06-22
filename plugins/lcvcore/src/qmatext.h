@@ -27,23 +27,23 @@ namespace lv{ namespace ml{
 template<>
 inline void serialize<QMat>(const QMat& v, MLNode& node){
     node = {
-        {"cols", v.data().cols},
-        {"rows", v.data().rows},
-        {"channels", v.data().channels()},
-        {"depth", v.data().depth()},
-        {"data", MLNode::BytesType(v.data().data, v.data().total() * v.data().elemSize())}
+        {"cols", v.internal().cols},
+        {"rows", v.internal().rows},
+        {"channels", v.internal().channels()},
+        {"depth", v.internal().depth()},
+        {"data", MLNode::BytesType(v.internal().data, v.internal().total() * v.internal().elemSize())}
     };
 }
 
 template<>
 inline void deserialize<QMat>(const MLNode& node, QMat& v){
-    *v.cvMat() = cv::Mat(
+    *v.internalPtr() = cv::Mat(
         cv::Size(node["cols"].asInt(), node["rows"].asInt()),
         CV_MAKETYPE(node["depth"].asInt(), node["channels"].asInt()),
         cv::Mat::AUTO_STEP
     );
     lv::MLNode::BytesType bt = node["data"].asBytes();
-    memcpy(v.cvMat()->data, bt.data(), bt.size());
+    memcpy(v.internalPtr()->data, bt.data(), bt.size());
 }
 
 } // namespace ml
@@ -54,7 +54,7 @@ Q_LCVCORE_EXPORT QmlObjectList* createMatList();
 inline lv::VisualLog& operator << (lv::VisualLog& vl, const QMat& v){
     vl.asObject("QMat", v);
     vl.asView("lcvcore/MatLog.qml", [&v](){ return QVariant::fromValue(v.clone()); });
-    return vl << "Mat[" << v.data().cols << "x" << v.data().rows << "," << v.data().channels() << "]";
+    return vl << "Mat[" << v.internal().cols << "x" << v.internal().rows << "," << v.internal().channels() << "]";
 }
 
 } // namespace lv

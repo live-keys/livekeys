@@ -6,17 +6,24 @@ Grid{
     
     columns: 2
     
-    ImRead{
+    ImageFile{
         id: src
-        file: project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
+        source: project.dir() + '/../../../samples/_images/object_101_piano_query.jpg'
+        visible: false
     }
     
     Levels{
-        lightness: [10, 1.5, 120]
+        id: levels
+        lightness: [10, 1.5, 220]
         channels: {
             0: [0, 1.0, 170]
         }
         input: src.output
+        onComplete: exec()
+    }
+    
+    ImageView{
+        image: levels.result
     }
     
 }

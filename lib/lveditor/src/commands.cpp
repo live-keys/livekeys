@@ -15,15 +15,19 @@
 ****************************************************************************/
 
 #include "commands.h"
+#include "workspacelayer.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
+#include "live/viewengine.h"
+
 #include <QJSValueIterator>
 #include <QDebug>
 
 namespace lv{
 
-Commands::Commands(QObject *parent)
+Commands::Commands(ViewEngine *engine, QObject *parent)
     : QObject(parent)
+    , m_engine(engine)
 {
 }
 
@@ -47,14 +51,16 @@ void Commands::setModel(CommandsModel *m)
     connect(m_model, &CommandsModel::modelChanged, this, &Commands::modelChanged);
 }
 
-
 QString Commands::add(QObject *object, const QJSValue &commands){
-    if ( object == 0 || object->objectName() == "" ){
-        qCritical("Cannot add commands for unnamed objects.");
+    if ( !m_engine )
+        THROW_EXCEPTION(lv::Exception, "Engine not assigned.", Exception::toCode("~Engine"));
+
+    if ( object == nullptr || object->objectName() == "" ){
+        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Cannot add commands for unnamed objects.", Exception::toCode("~Commands")), this).jsThrow();
         return "";
     }
     if ( !commands.isObject() ){
-        qCritical("Commands requires to be of object type.");
+        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Argument 'commands' requires to be of object type.", Exception::toCode("~Commands")), this).jsThrow();
         return "";
     }
 
@@ -104,7 +110,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
                         n->function = val;
                     } else
                     {
-                        qCritical("First value in array isn't a function: %s", qPrintable(key));
+                        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "First value in array isn't a function: " + key.toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
                         break;
                     }
                 }
@@ -113,7 +119,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
                     {
                         n->description = val.toString();
                     } else {
-                        qCritical("Second value in array isn't a string: %s", qPrintable(key));
+                        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Second value in array isn't a string: " + key.toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
                         break;
                     }
                 }
@@ -122,7 +128,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
                     {
                         n->check = val;
                     } else {
-                        qCritical("Third value in array isn't a function: %s", qPrintable(key));
+                        QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Third value in array isn't a function: " + key.toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
                         break;
                     }
                 }
@@ -130,7 +136,7 @@ QString Commands::add(QObject *object, const QJSValue &commands){
             }
         }
         else {
-            qCritical("Value given for command is neither a function nor an array: %s", qPrintable(key));
+            QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Value given for command is neither a function nor an array: " + key.toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
         }
     }
     m_model->updateAvailableCommands();
@@ -158,7 +164,7 @@ void Commands::removeCommandsFor(QObject *object){
 
 QStringList Commands::getCommandChain(QObject *object){
     QStringList commandChain;
-    while( object != 0 ){
+    while( object != nullptr ){
         if ( object->objectName() != "" )
             commandChain.prepend(object->objectName());
         object = object->parent();
@@ -168,11 +174,15 @@ QStringList Commands::getCommandChain(QObject *object){
 }
 
 void Commands::execute(const QString &command){
+    if ( !m_engine )
+        THROW_EXCEPTION(lv::Exception, "Engine not assigned.", Exception::toCode("~Engine"));
+
     auto it = m_commands.find(command);
     if ( it != m_commands.end() ){
         QJSValue r = it.value()->function.call();
         if ( r.isError() ){
-            qWarning("Error executing command %s: %s", qPrintable(command), qPrintable(r.toString()));
+            m_engine->throwError(r, this);
+//            QmlError(m_engine, CREATE_EXCEPTION(lv::Exception, "Error executing command '" + command.toStdString() + "': " + r.toString().toStdString() + ".", Exception::toCode("~Commands")), this).jsThrow();
         }
         return;
     }

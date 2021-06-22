@@ -1,17 +1,24 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.3
 import timeline 1.0
-import workspace 1.0
+import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Item{
     id: root
     width: parent.width
     height: 25
 
-    property TimelineStyle timelineStyle : null
+    objectName: "timelineTrackTitle"
+
+    property Item timelineArea: null
+    property QtObject timelineStyle : null
     property int trackIndex : 0
 
+    property var menuOptions: null
+
     signal addSegment(int index)
+    signal rightClicked(int index, Item trackTitleItem)
 
     property alias labelColor: editableLabel.textColor
     property alias borderColor: borderBottom.color
@@ -32,10 +39,10 @@ Item{
         height: parent.height - 1
         color: 'transparent'
 
-        MenuIcon{
+        Icons.MenuIcon{
             id: menuIcon
-            width: 5
-            height: 6
+            width: 2
+            height: 10
             anchors.centerIn: parent
             color: root.timelineStyle.iconColor
         }
@@ -44,36 +51,26 @@ Item{
             anchors.fill: parent
             hoverEnabled: true
             onClicked: {
-                contextMenu.popup()
+                root.timelineArea.handleContextMenu(root)
             }
         }
     }
 
-    EditableLabel{
+    Input.EditableLabel{
         id: editableLabel
         anchors.left: parent.left
         anchors.leftMargin: 20
         height: parent.height
         text: track.name
-        textColor: root.timelineStyle.textColor
+        style: root.timelineStyle.inputStyle
         onTextChanged: {
             track.name = text
         }
+        onRightClicked: root.rightClicked(root.trackIndex, root)
     }
 
-    Menu{
-        id: contextMenu
-        MenuItem {
-            text: qsTr("Add Segment...")
-            onTriggered: root.addSegment(root.trackIndex)
-        }
-        MenuItem {
-            text: qsTr("Insert Track")
-            onTriggered: timelineArea.timeline.addTrack()
-        }
-        MenuItem {
-            text: qsTr("Remove Track")
-            onTriggered: timelineArea.timeline.removeTrack(index)
-        }
+    Component.onCompleted: {
+        // load menu for this track type
+        root.menuOptions = timelineArea.timeline.config.trackMenu(track)
     }
 }

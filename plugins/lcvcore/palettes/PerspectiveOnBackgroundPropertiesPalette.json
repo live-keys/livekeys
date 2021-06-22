@@ -1,0 +1,10 @@
+{
+    "type": "qml/lcvcore#PerspectiveOnBackground",
+    "palettes": ["PerspectiveOnBackgroundPalette"],
+    "properties" : [
+        ["input"],
+        ["background"],
+        ["result", "", "true"]
+    ]
+}
+

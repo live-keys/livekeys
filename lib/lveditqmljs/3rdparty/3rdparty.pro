@@ -70,26 +70,26 @@ SOURCES += \
 HEADERS += \
     $$PWD/qmljs/parser/qmldirparser_p.h \
     $$PWD/qmljs/parser/qmlerror.h \
-    $$PWD/qmljs/parser/qmljsast_p.h \
-    $$PWD/qmljs/parser/qmljsastfwd_p.h \
-    $$PWD/qmljs/parser/qmljsastvisitor_p.h \
-    $$PWD/qmljs/parser/qmljsengine_p.h \
-    $$PWD/qmljs/parser/qmljsglobal_p.h \
-    $$PWD/qmljs/parser/qmljsgrammar_p.h \
-    $$PWD/qmljs/parser/qmljskeywords_p.h \
-    $$PWD/qmljs/parser/qmljslexer_p.h \
-    $$PWD/qmljs/parser/qmljsmemorypool_p.h \
-    $$PWD/qmljs/parser/qmljsparser_p.h
+    $$PWD/qmljs/parser/qqmljsast_p.h \
+    $$PWD/qmljs/parser/qqmljsastfwd_p.h \
+    $$PWD/qmljs/parser/qqmljsastvisitor_p.h \
+    $$PWD/qmljs/parser/qqmljsengine_p.h \
+    $$PWD/qmljs/parser/qqmljsglobal_p.h \
+    $$PWD/qmljs/parser/qqmljsgrammar_p.h \
+    $$PWD/qmljs/parser/qqmljskeywords_p.h \
+    $$PWD/qmljs/parser/qqmljslexer_p.h \
+    $$PWD/qmljs/parser/qqmljsmemorypool_p.h \
+    $$PWD/qmljs/parser/qqmljsparser_p.h
 
 SOURCES += \
     $$PWD/qmljs/parser/qmldirparser.cpp \
     $$PWD/qmljs/parser/qmlerror.cpp \
-    $$PWD/qmljs/parser/qmljsast.cpp \
-    $$PWD/qmljs/parser/qmljsastvisitor.cpp \
-    $$PWD/qmljs/parser/qmljsengine_p.cpp \
-    $$PWD/qmljs/parser/qmljsgrammar.cpp \
-    $$PWD/qmljs/parser/qmljslexer.cpp \
-    $$PWD/qmljs/parser/qmljsparser.cpp
+    $$PWD/qmljs/parser/qqmljsast.cpp \
+    $$PWD/qmljs/parser/qqmljsastvisitor.cpp \
+    $$PWD/qmljs/parser/qqmljsengine_p.cpp \
+    $$PWD/qmljs/parser/qqmljsgrammar.cpp \
+    $$PWD/qmljs/parser/qqmljslexer.cpp \
+    $$PWD/qmljs/parser/qqmljsparser.cpp
 
 
 

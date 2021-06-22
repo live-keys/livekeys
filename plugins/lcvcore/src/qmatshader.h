@@ -39,15 +39,15 @@ public:
 
     bool loadTexture(QMat* mat, int index, bool linearFilter = true);
 
-
 private:
+    int              m_shaderVersion;
     QList<GLuint>    m_textures;
     int              m_textureId;
     QOpenGLFunctions m_glFunctions;
 };
 
 inline const char *QMatShader::vertexShader() const{
-    return
+    const char* vertexShader20 =
         "attribute highp vec4 aVertex;                              \n"
         "attribute highp vec2 aTexCoord;                            \n"
         "uniform highp mat4 qt_Matrix;                              \n"
@@ -57,10 +57,24 @@ inline const char *QMatShader::vertexShader() const{
         "    texCoord[0] = aTexCoord.x;"
         "    texCoord[1] = aTexCoord.y;"
         "}";
+
+    const char* vertexShader330 =
+        "#version 330\n"
+        "in highp vec4 aVertex;                              \n"
+        "in highp vec2 aTexCoord;                            \n"
+        "uniform highp mat4 qt_Matrix;                              \n"
+        "out highp vec2 texCoord;                               \n"
+        "void main() {                                              \n"
+        "    gl_Position = qt_Matrix * aVertex;                     \n"
+        "    texCoord[0] = aTexCoord.x;"
+        "    texCoord[1] = aTexCoord.y;"
+        "}";
+
+    return m_shaderVersion == 20 ? vertexShader20 : vertexShader330;
 }
 
 inline const char *QMatShader::fragmentShader() const{
-    return
+    const char* fragmentShader20 =
         "uniform lowp float qt_Opacity;                             \n"
         "varying highp vec2 texCoord;                               \n"
         "uniform sampler2D textures[1];                             \n"
@@ -69,6 +83,20 @@ inline const char *QMatShader::fragmentShader() const{
         "   highp vec4 textureColor = texture2D( textures[0], texCoord.st );"
         "   gl_FragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
         "}";
+
+    const char* fragmentShader330 =
+        "#version 330\n"
+        "uniform lowp float qt_Opacity;                             \n"
+        "in highp vec2 texCoord;                               \n"
+        "uniform sampler2D textures[1];                             \n"
+        "out vec4 fragColor;                                        \n"
+        "void main ()                                               \n"
+        "{                                                          \n"
+        "   highp vec4 textureColor = texture( textures[0], texCoord.st );"
+        "   fragColor = vec4(textureColor.b, textureColor.g, textureColor.r, 1.0) * ( qt_Opacity * textureColor.a );"
+        "}";
+
+    return m_shaderVersion == 20 ? fragmentShader20 : fragmentShader330;
 }
 
 inline QList<QByteArray> QMatShader::attributes() const{

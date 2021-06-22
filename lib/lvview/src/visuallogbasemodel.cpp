@@ -26,9 +26,11 @@ namespace lv{
  */
 
 /** Constructor for string-type log entries */
-VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, const QString &p)
+VisualLogEntry::VisualLogEntry(const QString &ptag, quint8 lvl, const QString &pprefix, const QString& loc, const QString &p)
     : prefix(pprefix)
     , tag(ptag)
+    , level(lvl)
+    , location(loc)
     , data(p)
     , objectData(0)
     , component(0)
@@ -37,9 +39,11 @@ VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, cons
 }
 
 /** Constructor for objects and/or image log entries */
-VisualLogEntry::VisualLogEntry(const QString &ptag, const QString &pprefix, QVariant *od, QQmlComponent *c)
+VisualLogEntry::VisualLogEntry(const QString &ptag, quint8 lvl, const QString &pprefix, const QString &loc, QVariant *od, QQmlComponent *c)
     : prefix(pprefix)
     , tag(ptag)
+    , level(lvl)
+    , location(loc)
     , objectData(od)
     , component(c)
     , context(0)
@@ -64,8 +68,9 @@ VisualLogBaseModel::~VisualLogBaseModel(){
 
 QHash<int, QByteArray> VisualLogBaseModel::roleNames() const{
     QHash<int, QByteArray> roles;
-    roles[VisualLogBaseModel::Msg]    = "msg";
-    roles[VisualLogBaseModel::Prefix] = "prefix";
+    roles[VisualLogBaseModel::Msg]      = "msg";
+    roles[VisualLogBaseModel::Prefix]   = "prefix";
+    roles[VisualLogBaseModel::Location] = "location";
     return roles;
 }
 

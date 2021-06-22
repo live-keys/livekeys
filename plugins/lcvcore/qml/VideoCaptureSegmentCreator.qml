@@ -2,22 +2,23 @@ import QtQuick 2.0
 import timeline 1.0
 import lcvcore 1.0
 import live 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     width: 300
     height: 80
-    color: '#03070a'
+    color: '#141b20'
+    border.width: 1
+    border.color: '#232b30'
 
     signal segmentCreated(Segment segment)
     signal cancelled()
 
     property Component segmentFactory : VideoSegment{
-
     }
 
     function createSegment(options, track){
         return segmentFactory.createObject()
-        //TODO: Add serialization options
     }
 
     Text{
@@ -32,7 +33,7 @@ Rectangle{
         color: "#afafaf"
     }
 
-    PathInputBox{
+    Input.PathInputBox{
         anchors.left: parent.left
         anchors.leftMargin: 20
         anchors.top: parent.top
@@ -41,19 +42,24 @@ Rectangle{
         onPathSelected: {
             var newSegment = segmentFactory.createObject()
             newSegment.file = path
-            newSegment.length = 20
+            newSegment.length = 100
             parent.segmentCreated(newSegment)
         }
     }
 
-
-    TextButton{
+    Input.TextButton{
         anchors.right: parent.right
         anchors.rightMargin: 10
         radius: 5
         width: 30
         height: 30
         text: 'X'
+        style:  Input.TextButtonStyle{
+            backgroundColor: '#3f444d'
+            backgroundHoverColor: Qt.lighter('#3f444d', 1.2)
+            borderColor: '#575b63'
+        }
+
         onClicked: {
             parent.cancelled()
         }

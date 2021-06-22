@@ -6,7 +6,6 @@ depends QtQuick 2.3
 Editor            1.0 Editor.qml
 EditorPane        1.0 EditorPane.qml
 SuggestionBox     1.0 SuggestionBox.qml
-ContextMenuStyle  1.0 ContextMenuStyle.qml
 LoadingAnimation  1.0 LoadingAnimation.qml
 PaletteListView   1.0 PaletteListView.qml
 PaletteConnection 1.0 PaletteConnection.qml
@@ -15,8 +14,8 @@ PaneSplitView     1.0 PaneSplitView.qml
 PaneDragItem      1.0 PaneDragItem.qml
 PaneDropArea      1.0 PaneDropArea.qml
 PaneWindow        1.0 PaneWindow.qml
-PaneMenuButton    1.0 PaneMenuButton.qml
 WorkspaceTheme    1.0 WorkspaceTheme.qml
 WorkspaceControl  1.0 WorkspaceControl.qml
 DocumentationView 1.0 DocumentationView.qml
 ObjectPalettePane 1.0 ObjectPalettePane.qml
+PalettePane       1.0 PalettePane.qml

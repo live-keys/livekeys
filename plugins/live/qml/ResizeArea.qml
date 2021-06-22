@@ -15,12 +15,15 @@ Rectangle{
     property double minimumHeight: 50
     property double minimumWidth : 50
 
+    signal resizeFinished()
+
     MouseArea {
         anchors.fill: parent
         drag{
             target: parent;
             axis: Drag.XAndYAxis
         }
+        cursorShape: Qt.SizeFDiagCursor
         onMouseYChanged: {
             if(drag.active){
                 root.target.height = root.target.height + mouseY
@@ -35,5 +38,6 @@ Rectangle{
                     root.target.width = root.minimumWidth
             }
         }
+        onReleased: root.resizeFinished()
     }
 }

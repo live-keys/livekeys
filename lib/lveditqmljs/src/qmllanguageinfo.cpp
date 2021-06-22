@@ -150,6 +150,7 @@ QmlTypeInfo::Ptr QmlTypeInfo::clone(const QmlTypeInfo::ConstPtr &other){
     cl->m_properties = other->m_properties;
     cl->m_methods = other->m_methods;
     cl->m_enums = other->m_enums;
+    cl->m_defaultProperty = other->m_defaultProperty;
     return cl;
 }
 
@@ -212,6 +213,13 @@ QmlPropertyInfo QmlTypeInfo::propertyAt(const QString &name) const{
 
 void QmlTypeInfo::appendProperty(const QmlPropertyInfo &prop){
     m_properties.append(prop);
+}
+
+void QmlTypeInfo::updateProperty(int index, const QmlPropertyInfo &prop){
+    if ( index >= m_properties.size() )
+        return;
+
+    m_properties[index] = prop;
 }
 
 int QmlTypeInfo::totalFunctions() const{
@@ -288,6 +296,10 @@ bool QmlTypeInfo::isDeclaredInCpp() const{
     return !isDeclaredInQml();
 }
 
+const QString &QmlTypeInfo::defaultProperty() const{
+    return m_defaultProperty;
+}
+
 bool QmlTypeInfo::isSingleton() const{
     return m_isSingleton;
 }
@@ -305,12 +317,23 @@ bool QmlTypeInfo::isCreatable() const{
  * \returns true if \p typeString is an object, false otherwise
  */
 bool QmlTypeInfo::isObject(const QString &typeString){
-if ( typeString == "bool" || typeString == "double" || typeString == "enumeration" ||
-     typeString == "int" || typeString == "list" || typeString == "real" ||
-     typeString == "color" || typeString == "QColor" ||
-     typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" )
+    if ( typeString == "bool" || typeString == "double" || typeString == "qlonglong" || typeString == "enumeration" ||
+         typeString == "int" || typeString == "list" || typeString == "real" ||
+         typeString == "color" || typeString == "QColor" ||
+         typeString == "string" || typeString == "QString" || typeString == "url" || typeString == "var" || typeString == "QUrl" ||
+         typeString == "uint" || typeString == "size" || typeString == "QStringList" || typeString == "QSize" ||
+         typeString == "rect" || typeString == "QRect" )
+        return false;
+    return true;
+}
+
+bool QmlTypeInfo::isQmlBasicType(const QString &typeString){
+    if ( typeString == "bool" || typeString == "double" || typeString == "qlonglong" || typeString == "enumeration" ||
+         typeString == "int" || typeString == "list" || typeString == "real" ||
+         typeString == "color" || typeString == "string" || typeString == "url" || typeString == "var" ||
+         typeString == "object" || typeString == "Array" || typeString == "size" || typeString == "QStringList")
+        return true;
     return false;
-return true;
 }
 
 QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitive){
@@ -321,6 +344,10 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
             return QmlTypeReference(QmlTypeReference::Qml, "url");
         else if ( cppPrimitive.name() == "QString")
             return QmlTypeReference(QmlTypeReference::Qml, "string");
+        else if ( cppPrimitive.name() == "QSize")
+            return QmlTypeReference(QmlTypeReference::Qml, "size");
+        else if ( cppPrimitive.name() == "QPoint" || cppPrimitive.name() == "QPointF" )
+            return QmlTypeReference(QmlTypeReference::Qml, "point");
     }
     return cppPrimitive;
 }
@@ -331,7 +358,7 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
 QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
     if ( typeString == "bool" )
         return "false";
-    else if ( typeString == "double" || typeString == "int" || typeString == "enumeration" || typeString == "real" )
+    else if ( typeString == "double" || typeString == "int" || typeString == "qlonglong" || typeString == "enumeration" || typeString == "real" )
         return "0";
     else if ( typeString == "list" )
         return "[]";
@@ -344,7 +371,7 @@ QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
     else if ( typeString == "size" || typeString == "QSize" )
         return "\"0x0\"";
     else if ( typeString == "rect" || typeString == "QRect" )
-        return "\50,50,100x100\"";
+        return "\"0,0,0x0\"";
     else if ( typeString == "var" )
         return "undefined";
     else
@@ -358,6 +385,7 @@ QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
 QmlTypeInfo::Ptr QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObject::ConstPtr fmo,
         const QString& libraryUri)
 {
+
     QmlTypeInfo::Ptr qti = QmlTypeInfo::create();
 
     QString foundPackage;
@@ -397,6 +425,7 @@ QmlTypeInfo::Ptr QmlTypeInfoPrivate::fromMetaObject(LanguageUtils::FakeMetaObjec
     qti->m_isComposite = fmo->isComposite();
     qti->m_isCreatable = fmo->isCreatable();
     qti->m_isSingleton = fmo->isSingleton();
+    qti->m_defaultProperty = fmo->defaultPropertyName();
 
     return qti;
 }
@@ -463,6 +492,8 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
             typeName = "quaternion";
         } else if (typeName == "QVector2D" || typeName == "QVector3D" || typeName == "QVector4D"){
             typeName = "vector" + typeName[7] + "d";
+        } else if (typeName == "uint" || typeName == "qlonglong" ){
+            typeName = "int";
         }
 
         qpi.typeName = QmlTypeReference(QmlTypeReference::Qml, typeName);
@@ -509,14 +540,29 @@ bool QmlInheritanceInfo::isEmpty() const{
     return nodes.isEmpty();
 }
 
+QmlPropertyInfo QmlInheritanceInfo::defaultProperty() const{
+    QString defaultPropertyName = "";
+    for ( const QmlTypeInfo::Ptr& ti : nodes ){
+        if ( !ti->defaultProperty().isEmpty() )
+            defaultPropertyName = ti->defaultProperty();
+    }
+    if ( defaultPropertyName.isEmpty() )
+        return QmlPropertyInfo();
+
+    for ( const QmlTypeInfo::Ptr& ti : nodes ){
+        QmlPropertyInfo qpi = ti->propertyAt(defaultPropertyName);
+        if ( qpi.isValid() )
+            return qpi;
+    }
+    return QmlPropertyInfo();
+}
+
 QmlTypeReference QmlInheritanceInfo::languageType() const{
     if ( isEmpty() )
         return QmlTypeReference();
 
     return nodes.first()->prefereredType();
 }
-
-
 
 QmlPropertyInfo::QmlPropertyInfo()
     : isWritable(true)

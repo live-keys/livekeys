@@ -52,15 +52,16 @@ void Worker::appendAct(QObject * filter){
 
     lv::QmlAct* f = dynamic_cast<lv::QmlAct*>(filter);
     if ( f ){
-        f->setWorkerThread(m_filterWorker);
+        //TODO
+//        f->setWorkerThread(m_filterWorker);
         m_filterWorker->acts().append(f);
         return;
     }
 
     lv::QmlStreamFilter* sf = qobject_cast<QmlStreamFilter*>(filter);
     if ( sf ){
-        sf->setWorkerThread(m_filterWorker);
-        m_filterWorker->acts().append(sf);
+//        sf->setWorkerThread(m_filterWorker);
+//        m_filterWorker->acts().append(sf);
         return;
     }
 

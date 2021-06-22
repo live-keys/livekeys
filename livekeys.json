@@ -1,17 +1,18 @@
 {
-    "version": "1.7.0",
+    "version": "1.9.0",
     "name": "livekeys",
     "webpage": "https://livekeys.io",
     "components": {
         "livekeys": {
-            "version": "1.7.0",
+            "version": "1.9.0",
             "versionsync": {
-                "README.md": "\\s*(?:\\* \\*\\*Version\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
+                "README.md": "\\s*(?:VERSION\\s*\\=)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*",
                 "application/src/livekeys.h": [
                     "(?:\\s*#define LIVEKEYS_VERSION_MAJOR)\\s*([0-9]*)\\s*\n",
                     "(?:\\s*#define LIVEKEYS_VERSION_MINOR)\\s*([0-9]*)\\s*\n",
                     "(?:\\s*#define LIVEKEYS_VERSION_PATCH)\\s*([0-9]*)\\s*"
-                ]
+                ],
+                ".qmake.conf" : "\\s*(?:\\* \\*\\*LIVEKEYS_VERSION\\*\\*\\:)\\s*([0-9]*)\\.{1}([0-9]*)\\.{1}([0-9]*)\\s*"
             }
         },
         "live": {
@@ -228,8 +229,12 @@
                             "libQt5Qml.so*": "lib/-",
                             "libQt5QmlWorkerScript.so*": "lib/-",
                             "libQt5QmlModels.so*": "lib/-",
+                            "libQt5QuickShapes.so*": "lib/-",
+                            "libQt5QuickTemplates2.so*": "lib/-",
+                            "libQt5QuickControls2.so*": "lib/-",
                             "libQt5Quick.so*": "lib/-",
                             "libQt5Script.so*": "lib/-",
+                            "libQt5Svg.so*": "lib/-",
                             "libQt5Widgets.so*": "lib/-",
                             "libQt5Network.so*": "lib/-",
                             "libQt5Xml.so*": "lib/-",
@@ -260,11 +265,14 @@
                                 "Controls/*.qml": "plugins/QtQuick/Controls/-",
                                 "Controls/Private": "plugins/QtQuick/Controls/Private",
                                 "Controls/Styles": "plugins/QtQuick/Controls/Styles",
+                                "Controls.2": "plugins/QtQuick/Controls.2",
                                 "Dialogs": "plugins/QtQuick/Dialogs",
                                 "Layouts": "plugins/QtQuick/Layouts",
                                 "LocalStorage": "plugins/QtQuick/LocalStorage",
                                 "Particles.2": "plugins/QtQuick/Particles.2",
                                 "PrivateWidgets": "plugins/QtQuick/PrivateWidgets",
+                                "Shapes": "plugins/QtQuick/Shapes",
+                                "Templates.2": "plugins/QtQuick/Templates.2",
                                 "Window.2": "plugins/QtQuick/Window.2",
                                 "XmlListModel": "plugins/QtQuick/XmlListModel"
                             },
@@ -299,6 +307,13 @@
                         "chmod",
                         "755",
                         "livekeys"
+                    ]
+                },
+                {
+                    "run": [
+                        "chmod",
+                        "755",
+                        "QtWebEngineProcess"
                     ]
                 },
                 {
@@ -440,12 +455,12 @@
                 }
             ]
         },
-        "msvc2017_64": {
-            "compiler": "msvc2017_64",
+        "msvc2019_64": {
+            "compiler": "msvc2019_64",
             "environment": {
                 "OPENCV_DIR": "opencv_dir",
                 "QTDIR": "qtdir",
-                "VS141COMNTOOLS": "vs141comntools"
+                "VS142COMNTOOLS": "vs142comntools"
             },
             "build": [
                 {
@@ -458,6 +473,9 @@
                 }
             ],
             "deploy": [
+                {
+                    "qtenvsetup" : {}
+                },
                 {
                     "copy": {
                         "{qtdir}/bin": {
@@ -472,6 +490,10 @@
                             "Qt*QmlModels.dll": "-",
                             "Qt*QmlWorkerScript.dll": "-",
                             "Qt*Quick.dll": "-",
+                            "Qt*QuickControls2.dll": "-",
+                            "Qt*QuickShapes.dll": "-",
+                            "Qt*QuickTemplates2.dll": "-",
+                            "Qt*Svg.dll": "-",
                             "Qt*WebChannel.dll": "-",
                             "Qt*WebEngine.dll": "-",
                             "Qt*WebEngineCore.dll": "-",
@@ -482,6 +504,16 @@
                             "platforms/qwindows.dll": "libraries/platforms/qwindows.dll"
                         },
                         "{qtdir}/qml": {
+                            "QtGraphicalEffects": {
+                                "private": {
+                                    "qtgraphicaleffectsprivate.dll": "plugins/QtGraphicalEffects/private/-",
+                                    "qmldir": "plugins/QtGraphicalEffects/private/-"
+                                },
+                                "qtgraphicaleffectsplugin.dll": "plugins/QtGraphicalEffects/-",
+                                "qmldir": "plugins/QtGraphicalEffects/-",
+                                "*.qmltypes": "plugins/QtGraphicalEffects/-",
+                                "LinearGradient.qml": "plugins/QtGraphicalEffects/-"
+                            },
                             "QtQuick": {
                                 "Controls": {
                                     "Private": "plugins/QtQuick/Controls/Private",
@@ -494,6 +526,7 @@
                                             "FocusFrameStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
                                             "MenuStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
                                             "ScrollViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
+                                            "SliderStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
                                             "TableViewStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
                                             "TextFieldStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
                                             "ToolBarStyle.qml": "plugins/QtQuick/Controls/Styles/Base/-",
@@ -511,6 +544,7 @@
                                     "Menu.qml": "plugins/QtQuick/Controls/-",
                                     "MenuBar.qml": "plugins/QtQuick/Controls/-",
                                     "ScrollView.qml": "plugins/QtQuick/Controls/-",
+                                    "Slider.qml": "plugins/QtQuick/Controls/-",
                                     "SplitView.qml": "plugins/QtQuick/Controls/-",
                                     "TableView.qml": "plugins/QtQuick/Controls/-",
                                     "TableViewColumn.qml": "plugins/QtQuick/Controls/-",
@@ -520,12 +554,22 @@
                                     "TreeView.qml": "plugins/QtQuick/Controls/-",
                                     "qtquickcontrolsplugin.dll": "plugins/QtQuick/Controls/-"
                                 },
+                                "Controls.2": {
+                                    "Material": {
+                                        "qtquickcontrols2materialstyleplugin.dll": "plugins/QtQuick/Controls.2/Material/-",
+                                        "qmldir": "plugins/QtQuick/Controls.2/Material/-",
+                                        "*.qmltypes": "plugins/QtQuick/Controls.2/Material/-"
+                                    },
+                                    "qmldir": "plugins/QtQuick/Controls.2/-",
+                                    "qtquickcontrols2plugin.dll": "plugins/QtQuick/Controls.2/-"
+                                },
                                 "Dialogs": {
                                     "qml": {
                                         "DefaultWindowDecoration.qml": "plugins/QtQuick/Dialogs/qml/-",
                                         "IconButtonStyle.qml": "plugins/QtQuick/Dialogs/qml/-",
                                         "IconGlyph.qml": "plugins/QtQuick/Dialogs/qml/-",
-                                        "qmldir": "plugins/QtQuick/Dialogs/qml/-"
+                                        "qmldir": "plugins/QtQuick/Dialogs/qml/-",
+                                        "icons.ttf": "plugins/QtQuick/Dialogs/qml/-"
                                     },
                                     "DefaultFileDialog.qml": "plugins/QtQuick/Dialogs/-",
                                     "dialogplugin.dll": "plugins/QtQuick/Dialogs/-",
@@ -547,6 +591,12 @@
                                 "PrivateWidgets/widgetsplugin.dll": "plugins/QtQuick/PrivateWidgets/-",
                                 "PrivateWidgets/qmldir": "plugins/QtQuick/PrivateWidgets/-",
                                 "PrivateWidgets/*.qmltypes": "plugins/QtQuick/PrivateWidgets/-",
+                                "Shapes/qmlshapesplugin.dll": "plugins/QtQuick/Shapes/-",
+                                "Shapes/qmldir": "plugins/QtQuick/Shapes/-",
+                                "Shapes/*.qmltypes": "plugins/QtQuick/Shapes/-",
+                                "Templates.2/qtquicktemplates2plugin.dll": "plugins/QtQuick/Templates.2/-",
+                                "Templates.2/qmldir": "plugins/QtQuick/Templates.2/-",
+                                "Templates.2/*.qmltypes": "plugins/QtQuick/Templates.2/-",
                                 "Window.2/windowplugin.dll": "plugins/QtQuick/Window.2/-",
                                 "Window.2/qmldir": "plugins/QtQuick/Window.2/-",
                                 "Window.2/*.qmltypes": "plugins/QtQuick/Window.2/-",
@@ -575,7 +625,8 @@
                                 "StateMachine/*qmldir": "plugins/QtQml/StateMachine/-",
                                 "StateMachine/*.qmltypes": "plugins/QtQml/StateMachine/-",
                                 "*.qmltypes": "plugins/QtQml/-",
-                                "*qmldir": "plugins/QtQml/-"
+                                "*qmldir": "plugins/QtQml/-",
+                                "qmlplugin.dll": "plugins/QtQml/-"
                             },
                             "QtWebEngine": {
                                 "qmldir": "plugins/QtWebEngine/-",
@@ -585,7 +636,7 @@
                         },
                         "{qtdir}/resources": "resources",
                         "{qtdir}/translations": "translations",
-                        "{vs141comntools}/../../VC/Redist/MSVC/14.16.27012/x64/Microsoft.VC141.CRT": {
+                        "{vs142comntools}/../../VC/Redist/MSVC/14.29.30036/x64/Microsoft.VC142.CRT": {
                             "concrt140.dll": "-",
                             "msvcp140.dll": "-",
                             "msvcp140_1.dll": "-",
@@ -610,8 +661,10 @@
                             "lcvphoto": "plugins/lcvphoto",
                             "lcvvideo": "plugins/lcvvideo",
                             "live": "plugins/live",
+                            "paper": "plugins/paper",
                             "squareone": "plugins/squareone",
                             "timeline": "plugins/timeline",
+                            "visual": "plugins/visual",
                             "workspace": "plugins/workspace"
                         },
                         "{release}/bin/dev/lvbase/lib/lvbase.lib": "dev/lvbase/lib/-",
@@ -629,10 +682,18 @@
                             "lcvphoto/lib/lcvphoto.lib": "dev/plugins/lcvphoto/lib/-",
                             "lcvvideo/lib/lcvvideo.lib": "dev/plugins/lcvvideo/lib/-",
                             "live/lib/live.lib": "dev/plugins/live/lib/-",
+                            "paper/lib/paper.lib": "dev/plugins/paper/lib/-",
                             "timeline/lib/timeline.lib": "dev/plugins/timeline/lib/-",
+                            "visual/shapes/lib/shapes.lib": "dev/plugins/visual/shapes/lib/-",
                             "workspace/quickqanava/lib/quickqanava.lib": "dev/plugins/workspace/quickqanava/lib/-"
                         },
                         "{source}/project": "dev/project",
+                        "{qtdocsdir}" : {
+                            "qtqml" : "docs/qt/-",
+                            "qtquick" : "docs/qt/-",
+                            "qtquickcontrols" : "docs/qt/-",
+                            "qtquickdialogs" : "docs/qt/-"
+                        },
                         "{source}/samples": "-"
                     }
                 },
@@ -653,51 +714,51 @@
                     "populate": {
                         "plugins/base/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editor/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editqml/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/fs/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/live/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvcore/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvimgproc/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvvideo/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvfeatures2d/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvphoto/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/timeline/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/workspace/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         }
                     }
                 },
@@ -767,6 +828,9 @@
                             "to": "dev/plugins/lcvvideo/include"
                         }
                     ]
+                },
+                {
+                    "livedoc": {}
                 }
             ]
         },
@@ -783,7 +847,7 @@
                     ]
                 },
                 {
-                    "make": []
+                    "make": ["-j", "3"]
                 }
             ],
             "deploy": [
@@ -823,6 +887,7 @@
                             "QtConcurrent.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtConcurrent.framework/Versions/5",
                             "QtCore.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtCore.framework/Versions/5",
                             "QtDBus.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtDBus.framework/Versions/5",
+                            "QtSvg.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSvg.framework/Versions/5",
                             "QtGui.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtGui.framework/Versions/5",
                             "QtMacExtras.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMacExtras.framework/Versions/5",
                             "QtMultimedia.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtMultimedia.framework/Versions/5",
@@ -840,6 +905,7 @@
                             "QtQuickControls2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickControls2.framework/Versions/5",
                             "QtQuickParticles.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickParticles.framework/Versions/5",
                             "QtQuickTemplates2.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickTemplates2.framework/Versions/5",
+                            "QtQuickShapes.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickShapes.framework/Versions/5",
                             "QtQuickWidgets.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtQuickWidgets.framework/Versions/5",
                             "QtSql.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtSql.framework/Versions/5",
                             "QtUiPlugin.framework/Versions/5": "livekeys.app/Contents/Frameworks/QtUiPlugin.framework/Versions/5",
@@ -958,6 +1024,16 @@
                         "livekeys.app/Contents/Frameworks/QtWebEngineCore.framework/Helpers/QtWebEngineProcess.app/Contents/MacOS/QtWebEngineProcess*": [
                             "@executable_path/../../../../.."
                         ]
+                    }
+                },
+                {
+                    "dylibtransferdependencies": {
+                        "dependencies" : "/usr/local/Cellar",
+                        "files" : "{opencv_dir}/lib/libopencv_*.dylib",
+                        "destination" : "livekeys.app/Contents/Frameworks",
+                        "custom" : {
+                            "*libopencv_*" : "OpenCV.Framework/Libraries"
+                        }
                     }
                 },
                 {

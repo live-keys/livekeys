@@ -14,8 +14,10 @@ namespace lv{
 
 Segment::Segment(QObject *parent)
     : QObject(parent)
+    , m_track(nullptr)
     , m_position(0)
     , m_length(0)
+    , m_isProcessing(false)
     , m_maxStretchLeft(std::numeric_limits<unsigned int>::max())
     , m_maxStretchRight(std::numeric_limits<unsigned int>::max())
 {
@@ -34,9 +36,8 @@ Segment::~Segment(){
 }
 
 void Segment::setPosition(unsigned int arg){
-    SegmentModel* model = qobject_cast<SegmentModel*>(parent());
-    if (model){
-        model->setItemPosition(m_position, m_length, 0, arg);
+    if (m_track){
+        m_track->setSegmentPosition(this, arg);
     } else {
         setPosition(this, arg);
     }
@@ -44,18 +45,21 @@ void Segment::setPosition(unsigned int arg){
 
 
 void Segment::setLength(unsigned int arg){
-    SegmentModel* model = qobject_cast<SegmentModel*>(parent());
-    if (model){
-        model->setItemLength(m_position, m_length, 0, arg);
+    if (m_track){
+        m_track->setSegmentLength(this, arg);
     } else {
         setLength(this, arg);
     }
 }
 
-void Segment::assignTrack(Track*){}
+void Segment::assignTrack(Track* track){
+    m_track = track;
+}
+
 void Segment::cursorEnter(qint64){}
 void Segment::cursorNext(qint64){}
 void Segment::cursorMove(qint64){}
+void Segment::cursorPass(qint64){}
 
 void Segment::serialize(QQmlEngine *, MLNode &node) const{
     node = MLNode(MLNode::Object);
@@ -87,14 +91,18 @@ void Segment::deserialize(Track*, QQmlEngine *, const MLNode &node){
         setColor(QColor(QString::fromStdString(node["color"].asString())));
 }
 
-void Segment::cursorExit(){}
+void Segment::cursorExit(qint64){}
 
 bool Segment::contains(qint64 position){
     return (position >= m_position && position < m_position + m_length);
 }
 
-bool Segment::isAsync() const{
-    return m_isAsync;
+bool Segment::isProcessing() const{
+    return m_isProcessing;
+}
+
+Track *Segment::currentTrack() const{
+    return m_track;
 }
 
 void Segment::remove(){
@@ -115,8 +123,8 @@ void Segment::stretchRightTo(unsigned int position){
     setLength(position - m_position);
 }
 
-void Segment::setIsAsync(bool isAsync){
-    m_isAsync = isAsync;
+void Segment::setIsProcessing(bool isProcessing){
+    m_isProcessing = isProcessing;
 }
 
 void Segment::setPosition(Segment *segment, unsigned int position){

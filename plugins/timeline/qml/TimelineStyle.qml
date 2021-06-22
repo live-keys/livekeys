@@ -1,6 +1,7 @@
 import QtQuick 2.0
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.1
+import visual.input 1.0 as Input
 
 QtObject{
     id: root
@@ -17,34 +18,44 @@ QtObject{
     property color scrollHandleBackgronud: "#1f2227"
 
     property color iconColor: "#a0a6b1"
-    property color textColor: "#a0a6b1"
     property color cursorColor: "#a0a6b1"
     property color markerColor: "#a0a6b1"
     property color markerLabelColor: "#999"
 
-    property Component scrollStyleHandle : Item{
-        implicitWidth: 10
-        implicitHeight: 10
-        Rectangle {
-            color: root.scrollHandleBackgronud
-            anchors.fill: parent
-        }
+    property QtObject inputStyle: QtObject{
+        property QtObject textStyle: Input.TextStyle{}
+        property QtObject hintTextStyle: Input.TextStyle{}
+        property color backgroundColor: '#070b0f'
+        property color borderColor: '#323232'
+        property double borderThickness: 1
+        property color textSelectionColor: '#3d4856'
+        property double radius: 3
     }
 
-    property Component scrollStyleBackground : Item{
-        implicitWidth: 10
-        implicitHeight: 10
-        Rectangle{
-            anchors.fill: parent
-            color: root.scrollBackground
-        }
-    }
+    property QtObject timeLabelStyle: Input.TextStyle{}
 
-    property Component scrollStyleFrame : Rectangle{
-        color: root.scrollBackground
-    }
-    property Component scrollStyleCorner : Rectangle{
-        color: root.scrollHandleBackgronud
+    property Component scrollStyle: ScrollViewStyle {
+        transientScrollBars: false
+        handle: Item {
+            implicitWidth: 10
+            implicitHeight: 10
+            Rectangle {
+                color: "#1f2227"
+                anchors.fill: parent
+            }
+        }
+        scrollBarBackground: Item{
+            implicitWidth: 10
+            implicitHeight: 10
+            Rectangle{
+                anchors.fill: parent
+                color: 'transparent'
+            }
+        }
+        decrementControl: null
+        incrementControl: null
+        frame: Item{}
+        corner: Rectangle{color: 'transparent'}
     }
 
     property color segmentBackground: "#33333a"

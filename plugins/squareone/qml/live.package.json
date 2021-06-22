@@ -2,8 +2,8 @@
     "name" : "squareone",
     "version" : "1.0.0",
     "workspace" : {
+        "label" : "Square One",
         "tutorials" : {
-            "label" : "Square One",
             "sections" : [{
                 "label" : "1. Workspace",
                 "link" : "tutorials/workspace"

@@ -98,9 +98,12 @@ public:
 public:
     QmlScopeSnap(const ProjectQmlScope::Ptr& project, const DocumentQmlInfo::Ptr& document);
 
+    bool areDocumentLibrariesReady() const;
+
     QmlTypeInfo::Ptr getType(const QString& name) const;
     QmlTypeInfo::Ptr getType(const QString& importNamespace, const QString& typeName) const;
-    QmlTypeInfo::Ptr getType(const QStringList& typeAndImport);
+    QmlTypeInfo::Ptr getType(const QStringList& typeAndImport) const;
+    QmlTypeInfo::Ptr getType(const QmlTypeReference& typeReference) const;
     QmlTypeInfo::Ptr getTypeFromContextLibrary(
         const QString& typeName,
         const QString& libraryUri,

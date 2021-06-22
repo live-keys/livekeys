@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file alias="paper-full.js">../js/paper-full.js</file>
+        <file alias="PaperCanvas.qml">../qml/PaperCanvas.qml</file>
+        <file alias="xmldom.js">../js/xmldom.js</file>
+        <file alias="paper-dom.js">../js/paper-dom.js</file>
+    </qresource>
+</RCC>

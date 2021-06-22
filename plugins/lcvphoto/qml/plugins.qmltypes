@@ -149,15 +149,6 @@ Module {
         Property { name: "lightness"; type: "int" }
     }
     Component {
-        name: "QLevels"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvphoto/Levels 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "lightness"; type: "QJSValue" }
-        Property { name: "channels"; type: "QJSValue" }
-    }
-    Component {
         name: "QMatDisplay"
         defaultProperty: "data"
         prototype: "QQuickItem"

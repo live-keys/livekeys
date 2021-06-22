@@ -25,7 +25,6 @@ public:
 
     void process();
 
-
 signals:
     void textChanged();
     void outputChanged();

@@ -68,6 +68,10 @@ Runnable *RunnableContainer::runnableAt(const QString &path){
     return nullptr;
 }
 
+void RunnableContainer::announceQmlBuild(Runnable *runnable, QmlBuild *build){
+    emit qmlBuild(runnable, build);
+}
+
 QList<Runnable *> RunnableContainer::runnablesInPath(const QString &path){
     QList<Runnable *> result;
     for ( auto it = m_runnables.begin(); it != m_runnables.end(); ++it ){

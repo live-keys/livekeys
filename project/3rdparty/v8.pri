@@ -56,8 +56,6 @@ win32{
         copyV8($${V8_LIBRARY_PATH}/v8_libbase.dll, $$DEPLOY_PATH)
         copyV8($${V8_LIBRARY_PATH}/v8_libplatform.dll, $$DEPLOY_PATH)
 
-        copyV8($${V8_LIBRARY_PATH}/natives_blob.bin, $${DEPLOY_PATH}/external/v8)
-        copyV8($${V8_LIBRARY_PATH}/snapshot_blob.bin, $${DEPLOY_PATH}/external/v8)
     }
 
 }

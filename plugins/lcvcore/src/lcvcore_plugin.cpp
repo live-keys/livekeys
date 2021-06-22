@@ -16,13 +16,13 @@
 
 #include "lcvcore_plugin.h"
 #include "qmat.h"
+#include "qumat.h"
 #include "qwritablemat.h"
 #include "qmatop.h"
 #include "qmatio.h"
 #include "qmatext.h"
 #include "qmatview.h"
 #include "qimread.h"
-#include "qimwrite.h"
 #include "qimageview.h"
 #include "qmatroi.h"
 #include "qmatread.h"
@@ -42,13 +42,18 @@
 #include "qvideodecoder.h"
 
 #include "videosegment.h"
+#include "scriptvideosegment.h"
+#include "imagesegment.h"
 #include "videosurface.h"
+#include "videotrack.h"
 
+#include "live/timelinesettings.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
+#include <QMetaObject>
 
 
 static QObject* matOpProvider(QQmlEngine *engine, QJSEngine *){
@@ -66,13 +71,12 @@ static QObject* gradientProvider(QQmlEngine *engine, QJSEngine *){
 void LcvcorePlugin::registerTypes(const char *uri){
     // @uri modules.lcvcore
     qmlRegisterType<QMat>(                   uri, 1, 0, "Mat");
+    qmlRegisterType<QUMat>(                  uri, 1, 0, "UMat");
     qmlRegisterType<QWritableMat>(           uri, 1, 0, "WritableMat");
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImageView>(             uri, 1, 0, "ImageView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
-    qmlRegisterType<QImWrite>(               uri, 1, 0, "ImWrite");
     qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
-    qmlRegisterType<QMatRoi>(                uri, 1, 0, "Crop");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
     qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
@@ -91,6 +95,9 @@ void LcvcorePlugin::registerTypes(const char *uri){
 
     qmlRegisterType<lv::VideoSurface>(       uri, 1, 0, "VideoSurface");
     qmlRegisterType<lv::VideoSegment>(       uri, 1, 0, "VideoSegment");
+    qmlRegisterType<lv::ScriptVideoSegment>( uri, 1, 0, "ScriptVideoSegment");
+    qmlRegisterType<lv::VideoTrack>(         uri, 1, 0, "VideoTrack");
+    qmlRegisterType<lv::ImageSegment>(       uri, 1, 0, "ImageSegment");
 
     qmlRegisterSingletonType<QMatOp>(        uri, 1, 0, "MatOp",        &matOpProvider);
     qmlRegisterSingletonType<QMatIO>(        uri, 1, 0, "MatIO",        &matIOProvider);
@@ -98,7 +105,13 @@ void LcvcorePlugin::registerTypes(const char *uri){
 
 }
 
-void LcvcorePlugin::initializeEngine(QQmlEngine *, const char *){
+void LcvcorePlugin::initializeEngine(QQmlEngine * engine, const char *){
+    if ( lv::ViewContext::instance().engine()->engine() == engine ){ // view plugin
+        lv::TimelineSettings* ts = lv::TimelineSettings::grabFrom(lv::ViewContext::instance().settings());
+        ts->addTrackType("lcvcore#VideoTrack", "Video", "lcvcore/VideoTrackFactory", true, "lcvcore/VideoTrackExtension");
+    }
+
+
     lv::ViewContext::instance().engine()->registerQmlTypeInfo<QMat>(
         &lv::ml::serialize<QMat>,
         &lv::ml::deserialize<QMat>,

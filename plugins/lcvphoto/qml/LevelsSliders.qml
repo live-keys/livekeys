@@ -1,13 +1,18 @@
 import QtQuick 2.5
 import live 1.0
 import lcvcore 1.0 as Cv
-import lcvphoto 1.0
+import lcvphoto 1.0 as Photo
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
     width: 240
     height: 200
     color: 'transparent'
+
+    property QtObject style: QtObject{
+        property QtObject textStyle: Input.TextStyle{}
+    }
 
     property alias input: colorHistogram.input
 
@@ -23,7 +28,7 @@ Rectangle{
         width: 120
         height: 30
         dropBoxHeight: 120
-        model: root.input ? (root.input.channels() >= 3 ? ['RGB', 'Red', 'Green', 'Blue'] : ['Grey']) : []
+        model: root.input ? (root.input.channels() >= 3 ? ['RGB', 'Red', 'Green', 'Blue'] : ['Grey']) : ['RGB', 'Red', 'Green', 'Blue']
     }
 
     TextButton{
@@ -42,21 +47,16 @@ Rectangle{
         fontWeight: Font.Light
         onClicked : {
             autoLevelsHistogram.input = root.input
-            autoLevels.histogram = autoLevelsHistogram.output
-            root.levelByChannel = autoLevels.output
+            root.levelByChannel = Photo.Adjustments.autoLevels(autoLevelsHistogram.histogram.output)
             root.updateSliders()
             autoLevelsHistogram.input = Cv.MatOp.nullMat
         }
     }
 
-    Cv.ColorHistogram{
+    Cv.ColorHistogramView{
         id: autoLevelsHistogram
-        channel: Cv.ColorHistogram.AllChannels
+        histogram.channel: Cv.ColorHistogram.AllChannels
         visible: false
-    }
-
-    AutoLevels{
-        id: autoLevels
     }
 
     function assignSlidersFromValues(black, grey, white){
@@ -71,25 +71,25 @@ Rectangle{
     }
 
     function updateSliders(){
-        if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
+        if ( colorHistogram.histogram.channel === Cv.ColorHistogram.Total ){
             if ( lightness && lightness.length === 3 ){
                 assignSlidersFromValues(lightness[0], lightness[1], lightness[2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
+        } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.RedChannel ){
             if ( levelByChannel.hasOwnProperty(2) && levelByChannel[2].length === 3){
                 assignSlidersFromValues(levelByChannel[2][0], levelByChannel[2][1], levelByChannel[2][2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
+        } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.GreenChannel ){
             if ( levelByChannel.hasOwnProperty(1) && levelByChannel[1].length === 3){
                 assignSlidersFromValues(levelByChannel[1][0], levelByChannel[1][1], levelByChannel[1][2])
             } else {
                 assignSlidersFromValues(0, 1.0, 255)
             }
-        } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
+        } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.BlueChannel ){
             if ( levelByChannel.hasOwnProperty(0) && levelByChannel[0].length === 3){
                 assignSlidersFromValues(levelByChannel[0][0], levelByChannel[0][1], levelByChannel[0][2])
             } else {
@@ -98,7 +98,7 @@ Rectangle{
         }
     }
 
-    Cv.ColorHistogram{
+    Cv.ColorHistogramView{
         id: colorHistogram
 
         anchors.top: channelSelection.bottom
@@ -108,8 +108,8 @@ Rectangle{
 
         width: root.width - 20
         height: root.height - 90
-        fill: true
-        channel: {
+        histogram.fill: true
+        histogram.channel: {
             if ( channelSelection.selectedItem === 'RGB' || channelSelection.selectedItem === 'Grey')
                 return Cv.ColorHistogram.Total
             else if ( channelSelection.selectedItem === 'Red' )
@@ -120,7 +120,7 @@ Rectangle{
                 return Cv.ColorHistogram.BlueChannel
             return Cv.ColorHistogram.Total
         }
-        onChannelChanged: root.updateSliders()
+        histogram.onChannelChanged: root.updateSliders()
     }
 
     Item{
@@ -169,17 +169,17 @@ Rectangle{
                 return ax
             }
             onAssignedXChanged: {
-                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
+                if ( colorHistogram.histogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc2 = root.levelByChannel
                     rc2[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc2
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc3 = root.levelByChannel
                     rc3[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc3
@@ -190,7 +190,7 @@ Rectangle{
             radius: 5
             color: '#2a2c39'
 
-            Drag.active: dragAreaLeft.drag.active
+//            Drag.active: dragAreaLeft.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -224,17 +224,17 @@ Rectangle{
                 }
             }
             onAssignedXChanged: {
-                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
+                if ( colorHistogram.histogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc = root.levelByChannel
                     rc[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc = root.levelByChannel
                     rc[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
@@ -246,7 +246,7 @@ Rectangle{
             radius: 5
             color: '#4e4e64'
 
-            Drag.active: dragArea.drag.active
+//            Drag.active: dragArea.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -267,38 +267,37 @@ Rectangle{
             property double lastX: x
             onXChanged: {
                 lastX = x
-            }
 
-            property int assignedX: {
                 var ax = (x / (parent.width - width)) * 255
                 if ( ax < dragBlack.assignedX + 2 )
                     ax = dragBlack.assignedX + 2
-                return ax
-            }
-            onAssignedXChanged: {
-                if ( colorHistogram.channel === Cv.ColorHistogram.Total ){
+                assignedX = ax
+
+                if ( colorHistogram.histogram.channel === Cv.ColorHistogram.Total ){
                     root.lightness = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.RedChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.RedChannel ){
                     var rc = root.levelByChannel
                     rc[2] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.GreenChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.GreenChannel ){
                     var rc = root.levelByChannel
                     rc[1] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
-                } else if ( colorHistogram.channel === Cv.ColorHistogram.BlueChannel ){
+                } else if ( colorHistogram.histogram.channel === Cv.ColorHistogram.BlueChannel ){
                     var rc = root.levelByChannel
                     rc[0] = [dragBlack.assignedX, dragGrey.assignedX, dragWhite.assignedX]
                     root.levelByChannel = rc
                 }
             }
 
+            property int assignedX: 255
+
             width: 10
             height: 15
             radius: 5
             color: '#c1c1c8'
 
-            Drag.active: dragArea.drag.active
+//            Drag.active: dragArea.drag.active
             Drag.hotSpot.x: width / 2
             Drag.hotSpot.y: height / 2
 
@@ -314,34 +313,28 @@ Rectangle{
         }
     }
 
-    property var fontPixelSize: 12
-    property var labelTextColor: "#c7c7c7"
-    Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.left: parent.left
         text: dragBlack.assignedX
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
+        textStyle: root.style.textStyle
     }
 
-    Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
         text: dragGrey.assignedX.toFixed(2)
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
+        textStyle: root.style.textStyle
     }
 
-    Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.right: parent.right
         text: dragWhite.assignedX
-        fontPixelSize: fontPixelSize
-        textColor: labelTextColor
-
+        textStyle: root.style.textStyle
     }
 
 }

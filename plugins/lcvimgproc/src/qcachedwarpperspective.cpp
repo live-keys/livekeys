@@ -63,7 +63,7 @@ QCachedWarpPerspective::~QCachedWarpPerspective(){
 void QCachedWarpPerspective::transform(){
     if ( isComponentComplete() ){
         try{
-            transform(*input()->cvMat(), *output()->cvMat());
+            transform(*input()->internalPtr(), *output()->internalPtr());
             emit outputChanged();
             update();
         } catch (cv::Exception& e ){
@@ -77,7 +77,7 @@ void QCachedWarpPerspective::transform(const cv::Mat &in, cv::Mat &out){
         return;
 
     if ( m_cacheDirty ){
-        helpers::perspectiveToMaps(m_m->data(), out.size(), *m_cacheMap1, *m_cacheMap2);
+        helpers::perspectiveToMaps(m_m->internal(), out.size(), *m_cacheMap1, *m_cacheMap2);
         m_cacheDirty = false;
     }
 

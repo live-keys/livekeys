@@ -3438,11 +3438,11 @@ void TextEdit::invalidateBlockRange(int first, int last)
 
     for (auto sec: d->sectionsForViewport)
     {
-        if (last == -1) last = d->document->blockCount();
+        if (last == -1) last = d->document->blockCount()-1;
         if (sec.palette) continue;
 
         for (auto i = sec.start; i < sec.start + sec.size; ++i)
-            if (i >= first && i < last)
+            if (i >= first && i <= last)
             {
                 inRange.insert(i);
                 stateChangeHandler(i);

@@ -26,7 +26,7 @@ QAbsDiff::~QAbsDiff(){
 }
 
 void QAbsDiff::transform(const cv::Mat &in, cv::Mat &out){
-    if ( in.size() == m_in2->cvMat()->size() )
-        cv::absdiff(in, *m_in2->cvMat(), out);
+    if ( in.size() == m_in2->internalPtr()->size() )
+        cv::absdiff(in, *m_in2->internalPtr(), out);
 }
 

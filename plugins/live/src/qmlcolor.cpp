@@ -14,4 +14,8 @@ QColor QmlColor::RgbToHsv(QColor rgb)
     return rgb.toHsv();
 }
 
+QString QmlColor::toHex(QColor rgb){
+    return rgb.name(QColor::HexRgb);
+}
+
 }

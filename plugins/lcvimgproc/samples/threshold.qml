@@ -8,22 +8,20 @@ Grid{
     // This sample shows the usage of the CvtColor and Threshold
     // elements
 
-    ImRead{
+    ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
 
-    CvtColor{
-        id : grayscale
-        input : src.output
-        code : CvtColor.CV_BGR2GRAY
-        dstCn : 1
+    Threshold{
+        id: threshold
+        input: src.result
+        threshold : 95
+        maxValue : 255
+    }
+    
+    ImageView {
+        image: threshold.result
     }
 
-    Threshold{
-        input: grayscale.output
-        thresh : 95
-        maxVal : 255
-        thresholdType : Threshold.BINARY
-    }
 }

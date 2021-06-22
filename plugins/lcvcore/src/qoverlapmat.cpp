@@ -24,8 +24,8 @@ QOverlapMat::QOverlapMat(QQuickItem* parent)
 }
 
 void QOverlapMat::transform(const cv::Mat &in, cv::Mat &out){
-    if ( in.size() == m_mask->data().size() && in.size() == m_input2->data().size() ){
+    if ( in.size() == m_mask->internal().size() && in.size() == m_input2->internal().size() ){
         in.copyTo(out);
-        m_input2->data().copyTo(out, m_mask->data());
+        m_input2->internal().copyTo(out, m_mask->internal());
     }
 }

@@ -33,7 +33,6 @@ private slots:
     void initTestCase();
     void cppExceptionInObbjectTest();
     void engineExceptionTest();
-    void engineWarningTest();
 
     void engineObjectExceptionTest();
     void engineInternalWarningTest();

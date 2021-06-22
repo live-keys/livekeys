@@ -19,7 +19,6 @@
 #include "staticloader.h"
 #include "live/staticcontainer.h"
 #include "licensesettings.h"
-#include "triangle.h"
 #include "loglistener.h"
 #include "worker.h"
 #include "valuehistory.h"
@@ -63,7 +62,6 @@ static QObject* eventRelayProvider(QQmlEngine *engine, QJSEngine *){
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<lv::Triangle>(            uri, 1, 0, "Triangle");
     qmlRegisterType<lv::StaticLoader>(        uri, 1, 0, "StaticLoader");
     qmlRegisterType<lv::VisualLogFilter>(     uri, 1, 0, "VisualLogFilter");
     qmlRegisterType<lv::LogListener>(         uri, 1, 0, "LogListener");

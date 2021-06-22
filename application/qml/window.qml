@@ -39,6 +39,24 @@ ApplicationWindow{
 
     property QtObject dialogs : QtObject{
 
+        property QtObject messageStyle : QtObject{
+            property QtObject box: QtObject{
+                property color background: "#02070b"
+                property color borderColor: "#0c151c"
+                property int borderWidth: 1
+                property int radius: 5
+                property color textColor: "#fff"
+                property font font : Qt.font({
+                    family: 'Open Sans, sans-serif',
+                    weight: Font.Normal,
+                    italic: false,
+                    pixelSize: 12
+                })
+            }
+            property Component button: null
+
+        }
+
         function saveFile(options, callback){
             var title = options.title ? options.title : "Pleace choose a file";
             var filters = options.filters ? options.filters : ["All files (*)"]
@@ -59,6 +77,7 @@ ApplicationWindow{
             fileOpenDialog.title = title
             fileOpenDialog.nameFilters = filters
             fileOpenDialog.callback = callback
+            fileOpenDialog.folder = ""
 
             fileOpenDialog.open()
         }
@@ -68,6 +87,7 @@ ApplicationWindow{
 
             dirOpenDialog.title = title
             dirOpenDialog.callback = callback
+            dirOpenDialog.folder = ""
 
             dirOpenDialog.open()
         }
@@ -75,6 +95,10 @@ ApplicationWindow{
         function message(message, options){
             var ob = overlayBoxFactory.createObject(root)
             ob.box = messageDialogConfirmFactory.createObject()
+            ob.box.style = root.dialogs.messageStyle.box
+            if ( root.dialogs.messageStyle.button )
+                ob.box.buttonStyle = root.dialogs.messageStyle.button
+
             ob.box.show(message, options)
             return ob
         }
@@ -83,6 +107,11 @@ ApplicationWindow{
             var ob = overlayBoxFactory.createObject(root)
             ob.box = object
             return ob
+        }
+
+        function newWindow(){
+            var w = windowFactory.createObject(root)
+            return w
         }
     }
 
@@ -144,6 +173,7 @@ ApplicationWindow{
         Component.onCompleted: {
             if ( B.Script.environment.os.platform === 'darwin' )
                 folder = '~' // fixes a warning message that the path was constructed with an empty filename
+
             visible = false
             close()
         }
@@ -205,10 +235,13 @@ ApplicationWindow{
 
         MessageDialogConfirm{
             anchors.fill: parent
-            color: "#02070b"
-            border.width: 1
-            border.color: "#0c151c"
         }
+    }
+
+    Component{
+        id: windowFactory
+
+        Window{}
     }
 
     Component{
@@ -242,12 +275,11 @@ ApplicationWindow{
 
         Connections{
             target: lk
-            onLayerReady: {
+            function onLayerReady(layer){
                 if ( layer.name === 'workspace' ){
                     logo.opacity = 1.0
                 }
             }
         }
     }
-
 }

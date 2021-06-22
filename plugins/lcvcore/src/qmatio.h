@@ -23,9 +23,12 @@ public:
 public:
     explicit QMatIO(QObject *parent = nullptr);
 
+    static cv::Mat fromQImage(const QImage& inImage, bool cloneImageData = true);
+
 public slots:
     QMat* read(const QString& path, int isColor = CV_LOAD_IMAGE_COLOR);
     QMat* decode(const QByteArray& bytes, int isColor = CV_LOAD_IMAGE_COLOR);
+    bool write(const QString& file, QMat* image, QJSValue options = QJSValue());
 
 };
 

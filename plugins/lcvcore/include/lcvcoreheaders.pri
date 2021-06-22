@@ -1,4 +1,5 @@
 HEADERS += \
+    $$PWD/cvextras.h \
     $$PWD/qmat.h \
     $$PWD/qmatdisplay.h \
     $$PWD/qmatfilter.h \
@@ -7,4 +8,5 @@ HEADERS += \
     $$PWD/qmatstate.h \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/qmatext.h \
+    $$PWD/qumat.h \
     $$PWD/qwritablemat.h

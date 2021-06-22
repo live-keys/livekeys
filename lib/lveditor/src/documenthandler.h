@@ -51,7 +51,8 @@ public:
         LanguageHighlighting,
         LanguageJumpToDef,
         LanguageFindReferences,
-        LanguageDiagnostics
+        LanguageDiagnostics,
+        LanguageLayout
     };
 
 public:
@@ -64,8 +65,7 @@ public:
     explicit DocumentHandler(QObject* parent = nullptr);
     ~DocumentHandler();
 
-    QTextDocument *target();
-    void setTarget(QTextDocument *target);
+    QTextDocument *textDocument();
 
     /**
      * \brief Completion model
@@ -79,8 +79,6 @@ public:
     void classBegin(){}
     void componentComplete();
 
-    /** Returns the TextEdit */
-    TextEdit* textEdit();
     void setTextEdit(TextEdit* te);
 
     int currentCursorPosition() const;
@@ -110,6 +108,11 @@ public slots:
     void manageIndent(int from, int length, bool undo = false);
     void insertTab(int position);
 
+    void frameBox(QQuickItem *box, int position, int length);
+
+    /** Returns the TextEdit */
+    lv::TextEdit* textEdit();
+
     bool has(int feature);
 
 signals:
@@ -131,7 +134,6 @@ private:
     void updateCodeHandlerTarget();
 
     QChar                 m_lastChar;
-    QTextDocument*        m_targetDoc;
     CodeCompletionModel*  m_completionModel;
     QObject*              m_codeHandler;
     ProjectDocument*      m_projectDocument;
@@ -150,8 +152,8 @@ private:
 /**
  * \brief Returns the target text document
  */
-inline QTextDocument *DocumentHandler::target(){
-    return m_targetDoc;
+inline QTextDocument *DocumentHandler::textDocument(){
+    return m_projectDocument ? m_projectDocument->textDocument() : nullptr;
 }
 
 inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{

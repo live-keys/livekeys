@@ -1,4 +1,11 @@
 {
     "name" : "lcvimgproc",
-    "package" : "."
+    "package" : ".",
+    "palettes" : {
+        "palettes/TransformPalette.qml" : "qml/lcvimgproc#TransformImage",
+        "palettes/TransformPaletteProperties.json" : "qml/lcvimgproc#TransformImage",
+        "palettes/ThresholdPalette.qml" : "qml/lcvimgproc#Threshold",
+        "palettes/BlendPalette.json" : "qml/lcvimgproc#Blend",
+        "palettes/PadPalette.json" : "qml/lcvimgproc#Pad"
+    }
 }

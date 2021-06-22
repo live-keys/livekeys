@@ -2,6 +2,11 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/qmlerror.h"
+#include "cvextras.h"
+
+#include "opencv2/imgproc.hpp"
+
 #include <QJSValueIterator>
 
 namespace helpers{
@@ -114,7 +119,7 @@ lv::QmlObjectList* QMatOp::createMatList(const QJSValue &matArray)
             if ( it.name() != "length" ){
                 QMat* m = qobject_cast<QMat*>(it.value().toQObject());
                 if ( m ){
-                    cv::Mat* nmat = new cv::Mat(*m->cvMat());
+                    cv::Mat* nmat = new cv::Mat(*m->internalPtr());
                     data->push_back(new QMat(nmat));
                 } else {
                     data->clear();
@@ -139,16 +144,15 @@ QMat *QMatOp::create(const QSize &size, int type, int channels){
 }
 
 QMat *QMatOp::createFill(const QSize &size, int type, int channels, const QColor &color){
-    if ( size.isValid() ){
+    try{
         cv::Mat* m = new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels));
         m->setTo(toScalar(color));
-
         QMat* r = new QMat(m);
         return r;
-    }
 
-    lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    }catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, engine(), this, "MatOp: ").jsThrow();
+    }
     return nullptr;
 }
 
@@ -188,7 +192,7 @@ QWritableMat *QMatOp::createWritable(const QSize &size, int type, int channels){
 }
 
 QWritableMat *QMatOp::createWritableFill(const QSize &size, int type, int channels, const QColor &color){
-    if ( size.isValid() ){
+    if ( size.isValid() && channels > 0 ){
         cv::Mat* m = new cv::Mat(size.height(), size.width(), CV_MAKETYPE(type, channels));
         m->setTo(toScalar(color));
 
@@ -206,8 +210,15 @@ QWritableMat *QMatOp::createWritableFromMat(QMat *mat){
     return new QWritableMat(m);
 }
 
+QUMat *QMatOp::toUMat(QMat *m){
+    QUMat* um = new QUMat;
+    m->internal().copyTo(*um->internalPtr());
+    return um;
+}
+
 void QMatOp::fill(QMat *m, const QColor &color){
-    m->internal().setTo(toScalar(color));
+    if ( m )
+        m->internal().setTo(toScalar(color));
 }
 
 void QMatOp::fillWithMask(QMat *m, const QColor &color, QMat *mask){
@@ -219,14 +230,124 @@ QMat *QMatOp::reloc(QMat *m){
 }
 
 QMat *QMatOp::crop(QMat *m, const QRect &region){
+    if (!m)
+        return nullptr;
     QMat* r = new QMat;
-    m->internal()(toRect(region)).copyTo(r->internal());
+
+    QMat* copy = createFill(QSize(region.x()+region.width(), region.y() + region.height()), m->internal().type(), m->internal().channels(), QColor("white"));
+
+    cv::Range rowRange(0, qMin(m->internal().size().height, copy->internal().size().height));
+    cv::Range colRange(0, qMin(m->internal().size().width, copy->internal().size().width));
+
+    if (rowRange.size() == 0 || colRange.size() == 0) return r;
+    m->internal()(rowRange, colRange).copyTo(copy->internal()(rowRange, colRange));
+    copy->internal()(toRect(region)).copyTo(r->internal());
     return r;
 }
 
 QMat *QMatOp::flip(QMat *m, int direction){
     QMat* r = new QMat;
     cv::flip(m->internal(), r->internal(), direction);
+    return r;
+}
+
+QJSValue QMatOp::split(QMat *m){
+    if (!m)
+        return QJSValue();
+
+    std::vector<cv::Mat> channels;
+    cv::split(m->internal(), channels);
+
+    quint32 channelsSize = static_cast<quint32>(channels.size());
+
+    lv::ViewEngine* engine = lv::ViewEngine::grab(this);
+    QJSValue result = engine->engine()->newArray(channelsSize);
+
+    for ( quint32 i = 0; i < channelsSize; ++i ){
+        QMat* current = new QMat;
+        *current->internalPtr() = channels[i];
+        result.setProperty(i, engine->engine()->newQObject(current));
+    }
+    return result;
+}
+
+QMat *QMatOp::merge(const QJSValue &matArray){
+    std::vector<cv::Mat> channels;
+    QJSValueIterator it(matArray);
+    while ( it.hasNext() ){
+        it.next();
+        if ( it.name() != "length" ){
+            QMat* m = qobject_cast<QMat*>(it.value().toQObject());
+            if (m){
+                channels.push_back(m->internal());
+            }
+        }
+    }
+
+    QMat* r = new QMat;
+    cv::merge(channels, *r->internalPtr());
+    return r;
+}
+
+QMat *QMatOp::spreadByLinearInterpolation(QJSValue reference, QJSValue spread){
+    std::vector<double> referenceVector;
+    QJSValueIterator it(reference);
+    while ( it.hasNext() ){
+        it.next();
+        if ( it.name() != "length" )
+            referenceVector.push_back(it.value().toNumber());
+    }
+
+    std::vector<double> spreadVector;
+    QJSValueIterator it2(spread);
+    while ( it2.hasNext() ){
+        it2.next();
+        if ( it2.name() != "length" )
+            spreadVector.push_back(it2.value().toNumber());
+    }
+
+    if ( referenceVector.size() != spreadVector.size() ){
+        THROW_QMLERROR(lv::Exception, "MatOp: reference and spread must be the same size.", lv::Exception::toCode("~ArraySize"), this);
+        return nullptr;
+    }
+
+    QMat* r = new QMat(new cv::Mat(1, 256, CV_8U));
+    uchar* lut = r->internalPtr()->ptr();
+
+    for(int i = 0; i< 256; i++){
+        int j = 0;
+        double xval = static_cast<double>(i);
+        while(xval > referenceVector[static_cast<size_t>(j)]){
+            j++;
+        }
+        if(xval == referenceVector[static_cast<size_t>(j)]){
+            lut[i] = spreadVector[static_cast<size_t>(j)];
+            continue;
+        }
+        double slope    = static_cast<double>(spreadVector[j] - spreadVector[j - 1]) / static_cast<double>(referenceVector[j] - referenceVector[j-1]);
+        double constant = spreadVector[j] - slope * referenceVector[j];
+        lut[i] = slope * xval + constant;
+    }
+
+    return r;
+}
+
+QMat *QMatOp::lut(QMat *m, QMat *lut){
+    if ( !m || !lut )
+        return nullptr;
+
+    QMat* r = new QMat;
+
+    try {
+        cv::LUT(m->internal(), lut->internal(), *r->internalPtr());
+        cv::min(r->internal(), 255, *r->internalPtr());
+        cv::max(r->internal(), 0, *r->internalPtr());
+    } catch (cv::Exception& e) {
+        THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
+        delete r;
+        return nullptr;
+    }
+
     return r;
 }
 
@@ -283,8 +404,8 @@ QVariantList QMatOp::toArray(QMat *m){
 
 QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -299,8 +420,8 @@ QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseOr(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -313,8 +434,8 @@ QMat *QMatOp::bitwiseOr(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseAnd(QMat *arg1, QMat *arg2)
 {
-    cv::Mat* a1 = arg1->cvMat();
-    cv::Mat* a2 = arg2->cvMat();
+    cv::Mat* a1 = arg1->internalPtr();
+    cv::Mat* a2 = arg2->internalPtr();
 
     if (a1->rows != a2->rows || a1->cols != a2->cols || a1->type() != a2->type()) return nullptr;
 
@@ -327,13 +448,72 @@ QMat *QMatOp::bitwiseAnd(QMat *arg1, QMat *arg2)
 
 QMat *QMatOp::bitwiseNot(QMat *arg)
 {
-    cv::Mat* a1 = arg->cvMat();
+    cv::Mat* a1 = arg->internalPtr();
 
     cv::Mat* resMat = new cv::Mat(a1->rows, a1->cols, a1->type());
     cv::bitwise_not(*a1, *resMat);
 
     QMat* result = new QMat(resMat);
     return result;
+}
+
+QMat *QMatOp::selectChannel(QMat *input, int channel)
+{
+    if ( !input || input->internal().empty())
+        return nullptr;
+
+    try{
+        cv::Mat* rMat = new cv::Mat(
+            input->dimensions().height(),
+            input->dimensions().width(),
+            CV_MAKETYPE(CV_8UC1, 1));
+
+
+        if ( input->channels() == 1 ){
+            input->internal().copyTo(*rMat);
+            return new QMat(rMat);
+        } else if ( input->channels() == 3 ){
+            std::vector<cv::Mat> channels;
+            cv::split(input->internal(), channels);
+            channels[channel].copyTo(*rMat);
+        }
+
+        return new QMat(rMat);
+
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        return nullptr;
+    }
+}
+
+QMat *QMatOp::copyMakeBorder(QMat *input, int top, int bottom, int left, int right, int borderType, const QColor& color)
+{
+    if ( !input || input->internal().empty() )
+        return nullptr;
+
+    try{
+        cv::Mat* rMat = new cv::Mat(
+            input->dimensions().height(),
+            input->dimensions().width(),
+            CV_MAKETYPE(input->depth(), input->channels()));
+        cv::Scalar value;
+        if ( color.isValid() ){
+            if ( rMat->channels() == 1 )
+                value = color.red();
+            else if ( rMat->channels() == 3 )
+                value = cv::Scalar(color.blue(), color.green(), color.red());
+        }
+        cv::copyMakeBorder(input->internal(), *rMat, top, bottom, left, right, borderType, value);
+        return new QMat(rMat);
+
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        return nullptr;
+    }
+}
+
+lv::ViewEngine *QMatOp::engine(){
+    return lv::ViewContext::instance().engine();
 }
 
 

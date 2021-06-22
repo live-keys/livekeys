@@ -1,0 +1,12 @@
+{
+    "type": "qml/lcvimgproc#Pad",
+    "properties" : [
+        ["input"],
+        ["top", "IntPalette"],
+        ["right", "IntPalette"],
+        ["bottom", "IntPalette"],
+        ["left", "IntPalette"],
+        ["result"]
+    ]
+}
+

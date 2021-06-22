@@ -59,14 +59,37 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/double"] = "DoublePalette";
     m_defaultPalettes["qml/int"]    = "IntPalette";
     m_defaultPalettes["qml/string"] = "TextPalette";
+    m_defaultPalettes["qml/color"] = "ColorPalette";
+    m_defaultPalettes["qml/base#StreamValue"] = "StreamValuePalette";
     m_defaultPalettes["qml/lcvcore#VideoDecoderView"] = "VideoDecoderViewPalette";
+    m_defaultPalettes["qml/lcvcore#VideoFile"] = "VideoFilePropertiesPalette";
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
-    MLNode s = parent->readFor("qmljs");
-    if ( s.type() == MLNode::Object )
-        fromJson(s);
-    else
-        parent->write("qmljs", toJson());
+    m_defaultPalettes["qml/timeline#Timeline"] = "TimelinePalette";
+    m_defaultPalettes["qml/fs#VisualFileSelector"] = "VisualFileSelectorPropertiesPalette";
+    m_defaultPalettes["qml/lcvimgproc#Blend"] = "BlendPalette";
+    m_defaultPalettes["qml/lcvimgproc#Pad"] = "PadPalette";
+    m_defaultPalettes["qml/lcvimgproc#TransformImage"] = "TransformPaletteProperties";
+    m_defaultPalettes["qml/lcvcore#ImageRead"] = "ImageReadPalette";
+    m_defaultPalettes["qml/lcvcore#ImageFile"] = "ImageFilePalette";
+    m_defaultPalettes["qml/lcvcore#BlankImage"] = "BlankImagePalette";
+    m_defaultPalettes["qml/lcvcore#DrawSurface"] = "DrawSurfacePalette";
+    m_defaultPalettes["qml/lcvcore#ImageView"] = "ImageViewPalette";
+    m_defaultPalettes["qml/lcvcore#VideoSurfaceView"] = "VideoSurfacePropertiesPalette";
+    m_defaultPalettes["qml/lcvphoto#HueSaturationLightness"] = "HueSaturationLightnessPalette";
+    m_defaultPalettes["qml/lcvphoto#Levels"] = "LevelsDefaultPalette";
+    m_defaultPalettes["qml/lcvphoto#BrightnessAndContrast"] = "BrightnessAndContrastPalette";
+    m_defaultPalettes["qml/lcvcore#PerspectiveOnBackground"] = "PerspectiveOnBackgroundPropertiesPalette";
+    m_defaultPalettes["qml/lcvcore#ImageSegmentFactory"] = "ImageSegmentFactoryPropertiesPalette";
+    m_defaultPalettes["qml/lcvcore#GalleryFileSelector"] = "GalleryFileSelectorPropertiesPalette";
+
+    if (parent){
+        MLNode s = parent->readFor("qmljs");
+        if ( s.type() == MLNode::Object )
+            fromJson(s);
+        else
+            parent->write("qmljs", toJson());
+    }
 }
 
 QmlJsSettings::~QmlJsSettings(){

@@ -3,9 +3,11 @@
 
 #include <QObject>
 #include <QQmlListProperty>
+#include <QJSValue>
+
 #include "lvtimelineglobal.h"
 
-class QJSValue;
+class QQmlContext;
 
 namespace lv{
 
@@ -31,7 +33,7 @@ public:
 
 public:
     explicit Track(QObject *parent = nullptr);
-    ~Track();
+    virtual ~Track();
 
     const QString& name() const;
     void setName(const QString& name);
@@ -44,12 +46,31 @@ public:
     static void clearSegments(QQmlListProperty<QObject>*);
     QQmlListProperty<QObject> segments();
 
-    CursorOperation updateCursorPosition(qint64 newPosition);
+    virtual CursorOperation updateCursorPosition(qint64 newPosition);
+    virtual void cursorPositionProcessed(qint64 position);
+    virtual void recordingStarted();
+    virtual void recordingStopped();
+
+    virtual void setContentLength(qint64 contentLength);
 
     static void serialize(ViewEngine* engine, const QObject* o, MLNode &node);
     static void deserialize(Track* track, ViewEngine* engine, const MLNode &node);
 
-    QJSValue timelineProperties() const;
+    virtual void serialize(ViewEngine* engine, MLNode& node) const;
+    virtual void deserialize(ViewEngine* engine, const MLNode& node);
+
+    virtual void setSegmentPosition(Segment* segment, unsigned int position);
+    virtual void setSegmentLength(Segment* segment, unsigned int length);
+    virtual QString typeReference() const;
+
+    QObject *timelineProperties() const;
+
+    virtual void timelineComplete();
+    void notifyCursorProcessed(qint64 position);
+
+    QQmlContext* timelineContext();
+
+    void refreshPosition();
 
 public slots:
     bool addSegment(lv::Segment* segment);
@@ -59,15 +80,22 @@ public slots:
 
     void __segmentModelItemsChanged(qint64 startPosition, qint64 endPosition);
 
+    virtual QJSValue configuredProperties(lv::Segment*) const;
+
 signals:
     void nameChanged();
     void cursorProcessed(Track* track, qint64 position);
+
+protected:
+    qint64 cursorPosition() const;
+    void assignCursorPosition(qint64 position);
 
 private:
     QString       m_name;
     SegmentModel* m_segmentModel;
 
     qint64        m_cursorPosition;
+    bool          m_timelineReady;
 
     Segment*      m_activeSegment;
 };
@@ -76,16 +104,12 @@ inline const QString &Track::name() const{
     return m_name;
 }
 
-inline void Track::setName(const QString &name){
-    if (m_name == name)
-        return;
-
-    m_name = name;
-    emit nameChanged();
-}
-
 inline SegmentModel *Track::segmentModel(){
     return m_segmentModel;
+}
+
+inline qint64 Track::cursorPosition() const{
+    return m_cursorPosition;
 }
 
 }// namespace

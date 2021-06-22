@@ -84,24 +84,6 @@ void EngineTest::engineExceptionTest(){
     QVERIFY(isException);
 }
 
-void EngineTest::engineWarningTest(){
-    ViewEngine engine(new QQmlEngine, nullptr);
-
-    bool isWarning = false;
-
-    QObject::connect(&engine, &ViewEngine::applicationWarning, [&isWarning, this](QJSValue error){
-        QCOMPARE(error.property("message").toString(), QString("JSTest"));
-        QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
-        QCOMPARE(error.property("lineNumber").toInt(), 100);
-        isWarning = true;
-    });
-
-    engine.throwWarning("JSTest", nullptr, "enginetest.cpp", 100);
-    QCoreApplication::processEvents();
-
-    QVERIFY(isWarning);
-}
-
 void EngineTest::engineObjectExceptionTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 

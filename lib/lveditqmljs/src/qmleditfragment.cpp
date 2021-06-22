@@ -19,10 +19,13 @@
 #include "live/codepalette.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
-#include "qmlcodeconverter.h"
 #include "qmlbindingchannel.h"
-#include "qmlbindingspan.h"
-#include "qmlbindingspanmodel.h"
+#include "live/codeqmlhandler.h"
+#include "live/viewcontext.h"
+#include "documentqmlchannels.h"
+
+#include <QJSValue>
+#include <QJSValueIterator>
 
 namespace lv{
 
@@ -42,60 +45,57 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, QObject *parent)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
-    , m_bindingSpan(new QmlBindingSpan(this))
     , m_visualParent(nullptr)
-    , m_bindingSpanModel(nullptr)
     , m_refCount(0)
+    , m_fragmentType(0)
+    , m_codeHandler(codeHandler)
 {
+    if (m_declaration->isForSlot()){
+        m_location = Slot;
+    } else if (m_declaration->isForComponent() ){
+        m_location = Component;
+    } else if (m_declaration->isForImports()){
+        m_location = Imports;
+    } else if (m_declaration->isForObject()){
+        m_location = Object;
+    } else if (m_declaration->isForProperty()){
+        m_location = Property;
+    }
 }
 
 /**
  * \brief QmlEditFragment destructor
  */
 QmlEditFragment::~QmlEditFragment(){
+    for ( auto pal : m_palettes ){
+        pal->deleteLater();
+    }
+
     ProjectDocumentSection::Ptr section = declaration()->section();
     ProjectDocument* doc = declaration()->document();
     doc->removeSection(section);
 
-    for ( auto it = childFragments().begin(); it != childFragments().end(); ++it ){
+    auto fragments = childFragments();
+    for ( auto it = fragments.begin(); it != fragments.end(); ++it ){
         QmlEditFragment* edit = *it;
         edit->deleteLater();
     }
-
-    delete m_bindingSpanModel;
-    delete m_bindingSpan;
 }
 
-void QmlEditFragment::setRelativeBinding(const QSharedPointer<QmlBindingPath> &bp){
+QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent, QQmlContext *context)
+{
+    QString fullDeclaration;
+    fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "\n";
 
-    QmlBindingPath::Ptr bindingToParent = bp;
-
-    QmlEditFragment* parent = parentFragment();
-    if( parent && parent->parentFragment() ){
-        bindingToParent = QmlBindingPath::join(parent->m_relativeBinding, bindingToParent);
-    }
-
-    m_relativeBinding = bindingToParent;
-
-    QmlEditFragment* root = rootFragment();
-    if ( !root )
-        return;
-
-    QList<QmlBindingChannel::Ptr> bc = root->bindingSpan()->channels();
-    for ( auto it = bc.begin(); it != bc.end(); ++it ){
-        QmlBindingChannel::Ptr& bc = *it;
-        if ( bc->isEnabled() ){
-            QmlBindingPath::Ptr newbp = QmlBindingPath::join(bc->bindingPath(), m_relativeBinding, false);
-            Runnable* r = bc->runnable();
-            QmlBindingChannel::Ptr newbc = DocumentQmlInfo::traverseBindingPath(newbp, r);
-            newbc->setEnabled(true);
-            bindingSpan()->addChannel(newbc);
-        }
-    }
+    ViewEngine* engine = ViewContext::instance().engine();
+    ViewEngine::ComponentResult::Ptr cr = engine->createObject(
+        path, fullDeclaration.toUtf8(), parent, context
+    );
+    return cr->object;
 }
 
 /**
@@ -113,35 +113,38 @@ int QmlEditFragment::valueLength() const{
     return m_declaration->valueLength();
 }
 
-/**
- * \brief Returns true if this fragment edits an object
- */
-bool QmlEditFragment::isForObject() const{
-    return m_declaration->isForObject();
-}
-
-/**
- * \brief Returns true if this fragment edits a property
- */
-bool QmlEditFragment::isForProperty() const{
-    return m_declaration->isForProperty();
-}
-
-bool QmlEditFragment::isForSlot() const{
-    return m_declaration->isForSlot();
+int QmlEditFragment::length() const{
+    return m_declaration->length();
 }
 
 bool QmlEditFragment::isBuilder() const{
-    if ( m_bindingSpan->connectionChannel() )
-        return m_bindingSpan->connectionChannel()->isBuilder();
-    return false;
+    return isOfFragmentType(QmlEditFragment::FragmentType::Builder);
 }
 
 void QmlEditFragment::rebuild(){
-    if ( !isBuilder() || !m_bindingSpan->connectionChannel() )
-        return;
+    if ( m_channel->isBuilder() ){
+        codeHandler()->bindingChannels()->rebuild();
+    }
+}
 
-    m_bindingSpan->connectionChannel()->rebuild();
+bool QmlEditFragment::isGroup() const
+{
+    return m_fragmentType & QmlEditFragment::FragmentType::Group;
+}
+
+void QmlEditFragment::checkIfGroup()
+{
+    bool isForAnObject = false;
+    if ( !declaration()->type().path().isEmpty() )
+        isForAnObject = true;
+    else if (declaration()->type().name() != "import" && declaration()->type().name() != "slot")
+        isForAnObject = QmlTypeInfo::isObject(declaration()->type().name());
+
+    if (!isForAnObject) return;
+
+    if (declaration()->type().language() == QmlTypeReference::Cpp){
+        addFragmentType(QmlEditFragment::FragmentType::Group);
+    }
 }
 
 QString QmlEditFragment::defaultValue() const{
@@ -202,15 +205,19 @@ void QmlEditFragment::setBindingPalette(CodePalette *palette){
 
 void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
     m_childFragments.append(edit);
-
+    edit->setParent(this);
+    if ( m_channel ){
+        DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
+        disconnect(channels, &DocumentQmlChannels::selectedChannelChanged, edit, &QmlEditFragment::__selectedChannelChanged);
+    }
 }
 
 void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
     for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){
         if ( *it == edit ){
             edit->emitRemoval();
-            m_childFragments.erase(it);
             edit->deleteLater();
+            m_childFragments.erase(it);
             return;
         }
     }
@@ -226,10 +233,108 @@ QString QmlEditFragment::objectId()
     return m_objectId;
 }
 
+void QmlEditFragment::writeProperties(const QJSValue &properties)
+{
+    if ( !properties.isObject() ){
+        qWarning("Properties must be of object type, use 'write' to add code directly.");
+        return;
+    }
+
+    QVariantMap propsWritable = m_codeHandler->propertiesWritable(this);
+
+    int valuePosition = declaration()->valuePosition();
+    int valueLength   = declaration()->valueLength();
+    QString source    = declaration()->document()->content().mid(valuePosition, valueLength);
+
+    lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(declaration()->document()->file()->path());
+    if ( !docinfo->parse(source) )
+        return;
+
+    lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+    lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
+
+    QSet<QString> leftOverProperties;
+
+    QJSValueIterator it(properties);
+    while ( it.hasNext() ){
+        it.next();
+        leftOverProperties.insert(it.name());
+    }
+
+    QString indent = "";
+
+    for ( auto it = root->properties.begin(); it != root->properties.end(); ++it ){
+        lv::DocumentQmlValueObjects::RangeProperty* p = *it;
+        QString propertyName = source.mid(p->begin, p->propertyEnd - p->begin);
+
+        if ( indent.isEmpty() ){
+            int index = p->begin - 1;
+            while (index >= 0) {
+                if ( source[index] == QChar('\n') ){
+                    break;
+                }
+                if ( !source[index].isSpace() )
+                    break;
+                --index;
+            }
+            if ( index + 1 < p->begin - 1){
+                indent = source.mid(index + 1, p->begin - 1 - index);
+            }
+        }
+
+        if ( leftOverProperties.contains(propertyName)){
+            if (propsWritable.value(propertyName).toBool())
+                source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
+            leftOverProperties.remove(propertyName);
+        }
+    }
+
+    int writeIndex = source.length() - 2;
+    while ( writeIndex >= 0 ){
+        if ( !source[writeIndex].isSpace() ){
+            break;
+        }
+        --writeIndex;
+    }
+
+    if ( indent.isEmpty() ){
+        int indentIndex = source.length() - 2;
+        while ( indentIndex >= 0 ){
+            if ( source[indentIndex] == QChar('\n') ){
+                break;
+            }
+            if ( !source[indentIndex].isSpace() )
+                break;
+            --indentIndex;
+        }
+        if ( indentIndex + 1 < source.length() - 2){
+            indent = source.mid(indentIndex + 1, source.length() - 2 - indentIndex) + "    ";
+        }
+    }
+
+    for ( auto it = leftOverProperties.begin(); it != leftOverProperties.end(); ++it ){
+        if (propsWritable.value(*it).toBool())
+            source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
+    }
+
+    writeCode(source);
+}
+
+void QmlEditFragment::write(const QJSValue value){
+    m_codeHandler->populatePropertyInfoForFragment(this);
+    bool isWritable = m_objectInfo.value("isWritable").toBool();
+
+    if (isWritable || m_declaration->isForSlot()){
+        writeCode(buildCode(value));
+    }
+}
+
 /**
  * \brief Writes the \p code to the value part of this fragment
  */
-void QmlEditFragment::write(const QString &code){
+void QmlEditFragment::writeCode(const QString &code){
+    auto old = readValueText();
+    if (code == old) return;
     ProjectDocument* document = m_declaration->document();
 
     if ( document->editingStateIs(ProjectDocument::Palette))
@@ -248,7 +353,97 @@ void QmlEditFragment::write(const QString &code){
     }
 
     document->removeEditingState(ProjectDocument::Palette);
+
+    if (code == "null" || old == "null")
+        emit isNullChanged();
 }
+
+QObject *QmlEditFragment::readObject()
+{
+    if ( m_channel->isEnabled() ){
+        if ( m_channel->property().propertyTypeCategory() == QQmlProperty::List ){
+            QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_channel->property().read());
+            if (ppref.canAt()){
+                QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+                // create correct order for list reference
+                QObjectList ordered;
+                for (auto child: parent->children())
+                {
+                    bool found = false;
+                    for (int i = 0; i < ppref.count(); ++i)
+                        if (child == ppref.at(i)){
+                            found = true;
+                            break;
+                        }
+                    if (found)
+                        ordered.push_back(child);
+                }
+                return ordered[m_channel->listIndex()];
+            }
+        }
+        else if (m_channel->property().propertyTypeCategory() == QQmlProperty::Object){
+            return qvariant_cast<QObject*>(m_channel->property().read());
+        }
+    }
+
+    return nullptr;
+}
+
+QVariant QmlEditFragment::parse()
+{
+    QString val = readValueText();
+    if ( val.length() > 1 && (
+             (val.startsWith('"') && val.endsWith('"')) ||
+             (val.startsWith('\'') && val.endsWith('\'') )
+        ))
+    {
+        return QVariant(val.mid(1, val.length() - 2));
+    } else if ( val == "true" ){
+        return QVariant(true);
+    } else if ( val == "false" ){
+        return QVariant(false);
+    } else {
+        bool ok;
+        qint64 number = val.toLongLong(&ok);
+        if (ok)
+            return QVariant(number);
+
+        return QVariant(val.toDouble());
+    }
+}
+
+void QmlEditFragment::updateBindings()
+{
+    if (bindingPalette())
+        m_whenBinding.call();
+}
+
+void QmlEditFragment::updateFromPalette()
+{
+    CodePalette* palette = qobject_cast<CodePalette*>(sender());
+    if ( palette ){
+        commit(palette->value());
+    }
+}
+
+void QmlEditFragment::suggestionsForExpression(const QString &expression, CodeCompletionModel *model, bool suggestFunctions)
+{
+    QObject* editParent = parent();
+    CodeQmlHandler* qmlHandler = nullptr;
+    while ( editParent ){
+        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        if ( qmlHandler )
+            break;
+
+        editParent = editParent->parent();
+    }
+
+    if (qmlHandler){
+        qmlHandler->suggestionsForProposedExpression(declaration(), expression, model, suggestFunctions);
+    }
+}
+
 
 /**
  * \brief Reads the code value of this fragment and returns it.
@@ -261,15 +456,68 @@ QString QmlEditFragment::readValueText() const{
 }
 
 void QmlEditFragment::updatePaletteValue(CodePalette *palette){
-    QmlBindingChannel::Ptr inputChannel = bindingSpan()->connectionChannel();
-    if ( !inputChannel )
+    if ( !m_channel )
         return;
 
-    if ( inputChannel->listIndex() == -1 ){
-        palette->setValueFromBinding(inputChannel->property().read());
+    if ( m_channel->listIndex() == -1 ){
+        if ( m_channel->isBuilder() ){
+            palette->initViaSource();
+        } else {
+            palette->setValueFromBinding(m_channel->property().read());
+        }
     } else {
-        QQmlListReference ppref = qvariant_cast<QQmlListReference>(inputChannel->property().read());
-        palette->setValueFromBinding(QVariant::fromValue(ppref.at(inputChannel->listIndex())));
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_channel->property().read());
+        QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+        // create correct order for list reference
+        QObjectList ordered;
+
+        for (auto child: parent->children())
+        {
+            bool found = false;
+            for (int i = 0; i < ppref.count(); ++i)
+                if (child == ppref.at(i)){
+                    found = true;
+                    break;
+                }
+            if (found)
+                ordered.push_back(child);
+        }
+
+        palette->setValueFromBinding(QVariant::fromValue(ordered[m_channel->listIndex()]));
+    }
+}
+
+void QmlEditFragment::initializePaletteValue(CodePalette *palette){
+    if ( !m_channel )
+        return;
+
+    if ( m_channel->listIndex() == -1 ){
+        if ( m_channel->isBuilder() ){
+            palette->initViaSource();
+        } else {
+            palette->initValue(m_channel->property().read());
+        }
+    } else {
+        QQmlListReference ppref = qvariant_cast<QQmlListReference>(m_channel->property().read());
+        QObject* parent = ppref.count() > 0 ? ppref.at(0)->parent() : ppref.object();
+
+        // create correct order for list reference
+        QObjectList ordered;
+
+        for (auto child: parent->children())
+        {
+            bool found = false;
+            for (int i = 0; i < ppref.count(); ++i)
+                if (child == ppref.at(i)){
+                    found = true;
+                    break;
+                }
+            if (found)
+                ordered.push_back(child);
+        }
+
+        palette->initValue(QVariant::fromValue(ordered[m_channel->listIndex()]));
     }
 }
 
@@ -288,6 +536,14 @@ QmlEditFragment *QmlEditFragment::rootFragment(){
     return root;
 }
 
+void QmlEditFragment::setObjectInitializeType(const QmlTypeReference &type){
+    m_objectInitializeType = type;
+}
+
+const QmlTypeReference &QmlEditFragment::objectInitializeType() const{
+    return m_objectInitializeType;
+}
+
 void QmlEditFragment::emitRemoval(){
     emit aboutToBeRemoved();
 
@@ -304,12 +560,50 @@ void QmlEditFragment::emitRemoval(){
     m_bindingPalette = nullptr;
 }
 
-QmlBindingSpanModel* QmlEditFragment::bindingModel(lv::CodeQmlHandler *){
-    if ( !m_bindingSpanModel ){
-        m_bindingSpanModel = new QmlBindingSpanModel(this);
-        connect(m_bindingSpanModel, &QmlBindingSpanModel::inputPathIndexChanged, this, &QmlEditFragment::connectionChanged);
+QStringList QmlEditFragment::bindingPath(){
+    QmlBindingChannel::Ptr inputChannel = m_channel;
+    if ( inputChannel ){
+        return DocumentQmlChannels::describePath(inputChannel->bindingPath());
     }
-    return m_bindingSpanModel;
+    return QStringList();
+}
+
+void QmlEditFragment::__selectedChannelChanged(){
+    QmlEditFragment* pf = parentFragment();
+
+    if ( m_channel && !m_channel->isBuilder() &&  ( m_channel->type() == QmlBindingChannel::Object || m_channel->type() == QmlBindingChannel::ListIndex ) ){
+        QObject* ob = m_channel->object();
+        disconnect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    }
+
+    if ( pf ){
+        m_channel = DocumentQmlChannels::traverseBindingPathFrom(pf->channel(), m_channel->bindingPath());
+        if ( m_channel ){
+            m_channel->setEnabled(true);
+            if ( m_channel->listIndex() == -1 ){
+                m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+            }
+            for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+                updatePaletteValue(*it);
+            }
+        }
+    } else {
+        if ( m_channel ){
+            m_channel = DocumentQmlChannels::traverseBindingPathFrom(m_codeHandler->bindingChannels()->selectedChannel(), m_channel->bindingPath());
+            if ( m_channel ){
+                m_channel->setEnabled(true);
+                if ( m_channel->listIndex() == -1 ){
+                    m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+                }
+                for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+                    updatePaletteValue(*it);
+                }
+            }
+        }
+    }
+    for ( auto it = m_childFragments.begin(); it != m_childFragments.end(); ++it ){
+        (*it)->__selectedChannelChanged();
+    }
 }
 
 QString QmlEditFragment::type() const{
@@ -327,6 +621,10 @@ QString QmlEditFragment::identifier() const
     return ic[ic.size()-1];
 }
 
+QString QmlEditFragment::objectInitializerType() const{
+    return m_objectInitializeType.join();
+}
+
 QList<QObject*> QmlEditFragment::paletteList() const{
     QList<QObject*> result;
     for (CodePalette* palette : m_palettes)
@@ -342,7 +640,7 @@ QList<QObject *> QmlEditFragment::getChildFragments() const{
 }
 
 void QmlEditFragment::updateValue(){
-    QmlBindingChannel::Ptr inputPath = bindingSpan()->connectionChannel();
+    QmlBindingChannel::Ptr inputPath = m_channel;
 
     if ( inputPath && inputPath->listIndex() == -1 ){
         for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
@@ -351,14 +649,13 @@ void QmlEditFragment::updateValue(){
         }
         if ( m_bindingPalette ){
             m_bindingPalette->setValueFromBinding(inputPath->property().read());
-            QmlCodeConverter* cvt = static_cast<QmlCodeConverter*>(m_bindingPalette->extension());
-            cvt->whenBinding().call();
+            m_whenBinding.call();
         }
     }
 }
 
 void QmlEditFragment::__inputRunnableObjectReady(){
-    QmlBindingChannel::Ptr inputChannel = bindingSpan()->connectionChannel();
+    QmlBindingChannel::Ptr inputChannel = m_channel;
     if ( inputChannel && inputChannel->listIndex() == -1 ){
         inputChannel->property().connectNotifySignal(this, SLOT(updateValue()));
     }
@@ -377,6 +674,66 @@ void QmlEditFragment::clearNestedObjectsInfo()
 void QmlEditFragment::setObjectInfo(QVariantMap &info)
 {
     m_objectInfo = info;
+}
+
+void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
+    if ( !m_channel ){
+        if ( !parentFragment() ){
+            DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
+            connect(channels, &DocumentQmlChannels::selectedChannelChanged, this, &QmlEditFragment::__selectedChannelChanged);
+        }
+    }
+    m_channel = channel;
+    if ( m_channel && !m_channel->isBuilder() && m_channel->type() == QmlBindingChannel::Object ){
+        QObject* ob = m_channel->object();
+        connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    } else if ( m_channel && !m_channel->isBuilder() && m_channel->type() == QmlBindingChannel::ListIndex ){
+        QObject* ob = m_channel->object();
+        connect(ob, &QObject::destroyed, this, &QmlEditFragment::__channelObjectErased);
+    }
+    if ( m_channel && m_channel->isBuilder() )
+        addFragmentType(QmlEditFragment::Builder);
+    else {
+        removeFragmentType(QmlEditFragment::Builder);
+    }
+
+}
+
+QSharedPointer<QmlBindingPath> QmlEditFragment::fullBindingPath(){
+    if ( !m_channel )
+        return nullptr;
+    if ( !parentFragment() )
+        return m_channel->bindingPath();
+
+    return QmlBindingPath::join(parentFragment()->fullBindingPath(), m_channel->bindingPath());
+}
+
+int QmlEditFragment::fragmentType() const
+{
+    return m_fragmentType;
+}
+
+bool QmlEditFragment::isOfFragmentType(QmlEditFragment::FragmentType type) const
+{
+    return type & m_fragmentType;
+}
+
+void QmlEditFragment::addFragmentType(QmlEditFragment::FragmentType type)
+{
+    m_fragmentType |= type;
+}
+
+void QmlEditFragment::removeFragmentType(QmlEditFragment::FragmentType type)
+{
+    m_fragmentType &= ~type;
+}
+
+void QmlEditFragment::commit(const QVariant &value){
+    if ( m_channel && m_channel->canModify() ){
+        if ( m_channel->listIndex() == -1 ){
+            m_channel->property().write(value);
+        }
+    }
 }
 
 void QmlEditFragment::incrementRefCount()
@@ -406,9 +763,9 @@ QVariantMap QmlEditFragment::objectInfo()
     return m_objectInfo;
 }
 
-void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef)
+void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, bool expandDefault)
 {
-    emit propertyAdded(ef);
+    emit propertyAdded(ef, expandDefault);
 }
 
 void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoords)
@@ -417,4 +774,117 @@ void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoord
 }
 
 
+bool QmlEditFragment::bindExpression(const QString &expression){
+    if ( m_codeHandler )
+        return m_codeHandler->findBindingForExpression(this, expression);
+    return false;
+}
+
+bool QmlEditFragment::bindFunctionExpression(const QString &expression){
+    if (m_codeHandler){
+        return m_codeHandler->findFunctionBindingForExpression(this, expression);
+    }
+
+    return false;
+}
+
+bool QmlEditFragment::isNull()
+{
+    return readValueText() == "null";
+}
+
+bool QmlEditFragment::isMethod(){
+    return m_channel ? m_channel->type() == QmlBindingChannel::Method : false;
+}
+
+void QmlEditFragment::__channelObjectErased(){
+    if ( !m_channel )
+        return;
+
+    if ( m_channel->type() == QmlBindingChannel::Object ){
+        m_codeHandler->removeEditingFragment(this);
+    } else if ( m_channel->type() == QmlBindingChannel::ListIndex ){
+        auto parentFrag = parentFragment();
+        if (parentFrag){
+            for (auto cf: parentFrag->childFragments()){
+                if (!cf->channel()) continue;
+                if (cf->channel()->listIndex() <= m_channel->listIndex()) continue;
+                cf->channel()->updateConnection(cf->channel()->listIndex()-1);
+            }
+        }
+        m_codeHandler->removeEditingFragment(this);
+    }
+}
+
+QString QmlEditFragment::buildCode(const QJSValue &value){
+    if ( value.isArray() ){
+        QString result;
+        QJSValueIterator it(value);
+        result = "[";
+        bool first = true;
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                if ( first ){
+                    first = false;
+                } else {
+                    result += ",";
+                }
+                result += buildCode(it.value());
+            }
+        }
+        result += "]";
+        return result;
+    } else if ( value.isDate() ){
+        QDateTime dt = value.toDateTime();
+
+        QString year    = QString::number(dt.date().year()) + ",";
+        QString month   = QString::number(dt.date().month()) + ",";
+        QString day     = QString::number(dt.date().day()) + ",";
+        QString hour    = QString::number(dt.time().hour()) + ",";
+        QString minute  = QString::number(dt.time().minute()) + ",";
+        QString second  = QString::number(dt.time().second()) + ",";
+        QString msecond = QString::number(dt.time().msec());
+
+        return "new Date(" + year + month + day + hour + minute + second + msecond + ")";
+
+    } else if ( value.isObject() ){
+        if ( value.hasOwnProperty("__ref") ){
+            QString result = value.property("__ref").toString();
+            if ( result.isEmpty() ){
+                return "null";
+            } else {
+                return result;
+            }
+        }
+
+        QString text = value.toString();
+        if (text.length() > 6 && text.left(6) == "QSizeF"){
+            return "'" + value.property("width").toString() + "x" + value.property("height").toString() + "'";
+        }
+
+        QString result = "{";
+        bool first = true;
+        QJSValueIterator it(value);
+        while ( it.hasNext() ){
+            it.next();
+            if ( first ){
+                first = false;
+            } else {
+                result += ",";
+            }
+
+            result += it.name() + ": " + buildCode(it.value());
+        }
+
+        return result + "}";
+    } else if ( value.isString() ){
+        return "'" + value.toString() + "'";
+    } else if ( value.isBool() || value.isNumber() ){
+        return value.toString();
+    }
+    return "";
+}
+
 }// namespace
+

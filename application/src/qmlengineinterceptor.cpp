@@ -50,9 +50,11 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
                 }
 
                 try{
-                    Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
-                    if ( plugin != nullptr ){
-                        return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                    if ( Plugin::existsIn(localPath.toStdString() ) ){
+                        Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
+                        if ( plugin != nullptr ){
+                            return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                        }
                     }
                 } catch ( lv::Exception& ){}
             }
@@ -66,7 +68,6 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
             memoryPath.setScheme("memory");
             return memoryPath;
         }
-
     }
     return path;
 }
@@ -91,7 +92,6 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
     }
     return QNetworkAccessManager::createRequest(op, request, outgoingData);
 }
-
 
 void QmlEngineInterceptor::interceptEngine(ViewEngine *engine, PackageGraph* packageGraph, Project* project){
     m_project = project;

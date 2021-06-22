@@ -38,15 +38,16 @@ public:
 
     virtual void assignTrack(Track* track);
     virtual void cursorEnter(qint64 position);
-    virtual void cursorExit();
+    virtual void cursorExit(qint64 position);
     virtual void cursorNext(qint64 position);
     virtual void cursorMove(qint64 position);
+    virtual void cursorPass(qint64 position);
     virtual void serialize(QQmlEngine* engine, MLNode& node) const;
     virtual void deserialize(Track *track, QQmlEngine* engine, const MLNode& data);
 
     bool contains(qint64 position);
 
-    bool isAsync() const;
+    bool isProcessing() const;
 
     const QString& label() const;
     void setLabel(const QString& label);
@@ -58,6 +59,8 @@ public:
     void setMaxStretchRight(unsigned int maxStretchRight);
     unsigned int maxStretchLeft() const;
     unsigned int maxStrechRight() const;
+
+    Track* currentTrack() const;
 
 public slots:
     void remove();
@@ -75,15 +78,17 @@ signals:
     void maxStretchRightChanged();
 
 protected:
-    void setIsAsync(bool isAsync);
+    void setIsProcessing(bool isProcessing);
 
 private:
     static void setPosition(Segment* segment, unsigned int position);
     static void setLength(Segment* segment, unsigned int length);
 
+    Track*       m_track;
+
     unsigned int m_position;
     unsigned int m_length;
-    bool         m_isAsync;
+    bool         m_isProcessing;
     QString      m_label;
     QColor       m_color;
     unsigned int m_maxStretchLeft;

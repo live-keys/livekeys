@@ -20,38 +20,86 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import base 1.0
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
 
-    type : "qml/Exec"
+    type: "qml/Exec"
+
+    property QtObject theme: lk.layers.workspace.themes.current
 
     item: Item{
         id: execBox
         width: 100
-        height: 30
+        height: 25
 
         property var current : null
 
-        TextButton{
+        Input.TextButton{
+            id: textButton
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             height: 28
             width: 80
-            radius: 5
-            text: "Run"
+            style: theme.formButtonStyle
+            text: "Start"
+
             onClicked: {
-                execBox.current.run()
+                if (execBox.state == "NOT_RUNNING"){
+                    execBox.state = "STARTING"
+                    execBox.current.run()
+                } else if (execBox.state == "RUNNING"){
+                    execBox.current.stop()
+                }
             }
         }
+
+        Connections {
+            target: execBox.current
+            ignoreUnknownSignals: true
+            function onAboutToRun(){
+                execBox.state = "RUNNING"
+            }
+
+            function onFinished(){
+                execBox.state = "NOT_RUNNING"
+            }
+        }
+
+        state: "NOT_RUNNING"
+
+        states: [
+            State {
+                name: "NOT_RUNNING"
+                PropertyChanges {
+                    target: textButton
+                    text: "Start"
+                }
+            },
+
+            State {
+                name: "STARTING"
+            },
+            State {
+                name: "RUNNING"
+                PropertyChanges {
+                    target: textButton
+                    text: "Stop"
+                }
+            }
+        ]
     }
 
+    onValueFromBindingChanged: {
+        execBox.current = value
+    }
     onInit: {
         execBox.current = value
     }
 
-    onExtensionChanged: {
-        extension.whenBinding = function(){}
+    onEditFragmentChanged: {
+        editFragment.whenBinding = function(){}
     }
 }

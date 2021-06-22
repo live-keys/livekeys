@@ -28,3 +28,18 @@ QSGNode *QImageView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeD
 
     return n;
 }
+
+void QImageView::setImage(QMat *arg){
+    if ( arg == nullptr )
+        return;
+
+    cv::Mat* matData = arg->internalPtr();
+    if ( static_cast<int>(implicitWidth()) != matData->cols || static_cast<int>(implicitHeight()) != matData->rows ){
+        setImplicitWidth(matData->cols);
+        setImplicitHeight(matData->rows);
+    }
+    m_mat = arg;
+
+    emit imageChanged();
+    update();
+}

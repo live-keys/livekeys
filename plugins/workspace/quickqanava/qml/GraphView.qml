@@ -106,10 +106,10 @@ Qan.AbstractGraphView {
             graph.connector.visible)
             graph.connector.visible = false
 
-        graphView.focus = true           // User clicked outside a graph item, remove it's eventual active focus
+//        graphView.focus = true           // User clicked outside a graph item, remove it's eventual active focus
     }
     onRightClicked: {
-        graphView.focus = true
+//        graphView.focus = true
     }
 
     // Port management ////////////////////////////////////////////////////////
@@ -133,7 +133,7 @@ Qan.AbstractGraphView {
     Connections { // and update nodeResizer ratio policy (selected node is nodeResizer target)
         id: nodeItemRatioWatcher
         target: null
-        onRatioChanged: {
+        function onRatioChanged() {
             if ( nodeResizer &&
                  target &&
                  nodeResizer.target === target ) {

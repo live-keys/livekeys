@@ -11,6 +11,8 @@ HEADERS += \
     $$PWD/live/projectqmlextension.h \
     $$PWD/live/qmleditfragment.h \
     $$PWD/live/qmldeclaration.h \
+    $$PWD/live/qmleditfragmentcontainer.h \
     $$PWD/live/qmlimportsmodel.h \
     $$PWD/live/qmllanguageinfo.h \
-    $$PWD/live/qmllanguagescanner.h
+    $$PWD/live/qmllanguagescanner.h \
+    $$PWD/live/qmlwatcher.h
