@@ -48,7 +48,11 @@ CodePalette{
 
         property QtObject videoSurfaceView: null
         onVideoSurfaceViewChanged: {
-            videoSurface = Qt.binding(function(){ return videoSurfaceView.timeline.properties.videoSurface })
+            videoSurface = Qt.binding(function(){
+                return videoSurfaceView.timeline
+                        ? videoSurfaceView.timeline.properties.videoSurface
+                        :null
+            })
             imageView.image = Qt.binding(function(){ return videoSurfaceView.image })
         }
 

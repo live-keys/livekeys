@@ -30,20 +30,20 @@ Window{
             if ( data.pane === currentPane )
                 return
 
-            var parentSplitter = data.pane.parentSplitter
-            var paneIndex = data.pane.parentSplitterIndex()
+            var parentSplitView = data.pane.parentSplitView
+            var paneIndex = data.pane.parentSplitViewIndex()
             var clone = currentPane
 
             root.panes.removePane(currentPane)
 
             if ( location === paneDropArea.topPosition ){
-                root.panes.splitPaneVerticallyBeforeWith(parentSplitter, paneIndex, clone)
+                root.panes.splitPaneVerticallyBeforeWith(parentSplitView, paneIndex, clone)
             } else if ( location === paneDropArea.rightPosition ){
-                root.panes.splitPaneHorizontallyWith(parentSplitter, paneIndex, clone)
+                root.panes.splitPaneHorizontallyWith(parentSplitView, paneIndex, clone)
             } else if ( location === paneDropArea.bottomPosition ){
-                root.panes.splitPaneVerticallyWith(parentSplitter, paneIndex, clone)
+                root.panes.splitPaneVerticallyWith(parentSplitView, paneIndex, clone)
             } else if ( location === paneDropArea.leftPosition ){
-                root.panes.splitPaneHorizontallyBeforeWith(parentSplitter, paneIndex, clone)
+                root.panes.splitPaneHorizontallyBeforeWith(parentSplitView, paneIndex, clone)
             }
         }
     }

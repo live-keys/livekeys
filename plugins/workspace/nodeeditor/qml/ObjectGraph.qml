@@ -411,7 +411,7 @@ Rectangle{
         return node
     }
     
-    function addObjectNodeProperty(node, propertyName, ports, editingFragment){
+    function addObjectNodeProperty(node, propertyName, ports, editingFragment, options){
         var item = node.item
         var propertyItem = root.propertyDelegate.createObject(item.propertyContainer)
 
@@ -419,6 +419,10 @@ Rectangle{
         propertyItem.node = node
 
         propertyItem.editingFragment = editingFragment
+        if ( options && options.hasOwnProperty('isMethod') ){
+            propertyItem.isMethod = options.isMethod
+        }
+
         var isForObject = propertyItem.isForObject
         propertyItem.width = node.item.width - (isForObject ? 30 : 0)
 

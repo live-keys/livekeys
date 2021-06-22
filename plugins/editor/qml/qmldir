@@ -6,7 +6,6 @@ depends QtQuick 2.3
 Editor            1.0 Editor.qml
 EditorPane        1.0 EditorPane.qml
 SuggestionBox     1.0 SuggestionBox.qml
-ContextMenuStyle  1.0 ContextMenuStyle.qml
 LoadingAnimation  1.0 LoadingAnimation.qml
 PaletteListView   1.0 PaletteListView.qml
 PaletteConnection 1.0 PaletteConnection.qml
