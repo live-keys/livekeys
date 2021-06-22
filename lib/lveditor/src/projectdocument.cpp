@@ -93,14 +93,14 @@ public:
 /**
  * \brief Begin-iterator of the sections
  */
-inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
+ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
     return d_ptr->sections.begin();
 }
 
 /**
  * \brief End-iterator of the sections
  */
-inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
+ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
     return d_ptr->sections.end();
 }
 
@@ -108,7 +108,7 @@ inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
 /**
  * \brief Const begin-iterator of the sections
  */
-inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
+ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
     return d_ptr->sections.begin();
 }
 
@@ -116,14 +116,14 @@ inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() co
 /**
  * \brief Const end-iterator of the sections
  */
-inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
+ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
     return d_ptr->sections.end();
 }
 
 /**
  * \brief Number of sections
  */
-inline int ProjectDocument::totalSections() const{
+int ProjectDocument::totalSections() const{
     return d_ptr->sections.size();
 }
 
@@ -131,33 +131,33 @@ inline int ProjectDocument::totalSections() const{
 /**
  * \brief Shows if the object has any sections
  */
-inline bool ProjectDocument::hasSections() const{
+bool ProjectDocument::hasSections() const{
     return totalSections() > 0;
 }
 
 
-inline void ProjectDocument::resetSync() const{
+void ProjectDocument::resetSync() const{
     d_ptr->isSynced = false;
 }
 
 /**
  * \brief Text document which is wrapped inside the ProjectDocument
  */
-inline QTextDocument *ProjectDocument::textDocument(){
+QTextDocument *ProjectDocument::textDocument(){
     return d_ptr->textDocument;
 }
 
 /**
  * \brief Adds editing state flag
  */
-inline void ProjectDocument::addEditingState(EditingState state){
+void ProjectDocument::addEditingState(EditingState state){
     d_ptr->editingState |= state;
 }
 
 /**
  * \brief Removes the given editing state flag
  */
-inline void ProjectDocument::removeEditingState(EditingState state){
+void ProjectDocument::removeEditingState(EditingState state){
     if ( d_ptr->editingState & state ){
         bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
         d_ptr->editingState = d_ptr->editingState & ~state;
@@ -170,14 +170,14 @@ inline void ProjectDocument::removeEditingState(EditingState state){
 /**
  * \brief Shows if the editing state includes the given flags
  */
-inline bool ProjectDocument::editingStateIs(int flag) const{
+bool ProjectDocument::editingStateIs(int flag) const{
     return (flag & d_ptr->editingState) == flag;
 }
 
 /**
  * \brief Resets all of the editing state flags
  */
-inline void ProjectDocument::resetEditingState(){
+void ProjectDocument::resetEditingState(){
     d_ptr->editingState = 0;
 }
 
