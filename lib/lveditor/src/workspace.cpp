@@ -122,8 +122,6 @@ void Workspace::whenProjectPathChange(const QString &path){
     }
 }
 
-//HERE
-
 void Workspace::saveRecentsIfChanged(){
     if ( !m_recentsChanged )
         return;

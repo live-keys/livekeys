@@ -339,6 +339,14 @@ QtObject{
                     lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
                 }
 
+                var paletteList = ef.paletteList()
+                for ( var i = 0; i < paletteList.length; ++i ){
+                    if ( paletteList[i].writer ){
+                        paletteList[i].writer()
+                        break
+                    }
+                }
+
 
             } else if ( addBoxItem.activeIndex === 2 ){ // object
 
