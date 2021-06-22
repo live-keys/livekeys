@@ -295,7 +295,7 @@ private:
     bool isBlockEmptySpace(const QTextBlock& bl);
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
-    QJSValue findPalettesForDeclaration(QmlDeclaration::Ptr decl/*, bool includeExpandables = false*/);
+    QJSValue findPalettesForDeclaration(QmlDeclaration::Ptr decl);
 
     void createChannelForFragment(QmlEditFragment* parentFragment, QmlEditFragment* fragment, QmlBindingPath::Ptr bindingPath);
 private:

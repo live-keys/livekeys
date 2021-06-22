@@ -3808,7 +3808,8 @@ QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declarat
         for ( int i = 1; i < typePath.nodes.size(); ++i ){
             QmlTypeInfo::Ptr ti = typePath.nodes[i];
             if ( !ti->exportType().isEmpty() ){
-                lpl = d->projectHandler->paletteContainer()->findPalettes(ti->exportType().join(), configurations, lpl);
+                auto list = d->projectHandler->paletteContainer()->findPalettes(ti->exportType().join());
+                result.append(list);
             }
         }
     }
@@ -3822,7 +3823,8 @@ QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declarat
 
             if ( pi.isValid() && !ti->exportType().isEmpty() ){
                 QString propSearch = ti->exportType().join() + "." + pi.name;
-                lpl = d->projectHandler->paletteContainer()->findPalettes(propSearch, configurations, lpl);
+                auto list = d->projectHandler->paletteContainer()->findPalettes(propSearch);
+                result.append(list);
             }
         }
     }
