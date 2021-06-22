@@ -339,6 +339,14 @@ QtObject{
                     lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
                 }
 
+                var paletteList = ef.paletteList()
+                for ( var i = 0; i < paletteList.length; ++i ){
+                    if ( paletteList[i].writer ){
+                        paletteList[i].writer()
+                        break
+                    }
+                }
+
 
             } else if ( addBoxItem.activeIndex === 2 ){ // object
 
@@ -379,7 +387,7 @@ QtObject{
                 }
 
             } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                container.nodeParent.item.addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null)
+                container.nodeParent.item.addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null, {isMethod: true})
             }
 
             if (isForNode) objectGraph.activateFocus()
@@ -838,8 +846,8 @@ QtObject{
 
         var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            objectContainer.editor.parentSplitter,
-            objectContainer.editor.parentSplitterIndex(),
+            objectContainer.editor.parentSplitView,
+            objectContainer.editor.parentSplitViewIndex(),
             objectPane
         )
 

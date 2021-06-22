@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file alias="LogWindow.qml">qml/LogWindow.qml</file>
         <file alias="Top.qml">qml/Top.qml</file>
         <file alias="ProjectEnvironment.qml">qml/ProjectEnvironment.qml</file>
         <file alias="MessageDialogInternal.qml">qml/MessageDialogInternal.qml</file>
@@ -25,9 +24,9 @@
         <file alias="DocumentationViewPane.qml">qml/DocumentationViewPane.qml</file>
         <file alias="TextEditNodeView.qml">qml/TextEditNodeView.qml</file>
         <file alias="StartupBox.qml">qml/StartupBox.qml</file>
-        <file alias="ContextMenu.qml">qml/ContextMenu.qml</file>
         <file alias="Viewer.qml">qml/Viewer.qml</file>
         <file alias="MessagesContainer.qml">qml/MessagesContainer.qml</file>
+        <file alias="PaneEnvironment.qml">qml/PaneEnvironment.qml</file>
     </qresource>
     <qresource prefix="/fonts">
         <file alias="UbuntuMono-Bold.ttf">fonts/UbuntuMono-Bold.ttf</file>

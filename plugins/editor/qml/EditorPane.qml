@@ -30,7 +30,7 @@ Pane{
     property alias internalActiveFocus : editor.internalActiveFocus
     property alias internalFocus: editor.internalFocus
     onInternalActiveFocusChanged: {
-        if ( panes.activePane !== root ){
+        if ( internalActiveFocus && panes.activePane !== root ){
             panes.activateItem(textEdit, root)
         }
     }
@@ -98,8 +98,8 @@ Pane{
                         var storeWidth = root.width
                         docPane = root.panes.createPane('documentation', {}, [root.width, root.height])
 
-                        var index = root.parentSplitterIndex()
-                        root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, docPane)
+                        var index = root.parentSplitViewIndex()
+                        root.panes.splitPaneHorizontallyWith(root.parentSplitView, index, docPane)
 
                         root.width = storeWidth
                         docPane.width = storeWidth
@@ -128,6 +128,8 @@ Pane{
 
     color : lk.layers.workspace.themes.current.paneBackground
     clip : true
+    height: parent ? parent.height : 0
+    width: 400
 
     objectName: "editor"
 
@@ -389,8 +391,7 @@ Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 var clone = root.paneClone()
-                var index = root.parentSplitterIndex()
-                root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
+                root.panes.splitPaneHorizontally(root, clone)
             }
         }
         Workspace.PaneMenuItem{
@@ -398,8 +399,7 @@ Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 var clone = root.paneClone()
-                var index = root.parentSplitterIndex()
-                root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
+                root.panes.splitPaneVertically(root, clone)
             }
         }
         Workspace.PaneMenuItem{

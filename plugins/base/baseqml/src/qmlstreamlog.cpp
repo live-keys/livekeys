@@ -16,7 +16,7 @@ void QmlStreamLog::setStream(QmlStream *stream){
         return;
 
     if ( m_stream ){
-        m_stream->forward(nullptr, nullptr);
+        m_stream->unsubscribeObject(this);
     }
 
     m_stream = stream;
@@ -36,6 +36,8 @@ void QmlStreamLog::onStreamData(QObject *that, const QJSValue &val){
 }
 
 QmlStreamLog::~QmlStreamLog(){
+    if ( m_stream )
+        m_stream->unsubscribeObject(this);
 }
 
 }// namespace

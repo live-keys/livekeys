@@ -236,8 +236,8 @@ Pane{
                 onClicked: {
                     paneMenu.visible = false
                     var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
+                    var index = root.parentSplitViewIndex()
+                    root.panes.splitPaneHorizontallyWith(root.parentSplitView, index, clone)
                 }
             }
         }
@@ -266,8 +266,8 @@ Pane{
                 onClicked: {
                     paneMenu.visible = false
                     var clone = root.paneClone()
-                    var index = root.parentSplitterIndex()
-                    root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
+                    var index = root.parentSplitViewIndex()
+                    root.panes.splitPaneVerticallyWith(root.parentSplitView, index, clone)
                 }
             }
         }

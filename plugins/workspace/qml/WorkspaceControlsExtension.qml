@@ -3,12 +3,41 @@ import editor 1.0
 import workspace.nodeeditor 1.0
 
 WorkspaceExtension{
+    id: root
     objectName: "workspace"
 
     property ObjectGraphControls objectGraphControls: ObjectGraphControls{}
 
+    function addEditorPane(){
+        var pane = lk.layers.workspace.panes.createPane('editor')
+        lk.layers.workspace.panes.insertPane(pane, {orientation: Qt.Horizontal} )
+    }
+
+    property Component editorPane: Component{
+        EditorPane{
+            id: editorComponent
+            panes: lk.layers.workspace.panes
+            Component.onCompleted: {
+                editorComponent.editor.forceFocus()
+            }
+        }
+    }
+    property Component objectPalettePane: Component{
+        ObjectPalettePane{
+            id: objectPaletteComponent
+            panes: root.panes
+        }
+    }
+    property Component palettePane: Component{
+        PalettePane{
+            id: paletteComponent
+            panes: root.panes
+        }
+    }
+
     commands: {
         'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
+        'addEditor' : [root.addEditorPane, "Add editor pane"],
         'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
         "node_delete_active": [objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
         "nodeEditMode" : [objectGraphControls.nodeEditMode, "Switch to node editing mode."]
@@ -20,6 +49,38 @@ WorkspaceExtension{
         "backspace": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
         "delete": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
         "alt+n": {command: "workspace.nodeEditMode" }
+    }
+
+    panes: {
+        return {
+            "editor" : {
+                create: function(p, s){
+                    var pane = root.editorPane.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
+                single: false
+            },
+            "objectPalette" : {
+                create: function(p, s){
+                    var pane = root.objectPalettePane.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
+                single: false
+            },
+            "palette" : {
+                create: function(p, s){
+                    var pane = root.palettePane.createObject(p)
+                    if ( s )
+                        pane.paneInitialize(s)
+                    return pane
+                },
+                single: false
+            }
+        }
     }
 
     menuInterceptors: [

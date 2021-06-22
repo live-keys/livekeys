@@ -2177,7 +2177,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     }
 
     editParent->addChildFragment(ef);
-    ef->setParent(editParent);
 
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
@@ -2236,7 +2235,6 @@ lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragm
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
     parentFragment->addChildFragment(result);
-    result->setParent(parentFragment);
 
     return result;
 }
@@ -2318,7 +2316,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 });
 
                 edit->addChildFragment(ef);
-                ef->setParent(edit);
 
                 if (ef->location() == QmlEditFragment::Object)
                     populateObjectInfoForFragment(ef);
@@ -2448,7 +2445,6 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                         populatePropertyInfoForFragment(ef);
 
                     p->addChildFragment(ef);
-                    ef->setParent(p);
 
                     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
@@ -2602,7 +2598,7 @@ QJSValue CodeQmlHandler::findPalettes(int position){
         return res;
     }
 
-    return findPalettesForDeclaration(declarations.first()/*, includeLayoutConfigurations*/);
+    return findPalettesForDeclaration(declarations.first());
 }
 
 bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
@@ -3803,8 +3799,34 @@ QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declarat
     // every fragment has a declaration -> should end up here
 
     Q_D(CodeQmlHandler);
+    QmlScopeSnap scope = d->snapScope();
 
     QList<PaletteLoader*> result = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
+
+    if ( declaration->type().language() == QmlTypeReference::Qml ){
+        QmlInheritanceInfo typePath = scope.getTypePath(declaration->type());
+        for ( int i = 1; i < typePath.nodes.size(); ++i ){
+            QmlTypeInfo::Ptr ti = typePath.nodes[i];
+            if ( !ti->exportType().isEmpty() ){
+                lpl = d->projectHandler->paletteContainer()->findPalettes(ti->exportType().join(), configurations, lpl);
+            }
+        }
+    }
+
+    if  ( declaration->isForProperty() && declaration->parentType().language() == QmlTypeReference::Qml && !declaration->identifierChain().isEmpty() ){
+        QmlInheritanceInfo typePath = scope.getTypePath(declaration->parentType());
+
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            QmlTypeInfo::Ptr ti = *it;
+            QmlPropertyInfo pi = ti->propertyAt(declaration->identifierChain().last());
+
+            if ( pi.isValid() && !ti->exportType().isEmpty() ){
+                QString propSearch = ti->exportType().join() + "." + pi.name;
+                lpl = d->projectHandler->paletteContainer()->findPalettes(propSearch, configurations, lpl);
+            }
+        }
+    }
+
 
     if (declaration->isForComponent()){
         auto components = d->projectHandler->paletteContainer()->findPalettes("qml/Component");
