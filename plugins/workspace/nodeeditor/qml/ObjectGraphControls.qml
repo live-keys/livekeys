@@ -39,13 +39,13 @@ QtObject{
         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
-            var paletteRoot = codeHandler.findPalettes(rootPosition)
-            var poss = paletteRoot.pop()
-            paletteRoot = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(paletteRoot)
+            var palettesForRoot = codeHandler.findPalettes(rootPosition)
+            var pos = palettesForRoot.declaration.position
+            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
             var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
                 editor,
-                paletteRoot.length > 0 ? paletteRoot[0] : "",
-                poss
+                palettesForRoot.data.length > 0 ? palettesForRoot.data[0] : "",
+                pos
             )
             oc.contentWidth = Qt.binding(function(){
                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth

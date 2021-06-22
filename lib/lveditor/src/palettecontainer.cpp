@@ -52,9 +52,9 @@ public:
     CodePalette* getItem(QQmlEngine* engine);
     QJSValue getContent(QQmlEngine* engine);
     const QString& path() const{ return m_path; }
+    const QString& type() const{ return m_type; }
     const QString& name() const{ return m_name; }
     bool configuresLayout() const{ return m_configuresLayout; }
-    QJSValue getData(QQmlEngine* engine);
 private:
     void handleError(const QQmlComponent &component) const;
 
@@ -139,16 +139,6 @@ QJSValue PaletteLoader::getContent(QQmlEngine *engine){
     return QJSValue();
 }
 
-QJSValue PaletteLoader::getData(QQmlEngine* engine)
-{
-    QJSValue result = engine->newObject();
-    result.setProperty("name", m_name);
-    result.setProperty("type", m_type);
-    result.setProperty("path", m_path);
-    result.setProperty("configuresLayout", m_configuresLayout);
-
-    return result;
-}
 
 void PaletteLoader::handleError(const QQmlComponent &component) const{
     foreach ( const QQmlError& error, component.errors() ){
@@ -343,7 +333,13 @@ bool PaletteContainer::configuresLayout(PaletteLoader *loader){
 QJSValue PaletteContainer::paletteData(PaletteLoader *loader)
 {
     Q_D(PaletteContainer);
-    return loader->getData(d->engine);
+    QJSValue result = d->engine->newObject();
+    result.setProperty("name", loader->name());
+    result.setProperty("type", loader->type());
+    result.setProperty("path", loader->path());
+    result.setProperty("configuresLayout", loader->configuresLayout());
+
+    return result;
 }
 
 /**

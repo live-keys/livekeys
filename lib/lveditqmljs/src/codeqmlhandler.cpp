@@ -2573,8 +2573,14 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
 
 QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
     if (!fragment || !fragment->declaration()){
-        QJSValue res = m_engine->engine()->newArray(1);
-        res.setProperty(0, QJSValue(fragment->position()));
+
+        QJSValue res = m_engine->engine()->newObject();
+        QJSValue data = m_engine->engine()->newArray(0);
+        res.setProperty("data", data);
+        QJSValue decl = m_engine->engine()->newObject();
+        decl.setProperty("position", fragment->position());
+        res.setProperty("declaration", decl);
+
         return res;
     }
     return findPalettesForDeclaration(fragment->declaration());
@@ -2585,16 +2591,24 @@ QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment)
  */
 QJSValue CodeQmlHandler::findPalettes(int position){
     if ( !m_document ){
-        QJSValue res = m_engine->engine()->newArray(1);
-        res.setProperty(0, QJSValue(position));
+        QJSValue res = m_engine->engine()->newObject();
+        QJSValue data = m_engine->engine()->newArray(0);
+        res.setProperty("data", data);
+        QJSValue decl = m_engine->engine()->newObject();
+        decl.setProperty("position", position);
+        res.setProperty("declaration", decl);
         return res;
     }
     cancelEdit();
 
     QList<QmlDeclaration::Ptr> declarations = getDeclarations(position);
     if (declarations.isEmpty()) {
-        QJSValue res = m_engine->engine()->newArray(1);
-        res.setProperty(0, QJSValue(position));
+        QJSValue res = m_engine->engine()->newObject();
+        QJSValue data = m_engine->engine()->newArray(0);
+        res.setProperty("data", data);
+        QJSValue decl = m_engine->engine()->newObject();
+        decl.setProperty("position", position);
+        res.setProperty("declaration", decl);
         return res;
     }
 
@@ -2726,24 +2740,7 @@ QJSValue CodeQmlHandler::declarationInfo(int position, int length){
 
     auto declaration = properties.first();
 
-    QJSValue result = m_engine->engine()->newObject();
-    result.setProperty("position", declaration->position());
-    result.setProperty("length", declaration->length());
-    result.setProperty("type", declaration->type().join());
-    result.setProperty("parentType", declaration->parentType().join());
-    if ( declaration->isForComponent() ){
-        result.setProperty("type", "component");
-    } else if ( declaration->isForImports() ){
-        result.setProperty("type", "imports");
-    } else if ( declaration->isForList() ){
-        result.setProperty("type", "list");
-    } else if ( declaration->isForProperty() ){
-        result.setProperty("type", "property");
-    } else if ( declaration->isForSlot() ){
-        result.setProperty("type", "slot");
-    }
-    result.setProperty("hasObject", declaration->isForObject());
-    return result;
+    return declarationToQml(declaration);
 }
 
 /**
@@ -3850,12 +3847,15 @@ QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declarat
         }
     }
 
-    QJSValue res = m_engine->engine()->newArray(result.length() + 1);
+    QJSValue res = m_engine->engine()->newObject();
+    QJSValue data = m_engine->engine()->newArray(result.length());
     for (int i = 0; i < result.length(); ++i){
-        res.setProperty(i, d->projectHandler->paletteContainer()->paletteData(result[i]));
+        data.setProperty(i, d->projectHandler->paletteContainer()->paletteData(result[i]));
     }
+    res.setProperty("data", data);
 
-    res.setProperty(result.length(), QJSValue(declaration->position() + (declaration->isForImports() ? 7 : 0)));
+    QJSValue decl = declarationToQml(declaration);
+    res.setProperty("declaration", decl);
 
     return res;
 }
@@ -3898,6 +3898,28 @@ void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, Q
         }
     }
 
+}
+
+QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
+{
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", declaration->position());
+    result.setProperty("length", declaration->length());
+    result.setProperty("type", declaration->type().join());
+    result.setProperty("parentType", declaration->parentType().join());
+    if ( declaration->isForComponent() ){
+        result.setProperty("type", "component");
+    } else if ( declaration->isForImports() ){
+        result.setProperty("type", "imports");
+    } else if ( declaration->isForList() ){
+        result.setProperty("type", "list");
+    } else if ( declaration->isForProperty() ){
+        result.setProperty("type", "property");
+    } else if ( declaration->isForSlot() ){
+        result.setProperty("type", "slot");
+    }
+    result.setProperty("hasObject", declaration->isForObject());
+    return result;
 }
 
 void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)

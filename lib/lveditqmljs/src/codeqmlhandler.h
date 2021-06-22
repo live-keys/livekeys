@@ -298,6 +298,7 @@ private:
     QJSValue findPalettesForDeclaration(QmlDeclaration::Ptr decl);
 
     void createChannelForFragment(QmlEditFragment* parentFragment, QmlEditFragment* fragment, QmlBindingPath::Ptr bindingPath);
+    QJSValue declarationToQml(QmlDeclaration::Ptr decl);
 private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
