@@ -636,7 +636,7 @@
                         },
                         "{qtdir}/resources": "resources",
                         "{qtdir}/translations": "translations",
-                        "{vs142comntools}/../../VC/Redist/MSVC/14.28.29910/x64/Microsoft.VC142.CRT": {
+                        "{vs142comntools}/../../VC/Redist/MSVC/14.29.30036/x64/Microsoft.VC142.CRT": {
                             "concrt140.dll": "-",
                             "msvcp140.dll": "-",
                             "msvcp140_1.dll": "-",
