@@ -696,22 +696,42 @@ QtObject{
         openNestedProperties(objectContainer, true)
     }
 
+    function filterOutPalettes(palettes, names, includeLayouts){
+        if ((!names || names.length === 0) && includeLayouts)
+            return palettes
+
+        var result = []
+        for (var i = 0; i < palettes.length; ++i){
+            if (names && names.includes(palettes[i].name)) continue
+            if (!includeLayouts && palettes[i].configuresLayout) continue
+
+            result.push(palettes[i])
+        }
+
+        return result
+    }
+
     function addPaletteList(container, paletteGroup, aroundBox, mode, swap, listParent){
 
         if (!container.editingFragment)
             return null
 
         var palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
-            container.editingFragment,
+            container.editingFragment
+        )
+
+        var position = palettes.declaration.position
+
+        palettes.data = filterOutPalettes(
+            palettes.data,
+            paletteGroup.palettesOpened,
             mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor
         )
 
-        palettes.filterOut(paletteGroup.palettesOpened)
-
-        if (!palettes || palettes.size() === 0) return null
+        if (!palettes.data || palettes.data.length === 0) return null
 
         var paletteList = createPaletteListView(listParent ? listParent : null, theme.selectableListView)
-        paletteList.model = palettes
+        paletteList.model = palettes.data
 
         var palListBox = null
         if (mode !== PaletteControls.PaletteListMode.NodeEditor){
@@ -759,7 +779,9 @@ QtObject{
             paletteList.focus = false
             paletteList.model = null
 
-            var palette = container.editor.documentHandler.codeHandler.openPalette(container.editingFragment, palettes, index)
+            var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                "palettes" : [palettes.data[index].name]
+            })
             var paletteBox = openPalette(palette,
                                          container.editingFragment,
                                          container.editor,
@@ -902,12 +924,16 @@ QtObject{
         var rect = editor.getCursorRectangle()
         var paneCoords = editor.mapGlobalPosition()
 
-        if ( !palettes || palettes.size() === 0){
+
+        var position = palettes.declaration.position
+        palettes.data = filterOutPalettes(palettes.data)
+
+        if ( !palettes.data || palettes.data.length === 0){
             return
         }
 
-        if ( palettes.size() === 1 ){
-            loadPalette(editor, palettes, 0)
+        if ( palettes.data.length === 1 ){
+            loadPalette(editor, palettes.data, 0, position)
         } else {
             //Palette list box
 
@@ -916,7 +942,7 @@ QtObject{
                 palList, rect, paneCoords, lk.layers.editor.environment.placement.bottom
             )
             palListBox.color = 'transparent'
-            palList.model    = palettes
+            palList.model    = palettes.data
             editor.internalFocus = false
             palList.forceActiveFocus()
             lk.layers.workspace.panes.setActiveItem(palList, editor)
@@ -932,28 +958,30 @@ QtObject{
                 editor.editor.forceFocus()
                 palList.destroy()
                 palListBox.destroy()
-                loadPalette(editor, palettes, index)
+                loadPalette(editor, palettes.data, index, position)
             })
         }
     }
 
     function shape(editor){
         var codeHandler = editor.documentHandler.codeHandler
+        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
 
-        var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition, true)
+        var position = palettes.declaration.position
+
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.mapGlobalPosition()
 
-        if ( !palettes || palettes.size() === 0 ){
-            shapePalette(editor, palettes, -1)
-        } else if ( palettes.size() === 1 ){
-            shapePalette(editor, palettes, 0)
+        if ( !palettes.data || palettes.data.length === 0 ){
+            shapePalette(editor, "", position)
+        } else if ( palettes.length === 1 ){
+            shapePalette(editor, palettes.data[0].name, position)
         } else {
             //Palette list box
             var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
             var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
             palListBox.color = 'transparent'
-            palList.model    = palettes
+            palList.model    = palettes.data
             editor.internalFocus = false
             palList.forceActiveFocus()
             lk.layers.workspace.panes.setActiveItem(palList, editor)
@@ -969,7 +997,7 @@ QtObject{
                 editor.editor.forceFocus()
                 palList.destroy()
                 palListBox.destroy()
-                shapePalette(editor, palettes, index)
+                shapePalette(editor, palettes.data[index].name, position)
             })
         }
     }
@@ -978,17 +1006,20 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
+        var position = palettes.declaration.position
+        palettes = filterOutPalettes(palettes)
+
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.mapGlobalPosition()
-        if ( palettes.size() === 1 ){
-            var ef = codeHandler.openConnection(palettes.position())
+        if ( palettes.data.length === 1 ){
+            var ef = codeHandler.openConnection(position)
             ef.incrementRefCount()
-            codeHandler.openBinding(ef, palettes, 0)
+            codeHandler.openBinding(ef, palettes.data[0].name)
         } else {
             var palList      = createPaletteListView(null, theme.selectableListView)
             var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
             palListBox.color = 'transparent'
-            palList.model = palettes
+            palList.model = palettes.data
             editor.internalFocus = false
             palList.forceActiveFocus()
             lk.layers.workspace.panes.setActiveItem(palList, editor)
@@ -1005,21 +1036,20 @@ QtObject{
                 palList.destroy()
                 palListBox.destroy()
 
-                var ef = codeHandler.openConnection(palettes.position())
+                var ef = codeHandler.openConnection(position)
                 ef.incrementRefCount()
-
-                codeHandler.openBinding(ef, palettes, index)
+                codeHandler.openBinding(ef, palettes.data[index].name)
             })
         }
     }
 
-    function shapePalette(editor, palettes, index){
+    function shapePalette(editor, paletteName, position){
         var codeHandler = editor.documentHandler.codeHandler
-        var ef = codeHandler.openConnection(palettes.position())
+        var ef = codeHandler.openConnection(position)
 
         if (!ef){
             lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
-            throw linkError(new Error('Failed to find editing fragment for palette at: ' + palettes.position(), 300))
+            throw linkError(new Error('Failed to find editing fragment for palette at: ' + position, 300))
         }
 
         var forAnObject = ef.location === QmlEditFragment.Object
@@ -1051,7 +1081,12 @@ QtObject{
             objectContainer = p
         }
 
-        var palette = palettes.size() > 0 && !(forAnObject && palettes.size() === 1)? codeHandler.openPalette(ef, palettes, index) : null
+
+        var palette = paletteName !== ""
+                ? editor.documentHandler.codeHandler.expand(ef, {
+                    "palettes" : [paletteName]
+                })
+                : null
         var forImports = ef.location === QmlEditFragment.Imports
 
         if (palette){
@@ -1079,13 +1114,13 @@ QtObject{
         return objectContainer ? objectContainer : palette
     }
 
-    function loadPalette(editor, palettes, index){
+    function loadPalette(editor, palettes, index, position){
         var codeHandler = editor.documentHandler.codeHandler
 
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = codeHandler.openConnection(palettes.position())
+        var ef = codeHandler.openConnection(position)
 
         if (!ef)
         {
@@ -1094,7 +1129,9 @@ QtObject{
         }
         ef.incrementRefCount()
 
-        var palette = codeHandler.openPalette(ef, palettes, index)
+        var palette = editor.documentHandler.codeHandler.expand(ef, {
+            "palettes" : [palettes[index].name]
+        })
 
         var editorBox = ef.visualParent ? ef.visualParent.parent : null
         var paletteBoxGroup = editorBox ? editorBox.child : null

@@ -22,7 +22,7 @@ Input.SelectableListView{
                 anchors.leftMargin: 10
                 anchors.verticalCenter: parent.verticalCenter
                 textStyle: root.style.labelStyle
-                text: model.name
+                text: modelData.name
             }
 
             MouseArea{

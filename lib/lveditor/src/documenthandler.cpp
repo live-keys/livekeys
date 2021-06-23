@@ -24,7 +24,6 @@
 #include "live/viewengine.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
-#include "live/palettelist.h"
 #include "live/palettecontainer.h"
 #include "live/extensions.h"
 
