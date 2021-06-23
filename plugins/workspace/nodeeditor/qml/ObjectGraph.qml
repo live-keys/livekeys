@@ -443,6 +443,7 @@ Rectangle{
             port.label = propertyName + " In"
             port.y = Qt.binding(
                 function(){
+                    if (!node.item) return 0
                     return node.item.paletteContainer.height +
                            propertyItem.y +
                            (propertyItem.propertyTitle.height / 2) +

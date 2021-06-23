@@ -303,6 +303,7 @@ Qan.NodeItem{
         target: editingFragment
         ignoreUnknownSignals: true
         function onAboutToBeRemoved(){
+            paletteContainer.closePalettes()
             if (removeNode)
                 removeNode(nodeParent)
         }
