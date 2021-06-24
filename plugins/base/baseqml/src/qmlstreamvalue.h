@@ -16,6 +16,7 @@ class QmlStreamValue : public QObject, public QQmlParserStatus{
 
 public:
     explicit QmlStreamValue(QObject *parent = nullptr);
+    ~QmlStreamValue();
 
     lv::QmlStream* stream() const;
     void setStream(lv::QmlStream* stream);

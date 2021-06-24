@@ -21,5 +21,7 @@ OTHER_FILES += \
 
 DISTFILES += \
     qml/BrushIcon.qml \
+    qml/EventIcon.qml \
+    qml/FunctionIcon.qml \
     qml/GradientIcon.qml
 

@@ -148,6 +148,7 @@ CodePalette{
 
         function clean(){
             for (var i=0; i< allObjects.length; ++i){
+                if (!allObjects[i].item) return
                 var numofProps = allObjects[i].item.propertyContainer.children.length
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]

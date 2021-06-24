@@ -19,36 +19,39 @@ SplitView{
 
     property string paneType : "splitview"
 
-    property var parentSplitter : null
-    property var parentSplitterIndex : function(){
-        return parentSplitter ? parentSplitter.paneIndex(this) : -1
+    property var parentSplitView : null
+    property var parentSplitViewIndex : function(){
+        return parentSplitView ? parentSplitView.paneIndex(this) : -1
     }
     property var splitterHierarchyIndex : function(){
-        if (!parentSplitter){
+        if (!parentSplitView){
             return []
         }
-        return parentSplitter.splitterHierarchyIndex().concat([parentSplitter.paneIndex(this)])
+        return parentSplitView.splitterHierarchyIndex().concat([parentSplitView.paneIndex(this)])
     }
     property var splitterHierarchyPositioning : function(){
-        if (!parentSplitter){
+        if (!parentSplitView){
             return []
         }
 
-        var currentIndex = (parentSplitter.paneIndex(this) + 1) *
-                (parentSplitter.orientation === Qt.Vertical ? -1 : 1)
+        var currentIndex = (parentSplitView.paneIndex(this) + 1) *
+                (parentSplitView.orientation === Qt.Vertical ? -1 : 1)
 
-        return parentSplitter.splitterHierarchyPositioning().concat([currentIndex])
+        return parentSplitView.splitterHierarchyPositioning().concat([currentIndex])
     }
 
     property var mapGlobalPosition: function(){
-        if ( parentSplitter ){
-            var parentPoint = parentSplitter.mapGlobalPosition()
+        if ( parentSplitView ){
+            var parentPoint = parentSplitView.mapGlobalPosition()
             return Qt.point(parentPoint.x + x, parentPoint.y + y)
         }
         return Qt.point(x, y)
     }
 
     property var createNewSplitter : function(){}
+
+    property int paneMinimumWidth: 100
+    property int paneMinimumHeight: 100
 
     property var panes : []
     property var paneSizes : []
@@ -152,7 +155,44 @@ SplitView{
             }
             downJ--
         }
+    }
 
+    function __findLocationToFitPane(pane, options){
+        if ( options && options.hasOwnProperty('orientation') ){
+            if ( options.orientation === splitRoot.orientation )
+                if ( __canFitPane(pane) )
+                    return splitRoot
+        } else {
+            if ( __canFitPane(pane) )
+                return splitRoot
+        }
+
+        for ( var i = 0; i < panes.length; ++i ){
+            if ( panes[i].paneType === "splitview" ){
+                var fit = panes[i].__findLocationToFitPane(pane)
+                if ( fit )
+                    return fit
+            }
+        }
+        return null
+    }
+
+    function __canFitPane(pane){
+        if ( orientation === Qt.Horizontal ){
+            var minimumWidth = 0
+            for ( var i = 0; i < panes.length; ++i ){
+                minimumWidth += panes[i].paneMinimumWidth
+            }
+
+            return minimumWidth + pane.paneMinimumWidth < width
+        } else {
+            var minimumHeight = 0
+            for ( var i = 0; i < panes.length; ++i ){
+                minimumHeight += panes[i].paneMinimumHeight
+            }
+
+            return minimumHeight + pane.paneMinimumHeight < height
+        }
     }
 
     function resizePane(pane, newSize){
@@ -280,7 +320,7 @@ SplitView{
     function __splitPaneForVertical(i, item, positionBefore){
         if ( i === 0 && panes.length === 0 ){
             splitRoot.addItem(item)
-            item.parentSplitter = splitRoot
+            item.parentSplitView = splitRoot
             panes.push(item)
             paneSizes.push(item.height)
             return
@@ -302,7 +342,7 @@ SplitView{
 
         var insertIndex = positionBefore ? i : i + 1
 
-        item.parentSplitter = splitRoot
+        item.parentSplitView = splitRoot
         panes.splice(insertIndex, 0, item)
         paneSizes.splice(insertIndex, 0, h)
 
@@ -324,7 +364,7 @@ SplitView{
             splitRoot.addItem(item)
             panes.push(item)
             paneSizes.push(item.width)
-            item.parentSplitter = splitRoot
+            item.parentSplitView = splitRoot
             return
         }
 
@@ -344,7 +384,7 @@ SplitView{
 
         var insertIndex = positionBefore ? i : i + 1
 
-        item.parentSplitter = splitRoot
+        item.parentSplitView = splitRoot
         panes.splice(insertIndex, 0, item)
         paneSizes.splice(insertIndex, 0, w)
 
@@ -452,7 +492,7 @@ SplitView{
         }
 
         for ( var j = 0; j < panes.length; ++j ){
-            panes[j].parentSplitter = this
+            panes[j].parentSplitView = this
             splitRoot.addItem(panes[j])
         }
 
@@ -514,7 +554,7 @@ SplitView{
             splitRoot.removeItem(panes[j])
         }
 
-        item.parentSplitter = splitRoot
+        item.parentSplitView = splitRoot
         panes[i] = item
 
         for ( var j = i; j < panes.length; ++j ){

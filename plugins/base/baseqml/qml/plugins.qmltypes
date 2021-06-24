@@ -103,17 +103,22 @@ Module {
         prototype: "QObject"
         exports: ["base/Act 1.0"]
         exportMetaObjectRevisions: [0]
+        Enum {
+            name: "Trigger"
+            values: {
+                "PropertyChange": 0,
+                "Manual": 1
+            }
+        }
         Property { name: "run"; type: "QJSValue" }
         Property { name: "args"; type: "QJSValue" }
         Property { name: "returns"; type: "QString" }
         Property { name: "result"; type: "QJSValue"; isReadonly: true }
+        Property { name: "trigger"; type: "Trigger" }
         Property { name: "worker"; type: "lv::QmlWorkerInterface"; isPointer: true }
         Signal { name: "complete" }
         Method { name: "exec" }
-        Method {
-            name: "setWorker"
-            Parameter { name: "worker"; type: "lv::QmlWorkerInterface"; isPointer: true }
-        }
+        Method { name: "__propertyChange" }
     }
     Component {
         name: "lv::QmlClipboard"
@@ -189,6 +194,7 @@ Module {
         }
         Method { name: "run" }
         Method { name: "closeInput" }
+        Method { name: "stop" }
     }
     Component {
         name: "lv::QmlFollowUp"
@@ -298,7 +304,13 @@ Module {
         exportMetaObjectRevisions: [0]
         Method {
             name: "forward"
+            type: "QJSValue"
             Parameter { name: "callback"; type: "QJSValue" }
+        }
+        Method {
+            name: "unsubscribe"
+            type: "bool"
+            Parameter { name: "val"; type: "QJSValue" }
         }
     }
     Component {

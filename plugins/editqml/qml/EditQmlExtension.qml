@@ -121,7 +121,9 @@ WorkspaceExtension{
         var importsPosition = codeHandler.findImportsPosition()
         var paletteImports = codeHandler.findPalettes(importsPosition)
         if (paletteImports) {
-            var pc = globals.paletteControls.shapePalette(editor, paletteImports, 0)
+            var position = paletteImports.declaration.position
+            paletteImports.data = globals.paletteControls.filterOutPalettes(paletteImports.data)
+            var pc = globals.paletteControls.shapePalette(editor, paletteImports.data[0].name, position)
             pc.item.width = Qt.binding(function(){
                 if (!pc.item.parent || !pc.item.parent.parent) return
                 var editorSize = editor.width - editor.editor.lineSurfaceWidth - 30 - pc.item.parent.parent.headerWidth
@@ -143,12 +145,18 @@ WorkspaceExtension{
                 return
             }
 
-            var paletteRoot = codeHandler.findPalettes(rootPosition)
-            if (paletteRoot){
+            var palettesForRoot = codeHandler.findPalettes(rootPosition)
+            if (palettesForRoot){
                 if (callback)
                     callback()
                 else {
-                    var oc = globals.paletteControls.shapePalette(editor, paletteRoot, 0)
+                    var position = palettesForRoot.declaration.position
+                    palettesForRoot.data = globals.paletteControls.filterOutPalettes(palettesForRoot.data)
+                    var oc = globals.paletteControls.shapePalette(
+                        editor,
+                        palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
+                        position
+                    )
                     oc.contentWidth = Qt.binding(function(){
                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                     })
