@@ -40,6 +40,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_projectEnvironment(nullptr)
     , m_wizards(nullptr)
     , m_panes(nullptr)
+    , m_startup(nullptr)
     , m_viewRoot(nullptr)
     , m_messageStack(new lv::WorkspaceMessageStack(this))
     , m_commands(nullptr)
@@ -168,8 +169,9 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
     m_projectEnvironment = m_viewRoot->property("projectEnvironment").value<QObject*>();
     m_wizards            = m_projectEnvironment->property("wizards").value<QObject*>();
     m_panes              = m_viewRoot->property("panes").value<QObject*>();
+    m_startup            = m_viewRoot->property("startup").value<QObject*>();
     m_nextViewParent     = m_viewRoot->property("runSpace").value<QObject*>();
-    QJSValue paneFactories = m_panes->property("factories").value<QJSValue>();
+    QJSValue paneTypes   = m_panes->property("types").value<QJSValue>();
 
     m_keymap->store(0, Qt::Key_O,         lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.openFile");
     m_keymap->store(0, Qt::Key_Backslash, lv::KeyMap::CONTROL_OR_COMMAND, "window.workspace.project.toggleVisibility");
@@ -188,12 +190,12 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
             QJSValueIterator panesIt(panes);
             while ( panesIt.hasNext() ){
                 panesIt.next();
-                paneFactories.setProperty(panesIt.name(), panesIt.value());
+                paneTypes.setProperty(panesIt.name(), panesIt.value());
             }
         }
     }
 
-    m_panes->property("initializeStartupBox").value<QJSValue>().call();
+    m_startup->property("show").value<QJSValue>().call();
 
     emit viewReady(this, m_nextViewParent);
 }
@@ -337,7 +339,7 @@ void WorkspaceLayer::whenMainWindowClose(){
 }
 
 void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){
-    QJSValue v = m_panes->property("initializePanes").value<QJSValue>();
+    QJSValue initializePanesFn = m_panes->property("initializePanes").value<QJSValue>();
 
     const MLNode& layout = workspace->currentLayout();
 
@@ -368,7 +370,12 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
         QJSValue jsWindows;
         ml::toQml(layout["windows"], jsWindows, engine);
 
-        QJSValue initialPanes = v.callWithInstance(engine->newQObject(m_panes), QJSValueList() << jsWindows << jsPanes);
+        QJSValue initialPanes = initializePanesFn.callWithInstance(engine->newQObject(m_panes), QJSValueList() << jsWindows << jsPanes);
+        if ( initialPanes.isError() ){
+            lv::ViewContext::instance().engine()->throwError(initialPanes, this);
+            return;
+        }
+
         initializePanesAndWindows(workspace, initialPanes);
     }
 
@@ -426,6 +433,10 @@ void WorkspaceLayer::cancelTooltip(QObject *tooltip){
         disconnect(m_tooltip, &QObject::destroyed, this, &WorkspaceLayer::__tooltipDestroyed);
         m_tooltip = nullptr;
     }
+}
+
+void WorkspaceLayer::saveRecentsToFile(){
+    m_workspace->saveRecents();
 }
 
 void WorkspaceLayer::__tooltipDestroyed(){

@@ -19,7 +19,6 @@
 #include "live/project.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
-#include "live/palettelist.h"
 
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
@@ -53,9 +52,9 @@ public:
     CodePalette* getItem(QQmlEngine* engine);
     QJSValue getContent(QQmlEngine* engine);
     const QString& path() const{ return m_path; }
+    const QString& type() const{ return m_type; }
     const QString& name() const{ return m_name; }
     bool configuresLayout() const{ return m_configuresLayout; }
-
 private:
     void handleError(const QQmlComponent &component) const;
 
@@ -139,6 +138,7 @@ QJSValue PaletteLoader::getContent(QQmlEngine *engine){
     }
     return QJSValue();
 }
+
 
 void PaletteLoader::handleError(const QQmlComponent &component) const{
     foreach ( const QQmlError& error, component.errors() ){
@@ -259,24 +259,19 @@ PaletteLoader *PaletteContainer::findPalette(const QString &type) const{
  *
  * This list is Javascript-owned!
  */
-PaletteList *PaletteContainer::findPalettes(const QString &type, PaletteContainer::PaletteSearch searchType, lv::PaletteList *l){
+QList<PaletteLoader*> PaletteContainer::findPalettes(const QString &type){
     Q_D(PaletteContainer);
 
-    if ( !l ){
-        l = new PaletteList(this);
-        d->engine->setObjectOwnership(l, QQmlEngine::JavaScriptOwnership);
-    }
+    QList<PaletteLoader*> result;
 
     PaletteContainerPrivate::PaletteHash::Iterator it = d->items.find(type);
 
     while ( it != d->items.end() && it.key() == type ){
-        if ( !it.value()->configuresLayout() || (searchType & IncludeLayoutConfigurations ) ){
-            l->append(it.value());
-        }
+        result.push_back(it.value());
         ++it;
     }
 
-    return l;
+    return result;
 }
 
 /**
@@ -333,6 +328,18 @@ QJSValue PaletteContainer::paletteContent(PaletteLoader *loader){
 
 bool PaletteContainer::configuresLayout(PaletteLoader *loader){
     return loader->configuresLayout();
+}
+
+QJSValue PaletteContainer::paletteData(PaletteLoader *loader)
+{
+    Q_D(PaletteContainer);
+    QJSValue result = d->engine->newObject();
+    result.setProperty("name", loader->name());
+    result.setProperty("type", loader->type());
+    result.setProperty("path", loader->path());
+    result.setProperty("configuresLayout", loader->configuresLayout());
+
+    return result;
 }
 
 /**

@@ -129,25 +129,6 @@ Module {
         Property { name: "load"; type: "QJSValue" }
     }
     Component {
-        name: "lv::PaletteList"
-        prototype: "QAbstractListModel"
-        exports: ["editor/PaletteList 1.0"]
-        isCreatable: false
-        exportMetaObjectRevisions: [0]
-        Method { name: "position"; type: "int" }
-        Method { name: "size"; type: "int" }
-        Method {
-            name: "loadAt"
-            type: "lv::CodePalette*"
-            Parameter { name: "index"; type: "int" }
-        }
-        Method {
-            name: "contentAt"
-            type: "QJSValue"
-            Parameter { name: "index"; type: "int" }
-        }
-    }
-    Component {
         name: "lv::TextSearch"
         prototype: "QObject"
         exports: ["editor/TextSearch 1.0"]

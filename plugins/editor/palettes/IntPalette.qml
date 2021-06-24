@@ -27,6 +27,10 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
     item: Rectangle{
         width: 330
         height: 23
