@@ -253,7 +253,7 @@ WorkspaceExtension{
 
                                             editor.editor.rootShaped = true
 
-                                            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, editor, oc.groupsContainer.children[0], oc)
+                                            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, oc.groupsContainer.children[0], oc)
 
                                             pb.child.resize(oc.width - 50, editor.height - 170)
                                         })
@@ -308,7 +308,7 @@ WorkspaceExtension{
 
                                     editor.editor.rootShaped = true
 
-                                    var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, editor, oc.groupsContainer.children[0], oc)
+                                    var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, oc.groupsContainer.children[0], oc)
 
                                     pb.child.resize(oc.width - 50, editor.height - 170)
                                 })

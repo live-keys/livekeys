@@ -112,12 +112,6 @@ CodePalette{
         }
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     onInit: {
         palette.selectedColor = value
         colorPicker.color = value

@@ -221,7 +221,4 @@ CodePalette{
         timelineArea.timeline = value
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){}
-    }
 }

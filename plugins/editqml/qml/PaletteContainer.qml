@@ -26,21 +26,28 @@ Rectangle{
     property bool compact: true
     property bool isBuilder : false
 
-    property Item child : null
+    property Item child : palette ? palette.item : null
     property QtObject palette : null
 
     property bool isCompactVertical: child && child.height > 48
 
     color: "black"
 
-    property string name : ''
-    property string type : ''
+    property string name : palette ? palette.name : ''
+    property string type : palette ? palette.type : ''
     property string title : type + ' - ' + name
     property var cursorRectangle : null
     property var editorPosition : null
     property var editor: null
     property Item pane: null
     property Item dragPane: null
+
+    onEditingFragmentChanged: {
+        if (!editingFragment) return
+        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+        cursorRectangle = editor.getCursorRectangle()
+        editorPosition = editor.cursorWindowCoords()
+    }
 
     property bool paletteSwapVisible: false
     property bool paletteAddVisible: false
@@ -51,7 +58,7 @@ Rectangle{
     property double titleLeftMargin : 50
     property double titleRightMargin : 50
 
-    property DocumentHandler documentHandler : null
+    property DocumentHandler documentHandler : editor ? editor.documentHandler: null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
