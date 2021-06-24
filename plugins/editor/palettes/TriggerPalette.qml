@@ -227,12 +227,6 @@ CodePalette{
         input.forceActiveFocus()
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     Component.onDestruction: {
         if (!qmlSuggestionBox) return
         var par = qmlSuggestionBox.parent

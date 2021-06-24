@@ -87,8 +87,4 @@ CodePalette{
             dropdown.currentIndex = 0
         }
     }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){}
-    }
 }

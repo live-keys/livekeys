@@ -220,9 +220,4 @@ CodePalette{
         intSlider.value = floorValue
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
 }

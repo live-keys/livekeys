@@ -87,12 +87,4 @@ CodePalette {
         widthInput.text = value.width
         heightInput.text = value.height
     }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
-
 }

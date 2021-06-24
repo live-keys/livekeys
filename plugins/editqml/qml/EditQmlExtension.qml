@@ -303,7 +303,7 @@ WorkspaceExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem, false)
+            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem)
         }
     }
 

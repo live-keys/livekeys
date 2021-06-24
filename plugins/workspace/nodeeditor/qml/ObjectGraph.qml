@@ -150,6 +150,12 @@ Rectangle{
     property var editor: null
     property var editingFragment: null
 
+    onEditingFragmentChanged: {
+        if (!editingFragment) return
+        documentHandler = editingFragment.codeHandler.documentHandler
+        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+    }
+
     property alias zoom: graphView.zoom
     property alias zoomOrigin: graphView.zoomOrigin
 
@@ -260,16 +266,17 @@ Rectangle{
     onDoubleClicked: {
         var addBoxItem = paletteControls.createAddQmlBox(null)
         if (!addBoxItem) return
-        var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
-        var addOptions = documentHandler.codeHandler.getAddOptions(position)
+
+        var position = root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1
+        var addOptions = root.editingFragment.codeHandler.getAddOptions(position)
 
         addBoxItem.addContainer = addOptions
-        addBoxItem.codeQmlHandler = documentHandler.codeHandler
+        addBoxItem.codeQmlHandler = root.editingFragment.codeHandler
 
         addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var coords = editor.mapGlobalPosition()
+        var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
         var addBox = lk.layers.editor.environment.createEditorBox(
             addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
@@ -277,11 +284,11 @@ Rectangle{
         addBox.color = 'transparent'
 
         addBoxItem.accept = function(type, data){
-            var opos = documentHandler.codeHandler.addItem(
+            var opos = root.documentHandler.codeHandler.addItem(
                 addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
             )
-            documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
-            var ef = documentHandler.codeHandler.openNestedConnection(
+            root.documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
+            var ef = root.documentHandler.codeHandler.openNestedConnection(
                 editingFragment, opos
             )
             cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)

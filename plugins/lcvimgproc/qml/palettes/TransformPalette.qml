@@ -79,10 +79,9 @@ CodePalette{
             {
                 p = p.parent
             }
-            var codeHandler = p.documentHandler.codeHandler
             var position = ef.valuePosition() + ef.valueLength() - 1
 
-            var childEf = paletteControls.addItemToRuntime(codeHandler, ef, position, "TransformImage", name)
+            var childEf = paletteControls.addItemToRuntime(ef, position, "TransformImage", name)
             childEf.visualParent = p
             return childEf
         }
@@ -141,7 +140,7 @@ CodePalette{
                             if (!crop)
                                 return
                             var codeHandler = crop.visualParent.documentHandler.codeHandler
-                            fragment = paletteControls.addPropertyByFragment(crop, codeHandler, "region")
+                            fragment = paletteControls.addPropertyByFragment(crop, "region")
                         }
                         var toWrite = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
                         fragment.write({"__ref": toWrite})
@@ -203,7 +202,7 @@ CodePalette{
                             if (!resize)
                                 return
                             var codeHandler = resize.visualParent.documentHandler.codeHandler
-                            fragment = paletteControls.addPropertyByFragment(resize, codeHandler, "size")
+                            fragment = paletteControls.addPropertyByFragment(resize, "size")
                         }
                         var toWrite = '"' + Math.round(width) + "x" + Math.round(height) + '"'
                         fragment.write({"__ref": toWrite})
@@ -251,7 +250,7 @@ CodePalette{
                             if (!rotate)
                                 return
                             var codeHandler = rotate.visualParent.documentHandler.codeHandler
-                            fragment = paletteControls.addPropertyByFragment(rotate, codeHandler, "degrees")
+                            fragment = paletteControls.addPropertyByFragment(rotate, "degrees")
                         }
                         fragment.write(-angle)
                         fragment.commit(-angle)
@@ -296,7 +295,7 @@ CodePalette{
                             if (!perspective)
                                 return
                             var codeHandler = perspective.visualParent.documentHandler.codeHandler
-                            fragment = paletteControls.addPropertyByFragment(perspective, codeHandler, "points")
+                            fragment = paletteControls.addPropertyByFragment(perspective, "points")
                         }
                         var value = '['
                         value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '
