@@ -58,6 +58,9 @@ CodePalette{
     }
     onInit: {
         root.path = value
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
 
 }

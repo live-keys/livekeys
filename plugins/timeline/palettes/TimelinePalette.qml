@@ -216,6 +216,7 @@ CodePalette{
         } else {
             timelineConfig.sourceComponent = null
         }
+        editFragment.whenBinding = function(){}
     }
     onValueFromBindingChanged: {
         timelineArea.timeline = value
