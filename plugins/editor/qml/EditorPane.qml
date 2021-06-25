@@ -24,7 +24,7 @@ import base 1.0
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
 
-Pane{
+Workspace.Pane{
     id : root
 
     property alias internalActiveFocus : editor.internalActiveFocus
@@ -143,7 +143,7 @@ Pane{
         return editor.cursorWindowCoords(root)
     }
 
-    LoadingAnimation{
+    Workspace.LoadingAnimation{
         id: loadingAnimation
         visible: false
         x: parent.width/2 - width/2
@@ -208,7 +208,7 @@ Pane{
 
         color : root.topColor
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5

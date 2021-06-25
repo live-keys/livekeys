@@ -121,8 +121,8 @@ Rectangle{
 
         var palettePane = lk.layers.workspace.panes.createPane('palette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            paletteContainer.editor.parentSplitView,
-            paletteContainer.editor.parentSplitViewIndex(),
+            paletteContainer.editor.parent.parentSplitView,
+            paletteContainer.editor.parent.parentSplitViewIndex(),
             palettePane
         )
 
