@@ -11,7 +11,6 @@ CodePalette{
     id: palette
     type: "qml/Object"
 
-    property var editingFragment: null
     property var documentHandler: null
     property var editor: null
     property var objectsWithId: ({})
@@ -19,12 +18,6 @@ CodePalette{
     property var allObjects: []
 
     property QtObject theme: lk.layers.workspace.themes.current
-
-    onEditingFragmentChanged: {
-        if (!editingFragment) return
-
-        nodeItem.init()
-    }
 
     function addObject(object, cursorCoords){
         var n
@@ -65,7 +58,7 @@ CodePalette{
         }
 
         function init(){
-            var objectList = editingFragment.nestedObjectsInfo()
+            var objectList = editFragment.nestedObjectsInfo()
             var props = []
             for (var i = 0; i < objectList.length; ++i)
             {
@@ -170,23 +163,24 @@ CodePalette{
             palette: palette
             documentHandler: palette.documentHandler
             editor: palette.editor
-            editingFragment: palette ? palette.editingFragment: null
+            editingFragment: palette.editFragment
             style: theme.nodeEditor
         }
     }
 
 
-    property Connections connTest: Connections{
-        id: efConnection
-        target: editingFragment
-
-        function onObjectAdded(obj, cursorCoords){
+    onInit: {
+        if (!editFragment) return
+        editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
+        documentHandler = editFragment.codeHandler.documentHandler
+        editFragment.codeHandler.populateNestedObjectsForFragment(editFragment)
+        objectGraph.editingFragment = editFragment
+        nodeItem.init()
+        editFragment.objectAdded.connect(function(obj, cursorCoords){
             addObject(obj.objectInfo(), cursorCoords)
-        }
-        function onAboutToRemovePalette(palette){
+        })
+        editFragment.aboutToRemovePalette.connect(function(palette){
             nodeItem.clean()
-        }
-        ignoreUnknownSignals: true
+        })
     }
-
 }

@@ -24,10 +24,4 @@ CodePalette{
     onValueFromBindingChanged: {
         valueHistory.currentValue = value
     }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
 }

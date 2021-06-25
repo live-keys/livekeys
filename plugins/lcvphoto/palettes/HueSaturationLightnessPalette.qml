@@ -93,14 +93,4 @@ CodePalette{
     onValueFromBindingChanged: {
         adjustmentBox.hsl = value
     }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.writeProperties({
-                'hue' : palette.value.hue,
-                'saturation' : palette.value.saturation,
-                'lightness': palette.value.lightness
-            })
-        }
-    }
 }

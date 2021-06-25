@@ -29,12 +29,6 @@ CodePalette{
         }
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     onInit: {
         valueHistory.currentValue = value
     }

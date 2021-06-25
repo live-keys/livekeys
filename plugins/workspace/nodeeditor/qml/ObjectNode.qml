@@ -58,7 +58,7 @@ Qan.NodeItem{
     resizable: false
 
     function expandDefaultPalette(){
-        paletteControls.openDefaultPalette(editingFragment, editor, paletteContainer, root)
+        paletteControls.openDefaultPalette(editingFragment, paletteContainer, root)
     }
 
     function expandOptions(options){
@@ -69,7 +69,7 @@ Qan.NodeItem{
             for ( var i = 0; i < palettes.length; ++i){
                 if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
 
-                paletteControls.openPaletteByName(palettes[i], root.editingFragment, editor, paletteContainer)
+                paletteControls.openPaletteByName(palettes[i], root.editingFragment, paletteContainer)
             }
         }
 
@@ -110,7 +110,7 @@ Qan.NodeItem{
                         if (propertyContainer.children[j].propertyName !== propName) continue
                         if (propertyContainer.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
-                        paletteControls.openPaletteByName(propPalette, ef, editor, propertyContainer.children[j].paletteContainer)
+                        paletteControls.openPaletteByName(propPalette, ef, propertyContainer.children[j].paletteContainer)
                         break
                     }
                 } else {
@@ -242,7 +242,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true, objectGraph)
+                        paletteControls.compose(root)
                     }
                 }
             }

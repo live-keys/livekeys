@@ -179,12 +179,6 @@ CodePalette{
         }
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(itemList.modelToArray())
-        }
-    }
-
     onValueFromBindingChanged: {
         argsContainer.model.clear()
         for (var i = 0; i < value.length; ++i)

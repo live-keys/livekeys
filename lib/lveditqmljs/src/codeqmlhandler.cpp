@@ -2572,17 +2572,9 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
 }
 
 QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
-    if (!fragment || !fragment->declaration()){
+    if (!fragment || !fragment->declaration())
+        return QJSValue();
 
-        QJSValue res = m_engine->engine()->newObject();
-        QJSValue data = m_engine->engine()->newArray(0);
-        res.setProperty("data", data);
-        QJSValue decl = m_engine->engine()->newObject();
-        decl.setProperty("position", fragment->position());
-        res.setProperty("declaration", decl);
-
-        return res;
-    }
     return findPalettesForDeclaration(fragment->declaration());
 }
 
@@ -2590,27 +2582,15 @@ QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment)
  * \brief Finds the available list of palettes at the current \p cursor position
  */
 QJSValue CodeQmlHandler::findPalettes(int position){
-    if ( !m_document ){
-        QJSValue res = m_engine->engine()->newObject();
-        QJSValue data = m_engine->engine()->newArray(0);
-        res.setProperty("data", data);
-        QJSValue decl = m_engine->engine()->newObject();
-        decl.setProperty("position", position);
-        res.setProperty("declaration", decl);
-        return res;
-    }
+    if ( !m_document )
+        return QJSValue();
+
     cancelEdit();
 
     QList<QmlDeclaration::Ptr> declarations = getDeclarations(position);
-    if (declarations.isEmpty()) {
-        QJSValue res = m_engine->engine()->newObject();
-        QJSValue data = m_engine->engine()->newArray(0);
-        res.setProperty("data", data);
-        QJSValue decl = m_engine->engine()->newObject();
-        decl.setProperty("position", position);
-        res.setProperty("declaration", decl);
-        return res;
-    }
+    if (declarations.isEmpty())
+        return QJSValue();
+
 
     return findPalettesForDeclaration(declarations.first());
 }
