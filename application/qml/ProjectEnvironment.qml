@@ -23,6 +23,7 @@ import editor 1.0
 import editor.private 1.0
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
+import workspace 1.0
 
 Item{
     id: root

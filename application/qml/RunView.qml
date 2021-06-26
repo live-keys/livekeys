@@ -4,6 +4,7 @@ import editor.private 1.0
 import base 1.0
 import live 1.0
 import visual.shapes 1.0
+import workspace 1.0
 
 Pane{
     id: root
