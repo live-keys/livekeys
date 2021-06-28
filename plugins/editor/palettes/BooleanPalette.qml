@@ -45,6 +45,9 @@ CodePalette {
 
     onInit: {
         checked = value
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         checked = value

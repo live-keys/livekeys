@@ -34,6 +34,7 @@ import QtQuick 2.7
 import QtQuick.Controls 2.1
 
 import workspace.quickqanava 2.0 as Qan
+import workspace 1.0
 
 Qan.PortItem {
     id: portItem
@@ -122,7 +123,6 @@ Qan.PortItem {
     Pane {
         id: labelPane
         opacity: 0.80
-        padding: 0
         z: 2
         width: label.implicitWidth
         height: label.implicitHeight

@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtWebEngine 1.7
 import editor 1.0
 import fs 1.0 as Fs
+import workspace 1.0
 
 DocumentationLoader{
     id: root

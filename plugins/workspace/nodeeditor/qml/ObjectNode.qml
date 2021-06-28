@@ -28,7 +28,6 @@ Qan.NodeItem{
     property var removeNode: null
     property var addSubobject: null
     property string id: ""
-    property var documentHandler: null
     property var editor: null
     property var objectGraph: null
 
@@ -62,7 +61,7 @@ Qan.NodeItem{
     }
 
     function expandOptions(options){
-        var codeHandler = root.documentHandler.codeHandler
+        var codeHandler = editingFragment.codeHandler
 
         if ( 'palettes' in options){
             var palettes = options['palettes']
@@ -134,7 +133,7 @@ Qan.NodeItem{
             }
         }
 
-        var codeHandler = documentHandler.codeHandler
+        var codeHandler = editingFragment.codeHandler
 
         var position = editingFragment.valuePosition() +
                        editingFragment.valueLength() - 1
@@ -307,13 +306,13 @@ Qan.NodeItem{
         function onObjectAdded(obj, cursorCoords){
             if (!addSubobject) return
 
-            documentHandler.codeHandler.populateObjectInfoForFragment(obj)
+            editingFragment.codeHandler.populateObjectInfoForFragment(obj)
 
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
         }
         function onPropertyAdded(ef, expandDefault){
-            documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
+            editingFragment.codeHandler.populatePropertyInfoForFragment(ef)
 
             var prop = ef.objectInfo()
             var name = ef.identifier()

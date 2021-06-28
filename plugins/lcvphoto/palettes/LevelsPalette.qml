@@ -78,5 +78,11 @@ CodePalette{
     }
     onInit: {
         levelsSliders.levels = value
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
+                'lightness' : palette.value.lightness,
+                'channels' : palette.value.channels
+            })
+        }
     }
 }
