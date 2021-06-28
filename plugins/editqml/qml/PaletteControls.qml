@@ -231,10 +231,12 @@ QtObject{
         addBoxItem.addContainer = addContainer
         addBoxItem.codeQmlHandler = codeHandler
         if (isForNode)
-            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.WithFunctions
-        if (isGroup || !addContainer.model.supportsObjectNesting())
-            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.NoObjects
+            addBoxItem.categories = addBoxItem.categories.concat(['functions'])
 
+        if (isGroup || !addContainer.model.supportsObjectNesting())
+            addBoxItem.categories = addBoxItem.categories.filter(function(value, index, arr){
+                    return value !== 'objects'
+            })
         var oct = container.parent
 
         var pane = container.parent

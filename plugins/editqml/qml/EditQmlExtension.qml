@@ -229,8 +229,7 @@ WorkspaceExtension{
 
             addBoxItem.activeIndex = activeIndex ? activeIndex : 0
             if (objectsOnly)
-                addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
-
+                addBoxItem.categories = ['objects']
             var addBox = lk.layers.editor.environment.createEditorBox(
                 addBoxItem, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
             )

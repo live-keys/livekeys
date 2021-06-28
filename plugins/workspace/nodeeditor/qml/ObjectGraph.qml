@@ -271,7 +271,7 @@ Rectangle{
         addBoxItem.addContainer = addOptions
         addBoxItem.codeQmlHandler = root.editingFragment.codeHandler
 
-        addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
+        addBoxItem.categories = ['objects']
 
         var rect = Qt.rect(pos.x, pos.y, 1, 1)
         var coords = root.editor.parent.mapGlobalPosition()
