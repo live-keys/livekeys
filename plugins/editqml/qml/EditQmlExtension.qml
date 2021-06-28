@@ -210,65 +210,70 @@ WorkspaceExtension{
 
     function add(activeIndex, objectsOnly, forRoot){
         var activePane = lk.layers.workspace.panes.activePane
-        if ( activePane.objectName === 'editor' &&
-             activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, CodeQmlHandler.NoReadOnly)
-            if ( !addContainer )
-                return
 
-            var rect = activePane.getCursorRectangle()
-            var paneCoords = activePane.mapGlobalPosition()
-            var addBoxItem = globals.paletteControls.createAddQmlBox(null)
-            if (!addBoxItem) return
+        if (activePane.objectName !== 'editor' ||
+            !activePane.document ||
+            !canBeQml(activePane.document) )
+            return
 
-            addBoxItem.assignFocus()
-            addBoxItem.addContainer = addContainer
-            addBoxItem.codeQmlHandler = activePane.documentHandler.codeHandler
+        var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, CodeQmlHandler.NoReadOnly)
+        if ( !addContainer )
+            return
 
-            addBoxItem.activeIndex = activeIndex ? activeIndex : 0
-            if (objectsOnly)
-                addBoxItem.categories = ['objects']
-            var addBox = lk.layers.editor.environment.createEditorBox(
-                addBoxItem, rect, Qt.point(paneCoords.x, paneCoords.y), lk.layers.editor.environment.placement.bottom
-            )
-            addBox.color = 'transparent'
-            addBoxItem.cancel = function(){
-                addBoxItem.destroy()
-                addBox.destroy()
-            }
-            addBoxItem.accept = function(type, data){
-                if ( addBoxItem.activeIndex === 1 ){
-                    activePane.documentHandler.codeHandler.addProperty(
-                        addContainer.model.addPosition, addContainer.objectType, type, data, true
-                    )
-                } else if ( addBoxItem.activeIndex === 2 ){
-                    if (forRoot){
-                        var position = activePane.documentHandler.codeHandler.insertRootItem(data)
-                        if (position === -1){
-                            lk.layers.workspace.messages.pushError("Error: Can't create object with name " + data, 1)
-                        } else {
-                            root.rootPosition = position
-                            shapeRootObject(activePane, activePane.documentHandler.codeHandler)
-                        }
-                    }
-                    else
-                        activePane.documentHandler.codeHandler.addItem(
-                            addContainer.model.addPosition, addContainer.objectType, data
+        var rect = activePane.getCursorRectangle()
+        var paneCoords = activePane.mapGlobalPosition()
+
+        var categories = objectsOnly ? ['objects'] : ['objects', 'properties', 'events']
+
+        var addEditorBox = globals.paletteControls.views.openAddOptionsBox(
+            addContainer,
+            activePane.documentHandler.codeHandler,
+            {
+                aroundRect: rect,
+                panePosition: Qt.point(paneCoords.x, paneCoords.y),
+                relativePlacement: lk.layers.editor.environment.placement.bottom
+            },
+            {
+                categories: categories,
+                onCancelled: function(box){
+                    box.child.finalize()
+                },
+                onAccepted: function(box, selection){
+                    if ( selection.category === 'property' ){
+                        activePane.documentHandler.codeHandler.addProperty(
+                            selection.position, selection.objectType, selection.type, selection.name, true
                         )
-                } else if ( addBoxItem.activeIndex === 3 ){
-                    activePane.documentHandler.codeHandler.addEvent(
-                        addContainer.model.addPosition, addContainer.objectType, type, data
-                    )
+                    } else if ( selection.category === 'object' ){
+                        if (forRoot){
+                            var position = activePane.documentHandler.codeHandler.insertRootItem(selection.name)
+                            if (position === -1){
+                                lk.layers.workspace.messages.pushError("Error: Can't create object with name " + selection.name, 1)
+                            } else {
+                                root.rootPosition = position
+                                shapeRootObject(activePane, activePane.documentHandler.codeHandler)
+                            }
+                        }
+                        else
+                            activePane.documentHandler.codeHandler.addItem(
+                                selection.position, selection.objectType, selection.name
+                            )
+                    } else if ( selection.category === 'event' ){
+                        activePane.documentHandler.codeHandler.addEvent(
+                            selection.position, selection.objectType, selection.type, selection.name
+                        )
+                    }
+                    box.child.finalize()
+                },
+                onFinalized: function(box){
+                    box.child.destroy()
+                    box.destroy()
                 }
-                addBoxItem.destroy()
-                addBox.destroy()
             }
+        )
 
-            addBoxItem.assignFocus()
-            lk.layers.workspace.panes.setActiveItem(addBox, activePane)
-        }
+        addEditorBox.child.activeIndex = activeIndex ? activeIndex : 0
+        lk.layers.workspace.panes.setActiveItem(addEditorBox, activePane)
+
     }
 
     function bind(){

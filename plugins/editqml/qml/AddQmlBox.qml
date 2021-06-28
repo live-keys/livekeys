@@ -75,8 +75,9 @@ Rectangle{
         searchInput.forceFocus()
     }
 
-    property var cancel: function(){ }
-    property var accept : function(type, data, mode){ }
+    property var cancel : function(){}
+    property var accept : function(selection){}
+    property var finalize : function(){}
 
     function getCompletion(){
         if ( listView.currentItem ){
@@ -413,15 +414,43 @@ Rectangle{
             }
         }
 
-        if (selector === 2){
+        var selection = null
+        if (selector === 1){
+            selection = {
+                category: 'property',
+                position: root.addContainer.model.addPosition,
+                name: code,
+                type: type,
+                mode: mode,
+                objectType: root.addContainer.objectType
+            }
+        }
+        else if (selector === 2){
             var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-            root.activeIndex = 2
-            root.accept(importSpace, result, mode)
-        } else {
-            root.activeIndex = selector
-            root.accept(type, code, mode)
+            selection = {
+                category: 'object',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: result
+            }
+        } else if (selector === 3){
+            selection = {
+                category: 'event',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: code
+            }
+        } else if (selector === 4){
+            selection = {
+                category: 'function',
+                position: root.addContainer.model.addPosition,
+                name: code
+            }
         }
+
+        root.activeIndex = selector
+        root.accept(selection)
     }
 
     Item{
