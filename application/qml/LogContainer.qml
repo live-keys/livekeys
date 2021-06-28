@@ -7,7 +7,7 @@ import live 1.0
 import editor 1.0
 import workspace 1.0 as Workspace
 
-Pane{
+Workspace.Pane{
     id: root
     paneType: 'log'
     paneState : { return {} }
@@ -192,7 +192,7 @@ Pane{
         height: 30
         color : root.topColor
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5

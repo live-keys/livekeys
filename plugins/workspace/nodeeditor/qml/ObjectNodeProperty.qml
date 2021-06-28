@@ -19,7 +19,6 @@ Item{
     property QtObject node : null
     property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
-    property var documentHandler: null
     property alias propertyTitle: propertyTitle
     property alias paletteContainer: paletteContainer
 
@@ -163,7 +162,7 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    documentHandler.codeHandler.removeConnection(editingFragment)
+                    editingFragment.codeHandler.removeConnection(editingFragment)
                     if (editingFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()

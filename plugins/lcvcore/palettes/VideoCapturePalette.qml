@@ -104,6 +104,13 @@ CodePalette{
 
     onInit: {
         captureContainer.videoCapture = value
+        editFragment.whenBinding = function(){
+            editFragment.writeProperties({
+                'fps' : palette.value.fps,
+                'currentFrame' : palette.value.currentFrame,
+                'paused' : palette.value.paused
+            })
+        }
     }
     onValueFromBindingChanged: {
         captureContainer.videoCapture = value

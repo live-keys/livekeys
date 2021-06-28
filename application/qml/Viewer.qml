@@ -5,7 +5,7 @@ import editor.private 1.0
 import workspace 1.0 as Workspace
 import visual.shapes 1.0
 
-Pane{
+Workspace.Pane{
     id : viewer
     objectName: "viewer"
     paneType: "viewer"
@@ -37,7 +37,7 @@ Pane{
         height: 30
         color: currentTheme ? currentTheme.paneTopBackground : 'black'
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5

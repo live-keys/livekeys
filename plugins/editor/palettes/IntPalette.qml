@@ -197,6 +197,9 @@ CodePalette{
             }
         }
         intSlider.value = floorValue
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
 
     onValueFromBindingChanged: {
