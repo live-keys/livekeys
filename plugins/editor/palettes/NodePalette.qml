@@ -11,7 +11,6 @@ CodePalette{
     id: palette
     type: "qml/Object"
 
-    property var documentHandler: null
     property var editor: null
     property var objectsWithId: ({})
     property var numOfObjects: 0
@@ -146,10 +145,10 @@ CodePalette{
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]
                     if (child.editingFragment)
-                        palette.documentHandler.codeHandler.removeConnection(child.editingFragment)
+                        editFragment.codeHandler.removeConnection(child.editingFragment)
                     child.destroy()
                 }
-                palette.documentHandler.codeHandler.removeConnection(allObjects[i].item.editingFragment)
+                editFragment.codeHandler.removeConnection(allObjects[i].item.editingFragment)
             }
 
             allObjects = []
@@ -161,7 +160,6 @@ CodePalette{
             width: 600
             height: 300
             palette: palette
-            documentHandler: palette.documentHandler
             editor: palette.editor
             editingFragment: palette.editFragment
             style: theme.nodeEditor
@@ -172,7 +170,6 @@ CodePalette{
     onInit: {
         if (!editFragment) return
         editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
-        documentHandler = editFragment.codeHandler.documentHandler
         editFragment.codeHandler.populateNestedObjectsForFragment(editFragment)
         objectGraph.editingFragment = editFragment
         nodeItem.init()

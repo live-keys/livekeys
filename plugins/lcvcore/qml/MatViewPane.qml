@@ -6,6 +6,7 @@ import base 1.0
 import live 1.0
 import fs 1.0 as Fs
 import lcvcore 1.0 as Cv
+import workspace 1.0
 
 Pane{
     id: root

@@ -1,6 +1,7 @@
 import QtQuick 2.3
 import editor 1.0
 import editqml 1.0
+import workspace 1.0
 
 WorkspaceExtension{
     id: root

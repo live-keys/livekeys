@@ -7,7 +7,7 @@ import live 1.0
 import fs 1.0 as Fs
 import workspace 1.0 as Workspace
 
-Pane{
+Workspace.Pane{
     id: root
     objectName : 'palette'
     paneType: 'palette'
@@ -36,7 +36,7 @@ Pane{
         height: 30
         color: root.topColor
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5

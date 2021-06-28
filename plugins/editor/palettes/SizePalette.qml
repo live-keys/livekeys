@@ -82,6 +82,9 @@ CodePalette {
     onInit: {
         widthInput.text = value.width
         heightInput.text = value.height
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         widthInput.text = value.width
