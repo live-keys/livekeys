@@ -86,5 +86,6 @@ CodePalette{
         } else {
             dropdown.currentIndex = 0
         }
+        editFragment.whenBinding = function(){}
     }
 }

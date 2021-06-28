@@ -305,6 +305,9 @@ CodePalette{
             return
         }
         updateSliders(value)
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         if (isNaN(value)){

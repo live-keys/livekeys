@@ -146,13 +146,11 @@ Rectangle{
 
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
-    property var documentHandler: null
     property var editor: null
     property var editingFragment: null
 
     onEditingFragmentChanged: {
         if (!editingFragment) return
-        documentHandler = editingFragment.codeHandler.documentHandler
         editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
     }
 
@@ -284,11 +282,11 @@ Rectangle{
         addBox.color = 'transparent'
 
         addBoxItem.accept = function(type, data){
-            var opos = root.documentHandler.codeHandler.addItem(
+            var opos = editingFragment.codeHandler.addItem(
                 addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
             )
-            root.documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
-            var ef = root.documentHandler.codeHandler.openNestedConnection(
+            editingFragment.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
+            var ef = editingFragment.codeHandler.openNestedConnection(
                 editingFragment, opos
             )
             cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
@@ -400,7 +398,6 @@ Rectangle{
         node.item.label = label
         node.label = label
 
-        node.item.documentHandler = documentHandler
         node.item.editor = editor
         node.item.objectGraph = root
 
@@ -432,8 +429,6 @@ Rectangle{
 
         var isForObject = propertyItem.isForObject
         propertyItem.width = node.item.width - (isForObject ? 30 : 0)
-
-        propertyItem.documentHandler = root.documentHandler
 
         if (editingFragment) editingFragment.incrementRefCount()
 

@@ -184,4 +184,10 @@ CodePalette{
         for (var i = 0; i < value.length; ++i)
             argsContainer.model.append({'value': value[i]})
     }
+
+    onInit: {
+        editFragment.whenBinding = function(){
+            editFragment.write(itemList.modelToArray())
+        }
+    }
 }

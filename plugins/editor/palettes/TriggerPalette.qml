@@ -225,6 +225,9 @@ CodePalette{
         }
 
         input.forceActiveFocus()
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
 
     Component.onDestruction: {
