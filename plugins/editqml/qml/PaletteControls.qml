@@ -253,6 +253,42 @@ QtObject{
 
             return paletteList
         }
+
+        function openAddOptionsBox(addContainer, codeHandler, editorBoxParams, handlers){
+            var addBoxItem = createAddQmlBox(null)
+            if (!addBoxItem) return null
+
+            addBoxItem.addContainer = addContainer
+            addBoxItem.codeQmlHandler = codeHandler
+
+            addBoxItem.categories = handlers.categories
+
+            var addEditorBox = lk.layers.editor.environment.createEditorBox(
+                addBoxItem,
+                editorBoxParams.aroundRect,
+                editorBoxParams.panePosition,
+                editorBoxParams.relativePlacement
+            )
+            
+            addEditorBox.color = 'transparent'
+
+            if (handlers){
+                addBoxItem.accept = function(selection){
+                    handlers.onAccepted(addEditorBox, selection)
+                }
+                addBoxItem.cancel = function(){
+                    handlers.onCancelled(addEditorBox)
+                }
+                addBoxItem.finalize = function(){
+                    handlers.onFinalized(addEditorBox)
+                }
+            }
+
+            addBoxItem.assignFocus()
+
+            return addEditorBox
+        }
+    
     }
 
     function findPalettesFromFragment(editingFragment, palettesOpened, includeLayouts){
@@ -408,17 +444,6 @@ QtObject{
         if ( !addContainer )
             return
 
-        var addBoxItem = createAddQmlBox(null)
-
-        if (!addBoxItem)
-            return
-        addBoxItem.addContainer = addContainer
-        addBoxItem.codeQmlHandler = codeHandler
-        if (isForNode)
-            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.WithFunctions
-        if (isGroup || !addContainer.model.supportsObjectNesting())
-            addBoxItem.mode = addBoxItem.mode | AddQmlBox.DisplayMode.NoObjects
-
         var oct = container.parent
 
         var pane = container.parent
@@ -432,132 +457,138 @@ QtObject{
 
         var paneCoords = pane.mapGlobalPosition()
 
-        var addBox = lk.layers.editor.environment.createEditorBox(
-            addBoxItem,
-            Qt.rect(coords.x + container.width - 180 / 2, coords.y, 30, 30),
-            Qt.point(paneCoords.x, paneCoords.y - 35),
-            lk.layers.editor.environment.placement.top
+        var categories = ['properties', 'events']
+        if (!isGroup && addContainer.model.supportsObjectNesting()){
+            categories.push('objects')
+        }
+        if (isForNode){
+            categories.push('functions')
+        }
+        var addEditorBox = views.openAddOptionsBox(
+            addContainer,
+            codeHandler,
+            {
+                aroundRect: Qt.rect(coords.x + container.width - 180 / 2, coords.y, 30, 30),
+                panePosition: Qt.point(paneCoords.x, paneCoords.y - 35),
+                relativePlacement: lk.layers.editor.environment.placement.top
+            },
+            {
+                categories: categories,
+                onCancelled: function(box){
+                    box.child.finalize()
+                },
+                onFinalized: function(box){
+                    if (isForNode) objectGraph.activateFocus()
+                    box.child.destroy()
+                    box.destroy()
+                },
+                onAccepted: function(box, selection){
+                    if ( selection.category === 'property' ){ // property
+
+                        // check if property is opened already
+                        for (var i = 0; i < container.propertiesOpened.length; ++i){
+                            if (container.propertiesOpened[i] === selection.name){
+                                if (!isForNode && container.compact) container.expand()
+                                box.child.finalize()
+                                return
+                            }
+                        }
+
+                        if (!isForNode && container.compact) container.expand()
+
+
+                        var propsWritable = codeHandler.propertiesWritable(container.editingFragment)
+
+                        var ef = null
+
+                        var isWritable = propsWritable[selection.name]
+                        if (selection.mode === AddQmlBox.AddPropertyMode.AddAsReadOnly){
+                            isWritable = false
+                        }
+
+                        if (isWritable){
+                            var ppos = codeHandler.addProperty(
+                                selection.position,
+                                selection.objectType,
+                                selection.type,
+                                selection.name,
+                                true,
+                                isGroup ? container.editingFragment : null
+                            )
+
+                            ef = codeHandler.openNestedConnection(
+                                container.editingFragment, ppos, project.appRoot()
+                            )
+
+                            if (isGroup) ef.addFragmentType(QmlEditFragment.GroupChild)
+                        } else {
+                            ef = codeHandler.createReadOnlyPropertyFragment(container.editingFragment, selection.name)
+                        }
+
+                        if (ef) {
+                            container.editingFragment.signalPropertyAdded(ef)
+                        }
+
+                        if (!ef) {
+                            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
+                        }
+
+                        var paletteList = ef.paletteList()
+                        for ( var i = 0; i < paletteList.length; ++i ){
+                            if ( paletteList[i].writer ){
+                                paletteList[i].writer()
+                                break
+                            }
+                        }
+
+
+                    } else if ( selection.category === 'object' ){ // object
+
+                        addItemToRuntimeWithNotification(container, selection.position, selection.objectType, selection.name, isForNode)
+
+                    } else if ( selection.category === 'event' ){ // event
+
+                        // check if event is opened already
+                        for (var i = 0; i < container.propertiesOpened.length; ++i){
+                            if (container.propertiesOpened[i] === selection.name){
+                                if (!isForNode && container.compact) container.expand()
+                                box.child.finalize()
+                                return
+                            }
+                        }
+
+                        var ppos = codeHandler.addEvent(
+                            selection.position,
+                            selection.objectType,
+                            selection.type,
+                            selection.name,
+                            true
+                        )
+
+                        var ef = codeHandler.openNestedConnection(
+                            container.editingFragment, ppos, project.appRoot()
+                        )
+
+                        if (ef) {
+                            container.editingFragment.signalPropertyAdded(ef)
+                            if (!isForNode && container.compact) container.sortChildren()
+                        }
+
+                        if (!ef) {
+                            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
+
+                        }
+
+                    } else if (isForNode && selection.category === 'function' ){
+                        container.nodeParent.item.addSubobject(container.nodeParent, selection.name, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null, {isMethod: true})
+                    }
+
+                    box.child.finalize()
+                }
+            }
         )
 
-        addBox.color = 'transparent'
-        addBoxItem.cancel = function(){
-            if (isForNode)
-                objectGraph.activateFocus()
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-        addBoxItem.accept = function(type, data, mode){
-            if ( addBoxItem.activeIndex === 1 ){ // property
-
-                // check if property is opened already
-                for (var i = 0; i < container.propertiesOpened.length; ++i){
-                    if (container.propertiesOpened[i] === data){
-                        if (!isForNode && container.compact) container.expand()
-                        addBoxItem.destroy()
-                        addBox.destroy()
-                        return
-                    }
-                }
-
-                if (!isForNode && container.compact) container.expand()
-
-
-                var propsWritable = codeHandler.propertiesWritable(container.editingFragment)
-
-                var ef = null
-
-                var isWritable = propsWritable[data]
-                if (mode === AddQmlBox.AddPropertyMode.AddAsReadOnly){
-                    isWritable = false
-                }
-
-                if (isWritable){
-                    var ppos = codeHandler.addProperty(
-                        addContainer.model.addPosition,
-                        addContainer.objectType,
-                        type,
-                        data,
-                        true,
-                        isGroup ? container.editingFragment : null
-                    )
-
-                    ef = codeHandler.openNestedConnection(
-                        container.editingFragment, ppos, project.appRoot()
-                    )
-
-                    if (isGroup) ef.addFragmentType(QmlEditFragment.GroupChild)
-                } else {
-                    ef = codeHandler.createReadOnlyPropertyFragment(container.editingFragment, data)
-                }
-
-                if (ef) {
-                    container.editingFragment.signalPropertyAdded(ef)
-                }
-
-                if (!ef) {
-                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
-                }
-
-                var paletteList = ef.paletteList()
-                for ( var i = 0; i < paletteList.length; ++i ){
-                    if ( paletteList[i].writer ){
-                        paletteList[i].writer()
-                        break
-                    }
-                }
-
-
-            } else if ( addBoxItem.activeIndex === 2 ){ // object
-
-                addItemToRuntimeWithNotification(container, addContainer.model.addPosition, addContainer.objectType, data, isForNode)
-
-            } else if ( addBoxItem.activeIndex === 3 ){ // event
-
-                // check if event is opened already
-                for (var i = 0; i < container.propertiesOpened.length; ++i){
-                    if (container.propertiesOpened[i] === data){
-                        if (!isForNode && container.compact) container.expand()
-                        addBoxItem.destroy()
-                        addBox.destroy()
-                        return
-                    }
-                }
-
-                var ppos = codeHandler.addEvent(
-                    addContainer.model.addPosition,
-                    addContainer.objectType,
-                    type,
-                    data,
-                    true
-                )
-
-                var ef = codeHandler.openNestedConnection(
-                    container.editingFragment, ppos, project.appRoot()
-                )
-
-                if (ef) {
-                    container.editingFragment.signalPropertyAdded(ef)
-                    if (!isForNode && container.compact) container.sortChildren()
-                }
-
-                if (!ef) {
-                    lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
-
-                }
-
-            } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                container.nodeParent.item.addSubobject(container.nodeParent, data, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null, {isMethod: true})
-            }
-
-            if (isForNode) objectGraph.activateFocus()
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-
-        addBoxItem.assignFocus()
-        lk.layers.workspace.panes.setActiveItem(addBox, container.editor)
+        lk.layers.workspace.panes.setActiveItem(addEditorBox, container.editor)
     }
 
     function addPropertyContainer(objectContainer, ef, expandDefault){

@@ -262,52 +262,47 @@ Rectangle{
     }
 
     onDoubleClicked: {
-        var addBoxItem = paletteControls.createAddQmlBox(null)
-        if (!addBoxItem) return
-
         var position = root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1
         var addOptions = root.editingFragment.codeHandler.getAddOptions(position)
 
-        addBoxItem.addContainer = addOptions
-        addBoxItem.codeQmlHandler = root.editingFragment.codeHandler
-
-        addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
-
-        var rect = Qt.rect(pos.x, pos.y, 1, 1)
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
-        var addBox = lk.layers.editor.environment.createEditorBox(
-            addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+
+        var addBoxItem = paletteControls.views.openAddOptionsBox(
+            addOptions,
+            root.editingFragment.codeHandler,
+            {
+                aroundRect: Qt.rect(pos.x, pos.y, 1, 1),
+                panePosition: cursorCoords,
+                relativePlacement: lk.layers.editor.environment.placement.bottom
+            },
+            {
+                categories: ['objects'],
+                onCancelled: function(box){
+                    box.child.finalize()
+                },
+                onFinalized: function(box){
+                    root.activateFocus()
+                    box.child.destroy()
+                    box.destroy()
+                },
+                onAccepted: function(box, selection){
+                    var opos = editingFragment.codeHandler.addItem(
+                        selection.position, selection.objectType, selection.name
+                    )
+                    editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name, project.appRoot())
+                    var ef = editingFragment.codeHandler.openNestedConnection(
+                        editingFragment, opos
+                    )
+                    cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
+                    if (ef)
+                        editingFragment.signalObjectAdded(ef, cursorCoords)
+
+                    box.child.finalize()
+                }
+            }
         )
-        addBox.color = 'transparent'
-
-        addBoxItem.accept = function(type, data){
-            var opos = editingFragment.codeHandler.addItem(
-                addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
-            )
-            editingFragment.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
-            var ef = editingFragment.codeHandler.openNestedConnection(
-                editingFragment, opos
-            )
-            cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
-
-            if (ef)
-                editingFragment.signalObjectAdded(ef, cursorCoords)
-            root.activateFocus()
-
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-        addBoxItem.cancel = function(){
-            root.activateFocus()
-
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-        addBoxItem.assignFocus()
-
     }
 
     function bindPorts(src, dst){
