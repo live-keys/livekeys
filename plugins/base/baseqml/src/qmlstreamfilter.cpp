@@ -67,7 +67,7 @@ void QmlStreamFilter::setPull(QmlStream *pull){
         return;
 
     if ( m_pull )
-        m_pull->forward(nullptr, nullptr);
+        m_pull->unsubscribeObject(this);
 
     m_pull = pull;
     m_pull->forward(this, &QmlStreamFilter::streamHandler);

@@ -56,9 +56,6 @@ CodePalette{
     }
     onInit: {
         paletteItem.current = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){}
     }
 }

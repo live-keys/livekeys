@@ -97,9 +97,7 @@ CodePalette{
     }
     onInit: {
         execBox.current = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){}
     }
+
 }

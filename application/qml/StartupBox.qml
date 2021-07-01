@@ -28,7 +28,7 @@ Rectangle{
         MouseArea{
             anchors.fill: parent
             onClicked: {
-                lk.layers.workspace.panes.removeStartupBox()
+                lk.layers.workspace.startup.close()
             }
         }
     }
@@ -166,7 +166,6 @@ Rectangle{
                 font.pixelSize: 18
                 font.weight: Font.Light
             }
-
 
             Rectangle {
                 width: parent.width
@@ -588,6 +587,7 @@ Rectangle{
                     hoverEnabled: true
                     onClicked: {
                         noThanks = true
+                        lk.layers.workspace.saveRecentsToFile()
                     }
                 }
 

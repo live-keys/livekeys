@@ -16,14 +16,21 @@ namespace lv{
 class LV_BASEQML_EXPORT QmlAct : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
+    Q_ENUMS(Trigger)
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QJSValue run                   READ run     WRITE setRun     NOTIFY runChanged)
     Q_PROPERTY(QJSValue args                  READ args    WRITE setArgs    NOTIFY argsChanged)
     Q_PROPERTY(QString returns                READ returns WRITE setReturns NOTIFY returnsChanged)
     Q_PROPERTY(QJSValue result                READ result  NOTIFY resultChanged)
+    Q_PROPERTY(Trigger trigger                READ trigger WRITE setTrigger NOTIFY triggerChanged)
     Q_PROPERTY(lv::QmlWorkerInterface* worker READ worker  WRITE setWorker NOTIFY workerChanged)
 
 public:
+    enum Trigger{
+        PropertyChange,
+        Manual
+    };
+
     class RunSource{
     public:
         RunSource(ComponentDeclaration cd) : declarationLocation(cd){}
@@ -44,9 +51,10 @@ public:
     virtual void process(){}
 
     void setRun(QJSValue run);
+    const QJSValue& run() const;
+
     void setArgs(QJSValue args);
     const QJSValue& args() const;
-    const QJSValue& run() const;
 
     void setResult(const QJSValue& result);
     void setResult(const QVariant& result);
@@ -55,12 +63,17 @@ public:
     void setReturns(QString returns);
 
     lv::QmlWorkerInterface* worker() const;
+    void setWorker(lv::QmlWorkerInterface* worker);
 
     bool event(QEvent *event) override;
 
+    Trigger trigger() const;
+    void setTrigger(Trigger trigger);
+
 public slots:
     void exec();
-    void setWorker(lv::QmlWorkerInterface* worker);
+
+    void __propertyChange();
 
 signals:
     void complete();
@@ -69,6 +82,8 @@ signals:
     void argsChanged();
     void workerChanged();
     void returnsChanged();
+    void triggerChanged();
+
 
 protected:
     void classBegin() override{}
@@ -78,6 +93,7 @@ private:
     void extractSource(ViewEngine* engine);
 
     bool     m_isComponentComplete;
+    Trigger  m_trigger;
     QJSValue m_result;
     QJSValue m_run;
     QJSValue m_args;
@@ -113,6 +129,18 @@ inline QString QmlAct::returns() const{
 
 inline QmlWorkerInterface *QmlAct::worker() const{
     return m_worker;
+}
+
+inline QmlAct::Trigger QmlAct::trigger() const{
+    return m_trigger;
+}
+
+inline void QmlAct::setTrigger(QmlAct::Trigger trigger){
+    if (m_trigger == trigger)
+        return;
+
+    m_trigger = trigger;
+    emit triggerChanged();
 }
 
 } // namespace

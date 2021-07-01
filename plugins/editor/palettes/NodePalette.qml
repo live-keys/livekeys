@@ -11,20 +11,12 @@ CodePalette{
     id: palette
     type: "qml/Object"
 
-    property var editingFragment: null
-    property var documentHandler: null
     property var editor: null
     property var objectsWithId: ({})
     property var numOfObjects: 0
     property var allObjects: []
 
     property QtObject theme: lk.layers.workspace.themes.current
-
-    onEditingFragmentChanged: {
-        if (!editingFragment) return
-
-        nodeItem.init()
-    }
 
     function addObject(object, cursorCoords){
         var n
@@ -65,7 +57,7 @@ CodePalette{
         }
 
         function init(){
-            var objectList = editingFragment.nestedObjectsInfo()
+            var objectList = editFragment.nestedObjectsInfo()
             var props = []
             for (var i = 0; i < objectList.length; ++i)
             {
@@ -148,14 +140,15 @@ CodePalette{
 
         function clean(){
             for (var i=0; i< allObjects.length; ++i){
+                if (!allObjects[i].item) return
                 var numofProps = allObjects[i].item.propertyContainer.children.length
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]
                     if (child.editingFragment)
-                        palette.documentHandler.codeHandler.removeConnection(child.editingFragment)
+                        editFragment.codeHandler.removeConnection(child.editingFragment)
                     child.destroy()
                 }
-                palette.documentHandler.codeHandler.removeConnection(allObjects[i].item.editingFragment)
+                editFragment.codeHandler.removeConnection(allObjects[i].item.editingFragment)
             }
 
             allObjects = []
@@ -167,25 +160,24 @@ CodePalette{
             width: 600
             height: 300
             palette: palette
-            documentHandler: palette.documentHandler
             editor: palette.editor
-            editingFragment: palette ? palette.editingFragment: null
+            editingFragment: palette.editFragment
             style: theme.nodeEditor
         }
     }
 
 
-    property Connections connTest: Connections{
-        id: efConnection
-        target: editingFragment
-
-        function onObjectAdded(obj, cursorCoords){
+    onInit: {
+        if (!editFragment) return
+        editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
+        editFragment.codeHandler.populateNestedObjectsForFragment(editFragment)
+        objectGraph.editingFragment = editFragment
+        nodeItem.init()
+        editFragment.objectAdded.connect(function(obj, cursorCoords){
             addObject(obj.objectInfo(), cursorCoords)
-        }
-        function onAboutToRemovePalette(palette){
+        })
+        editFragment.aboutToRemovePalette.connect(function(palette){
             nodeItem.clean()
-        }
-        ignoreUnknownSignals: true
+        })
     }
-
 }

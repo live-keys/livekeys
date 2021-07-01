@@ -33,3 +33,5 @@ UndoIcon             1.0 UndoIcon.qml
 RedoIcon             1.0 RedoIcon.qml
 BrushIcon            1.0 BrushIcon.qml
 GradientIcon         1.0 GradientIcon.qml
+EventIcon            1.0 EventIcon.qml
+FunctionIcon         1.0 FunctionIcon.qml

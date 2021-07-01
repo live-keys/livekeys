@@ -23,6 +23,7 @@ import editor 1.0
 import editor.private 1.0
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
+import workspace 1.0
 
 Item{
     id: root
@@ -222,7 +223,7 @@ Item{
             root.wizards.checkUnsavedFiles(function(){
                 lk.layers.window.dialogs.openDir({}, function(url){
                     root.wizards.openProject(url, callback)
-    //                lk.openProjectInstance(url)
+                    // lk.openProjectInstance(url)
                 })
             })
         }
@@ -277,7 +278,7 @@ Item{
                     if ( callback )
                         callback(path)
                 }
-    //                lk.openProjectInstance(url)
+                // lk.openProjectInstance(url)
             })
         }
 
@@ -286,7 +287,7 @@ Item{
                 project.newProject()
                 if ( callback )
                     callback()
-    //            lk.newProjectInstance()
+                // lk.newProjectInstance()
             })
         }
 

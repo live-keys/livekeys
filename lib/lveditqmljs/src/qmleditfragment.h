@@ -196,6 +196,7 @@ public slots:
     bool bindFunctionExpression(const QString& expression);
 
     bool isNull();
+    bool isMethod();
 
     void __channelObjectErased();
 

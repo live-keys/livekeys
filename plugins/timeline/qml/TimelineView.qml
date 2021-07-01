@@ -14,6 +14,7 @@ Rectangle{
     color: timelineStyle.borderColor
 
     Keys.onPressed: {
+        if (!root.timeline) return
         if ( event.key === Qt.Key_Space ){
             if ( root.timeline.isRunning )
                 root.timeline.stop()
@@ -196,6 +197,7 @@ Rectangle{
         headerModel.scale: root.zoom
     }
     onTimelineChanged: {
+        if (!root.timeline) return
         root.timeline.headerModel.scale = Qt.binding(function(){return root.zoom })
         segmentInsertMenu.segmentSelection = root.timeline.config.loaders()
         segmentInsertMenu.model = Object.keys(segmentInsertMenu.segmentSelection)
@@ -252,7 +254,7 @@ Rectangle{
                 width: 12
                 height: 12
                 color: root.timelineStyle.iconColor
-                visible: !root.timeline.isRunning
+                visible: root.timeline ? !root.timeline.isRunning: true
             }
             Icons.StopIcon{
                 anchors.centerIn: parent
@@ -260,7 +262,7 @@ Rectangle{
                 height: 12
                 padding: 2
                 color: root.timelineStyle.iconColor
-                visible: root.timeline.isRecording
+                visible: root.timeline ? root.timeline.isRecording: false
             }
 
             MouseArea{
@@ -291,9 +293,9 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 50
-            isRunning: root.timeline.isRunning
+            isRunning: root.timeline ? root.timeline.isRunning : false
             color: root.timelineStyle.iconColor
-            visible: !root.timeline.isRecording
+            visible: root.timeline ? !root.timeline.isRecording : false
             onClicked : {
                 if ( value )
                     root.timeline.start()
@@ -306,7 +308,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 80
-            text: root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false)
+            text: root.timeline ? root.timeline.positionToLabel(timelineArea.timeline.cursorPosition, false): ""
             textStyle: root.timelineStyle.timeLabelStyle
         }
 
@@ -353,7 +355,7 @@ Rectangle{
             interactive: false
             contentY: timelineView.contentY
 
-            model: root.timeline.trackList
+            model: root.timeline ? root.timeline.trackList: null
             delegate: root.trackTitleDelegate
 
             MouseArea{
@@ -405,7 +407,7 @@ Rectangle{
         Rectangle{
             id : timelineTopHeader
 
-            width : root.zoom * root.timeline.contentLength
+            width : root.zoom * (root.timeline ? root.timeline.contentLength : 10)
             height : 35
             color : root.timelineStyle.topHeaderBackgroundColor
 
@@ -413,7 +415,7 @@ Rectangle{
                 id: timelineHeaderView
                 height: parent.height
                 width: parent.width
-                model: root.timeline.headerModel
+                model: root.timeline ? root.timeline.headerModel: null
 
                 viewportX: timelineView.contentX
                 viewportWidth: timelineView.width
@@ -429,7 +431,7 @@ Rectangle{
                             anchors.left: isDelimiter ? parent.left : undefined
                             anchors.horizontalCenter: isDelimiter ? undefined : parent.horizontalCenter
 
-                            text: root.timeline.positionToLabel(label, true)
+                            text: root.timeline ? root.timeline.positionToLabel(label, true) : ""
                             color: root.timelineStyle.markerColor
                             font.pixelSize: 8
                             visible: hasLabel
@@ -463,7 +465,7 @@ Rectangle{
                 height : parent.height / 2
                 color: root.timelineStyle.cursorColor
 
-                x: root.timeline.cursorPosition * root.zoom
+                x: (root.timeline ? root.timeline.cursorPosition: 0) * root.zoom
                 onXChanged: {
                     if ( x > mainScroll.flickableItem.contentX + timeline.width - 10 ){
                         var newContentXForwardPos = x - 30
@@ -526,8 +528,8 @@ Rectangle{
                 boundsBehavior: Flickable.StopAtBounds
 
                 height: parent.height
-                contentWidth: root.timeline.contentLength * root.zoom + 5
-                model: root.timeline.trackList
+                contentWidth: (root.timeline ? root.timeline.contentLength: 0) * root.zoom + 5
+                model: root.timeline ? root.timeline.trackList : null
                 delegate: Rectangle{
                     objectName: "timelineRowDelegate"
                     height: 25
@@ -567,7 +569,7 @@ Rectangle{
                         width : 1
                         height : parent.height
                         color: root.timelineStyle.cursorColor
-                        x: root.timeline.cursorPosition * root.zoom
+                        x: (root.timeline ? root.timeline.cursorPosition : 0) * root.zoom
                     }
                 }
             }

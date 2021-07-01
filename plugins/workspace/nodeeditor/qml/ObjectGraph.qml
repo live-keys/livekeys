@@ -146,9 +146,13 @@ Rectangle{
 
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
-    property var documentHandler: null
     property var editor: null
     property var editingFragment: null
+
+    onEditingFragmentChanged: {
+        if (!editingFragment) return
+        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+    }
 
     property alias zoom: graphView.zoom
     property alias zoomOrigin: graphView.zoomOrigin
@@ -258,51 +262,47 @@ Rectangle{
     }
 
     onDoubleClicked: {
-        var addBoxItem = paletteControls.createAddQmlBox(null)
-        if (!addBoxItem) return
-        var position = editingFragment.valuePosition() + editingFragment.valueLength() - 1
-        var addOptions = documentHandler.codeHandler.getAddOptions(position)
+        var position = root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1
+        var addOptions = root.editingFragment.codeHandler.getAddOptions(position)
 
-        addBoxItem.addContainer = addOptions
-        addBoxItem.codeQmlHandler = documentHandler.codeHandler
-
-        addBoxItem.mode = AddQmlBox.DisplayMode.ObjectsOnly
-
-        var rect = Qt.rect(pos.x, pos.y, 1, 1)
-        var coords = editor.mapGlobalPosition()
+        var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
-        var addBox = lk.layers.editor.environment.createEditorBox(
-            addBoxItem, rect, cursorCoords, lk.layers.editor.environment.placement.bottom
+
+        var addBoxItem = paletteControls.views.openAddOptionsBox(
+            addOptions,
+            root.editingFragment.codeHandler,
+            {
+                aroundRect: Qt.rect(pos.x, pos.y, 1, 1),
+                panePosition: cursorCoords,
+                relativePlacement: lk.layers.editor.environment.placement.bottom
+            },
+            {
+                categories: ['objects'],
+                onCancelled: function(box){
+                    box.child.finalize()
+                },
+                onFinalized: function(box){
+                    root.activateFocus()
+                    box.child.destroy()
+                    box.destroy()
+                },
+                onAccepted: function(box, selection){
+                    var opos = editingFragment.codeHandler.addItem(
+                        selection.position, selection.objectType, selection.name
+                    )
+                    editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name, project.appRoot())
+                    var ef = editingFragment.codeHandler.openNestedConnection(
+                        editingFragment, opos
+                    )
+                    cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
+                    if (ef)
+                        editingFragment.signalObjectAdded(ef, cursorCoords)
+
+                    box.child.finalize()
+                }
+            }
         )
-        addBox.color = 'transparent'
-
-        addBoxItem.accept = function(type, data){
-            var opos = documentHandler.codeHandler.addItem(
-                addBoxItem.addContainer.model.addPosition, addBoxItem.addContainer.objectType, data
-            )
-            documentHandler.codeHandler.addItemToRuntime(editingFragment, data, project.appRoot())
-            var ef = documentHandler.codeHandler.openNestedConnection(
-                editingFragment, opos
-            )
-            cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
-
-            if (ef)
-                editingFragment.signalObjectAdded(ef, cursorCoords)
-            root.activateFocus()
-
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-        addBoxItem.cancel = function(){
-            root.activateFocus()
-
-            addBoxItem.destroy()
-            addBox.destroy()
-        }
-
-        addBoxItem.assignFocus()
-
     }
 
     function bindPorts(src, dst){
@@ -393,7 +393,6 @@ Rectangle{
         node.item.label = label
         node.label = label
 
-        node.item.documentHandler = documentHandler
         node.item.editor = editor
         node.item.objectGraph = root
 
@@ -411,7 +410,7 @@ Rectangle{
         return node
     }
     
-    function addObjectNodeProperty(node, propertyName, ports, editingFragment){
+    function addObjectNodeProperty(node, propertyName, ports, editingFragment, options){
         var item = node.item
         var propertyItem = root.propertyDelegate.createObject(item.propertyContainer)
 
@@ -419,10 +418,12 @@ Rectangle{
         propertyItem.node = node
 
         propertyItem.editingFragment = editingFragment
+        if ( options && options.hasOwnProperty('isMethod') ){
+            propertyItem.isMethod = options.isMethod
+        }
+
         var isForObject = propertyItem.isForObject
         propertyItem.width = node.item.width - (isForObject ? 30 : 0)
-
-        propertyItem.documentHandler = root.documentHandler
 
         if (editingFragment) editingFragment.incrementRefCount()
 
@@ -439,6 +440,7 @@ Rectangle{
             port.label = propertyName + " In"
             port.y = Qt.binding(
                 function(){
+                    if (!node.item) return 0
                     return node.item.paletteContainer.height +
                            propertyItem.y +
                            (propertyItem.propertyTitle.height / 2) +

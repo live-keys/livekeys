@@ -203,6 +203,10 @@ CodePalette{
         }
 
         input.forceActiveFocus()
+
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
 
     onSourceInit: {
@@ -229,12 +233,6 @@ CodePalette{
         }
 
         input.forceActiveFocus()
-    }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
     }
 
     Component.onDestruction: {

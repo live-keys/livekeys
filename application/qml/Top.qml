@@ -81,7 +81,7 @@ Rectangle {
         height: parent.height
         hoverEnabled: true
         onClicked: {
-            lk.layers.workspace.panes.initializeStartupBox()
+            lk.layers.workspace.startup.show()
         }
         Workspace.Tooltip{
             mouseOver: logoFunction.containsMouse

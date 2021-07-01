@@ -13,6 +13,11 @@ QmlStreamValue::QmlStreamValue(QObject *parent)
 {
 }
 
+QmlStreamValue::~QmlStreamValue(){
+    if ( m_stream )
+        m_stream->unsubscribeObject(this);
+}
+
 void QmlStreamValue::streamHandler(QObject *that, const QJSValue &val){
     QmlStreamValue* sf = static_cast<QmlStreamValue*>(that);
     sf->m_current = val;
@@ -57,7 +62,7 @@ void QmlStreamValue::updateFollowsObject(){
     QmlStreamFilter* filter = qobject_cast<QmlStreamFilter*>(m_follow);
     if ( filter ){
         if( m_stream )
-            m_stream->forward(nullptr, nullptr);
+            m_stream->unsubscribeObject(this);
 
         if ( filter->pull() ){
             m_stream = filter->pull();

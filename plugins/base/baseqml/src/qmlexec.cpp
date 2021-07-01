@@ -22,6 +22,8 @@ QmlExec::QmlExec(QObject *parent)
 }
 
 QmlExec::~QmlExec(){
+    if ( m_in )
+        m_in->unsubscribeObject(this);
 }
 
 void QmlExec::componentComplete(){
@@ -59,7 +61,7 @@ void QmlExec::setInput(QmlStream *in){
         return;
 
     if ( m_in )
-        m_in->forward(nullptr, nullptr);
+        m_in->unsubscribeObject(this);
 
     m_in = in;
     emit inChanged();

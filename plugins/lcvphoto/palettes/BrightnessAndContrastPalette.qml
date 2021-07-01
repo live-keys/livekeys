@@ -142,12 +142,6 @@ CodePalette{
 
     onInit: {
         adjustmentBox.bandc = value
-    }
-    onValueFromBindingChanged: {
-        adjustmentBox.bandc = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
@@ -155,4 +149,8 @@ CodePalette{
             })
         }
     }
+    onValueFromBindingChanged: {
+        adjustmentBox.bandc = value
+    }
+
 }

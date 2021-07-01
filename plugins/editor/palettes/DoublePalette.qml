@@ -28,6 +28,10 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
     item: Item{
         width: 330
         height: 25
@@ -266,12 +270,6 @@ CodePalette{
 
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     function updateSliders(value){
         if (value < intSlider.minimumValue || value > intSlider.maximumValue){
             if (value > 0){
@@ -307,6 +305,9 @@ CodePalette{
             return
         }
         updateSliders(value)
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         if (isNaN(value)){

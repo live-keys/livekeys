@@ -39,9 +39,6 @@ CodePalette{
     }
     onInit: {
         inputBox.path = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)
         }

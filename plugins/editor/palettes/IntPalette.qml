@@ -27,6 +27,10 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
     item: Rectangle{
         width: 330
         height: 23
@@ -193,6 +197,9 @@ CodePalette{
             }
         }
         intSlider.value = floorValue
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
 
     onValueFromBindingChanged: {
@@ -216,9 +223,4 @@ CodePalette{
         intSlider.value = floorValue
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
 }
