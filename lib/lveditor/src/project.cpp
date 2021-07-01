@@ -331,6 +331,13 @@ bool Project::isFileInProject(const QString &path) const{
 }
 
 /**
+ * \brief Checks whether the file can be run
+ */
+bool Project::canRunFile(const QString &path) const{
+    return path.endsWith(".qml") || path.endsWith(".lv");
+}
+
+/**
  * \brief Set the active file given its path
  *
  * This file is the one actually compiling
