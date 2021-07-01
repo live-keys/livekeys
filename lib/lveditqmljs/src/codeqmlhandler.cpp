@@ -1294,8 +1294,6 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
     QmlBindingChannel::Ptr bc = edit->channel();
 
     if ( bc->canModify() ){
-        QQmlProperty& p = bc->property();
-
         QString creationPath = m_document->file()->path();
         creationPath.replace(".qml", "_a.qml");
 
@@ -3099,7 +3097,7 @@ int CodeQmlHandler::addProperty(
 int CodeQmlHandler::addEvent(
         int position,
         const QString &object,
-        const QString &type,
+        const QString &,
         const QString &name)
 {
     DocumentQmlValueScanner qvs(m_document, position, 1);
@@ -3340,7 +3338,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     }
 }
 
-QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *currentApp)
+QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *)
 {
     try{
         int opos = addItem(position, "", type);

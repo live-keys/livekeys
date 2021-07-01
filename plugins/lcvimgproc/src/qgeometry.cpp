@@ -191,7 +191,7 @@ QMat *QGeometry::perspectiveProjection(QMat *input, QMat *background, QJSValue p
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Geometry: ").jsThrow();
     }
-
+    return nullptr;
 }
 
 QMat *QGeometry::warpPerspective(QMat *input, QMat *transform, QSize size, int flags, int borderMode)

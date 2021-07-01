@@ -4082,14 +4082,14 @@ void TextEdit::linePaletteRemoved(QQuickItem *palette)
     if (result == -1) return;
 }
 
-void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int newHeight)
+void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int)
 {
     Q_D(TextEdit);
 
     d->lineControl->resizePaletteHeight(palette);
 }
 
-void TextEdit::linePaletteWidthChanged(QQuickItem *palette, int newWidth)
+void TextEdit::linePaletteWidthChanged(QQuickItem *palette, int)
 {
     Q_D(TextEdit);
 
@@ -4245,7 +4245,7 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
     d->lineControl->collapseChange(pos, delta);
 }
 
-void TextEdit::updateLineSurface(int oldLineNum, int newLineNum, int dirtyPos)
+void TextEdit::updateLineSurface(int, int, int)
 {
     Q_D(TextEdit);
     if (d->lineSurface) d->lineSurface->triggerUpdate();
