@@ -2,6 +2,7 @@
 #define LVQMLTIME_H
 
 #include <QObject>
+#include <QJSValue>
 
 namespace lv{
 
@@ -17,6 +18,7 @@ public slots:
     void sleep(int seconds);
     void msleep(int mseconds);
     void usleep(int useconds);
+    void delay(int mseconds, QJSValue callback);
 };
 
 }// namespace

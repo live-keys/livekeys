@@ -1,5 +1,6 @@
 #include "qmltime.h"
 
+#include <QTimer>
 #include <QThread>
 
 namespace lv{
@@ -22,6 +23,12 @@ void QmlTime::msleep(int mseconds){
 
 void QmlTime::usleep(int useconds){
     return QThread::usleep(useconds);
+}
+
+void QmlTime::delay(int mseconds, QJSValue callback){
+    QTimer::singleShot(mseconds, [callback]() mutable{
+        callback.call();
+    });
 }
 
 } // namespace
