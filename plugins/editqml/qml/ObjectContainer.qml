@@ -290,7 +290,7 @@ Item{
                 var p = root.parent
 
                 if (editingFragment.position() === rootPosition)
-                    editor.editor.rootShaped = false
+                    editor.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box

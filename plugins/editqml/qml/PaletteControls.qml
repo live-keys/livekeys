@@ -907,10 +907,9 @@ QtObject{
         var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
         objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment, !objectContainer.isForProperty)
 
-
         if (rootDeleted) {
-            objectContainer.editor.editor.rootShaped = false
-            objectContainer.editor.editor.addRootButton.visible = true
+            objectContainer.editor.rootShaped = false
+            objectContainer.editor.addRootButton.visible = true
         }
 
         if ( objectContainer.isForProperty ) {
