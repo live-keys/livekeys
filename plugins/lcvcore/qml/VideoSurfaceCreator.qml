@@ -56,7 +56,7 @@ Rectangle{
         property var values: [
             { w: 800, h: 600, label: '800x600 4:3 (Default)'},
             { w: 1280, h: 720, label: '1280x720 16:9 (HD)'},
-            { w: 800, h: 600, label: '1920x1080 16:9 (Full HD)'},
+            { w: 1920, h: 1080, label: '1920x1080 16:9 (Full HD)'},
             { w: 3840, h: 2160, label: '3840x600 16:9 (Ultra HD)'}
         ]
 
