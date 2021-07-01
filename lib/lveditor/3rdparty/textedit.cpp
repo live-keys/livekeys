@@ -705,6 +705,10 @@ void TextEdit::resetFragmentStart() {
     setFragmentStart(0);
 }
 
+int TextEdit::fragmentEnd() const{
+    return 0;
+}
+
 void TextEdit::resetFragmentEnd() {
     setFragmentEnd(INT_MAX);
 }
@@ -3988,6 +3992,10 @@ void TextEdit::resetBottomPadding()
 {
     Q_D(TextEdit);
     d->setBottomPadding(0, true);
+}
+
+int TextEdit::fragmentStart() const{
+    return 0;
 }
 
 /*!
