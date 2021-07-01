@@ -262,12 +262,9 @@ Qan.NodeItem{
                     anchors.fill: parent
                     onClicked: {
                         root.selected = false
-                        var paletteList = paletteControls.addPaletteList(
+                        var paletteList = paletteControls.views.openPaletteListForNode(
                             root,
                             paletteContainer,
-                            {"x": 0, "y": 0},
-                            PaletteControls.PaletteListMode.NodeEditor,
-                            PaletteControls.PaletteListSwap.NoSwap,
                             wrapper
                         )
 

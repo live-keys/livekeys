@@ -113,7 +113,7 @@ Item{
                     }
                     var coords = paletteAddButton.mapToItem(pane, 0, 0)
 
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
                         propertyContainer,
                         propertyContainer.valueContainer,
                         Qt.rect(coords.x + 150, coords.y, 30, 30),

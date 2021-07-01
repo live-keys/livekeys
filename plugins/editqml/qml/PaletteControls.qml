@@ -33,9 +33,18 @@ QtObject{
                 property var selectedHandler : function(){}
                 property var cancelledHandler : function(index){}
 
-                onPaletteSelected: selectedHandler(index)
-                onCancelled : cancelledHandler()
-
+                onPaletteSelected : function(index){
+                    focus = false
+                    model = null
+                    destroy()
+                    selectedHandler(index)
+                }
+                onCancelled : function(){
+                    focus = false
+                    model = null
+                    destroy()
+                    cancelledHandler()
+                }
                 onParentChanged: {
                     if (parent) anchors.top = parent.top
                 }
@@ -88,6 +97,163 @@ QtObject{
 
     property QtObject views: QtObject {
 
+        function openPaletteList(style, model, parent, handlers){
+            var paletteList = createPaletteListView(parent, style)
+            paletteList.model = model
+
+            if (handlers){
+                paletteList.cancelledHandler = handlers.onCancelled
+                paletteList.selectedHandler = handlers.onSelected
+            }
+
+            return paletteList
+        }
+
+        function openPaletteListBox(style, model, editorBoxParams, handlers){
+            var paletteList = openPaletteList(style, model, null)
+
+            var paletteListBox = lk.layers.editor.environment.createEditorBox(
+                paletteList,
+                editorBoxParams.aroundRect,
+                editorBoxParams.panePosition,
+                editorBoxParams.relativePlacement
+            )
+
+            paletteList.forceActiveFocus()
+            paletteListBox.color = 'transparent'
+
+            if (handlers){
+                paletteList.cancelledHandler = function(){
+                    handlers.onCancelled(paletteListBox)
+                }
+                paletteList.selectedHandler = function(index){
+                    handlers.onSelected(index, paletteListBox)
+                }
+            }
+            return paletteList
+        }
+
+        function openPaletteListForNode(container, paletteGroup, parent){
+
+            var palettes = findPalettesFromFragment(container.editingFragment, paletteGroup.palettesOpened, true)
+
+            if (!palettes.data || palettes.data.length === 0) return null
+
+            var paletteList = openPaletteList(theme.selectableListView, palettes.data, parent,
+            {
+                onCancelled: function(){
+                    container.objectGraph.paletteListOpened = false
+                    container.objectGraph.activateFocus()
+                },
+                onSelected: function(index){
+                    var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                        "palettes" : [palettes.data[index].name]
+                    })
+
+                    var objectRoot = container.objectName === "objectNode" ? container : null
+                    var paletteBox = openPalette(palette,
+                                                 paletteGroup,
+                                                 objectRoot)
+
+                    if (paletteBox){
+                        paletteBox.moveEnabledSet = false
+                    }
+
+                    container.objectGraph.paletteListOpened = false
+                    container.objectGraph.activateFocus()
+                }
+            })
+
+            container.objectGraph.paletteListOpened = true
+
+            return paletteList
+        }
+
+        function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
+
+            var palettes = findPalettesFromFragment(
+                container.editingFragment,
+                paletteGroup.palettesOpened,
+                mode === PaletteControls.PaletteListMode.ObjectContainer
+            )
+
+            if (!palettes.data || palettes.data.length === 0) return null
+
+            var pane = container.parent
+            if ( container.pane )
+                pane = container.pane
+            while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+                pane = pane.parent
+                if ( pane && pane.pane && pane.pane.objectName === 'objectPalette' ){
+                    pane = pane.pane
+                }
+            }
+            var paneCoords = pane.mapGlobalPosition()
+
+            var editorBoxParams = {
+                aroundRect: aroundBox,
+                panePosition: Qt.point(paneCoords.x, paneCoords.y - 35),
+                relativePlacement: lk.layers.editor.environment.placement.bottom
+            }
+
+            var cancelledHandler = function(paletteListBox){
+                paletteListBox.destroy()
+            }
+
+            var selectedHandler = function(index, paletteListBox){
+                var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                    "palettes" : [palettes.data[index].name]
+                })
+
+                var objectRoot = mode === PaletteControls.PaletteListMode.ObjectContainer
+                               ? container.parent
+                               : (container.objectName === "objectNode" ? container : null)
+                var paletteBox = openPalette(palette,
+                                             paletteGroup,
+                                             objectRoot)
+
+                if (paletteBox){
+                    if (mode === PaletteControls.PaletteListMode.ObjectContainer){
+                        paletteBox.moveEnabledSet = false
+                    } else if (mode === PaletteControls.PaletteListMode.PaletteContainer){
+                        paletteBox.moveEnabledSet = container.moveEnabledGet
+                    }
+                }
+
+                if (swap === PaletteControls.PaletteListSwap.Swap){
+
+                    var p = container.parent
+                    while (p && p.objectName !== "paletteGroup"){
+                        p = p.parent
+                    }
+                    p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== container.palette.name })
+                    container.parent = null
+                    container.documentHandler.codeHandler.removePalette(container.palette)
+                    container.destroy()
+                }
+
+                paletteListBox.destroy()
+            }
+
+            var handlers = {
+                onCancelled: cancelledHandler,
+                onSelected: selectedHandler
+            }
+
+            var paletteList = openPaletteListBox(
+                theme.selectableListView,
+                palettes.data,
+                {
+                    aroundRect: aroundBox,
+                    panePosition: Qt.point(paneCoords.x, paneCoords.y - 35),
+                    relativePlacement: lk.layers.editor.environment.placement.bottom
+                },
+                handlers
+            )
+
+            return paletteList
+        }
+
         function openAddOptionsBox(addContainer, codeHandler, editorBoxParams, handlers){
             var addBoxItem = createAddQmlBox(null)
             if (!addBoxItem) return null
@@ -103,6 +269,7 @@ QtObject{
                 editorBoxParams.panePosition,
                 editorBoxParams.relativePlacement
             )
+            
             addEditorBox.color = 'transparent'
 
             if (handlers){
@@ -121,6 +288,22 @@ QtObject{
 
             return addEditorBox
         }
+    
+    }
+
+    function findPalettesFromFragment(editingFragment, palettesOpened, includeLayouts){
+        if (!editingFragment)
+            return null
+
+        var palettes = editingFragment.codeHandler.findPalettesFromFragment(editingFragment)
+
+        palettes.data = filterOutPalettes(
+            palettes.data,
+            palettesOpened,
+            includeLayouts
+        )
+
+        return palettes
     }
 
     function openDefaultPalette(editingFragment, paletteBoxParent, objectRoot){
@@ -717,116 +900,6 @@ QtObject{
         return result
     }
 
-    function addPaletteList(container, paletteGroup, aroundBox, mode, swap, listParent){
-
-        if (!container.editingFragment)
-            return null
-
-        var palettes = container.editor.documentHandler.codeHandler.findPalettesFromFragment(
-            container.editingFragment
-        )
-
-        var position = palettes.declaration.position
-
-        palettes.data = filterOutPalettes(
-            palettes.data,
-            paletteGroup.palettesOpened,
-            mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor
-        )
-
-        if (!palettes.data || palettes.data.length === 0) return null
-
-        var paletteList = createPaletteListView(listParent ? listParent : null, theme.selectableListView)
-        paletteList.model = palettes.data
-
-        var palListBox = null
-        if (mode !== PaletteControls.PaletteListMode.NodeEditor){
-
-            var pane = container.parent
-            if ( container.pane )
-                pane = container.pane
-            while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
-                pane = pane.parent
-                if ( pane && pane.pane && pane.pane.objectName === 'objectPalette' ){
-                    pane = pane.pane
-                }
-            }
-
-            var paneCoords = pane.mapGlobalPosition()
-
-            palListBox  = lk.layers.editor.environment.createEditorBox(
-                paletteList,
-                aroundBox,
-                Qt.point(paneCoords.x, paneCoords.y - 35),
-                lk.layers.editor.environment.placement.bottom
-            )
-
-            palListBox.color = 'transparent'
-
-        } else {
-            container.objectGraph.paletteListOpened = true
-        }
-
-        paletteList.forceActiveFocus()
-
-
-        paletteList.cancelledHandler = function(){
-            paletteList.focus = false
-            paletteList.model = null
-            paletteList.destroy()
-            if (mode !== PaletteControls.PaletteListMode.NodeEditor) palListBox.destroy()
-            else {
-                container.objectGraph.paletteListOpened = false
-                container.objectGraph.activateFocus()
-            }
-        }
-
-        paletteList.selectedHandler = function(index){
-            paletteList.focus = false
-            paletteList.model = null
-
-            var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
-                "palettes" : [palettes.data[index].name]
-            })
-
-            var objectRoot = mode === PaletteControls.PaletteListMode.ObjectContainer
-                           ? container.parent
-                           : (container.objectName === "objectNode" ? container : null)
-            var paletteBox = openPalette(palette,
-                                         paletteGroup,
-                                         objectRoot)
-
-            if (paletteBox){
-                if (mode === PaletteControls.PaletteListMode.ObjectContainer || mode === PaletteControls.PaletteListMode.NodeEditor){
-                    paletteBox.moveEnabledSet = false
-                } else if (mode === PaletteControls.PaletteListMode.PaletteContainer){
-                    paletteBox.moveEnabledSet = container.moveEnabledGet
-                }
-            }
-
-            if (mode === PaletteControls.PaletteListMode.PaletteContainer && swap === PaletteControls.PaletteListSwap.Swap){
-
-                var p = container.parent
-                while (p && p.objectName !== "paletteGroup"){
-                    p = p.parent
-                }
-                p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== container.palette.name })
-                container.parent = null
-                container.documentHandler.codeHandler.removePalette(container.palette)
-                container.destroy()
-            }
-
-            paletteList.destroy()
-            if (mode !== PaletteControls.PaletteListMode.NodeEditor) palListBox.destroy()
-            else {
-                container.objectGraph.paletteListOpened = false
-                container.objectGraph.activateFocus()
-            }
-        }
-
-        return paletteList
-    }
-
     function eraseObject(objectContainer){
         var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
         objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment, !objectContainer.isForProperty)
@@ -875,7 +948,7 @@ QtObject{
         objectContainer.collapse()
         var rootPos = codeHandler.findRootPosition()
         if (rootPos === objectContainer.editingFragment.position())
-            objectContainer.editor.editor.rootShaped = false
+            objectContainer.editor.rootShaped = false
 
         codeHandler.removeConnection(objectContainer.editingFragment)
 
@@ -927,9 +1000,6 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var palettes = codeHandler.findPalettes(editor.textEdit.cursorPosition)
-        var rect = editor.getCursorRectangle()
-        var paneCoords = editor.mapGlobalPosition()
-
 
         var position = palettes.declaration.position
         palettes.data = filterOutPalettes(palettes.data)
@@ -942,30 +1012,29 @@ QtObject{
             loadPalette(editor, palettes.data, 0, position)
         } else {
             //Palette list box
-
-            var palList      = createPaletteListView(null, theme.selectableListView)
-            var palListBox   = lk.layers.editor.environment.createEditorBox(
-                palList, rect, paneCoords, lk.layers.editor.environment.placement.bottom
-            )
-            palListBox.color = 'transparent'
-            palList.model    = palettes.data
             editor.internalFocus = false
-            palList.forceActiveFocus()
-            lk.layers.workspace.panes.setActiveItem(palList, editor)
 
-            palList.cancelled.connect(function(){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-            })
-            palList.paletteSelected.connect(function(index){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-                loadPalette(editor, palettes.data, index, position)
-            })
+            var paletteList = views.openPaletteListBox(
+                theme.selectableListView,
+                palettes.data,
+                {
+                    aroundRect: editor.getCursorRectangle(),
+                    panePosition: editor.mapGlobalPosition(),
+                    relativePlacement: lk.layers.editor.environment.placement.bottom
+                },
+                {
+                    onCancelled: function(paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                    },
+                    onSelected: function(index, paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                        loadPalette(editor, palettes.data, index, position)
+                    }
+                }
+            )
+            lk.layers.workspace.panes.setActiveItem(paletteList, editor)
         }
     }
 
@@ -975,36 +1044,35 @@ QtObject{
 
         var position = palettes.declaration.position
 
-        var rect = editor.getCursorRectangle()
-        var cursorCoords = editor.mapGlobalPosition()
-
         if ( !palettes.data || palettes.data.length === 0 ){
             shapePalette(editor, "", position)
         } else if ( palettes.length === 1 ){
             shapePalette(editor, palettes.data[0].name, position)
         } else {
             //Palette list box
-            var palList      = globals.paletteControls.createPaletteListView(null, currentTheme.selectableListView)
-            var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-            palListBox.color = 'transparent'
-            palList.model    = palettes.data
             editor.internalFocus = false
-            palList.forceActiveFocus()
-            lk.layers.workspace.panes.setActiveItem(palList, editor)
 
-            palList.cancelled.connect(function(){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-            })
-            palList.paletteSelected.connect(function(index){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-                shapePalette(editor, palettes.data[index].name, position)
-            })
+            var paletteList = views.openPaletteListBox(
+                theme.selectableListView,
+                palettes.data,
+                {
+                    aroundRect: editor.getCursorRectangle(),
+                    panePosition: editor.mapGlobalPosition(),
+                    relativePlacement: lk.layers.editor.environment.placement.bottom
+                },
+                {
+                    onCancelled: function(paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                    },
+                    onSelected: function(index, paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                        shapePalette(editor, palettes.data[index].name, position)
+                    }
+                }
+            )
+            lk.layers.workspace.panes.setActiveItem(paletteList, editor)
         }
     }
 
@@ -1015,37 +1083,36 @@ QtObject{
         var position = palettes.declaration.position
         palettes = filterOutPalettes(palettes)
 
-        var rect = editor.getCursorRectangle()
-        var cursorCoords = editor.mapGlobalPosition()
         if ( palettes.data.length === 1 ){
             var ef = codeHandler.openConnection(position)
             ef.incrementRefCount()
             codeHandler.openBinding(ef, palettes.data[0].name)
         } else {
-            var palList      = createPaletteListView(null, theme.selectableListView)
-            var palListBox   = lk.layers.editor.environment.createEditorBox(palList, rect, cursorCoords, lk.layers.editor.environment.placement.bottom)
-            palListBox.color = 'transparent'
-            palList.model = palettes.data
             editor.internalFocus = false
-            palList.forceActiveFocus()
-            lk.layers.workspace.panes.setActiveItem(palList, editor)
 
-            palList.cancelled.connect(function(){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-            })
-            palList.paletteSelected.connect(function(index){
-                palList.focus = false
-                editor.editor.forceFocus()
-                palList.destroy()
-                palListBox.destroy()
-
-                var ef = codeHandler.openConnection(position)
-                ef.incrementRefCount()
-                codeHandler.openBinding(ef, palettes.data[index].name)
-            })
+            var paletteList = views.openPaletteListBox(
+                theme.selectableListView,
+                palettes.data,
+                {
+                    aroundRect: editor.getCursorRectangle(),
+                    panePosition: editor.mapGlobalPosition(),
+                    relativePlacement: lk.layers.editor.environment.placement.bottom
+                },
+                {
+                    onCancelled: function(paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                    },
+                    onSelected: function(index, paletteListBox){
+                        editor.editor.forceFocus()
+                        paletteListBox.destroy()
+                        var ef = codeHandler.openConnection(position)
+                        ef.incrementRefCount()
+                        codeHandler.openBinding(ef, palettes.data[index].name)
+                    }
+                }
+            )
+            lk.layers.workspace.panes.setActiveItem(paletteList, editor)
         }
     }
 

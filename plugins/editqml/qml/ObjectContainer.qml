@@ -406,7 +406,7 @@ Item{
                     if ( container.pane )
                         coords.y -= 30 // if this container is in the title of a pane
 
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
                         objectContainer,
                         paletteGroup,
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
