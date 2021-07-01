@@ -10,6 +10,7 @@
 namespace lv{
 
 class ViewEngine;
+class QmlStreamProvider;
 class LV_VIEW_EXPORT QmlStream : public QObject{
 
     Q_OBJECT
@@ -77,6 +78,7 @@ private:
 
 public:
     explicit QmlStream(QObject *parent = nullptr);
+    QmlStream(QmlStreamProvider* provider, QObject* parent);
     ~QmlStream();
 
     void push(QObject* object);
@@ -86,6 +88,8 @@ public:
     void unsubscribeObject(QObject* object);
     void unsubscribe(Observer* observer);
 
+    QmlStreamProvider* provider();
+
 public slots:
     QJSValue forward(const QJSValue& callback);
     bool unsubscribe(const QJSValue& val);
@@ -94,8 +98,9 @@ private:
     void incrementIdCounter();
     void clearObservers();
 
-    ViewEngine*  m_engine;
-    unsigned int m_idCounter;
+    QmlStreamProvider* m_provider;
+    ViewEngine*        m_engine;
+    unsigned int       m_idCounter;
     std::list<QmlStream::Observer*>* m_observers;
 };
 

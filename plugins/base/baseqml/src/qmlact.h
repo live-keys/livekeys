@@ -70,6 +70,8 @@ public:
     Trigger trigger() const;
     void setTrigger(Trigger trigger);
 
+    bool isRunning() const;
+
 public slots:
     void exec();
 
@@ -83,7 +85,6 @@ signals:
     void workerChanged();
     void returnsChanged();
     void triggerChanged();
-
 
 protected:
     void classBegin() override{}
@@ -141,6 +142,10 @@ inline void QmlAct::setTrigger(QmlAct::Trigger trigger){
 
     m_trigger = trigger;
     emit triggerChanged();
+}
+
+inline bool QmlAct::isRunning() const{
+    return m_currentTask;
 }
 
 } // namespace

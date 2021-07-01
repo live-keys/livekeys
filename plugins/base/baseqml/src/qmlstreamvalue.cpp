@@ -58,6 +58,10 @@ void QmlStreamValue::setValueType(const QString &valueType){
     emit valueTypeChanged(m_valueType);
 }
 
+void QmlStreamValue::__streamRemoved(){
+    m_stream = nullptr;
+}
+
 void QmlStreamValue::updateFollowsObject(){
     QmlStreamFilter* filter = qobject_cast<QmlStreamFilter*>(m_follow);
     if ( filter ){
@@ -80,7 +84,7 @@ void QmlStreamValue::removeFollowsObject(){
     m_follow = nullptr;
 }
 
-void lv::QmlStreamValue::setStream(QmlStream *stream){
+void QmlStreamValue::setStream(QmlStream *stream){
     if (m_stream == stream)
         return;
 
@@ -88,11 +92,14 @@ void lv::QmlStreamValue::setStream(QmlStream *stream){
         removeFollowsObject();
     }
 
-    if( m_stream )
-        m_stream->forward(nullptr, nullptr);
+    if( m_stream ){
+        m_stream->unsubscribeObject(this);
+        disconnect(m_stream, &QObject::destroyed, this, &QmlStreamValue::__streamRemoved);
+    }
 
     m_stream = stream;
     m_stream->forward(this, &QmlStreamValue::streamHandler);
+    connect(m_stream, &QObject::destroyed, this, &QmlStreamValue::__streamRemoved);
 
     emit streamChanged();
 }

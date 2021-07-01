@@ -29,9 +29,10 @@ public:
     void componentComplete();
 
     const QString& valueType() const;
+    void setValueType(const QString& valueType);
 
 public slots:
-    void setValueType(const QString& valueType);
+    void __streamRemoved();
 
 signals:
     void streamChanged();

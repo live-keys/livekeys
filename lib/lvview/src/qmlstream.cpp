@@ -71,6 +71,17 @@ void QmlStream::PropertyObserver::push(ViewEngine*, QObject *object){
 
 QmlStream::QmlStream(QObject *parent)
     : QObject(parent)
+    , m_provider(nullptr)
+    , m_idCounter(1)
+    , m_observers(new std::list<QmlStream::Observer*>())
+{
+    //TODO: Capture engine from component complete
+    m_engine = lv::ViewContext::instance().engine();
+}
+
+QmlStream::QmlStream(QmlStreamProvider *provider, QObject *parent)
+    : QObject(parent)
+    , m_provider(provider)
     , m_idCounter(1)
     , m_observers(new std::list<QmlStream::Observer*>())
 {
@@ -128,6 +139,10 @@ void QmlStream::unsubscribe(QmlStream::Observer *observer){
             return;
         }
     }
+}
+
+QmlStreamProvider *QmlStream::provider(){
+    return m_provider;
 }
 
 QJSValue QmlStream::forward(const QJSValue &callback){

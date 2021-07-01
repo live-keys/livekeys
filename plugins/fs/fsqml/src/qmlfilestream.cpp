@@ -11,22 +11,27 @@ namespace lv{
 QmlFileStream::QmlFileStream(QObject *parent)
     : QObject(parent)
     , m_stream(nullptr)
-    , m_synced(false)
+    , m_wait(0)
 {
 }
 
 QmlFileStream::~QmlFileStream(){
 }
 
-void QmlFileStream::next(){
-    if ( !m_synced ){
-        while ( !m_text.atEnd() )
-            m_stream->push(m_text.readLine());
-    } else {
-        if ( !m_text.atEnd() ){
-            m_stream->push(m_text.readLine());
-        }
+void QmlFileStream::wait(){
+    ++m_wait;
+}
+
+void QmlFileStream::resume(){
+    if ( m_wait > 0 ){
+        --m_wait;
+        next();
     }
+}
+
+void QmlFileStream::next(){
+    while ( !m_text.atEnd() && !m_wait )
+        m_stream->push(m_text.readLine());
 }
 
 QmlStream *QmlFileStream::lines(const QString &file){
@@ -53,7 +58,7 @@ QmlStream *QmlFileStream::lines(const QString &file){
     m_text.setDevice(&m_file);
 
     m_filePath = file;
-    m_stream   = new QmlStream(this);
+    m_stream   = new QmlStream(this, this);
 
     QTimer::singleShot(0, this, &QmlFileStream::next);
 

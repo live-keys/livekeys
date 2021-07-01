@@ -14,6 +14,7 @@ ImageView{
     property alias paused: decoder.paused
     property alias currentFrame: decoder.currentFrame
     property alias totalFrames: decoder.totalFrames
+    property alias stream: decoder.stream
 
     function seekTo(value){
         decoder.seekTo(value)

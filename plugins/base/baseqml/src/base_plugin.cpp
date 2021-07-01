@@ -33,8 +33,10 @@
 #include "groupcollector.h"
 #include "qmlstreamfilter.h"
 #include "qmlstreamvalue.h"
+#include "qmlstreamact.h"
 #include "qmlthreadinfo.h"
 #include "qmltime.h"
+#include "qmlstreamoperator.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -80,6 +82,8 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlStreamFilter>(    uri, 1, 0, "StreamFilter");
     qmlRegisterType<lv::QmlStreamSink>(      uri, 1, 0, "StreamSink");
     qmlRegisterType<lv::QmlStreamValue>(     uri, 1, 0, "StreamValue");
+    qmlRegisterType<lv::QmlStreamAct>(       uri, 1, 0, "StreamAct");
+    qmlRegisterType<lv::QmlStreamOperator>(  uri, 1, 0, "StreamOperator");
 
     qmlRegisterSingletonType<lv::QmlScript>(           uri, 1, 0, "Script", &scriptProvider);
     qmlRegisterSingletonType<lv::QmlWorkerPoolObject>( uri, 1, 0, "WorkerPool", &workerPoolProvider);
