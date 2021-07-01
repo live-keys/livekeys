@@ -290,7 +290,7 @@ Item{
                 var p = root.parent
 
                 if (editingFragment.position() === rootPosition)
-                    editor.editor.rootShaped = false
+                    editor.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -406,7 +406,7 @@ Item{
                     if ( container.pane )
                         coords.y -= 30 // if this container is in the title of a pane
 
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
                         objectContainer,
                         paletteGroup,
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),

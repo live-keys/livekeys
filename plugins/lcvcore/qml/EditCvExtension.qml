@@ -64,7 +64,7 @@ WorkspaceExtension{
                 if ( item.currentSegment instanceof Cv.VideoSegment || item.currentSegment instanceof Cv.ImageSegment ){
                     var segment = item.currentSegment
                     return [{
-                        name : "Adjust",
+                        name : "Create Filter",
                         action : function(){
                             if ( !project.isDirProject() ){
                                 lk.layers.workspace.messages.pushError(
@@ -167,7 +167,7 @@ WorkspaceExtension{
                             }
                         }
                     },{
-                        name : "Adjust Using Nodes",
+                        name : "Create Filter using Nodes",
                         action : function(){
                             if ( !project.isDirProject() ){
                                 lk.layers.workspace.messages.pushError(

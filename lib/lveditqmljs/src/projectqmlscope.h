@@ -54,7 +54,7 @@ public:
 public:
     ~ProjectQmlScope();
 
-    static Ptr create(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
+    static Ptr create(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine);
 
     static QmlLibraryInfo::Ptr findQmlLibraryInImports(
         const QStringList& importPaths,

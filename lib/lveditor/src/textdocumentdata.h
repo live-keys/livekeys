@@ -18,7 +18,7 @@ public:
     std::vector<std::pair<unsigned, unsigned>> contentsChange(QTextDocument* document, int position, int removed, int added);
     void clear();
     std::u16string &rowAt(unsigned i);
-    unsigned size() { return rows.size(); }
+    unsigned int size() { return static_cast<unsigned int>(rows.size()); }
 
 private:
     std::vector<std::u16string> rows;

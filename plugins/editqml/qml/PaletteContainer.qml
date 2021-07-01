@@ -65,7 +65,7 @@ Rectangle{
         var coords = paletteContainer.mapToItem(pane, 0, 0)
         coords.y -= 35;
 
-        var paletteList = paletteControls.addPaletteList(
+        var paletteList = paletteControls.views.openPaletetListBoxForContainer(
             paletteContainer,
             paletteContainer.parent,
             Qt.rect(coords.x - 180 / 2, coords.y, 30, 30),

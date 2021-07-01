@@ -2,9 +2,9 @@
     "type": "qml/lcvcore#ImageSegmentFactory",
     "palettes": ["ImageSegmentFactoryPalette"],
     "properties" : [
-        ["file", "FilePathPalette"],
+        ["timeline"],
         ["trackName", "TextPalette"],
-        ["timeline"]
+        ["file", "FilePathPalette"]
     ]
 }
 

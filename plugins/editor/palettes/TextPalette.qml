@@ -26,6 +26,7 @@ CodePalette{
             height: 25
 
             style: theme.inputStyle
+            onTextChanged: commitButton.visible = true
 
             onKeyPressed: {
                 if ( event.key === Qt.Key_Return ){
@@ -33,12 +34,14 @@ CodePalette{
                     if ( !palette.isBindingChange() ){
                         editFragment.write(palette.value)
                     }
+                    commitButton.visible = false
                     event.accepted = true
                 }
             }
         }
 
         Input.Button{
+            id: commitButton
             anchors.right: parent.right
             width: 30
             height: 25
@@ -48,6 +51,7 @@ CodePalette{
                 if ( !palette.isBindingChange() ){
                     editFragment.write(palette.value)
                 }
+                commitButton.visible = false
             }
         }
 

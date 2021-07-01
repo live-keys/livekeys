@@ -262,12 +262,9 @@ Qan.NodeItem{
                     anchors.fill: parent
                     onClicked: {
                         root.selected = false
-                        var paletteList = paletteControls.addPaletteList(
+                        var paletteList = paletteControls.views.openPaletteListForNode(
                             root,
                             paletteContainer,
-                            {"x": 0, "y": 0},
-                            PaletteControls.PaletteListMode.NodeEditor,
-                            PaletteControls.PaletteListSwap.NoSwap,
                             wrapper
                         )
 
@@ -325,7 +322,9 @@ Qan.NodeItem{
             propertiesOpened.push(name)
             var portState = ObjectGraph.PortMode.OutPort
 
-            if (prop.isWritable) portState = portState | ObjectGraph.PortMode.InPort
+            if (prop.isWritable || ef.location === QmlEditFragment.Slot) {
+                portState = portState | ObjectGraph.PortMode.InPort
+            }
             addSubobject(nodeParent, name, portState, prop.connection)
         }
 

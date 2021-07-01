@@ -25,18 +25,13 @@ import visual.input 1.0 as Input
 Rectangle{
     id: root
 
-    width: 380 + (mode & AddQmlBox.DisplayMode.WithFunctions ? 100: 0)
+    width: 380 + (categories.includes('functions') ? 100: 0)
     height: 280
     color: root.theme.colorScheme.background
     opacity: 0.95
     objectName: "addQmlBox"
 
-    enum DisplayMode {
-        ObjectsOnly = 0,
-        Default = 1,
-        WithFunctions = 2,
-        NoObjects = 4
-    }
+    property var categories: ['objects', 'properties', 'events']
 
     enum AddPropertyMode {
         Default = 0,
@@ -54,13 +49,11 @@ Rectangle{
     property int smallFontSize: 9
     property var codeQmlHandler: null
 
-    property var mode: AddQmlBox.DisplayMode.Default
-
     border.color: root.theme.colorScheme.middlegroundOverlayDominant
     border.width: 1
 
-    onModeChanged: {
-        if (mode === AddQmlBox.DisplayMode.ObjectsOnly)
+    onCategoriesChanged: {
+        if (categories.length === 1 && categories[0] === 'objects')
             activeIndex = 2
     }
 
@@ -82,8 +75,9 @@ Rectangle{
         searchInput.forceFocus()
     }
 
-    property var cancel: function(){ }
-    property var accept : function(type, data, mode){ }
+    property var cancel : function(){}
+    property var accept : function(selection){}
+    property var finalize : function(){}
 
     function getCompletion(){
         if ( listView.currentItem ){
@@ -135,7 +129,7 @@ Rectangle{
             spacing: 2
 
             Input.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+                visible: categories.length !== 1 || categories[0] !== 'objects'
                 text: 'All'
                 height: 22
                 width: 70
@@ -149,7 +143,7 @@ Rectangle{
             }
 
             Input.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+                visible: categories.includes('properties')
                 text: 'Property'
                 height: 22
                 width: 70
@@ -166,7 +160,7 @@ Rectangle{
                 text: 'Object'
                 height: 22
                 width: 70
-                visible: !(mode & AddQmlBox.DisplayMode.NoObjects)
+                visible: categories.includes('objects')
 
                 style: root.theme.formButtonStyle
                 color: {
@@ -179,7 +173,7 @@ Rectangle{
             }
 
             Input.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+                visible: categories.includes('events')
                 text: 'Event'
                 height: 22
                 width: 70
@@ -194,7 +188,7 @@ Rectangle{
             }
 
             Input.TextButton{
-                visible: mode & AddQmlBox.DisplayMode.WithFunctions
+                visible: categories.includes('functions')
                 text: 'Function'
                 height: 22
                 width: 70
@@ -420,15 +414,43 @@ Rectangle{
             }
         }
 
-        if (selector === 2){
+        var selection = null
+        if (selector === 1){
+            selection = {
+                category: 'property',
+                position: root.addContainer.model.addPosition,
+                name: code,
+                type: type,
+                mode: mode,
+                objectType: root.addContainer.objectType
+            }
+        }
+        else if (selector === 2){
             var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-            root.activeIndex = 2
-            root.accept(importSpace, result, mode)
-        } else {
-            root.activeIndex = selector
-            root.accept(type, code, mode)
+            selection = {
+                category: 'object',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: result
+            }
+        } else if (selector === 3){
+            selection = {
+                category: 'event',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: code
+            }
+        } else if (selector === 4){
+            selection = {
+                category: 'function',
+                position: root.addContainer.model.addPosition,
+                name: code
+            }
         }
+
+        root.activeIndex = selector
+        root.accept(selection)
     }
 
     Item{

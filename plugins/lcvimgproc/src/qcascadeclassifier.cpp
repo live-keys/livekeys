@@ -47,7 +47,7 @@ QVariantList QCascadeClassifier::detectFaces(QMat *input, double scaleFactor, in
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "CascadeClassifier: ").jsThrow();
     }
-
+    return result;
 }
 
 
