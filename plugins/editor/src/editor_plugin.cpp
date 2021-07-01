@@ -16,7 +16,6 @@
 
 #include "editor_plugin.h"
 #include "live/codepalette.h"
-#include "live/palettelist.h"
 #include "live/applicationcontext.h"
 #include "live/visuallog.h"
 #include "live/settings.h"
@@ -35,9 +34,6 @@
 
 void EditorPlugin::registerTypes(const char *uri){
     // @uri editor
-    qmlRegisterUncreatableType<lv::PaletteList>(
-        uri, 1, 0, "PaletteList", "PaletteList can be accessed through a DocumentHandler."
-    );
     qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
     qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");

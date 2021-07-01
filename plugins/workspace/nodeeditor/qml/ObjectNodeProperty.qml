@@ -19,7 +19,6 @@ Item{
     property QtObject node : null
     property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
-    property var documentHandler: null
     property alias propertyTitle: propertyTitle
     property alias paletteContainer: paletteContainer
 
@@ -125,12 +124,9 @@ Item{
                 anchors.fill: parent
                 onClicked: {
                     var coords = propertyItem.mapToItem(node.item, 0, 0)
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletteListForNode(
                         propertyItem,
                         paletteContainer,
-                        Qt.rect(coords.x, coords.y ,1,1),
-                        PaletteControls.PaletteListMode.NodeEditor,
-                        PaletteControls.PaletteListSwap.NoSwap,
                         node.item
                     )
 
@@ -163,7 +159,7 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    documentHandler.codeHandler.removeConnection(editingFragment)
+                    editingFragment.codeHandler.removeConnection(editingFragment)
                     if (editingFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()

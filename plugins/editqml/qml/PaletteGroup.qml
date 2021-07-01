@@ -31,7 +31,7 @@ Column{
                 }
             } else {
                 if ( box && box.objectName === 'editorBox' ){
-                    codeHandler.removeConnection(editingFragment)
+                    editingFragment.codeHandler.removeConnection(editingFragment)
                     paletteGroup.destroy()
                 }
             }
@@ -56,6 +56,11 @@ Column{
                 p.destroy()
             }
         }
+    }
+
+    function closePalettes(){
+        for (var i = 0; i < paletteGroup.children.length; ++i)
+            editingFragment.codeHandler.removePalette(paletteGroup.children[i].palette)
     }
 
     onWidthChanged: {

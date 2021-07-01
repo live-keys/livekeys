@@ -90,6 +90,32 @@ Rectangle{
                 }
             }
         }, {
+               name: "Add Video Surface...",
+               enabled: true,
+               action: function(){
+                   var objectPath = lk.layers.workspace.pluginsPath() + '/lcvcore/VideoSurfaceCreator.qml'
+                   var objectPathUrl = Fs.UrlInfo.urlFromLocalFile(objectPath)
+
+                   var objectComponent = Qt.createComponent(objectPathUrl);
+                   if ( objectComponent.status === Component.Error ){
+                       throw linkError(new Error(objectComponent.errorString()), this)
+                   }
+
+                   var object = objectComponent.createObject();
+                   var overlay = lk.layers.window.dialogs.overlayBox(object)
+
+                   object.surfaceCreated.connect(function(videoSurface){
+                       root.timeline.properties.videoSurface = videoSurface
+                       overlay.closeBox()
+                       object.destroy()
+                   })
+
+                   object.cancelled.connect(function(){
+                       overlay.closeBox()
+                       object.destroy()
+                   })
+               }
+           },{
             name: "Add Keyframe Track",
             enabled: true,
             action: function(){

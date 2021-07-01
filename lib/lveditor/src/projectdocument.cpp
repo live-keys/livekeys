@@ -124,7 +124,7 @@ ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
  * \brief Number of sections
  */
 int ProjectDocument::totalSections() const{
-    return d_ptr->sections.size();
+    return static_cast<int>(d_ptr->sections.size());
 }
 
 

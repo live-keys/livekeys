@@ -11,6 +11,7 @@ class QmlStream;
 class QmlStreamSink : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
+    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QJSValue input READ input WRITE setInput NOTIFY inputChanged)
 
 public:

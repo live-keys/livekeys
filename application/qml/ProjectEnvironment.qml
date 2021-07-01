@@ -23,6 +23,7 @@ import editor 1.0
 import editor.private 1.0
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
+import workspace 1.0
 
 Item{
     id: root
@@ -301,12 +302,15 @@ Item{
 
         function openFileViaDialog(callback){
             var openCallback = function(url){
+                var localPath = Fs.UrlInfo.toLocalFile(url)
                 if ( project.rootPath === '' ){
                     project.openProject(url)
                     var path = Fs.UrlInfo.toLocalFile(url)
                     if ( callback )
                         callback(path)
                 } else if ( project.isFileInProject(url) ){
+                    root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
+                } else if ( !project.canRunFile(localPath) ){
                     root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                 } else {
                     var fileUrl = url
@@ -323,6 +327,10 @@ Item{
                                     callback(path)
                             })
                             mbox.close()
+                        },
+                        button2Name : 'Open file',
+                        button2Function : function(mbox){
+                            root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                         },
                         button3Name : 'Cancel',
                         button3Function : function(mbox){

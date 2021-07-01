@@ -43,7 +43,7 @@ Item{
     }
 
     property double containerContentWidth : 0
-    property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.editor.lineSurfaceWidth - 50 : 0
+    property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.lineSurfaceWidth - 50 : 0
 
     property alias editingFragment : objectContainer.editingFragment
     property alias editor : objectContainer.editor
@@ -105,12 +105,6 @@ Item{
         ef.incrementRefCount()
 
         return childObjectContainer
-    }
-
-    function addPropertyFragmentToContainer(ef, expandDefault){
-        if (!ef) return
-
-        paletteControls.addPropertyContainer(root, ef, expandDefault)
     }
 
     function destroyObjectContainer(oc){
@@ -195,7 +189,7 @@ Item{
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
                     if (paletteGroup.palettesOpened.indexOf(palettes[i]) !== -1) continue
-                    paletteControls.openPaletteByName(palettes[i], objectContainer.editingFragment, editor, paletteGroup)
+                    paletteControls.openPaletteByName(palettes[i], objectContainer.editingFragment, paletteGroup)
                 }
             }
 
@@ -240,7 +234,7 @@ Item{
                             if (child.title !== propName) continue
 
                             if (child.valueContainer.palettesOpened && child.valueContainer.palettesOpened.indexOf(propPalette) !== -1) break
-                            paletteControls.openPaletteByName(propPalette, ef, editor, child.valueContainer)
+                            paletteControls.openPaletteByName(propPalette, ef, child.valueContainer)
                             break
                         }
 
@@ -296,7 +290,7 @@ Item{
                 var p = root.parent
 
                 if (editingFragment.position() === rootPosition)
-                    editor.editor.rootShaped = false
+                    editor.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -339,7 +333,7 @@ Item{
                 editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
 
                 if (compact) expand()
-                addPropertyFragmentToContainer(ef, expandDefault)
+                paletteControls.addPropertyContainer(root, ef, expandDefault)
                 container.sortChildren()
             }
         }
@@ -412,7 +406,7 @@ Item{
                     if ( container.pane )
                         coords.y -= 30 // if this container is in the title of a pane
 
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
                         objectContainer,
                         paletteGroup,
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
@@ -424,7 +418,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer, false)
+                    paletteControls.compose(objectContainer)
                 }
 
                 onCreateObject: {

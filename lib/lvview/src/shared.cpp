@@ -90,6 +90,10 @@ QVariant Shared::transfer(const QJSValue &value, QList<Shared *> &shared){
     } else if ( value.isDate() ){
         return QVariant(value.toDateTime());
     } else if ( value.isObject() ){
+        if ( value.property("constructor").property("name").toString() == "ArrayBuffer" ){
+            return QVariant(value.toString());
+        }
+
         QJSValueIterator it(value);
         QVariantMap vm;
         while ( it.next() ){

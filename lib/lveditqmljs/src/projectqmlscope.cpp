@@ -114,7 +114,7 @@ ProjectQmlScope::~ProjectQmlScope(){
 /**
  * \brief Creates a new ProjectQmlScope object
  */
-ProjectQmlScope::Ptr ProjectQmlScope::create(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine, QObject *parent){
+ProjectQmlScope::Ptr ProjectQmlScope::create(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine){
     return ProjectQmlScope::Ptr(new ProjectQmlScope(ioSession, engine));
 }
 

@@ -270,12 +270,6 @@ CodePalette{
 
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     function updateSliders(value){
         if (value < intSlider.minimumValue || value > intSlider.maximumValue){
             if (value > 0){
@@ -301,7 +295,6 @@ CodePalette{
     }
 
     onInit: {
-        console.log("ON INTIALIZE:" + value)
         if (isNaN(value)){
             palette.value = NaN
             numberInput.text = 'NaN'
@@ -312,6 +305,9 @@ CodePalette{
             return
         }
         updateSliders(value)
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         if (isNaN(value)){

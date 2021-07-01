@@ -5,6 +5,7 @@ import timeline 1.0
 QtObject{
 
     property string file: ''
+
     property int position: 0
     property int length: 0
 
@@ -16,13 +17,15 @@ QtObject{
     property var track: null
 
     function create(){
-        if ( !file ){
+        var fileTrim = file.trim()
+
+        if ( !fileTrim || fileTrim.length === 0){
             return
         }
 
         var segment = factory.createObject()
-        segment.file = file
-        segment.length = 10
+        segment.file = fileTrim
+        segment.length = 30
         if ( length > 0 )
             segment.length = length
         if ( position > 0 )

@@ -73,7 +73,7 @@ void TrackListModel::serialize(ViewEngine *engine, const QObject *o, MLNode &nod
     }
 }
 
-QObject *TrackListModel::deserialize(ViewEngine *engine, const MLNode &node){
+QObject *TrackListModel::deserialize(ViewEngine *, const MLNode &){
     return nullptr;
 }
 

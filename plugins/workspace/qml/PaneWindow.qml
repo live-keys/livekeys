@@ -1,5 +1,6 @@
 import QtQuick 2.3
 import QtQuick.Window 2.2
+import workspace 1.0
 
 Window{
     id: root

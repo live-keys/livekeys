@@ -225,7 +225,7 @@ QHash<int, QByteArray> SegmentModel::roleNames() const{
 
 bool SegmentModel::addSegment(Segment *segment){
     if ( !segment )
-        return -1;
+        return false;
 
     beginDataChange(segment->position(), segment->position() + 1);
     int index = insertItemImpl(segment);

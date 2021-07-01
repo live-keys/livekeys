@@ -64,7 +64,7 @@ WorkspaceExtension{
                 if ( item.currentSegment instanceof Cv.VideoSegment || item.currentSegment instanceof Cv.ImageSegment ){
                     var segment = item.currentSegment
                     return [{
-                        name : "Adjust",
+                        name : "Create Filter",
                         action : function(){
                             if ( !project.isDirProject() ){
                                 lk.layers.workspace.messages.pushError(
@@ -167,7 +167,7 @@ WorkspaceExtension{
                             }
                         }
                     },{
-                        name : "Adjust Using Nodes",
+                        name : "Create Filter using Nodes",
                         action : function(){
                             if ( !project.isDirProject() ){
                                 lk.layers.workspace.messages.pushError(
@@ -239,15 +239,21 @@ WorkspaceExtension{
                                         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
                                         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
-                                            var paletteRoot = codeHandler.findPalettes(rootPosition)
-                                            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(editor, paletteRoot, 0)
+                                            var palettesForRoot = codeHandler.findPalettes(rootPosition)
+                                            var pos = palettesForRoot.declaration.position
+                                            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
+                                            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                                editor,
+                                                palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
+                                                pos
+                                            )
                                             oc.contentWidth = Qt.binding(function(){
                                                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                             })
 
                                             editor.editor.rootShaped = true
 
-                                            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, editor, oc.groupsContainer.children[0], oc)
+                                            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, oc.groupsContainer.children[0], oc)
 
                                             pb.child.resize(oc.width - 50, editor.height - 170)
                                         })
@@ -288,15 +294,21 @@ WorkspaceExtension{
                                 var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
                                 lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                 lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
-                                    var paletteRoot = codeHandler.findPalettes(rootPosition)
-                                    var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(editor, paletteRoot, 0)
+                                    var palettesForRoot = codeHandler.findPalettes(rootPosition)
+                                    var pos = palettesForRoot.declaration.position
+                                    palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
+                                    var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                        editor,
+                                        palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
+                                        pos
+                                    )
                                     oc.contentWidth = Qt.binding(function(){
                                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                     })
 
                                     editor.editor.rootShaped = true
 
-                                    var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, editor, oc.groupsContainer.children[0], oc)
+                                    var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, oc.groupsContainer.children[0], oc)
 
                                     pb.child.resize(oc.width - 50, editor.height - 170)
                                 })

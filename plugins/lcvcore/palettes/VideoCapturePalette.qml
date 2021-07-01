@@ -104,12 +104,6 @@ CodePalette{
 
     onInit: {
         captureContainer.videoCapture = value
-    }
-    onValueFromBindingChanged: {
-        captureContainer.videoCapture = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.writeProperties({
                 'fps' : palette.value.fps,
@@ -118,4 +112,8 @@ CodePalette{
             })
         }
     }
+    onValueFromBindingChanged: {
+        captureContainer.videoCapture = value
+    }
+
 }

@@ -3,7 +3,8 @@
     "palettes": ["VisualFileSelectorPalette"],
     "properties" : [
         ["workingDirectory", "FolderPathPalette"],
-        ["selectedFile", "", "true"]
+        ["selectedFile", "", "true"],
+        ["highlightedFile", "", "true"]
     ]
 }
 

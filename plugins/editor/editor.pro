@@ -68,20 +68,14 @@ DISTFILES += \
     palettes/StringListPalette.qml \
     palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
-    qml/DocumentationView.qml \
     qml/EditorPane.qml \
     qml/ObjectPalettePane.qml \
     qml/PaletteConnection.qml \
     qml/PalettePane.qml \
-    qml/WorkspaceControl.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \
     palettes/EditPalette.qml \
-    qml/Pane.qml \
-    qml/PaneWindow.qml \
-    qml/WorkspaceTheme.qml \
     qml/PaneMenuButton.qml \
-    qml/LoadingAnimation.qml \
     qml/loaddocs.qml \
     qml/loadqtdocs.qml
