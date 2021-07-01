@@ -22,14 +22,15 @@ import editor.private 1.0
 import workspace 1.0 as Workspace
 import base 1.0
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
-Pane{
+Workspace.Pane{
     id : root
 
     property alias internalActiveFocus : editor.internalActiveFocus
     property alias internalFocus: editor.internalFocus
     onInternalActiveFocusChanged: {
-        if ( panes.activePane !== root ){
+        if ( internalActiveFocus && panes.activePane !== root ){
             panes.activateItem(textEdit, root)
         }
     }
@@ -97,8 +98,8 @@ Pane{
                         var storeWidth = root.width
                         docPane = root.panes.createPane('documentation', {}, [root.width, root.height])
 
-                        var index = root.parentSplitterIndex()
-                        root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, docPane)
+                        var index = root.parentSplitViewIndex()
+                        root.panes.splitPaneHorizontallyWith(root.parentSplitView, index, docPane)
 
                         root.width = storeWidth
                         docPane.width = storeWidth
@@ -127,6 +128,8 @@ Pane{
 
     color : lk.layers.workspace.themes.current.paneBackground
     clip : true
+    height: parent ? parent.height : 0
+    width: 400
 
     objectName: "editor"
 
@@ -140,7 +143,7 @@ Pane{
         return editor.cursorWindowCoords(root)
     }
 
-    LoadingAnimation{
+    Workspace.LoadingAnimation{
         id: loadingAnimation
         visible: false
         x: parent.width/2 - width/2
@@ -153,7 +156,7 @@ Pane{
         visible: loadingAnimation.visible
         anchors.fill: parent
         anchors.topMargin: 30
-        color: "#030609"
+        color: currentTheme ? currentTheme.colorScheme.background : 'black'
         opacity: loadingAnimation.visible ? 0.95 : 0
         Behavior on opacity{ NumberAnimation{ duration: 250} }
         z: 900
@@ -205,7 +208,7 @@ Pane{
 
         color : root.topColor
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -263,7 +266,7 @@ Pane{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             id: shapeAllButton
             anchors.right: parent.right
             anchors.rightMargin: 110
@@ -388,8 +391,7 @@ Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 var clone = root.paneClone()
-                var index = root.parentSplitterIndex()
-                root.panes.splitPaneHorizontallyWith(root.parentSplitter, index, clone)
+                root.panes.splitPaneHorizontally(root, clone)
             }
         }
         Workspace.PaneMenuItem{
@@ -397,8 +399,7 @@ Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
                 var clone = root.paneClone()
-                var index = root.parentSplitterIndex()
-                root.panes.splitPaneVerticallyWith(root.parentSplitter, index, clone)
+                root.panes.splitPaneVertically(root, clone)
             }
         }
         Workspace.PaneMenuItem{

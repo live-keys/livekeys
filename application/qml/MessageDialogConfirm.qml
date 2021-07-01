@@ -55,23 +55,85 @@ MessageDialogInternal{
             aitem.forceActiveFocus()
     }
 
-    MessageDialogButton{
+    property Component buttonStyle: Rectangle{
+        id: dialogButton
+
+        property alias text: buttonLabel.text
+        property var callback : function(){}
+
+        signal clicked()
+        onClicked: parent.clicked()
+
+        color: buttonMouseArea.containsMouse ? "#11212c" : "#0b151c"
+        width: 100
+        height: 30
+
+        Text{
+            id: buttonLabel
+            anchors.centerIn: parent
+            text: ""
+            color: "#ccc"
+            font.pixelSize: 12
+            font.family: "Open Sans, sans-serif"
+            font.weight: Font.Light
+        }
+        MouseArea{
+            id: buttonMouseArea
+            anchors.fill: parent
+            hoverEnabled: true
+            onClicked: {
+                dialogButton.clicked()
+            }
+        }
+    }
+
+    Loader{
         id: messageBoxButton1
+
+        property string text: ''
+        property var callback: function(){}
+        signal clicked()
+
         visible : text !== ''
+        sourceComponent: root.buttonStyle
+        onItemChanged: {
+            if ( item )
+                item.text = Qt.binding(function(){ return messageBoxButton1.text } )
+        }
         onClicked: messageBoxButton1.callback(root)
     }
 
-    MessageDialogButton{
+    Loader{
         id: messageBoxButton2
-        anchors.centerIn: parent
+
+        property string text: ''
+        property var callback: function(){}
+        signal clicked()
+
+        anchors.horizontalCenter: parent.horizontalCenter
         visible : text !== ''
+        sourceComponent: root.buttonStyle
+        onItemChanged: {
+            if ( item )
+                item.text = Qt.binding(function(){ return messageBoxButton2.text } )
+        }
         onClicked: messageBoxButton2.callback(root)
     }
 
-    MessageDialogButton{
+    Loader{
         id: messageBoxButton3
+
+        property string text: ''
+        property var callback: function(){}
+        signal clicked()
+
         anchors.right: parent.right
         visible : text !== ''
+        sourceComponent: root.buttonStyle
+        onItemChanged: {
+            if ( item )
+                item.text = Qt.binding(function(){ return messageBoxButton3.text } )
+        }
         onClicked: messageBoxButton3.callback(root)
     }
 }

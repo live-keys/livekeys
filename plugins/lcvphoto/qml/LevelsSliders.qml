@@ -1,8 +1,8 @@
 import QtQuick 2.5
 import live 1.0
-import workspace 1.0 as Workspace
 import lcvcore 1.0 as Cv
 import lcvphoto 1.0 as Photo
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -11,7 +11,7 @@ Rectangle{
     color: 'transparent'
 
     property QtObject style: QtObject{
-        property QtObject textStyle: Workspace.TextStyle{}
+        property QtObject textStyle: Input.TextStyle{}
     }
 
     property alias input: colorHistogram.input
@@ -313,7 +313,7 @@ Rectangle{
         }
     }
 
-    Workspace.Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.left: parent.left
@@ -321,7 +321,7 @@ Rectangle{
         textStyle: root.style.textStyle
     }
 
-    Workspace.Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.horizontalCenter: parent.horizontalCenter
@@ -329,7 +329,7 @@ Rectangle{
         textStyle: root.style.textStyle
     }
 
-    Workspace.Label{
+    Input.Label{
         anchors.bottom: parent.bottom
         anchors.bottomMargin: 5
         anchors.right: parent.right

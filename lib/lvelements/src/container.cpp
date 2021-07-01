@@ -24,10 +24,12 @@ void Container::setChildren(ScopedValue children){
     }
     m_data.clear();
 
+    auto isolate = engine()->isolate();
+    auto context = isolate->GetCurrentContext();
     if ( data->IsArray()){
         v8::Local<v8::Array> arr = v8::Local<v8::Array>::Cast(data);
         for ( unsigned int i = 0; i < arr->Length(); ++i ){
-            ScopedValue v(arr->Get(i));
+            ScopedValue v(arr->Get(context, i).ToLocalChecked());
             Element* e = v.toElement(engine());
             e->setParent(this);
             m_data.push_back(e);

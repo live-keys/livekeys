@@ -72,6 +72,8 @@ Qan.Connector {
     //! True when the connector item is currently dragged.
     property bool   connectorDragged: dropDestArea.drag.active
 
+    property var    createEdgeHook: null
+
     edgeComponent: Component{ Qan.Edge{} }
     onEdgeColorChanged: {
         if (edgeItem)
@@ -214,7 +216,7 @@ Qan.Connector {
         enabled: true
         onReleased: {
             if ( connectorItem.state === "HILIGHT" ) {
-                connectorReleased(visualConnector.Drag.target)
+                connectorReleased(visualConnector.Drag.target, createEdgeHook)
             }
             configureConnectorPosition()
             if (edgeItem)       // Hide the edgeItem after a mouse release or it could

@@ -39,6 +39,24 @@ ApplicationWindow{
 
     property QtObject dialogs : QtObject{
 
+        property QtObject messageStyle : QtObject{
+            property QtObject box: QtObject{
+                property color background: "#02070b"
+                property color borderColor: "#0c151c"
+                property int borderWidth: 1
+                property int radius: 5
+                property color textColor: "#fff"
+                property font font : Qt.font({
+                    family: 'Open Sans, sans-serif',
+                    weight: Font.Normal,
+                    italic: false,
+                    pixelSize: 12
+                })
+            }
+            property Component button: null
+
+        }
+
         function saveFile(options, callback){
             var title = options.title ? options.title : "Pleace choose a file";
             var filters = options.filters ? options.filters : ["All files (*)"]
@@ -77,6 +95,10 @@ ApplicationWindow{
         function message(message, options){
             var ob = overlayBoxFactory.createObject(root)
             ob.box = messageDialogConfirmFactory.createObject()
+            ob.box.style = root.dialogs.messageStyle.box
+            if ( root.dialogs.messageStyle.button )
+                ob.box.buttonStyle = root.dialogs.messageStyle.button
+
             ob.box.show(message, options)
             return ob
         }
@@ -213,9 +235,6 @@ ApplicationWindow{
 
         MessageDialogConfirm{
             anchors.fill: parent
-            color: "#02070b"
-            border.width: 1
-            border.color: "#0c151c"
         }
     }
 

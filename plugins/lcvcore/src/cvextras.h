@@ -4,10 +4,11 @@
 #include "opencv2/core.hpp"
 #include "live/exception.h"
 #include "live/qmlerror.h"
+#include "qlcvcoreglobal.h"
 
 namespace lv{
 
-class CvExtras{
+class Q_LCVCORE_EXPORT CvExtras{
 
 public:
     CvExtras();

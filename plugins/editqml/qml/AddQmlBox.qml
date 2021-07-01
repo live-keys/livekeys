@@ -20,23 +20,18 @@ import QtQuick.Controls.Styles 1.2
 import base 1.0
 import live 1.0
 import editor.private 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
 
-    width: 380 + (mode & AddQmlBox.DisplayMode.WithFunctions ? 100: 0)
+    width: 380 + (categories.includes('functions') ? 100: 0)
     height: 280
     color: root.theme.colorScheme.background
     opacity: 0.95
     objectName: "addQmlBox"
 
-    enum DisplayMode {
-        ObjectsOnly = 0,
-        Default = 1,
-        WithFunctions = 2,
-        NoObjects = 4
-    }
+    property var categories: ['objects', 'properties', 'events']
 
     enum AddPropertyMode {
         Default = 0,
@@ -54,13 +49,11 @@ Rectangle{
     property int smallFontSize: 9
     property var codeQmlHandler: null
 
-    property var mode: AddQmlBox.DisplayMode.Default
-
     border.color: root.theme.colorScheme.middlegroundOverlayDominant
     border.width: 1
 
-    onModeChanged: {
-        if (mode === AddQmlBox.DisplayMode.ObjectsOnly)
+    onCategoriesChanged: {
+        if (categories.length === 1 && categories[0] === 'objects')
             activeIndex = 2
     }
 
@@ -82,8 +75,9 @@ Rectangle{
         searchInput.forceFocus()
     }
 
-    property var cancel: function(){ }
-    property var accept : function(type, data, mode){ }
+    property var cancel : function(){}
+    property var accept : function(selection){}
+    property var finalize : function(){}
 
     function getCompletion(){
         if ( listView.currentItem ){
@@ -103,7 +97,7 @@ Rectangle{
         height: title.height + buttonsContainer.height
         anchors.top: parent.top
 
-        Workspace.Label{
+        Input.Label{
             id: title
             anchors.top: parent.top
             anchors.topMargin: 5
@@ -134,8 +128,8 @@ Rectangle{
             height: 30
             spacing: 2
 
-            Workspace.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+            Input.TextButton{
+                visible: categories.length !== 1 || categories[0] !== 'objects'
                 text: 'All'
                 height: 22
                 width: 70
@@ -148,8 +142,8 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+            Input.TextButton{
+                visible: categories.includes('properties')
                 text: 'Property'
                 height: 22
                 width: 70
@@ -162,11 +156,11 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
+            Input.TextButton{
                 text: 'Object'
                 height: 22
                 width: 70
-                visible: !(mode & AddQmlBox.DisplayMode.NoObjects)
+                visible: categories.includes('objects')
 
                 style: root.theme.formButtonStyle
                 color: {
@@ -178,8 +172,8 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
-                visible: mode !== AddQmlBox.DisplayMode.ObjectsOnly
+            Input.TextButton{
+                visible: categories.includes('events')
                 text: 'Event'
                 height: 22
                 width: 70
@@ -193,8 +187,8 @@ Rectangle{
                 }
             }
 
-            Workspace.TextButton{
-                visible: mode & AddQmlBox.DisplayMode.WithFunctions
+            Input.TextButton{
+                visible: categories.includes('functions')
                 text: 'Function'
                 height: 22
                 width: 70
@@ -263,7 +257,7 @@ Rectangle{
             anchors.rightMargin: 0
             color: "transparent"
 
-            Workspace.InputBox {
+            Input.InputBox {
 
                 id : idInput
 
@@ -347,7 +341,7 @@ Rectangle{
         color: "transparent"
         height: 28
 
-        Workspace.InputBox {
+        Input.InputBox {
             id : searchInput
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -420,15 +414,43 @@ Rectangle{
             }
         }
 
-        if (selector === 2){
+        var selection = null
+        if (selector === 1){
+            selection = {
+                category: 'property',
+                position: root.addContainer.model.addPosition,
+                name: code,
+                type: type,
+                mode: mode,
+                objectType: root.addContainer.objectType
+            }
+        }
+        else if (selector === 2){
             var result = code
             if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
-            root.activeIndex = 2
-            root.accept(importSpace, result, mode)
-        } else {
-            root.activeIndex = selector
-            root.accept(type, code, mode)
+            selection = {
+                category: 'object',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: result
+            }
+        } else if (selector === 3){
+            selection = {
+                category: 'event',
+                position: root.addContainer.model.addPosition,
+                objectType: root.addContainer.objectType,
+                name: code
+            }
+        } else if (selector === 4){
+            selection = {
+                category: 'function',
+                position: root.addContainer.model.addPosition,
+                name: code
+            }
         }
+
+        root.activeIndex = selector
+        root.accept(selection)
     }
 
     Item{
@@ -439,7 +461,7 @@ Rectangle{
         anchors.rightMargin: 1
         anchors.bottomMargin: 1
 
-        Workspace.SelectableListView {
+        Input.SelectableListView {
             id: categoryList
             anchors.top : parent.top
             anchors.left: parent.left
@@ -471,7 +493,7 @@ Rectangle{
 
                     height : 25
                     color : ListView.isCurrentItem ? root.theme.selectableListView.selectionBackgroundColor : "transparent"
-                    Workspace.Label{
+                    Input.Label{
                         id: label
                         anchors.left: parent.left
                         anchors.leftMargin: 10
@@ -523,7 +545,7 @@ Rectangle{
             }
         }
 
-        Workspace.SelectableListView {
+        Input.SelectableListView {
             id: listView
             anchors.top : parent.top
             anchors.right: parent.right

@@ -7,6 +7,7 @@ Rectangle{
 
     signal segmentFocused(Segment segment)
     signal segmentDoubleClicked(Segment segment)
+    signal segmentRightClicked(Item delegate, Segment segment)
     signal trackClicked(int position)
     signal trackDoubleClicked(int position)
 

@@ -1,0 +1,7 @@
+component TodoList < Ul{
+
+    children: this.items.map((item, index) => {
+        return TodoListItem{
+        }
+    })
+}

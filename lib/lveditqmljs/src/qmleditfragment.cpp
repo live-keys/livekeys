@@ -205,7 +205,11 @@ void QmlEditFragment::setBindingPalette(CodePalette *palette){
 
 void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
     m_childFragments.append(edit);
-
+    edit->setParent(this);
+    if ( m_channel ){
+        DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
+        disconnect(channels, &DocumentQmlChannels::selectedChannelChanged, edit, &QmlEditFragment::__selectedChannelChanged);
+    }
 }
 
 void QmlEditFragment::removeChildFragment(QmlEditFragment *edit){
@@ -674,9 +678,10 @@ void QmlEditFragment::setObjectInfo(QVariantMap &info)
 
 void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
     if ( !m_channel ){
-        DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
-        if ( !parentFragment() )
+        if ( !parentFragment() ){
+            DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
             connect(channels, &DocumentQmlChannels::selectedChannelChanged, this, &QmlEditFragment::__selectedChannelChanged);
+        }
     }
     m_channel = channel;
     if ( m_channel && !m_channel->isBuilder() && m_channel->type() == QmlBindingChannel::Object ){
@@ -786,6 +791,10 @@ bool QmlEditFragment::bindFunctionExpression(const QString &expression){
 bool QmlEditFragment::isNull()
 {
     return readValueText() == "null";
+}
+
+bool QmlEditFragment::isMethod(){
+    return m_channel ? m_channel->type() == QmlBindingChannel::Method : false;
 }
 
 void QmlEditFragment::__channelObjectErased(){

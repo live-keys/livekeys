@@ -289,8 +289,8 @@ int Livekeys::exec(const QGuiApplication& app){
 #endif
 }
 
-int Livekeys::execElements(const QGuiApplication &app){
 #ifdef BUILD_ELEMENTS
+int Livekeys::execElements(const QGuiApplication &app){
     int result = 0;
     m_engine->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
     m_engine->scope([&result, this, &app](){
@@ -298,11 +298,13 @@ int Livekeys::execElements(const QGuiApplication &app){
         result = app.exec();
     });
     return result;
+}
 #else
+int Livekeys::execElements(const QGuiApplication &){
     vlog().e() << "Support for elements is disabled.";
     return 0;
-#endif
 }
+#endif
 
 void Livekeys::loadDefaultLayers(){
     QStringList layersToLoad = {"window", "workspace", "editor"}; // defaults
@@ -421,6 +423,11 @@ const MLNode &Livekeys::startupConfiguration(){
                      {"package", "workspace"},
                      {"enabled", true},
                      {"component", "WorkspaceControlsExtension.qml"}
+                 },
+                 {
+                     {"package", "lcvcore"},
+                     {"enabled", true},
+                     {"component", "EditCvExtension.qml"}
                  }/*,
                  {
                      {"package", "editlv"},

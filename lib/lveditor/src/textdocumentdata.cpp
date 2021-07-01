@@ -14,8 +14,8 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
 {
     // assumption: we will always have blocks containing "position" and "removed" blocks
 
-    unsigned i = 0;
-    unsigned total = 0;
+    size_t i = 0;
+    size_t total = 0;
 
     std::pair<unsigned, unsigned> start, old_end, new_end;
 

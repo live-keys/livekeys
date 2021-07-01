@@ -100,12 +100,6 @@ CodePalette{
 
     onInit: {
         captureContainer.videoDecoderView = value
-    }
-    onValueFromBindingChanged: {
-        captureContainer.videoDecoderView = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.writeProperties({
                 'fps' : palette.value.fps,
@@ -113,5 +107,8 @@ CodePalette{
                 'paused' : palette.value.paused
             })
         }
+    }
+    onValueFromBindingChanged: {
+        captureContainer.videoDecoderView = value
     }
 }

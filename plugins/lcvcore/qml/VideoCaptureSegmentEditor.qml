@@ -3,7 +3,7 @@ import timeline 1.0
 import lcvcore 1.0
 import live 1.0
 import editor 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -31,7 +31,7 @@ Rectangle{
         color: "#afafaf"
     }
 
-    Workspace.PathInputBox{
+    Input.PathInputBox{
         id: pathInputBox
         anchors.right: parent.right
         anchors.rightMargin: 60
@@ -46,7 +46,7 @@ Rectangle{
         path: root.currentSegment ? root.currentSegment.filters : ''
     }
 
-    Workspace.Button{
+    Input.Button{
         anchors.top: parent.top
         anchors.topMargin: 4
         anchors.right: parent.right
@@ -61,7 +61,7 @@ Rectangle{
     }
 
 
-    TextButton{
+    Input.TextButton{
         anchors.top: parent.top
         anchors.topMargin: 4
         anchors.right: parent.right

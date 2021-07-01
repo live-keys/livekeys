@@ -87,6 +87,26 @@ QMat *QGeometry::transform(QMat *input, QMat *m){
     return r;
 }
 
+QMat *QGeometry::pad(QMat *input, QColor color, int top, int right, int bottom, int left){
+    if ( !input )
+        return nullptr;
+
+    QMat* r = new QMat(input->internal().cols + left + right, input->internal().rows + top + bottom, QMat::CV8U, 4);
+
+    try {
+        cv::Mat* surface = r->internalPtr();
+        cv::Mat surfaceSelect = (*surface)(cv::Rect(left, top, input->internal().cols, input->internal().rows));
+        surface->setTo(cv::Scalar(color.blue(), color.green(), color.red(), color.alpha()));
+        lv::CvExtras::copyTo4Channels(input->internal(), surfaceSelect);
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewEngine::grab(this), this, "Geometry: ").jsThrow();
+        delete r;
+        return nullptr;
+    }
+
+    return r;
+}
+
 QMat *QGeometry::getPerspectiveTransform(QJSValue src, QJSValue dst)
 {
     return getPerspectiveTransform(src.toVariant().toList(), dst.toVariant().toList());
@@ -171,7 +191,7 @@ QMat *QGeometry::perspectiveProjection(QMat *input, QMat *background, QJSValue p
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Geometry: ").jsThrow();
     }
-
+    return nullptr;
 }
 
 QMat *QGeometry::warpPerspective(QMat *input, QMat *transform, QSize size, int flags, int borderMode)

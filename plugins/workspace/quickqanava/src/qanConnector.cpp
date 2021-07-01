@@ -91,7 +91,7 @@ qan::NodeStyle* Connector::style() noexcept
 //-----------------------------------------------------------------------------
 
 /* Connector Configuration *///------------------------------------------------
-void    Connector::connectorReleased(QQuickItem* target) noexcept
+void    Connector::connectorReleased(QQuickItem* target, QJSValue callback) noexcept
 {
 //    qWarning() << "connectorReleased...";
     // Restore original position
@@ -140,8 +140,11 @@ void    Connector::connectorReleased(QQuickItem* target) noexcept
                   dstPortItem == nullptr )
             create = _graph->isEdgeSourceBindable(*srcPortItem);
         if ( getCreateDefaultEdge() ) {
+            auto engine = qmlEngine(_graph);
             if ( create )
-                createdEdge = _graph->insertEdge( srcNode, dstNode );
+                createdEdge = _graph->insertEdge( srcNode, dstNode,
+                                                  callback.isCallable() && engine ? qobject_cast<QQmlComponent*>(callback.call(QJSValueList() << engine->newQObject(srcNode) << engine->newQObject(dstNode)).toQObject()) : nullptr);
+
             if ( createdEdge != nullptr ) {     // Special handling for src or dst port item binding
                 if ( srcPortItem )
                     _graph->bindEdgeSource(*createdEdge, *srcPortItem);

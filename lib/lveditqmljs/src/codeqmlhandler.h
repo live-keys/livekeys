@@ -24,7 +24,6 @@
 #include "live/lockedfileiosession.h"
 #include "live/viewengine.h"
 #include "live/settings.h"
-#include "live/palettelist.h"
 #include "live/codecompletionmodel.h"
 #include "live/qmlimportsmodel.h"
 #include "live/documentqmlinfo.h"
@@ -58,6 +57,7 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(CodeQmlHandler)
+    Q_PROPERTY(lv::DocumentHandler* documentHandler        READ documentHandler CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
 
@@ -116,11 +116,13 @@ public:
         GroupOnly = 4,
         NoReadOnly = 8
     };
+    Q_ENUMS(AddOptionsFilter);
 
     QmlEditFragmentContainer *editContainer();
     DocumentQmlChannels* bindingChannels() const;
+    DocumentHandler* documentHandler() const;
 
-    Q_ENUMS(AddOptionsFilter);
+
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
@@ -162,15 +164,14 @@ public slots:
 
     QString propertyType(lv::QmlEditFragment* edit, const QString& propertyName);
 
-    lv::PaletteList *findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeLayoutConfigurations = false);
-    lv::PaletteList *findPalettes(int position, bool includeLayoutConfigurations = false);
+    QJSValue findPalettesFromFragment(lv::QmlEditFragment* fragment);
+    QJSValue findPalettes(int position);
 
-    QJSValue openPalette(lv::QmlEditFragment* fragment, lv::PaletteList* palette, int index);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
 
     QString defaultPalette(lv::QmlEditFragment* fragment);
 
-    lv::CodePalette* openBinding(lv::QmlEditFragment* edit, lv::PaletteList* paletteList, int index);
+    lv::CodePalette* openBinding(lv::QmlEditFragment* edit, QString paletteName);
     void closeBinding(int position, int length);
 
     QJSValue expand(lv::QmlEditFragment* edit, const QJSValue& val);
@@ -294,9 +295,10 @@ private:
     bool isBlockEmptySpace(const QTextBlock& bl);
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
-    lv::PaletteList* findPalettesForDeclaration(QmlDeclaration::Ptr decl, bool includeExpandables = false);
+    QJSValue findPalettesForDeclaration(QmlDeclaration::Ptr decl);
 
     void createChannelForFragment(QmlEditFragment* parentFragment, QmlEditFragment* fragment, QmlBindingPath::Ptr bindingPath);
+    QJSValue declarationToQml(QmlDeclaration::Ptr decl);
 private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
@@ -320,6 +322,7 @@ private:
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 
     Q_DECLARE_PRIVATE(CodeQmlHandler)
+    lv::DocumentHandler* m_documentHandler;
 };
 
 inline ProjectDocument *CodeQmlHandler::document() const{

@@ -457,6 +457,61 @@ QMat *QMatOp::bitwiseNot(QMat *arg)
     return result;
 }
 
+QMat *QMatOp::selectChannel(QMat *input, int channel)
+{
+    if ( !input || input->internal().empty())
+        return nullptr;
+
+    try{
+        cv::Mat* rMat = new cv::Mat(
+            input->dimensions().height(),
+            input->dimensions().width(),
+            CV_MAKETYPE(CV_8UC1, 1));
+
+
+        if ( input->channels() == 1 ){
+            input->internal().copyTo(*rMat);
+            return new QMat(rMat);
+        } else if ( input->channels() == 3 ){
+            std::vector<cv::Mat> channels;
+            cv::split(input->internal(), channels);
+            channels[channel].copyTo(*rMat);
+        }
+
+        return new QMat(rMat);
+
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        return nullptr;
+    }
+}
+
+QMat *QMatOp::copyMakeBorder(QMat *input, int top, int bottom, int left, int right, int borderType, const QColor& color)
+{
+    if ( !input || input->internal().empty() )
+        return nullptr;
+
+    try{
+        cv::Mat* rMat = new cv::Mat(
+            input->dimensions().height(),
+            input->dimensions().width(),
+            CV_MAKETYPE(input->depth(), input->channels()));
+        cv::Scalar value;
+        if ( color.isValid() ){
+            if ( rMat->channels() == 1 )
+                value = color.red();
+            else if ( rMat->channels() == 3 )
+                value = cv::Scalar(color.blue(), color.green(), color.red());
+        }
+        cv::copyMakeBorder(input->internal(), *rMat, top, bottom, left, right, borderType, value);
+        return new QMat(rMat);
+
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        return nullptr;
+    }
+}
+
 lv::ViewEngine *QMatOp::engine(){
     return lv::ViewContext::instance().engine();
 }

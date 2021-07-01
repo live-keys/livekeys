@@ -17,19 +17,6 @@
 #include "lcvimgproc_plugin.h"
 
 #include <qqml.h>
-#include "qblur.h"
-#include "qcanny.h"
-#include "qgaussianblur.h"
-#include "qhoughlines.h"
-#include "qhoughlinesp.h"
-#include "qsobel.h"
-#include "qcvtcolor.h"
-#include "qfilter2d.h"
-#include "qchannelselect.h"
-#include "qstructuringelement.h"
-#include "qdilate.h"
-#include "qerode.h"
-#include "qcopymakeborder.h"
 #include "qdraw.h"
 #include "qcachedwarpperspective.h"
 #include "qgeometry.h"
@@ -37,6 +24,9 @@
 #include "qtransformimage.h"
 #include "qtransformations.h"
 #include "qcascadeclassifier.h"
+#include "qfilteringoperations.h"
+#include "colorspace.h"
+#include "qfeaturedetection.h"
 #include <QQmlEngine>
 
 
@@ -55,21 +45,20 @@ static QObject* transformationsProvider(QQmlEngine *engine, QJSEngine *){
     return new QTransformations(engine);
 }
 
+static QObject* filteringOperationsProvider(QQmlEngine *engine, QJSEngine *){
+    return new QFilteringOperations(engine);
+}
+
+static QObject* colorSpaceProvider(QQmlEngine *engine, QJSEngine *){
+    return new ColorSpace(engine);
+}
+
+static QObject* featureDetectionProvider(QQmlEngine *engine, QJSEngine *){
+    return new QFeatureDetection(engine);
+}
+
 void LcvimgprocPlugin::registerTypes(const char *uri){
     // @uri modules.lcvimgproc
-    qmlRegisterType<QBlur>(                   uri, 1, 0, "Blur");
-    qmlRegisterType<QCanny>(                  uri, 1, 0, "Canny");
-    qmlRegisterType<QGaussianBlur>(           uri, 1, 0, "GaussianBlur");
-    qmlRegisterType<QHoughLines>(             uri, 1, 0, "HoughLines");
-    qmlRegisterType<QHoughLinesP>(            uri, 1, 0, "HoughLinesP");
-    qmlRegisterType<QSobel>(                  uri, 1, 0, "Sobel");
-    qmlRegisterType<QCvtColor>(               uri, 1, 0, "CvtColor");
-    qmlRegisterType<QChannelSelect>(          uri, 1, 0, "ChannelSelect");
-    qmlRegisterType<QStructuringElement>(     uri, 1, 0, "StructuringElement");
-    qmlRegisterType<QFilter2D>(               uri, 1, 0, "Filter2D");
-    qmlRegisterType<QDilate>(                 uri, 1, 0, "Dilate");
-    qmlRegisterType<QErode>(                  uri, 1, 0, "Erode");
-    qmlRegisterType<QCopyMakeBorder>(         uri, 1, 0, "CopyMakeBorder");
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
     qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");
     qmlRegisterType<QCascadeClassifier>(      uri, 1, 0, "CascadeClassifier");
@@ -79,6 +68,11 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterSingletonType<QShapeDescriptors>( uri, 1, 0, "ShapeDescriptors",
                                                  &shapeDescriptorsProvider);
     qmlRegisterSingletonType<QTransformations>(uri, 1, 0, "Transformations", &transformationsProvider);
+    qmlRegisterSingletonType<QFilteringOperations>( uri, 1, 0, "FilteringOperations",
+                                                 &filteringOperationsProvider);
+    qmlRegisterSingletonType<ColorSpace>( uri, 1, 0, "ColorSpace", &colorSpaceProvider);
+    qmlRegisterSingletonType<QFeatureDetection>( uri, 1, 0, "FeatureDetection", &featureDetectionProvider);
+
 }
 
 

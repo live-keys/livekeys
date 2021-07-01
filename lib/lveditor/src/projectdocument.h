@@ -36,6 +36,7 @@ class ProjectFile;
 class ProjectDocument;
 class ProjectDocumentBlockData;
 class DocumentHandler;
+class ProjectDocumentPrivate;
 
 class LV_EDITOR_EXPORT ProjectDocumentMarker{
 
@@ -188,12 +189,13 @@ private:
 class LV_EDITOR_EXPORT ProjectDocument : public Document{
 
     Q_OBJECT
+    Q_ENUMS(EditingState)
 
 public:
     /** Iterator through sections */
-    typedef QLinkedList<ProjectDocumentSection::Ptr>::iterator       SectionIterator;
+    typedef std::list<ProjectDocumentSection::Ptr>::iterator       SectionIterator;
     /** Const iterator through sections */
-    typedef QLinkedList<ProjectDocumentSection::Ptr>::const_iterator SectionConstIterator;
+    typedef std::list<ProjectDocumentSection::Ptr>::const_iterator SectionConstIterator;
 
     friend class ProjectDocumentAction;
     friend class ProjectDocumentMarker;
@@ -268,8 +270,9 @@ public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
 
     virtual void readContent() override;
+    virtual int contentLength() override;
     QString substring(int from, int length) const;
-    void insert(int from, int length, const QString& text);
+    void insert(int from, int length, const QString& text, int editingState = ProjectDocument::Assisted);
     int offsetAtLine(int line) const;
 
 signals:
@@ -287,114 +290,8 @@ private:
     void updateSectionBlocks(int position, const QString& addedText);
     QString getCharsRemoved(int position, int count);
 
-    QTextDocument*   m_textDocument;
-
-    QLinkedList<ProjectDocumentSection::Ptr> m_sections;
-    QLinkedList<ProjectDocumentMarker::Ptr>  m_markers;
-
-    QLinkedList<ProjectDocumentSection::Ptr> m_sectionsToRemove;
-    bool                                     m_iteratingSections;
-
-    QLinkedList<ProjectDocumentAction>      m_changes;
-    mutable QLinkedList<ProjectDocumentAction>::iterator m_lastChange;
-
-    QString       m_contentString;
-    bool          m_contentStringDirty;
-
-    mutable int   m_editingState;
-    mutable bool  m_isSynced;
-    int           m_lastCursorPosition;
-//    mutable bool  m_isDirty;
+    ProjectDocumentPrivate* d_ptr;
 };
-
-/**
- * \brief Begin-iterator of the sections
- */
-inline ProjectDocument::SectionIterator ProjectDocument::sectionsBegin(){
-    return m_sections.begin();
-}
-
-/**
- * \brief End-iterator of the sections
- */
-inline ProjectDocument::SectionIterator ProjectDocument::sectionsEnd(){
-    return m_sections.end();
-}
-
-
-/**
- * \brief Const begin-iterator of the sections
- */
-inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsBegin() const{
-    return m_sections.begin();
-}
-
-
-/**
- * \brief Const end-iterator of the sections
- */
-inline ProjectDocument::SectionConstIterator ProjectDocument::sectionsEnd() const{
-    return m_sections.end();
-}
-
-/**
- * \brief Number of sections
- */
-inline int ProjectDocument::totalSections() const{
-    return m_sections.size();
-}
-
-/**
- * \brief Shows if the object has any sections
- */
-inline bool ProjectDocument::hasSections() const{
-    return totalSections() > 0;
-}
-
-inline void ProjectDocument::resetSync() const{
-    m_isSynced = false;
-}
-
-/**
- * \brief Text document which is wrapped inside the ProjectDocument
- */
-inline QTextDocument *ProjectDocument::textDocument(){
-    return m_textDocument;
-}
-
-/**
- * \brief Adds editing state flag
- */
-inline void ProjectDocument::addEditingState(EditingState state){
-    m_editingState |= state;
-}
-
-/**
- * \brief Removes the given editing state flag
- */
-inline void ProjectDocument::removeEditingState(EditingState state){
-    if ( m_editingState & state ){
-        bool restoreSilent = editingStateIs(ProjectDocument::Palette | ProjectDocument::Runtime);
-        m_editingState = m_editingState & ~state;
-        if ( restoreSilent ){
-            m_editingState |= ProjectDocument::Silent;
-        }
-    }
-}
-
-/**
- * \brief Shows if the editing state includes the given flags
- */
-inline bool ProjectDocument::editingStateIs(int flag) const{
-    return (flag & m_editingState) == flag;
-}
-
-/**
- * \brief Resets all of the editing state flags
- */
-inline void ProjectDocument::resetEditingState(){
-    m_editingState = 0;
-}
 
 }// namespace
 

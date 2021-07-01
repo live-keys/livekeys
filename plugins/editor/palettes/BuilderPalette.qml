@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import editqml 1.0 as QmlEdit
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -89,7 +89,7 @@ CodePalette{
         width: 280
         height: 50
 
-        Workspace.TextButton{
+        Input.TextButton{
             visible: !hasBuilder
             text: 'Add Builder'
             height: 22
@@ -98,7 +98,7 @@ CodePalette{
             onClicked : palette.createBuilder()
         }
 
-        Workspace.Label{
+        Input.Label{
             id: title
             anchors.top: parent.top
             anchors.topMargin: 2
@@ -112,7 +112,7 @@ CodePalette{
             visible: hasBuilder
         }
 
-        Workspace.PathInputBox{
+        Input.PathInputBox{
             id: pathInput
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -127,7 +127,7 @@ CodePalette{
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             anchors.top: parent.top
             anchors.topMargin: 25
             anchors.right: parent.right

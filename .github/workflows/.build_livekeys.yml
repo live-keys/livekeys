@@ -48,6 +48,7 @@ jobs:
       - name: Download dependencies Linux
         if: runner.os == 'Linux'
         run: |
+          sudo apt-get update
           sudo apt-get install -y gcc-7 g++-7 build-essential cmake cmake-data libgtk2.0-dev pkg-config libavcodec-dev libavformat-dev libswscale-dev
           sudo apt-get install -y python-dev python-numpy python3 python3-pip libtbb2 libtbb-dev libjpeg-dev libpng-dev libdc1394-22-dev libgl1-mesa-dev unzip
           sudo apt-get install -y libtiff5 libtiff5-dev python3-setuptools doxygen libssl1.0-dev nodejs-dev npm
@@ -98,12 +99,12 @@ jobs:
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v1
         with:
-          python-version: 3.9
+          python-version: 3.8
           
       - name: Setup Qt MacOS
         if: runner.os == 'macOS'
         run: |
-          pip3 install aqtinstall
+          pip3 install aqtinstall==1.1.4
           aqt install 5.14.2 --outputdir /opt/qt mac desktop clang_64 -m qtwebengine qtquick3d
           aqt doc 5.14.2 --outputdir /opt/qt mac desktop -m qtwebengine
           export QTDIR=/opt/qt/5.14.2/clang_64
@@ -112,7 +113,7 @@ jobs:
       - name: Setup Qt Linux
         if: runner.os == 'Linux'
         run: |
-          pip3 install aqtinstall
+          pip3 install aqtinstall==1.1.4
           echo "Installed aqtinstall"
           aqt install 5.14.2 --outputdir /opt/qt linux desktop gcc_64 -m qtwebengine qtquick3d
           aqt doc 5.14.2 --outputdir /opt/qt linux desktop -m qtwebengine

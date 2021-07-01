@@ -130,6 +130,7 @@ public slots:
     bool isDirProject() const;
     bool isFileInProject(const QUrl& rootPath) const;
     bool isFileInProject(const QString& rootPath) const;
+    bool canRunFile(const QString& path) const;
 
     void openProject(const QString& rootPath);
     void openProject(const QUrl& url);

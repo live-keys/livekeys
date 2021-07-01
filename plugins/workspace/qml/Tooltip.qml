@@ -1,5 +1,5 @@
 import QtQuick 2.3
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Item{
     id: tooltip
@@ -56,7 +56,7 @@ Item{
 
         property alias labelStyle: label.textStyle
 
-        Workspace.Label{
+        Input.Label{
             id: label
             anchors.left: parent.left
             anchors.leftMargin: 5

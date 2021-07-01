@@ -1,13 +1,13 @@
 import QtQuick 2.3
 import workspace 1.0
-
+import visual.input 1.0 as Input
 
 Tool{
     id: root
 
     toolLabel: 'Crop'
 
-    property QtObject labelInfoStyle: TextStyle{}
+    property QtObject labelInfoStyle: Input.TextStyle{}
     property Component applyButton : null
     property Component cancelButton : null
 
@@ -22,7 +22,7 @@ Tool{
     infoBarContent: Item{
         anchors.fill: parent
 
-        Label{
+        Input.Label{
             id: selectionInfo
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -38,7 +38,7 @@ Tool{
             }
         }
 
-        Button{
+        Input.Button{
             anchors.left: parent.left
             anchors.leftMargin: 140
             width: 25
@@ -46,7 +46,7 @@ Tool{
             content: root.applyButton
             onClicked: root.apply(root.selectedX, root.selectedY, root.selectedWidth, root.selectedHeight)
         }
-        Button{
+        Input.Button{
             anchors.left: parent.left
             anchors.leftMargin: 168
             width: 25
@@ -100,7 +100,7 @@ Tool{
         }
 
 
-        RectangleSelection{
+        Input.RectangleSelection{
             id: rectangleSelection
 
             onRegionModified: {

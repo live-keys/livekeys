@@ -5,7 +5,7 @@ import editor.private 1.0
 import workspace 1.0 as Workspace
 import visual.shapes 1.0
 
-Pane{
+Workspace.Pane{
     id : viewer
     objectName: "viewer"
     paneType: "viewer"
@@ -37,7 +37,7 @@ Pane{
         height: 30
         color: currentTheme ? currentTheme.paneTopBackground : 'black'
 
-        PaneDragItem{
+        Workspace.PaneDragItem{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5
@@ -241,8 +241,12 @@ Pane{
         id: error
         anchors.bottom: parent.bottom
         width : parent.width
-        color : root.style.errorBackgroundColor
-        font: root.style.errorFont
+        color : "#000"
+        font: Qt.font({
+            family: "Source Code Pro, Ubuntu Mono, Courier New, Courier",
+            pixelSize: 12,
+            weight: Font.Normal
+        })
     }
 
     RunnablesMenu{

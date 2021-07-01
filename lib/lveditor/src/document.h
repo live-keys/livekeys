@@ -78,6 +78,7 @@ signals:
 public slots:
     virtual void setContent(const QByteArray& content);
     virtual void readContent();
+    virtual int contentLength();
     bool save();
     bool saveAs(const QString& path);
     bool saveAs(const QUrl& url);

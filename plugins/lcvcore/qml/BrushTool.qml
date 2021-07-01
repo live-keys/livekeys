@@ -4,15 +4,16 @@ import QtQuick.Controls.Styles 1.2
 import workspace 1.0 as Workspace
 import workspace.icons 1.0
 import lcvimgproc 1.0 as Img
+import visual.input 1.0 as Input
 
 Workspace.Tool{
     id: root
 
     toolLabel: 'Brush'
 
-    property QtObject labelInfoStyle: Workspace.TextStyle{}
-    property QtObject labelBoxStyle: Workspace.LabelOnRectangleStyle{}
-    property QtObject formButtonStyle: Workspace.RectangleButtonStyle{}
+    property QtObject labelInfoStyle: Input.TextStyle{}
+    property QtObject labelBoxStyle: Input.LabelOnRectangleStyle{}
+    property QtObject formButtonStyle: Input.RectangleButtonStyle{}
     property Component sizeButton : null
 
     property real brushSize: 1
@@ -20,7 +21,7 @@ Workspace.Tool{
     infoBarContent: Item{
         anchors.fill: parent
 
-        Workspace.Label{
+        Input.Label{
             id: selectionInfo
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -29,13 +30,13 @@ Workspace.Tool{
             text: 'Brush'
         }
 
-        Workspace.Button{
+        Input.Button{
             anchors.left: selectionInfo.right
             anchors.leftMargin: 15
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 15
-            content: Workspace.RectangleButton{
+            content: Input.RectangleButton{
                 width: parent ? parent.width : 20
                 height: parent ? parent.height: 20
 
@@ -88,7 +89,7 @@ Workspace.Tool{
                 }
             }
 
-            Workspace.LabelOnRectangle{
+            Input.LabelOnRectangle{
                 id: valueLabel
                 anchors.left: parent.left
                 anchors.leftMargin: 2

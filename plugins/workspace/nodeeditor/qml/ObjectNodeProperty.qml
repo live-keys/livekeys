@@ -4,6 +4,8 @@ import editor.private 1.0
 import editqml 1.0
 
 import workspace 1.0 as Workspace
+import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Item{
     id: propertyItem
@@ -17,12 +19,15 @@ Item{
     property QtObject node : null
     property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
-    property var documentHandler: null
     property alias propertyTitle: propertyTitle
     property alias paletteContainer: paletteContainer
 
     property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
+    property bool isMethod: false
+
+    property Component methodIcon: Icons.FunctionIcon{ color: theme.colorScheme.foregroundFaded; width: 15; height: 15 }
+    property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.foregroundFaded; width: 15; height: 15 }
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
@@ -37,13 +42,12 @@ Item{
     anchors.leftMargin: isForObject ? 30 : 0
     height: propertyTitle.height + paletteContainer.height
 
-
     property int contentWidth: 355 - anchors.leftMargin
 
     property QtObject defaultStyle : QtObject{
         property color background: "#333"
         property double radius: 5
-        property QtObject textStyle: Workspace.TextStyle{}
+        property QtObject textStyle: Input.TextStyle{}
     }
 
     property QtObject style: defaultStyle
@@ -81,13 +85,27 @@ Item{
         width: parent.width - 10
         height: 30
 
-        Workspace.Label{
+        Input.Label{
+            id: propertyLabel
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             text: propertyItem.propertyName
             textStyle: propertyItem.style.textStyle
         }
+
+        Loader{
+            id: iconLoader
+            anchors.verticalCenter: parent.verticalCenter
+            anchors.left: propertyLabel.right
+            anchors.leftMargin: 5
+            sourceComponent: {
+                return propertyItem.editingFragment && propertyItem.editingFragment.location === QmlEditFragment.Slot
+                    ? propertyItem.eventIcon
+                    : propertyItem.isMethod ? propertyItem.methodIcon : null
+            }
+        }
+
 
         Item{
             visible:!isForObject
@@ -106,12 +124,9 @@ Item{
                 anchors.fill: parent
                 onClicked: {
                     var coords = propertyItem.mapToItem(node.item, 0, 0)
-                    var paletteList = paletteControls.addPaletteList(
+                    var paletteList = paletteControls.views.openPaletteListForNode(
                         propertyItem,
                         paletteContainer,
-                        Qt.rect(coords.x, coords.y ,1,1),
-                        PaletteControls.PaletteListMode.NodeEditor,
-                        PaletteControls.PaletteListSwap.NoSwap,
                         node.item
                     )
 
@@ -144,7 +159,7 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    documentHandler.codeHandler.removeConnection(editingFragment)
+                    editingFragment.codeHandler.removeConnection(editingFragment)
                     if (editingFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()

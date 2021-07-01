@@ -1,8 +1,8 @@
 import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
+import visual.input 1.0 as Input
 
 Rectangle {
     id: root
@@ -97,7 +97,7 @@ Rectangle {
         }
     }
 
-    Workspace.SelectableListView {
+    Input.SelectableListView {
         id: listView
         anchors.top: parent.top
         anchors.topMargin: 30
@@ -149,7 +149,7 @@ Rectangle {
                 width: parent.width - 35
                 height: msgText.height
 
-                Workspace.Label{
+                Input.Label{
                     id: msgText
                     width: listView.width - 55
                     text: model.message
@@ -203,7 +203,7 @@ Rectangle {
             width: parent.width - 35
             height: noMsgsText.height
 
-            Workspace.Label{
+            Input.Label{
                 id: noMsgsText
                 width: listView.width - 55
                 font.italic: true

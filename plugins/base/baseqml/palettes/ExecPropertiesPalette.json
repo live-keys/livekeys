@@ -1,0 +1,11 @@
+{
+    "type": "qml/base#Exec",
+    "palettes" : ["ExecPalette"],
+    "properties" : [
+        ["path", "TextPalette"],
+        ["args", "StringListPalette"],
+        ["input"],
+        ["out", "", "true"]
+    ]
+}
+

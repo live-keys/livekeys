@@ -6,16 +6,21 @@
 #include <QFile>
 
 #include "live/qmlstream.h"
+#include "live/qmlstreamprovider.h"
 
 namespace lv{
 
-class QmlFileStream : public QObject{
+class QmlFileStream : public QObject, public QmlStreamProvider{
 
     Q_OBJECT
 
 public:
     explicit QmlFileStream(QObject *parent = nullptr);
     ~QmlFileStream();
+
+    // QmlStreamProvider interface
+    void wait() override;
+    void resume() override;
 
 signals:
 
@@ -29,11 +34,12 @@ private:
     QFile       m_file;
     QTextStream m_text;
     QString     m_filePath;
-    bool        m_synced;
+    int         m_wait;
+
 };
 
 inline QmlFileStream *QmlFileStream::synced(){
-    m_synced = true;
+    m_wait = true;
     return this;
 }
 

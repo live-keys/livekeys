@@ -4,8 +4,8 @@ import editor 1.0
 import editor.private 1.0
 import editqml 1.0
 
-import workspace 1.0 as Workspace
 import workspace.quickqanava 2.0 as Qan
+import visual.input 1.0 as Input
 
 Qan.NodeItem{
     id: root
@@ -28,7 +28,6 @@ Qan.NodeItem{
     property var removeNode: null
     property var addSubobject: null
     property string id: ""
-    property var documentHandler: null
     property var editor: null
     property var objectGraph: null
 
@@ -58,18 +57,18 @@ Qan.NodeItem{
     resizable: false
 
     function expandDefaultPalette(){
-        paletteControls.openDefaultPalette(editingFragment, editor, paletteContainer, root)
+        paletteControls.openDefaultPalette(editingFragment, paletteContainer, root)
     }
 
     function expandOptions(options){
-        var codeHandler = root.documentHandler.codeHandler
+        var codeHandler = editingFragment.codeHandler
 
         if ( 'palettes' in options){
             var palettes = options['palettes']
             for ( var i = 0; i < palettes.length; ++i){
                 if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
 
-                paletteControls.openPaletteByName(palettes[i], root.editingFragment, editor, paletteContainer)
+                paletteControls.openPaletteByName(palettes[i], root.editingFragment, paletteContainer)
             }
         }
 
@@ -110,7 +109,7 @@ Qan.NodeItem{
                         if (propertyContainer.children[j].propertyName !== propName) continue
                         if (propertyContainer.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
-                        paletteControls.openPaletteByName(propPalette, ef, editor, propertyContainer.children[j].paletteContainer)
+                        paletteControls.openPaletteByName(propPalette, ef, propertyContainer.children[j].paletteContainer)
                         break
                     }
                 } else {
@@ -134,7 +133,7 @@ Qan.NodeItem{
             }
         }
 
-        var codeHandler = documentHandler.codeHandler
+        var codeHandler = editingFragment.codeHandler
 
         var position = editingFragment.valuePosition() +
                        editingFragment.valueLength() - 1
@@ -178,7 +177,7 @@ Qan.NodeItem{
 
         property color titleBackground: "#666"
         property double titleRadius: 5
-        property QtObject titleTextStyle : Workspace.TextStyle{}
+        property QtObject titleTextStyle : Input.TextStyle{}
     }
 
     property QtObject nodeStyle : defaultStyle
@@ -201,7 +200,7 @@ Qan.NodeItem{
             color: root.nodeStyle.titleBackground
             radius: root.nodeStyle.titleRadius
             
-            Workspace.Label{
+            Input.Label{
                 anchors.verticalCenter: parent.verticalCenter
                 anchors.left: parent.left
                 anchors.leftMargin: 15
@@ -242,7 +241,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root, true, objectGraph)
+                        paletteControls.compose(root)
                     }
                 }
             }
@@ -263,12 +262,9 @@ Qan.NodeItem{
                     anchors.fill: parent
                     onClicked: {
                         root.selected = false
-                        var paletteList = paletteControls.addPaletteList(
+                        var paletteList = paletteControls.views.openPaletteListForNode(
                             root,
                             paletteContainer,
-                            {"x": 0, "y": 0},
-                            PaletteControls.PaletteListMode.NodeEditor,
-                            PaletteControls.PaletteListSwap.NoSwap,
                             wrapper
                         )
 
@@ -303,19 +299,20 @@ Qan.NodeItem{
         target: editingFragment
         ignoreUnknownSignals: true
         function onAboutToBeRemoved(){
+            paletteContainer.closePalettes()
             if (removeNode)
                 removeNode(nodeParent)
         }
         function onObjectAdded(obj, cursorCoords){
             if (!addSubobject) return
 
-            documentHandler.codeHandler.populateObjectInfoForFragment(obj)
+            editingFragment.codeHandler.populateObjectInfoForFragment(obj)
 
             var object = obj.objectInfo()
             addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
         }
         function onPropertyAdded(ef, expandDefault){
-            documentHandler.codeHandler.populatePropertyInfoForFragment(ef)
+            editingFragment.codeHandler.populatePropertyInfoForFragment(ef)
 
             var prop = ef.objectInfo()
             var name = ef.identifier()
@@ -325,7 +322,9 @@ Qan.NodeItem{
             propertiesOpened.push(name)
             var portState = ObjectGraph.PortMode.OutPort
 
-            if (prop.isWritable) portState = portState | ObjectGraph.PortMode.InPort
+            if (prop.isWritable || ef.location === QmlEditFragment.Slot) {
+                portState = portState | ObjectGraph.PortMode.InPort
+            }
             addSubobject(nodeParent, name, portState, prop.connection)
         }
 

@@ -49,6 +49,10 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 
 DISTFILES += \
+    palettes/ExecPropertiesPalette.json \
+    palettes/StreamLogPropertiesPalette.json \
+    palettes/ActTriggerTypePalette.qml \
+    palettes/StreamValuePalette.json \
     qml/ConvertToInt.qml \
     qml/JsonDecoder.qml \
     qml/JsonEncoder.qml \

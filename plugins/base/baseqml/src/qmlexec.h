@@ -68,7 +68,7 @@ public slots:
 
     void run();
     void closeInput();
-
+    void stop();
 
 private:
     bool        m_componentComplete;

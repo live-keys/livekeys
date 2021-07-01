@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import lcvphoto 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -77,7 +77,7 @@ CodePalette{
             }
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             width: 35
             height: 22
@@ -129,7 +129,7 @@ CodePalette{
             }
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             anchors.topMargin: 30
             width: 35
@@ -142,12 +142,6 @@ CodePalette{
 
     onInit: {
         adjustmentBox.bandc = value
-    }
-    onValueFromBindingChanged: {
-        adjustmentBox.bandc = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.writeProperties({
                 'brightness' : palette.value.brightness,
@@ -155,4 +149,8 @@ CodePalette{
             })
         }
     }
+    onValueFromBindingChanged: {
+        adjustmentBox.bandc = value
+    }
+
 }

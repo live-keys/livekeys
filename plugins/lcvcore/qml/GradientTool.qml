@@ -2,13 +2,14 @@ import QtQuick 2.3
 import workspace 1.0
 import lcvcore 1.0 as Cv
 import lcvimgproc 1.0 as Img
+import visual.input 1.0 as Input
 
 Tool{
     id: root
 
     toolLabel: 'Brush'
 
-    property QtObject labelInfoStyle: TextStyle{}
+    property QtObject labelInfoStyle: Input.TextStyle{}
     property Component sizeButton : null
 
     property real brushSize: 1
@@ -16,7 +17,7 @@ Tool{
     infoBarContent: Item{
         anchors.fill: parent
 
-        Label{
+        Input.Label{
             id: selectionInfo
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -90,8 +91,7 @@ Tool{
                 imageContainer.writableImage,
                 Qt.point(root.lastX, root.lastY),
                 Qt.point(event.imageX, event.imageY),
-                toolbox.foreground,
-                toolbox.background
+                [[0, toolbox.foreground], [1, toolbox.background]]
             )
 
             root.lastX = event.imageX

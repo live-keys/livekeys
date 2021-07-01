@@ -19,8 +19,8 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0 as L
-import workspace 1.0 as Workspace
 import visual.shapes 1.0 as Vs
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -28,11 +28,15 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    writer: function(){
+        editFragment.write(palette.value)
+    }
+
     item: Item{
         width: 330
         height: 25
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: numberInput
             anchors.left: parent.left
             width: 70
@@ -166,7 +170,7 @@ CodePalette{
             }
         }
 
-        Workspace.NumberLabel{
+        Input.NumberLabel{
             id: leftLabel
             mode: 1
             anchors.top: parent.top
@@ -216,7 +220,7 @@ CodePalette{
 
 
 
-        Workspace.NumberLabel{
+        Input.NumberLabel{
             id: rightLabel
             mode: 2
             anchors.top: parent.top
@@ -266,12 +270,6 @@ CodePalette{
 
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     function updateSliders(value){
         if (value < intSlider.minimumValue || value > intSlider.maximumValue){
             if (value > 0){
@@ -307,6 +305,9 @@ CodePalette{
             return
         }
         updateSliders(value)
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         if (isNaN(value)){

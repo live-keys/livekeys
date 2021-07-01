@@ -7,6 +7,8 @@
         "palettes/DrawPalette.qml" : "qml/lcvcore#DrawSurface",
         "palettes/DrawSurfacePalette.json" : "qml/lcvcore#DrawSurface",
         "palettes/ImageViewPalette.json" : "qml/lcvcore#ImageView",
+        "palettes/VideoSurfacePalette.qml" : "qml/lcvcore#VideoSurfaceView",
+        "palettes/VideoSurfacePropertiesPalette.json" : "qml/lcvcore#VideoSurfaceView",
         "palettes/VideoCapturePalette.qml": "qml/lcvcore#VideoCapture",
         "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",
         "palettes/VideoFilePalette.qml": "qml/lcvcore#VideoFile",
@@ -17,6 +19,10 @@
         "palettes/ImageFilePalette.json" : "qml/lcvcore#ImageFile",
         "palettes/BlankImagePalette.json" : "qml/lcvcore#BlankImage",
         "palettes/PerspectiveOnBackgroundPalette.qml": "qml/lcvcore#PerspectiveOnBackground",
-        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground"
+        "palettes/PerspectiveOnBackgroundPropertiesPalette.json": "qml/lcvcore#PerspectiveOnBackground",
+        "palettes/ImageSegmentFactoryPalette.qml": "qml/lcvcore#ImageSegmentFactory",
+        "palettes/ImageSegmentFactoryPropertiesPalette.json": "qml/lcvcore#ImageSegmentFactory",
+        "palettes/GalleryFileSelectorPalette.qml": "qml/lcvcore#GalleryFileSelector",
+        "palettes/GalleryFileSelectorPropertiesPalette.json": "qml/lcvcore#GalleryFileSelector"
     }
 }

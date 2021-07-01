@@ -38,7 +38,7 @@ QVariant StartupModel::data(const QModelIndex &index, int role) const
 
 int StartupModel::rowCount(const QModelIndex &) const
 {
-    return m_entries.size();
+    return static_cast<int>(m_entries.size());
 }
 
 QHash<int, QByteArray> StartupModel::roleNames() const
@@ -48,7 +48,7 @@ QHash<int, QByteArray> StartupModel::roleNames() const
 
 void StartupModel::addStartupEntry(StartupModel::StartupEntry e)
 {
-    beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
+    beginInsertRows(QModelIndex(), static_cast<int>(m_entries.size()), static_cast<int>(m_entries.size()));
     m_entries.push_back(e);
     if (e.m_isGroupTitle) ++m_numberOfTitles;
     endInsertRows();
@@ -72,13 +72,14 @@ void StartupModel::addEntryAt(StartupEntry e, int i)
 
 lv::StartupModel::StartupEntry lv::StartupModel::entryAt(int i)
 {
-    if (i < 0 || i>= m_entries.size()) return StartupEntry(false, "", "", "");
+    if (i < 0 || i >= static_cast<int>(m_entries.size()) )
+        return StartupEntry(false, "", "", "");
     return m_entries[i];
 }
 
 void lv::StartupModel::clear()
 {
-    beginRemoveRows(QModelIndex(), 0, m_entries.size() - 1);
+    beginRemoveRows(QModelIndex(), 0, static_cast<int>(m_entries.size() - 1));
     m_entries.clear();
     m_numberOfTitles = 0;
     endRemoveRows();

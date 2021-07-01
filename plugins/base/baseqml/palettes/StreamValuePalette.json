@@ -1,0 +1,8 @@
+{
+    "type": "qml/base#StreamValue",
+    "properties" : [
+        ["stream"],
+        ["value"]
+    ]
+}
+

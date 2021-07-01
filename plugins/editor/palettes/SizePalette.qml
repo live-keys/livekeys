@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette {
     id: palette
@@ -14,7 +14,7 @@ CodePalette {
         height: 24
         width: 160
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: widthInput
             anchors.left: parent.left
             width: 50
@@ -44,7 +44,7 @@ CodePalette {
             color: "white"
         }
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: heightInput
             anchors.left: widthInput.right
             anchors.leftMargin: 20
@@ -65,7 +65,7 @@ CodePalette {
             }
         }
 
-        Workspace.Button{
+        Input.Button{
             anchors.right: parent.right
             width: 30
             height: 25
@@ -82,17 +82,12 @@ CodePalette {
     onInit: {
         widthInput.text = value.width
         heightInput.text = value.height
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         widthInput.text = value.width
         heightInput.text = value.height
     }
-
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
-
 }

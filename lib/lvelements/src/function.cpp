@@ -3,33 +3,38 @@
 #include "live/elements/element.h"
 #include "live/exception.h"
 #include "v8nowarnings.h"
+#include "context_p.h"
 
 namespace lv{ namespace el{
 
 
 template<>
 bool Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return (*info)[index]->BooleanValue();
+    return (*info)[index]->BooleanValue(info->GetIsolate());
 }
 
 template<>
 Value::Int32 Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index){
-    return (*info)[index]->Int32Value();
+    auto engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+    return (*info)[index]->Int32Value(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
 Value::Int64 Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return (*info)[index]->IntegerValue();
+    auto engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+    return (*info)[index]->IntegerValue(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
 Value::Number Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return (*info)[index]->NumberValue();
+    auto engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+    return (*info)[index]->NumberValue(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
 std::string Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return *v8::String::Utf8Value((*info)[index]->ToString(info->GetIsolate()));
+    auto engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
+    return *v8::String::Utf8Value(info->GetIsolate(), (*info)[index]->ToString(engine->currentContext()->asLocal()).ToLocalChecked());
 }
 
 template<>
@@ -171,28 +176,28 @@ int Function::Parameters::length() const{
 
 
 template<>
-bool Function::Parameters::extractValue(Engine *, const v8::Local<v8::Value> *args, int index){
-    return args[index]->BooleanValue();
+bool Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
+    return args[index]->BooleanValue(engine->isolate());
 }
 
 template<>
-int Function::Parameters::extractValue(Engine*, const v8::Local<v8::Value> *args, int index){
-    return args[index]->Int32Value();
+int Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
+    return args[index]->Int32Value(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
-Value::Int64 Function::Parameters::extractValue(Engine*, const v8::Local<v8::Value> *args, int index){
-    return args[index]->IntegerValue();
+Value::Int64 Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
+    return args[index]->IntegerValue(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
-double Function::Parameters::extractValue(Engine*, const v8::Local<v8::Value> *args, int index){
-    return args[index]->NumberValue();
+double Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
+    return args[index]->NumberValue(engine->currentContext()->asLocal()).ToChecked();
 }
 
 template<>
 std::string Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
-    return *v8::String::Utf8Value(args[index]->ToString(engine->isolate()));
+    return *v8::String::Utf8Value(engine->isolate(), args[index]->ToString(engine->currentContext()->asLocal()).ToLocalChecked());
 }
 
 template<>

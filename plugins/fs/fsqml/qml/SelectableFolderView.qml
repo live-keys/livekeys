@@ -3,11 +3,11 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import base 1.0
 import editor.private 1.0
-import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
-Workspace.SelectableListView{
+Input.SelectableListView{
     id: root
 
     property var selectedIndexes : []
@@ -20,6 +20,7 @@ Workspace.SelectableListView{
         model = wdlist
     }
 
+    signal itemHighlighted(int index)
     signal itemSelected(int index)
     onItemSelected: {
         var item = model[index]
@@ -52,7 +53,7 @@ Workspace.SelectableListView{
                 
                 return 'transparent'
             }
-            Workspace.Label{
+            Input.Label{
                 id: label
                 anchors.left: parent.left
                 anchors.leftMargin: 25
@@ -99,6 +100,7 @@ Workspace.SelectableListView{
                         }
                     } else {
                         root.selectedIndexes = [index]
+                        root.itemHighlighted(index)
                     }
                     root.forceActiveFocus()
                 }

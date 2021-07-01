@@ -7,7 +7,7 @@ HEADERS += \
     $$PWD/metainfo.h \
     $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
-    $$PWD/qmlstreamiterator.h \
+    $$PWD/qmlstreamprovider.h \
     $$PWD/qmlwritablestream.h \
     $$PWD/settings.h \
     $$PWD/visuallogbasemodel.h \
@@ -46,7 +46,7 @@ SOURCES += \
     $$PWD/metainfo.cpp \
     $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
-    $$PWD/qmlstreamiterator.cpp \
+    $$PWD/qmlstreamprovider.cpp \
     $$PWD/qmlwritablestream.cpp \
     $$PWD/settings.cpp \
     $$PWD/qmlclipboard.cpp \

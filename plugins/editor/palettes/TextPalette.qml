@@ -3,7 +3,7 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -19,13 +19,14 @@ CodePalette{
         property alias path: pathInput.text
         property alias font: pathInput.font
 
-        Workspace.InputBox{
+        Input.InputBox{
             id: pathInput
             anchors.left: parent.left
             width: parent.width - 30
             height: 25
 
             style: theme.inputStyle
+            onTextChanged: commitButton.visible = true
 
             onKeyPressed: {
                 if ( event.key === Qt.Key_Return ){
@@ -33,12 +34,14 @@ CodePalette{
                     if ( !palette.isBindingChange() ){
                         editFragment.write(palette.value)
                     }
+                    commitButton.visible = false
                     event.accepted = true
                 }
             }
         }
 
-        Workspace.Button{
+        Input.Button{
+            id: commitButton
             anchors.right: parent.right
             width: 30
             height: 25
@@ -48,6 +51,7 @@ CodePalette{
                 if ( !palette.isBindingChange() ){
                     editFragment.write(palette.value)
                 }
+                commitButton.visible = false
             }
         }
 
@@ -58,11 +62,9 @@ CodePalette{
     }
     onInit: {
         root.path = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)
         }
     }
+
 }

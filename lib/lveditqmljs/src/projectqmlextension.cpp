@@ -83,7 +83,6 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
  * @brief ProjectQmlExtension destructor
  */
 ProjectQmlExtension::~ProjectQmlExtension(){
-    m_engine->removeCompileHook(&ProjectQmlExtension::engineHook, this);
     for ( auto it = m_codeHandlers.begin(); it != m_codeHandlers.end(); ++it ){
         CodeQmlHandler* cqh = *it;
         cqh->resetProjectQmlExtension();
@@ -124,17 +123,6 @@ void ProjectQmlExtension::componentComplete(){
 
         setParams(settings, project, engine, workspace);
     }
-}
-
-/**
- * \brief Hook that get's executed for each engine recompile, notifying all codeHandlers assigned to this object.
- */
-void ProjectQmlExtension::engineHook(const QString &, const QUrl &, QObject *, void* /*data*/){
-//    ProjectQmlExtension* that = reinterpret_cast<ProjectQmlExtension*>(data);
-//    for ( auto it = that->m_codeHandlers.begin(); it != that->m_codeHandlers.end(); ++it ){
-//        CodeQmlHandler* h = *it;
-////        h->updateRuntimeBindings();
-//    }
 }
 
 /**
@@ -193,8 +181,6 @@ void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEn
     lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
     m_settings = new QmlJsSettings(editorSettings);
     editorSettings->syncWithFile();
-
-    m_engine->addCompileHook(&ProjectQmlExtension::engineHook, this);
 
     EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(engine->engine()->rootContext()->contextProperty("editor").value<QObject*>());
     if ( !editor ){

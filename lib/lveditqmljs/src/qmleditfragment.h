@@ -121,6 +121,8 @@ public:
 
     QSharedPointer<QmlBindingPath> fullBindingPath();
 
+    Location location() const;
+
 public slots:
     int fragmentType() const;
     bool isOfFragmentType(FragmentType type) const;
@@ -178,8 +180,6 @@ public slots:
     void setObjectId(QString id);
     QString objectId();
 
-    Location location() const;
-
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
     void writeCode(const QString& code);
@@ -196,6 +196,7 @@ public slots:
     bool bindFunctionExpression(const QString& expression);
 
     bool isNull();
+    bool isMethod();
 
     void __channelObjectErased();
 

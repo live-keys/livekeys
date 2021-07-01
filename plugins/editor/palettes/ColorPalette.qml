@@ -20,7 +20,6 @@ import QtQuick.Controls.Styles 1.4
 import QtGraphicalEffects 1.0
 import live 1.0
 import editor 1.0
-import workspace 1.0 as Workspace
 import visual.input 1.0 as Input
 
 CodePalette{
@@ -79,7 +78,7 @@ CodePalette{
             anchors.left: parent.left
             anchors.leftMargin: colorDisplay.width + 2
 
-            Workspace.InputBox{
+            Input.InputBox{
                 id: input
                 height: 25
                 anchors.top: parent.top
@@ -113,15 +112,12 @@ CodePalette{
         }
     }
 
-    onEditFragmentChanged: {
-        editFragment.whenBinding = function(){
-            editFragment.write(palette.value)
-        }
-    }
-
     onInit: {
         palette.selectedColor = value
         colorPicker.color = value
+        editFragment.whenBinding = function(){
+            editFragment.write(palette.value)
+        }
     }
     onValueFromBindingChanged: {
         palette.selectedColor = value

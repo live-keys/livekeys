@@ -26,20 +26,24 @@ Rectangle{
     property bool compact: true
     property bool isBuilder : false
 
-    property Item child : null
+    property Item child : palette ? palette.item : null
     property QtObject palette : null
 
     property bool isCompactVertical: child && child.height > 48
 
     color: "black"
 
-    property string name : ''
-    property string type : ''
+    property string name : palette ? palette.name : ''
+    property string type : palette ? palette.type : ''
     property string title : type + ' - ' + name
-    property var cursorRectangle : null
-    property var editorPosition : null
     property var editor: null
     property Item pane: null
+    property Item dragPane: null
+
+    onEditingFragmentChanged: {
+        if (!editingFragment) return
+        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+    }
 
     property bool paletteSwapVisible: false
     property bool paletteAddVisible: false
@@ -49,8 +53,6 @@ Rectangle{
 
     property double titleLeftMargin : 50
     property double titleRightMargin : 50
-
-    property DocumentHandler documentHandler : null
 
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
@@ -63,7 +65,7 @@ Rectangle{
         var coords = paletteContainer.mapToItem(pane, 0, 0)
         coords.y -= 35;
 
-        var paletteList = paletteControls.addPaletteList(
+        var paletteList = paletteControls.views.openPaletetListBoxForContainer(
             paletteContainer,
             paletteContainer.parent,
             Qt.rect(coords.x - 180 / 2, coords.y, 30, 30),
@@ -85,7 +87,7 @@ Rectangle{
             paletteConnection.editingFragment = null
         } else {
             paletteConnection.forceActiveFocus()
-            paletteConnection.model = editor.documentHandler.codeHandler.bindingChannels
+            paletteConnection.model = editingFragment.codeHandler.bindingChannels
             paletteConnection.editingFragment = editingFragment
         }
     }
@@ -113,8 +115,8 @@ Rectangle{
 
         var palettePane = lk.layers.workspace.panes.createPane('palette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            paletteContainer.editor.parentSplitter,
-            paletteContainer.editor.parentSplitterIndex(),
+            paletteContainer.editor.parent.parentSplitView,
+            paletteContainer.editor.parent.parentSplitViewIndex(),
             palettePane
         )
 
@@ -134,7 +136,7 @@ Rectangle{
             p = p.parent
         }
         p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== paletteContainer.palette.name })
-        documentHandler.codeHandler.removePalette(paletteContainer.palette)
+        editingFragment.codeHandler.removePalette(paletteContainer.palette)
     }
 
     Component.onCompleted: {
@@ -239,6 +241,25 @@ Rectangle{
                 })
                 item.moveToNewPane.connect(function(){
                     paletteContainer.paletteToPane()
+                })
+                item.dragToNewPaneStarted.connect(function(){
+                    lk.layers.workspace.panes.__dragStarted(function(){
+                        var palettePane = lk.layers.workspace.panes.createPane('palette', {}, [400, 400])
+                        paletteContainer.dragPane = palettePane
+                        return palettePane
+                    })
+                })
+                item.dragToNewPaneFinished.connect(function(){
+                    lk.layers.workspace.panes.__dragFinished()
+
+                    var palettePane = paletteContainer.dragPane
+                    paletteContainer.dragPane = null
+
+                    paletteContainer.pane = palettePane
+
+                    palettePane.paletteContainer = paletteChild
+                    palettePane.title = paletteContainer.title
+                    paletteChild.y = 0
                 })
             }
         }

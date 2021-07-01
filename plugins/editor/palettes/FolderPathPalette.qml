@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import workspace 1.0
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -15,7 +16,7 @@ CodePalette{
         width: 180
         height: 25
 
-        PathInputBox{
+        Input.PathInputBox{
             id: inputBox
             width: parent.width
             height: 25
@@ -38,9 +39,6 @@ CodePalette{
     }
     onInit: {
         inputBox.path = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)
         }

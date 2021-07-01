@@ -1,12 +1,12 @@
 import QtQuick 2.3
 import workspace 1.0
-
+import visual.input 1.0 as Input
 Tool{
     id: root
     toolLabel: 'Rotate'
 
     property QtObject theme: lk.layers.workspace.themes.current
-    property QtObject labelInfoStyle: TextStyle{}
+    property QtObject labelInfoStyle: Input.TextStyle{}
     property Component applyButton : null
     property Component cancelButton : null
 
@@ -16,7 +16,7 @@ Tool{
     infoBarContent: Item{
         anchors.fill: parent
 
-        Label{
+        Input.Label{
             id: selectionInfo
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
@@ -25,7 +25,7 @@ Tool{
             text: 'Rotate'
         }
 
-        InputBox{
+        Input.InputBox{
             id: angleInput
             anchors.left: parent.left
             anchors.leftMargin: 40
@@ -40,7 +40,7 @@ Tool{
             style: theme.inputStyle
         }
 
-        Button{
+        Input.Button{
             anchors.left: parent.left
             anchors.leftMargin: 90
             width: 25
@@ -52,7 +52,7 @@ Tool{
                 root.apply(value)
             }
         }
-        Button{
+        Input.Button{
             anchors.left: parent.left
             anchors.leftMargin: 118
             width: 25

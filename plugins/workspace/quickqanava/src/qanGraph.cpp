@@ -699,7 +699,10 @@ qan::Edge*  Graph::insertEdge( QObject* source, QObject* destination, QQmlCompon
 }
 
 qan::Edge*  Graph::insertEdge( qan::Node* source, qan::Node* destination, QQmlComponent* edgeComponent )
-{
+{    
+    if ( !edgeComponent )
+            edgeComponent = getEdgeDelegate();
+
     // PRECONDITION;
         // source and destination can't be nullptr
     if ( source == nullptr ||

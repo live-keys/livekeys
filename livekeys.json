@@ -455,8 +455,8 @@
                 }
             ]
         },
-        "msvc2017_64": {
-            "compiler": "msvc2017_64",
+        "msvc2019_64": {
+            "compiler": "msvc2019_64",
             "environment": {
                 "OPENCV_DIR": "opencv_dir",
                 "QTDIR": "qtdir",
@@ -636,7 +636,7 @@
                         },
                         "{qtdir}/resources": "resources",
                         "{qtdir}/translations": "translations",
-                        "{vs142comntools}/../../VC/Redist/MSVC/14.28.29910/x64/Microsoft.VC142.CRT": {
+                        "{vs142comntools}/../../VC/Redist/MSVC/14.29.30036/x64/Microsoft.VC142.CRT": {
                             "concrt140.dll": "-",
                             "msvcp140.dll": "-",
                             "msvcp140_1.dll": "-",
@@ -714,51 +714,51 @@
                     "populate": {
                         "plugins/base/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editor/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/editqml/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/fs/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/live/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvcore/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvimgproc/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvvideo/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvfeatures2d/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/lcvphoto/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/timeline/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         },
                         "plugins/workspace/live.package.json": {
                             "release": "win",
-                            "build": "msvc2017"
+                            "build": "msvc2019"
                         }
                     }
                 },

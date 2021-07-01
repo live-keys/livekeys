@@ -5,7 +5,7 @@ import editor 1.0
 import editor.private 1.0
 import base 1.0
 import live 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -303,6 +303,7 @@ Rectangle{
             NewTextEdit {
                 id : textEdit
 
+
                 anchors.left: parent.left
                 anchors.leftMargin: 2
                 viewport: Qt.rect(flick.flickableItem.contentX,flick.flickableItem.contentY,flick.width,flick.height)
@@ -319,6 +320,7 @@ Rectangle{
                     }
                 }
 
+                function getEditor(){ return root }
 
                 property int lastLength: 0
 
@@ -519,7 +521,7 @@ Rectangle{
 
     }
 
-    Workspace.TextButton{
+    Input.TextButton{
         id: addRootButton
         anchors.left: lineSurfaceBackground.right
         anchors.leftMargin: 10

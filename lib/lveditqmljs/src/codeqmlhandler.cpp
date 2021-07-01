@@ -64,6 +64,7 @@
 #include <QWaitCondition>
 #include <queue>
 #include <QSet>
+#include "live/codepalette.h"
 
 namespace lv{
 
@@ -1205,7 +1206,6 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int len
  */
 QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
     Q_D(CodeQmlHandler);
-    Project* project = d->projectHandler->project();
 
     if ( m_document ){
         d->syncParse(m_document);
@@ -1294,12 +1294,18 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
     QmlBindingChannel::Ptr bc = edit->channel();
 
     if ( bc->canModify() ){
-        QQmlProperty& p = bc->property();
-
         QString creationPath = m_document->file()->path();
         creationPath.replace(".qml", "_a.qml");
+
+        QQmlContext* creationCtx = nullptr;
+        if ( bc->type() == QmlBindingChannel::ListIndex || bc->type() == QmlBindingChannel::Object ){
+            QObject* creationObj = bc->object();
+            if ( creationObj )
+                creationCtx = new QQmlContext(qmlContext(creationObj));
+        }
+
         QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", creationPath
+            d->documentInfo(), type + "{}", creationPath, nullptr, creationCtx
         );
         if ( !result )
             THROW_EXCEPTION(lv::Exception, "Failed to create object: " + type.toStdString(), Exception::toCode("~CreateObject"));
@@ -2169,7 +2175,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     }
 
     editParent->addChildFragment(ef);
-    ef->setParent(editParent);
 
     if (ef->location() == QmlEditFragment::Object)
         populateObjectInfoForFragment(ef);
@@ -2228,7 +2233,6 @@ lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragm
 
     result->addFragmentType(QmlEditFragment::FragmentType::ReadOnly);
     parentFragment->addChildFragment(result);
-    result->setParent(parentFragment);
 
     return result;
 }
@@ -2310,7 +2314,6 @@ QList<QObject *> CodeQmlHandler::openNestedObjects(QmlEditFragment *edit){
                 });
 
                 edit->addChildFragment(ef);
-                ef->setParent(edit);
 
                 if (ef->location() == QmlEditFragment::Object)
                     populateObjectInfoForFragment(ef);
@@ -2440,13 +2443,14 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                         populatePropertyInfoForFragment(ef);
 
                     p->addChildFragment(ef);
-                    ef->setParent(p);
 
                     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
                     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
                     if ( dh )
                         dh->requestCursorPosition(ef->valuePosition());
+
+                    child = ef;
                 } else {
                     child = createReadOnlyPropertyFragment(p, propName);
                 }
@@ -2567,58 +2571,28 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
     return "";
 }
 
-lv::PaletteList* CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment, bool includeLayoutConfigurations){
+QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
     if (!fragment || !fragment->declaration())
-        return nullptr;
+        return QJSValue();
 
-    return findPalettesForDeclaration(fragment->declaration(), includeLayoutConfigurations);
+    return findPalettesForDeclaration(fragment->declaration());
 }
 
 /**
  * \brief Finds the available list of palettes at the current \p cursor position
  */
-lv::PaletteList* CodeQmlHandler::findPalettes(int position, bool includeLayoutConfigurations){
+QJSValue CodeQmlHandler::findPalettes(int position){
     if ( !m_document )
-        return nullptr;
+        return QJSValue();
+
     cancelEdit();
 
     QList<QmlDeclaration::Ptr> declarations = getDeclarations(position);
-    return declarations.isEmpty() ? nullptr : findPalettesForDeclaration(declarations.first(), includeLayoutConfigurations);
-}
-
-/**
- * \brief Opens the palette \p index from a given \p paletteList
- */
-QJSValue CodeQmlHandler::openPalette(lv::QmlEditFragment* edit, lv::PaletteList *paletteList, int index){
-    if ( !m_document || !edit || !paletteList )
+    if (declarations.isEmpty())
         return QJSValue();
 
-    // check if duplicate
-    PaletteLoader* paletteLoader = paletteList->loaderAt(index);
 
-    if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
-        edit->addPalette(edit->bindingPalette());
-        return m_engine->engine()->newQObject(edit->bindingPalette());
-    }
-
-    if ( !PaletteContainer::configuresLayout(paletteLoader) ){
-        CodePalette* palette = paletteList->loadAt(index);
-        palette->setEditFragment(edit);
-        edit->addPalette(palette);
-        edit->initializePaletteValue(palette);
-
-        connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
-
-        rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
-
-        DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-        if ( dh )
-            dh->requestCursorPosition(edit->valuePosition());
-
-        return m_engine->engine()->newQObject(palette);
-    } else {
-        return paletteList->contentAt(index);
-    }
+    return findPalettesForDeclaration(declarations.first());
 }
 
 bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
@@ -2667,12 +2641,13 @@ QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
  *
  * \returns A pointer to the opened lv::CodePalette.
  */
-CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *paletteList, int index){
-    if ( !m_document || !edit || !paletteList )
+CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, QString paletteName){
+    Q_D(CodeQmlHandler);
+    if ( !m_document || !edit )
         return nullptr;
 
     // check if duplicate
-    PaletteLoader* paletteLoader = paletteList->loaderAt(index);
+    PaletteLoader* paletteLoader = d->projectHandler->paletteContainer()->findPaletteByName(paletteName);
     if ( edit->bindingPalette() ){
         if ( edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) )
             return edit->bindingPalette();
@@ -2683,7 +2658,8 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, PaletteList *pal
         return cp;
     }
 
-    CodePalette* palette = paletteList->loadAt(index);
+    CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteLoader);
+    qmlEngine(this)->setObjectOwnership(palette, QQmlEngine::CppOwnership);
     palette->setEditFragment(edit);
 
     edit->setBindingPalette(palette);
@@ -2744,24 +2720,7 @@ QJSValue CodeQmlHandler::declarationInfo(int position, int length){
 
     auto declaration = properties.first();
 
-    QJSValue result = m_engine->engine()->newObject();
-    result.setProperty("position", declaration->position());
-    result.setProperty("length", declaration->length());
-    result.setProperty("type", declaration->type().join());
-    result.setProperty("parentType", declaration->parentType().join());
-    if ( declaration->isForComponent() ){
-        result.setProperty("type", "component");
-    } else if ( declaration->isForImports() ){
-        result.setProperty("type", "imports");
-    } else if ( declaration->isForList() ){
-        result.setProperty("type", "list");
-    } else if ( declaration->isForProperty() ){
-        result.setProperty("type", "property");
-    } else if ( declaration->isForSlot() ){
-        result.setProperty("type", "slot");
-    }
-    result.setProperty("hasObject", declaration->isForObject());
-    return result;
+    return declarationToQml(declaration);
 }
 
 /**
@@ -3140,7 +3099,7 @@ int CodeQmlHandler::addProperty(
 int CodeQmlHandler::addEvent(
         int position,
         const QString &object,
-        const QString &type,
+        const QString &,
         const QString &name)
 {
     DocumentQmlValueScanner qvs(m_document, position, 1);
@@ -3381,7 +3340,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     }
 }
 
-QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *currentApp)
+QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *)
 {
     try{
         int opos = addItem(position, "", type);
@@ -3457,6 +3416,10 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
             m_engine->throwError(res, this);
         }
     }
+}
+
+DocumentHandler *CodeQmlHandler::documentHandler() const{
+    return qobject_cast<DocumentHandler*>(parent());
 }
 
 void CodeQmlHandler::__whenLibraryScanQueueCleared(){
@@ -3808,34 +3771,73 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     return QmlTypeInfo::isObject(declaration->type().name());
 }
 
-PaletteList *CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration, bool includeLayoutConfigurations)
+QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration)
 {
     // every fragment has a declaration -> should end up here
 
     Q_D(CodeQmlHandler);
+    QmlScopeSnap scope = d->snapScope();
 
-    PaletteContainer::PaletteSearch configurations = includeLayoutConfigurations ? PaletteContainer::IncludeLayoutConfigurations : PaletteContainer::Empty;
+    QList<PaletteLoader*> result = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
 
-    PaletteList* lpl = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join(), configurations);
-
-    if (declaration->isForComponent()){
-        lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Component", configurations, lpl);
-    } else {
-        if ( declaration->isForObject())
-        if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/Object", configurations, lpl);
+    if ( declaration->type().language() == QmlTypeReference::Qml ){
+        QmlInheritanceInfo typePath = scope.getTypePath(declaration->type());
+        for ( int i = 1; i < typePath.nodes.size(); ++i ){
+            QmlTypeInfo::Ptr ti = typePath.nodes[i];
+            if ( !ti->exportType().isEmpty() ){
+                auto list = d->projectHandler->paletteContainer()->findPalettes(ti->exportType().join());
+                result.append(list);
+            }
         }
+    }
 
-        if ( declaration->isForList() ){
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/childlist", configurations, lpl);
-        } else {
-            lpl = d->projectHandler->paletteContainer()->findPalettes("qml/property", configurations, lpl);
+    if  ( declaration->isForProperty() && declaration->parentType().language() == QmlTypeReference::Qml && !declaration->identifierChain().isEmpty() ){
+        QmlInheritanceInfo typePath = scope.getTypePath(declaration->parentType());
+
+        for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
+            QmlTypeInfo::Ptr ti = *it;
+            QmlPropertyInfo pi = ti->propertyAt(declaration->identifierChain().last());
+
+            if ( pi.isValid() && !ti->exportType().isEmpty() ){
+                QString propSearch = ti->exportType().join() + "." + pi.name;
+                auto list = d->projectHandler->paletteContainer()->findPalettes(propSearch);
+                result.append(list);
+            }
         }
     }
 
 
-    lpl->setPosition(declaration->position() + (declaration->isForImports() ? 7 : 0));
-    return lpl;
+    if (declaration->isForComponent()){
+        auto components = d->projectHandler->paletteContainer()->findPalettes("qml/Component");
+        result.append(components);
+    } else {
+        if ( declaration->isForObject()){
+            if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
+                auto object = d->projectHandler->paletteContainer()->findPalettes("qml/Object");
+                result.append(object);
+            }
+        }
+
+        if ( declaration->isForList() ){
+            auto child = d->projectHandler->paletteContainer()->findPalettes("qml/childlist");
+            result.append(child);
+        } else {
+            auto prop = d->projectHandler->paletteContainer()->findPalettes("qml/property");
+            result.append(prop);
+        }
+    }
+
+    QJSValue res = m_engine->engine()->newObject();
+    QJSValue data = m_engine->engine()->newArray(result.length());
+    for (int i = 0; i < result.length(); ++i){
+        data.setProperty(i, d->projectHandler->paletteContainer()->paletteData(result[i]));
+    }
+    res.setProperty("data", data);
+
+    QJSValue decl = declarationToQml(declaration);
+    res.setProperty("declaration", decl);
+
+    return res;
 }
 
 void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
@@ -3876,6 +3878,28 @@ void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, Q
         }
     }
 
+}
+
+QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
+{
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", declaration->position());
+    result.setProperty("length", declaration->length());
+    result.setProperty("type", declaration->type().join());
+    result.setProperty("parentType", declaration->parentType().join());
+    if ( declaration->isForComponent() ){
+        result.setProperty("type", "component");
+    } else if ( declaration->isForImports() ){
+        result.setProperty("type", "imports");
+    } else if ( declaration->isForList() ){
+        result.setProperty("type", "list");
+    } else if ( declaration->isForProperty() ){
+        result.setProperty("type", "property");
+    } else if ( declaration->isForSlot() ){
+        result.setProperty("type", "slot");
+    }
+    result.setProperty("hasObject", declaration->isForObject());
+    return result;
 }
 
 void CodeQmlHandler::populateNestedObjectsForFragment(lv::QmlEditFragment *edit)

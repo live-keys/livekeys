@@ -81,7 +81,7 @@ Rectangle {
         height: parent.height
         hoverEnabled: true
         onClicked: {
-            lk.layers.workspace.panes.initializeStartupBox()
+            lk.layers.workspace.startup.show()
         }
         Workspace.Tooltip{
             mouseOver: logoFunction.containsMouse
@@ -113,7 +113,7 @@ Rectangle {
             id : newMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: lk.layers.workspace.project.newProject()
+            onClicked: lk.layers.workspace.wizards.newProject()
         }
         Workspace.Tooltip{
             mouseOver: newMArea.containsMouse
@@ -183,7 +183,7 @@ Rectangle {
             id : openMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: lk.layers.workspace.project.openFileDialog()
+            onClicked: lk.layers.workspace.wizards.openFileViaDialog()
         }
         Workspace.Tooltip{
             mouseOver: openMArea.containsMouse
@@ -217,7 +217,7 @@ Rectangle {
             id : openProjectMArea
             anchors.fill: parent
             hoverEnabled: true
-            onClicked: lk.layers.workspace.project.openProject()
+            onClicked: lk.layers.workspace.wizards.openProjectDirViaDialog()
         }
         Workspace.Tooltip{
             mouseOver: openProjectMArea.containsMouse

@@ -39,6 +39,14 @@ CodePalette{
                     parent.visualFileSelector.selectedFile = itemPath
                 }
             }
+            onItemHighlighted: {
+                var item = model[index]
+
+                if ( !item.isDir ){
+                    var itemPath = Fs.Path.absolutePath(item.path ? item.path : Fs.Path.join(cwd, item.name))
+                    parent.visualFileSelector.highlightedFile = itemPath
+                }
+            }
         }
 
     }

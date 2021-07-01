@@ -3,7 +3,7 @@ import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.2
 import QtQuick.Controls 2.12 as QC2
 import QtGraphicalEffects 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -95,7 +95,7 @@ Rectangle{
             }
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             id: hueLabelLeft
             width: 35
             height: 22
@@ -104,7 +104,7 @@ Rectangle{
             style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             anchors.right: parent.right
             width: 35
@@ -163,14 +163,14 @@ Rectangle{
             }
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             width: 35
             text: saturationSlider.from
             style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             anchors.right: parent.right
             width: 35
@@ -230,7 +230,7 @@ Rectangle{
             }
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             text: valueSlider.from
             width: 35
@@ -238,7 +238,7 @@ Rectangle{
             style: root.style ? root.style.labelStyle : defaultStyle
         }
 
-        Workspace.LabelOnRectangle{
+        Input.LabelOnRectangle{
             anchors.top: parent.top
             anchors.right: parent.right
             text: valueSlider.to

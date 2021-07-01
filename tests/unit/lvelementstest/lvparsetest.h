@@ -31,8 +31,22 @@ private slots:
     void testSimplePropertyAssignment();
     void testScenarioTest();
     void nestedLanguageScannerTest();
+    void nestedFunctionAssignment();
+    void arrowFunctionElement();
+    void todoListItemSmall();
+    void todoList();
+    void todoListItem();
+    void todoForm();
+    void todoApp();
+    void complexTernaryOperator();
+    void doublyNestedElement();
+    void idObjectInJsScope();
+    void nestedObjectsInJsScope();
+    void sameIdInBothScopes();
 
 private:
+    void parseTestTemplate(std::string name);
+
     lv::LockedFileIOSession::Ptr m_fileSession;
     std::string                  m_scriptPath;
 };

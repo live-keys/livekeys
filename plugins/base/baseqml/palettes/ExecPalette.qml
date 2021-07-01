@@ -20,7 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import base 1.0
-import workspace 1.0 as Workspace
+import visual.input 1.0 as Input
 
 CodePalette{
     id: palette
@@ -36,20 +36,60 @@ CodePalette{
 
         property var current : null
 
-        Workspace.TextButton{
+        Input.TextButton{
+            id: textButton
             anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
             height: 28
             width: 80
             style: theme.formButtonStyle
+            text: "Start"
 
-
-            text: "Run"
             onClicked: {
-                execBox.current.run()
+                if (execBox.state == "NOT_RUNNING"){
+                    execBox.state = "STARTING"
+                    execBox.current.run()
+                } else if (execBox.state == "RUNNING"){
+                    execBox.current.stop()
+                }
             }
         }
+
+        Connections {
+            target: execBox.current
+            ignoreUnknownSignals: true
+            function onAboutToRun(){
+                execBox.state = "RUNNING"
+            }
+
+            function onFinished(){
+                execBox.state = "NOT_RUNNING"
+            }
+        }
+
+        state: "NOT_RUNNING"
+
+        states: [
+            State {
+                name: "NOT_RUNNING"
+                PropertyChanges {
+                    target: textButton
+                    text: "Start"
+                }
+            },
+
+            State {
+                name: "STARTING"
+            },
+            State {
+                name: "RUNNING"
+                PropertyChanges {
+                    target: textButton
+                    text: "Stop"
+                }
+            }
+        ]
     }
 
     onValueFromBindingChanged: {
@@ -57,9 +97,7 @@ CodePalette{
     }
     onInit: {
         execBox.current = value
-    }
-
-    onEditFragmentChanged: {
         editFragment.whenBinding = function(){}
     }
+
 }
