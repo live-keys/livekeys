@@ -1,6 +1,7 @@
 #include "qimageview.h"
 #include "qmatnode.h"
 #include "qmatshader.h"
+#include "live/shared.h"
 #include <QSGSimpleMaterial>
 
 QImageView::QImageView(QQuickItem *parent)
@@ -38,7 +39,12 @@ void QImageView::setImage(QMat *arg){
         setImplicitWidth(matData->cols);
         setImplicitHeight(matData->rows);
     }
+
+    if ( m_mat )
+        lv::Shared::unref(m_mat);
+
     m_mat = arg;
+    lv::Shared::ref(arg);
 
     emit imageChanged();
     update();
