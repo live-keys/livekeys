@@ -233,8 +233,15 @@ Item{
                             if (child.objectName !== "propertyContainer") continue
                             if (child.title !== propName) continue
 
-                            if (child.valueContainer.palettesOpened && child.valueContainer.palettesOpened.indexOf(propPalette) !== -1) break
-                            paletteControls.openPaletteByName(propPalette, ef, child.valueContainer)
+                            var pg = null
+                            if (child.valueContainer.objectName === "objectContainer"){
+                                pg = child.valueContainer.paletteGroup
+                            } else {
+                                pg = child.valueContainer
+                            }
+
+                            if (pg.palettesOpened && pg.palettesOpened.indexOf(propPalette) !== -1) break
+                            paletteControls.openPaletteByName(propPalette, ef, pg)
                             break
                         }
 

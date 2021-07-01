@@ -193,7 +193,7 @@ WebEngineView{
                     var path = Fs.UrlInfo.path(request.requestedUrl)
                     path = Fs.Path.join(lk.layers.workspace.pluginsPath(), path)
 
-                    lk.layers.workspace.project.openProjectPath(path)
+                    lk.layers.workspace.wizards.openProject(path)
                 }
             }
         }

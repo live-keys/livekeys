@@ -565,22 +565,14 @@ QtObject{
                             true
                         )
 
-                    } else if (isForNode && addBoxItem.activeIndex === 4 ){
-                        container.nodeParent.item.addSubobject(
-                            container.nodeParent,
-                            data,
-                            container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node,
-                            null)
+                        ef = codeHandler.openNestedConnection(
+                            container.editingFragment, ppos, project.appRoot()
+                        )
 
                         if (ef) {
                             container.editingFragment.signalPropertyAdded(ef)
-                            if (!isForNode && container.compact) container.sortChildren()
                         }
 
-                        if (!ef) {
-                            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
-
-                        }
 
                     } else if (isForNode && selection.category === 'function' ){
                         container.nodeParent.item.addSubobject(container.nodeParent, selection.name, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null, {isMethod: true})
@@ -1253,14 +1245,19 @@ QtObject{
         result['type'] = object.type()
         var paletteList = object.paletteList()
         var nameList = []
-        for (var p = 0; p < paletteList.length; ++p)
-            nameList.push(paletteList[p].name)
+        for (var idx = 0; idx < paletteList.length; ++idx)
+            nameList.push(paletteList[idx].name)
         if (nameList.length > 0)
             result['palettes'] = nameList
 
-        var objectContainer = container ? container : object.visualParent.parent.parent.parent
-
-        if (objectContainer.compact) return result
+        var objectContainer = container
+        if (!container){
+            var p = object.visualParent
+            while (p && p.objectName !== "objectContainer")
+                p = p.parent
+            if (p) objectContainer = p
+        }
+        if (objectContainer && objectContainer.compact) return result
         var childFragments = object.getChildFragments()
         var objects = []
         var properties = []
