@@ -27,6 +27,8 @@ public slots:
         int searchWindowSize = 21
     );
 
+    QMat* denoiseTVL1(const QVariantList& obs, double lambda=1.0, int iters=30);
+
 };
 
 #endif // QDENOISING_H

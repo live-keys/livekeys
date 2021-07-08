@@ -11,3 +11,4 @@ BrightnessAndContrast         1.0 BrightnessAndContrast.qml
 HueSaturationLightness        1.0 HueSaturationLightness.qml
 Sepia                         1.0 Sepia.qml
 Temperature                   1.0 Temperature.qml
+DenoiseTVL1                   1.0 DenoiseTVL1.qml

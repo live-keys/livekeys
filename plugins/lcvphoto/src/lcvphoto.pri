@@ -1,7 +1,6 @@
 HEADERS += \
     $$PWD/lcvphoto_plugin.h \
     $$PWD/qadjustments.h \
-    $$PWD/qdenoisetvl1.h \
     $$PWD/qalignmtb.h \
     $$PWD/qcalibratedebevec.h \
     $$PWD/qcalibraterobertson.h \
@@ -17,7 +16,6 @@ HEADERS += \
 SOURCES += \
     $$PWD/lcvphoto_plugin.cpp \
     $$PWD/qadjustments.cpp \
-    $$PWD/qdenoisetvl1.cpp \
     $$PWD/qalignmtb.cpp \
     $$PWD/qcalibratedebevec.cpp \
     $$PWD/qcalibraterobertson.cpp \

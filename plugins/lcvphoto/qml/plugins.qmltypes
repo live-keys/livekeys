@@ -71,16 +71,6 @@ Module {
         }
     }
     Component {
-        name: "QDenoiseTvl1"
-        defaultProperty: "data"
-        prototype: "QMatFilter"
-        exports: ["lcvphoto/DenoiseTvl1 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "bufferSize"; type: "int" }
-        Property { name: "lambda"; type: "double" }
-        Property { name: "nIters"; type: "int" }
-    }
-    Component {
         name: "QDenoising"
         prototype: "QObject"
         exports: ["lcvphoto/Denoising 1.0"]

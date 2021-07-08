@@ -471,19 +471,6 @@ calculate the motion. It uses a MatBuffer to store the previous frame:
 
 Second input for the subtraction.
 
-{qmlType:MatLoader}
-{qmlInherits:external.QtQuick#item}
-{qmlBrief:Static matrix loader}
-
-{qmlMethod:Mat staticLoad(string id, Object options)}
-
-Loads the matrix statically, where id is the static id used to capture the matrix, and options can be:
-
- * `w` : width of the matrix
- * `h` : height of the matrix
- * `ch` : no of channels for the matrix
- * `type` : matrix type
- * `color` : background color
 
 {qmlType:ImageFile}
 {qmlInherits:lcvcore#MatDisplay}

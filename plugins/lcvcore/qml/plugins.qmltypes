@@ -299,19 +299,6 @@ Module {
         }
     }
     Component {
-        name: "QMatLoader"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["lcvcore/MatLoader 1.0"]
-        exportMetaObjectRevisions: [0]
-        Method {
-            name: "staticLoad"
-            type: "QMat*"
-            Parameter { name: "id"; type: "QString" }
-            Parameter { name: "params"; type: "QJSValue" }
-        }
-    }
-    Component {
         name: "QMatOp"
         prototype: "QObject"
         exports: ["lcvcore/MatOp 1.0"]

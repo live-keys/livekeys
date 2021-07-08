@@ -19,7 +19,6 @@
 #include <qqml.h>
 #include <QQmlEngine>
 
-#include "qdenoisetvl1.h"
 #include "qstitcher.h"
 
 #include "qalignmtb.h"
@@ -46,7 +45,6 @@ static QObject* adjustmentsProvider(QQmlEngine* engine, QJSEngine*){
 
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
-    qmlRegisterType<QDenoiseTvl1>(                    uri, 1, 0, "DenoiseTvl1");
 
     qmlRegisterType<QStitcher>(                       uri, 1, 0, "Stitcher");
 
