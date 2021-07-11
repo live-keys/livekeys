@@ -7,29 +7,38 @@ Grid{
     // This sample shows the usage of the erode
     // and dilate elements
     
-    columns: 2
+    columns: 1
     
-    ImRead{
+    ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
     
     StructuringElement{
         id : se
-        shape : StructuringElement.MORPH_ELLIPSE
-        ksize : "11x11"
+        size : "11x11"
     }
     
     Dilate{
-        input : src.output
-        kernel : se.output
+        id: dilate
+        input : src.result
+        kernel : se.result
         iterations : 5
     }
     
     
     Erode{
-        input : src.output
-        kernel : se.output
+        id: erode
+        input : src.result
+        kernel : se.result
         iterations : 5
+    }
+    
+    ImageView {
+        image: dilate.result
+    }
+    
+    ImageView {
+        image: erode.result
     }
 }

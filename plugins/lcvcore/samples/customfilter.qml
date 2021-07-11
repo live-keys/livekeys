@@ -8,27 +8,23 @@ Row{
     // access values from an image directly
     // from the qml file and create a custom filter.
     
-    ImRead{
+    ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
     
     ChannelSelect{
-        input : src.output
-        width : src.width
-        height : src.height
+        id: cs
+        input : src.result
         
-        onOutputChanged : {
-            // Versions of Qt >= 5.8 have raw buffer processing
-            // which is a lot faster than the current method
-            // If you're using a higher version, you can replace the 
-            // 5.7 lines with 5.8
-            
-            var dim   = output.dimensions()
-            var uview = cv.matToArray(output) // 5.7
-            //var buffer = output.buffer() // 5.8
-            //var uview = new Uint8Array(buffer) // 5.8
+        
+        onResultChanged : {
+            if (!result) return
 
+            var dim   = result.dimensions()
+            var buffer = result.buffer() 
+            var uview = new Uint8Array(buffer) 
+            
             for ( var i = 0; i < dim.height; ++i ){
                 for ( var j = 0; j < dim.width; ++j ){
                     var val = uview[i * dim.width + j]
@@ -37,8 +33,12 @@ Row{
                 }
             }
             
-            cv.assignArrayToMat(uview, output) // 5.7
         }
+    }
+    
+    ImageView {
+        id: imageView
+        image: cs.result
     }
     
 }
