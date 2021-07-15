@@ -15,27 +15,32 @@
 ****************************************************************************/
 
 #include "qmergerobertson.h"
+#include "live/exception.h"
+#include "live/viewcontext.h"
+#include "cvextras.h"
 
 QMergeRobertson::QMergeRobertson(QObject *parent)
     : QObject(parent)
-    , m_input(nullptr)
-    , m_response(nullptr)
-    , m_output(new QMat)
     , m_mergeRobertson(cv::createMergeRobertson())
-    , m_componentComplete(false)
 {
 }
 
 QMergeRobertson::~QMergeRobertson(){
 }
 
-void QMergeRobertson::filter(){
-    if ( m_componentComplete &&
-         m_response &&
-         m_input &&
-         m_input->itemCount() == m_times.size() &&
-         m_input->itemCount() > 0)
-    {
+QMat *QMergeRobertson::process(lv::QmlObjectList *input, QList<qreal> times, QMat *response)
+{
+        if ( !response ||
+             response->internal().empty() ||
+             !input ||
+             input->itemCount() != times.size() ||
+             input->itemCount() == 0)
+            return nullptr;
+    try {
+        std::vector<float> timesVector;
+        for ( int i = 0; i < times.size(); ++i )
+            timesVector.push_back(times[i]);
+
         auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
             std::vector<cv::Mat> result;
             for (int i = 0; i < list->itemCount(); ++i){
@@ -46,12 +51,15 @@ void QMergeRobertson::filter(){
             return result;
         };
 
-        std::vector<float> times;
-        for ( int i = 0; i < m_times.size(); ++i )
-            times.push_back(m_times[i]);
+        auto inputVector = asVector(input);
 
-        m_mergeRobertson->process(asVector(m_input), *m_output->internalPtr(), times, *m_response->internalPtr());
+        QMat* result = new QMat();
 
-        emit outputChanged();
+        m_mergeRobertson->process(inputVector, *result->internalPtr(), timesVector, *response->internalPtr());
+
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MergeRobertson: ").jsThrow();
+        return nullptr;
     }
 }

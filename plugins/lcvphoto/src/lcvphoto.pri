@@ -9,9 +9,9 @@ HEADERS += \
     $$PWD/qtonemap.h \
     $$PWD/qtonemapdrago.h \
     $$PWD/qtonemapmantiuk.h \
-    $$PWD/qtonemapreinard.h \
     $$PWD/qstitcher.h \
-    $$PWD/qdenoising.h
+    $$PWD/qdenoising.h \
+    $$PWD/qtonemapreinhard.h
 
 SOURCES += \
     $$PWD/lcvphoto_plugin.cpp \
@@ -24,6 +24,6 @@ SOURCES += \
     $$PWD/qtonemap.cpp \
     $$PWD/qtonemapdrago.cpp \
     $$PWD/qtonemapmantiuk.cpp \
-    $$PWD/qtonemapreinard.cpp \
     $$PWD/qstitcher.cpp \
-    $$PWD/qdenoising.cpp
+    $$PWD/qdenoising.cpp \
+    $$PWD/qtonemapreinhard.cpp

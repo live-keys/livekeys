@@ -19,22 +19,20 @@
 
 #include <QQuickItem>
 #include "opencv2/stitching.hpp"
-#include "qmatdisplay.h"
 #include "live/qmlobjectlist.h"
-
-class QStitcher : public QMatDisplay{
+#include "qmat.h"
+class QStitcher : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlObjectList* input    READ input  WRITE setInput  NOTIFY inputChanged)
-    Q_PROPERTY(QVariantMap params READ params WRITE setParams NOTIFY paramsChanged)
-
+    Q_PROPERTY(int                mode      READ mode      WRITE setMode      NOTIFY modeChanged)
+    Q_PROPERTY(bool               tryUseGpu READ tryUseGpu WRITE setTryUseGpu NOTIFY tryUseGpuChanged)
 public:
 #if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     enum Mode{
-        Panorma = cv::Stitcher::PANORAMA,
+        Panorama = cv::Stitcher::PANORAMA,
         Scans = cv::Stitcher::SCANS
     };
-    Q_ENUM(Mode)
+    Q_ENUMS(Mode)
 #endif
 
     enum Status{
@@ -43,55 +41,35 @@ public:
         ErrHomographyEstFail = cv::Stitcher::ERR_HOMOGRAPHY_EST_FAIL,
         ErrCameraParamsAdjustFail = cv::Stitcher::ERR_CAMERA_PARAMS_ADJUST_FAIL
     };
-    Q_ENUM(Status)
+    Q_ENUMS(Status)
 
 public:
-    QStitcher(QQuickItem* parent = nullptr);
+    QStitcher(QObject* parent = nullptr);
 
-    lv::QmlObjectList* input() const;
-    void setInput(lv::QmlObjectList* input);
+    int mode() const;
+    void setMode(int mode);
 
-    const QVariantMap &params() const;
+    bool tryUseGpu() const;
+    void setTryUseGpu(bool tryUseGpu);
 
 signals:
-    void inputChanged();
+    void modeChanged();
+    void tryUseGpuChanged();
     void error(int status);
 
-    void paramsChanged(QVariantMap params);
-
 public slots:
-    void setParams(const QVariantMap& params);
+    QMat* stitch(lv::QmlObjectList* input);
 
 private:
-    void filter();
-
-    lv::QmlObjectList*             m_input;
-
+    void createSticher();
+    lv::QmlObjectList* m_input;
 #if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
     cv::Ptr<cv::Stitcher> m_stitcher;
 #else
     cv::Stitcher m_stitcher;
 #endif
-
-    QVariantMap m_params;
+    int m_mode;
+    bool m_tryUseGpu;
 };
-
-inline lv::QmlObjectList *QStitcher::input() const{
-    return m_input;
-}
-
-inline const QVariantMap& QStitcher::params() const{
-    return m_params;
-}
-
-inline void QStitcher::setInput(lv::QmlObjectList *input){
-    if (m_input == input)
-        return;
-
-    m_input = input;
-    emit inputChanged();
-
-    filter();
-}
 
 #endif // QSTITCHER_H

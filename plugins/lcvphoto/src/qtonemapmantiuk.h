@@ -23,12 +23,25 @@
 class QTonemapMantiuk : public QTonemap{
 
     Q_OBJECT
-
+    Q_PROPERTY(float scale      READ scale      WRITE setScale      NOTIFY scaleChanged)
+    Q_PROPERTY(float saturation READ saturation WRITE setSaturation NOTIFY saturationChanged)
 public:
     QTonemapMantiuk(QQuickItem* parent = nullptr);
     virtual ~QTonemapMantiuk(){}
 
-    void initialize(const QVariantMap& options);
+    float scale() const;
+    void setScale(float scale);
+
+    float saturation() const;
+    void setSaturation(float saturation);
+signals:
+    void scaleChanged();
+    void saturationChanged();
+private:
+    void createTonemapMantiuk();
+
+    float m_scale;
+    float m_saturation;
 };
 
 #endif // QTONEMAPMANTIUK_H

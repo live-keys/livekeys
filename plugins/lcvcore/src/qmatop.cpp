@@ -512,6 +512,15 @@ QMat *QMatOp::copyMakeBorder(QMat *input, int top, int bottom, int left, int rig
     }
 }
 
+QMat *QMatOp::convertTo8U(QMat *input)
+{
+    if (!input || input->internal().empty())
+        return nullptr;
+    QMat* result = new QMat();
+    input->internal().convertTo(*result->internalPtr(), CV_8UC3, 255);
+    return result;
+}
+
 lv::ViewEngine *QMatOp::engine(){
     return lv::ViewContext::instance().engine();
 }

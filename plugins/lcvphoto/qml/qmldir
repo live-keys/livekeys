@@ -12,3 +12,12 @@ HueSaturationLightness        1.0 HueSaturationLightness.qml
 Sepia                         1.0 Sepia.qml
 Temperature                   1.0 Temperature.qml
 DenoiseTVL1                   1.0 DenoiseTVL1.qml
+Stitcher                      1.0 Stitcher.qml
+AlignMTB                      1.0 AlignMTB.qml
+CalibrateDebevec              1.0 CalibrateDebevec.qml
+CalibrateRobertson            1.0 CalibrateRobertson.qml
+MergeDebevec                  1.0 MergeDebevec.qml
+MergeRobertson                1.0 MergeRobertson.qml
+TonemapReinhard               1.0 TonemapReinhard.qml
+TonemapMantiuk                1.0 TonemapMantiuk.qml
+TonemapDrago                  1.0 TonemapDrago.qml

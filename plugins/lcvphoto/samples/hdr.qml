@@ -9,10 +9,10 @@ Item{
     // using either Robertson or Debevec, then tonemapping is applied, which 
     // also converts the resulting image to 8 bit channels.
     
-    height: parent.height
-    width: parent.width
     
-    Column{
+    
+    Row{
+        id: row1
         Repeater{
             id: repeater
             model: ['coast_1.6.jpg', 'coast_6.jpg', 'coast_30.jpg'].map(
@@ -31,28 +31,30 @@ Item{
         id: alignMTB
         input: Cv.MatOp.createMatList(repeater.model)
     }
-    
-    CalibrateRobertson{ 
-        id: calibrateRobertson
-        input: alignMTB.output
+
+    CalibrateRobertson {
+        id: cd
+        input: alignMTB.result
         times: repeater.times
     }
     
-    MergeRobertson{
-        id: mergeRobertson
-        input: alignMTB.output
+    MergeRobertson {
+        id: md
+        input: alignMTB.result
         times: repeater.times
-        response: calibrateRobertson.output
+        response: cd.result
     }
     
-    TonemapDrago{
-        anchors.right: parent.right
-        anchors.top: parent.top
-        input: mergeRobertson.output
-        params: {
-            'gamma': 0.9,
-            'saturation': 0.8
-        }
+
+    TonemapMantiuk {
+        id: tonemap
+        input: md.result
     }
+    
+    Cv.ImageView {
+        anchors.top: row1.bottom
+        image: Cv.MatOp.convertTo8U(tonemap.result)
+    }
+    
     
 }

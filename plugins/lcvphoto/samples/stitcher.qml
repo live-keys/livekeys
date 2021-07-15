@@ -31,5 +31,9 @@ Column{
         id: stitcher
         input: Cv.MatOp.createMatList(repeater.model)
     }
+
+    Cv.ImageView {
+        image: stitcher.result
+    }
     
 }

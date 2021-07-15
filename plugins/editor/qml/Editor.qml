@@ -28,6 +28,8 @@ Rectangle{
 
     objectName: "editorType"
 
+    property var isActive: lk.layers.workspace.panes.activePane === root.parent
+
     property alias internalActiveFocus : textEdit.activeFocus
     property alias internalFocus: textEdit.focus
     property alias lineSurfaceVisible: lineSurfaceBackground.visible
@@ -351,7 +353,7 @@ Rectangle{
                 width: Math.max(paintedWidth, flick.width)
 
                 readOnly: root.document === null || root.document.isMonitored || (importsShaped && rootShaped)
-                cursorVisible: !readOnly
+                cursorVisible: !readOnly && isActive
 
                 Keys.onPressed: {
                     if ( event.key === Qt.Key_PageUp ){
