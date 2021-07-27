@@ -56,6 +56,13 @@ Tool{
         }
     }
 
+    function recalculateSelection(){
+        selectionArea.rectangleSelection.x = root.selectedX * root.canvas.scale
+        selectionArea.rectangleSelection.y = root.selectedY * root.canvas.scale
+        selectionArea.rectangleSelection.width = root.selectedWidth * root.canvas.scale
+        selectionArea.rectangleSelection.height = root.selectedHeight * root.canvas.scale
+    }
+
     property Item selectionArea : null
 
     property Component selectionAreaFactory: Item{
@@ -134,10 +141,7 @@ Tool{
         selectedWidth = dims.width
         selectedHeight = dims.height
 
-        selectionArea.rectangleSelection.x = root.selectedX * root.canvas.scale
-        selectionArea.rectangleSelection.y = root.selectedY * root.canvas.scale
-        selectionArea.rectangleSelection.width = root.selectedWidth * root.canvas.scale
-        selectionArea.rectangleSelection.height = root.selectedHeight * root.canvas.scale
+        recalculateSelection()
     }
 
     deactivate: function(){

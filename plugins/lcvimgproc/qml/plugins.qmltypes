@@ -20,6 +20,23 @@ Module {
         Property { name: "interpolation"; type: "int" }
     }
     Component {
+        name: "QProjectionSurface"
+        prototype: "QObject"
+        exports: ["lcvimgproc/ProjectionSurface 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "input"; type: "QMat"; isPointer: true }
+        Property { name: "destination"; type: "QVariantList" }
+        Property { name: "mapper"; type: "QProjectionMapper"; isPointer: true }
+    }
+    Component {
+        name: "QProjectionMapper"
+        prototype: "QObject"
+        exports: ["lcvimgproc/ProjectionMapper 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "backgroundImage"; type: "QMat"; isPointer: true }
+        Property { name: "result"; type: "QMat"; isPointer: true }s
+    }
+    Component {
         name: "QCvtColor"
         defaultProperty: "data"
         prototype: "QMatFilter"

@@ -78,4 +78,5 @@ DISTFILES += \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/palettes/PadPalette.json \
+    qml/palettes/ProjectionMapperPalette.qml \
     qml/palettes/TransformPaletteProperties.json

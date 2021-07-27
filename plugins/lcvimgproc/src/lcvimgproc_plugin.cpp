@@ -27,6 +27,8 @@
 #include "qfilteringoperations.h"
 #include "colorspace.h"
 #include "qfeaturedetection.h"
+#include "qprojectionsurface.h"
+#include "qprojectionmapper.h"
 #include <QQmlEngine>
 
 
@@ -62,6 +64,8 @@ void LcvimgprocPlugin::registerTypes(const char *uri){
     qmlRegisterType<QCachedWarpPerspective>(  uri, 1, 0, "CachedWarpPerspective");
     qmlRegisterType<QTransformImage>(         uri, 1, 0, "TransformImage");
     qmlRegisterType<QCascadeClassifier>(      uri, 1, 0, "CascadeClassifier");
+    qmlRegisterType<QProjectionSurface>(      uri, 1, 0, "ProjectionSurface");
+    qmlRegisterType<QProjectionMapper>(       uri, 1, 0, "ProjectionMapper");
 
     qmlRegisterSingletonType<QDraw>( uri, 1, 0, "Draw", &drawProvider);
     qmlRegisterSingletonType<QGeometry>( uri, 1, 0, "Geometry", &geometryProvider);

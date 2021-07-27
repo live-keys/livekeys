@@ -9,8 +9,7 @@
 #include "live/qmlobjectlist.h"
 #include "live/viewengine.h"
 
-/// \private
-class QMatOp : public QObject{
+class Q_LCVCORE_EXPORT QMatOp : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QMat* nullMat READ nullMat CONSTANT)

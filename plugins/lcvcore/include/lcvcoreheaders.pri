@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/qmatdisplay.h \
     $$PWD/qmatfilter.h \
     $$PWD/qmatnode.h \
+    $$PWD/qmatop.h \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
     $$PWD/qlcvcoreglobal.h \
