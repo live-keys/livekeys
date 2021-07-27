@@ -34,7 +34,7 @@ Module {
         exports: ["lcvimgproc/ProjectionMapper 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "backgroundImage"; type: "QMat"; isPointer: true }
-        Property { name: "result"; type: "QMat"; isPointer: true }s
+        Property { name: "result"; type: "QMat"; isPointer: true }
     }
     Component {
         name: "QCvtColor"
