@@ -27,13 +27,11 @@ class QStitcher : public QObject{
     Q_PROPERTY(int                mode      READ mode      WRITE setMode      NOTIFY modeChanged)
     Q_PROPERTY(bool               tryUseGpu READ tryUseGpu WRITE setTryUseGpu NOTIFY tryUseGpuChanged)
 public:
-#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
     enum Mode{
         Panorama = cv::Stitcher::PANORAMA,
         Scans = cv::Stitcher::SCANS
     };
     Q_ENUMS(Mode)
-#endif
 
     enum Status{
         Ok = cv::Stitcher::OK,

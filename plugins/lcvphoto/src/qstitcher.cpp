@@ -22,7 +22,7 @@
 
 QStitcher::QStitcher(QObject *parent)
     : QObject(parent)
-    , m_mode(Panorama)
+    , m_mode(Mode::Panorama)
     , m_tryUseGpu(true)
 {
     createSticher();
