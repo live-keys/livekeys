@@ -5,7 +5,7 @@ import lcvphoto 1.0 as Photo
 Act{
     id: root
     property var input: null
-    property int mode: Photo.CvStitcher.Panorama
+    property int mode: 0
     property bool tryUseGpu: true
 
     property var stitcher: Photo.CvStitcher {

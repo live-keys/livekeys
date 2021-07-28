@@ -1,7 +1,6 @@
 #include "qprojectionsurface.h"
 #include "qmat.h"
 #include "qprojectionmapper.h"
-#include "qmatop.h"
 
 QProjectionSurface::QProjectionSurface(QObject *parent)
     : QObject(parent)
