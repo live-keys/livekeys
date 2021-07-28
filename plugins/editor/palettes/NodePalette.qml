@@ -94,7 +94,7 @@ CodePalette{
                 for (var so = 0; so < object.subobjects.length; ++so)
                 {
                     var subobject = object.subobjects[so]
-                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), ObjectGraph.PortMode.None, subobject.connection)
+                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), subobject.id ? ObjectGraph.PortMode.OutPort : ObjectGraph.PortMode.None, subobject.connection)
                 }
 
             }

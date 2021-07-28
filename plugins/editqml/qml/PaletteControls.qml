@@ -570,7 +570,7 @@ QtObject{
 
 
                     } else if (isForNode && selection.category === 'function' ){
-                        container.nodeParent.item.addSubobject(container.nodeParent, selection.name, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.Node, null, {isMethod: true})
+                        container.nodeParent.item.addSubobject(container.nodeParent, selection.name, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.None, null, {isMethod: true})
                     }
 
                     box.child.finalize()
