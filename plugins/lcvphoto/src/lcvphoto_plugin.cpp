@@ -46,16 +46,16 @@ static QObject* adjustmentsProvider(QQmlEngine* engine, QJSEngine*){
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
 
-    qmlRegisterType<QStitcher>(                       uri, 1, 0, "CvStitcher");
+    qmlRegisterType<QStitcher>(                       uri, 1, 0, "StitcherInternal");
 
-    qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "CvAlignMTB");
-    qmlRegisterType<QCalibrateDebevec>(               uri, 1, 0, "CvCalibrateDebevec");
-    qmlRegisterType<QCalibrateRobertson>(             uri, 1, 0, "CvCalibrateRobertson");
-    qmlRegisterType<QMergeDebevec>(                   uri, 1, 0, "CvMergeDebevec");
-    qmlRegisterType<QMergeRobertson>(                 uri, 1, 0, "CvMergeRobertson");
-    qmlRegisterType<QTonemapDrago>(                   uri, 1, 0, "CvTonemapDrago");
-    qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "CvTonemapMantiuk");
-    qmlRegisterType<QTonemapReinhard>(                uri, 1, 0, "CvTonemapReinhard");
+    qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "AlignMTBInternal");
+    qmlRegisterType<QCalibrateDebevec>(               uri, 1, 0, "CalibrateDebevecInternal");
+    qmlRegisterType<QCalibrateRobertson>(             uri, 1, 0, "CalibrateRobertsonInternal");
+    qmlRegisterType<QMergeDebevec>(                   uri, 1, 0, "MergeDebevecInternal");
+    qmlRegisterType<QMergeRobertson>(                 uri, 1, 0, "MergeRobertsonInternal");
+    qmlRegisterType<QTonemapDrago>(                   uri, 1, 0, "TonemapDragoInternal");
+    qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "TonemapMantiukInternal");
+    qmlRegisterType<QTonemapReinhard>(                uri, 1, 0, "TonemapReinhardInternal");
 
     qmlRegisterSingletonType<QDenoising>(             uri, 1, 0, "Denoising", &denoisingProvider);
     qmlRegisterSingletonType<QAdjustments>(           uri, 1, 0, "Adjustments", &adjustmentsProvider);

@@ -9,7 +9,7 @@ Act{
     property int samples: 70
     property real lambda: 10.0
     property bool random: true
-    property var calibrateDebevec: CvCalibrateDebevec {
+    property var calibrateDebevec: CalibrateDebevecInternal {
         samples: root.samples
         lambda: root.lambda
         random: root.random

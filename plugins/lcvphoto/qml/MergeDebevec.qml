@@ -7,7 +7,7 @@ Act{
     property var input: null
     property var times: []
     property var response: null
-    property var mergeDebevec: CvMergeDebevec {}
+    property var mergeDebevec: MergeDebevecInternal {}
 
     run: function(input, times, response){
         return mergeDebevec.process(input, times, response)

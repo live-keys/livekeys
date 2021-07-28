@@ -9,7 +9,7 @@ Act{
     property real saturation: 1.0
     property real bias: 0.85
 
-    property var tonemapDrago: CvTonemapDrago {
+    property var tonemapDrago: TonemapDragoInternal {
         gamma: root.gamma
         saturation: root.saturation
         bias: root.bias

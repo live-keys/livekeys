@@ -9,7 +9,7 @@ Act{
     property real saturation: 1.0
     property real scale: 0.7
 
-    property var tonemapMantiuk: CvTonemapMantiuk {
+    property var tonemapMantiuk: TonemapMantiukInternal {
         gamma: root.gamma
         saturation: root.saturation
         scale: root.scale

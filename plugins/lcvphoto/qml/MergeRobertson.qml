@@ -7,7 +7,7 @@ Act{
     property var input: null
     property var times: []
     property var response: null
-    property var mergeRobertson: CvMergeRobertson {}
+    property var mergeRobertson: MergeRobertsonInternal {}
 
     run: function(input, times, response){
         return mergeRobertson.process(input, times, response)
