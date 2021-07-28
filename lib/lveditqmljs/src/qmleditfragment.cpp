@@ -86,10 +86,22 @@ QmlEditFragment::~QmlEditFragment(){
     }
 }
 
-QObject *QmlEditFragment::createObject(const DocumentQmlInfo::ConstPtr &info, const QString &declaration, const QString &path, QObject *parent, QQmlContext *context)
+QObject *QmlEditFragment::createObject(
+        const DocumentQmlInfo::ConstPtr &info,
+        const QString &declaration,
+        const QString &path,
+        QObject *parent,
+        QQmlContext *context,
+        QList<std::tuple<QString, QString, QString> > props)
 {
+    QString propertiesDeclaration;
+    for ( auto it = props.begin(); it != props.end(); ++it ){
+        auto prop = *it;
+        propertiesDeclaration.append("property " + std::get<0>(prop) + " " + std::get<1>(prop) + ": " + std::get<2>(prop) + "\n");
+    }
+
     QString fullDeclaration;
-    fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "\n";
+    fullDeclaration = DocumentQmlInfo::Import::join(info->imports()) + "\n" + declaration + "{\n" + propertiesDeclaration + "\n}" + "\n";
 
     ViewEngine* engine = ViewContext::instance().engine();
     ViewEngine::ComponentResult::Ptr cr = engine->createObject(
@@ -283,8 +295,9 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         }
 
         if ( leftOverProperties.contains(propertyName)){
-            if (propsWritable.value(propertyName).toBool())
-                source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName)));
+            if (propsWritable.value(propertyName).toBool()){
+                source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName), true));
+            }
             leftOverProperties.remove(propertyName);
         }
     }
@@ -313,8 +326,9 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
     }
 
     for ( auto it = leftOverProperties.begin(); it != leftOverProperties.end(); ++it ){
-        if (propsWritable.value(*it).toBool())
-            source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it)));
+        if (propsWritable.value(*it).toBool()){
+            source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it), true));
+        }
     }
 
     writeCode(source);
@@ -387,6 +401,13 @@ QObject *QmlEditFragment::readObject()
         }
     }
 
+    return nullptr;
+}
+
+QObject *QmlEditFragment::propertyObject(){
+    if ( m_channel && m_channel->listIndex() == -1 ){
+        return m_channel->property().object();
+    }
     return nullptr;
 }
 
@@ -816,7 +837,7 @@ void QmlEditFragment::__channelObjectErased(){
     }
 }
 
-QString QmlEditFragment::buildCode(const QJSValue &value){
+QString QmlEditFragment::buildCode(const QJSValue &value, bool additionalBraces){
     if ( value.isArray() ){
         QString result;
         QJSValueIterator it(value);
@@ -877,7 +898,7 @@ QString QmlEditFragment::buildCode(const QJSValue &value){
             result += it.name() + ": " + buildCode(it.value());
         }
 
-        return result + "}";
+        return additionalBraces ? "{ return" + result + "}}" : result + "}";
     } else if ( value.isString() ){
         return "'" + value.toString() + "'";
     } else if ( value.isBool() || value.isNumber() ){

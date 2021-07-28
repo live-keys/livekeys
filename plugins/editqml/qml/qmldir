@@ -4,6 +4,7 @@ plugin editqml
 depends QtQuick 2.3
 
 AddQmlBox              1.0 AddQmlBox.qml
+AddExtraPropertiesBox  1.0 AddExtraPropertiesBox.qml
 PaletteGroup           1.0 PaletteGroup.qml
 ObjectContainer        1.0 ObjectContainer.qml
 ObjectContainerTop     1.0 ObjectContainerTop.qml

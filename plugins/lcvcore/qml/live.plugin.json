@@ -13,6 +13,7 @@
         "palettes/VideoPlayerPalette.qml": "qml/lcvcore#VideoDecoderView",
         "palettes/VideoFilePalette.qml": "qml/lcvcore#VideoFile",
         "palettes/VideoFilePropertiesPalette.json": "qml/lcvcore#VideoFile",
+        "palettes/VideoFileStreamTypePalette.qml": "qml/lcvcore#VideoFile.streamType",
         "palettes/VideoDecoderViewPalette.json" : "qml/lcvcore#VideoDecoderView",
         "palettes/GrayscaleViewPalette.json" : "qml/lcvcore#GrayscaleView",
         "palettes/ImageReadPalette.json" : "qml/lcvcore#ImageRead",

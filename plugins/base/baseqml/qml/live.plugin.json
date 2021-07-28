@@ -7,6 +7,8 @@
         "palettes/ExecPropertiesPalette.json" : "qml/base#Exec",
         "palettes/StreamValuePalette.json" : "qml/base#StreamValue",
         "palettes/StreamLogPropertiesPalette.json" : "qml/base#StreamLog",
-        "palettes/ActTriggerTypePalette.qml" : "qml/base#Act.trigger"
+        "palettes/ActTriggerTypePalette.qml" : "qml/base#Act.trigger",
+        "palettes/ActReturnsPalette.qml" : "qml/base#Act.returns",
+        "palettes/ArrangePalette.qml" : "qml/base#Arrange"
     }
 }

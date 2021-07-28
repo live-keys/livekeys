@@ -59,10 +59,15 @@ Rectangle{
 
     property int activeIndex : 0
     property bool idChecked: false
+    property bool extraPropertiesChecked: false
+
     onActiveIndexChanged: {
         searchInput.text = ''
         root.addContainer.model.setFilter('')
-        if (activeIndex === 2) idChecked = true
+        if (activeIndex === 2) {
+            idChecked = true
+            extraPropertiesChecked = false
+        }
         root.addContainer.model.setCategoryFilter(activeIndex)
         root.addContainer.model.setImportFilter('')
         root.addContainer.model.setTypeFilter('')
@@ -208,7 +213,7 @@ Rectangle{
     Item {
         id: idInputItem
         visible: activeIndex === 2
-        height: 30
+        height: visible ? 30 : 0
         width: parent.width
         anchors.top: parent.top
         anchors.topMargin: header.height
@@ -238,14 +243,12 @@ Rectangle{
             }
         }
 
-        Text {
+
+        Input.Label{
             x: 45
-            y: 3
+            y: 5
+            textStyle: root.theme.inputStyle.textStyle
             text: "Id"
-            color : "#efefef"
-            font.family: "Open Sans, sans-serif"
-            font.pixelSize: 14
-            font.weight: Font.Normal
         }
 
         Rectangle {
@@ -330,10 +333,52 @@ Rectangle{
 
     }
 
+
+    Item {
+        id: addExtraProperties
+        visible: activeIndex === 2
+        height: visible ? 30 : 0
+        width: parent.width
+        anchors.top: parent.top
+        anchors.topMargin: header.height + idInputItem.height
+
+        Rectangle {
+            x: 15
+            y: 5
+            width: 16
+            height: 16
+            border.width: 2
+            border.color: root.theme.colorScheme.middlegroundOverlayDominant
+            color: "transparent"
+
+            Rectangle {
+                color: root.theme.colorScheme.middlegroundOverlayDominant
+                width: 8
+                height: 8
+                x: 4
+                y: 4
+                visible: extraPropertiesChecked
+            }
+            MouseArea {
+                anchors.fill: parent
+                onClicked: {
+                    extraPropertiesChecked = !extraPropertiesChecked
+                }
+            }
+        }
+
+        Input.Label{
+            x: 45
+            y: 5
+            textStyle: root.theme.inputStyle.textStyle
+            text: "Extra Properties"
+        }
+    }
+
     Rectangle{
         id: searchInputBox
         anchors.top: parent.top
-        anchors.topMargin: idInputItem && idInputItem.visible? header.height + 30 : header.height
+        anchors.topMargin: header.height + idInputItem.height + addExtraProperties.height
         anchors.left: parent.left
         anchors.leftMargin: 1
         width: parent.width - 1
@@ -432,7 +477,8 @@ Rectangle{
                 category: 'object',
                 position: root.addContainer.model.addPosition,
                 objectType: root.addContainer.objectType,
-                name: result
+                name: result,
+                extraProperties: extraPropertiesChecked
             }
         } else if (selector === 3){
             selection = {
@@ -456,7 +502,7 @@ Rectangle{
     Item{
         id: container
         anchors.fill: parent
-        anchors.topMargin: idInputItem && idInputItem.visible ? header.height + 60 : header.height + 30
+        anchors.topMargin: addExtraProperties.height + idInputItem.height + header.height + 30
         anchors.leftMargin: 1
         anchors.rightMargin: 1
         anchors.bottomMargin: 1

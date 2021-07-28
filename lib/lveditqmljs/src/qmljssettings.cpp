@@ -63,8 +63,11 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/base#Exec"] = "ExecPropertiesPalette";
     m_defaultPalettes["qml/base#StreamValue"] = "StreamValuePalette";
     m_defaultPalettes["qml/base#StreamLog"] = "StreamLogPropertiesPalette";
+    m_defaultPalettes["qml/base#Act.returns"] = "ActReturnsPalette";
+    m_defaultPalettes["qml/base#Arrange"] = "ArrangePalette";
     m_defaultPalettes["qml/lcvcore#VideoDecoderView"] = "VideoDecoderViewPalette";
     m_defaultPalettes["qml/lcvcore#VideoFile"] = "VideoFilePropertiesPalette";
+    m_defaultPalettes["qml/lcvcore#VideoFile.streamType"] = "VideoFileStreamTypePalette";
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
     m_defaultPalettes["qml/timeline#Timeline"] = "TimelinePalette";

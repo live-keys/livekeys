@@ -55,7 +55,7 @@ void QmlStreamValue::setValueType(const QString &valueType){
     }
 
     m_valueType = valueType;
-    emit valueTypeChanged(m_valueType);
+    emit valueTypeChanged();
 }
 
 void QmlStreamValue::__streamRemoved(){

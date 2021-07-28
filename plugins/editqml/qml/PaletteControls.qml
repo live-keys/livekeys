@@ -20,6 +20,7 @@ QtObject{
     property QtObject factories : QtObject{
 
         property Component addQmlBox: Component{ AddQmlBox{} }
+        property Component addExtraPropertiesBox: Component{ AddExtraPropertiesBox{} }
         property Component paletteGroup: Component{ PaletteGroup{} }
         property Component objectContainer: Component{ ObjectContainer{} }
         property Component paletteContainer: Component{ PaletteContainer{} }
@@ -288,6 +289,23 @@ QtObject{
 
             return addEditorBox
         }
+
+        function openAddExtraPropertiesBox(type, handlers){
+            var boxItem = factories.addExtraPropertiesBox.createObject(null)
+            boxItem.type = type
+            boxItem.ready.connect(function(data){
+                if ( handlers && handlers.onAccepted ){
+                    handlers.onAccepted(data)
+                }
+                boxItem.destroy()
+            })
+            boxItem.cancel.connect(function(){
+                boxItem.destroy()
+            })
+
+            lk.layers.window.dialogs.overlayBox(boxItem)
+
+        }
     
     }
 
@@ -392,12 +410,10 @@ QtObject{
                     parentType,
                     type)
 
-        codeHandler.addItemToRuntime(ef, type, project.appRoot())
+        codeHandler.addItemToRuntime(ef, type)
 
 
-        var res = codeHandler.openNestedConnection(
-            ef, opos, project.appRoot()
-        )
+        var res = codeHandler.openNestedConnection(ef, opos)
 
         return res
     }
@@ -544,7 +560,36 @@ QtObject{
 
                     } else if ( selection.category === 'object' ){ // object
 
-                        addItemToRuntimeWithNotification(container, selection.position, selection.objectType, selection.name, isForNode)
+                        if ( selection.extraProperties ){
+                            views.openAddExtraPropertiesBox(selection.name, {
+                                onAccepted: function(propertiesToAdd){
+                                    var parentType = selection.objectType
+                                    var type = selection.name
+                                    var ef = container.editingFragment
+
+                                    var codeHandler = ef.codeHandler
+
+                                    var opos = codeHandler.addItem(selection.position, parentType, type, propertiesToAdd)
+                                    codeHandler.addItemToRuntime(ef, type, propertiesToAdd)
+
+                                    var newEf = codeHandler.openNestedConnection(ef, opos)
+                                    if (!newEf)
+                                        return
+
+                                    if (!isForNode && container.compact)
+                                        container.expand()
+                                    else
+                                        container.editingFragment.signalObjectAdded(newEf)
+                                    if (!isForNode && container.compact)
+                                        container.sortChildren()
+
+                                },
+                                onCancelled: function(){}
+                            })
+                        } else {
+                            addItemToRuntimeWithNotification(container, selection.position, selection.objectType, selection.name, isForNode)
+                        }
+
 
                     } else if ( selection.category === 'event' ){ // event
 

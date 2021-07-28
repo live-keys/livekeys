@@ -24,7 +24,7 @@ import lcvcore 1.0
 CodePalette{
     id: palette
 
-    type : "qml/VideoFile"
+    type : "qml/lcvcore#VideoFile"
 
     item: Item{
         id: captureContainer

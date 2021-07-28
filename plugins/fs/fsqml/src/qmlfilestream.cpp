@@ -23,8 +23,10 @@ void QmlFileStream::wait(){
 }
 
 void QmlFileStream::resume(){
-    if ( m_wait > 0 ){
+    if ( m_wait > 0 )
         --m_wait;
+
+    if ( m_wait == 0 ){
         next();
     }
 }
@@ -39,7 +41,7 @@ QmlStream *QmlFileStream::lines(const QString &file){
         if ( m_filePath == file )
             return m_stream;
 
-        delete m_stream;
+        Shared::unref(m_stream);
         m_stream = nullptr;
     }
     if ( !QFile::exists(file) ){
@@ -59,6 +61,7 @@ QmlStream *QmlFileStream::lines(const QString &file){
 
     m_filePath = file;
     m_stream   = new QmlStream(this, this);
+    Shared::ref(m_stream);
 
     QTimer::singleShot(0, this, &QmlFileStream::next);
 
