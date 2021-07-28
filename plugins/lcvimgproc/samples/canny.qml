@@ -7,18 +7,21 @@ Row{
     
     // Sample showing how to use 
     // Canny Edge Detector algorithm
-    
-    property string imagePath : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
-    
-    ImRead{
+        
+    ImageRead{
         id : imgSource
-        file : parent.imagePath
+        file: project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
     
     Canny{
-        input: imgSource.output
+        id: canny
+        input: imgSource.result
         threshold1 : 72
         threshold2 : 222
+    }
+    
+    ImageView {
+        image: canny.result
     }
     
 }

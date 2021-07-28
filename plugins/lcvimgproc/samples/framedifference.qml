@@ -5,15 +5,13 @@ import lcvimgproc 1.0
 Grid{
     // Calculate movement in a video.
     
-    property string videoPath : project.dir() + '/../../../samples/_videos/amherst-11_2754_3754.avi'
-
-    columns : 2    
+    columns : 1    
 
     VideoCapture{
         id : videoArea
         loop : true
         Component.onCompleted : {
-            staticOpen(parent.videoPath)
+            staticOpen(project.dir() + '/../../../samples/_videos/amherst-11_2754_3754.avi')
             width = width / 2
             height = height / 2
         }
@@ -22,19 +20,18 @@ Grid{
     ChannelSelect{
         id : cs
         input : videoArea.output
-        width : videoArea.width
-        height : videoArea.height
+        channel: 0
     }
     
     MatBuffer{
         id : mb
-        input : cs.output
+        input : cs.result
         width : videoArea.width
         height : videoArea.height
     }
     
     AbsDiff{
-        input : cs.output
+        input : cs.result
         input2 : mb.output
         width : videoArea.width
         height : videoArea.height

@@ -2482,6 +2482,8 @@ QList<QObject *> CodeQmlHandler::openNestedProperties(QmlEditFragment *edit){
                     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
                     if ( dh )
                         dh->requestCursorPosition(ef->valuePosition());
+
+                    child = ef;
                 } else {
                     child = createReadOnlyPropertyFragment(p, propName);
                 }

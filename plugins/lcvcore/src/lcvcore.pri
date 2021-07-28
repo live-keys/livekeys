@@ -25,7 +25,6 @@ HEADERS += \
     $$PWD/qmatnode.h \
     $$PWD/qmatshader.h \
     $$PWD/qmatstate.h \
-    $$PWD/qmatloader.h \
     $$PWD/qlcvcoreglobal.h \
     $$PWD/lcvcore_plugin.h \
     $$PWD/qcolorhistogram.h \
@@ -69,7 +68,6 @@ SOURCES += \
     $$PWD/qmatnode.cpp \
     $$PWD/qmatshader.cpp \
     $$PWD/qmatstate.cpp \
-    $$PWD/qmatloader.cpp \
     $$PWD/qcolorhistogram.cpp \
     $$PWD/qimagefile.cpp \
     $$PWD/qoverlapmat.cpp \

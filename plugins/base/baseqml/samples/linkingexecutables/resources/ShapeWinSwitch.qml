@@ -2,6 +2,7 @@ import QtQuick 2.9
 import editor 1.0
 import editqml 1.0
 import base 1.0 as B
+import workspace 1.0
 
 WorkspaceControl{
 

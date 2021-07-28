@@ -46,6 +46,7 @@ SOURCES += \
     $$PWD/metainfo.cpp \
     $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
+    $$PWD/qmlstreamprovider.cpp \
     $$PWD/qmlwritablestream.cpp \
     $$PWD/settings.cpp \
     $$PWD/qmlclipboard.cpp \

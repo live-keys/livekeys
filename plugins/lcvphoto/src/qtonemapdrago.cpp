@@ -17,21 +17,43 @@
 #include "qtonemapdrago.h"
 
 QTonemapDrago::QTonemapDrago(QQuickItem *parent)
-    : QTonemap(cv::createTonemapDrago(), parent)
+    : QTonemap(parent)
+    , m_saturation(1.0f)
+    , m_bias(0.85f)
 {
+    createTonemapDrago();
+    connect(this, SIGNAL(gammaChanged()), this, SLOT(createTonemapDrago()));
 }
 
-void QTonemapDrago::initialize(const QVariantMap &options){
-    float gamma = 1.0f;
-    float saturation =   1.0f;
-    float bias = 0.85f;
+void QTonemapDrago::createTonemapDrago()
+{
+    initializeTonemapper(cv::createTonemapDrago(gamma(), m_saturation, m_bias));
+}
 
-    if ( options.contains("gamma") )
-        gamma = options["gamma"].toFloat();
-    if ( options.contains("saturation") )
-        saturation = options["saturation"].toFloat();
-    if ( options.contains("bias") )
-        bias = options["bias"].toFloat();
+float QTonemapDrago::bias() const
+{
+    return m_bias;
+}
 
-    initializeTonemapper(cv::createTonemapDrago(gamma, saturation, bias));
+void QTonemapDrago::setBias(float bias)
+{
+    if (m_bias == bias)
+        return;
+    m_bias = bias;
+    createTonemapDrago();
+    emit biasChanged();
+}
+
+float QTonemapDrago::saturation() const
+{
+    return m_saturation;
+}
+
+void QTonemapDrago::setSaturation(float saturation)
+{
+    if (m_saturation == saturation)
+        return;
+    m_saturation = saturation;
+    createTonemapDrago();
+    emit biasChanged();
 }

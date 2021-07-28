@@ -17,26 +17,48 @@
 #include "qtonemapmantiuk.h"
 
 QTonemapMantiuk::QTonemapMantiuk(QQuickItem *parent)
-    : QTonemap(cv::createTonemapMantiuk(), parent)
+    : QTonemap(parent)
+    , m_scale(0.7f)
+    , m_saturation(1.0f)
 {
+    createTonemapMantiuk();
+    connect(this, SIGNAL(gammaChanged()), this, SLOT(createTonemapMantiuk()));
+
 }
 
-void QTonemapMantiuk::initialize(const QVariantMap &options){
-    float gamma = 1.0f;
-    float scale = 0.7f;
-    float saturation = 1.0f;
-
-    if ( options.contains("gamma") )
-        gamma = options["gamma"].toFloat();
-    if ( options.contains("scale") )
-        scale = options["scale"].toFloat();
-    if ( options.contains("saturation") )
-        saturation = options["saturation"].toFloat();
-
+void QTonemapMantiuk::createTonemapMantiuk()
+{
     initializeTonemapper(cv::createTonemapMantiuk(
-        gamma, scale, saturation
+        gamma(), m_scale, m_saturation
     ));
+}
 
+float QTonemapMantiuk::saturation() const
+{
+    return m_saturation;
+}
+
+void QTonemapMantiuk::setSaturation(float saturation)
+{
+    if (m_saturation == saturation)
+        return;
+    m_saturation = saturation;
+    createTonemapMantiuk();
+    emit saturationChanged();
+}
+
+float QTonemapMantiuk::scale() const
+{
+    return m_scale;
+}
+
+void QTonemapMantiuk::setScale(float scale)
+{
+    if (m_scale == scale)
+        return;
+    m_scale = scale;
+    createTonemapMantiuk();
+    emit scaleChanged();
 }
 
 

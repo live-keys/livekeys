@@ -6,6 +6,7 @@
         "palettes/TransformPaletteProperties.json" : "qml/lcvimgproc#TransformImage",
         "palettes/ThresholdPalette.qml" : "qml/lcvimgproc#Threshold",
         "palettes/BlendPalette.json" : "qml/lcvimgproc#Blend",
-        "palettes/PadPalette.json" : "qml/lcvimgproc#Pad"
+        "palettes/PadPalette.json" : "qml/lcvimgproc#Pad",
+        "palettes/ProjectionMapperPalette.qml" : "qml/lcvimgproc#ProjectionMapper"
     }
 }

@@ -6,45 +6,44 @@ Grid{
     
     // Sobel operator sample in x and y directions
     
-    columns : 2
+    columns : 1
     
     id : root
     
     property string imagePath : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     
-    ImRead{
+    ImageRead{
         id : src
         file : root.imagePath
     }
     
     ChannelSelect{
         id : cs
-        input : src.output
+        input : src.result
         channel : 2
-        visible : false
     }
     
     Sobel{ // Sobel in y direction
-        input : cs.output
+        id: s1
+        input : cs.result
         ddepth : Mat.CV16S
-        width : src.width
-        height : src.height
-        xorder : 1
-        yorder : 0
-        ksize  : 3
-        scale  : 1
-        delta : 0
+        xOrder : 1
+        yOrder : 0
     }
     
     Sobel{ // Sobel in x direction
-        input : cs.output
+        id: s2
+        input : cs.result
         ddepth : Mat.CV16S
-        width : src.width
-        height : src.height
-        xorder : 0
-        yorder : 1
-        ksize  : 3
-        scale  : 1
-        delta : 0
+        xOrder : 0
+        yOrder : 1
+    }
+    
+    ImageView {
+        image: s1.result
+    }
+    
+    ImageView {
+        image: s2.result
     }
 }

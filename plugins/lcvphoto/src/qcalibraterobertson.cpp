@@ -18,67 +18,82 @@
 #include "live/exception.h"
 #include "live/viewengine.h"
 #include "live/viewcontext.h"
+#include "cvextras.h"
 
 QCalibrateRobertson::QCalibrateRobertson(QObject *parent)
     : QObject(parent)
-    , m_input(nullptr)
-    , m_output(new QMat)
-    , m_calibrateRobertson(cv::createCalibrateRobertson())
-    , m_componentComplete(false)
+    , m_maxIter(30)
+    , m_threshold(0.01f)
 {
+    createCalibrateRobertson();
 }
 
 QCalibrateRobertson::~QCalibrateRobertson(){
 }
 
-void QCalibrateRobertson::setParams(const QVariantMap &params){
-    if (m_params == params)
-        return;
-
-    m_params = params;
-    emit paramsChanged();
-
-    int maxIter     = 30;
-    float threshold = 0.01f;
-
-    if ( params.contains("maxIter") )
-        maxIter = params["maxIter"].toInt();
-    if ( params.contains("threshold") )
-        threshold = params["threshold"].toFloat();
-
-    m_calibrateRobertson = cv::createCalibrateRobertson(maxIter, threshold);
-
-    filter();
+int QCalibrateRobertson::maxIter() const
+{
+    return m_maxIter;
 }
 
-void QCalibrateRobertson::filter(){
-    if ( m_componentComplete &&
-         m_input &&
-         m_input->itemCount() == m_times.size() &&
-         m_input->itemCount() > 0 &&
-         m_calibrateRobertson)
-    {
-        try{
-            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
-                std::vector<cv::Mat> result;
-                for (int i = 0; i < list->itemCount(); ++i){
-                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
-                    if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->internal());
-                }
-                return result;
-            };
+void QCalibrateRobertson::setMaxIter(int maxIter)
+{
+    if (m_maxIter == maxIter)
+        return;
+    m_maxIter = maxIter;
+    createCalibrateRobertson();
+    emit maxIterChanged();
+}
 
-            std::vector<float> times;
-            for ( int i = 0; i < m_times.size(); ++i )
-                times.push_back(m_times[i]);
+float QCalibrateRobertson::threshold() const
+{
+    return m_threshold;
+}
 
-            m_calibrateRobertson->process(asVector(m_input), *m_output->internalPtr(), times);
-        } catch ( cv::Exception& e ){
-            lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::ViewContext::instance().engine()->throwError(&lve, this);
-            return;
-        }
+void QCalibrateRobertson::setThreshold(float threshold)
+{
+    if (m_threshold == threshold)
+        return;
+    m_threshold = threshold;
+    createCalibrateRobertson();
+    emit thresholdChanged();
+}
 
+QMat *QCalibrateRobertson::process(lv::QmlObjectList *input, QList<qreal> times)
+{
+    if (!input || input->itemCount() != times.size() || input->itemCount() == 0 || !m_calibrateRobertson)
+        return nullptr;
+
+    try {
+        std::vector<float> vectorTimes;
+        for ( int i = 0; i < times.size(); ++i )
+            vectorTimes.push_back(times[i]);
+
+        auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+            std::vector<cv::Mat> result;
+            for (int i = 0; i < list->itemCount(); ++i){
+                QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                if (!m) return std::vector<cv::Mat>();
+                result.push_back(m->internal());
+            }
+            return result;
+        };
+
+        auto inputVector = asVector(input);
+
+        QMat* result = new QMat();
+
+        m_calibrateRobertson->process(inputVector, *result->internalPtr(), vectorTimes);
+
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "CalibrateRobertson: ").jsThrow();
+        return nullptr;
     }
 }
+
+void QCalibrateRobertson::createCalibrateRobertson()
+{
+    m_calibrateRobertson = cv::createCalibrateRobertson(m_maxIter, m_threshold);
+}
+

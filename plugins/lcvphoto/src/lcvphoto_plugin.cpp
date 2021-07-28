@@ -19,7 +19,6 @@
 #include <qqml.h>
 #include <QQmlEngine>
 
-#include "qdenoisetvl1.h"
 #include "qstitcher.h"
 
 #include "qalignmtb.h"
@@ -31,7 +30,7 @@
 #include "qtonemap.h"
 #include "qtonemapdrago.h"
 #include "qtonemapmantiuk.h"
-#include "qtonemapreinard.h"
+#include "qtonemapreinhard.h"
 
 #include "qdenoising.h"
 #include "qadjustments.h"
@@ -46,19 +45,17 @@ static QObject* adjustmentsProvider(QQmlEngine* engine, QJSEngine*){
 
 void LcvphotoPlugin::registerTypes(const char *uri){
     // @uri modules.lcvphoto
-    qmlRegisterType<QDenoiseTvl1>(                    uri, 1, 0, "DenoiseTvl1");
 
-    qmlRegisterType<QStitcher>(                       uri, 1, 0, "Stitcher");
+    qmlRegisterType<QStitcher>(                       uri, 1, 0, "CvStitcher");
 
-    qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "AlignMTB");
-    qmlRegisterType<QCalibrateDebevec>(               uri, 1, 0, "CalibrateDebevec");
-    qmlRegisterType<QCalibrateRobertson>(             uri, 1, 0, "CalibrateRobertson");
-    qmlRegisterType<QMergeDebevec>(                   uri, 1, 0, "MergeDebevec");
-    qmlRegisterType<QMergeRobertson>(                 uri, 1, 0, "MergeRobertson");
-    qmlRegisterType<QTonemap>(                        uri, 1, 0, "Tonemap");
-    qmlRegisterType<QTonemapDrago>(                   uri, 1, 0, "TonemapDrago");
-    qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "TonemapMantiuk");
-    qmlRegisterType<QTonemapReinard>(                 uri, 1, 0, "TonemapReinard");
+    qmlRegisterType<QAlignMTB>(                       uri, 1, 0, "CvAlignMTB");
+    qmlRegisterType<QCalibrateDebevec>(               uri, 1, 0, "CvCalibrateDebevec");
+    qmlRegisterType<QCalibrateRobertson>(             uri, 1, 0, "CvCalibrateRobertson");
+    qmlRegisterType<QMergeDebevec>(                   uri, 1, 0, "CvMergeDebevec");
+    qmlRegisterType<QMergeRobertson>(                 uri, 1, 0, "CvMergeRobertson");
+    qmlRegisterType<QTonemapDrago>(                   uri, 1, 0, "CvTonemapDrago");
+    qmlRegisterType<QTonemapMantiuk>(                 uri, 1, 0, "CvTonemapMantiuk");
+    qmlRegisterType<QTonemapReinhard>(                uri, 1, 0, "CvTonemapReinhard");
 
     qmlRegisterSingletonType<QDenoising>(             uri, 1, 0, "Denoising", &denoisingProvider);
     qmlRegisterSingletonType<QAdjustments>(           uri, 1, 0, "Adjustments", &adjustmentsProvider);

@@ -429,13 +429,13 @@ Item{
                         button1Function : function(mbox){
                             doc.save()
                             project.closeFile(path)
-                            callback()
+                            if (callback) callback()
                             mbox.close()
                         },
                         button2Name : 'No',
                         button2Function : function(mbox){
                             project.closeFile(path)
-                            callback()
+                            if (callback) callback()
                             mbox.close()
                         },
                         button3Name : 'Cancel',
@@ -445,13 +445,13 @@ Item{
                         returnPressed : function(mbox){
                             doc.save()
                             project.closeFile(path)
-                            callback()
+                            if (callback) callback()
                             mbox.close()
                         }
                     })
                 } else {
                     project.closeFile(path)
-                    callback()
+                    if (callback) callback()
                 }
             }
         }
