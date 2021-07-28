@@ -35,6 +35,12 @@ Rectangle{
     property int fontSize: 12
     property int smallFontSize: 9
 
+    function __initialize(font){
+        root.fontFamily = font.family
+        root.fontSize = font.pixelSize
+        root.smallFontSize = font.pixelSize - 2
+    }
+
     function getCompletion(){
         if ( pluginList.currentItem ){
             return pluginList.currentItem.completion

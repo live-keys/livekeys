@@ -10,6 +10,20 @@ Item{
     property alias paletteGroup: objectContainer.paletteGroup
     property alias groupsContainer: container
     property alias pane: objectContainer.pane
+    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+
+    function __initialize(editor, ef){
+        root.editor = editor
+        root.editingFragment = ef
+        root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+
+        var paletteBoxGroup = paletteControls.createPaletteGroup(root.groupsContainer, ef)
+
+        paletteBoxGroup.leftPadding = 7
+        paletteBoxGroup.topPadding = 7
+        root.paletteGroup = paletteBoxGroup
+
+    }
 
     function recalculateContentWidth(){
         var max = 0
@@ -56,7 +70,6 @@ Item{
 
     property var parentObjectContainer: null
     property var isForProperty: false
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
     property QtObject theme: lk.layers.workspace.themes.current
 
     width: objectContainer.width

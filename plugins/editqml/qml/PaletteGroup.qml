@@ -8,6 +8,12 @@ Column{
     topPadding: 0
     objectName: "paletteGroup"
 
+    function __initialize(ef){
+        paletteGroup.editingFragment = ef
+        paletteGroup.codeHandler = ef.codeHandler
+        ef.visualParent = paletteGroup
+    }
+
     property QtObject editingFragment : null
     property QtObject codeHandler : null
     property var owner: null

@@ -67,12 +67,16 @@ QtObject{
         return factories.addQmlBox.createObject(parent)
     }
 
-    function createPaletteGroup(parent){
-        return factories.paletteGroup.createObject(parent)
+    function createPaletteGroup(parent, ef){
+        var pg = factories.paletteGroup.createObject(parent)
+        pg.__initialize(ef)
+        return pg
     }
 
-    function createObjectContainer(parent){
-        return factories.objectContainer.createObject(parent)
+    function createObjectContainer(parent, editor, ef){
+        var oc = factories.objectContainer.createObject(parent)
+        oc.__initialize(editor, ef)
+        return oc
     }
 
     function createPaletteContainer(parent){
@@ -85,12 +89,16 @@ QtObject{
         return plv
     }
 
-    function createPropertyContainer(parent){
-        return factories.propertyContainer.createObject(parent)
+    function createPropertyContainer(parent, editor, ef){
+        var pc = factories.propertyContainer.createObject(parent)
+        pc.__initialize(editor, ef)
+        return pc
     }
 
-    function createSuggestionBox(parent){
-        return factories.suggestionBox.createObject(parent)
+    function createSuggestionBox(parent, font){
+        var sb = factories.suggestionBox.createObject(parent)
+        sb.__initialize(font)
+        return sb
     }
 
     //////////////////////////////////////////////
@@ -357,22 +365,9 @@ QtObject{
     }
 
     function addChildObjectContainer(parentObjectContainer, ef, expandDefault){
-        var childObjectContainer = createObjectContainer(parentObjectContainer.groupsContainer)
+        var childObjectContainer = createObjectContainer(parentObjectContainer.groupsContainer, parentObjectContainer.editor, ef)
 
         childObjectContainer.parentObjectContainer = parentObjectContainer
-
-        childObjectContainer.editor = parentObjectContainer.editor
-        childObjectContainer.editingFragment = ef
-        childObjectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-
-        var paletteBoxGroup = createPaletteGroup(childObjectContainer.groupsContainer)
-        paletteBoxGroup.editingFragment = ef
-        paletteBoxGroup.codeHandler = parentObjectContainer.editor.documentHandler.codeHandler
-
-        paletteBoxGroup.leftPadding = 7
-        paletteBoxGroup.topPadding = 7
-        ef.visualParent = paletteBoxGroup
-        childObjectContainer.paletteGroup = paletteBoxGroup
 
         if (expandDefault) {
             openDefaultPalette(ef,
@@ -591,16 +586,9 @@ QtObject{
             if (objectContainer.propertiesOpened[i] === ef.identifier()) return
 
         var codeHandler = objectContainer.editor.documentHandler.codeHandler
-        var propertyContainer = createPropertyContainer(objectContainer.groupsContainer)
-
-        propertyContainer.title = ef.identifier()
-        propertyContainer.documentHandler = objectContainer.editor.documentHandler
-
-        propertyContainer.editor = objectContainer.editor
-        propertyContainer.editingFragment = ef
+        var propertyContainer = createPropertyContainer(objectContainer.groupsContainer, objectContainer.editor, ef)
 
         if ( codeHandler.isForAnObject(ef)){
-            propertyContainer.isAnObject = true
             var childObjectContainer = addChildObjectContainer(objectContainer, ef, !instructionsShaping, propertyContainer)
             propertyContainer.childObjectContainer = childObjectContainer
             childObjectContainer.isForProperty = true
@@ -608,11 +596,7 @@ QtObject{
             propertyContainer.paletteAddButtonVisible = false
             childObjectContainer.expand()
         } else {
-            propertyContainer.valueContainer = createPaletteGroup()
-            ef.visualParent = propertyContainer.valueContainer
-
-            propertyContainer.valueContainer.editingFragment = ef
-            propertyContainer.valueContainer.codeHandler = objectContainer.editor.documentHandler.codeHandler
+            propertyContainer.valueContainer = createPaletteGroup(null, ef)
 
             if (expandDefault){
                 openDefaultPalette(ef, propertyContainer.valueContainer)
@@ -630,19 +614,7 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
         var editorBox = lk.layers.editor.environment.createEmptyEditorBox(editor.textEdit)
 
-        var objectContainer = createObjectContainer(lk.layers.editor.environment.content)
-        objectContainer.editor = editor
-        objectContainer.editingFragment = ef
-        objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-        var paletteBoxGroup = createPaletteGroup(objectContainer.groupsContainer)
-        paletteBoxGroup.editingFragment = ef
-        ef.visualParent = paletteBoxGroup
-
-        paletteBoxGroup.leftPadding = 7
-        paletteBoxGroup.topPadding = 7
-
-        paletteBoxGroup.codeHandler = codeHandler
-        objectContainer.paletteGroup = paletteBoxGroup
+        var objectContainer = createObjectContainer(lk.layers.editor.environment.content, editor, ef)
 
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -672,10 +644,7 @@ QtObject{
             par = editor.textEdit
         var editorBox = lk.layers.editor.environment.createEmptyEditorBox(par)
 
-        var paletteBoxGroup = createPaletteGroup(lk.layers.editor.environment.content)
-        paletteBoxGroup.editingFragment = ef
-        ef.visualParent = paletteBoxGroup
-        paletteBoxGroup.codeHandler = codeHandler
+        var paletteBoxGroup = createPaletteGroup(lk.layers.editor.environment.content, ef)
 
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -771,13 +740,7 @@ QtObject{
             propertyContainer = ef.visualParent.owner
         else {
             var codeHandler = objectContainer.editor.documentHandler.codeHandler
-            propertyContainer = createPropertyContainer(objectContainer.groupsContainer)
-
-            propertyContainer.title = ef.identifier()
-            propertyContainer.documentHandler = objectContainer.editor.documentHandler
-
-            propertyContainer.editor = objectContainer.editor
-            propertyContainer.editingFragment = ef
+            propertyContainer = createPropertyContainer(objectContainer.groupsContainer, objectContainer.editor, ef)
         }
 
         var isAnObject = ('isAnObject' in prop) && prop['isAnObject']
@@ -967,12 +930,9 @@ QtObject{
         var palette = codeHandler.edit(ef)
 
         var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-        var paletteGroup = createPaletteGroup(lk.layers.editor.environment.content)
+        var paletteGroup = createPaletteGroup(lk.layers.editor.environment.content, ef)
         editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
         paletteGroup.x = 2
-        paletteGroup.editingFragment = ef
-        paletteGroup.codeHandler = codeHandler
-        ef.visualParent = paletteGroup
         editorBox.color = "black"
         editorBox.border.width = 1
         editorBox.border.color = "#141c25"
