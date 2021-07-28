@@ -18,53 +18,50 @@
 #include "live/exception.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
+#include "cvextras.h"
 
 QMergeDebevec::QMergeDebevec(QObject *parent)
     : QObject(parent)
-    , m_input(new lv::QmlObjectList(this))
-    , m_response(0)
-    , m_output(new QMat)
     , m_mergeDebevec(cv::createMergeDebevec())
-    , m_componentComplete(false)
 {
-    // we have to set this up as a QMat object list somewhere in QML via MatOp singleton
+
 }
 
 QMergeDebevec::~QMergeDebevec(){
-    delete m_output;
 }
 
-void QMergeDebevec::filter(){
-    if ( m_componentComplete &&
-         m_response &&
-         !m_response->internal().empty() &&
-         m_input &&
-         m_input->itemCount() == m_times.size() &&
-         m_input->itemCount() > 0)
-    {
-        try{
-            std::vector<float> times;
-            for ( int i = 0; i < m_times.size(); ++i )
-                times.push_back(m_times[i]);
+QMat *QMergeDebevec::process(lv::QmlObjectList *input, QList<qreal> times, QMat *response)
+{
+        if ( !response ||
+             response->internal().empty() ||
+             !input ||
+             input->itemCount() != times.size() ||
+             input->itemCount() == 0)
+            return nullptr;
+    try {
+        std::vector<float> timesVector;
+        for ( int i = 0; i < times.size(); ++i )
+            timesVector.push_back(times[i]);
 
-            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
-                std::vector<cv::Mat> result;
-                for (int i = 0; i < list->itemCount(); ++i){
-                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
-                    if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->internal());
-                }
-                return result;
-            };
+        auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+            std::vector<cv::Mat> result;
+            for (int i = 0; i < list->itemCount(); ++i){
+                QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                if (!m) return std::vector<cv::Mat>();
+                result.push_back(m->internal());
+            }
+            return result;
+        };
 
-            m_mergeDebevec->process(asVector(m_input), *m_output->internalPtr(), times, *m_response->internalPtr());
+        auto inputVector = asVector(input);
 
-            emit outputChanged();
+        QMat* result = new QMat();
 
-        } catch ( cv::Exception& e ){
-            lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::ViewContext::instance().engine()->throwError(&lve, this);
-            return;
-        }
+        m_mergeDebevec->process(inputVector, *result->internalPtr(), timesVector, *response->internalPtr());
+
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MergeDebevec: ").jsThrow();
+        return nullptr;
     }
 }

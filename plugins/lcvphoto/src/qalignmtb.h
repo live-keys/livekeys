@@ -22,69 +22,41 @@
 #include "opencv2/photo.hpp"
 #include "live/qmlobjectlist.h"
 
-class QAlignMTB : public QObject, public QQmlParserStatus{
+class QAlignMTB : public QObject{
 
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(lv::QmlObjectList*    input  READ input  WRITE  setInput    NOTIFY inputChanged)
-    Q_PROPERTY(QVariantMap           params READ params WRITE  setParams   NOTIFY paramsChanged)
-    Q_PROPERTY(lv::QmlObjectList*    output READ output WRITE  setupOutput NOTIFY outputChanged)
+    Q_PROPERTY(int                maxBits       READ maxBits        WRITE setMaxBits        NOTIFY maxBitsChanged)
+    Q_PROPERTY(int                excludeRange  READ excludeRange   WRITE setExcludeRange   NOTIFY excludeRangeChanged)
+    Q_PROPERTY(bool               cut           READ cut            WRITE setCut            NOTIFY cutChanged)
 
 public:
     explicit QAlignMTB(QObject *parent = nullptr);
     ~QAlignMTB();
 
-    lv::QmlObjectList* input() const;
-    lv::QmlObjectList* output() const;
+    int maxBits() const;
+    void setMaxBits(int maxBits);
 
-    void setInput(lv::QmlObjectList* input);
-    void setupOutput(lv::QmlObjectList* output);
-    void classBegin() Q_DECL_OVERRIDE{}
-    void componentComplete() Q_DECL_OVERRIDE;
+    int excludeRange() const;
+    void setExcludeRange(int excludeRange);
 
-    const QVariantMap& params() const;
+    bool cut() const;
+    void setCut(bool cut);
 
 public slots:
-    void setParams(const QVariantMap& params);
-
+    lv::QmlObjectList* process(lv::QmlObjectList* input);
 signals:
-    void inputChanged();
-    void outputChanged();
-    void paramsChanged();
+    void maxBitsChanged();
+    void excludeRangeChanged();
+    void cutChanged();
 
 private:
-    void filter();
-    bool isComponentComplete();
+    void createAlignMTB();
 
     lv::QmlObjectList*    m_input;
-    lv::QmlObjectList*    m_output;
     cv::Ptr<cv::AlignMTB> m_alignMTB;
-    QVariantMap           m_params;
-    bool                  m_componentComplete;
+    int                   m_maxBits;
+    int                   m_excludeRange;
+    bool                  m_cut;
 };
-
-inline lv::QmlObjectList *QAlignMTB::input() const{
-    return m_input;
-}
-
-inline lv::QmlObjectList *QAlignMTB::output() const{
-    return m_output;
-}
-
-inline void QAlignMTB::setInput(lv::QmlObjectList *input){
-    m_input = input;
-    emit inputChanged();
-
-    filter();
-}
-
-inline void QAlignMTB::setupOutput(lv::QmlObjectList *output){
-    m_output = output;
-    filter();
-}
-
-inline const QVariantMap& QAlignMTB::params() const{
-    return m_params;
-}
 
 #endif // QALIGNMTB_H

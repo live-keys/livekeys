@@ -84,6 +84,8 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/lcvcore#PerspectiveOnBackground"] = "PerspectiveOnBackgroundPropertiesPalette";
     m_defaultPalettes["qml/lcvcore#ImageSegmentFactory"] = "ImageSegmentFactoryPropertiesPalette";
     m_defaultPalettes["qml/lcvcore#GalleryFileSelector"] = "GalleryFileSelectorPropertiesPalette";
+    m_defaultPalettes["qml/lcvimgproc#ProjectionMapper"] = "ProjectionMapperPalette";
+
 
     if (parent){
         MLNode s = parent->readFor("qmljs");

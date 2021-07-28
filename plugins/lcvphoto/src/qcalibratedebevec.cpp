@@ -18,74 +18,95 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "cvextras.h"
+#include "qmatext.h"
 
 QCalibrateDebevec::QCalibrateDebevec(QObject *parent)
     : QObject(parent)
-    , m_input(new lv::QmlObjectList)
-    , m_output(new QMat)
-    , m_calibrateDebevec(cv::createCalibrateDebevec())
-    , m_componentComplete(false)
+    , m_samples(70)
+    , m_lambda(10.0f)
+    , m_random(false)
 {
+    createCalibrateDebevec();
 }
 
 QCalibrateDebevec::~QCalibrateDebevec(){
-    delete m_output;
 }
 
-void QCalibrateDebevec::setParams(const QVariantMap &params){
-    if (m_params == params)
+int QCalibrateDebevec::samples() const
+{
+    return m_samples;
+}
+
+void QCalibrateDebevec::setSamples(int samples)
+{
+    if (m_samples == samples)
         return;
-
-    m_params = params;
-    emit paramsChanged();
-
-    int samples  = 70;
-    float lambda = 10.0f;
-    bool random  = false;
-
-    if ( params.contains("samples") )
-        samples = params["samples"].toInt();
-    if ( params.contains("lambda") )
-        lambda = params["lambda"].toFloat();
-    if ( params.contains("random") )
-        random = params["random"].toBool();
-
-    m_calibrateDebevec = cv::createCalibrateDebevec(samples, lambda, random);
-
-    filter();
+    m_samples = samples;
+    emit samplesChanged();
 }
 
-void QCalibrateDebevec::filter(){
-    if ( m_componentComplete &&
-         m_input &&
-         m_input->itemCount() == m_times.size() &&
-         m_input->itemCount() > 0 &&
-         m_calibrateDebevec)
-    {
-        try{
-            std::vector<float> times;
-            for ( int i = 0; i < m_times.size(); ++i )
-                times.push_back(m_times[i]);
+float QCalibrateDebevec::lambda() const
+{
+    return m_lambda;
+}
 
-            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
-                std::vector<cv::Mat> result;
-                for (int i = 0; i < list->itemCount(); ++i){
-                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
-                    if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->internal());
-                }
-                return result;
-            };
+void QCalibrateDebevec::setLambda(float lambda)
+{
+    if (m_lambda == lambda)
+        return;
+    m_lambda = lambda;
+    emit lambdaChanged();
+}
 
-            m_calibrateDebevec->process(asVector(m_input), *m_output->internalPtr(), times);
+bool QCalibrateDebevec::random() const
+{
+    return m_random;
+}
 
-            emit outputChanged();
+void QCalibrateDebevec::setRandom(bool random)
+{
+    if (m_random == random)
+        return;
+    m_random = random;
+    emit randomChanged();
+}
 
-        } catch ( cv::Exception& e ){
-            lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::ViewContext::instance().engine()->throwError(&lve, this);
-            return;
-        }
+QMat *QCalibrateDebevec::process(lv::QmlObjectList *input, QList<qreal> times)
+{
+    if (!input || input->itemCount() != times.size() || input->itemCount() == 0 || !m_calibrateDebevec)
+        return nullptr;
 
+    try {
+        std::vector<float> vectorTimes;
+        for ( int i = 0; i < times.size(); ++i )
+            vectorTimes.push_back(times[i]);
+
+        auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+            std::vector<cv::Mat> result;
+            for (int i = 0; i < list->itemCount(); ++i){
+                QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                if (!m) return std::vector<cv::Mat>();
+                result.push_back(m->internal());
+            }
+            return result;
+        };
+
+        auto inputVector = asVector(input);
+
+        QMat* result = new QMat();
+
+        m_calibrateDebevec->process(inputVector, *result->internalPtr(), vectorTimes);
+
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "CalibrateDebevec: ").jsThrow();
+        return nullptr;
     }
 }
+
+void QCalibrateDebevec::createCalibrateDebevec()
+{
+    m_calibrateDebevec = cv::createCalibrateDebevec(m_samples, m_lambda, m_random);
+}
+

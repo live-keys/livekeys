@@ -18,81 +18,92 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/viewcontext.h"
+#include "cvextras.h"
 
-QStitcher::QStitcher(QQuickItem *parent)
-    : QMatDisplay(parent)
-#if CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
-    , m_stitcher(cv::Stitcher::create())
-#elif CV_VERSION_MAJOR >= 4
-    , m_stitcher(cv::Stitcher::create())
-#else
-    , m_stitcher(cv::Stitcher::createDefault())
-#endif
+QStitcher::QStitcher(QObject *parent)
+    : QObject(parent)
+    , m_mode(Mode::Panorama)
+    , m_tryUseGpu(true)
 {
-
+    createSticher();
 }
 
-void QStitcher::filter(){
-    if ( m_input && m_input->itemCount() > 1 ){
-        try{
-            auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
-                std::vector<cv::Mat> result;
-                for (int i = 0; i < list->itemCount(); ++i){
-                    QMat* m = qobject_cast<QMat*>(list->itemAt(i));
-                    if (!m) return std::vector<cv::Mat>();
-                    result.push_back(m->internal());
-                }
-                return result;
-            };
-
-            auto vectorInput = asVector(m_input);
-
-            #if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
-                cv::Stitcher::Status status = m_stitcher->stitch(vectorInput, *output()->internalPtr());
-            #else
-                cv::Stitcher::Status status = m_stitcher.stitch(vectorInput, *output()->cvMat());
-            #endif
-
-            if ( status == cv::Stitcher::OK ){
-                setImplicitWidth(output()->internal().cols);
-                setImplicitHeight(output()->internal().rows);
-                emit outputChanged();
-                update();
-            } else {
-                emit error(status);
+QMat* QStitcher::stitch(lv::QmlObjectList* input){
+    if (!input || input->itemCount() <= 1)
+        return nullptr;
+    try{
+        auto asVector = [](lv::QmlObjectList* list) -> std::vector<cv::Mat> {
+            std::vector<cv::Mat> result;
+            for (int i = 0; i < list->itemCount(); ++i){
+                QMat* m = qobject_cast<QMat*>(list->itemAt(i));
+                if (!m) return std::vector<cv::Mat>();
+                result.push_back(m->internal());
             }
-        } catch ( cv::Exception& e ){
-            lv::Exception lve = CREATE_EXCEPTION(lv::Exception, e.what(), e.code);
-            lv::ViewContext::instance().engine()->throwError(&lve, this);
-            return;
+            return result;
+        };
+
+        auto vectorInput = asVector(input);
+        QMat* result = new QMat();
+
+        #if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
+            cv::Stitcher::Status status = m_stitcher->stitch(vectorInput, *result->internalPtr());
+        #else
+            cv::Stitcher::Status status = m_stitcher.stitch(vectorInput, *result->internalPtr());
+        #endif
+
+
+        if ( status != cv::Stitcher::OK ){
+            emit error(status);
+            lv::CvExtras::toLocalError(cv::Exception(), lv::ViewContext::instance().engine(), this, "Stitcher: " + std::to_string(status)).jsThrow();
+            return nullptr;
         }
+
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Stitcher: ").jsThrow();
+        return nullptr;
     }
 }
 
-void QStitcher::setParams(const QVariantMap &params){
-    if (m_params == params)
-        return;
-
-    m_params = params;
-    emit paramsChanged(m_params);
-
-#if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
-    cv::Stitcher::Mode mode = cv::Stitcher::PANORAMA;
-    if ( params.contains("mode") )
-        mode = static_cast<cv::Stitcher::Mode>(params["mode"].toInt());
-#endif
-
-    bool tryUseGpu = false;
-    if ( params.contains("tryUseGpu") )
-        tryUseGpu = params["tryUseGpu"].toBool();
-
-#if CV_VERSION_MAJOR >= 4
-    m_stitcher = cv::Stitcher::create(mode);
-#elif CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
-    m_stitcher = cv::Stitcher::create(mode, tryUseGpu);
-#else
-    m_stitcher = cv::Stitcher::createDefault(tryUseGpu);
-#endif
-
-    filter();
+void QStitcher::createSticher()
+{
+    #if CV_VERSION_MAJOR >= 4
+        m_stitcher = cv::Stitcher::create(static_cast<cv::Stitcher::Mode>(m_mode));
+    #elif CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2
+        m_stitcher = cv::Stitcher::create(static_cast<cv::Stitcher::Mode>(m_mode), m_tryUseGpu);
+    #else
+        m_stitcher = cv::Stitcher::createDefault(m_tryUseGpu);
+    #endif
 }
+
+bool QStitcher::tryUseGpu() const
+{
+    return m_tryUseGpu;
+}
+
+void QStitcher::setTryUseGpu(bool tryUseGpu)
+{
+    if (m_tryUseGpu == tryUseGpu)
+        return;
+    m_tryUseGpu = tryUseGpu;
+    createSticher();
+    emit tryUseGpuChanged();
+}
+
+int QStitcher::mode() const
+{
+    return m_mode;
+}
+
+void QStitcher::setMode(int mode)
+{
+#if (CV_VERSION_MAJOR >= 3 && CV_VERSION_MINOR > 2) || CV_VERSION_MAJOR >= 4
+    if (m_mode == mode)
+        return;
+    m_mode = mode;
+    createSticher();
+    emit modeChanged();
+#endif
+}
+
+

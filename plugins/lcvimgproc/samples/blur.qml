@@ -7,14 +7,19 @@ Row{
     // This sample shows the usage of the Blur
     // element
     
-    ImRead{
+    ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
     
     Blur{
-        input : src.output
+        id: blur
+        input : src.result
         anchor : Qt.point(3, 3)
-        ksize : "5x5"
+        size : "5x5"
+    }
+    
+    ImageView {
+        image: blur.result
     }
 }

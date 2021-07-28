@@ -18,6 +18,7 @@ Tool{
 
     signal apply(point p1, point p2, point p3, point p4)
     signal cancel()
+    signal shapeChanged(var points)
 
     infoBarContent: Item {
         anchors.fill: parent
@@ -114,10 +115,26 @@ Tool{
                 root.p3.y = shape.p3.y / root.canvas.scale
                 root.p4.x = shape.p4.x / root.canvas.scale
                 root.p4.y = shape.p4.y / root.canvas.scale
+                root.shapeChanged([root.p1, root.p2, root.p3, root.p4])
             }
         }
 
     }
+
+
+    function assignShapePoints(p1, p2, p3, p4){
+        var dims = root.canvas.imageView.image.dimensions()
+
+        root.p1 = p1
+        root.p2 = p2
+        root.p3 = p3
+        root.p4 = p4
+
+        selectionShape.shape.width = dims.width * root.canvas.scale
+        selectionShape.shape.height = dims.height * root.canvas.scale
+        selectionShape.shape.setPoints(root.p1, root.p2, root.p3, root.p4, root.canvas.scale)
+    }
+
 
     activate: function(){
         if ( selectionShape ){
@@ -133,14 +150,12 @@ Tool{
         selectionShape.width = root.canvas.imageView.width
         selectionShape.height = root.canvas.imageView.height
 
-        root.p1 = Qt.point(0,0)
-        root.p2 = Qt.point(dims.width, 0)
-        root.p3 = Qt.point(dims.width, dims.height)
-        root.p4 = Qt.point(0, dims.height)
-
-        selectionShape.shape.width = dims.width * root.canvas.scale
-        selectionShape.shape.height = dims.height * root.canvas.scale
-        selectionShape.shape.setPoints(root.p1, root.p2, root.p3, root.p4, root.canvas.scale)
+        root.assignShapePoints(
+            Qt.point(0,0), 
+            Qt.point(dims.width, 0),
+            Qt.point(dims.width, dims.height),
+            Qt.point(0, dims.height)
+        )
     }
 
     deactivate: function(){

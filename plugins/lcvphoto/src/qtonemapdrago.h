@@ -23,12 +23,25 @@
 class QTonemapDrago : public QTonemap{
 
     Q_OBJECT
-
+    Q_PROPERTY(float saturation READ saturation WRITE setSaturation NOTIFY saturationChanged)
+    Q_PROPERTY(float bias       READ bias       WRITE setBias       NOTIFY biasChanged)
 public:
     QTonemapDrago(QQuickItem* parent = nullptr);
     virtual ~QTonemapDrago(){}
 
-    void initialize(const QVariantMap &options);
+    float saturation() const;
+    void setSaturation(float saturation);
+
+    float bias() const;
+    void setBias(float bias);
+signals:
+    void biasChanged();
+    void saturationChanged();
+private:
+    void createTonemapDrago();
+
+    float m_saturation;
+    float m_bias;
 
 };
 

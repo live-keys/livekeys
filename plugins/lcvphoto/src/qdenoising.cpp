@@ -5,6 +5,9 @@
 
 #include "live/exception.h"
 #include "live/qmlerror.h"
+#include "cvextras.h"
+#include "qqmlapplicationengine.h"
+#include "live/viewcontext.h"
 
 QDenoising::QDenoising(QObject *parent)
     : QObject(parent)
@@ -85,4 +88,32 @@ QObject* QDenoising::fastNlMeansColored(
     }
 
     return nullptr;
+}
+
+QMat *QDenoising::denoiseTVL1(const QVariantList &obs, double lambda, int iters)
+{
+    if (obs.size() == 0) return nullptr;
+    try {
+        std::vector<cv::Mat> obsVector;
+        for(int i = 0; i < obs.size(); i++)
+        {
+            QMat* mat = obs.at(i).value<QMat*>();
+            if (!mat){
+                return nullptr;
+            }
+            obsVector.push_back(mat->internal());
+        }
+
+        cv::Mat* rMat = new cv::Mat(
+            obsVector[0].rows,
+            obsVector[0].cols,
+            CV_8UC1);
+        cv::denoise_TVL1(obsVector, *rMat, lambda, iters);
+        QMat* result = new QMat(rMat);
+
+        return result;
+    } catch (cv::Exception& e){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Denoising: ").jsThrow();
+        return nullptr;
+    }
 }

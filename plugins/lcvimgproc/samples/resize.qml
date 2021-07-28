@@ -13,20 +13,24 @@ Column{
     
     Row{
         
-        width : sc.width
-        height : sc.height
+        width : result.width
+        height : result.height
         
-        ImRead{
+        ImageRead{
             id : sc
             file : root.imagePath
         }
         
         Resize{
-            id : scrs
-            input : sc.output
-            fx : 0.25
-            fy : 0.25
             
+            id : scrs
+            input : sc.result
+            size: "400x320"        
+        }
+        
+        ImageView {
+            id: result
+            image: scrs.result
         }
     }
 }

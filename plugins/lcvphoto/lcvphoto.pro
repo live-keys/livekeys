@@ -60,14 +60,24 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 DISTFILES += \
     palettes/HueSaturationLightnessPalette.qml \
+    qml/AlignMTB.qml \
     qml/BrightnessAndContrast.qml \
+    qml/CalibrateDebevec.qml \
+    qml/CalibrateRobertson.qml \
+    qml/DenoiseTVL1.qml \
     qml/FastNlMeansDenoising_.qml \
     qml/HueSaturationLightness.qml \
     qml/Levels.qml \
     qml/LevelsSliders.qml \
     qml/HueSaturationLightnessSliders.qml \
+    qml/MergeDebevec.qml \
+    qml/MergeRobertson.qml \
     qml/Sepia.qml \
+    qml/Stitcher.qml \
     qml/Temperature.qml \
+    qml/TonemapDrago.qml \
+    qml/TonemapMantiuk.qml \
+    qml/TonemapReinhard.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     palettes/LevelsPalette.qml \

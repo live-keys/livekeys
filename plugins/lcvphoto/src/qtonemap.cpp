@@ -15,47 +15,53 @@
 ****************************************************************************/
 
 #include "qtonemap.h"
+#include "live/exception.h"
+#include "live/viewengine.h"
+#include "live/viewcontext.h"
+#include "cvextras.h"
 
-QTonemap::QTonemap(QQuickItem *parent)
-    : QMatDisplay(parent)
-    , m_input(QMat::nullMat())
+QTonemap::QTonemap(QObject *parent)
+    : QObject(parent)
+    , m_gamma(1.0f)
     , m_tonemapper()
 {
 }
 
-QTonemap::QTonemap(cv::Ptr<cv::Tonemap> tonemapper, QQuickItem *parent)
-    : QMatDisplay(parent)
-    , m_input(QMat::nullMat())
+QTonemap::QTonemap(cv::Ptr<cv::Tonemap> tonemapper, QObject *parent)
+    : QObject(parent)
+    , m_gamma(1.0f)
     , m_tonemapper(tonemapper){
 }
 
 QTonemap::~QTonemap(){
 }
 
-void QTonemap::initialize(const QVariantMap &){
-}
 
 void QTonemap::initializeTonemapper(cv::Ptr<cv::Tonemap> tonemapper){
     m_tonemapper = tonemapper;
-    process();
 }
 
-void QTonemap::process(){
-    if ( m_tonemapper && !m_input->internal().empty() && isComponentComplete() ){
-        m_tonemapper->process(m_input->internal(), m_store);
-//        m_store = m_store * 3;
+QMat* QTonemap::process(QMat* input){
+    if ( !m_tonemapper || !input || input->internal().empty())
+        return nullptr;
 
-        m_store.convertTo(*output()->internalPtr(), CV_8UC3, 255);
-
-        setImplicitWidth(output()->internal().cols);
-        setImplicitHeight(output()->internal().rows);
-
-        emit outputChanged();
-        update();
+    try {
+        QMat* result = new QMat();
+        m_tonemapper->process(input->internal(), *result->internalPtr());
+        return result;
+    } catch ( cv::Exception& e ){
+        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Tonemap: ").jsThrow();
+        return nullptr;
     }
 }
 
-void QTonemap::componentComplete(){
-    QQuickItem::componentComplete();
-    process();
+float QTonemap::gamma() const
+{
+    return m_gamma;
 }
+
+void QTonemap::setGamma(float gamma)
+{
+    m_gamma = gamma;
+}
+

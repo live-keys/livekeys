@@ -7,15 +7,20 @@ Row{
     // This sample shows the usage of the Blur
     // element
     
-    ImRead{
+    ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
     
     GaussianBlur{
-        input : src.output
-        ksize : "21x21"
+        id: gaussianBlur
+        input : src.result
+        size : "21x21"
         sigmaX : 5
         sigmaY : 5
+    }
+    
+    ImageView {
+        image: gaussianBlur.result
     }
 }

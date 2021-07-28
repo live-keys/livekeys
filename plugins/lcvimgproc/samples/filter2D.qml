@@ -6,9 +6,9 @@ Grid{
     
     // Usage of the filter2D
     
-    columns: 2
+    columns: 1
     
-    Cv.ImRead{
+    Cv.ImageRead{
        id : src
        file : project.dir() + '/../../../samples/_images/buildings_0246.jpg'
     }
@@ -20,15 +20,20 @@ Grid{
         linearFilter : false
         mat : {
             return Cv.MatOp.createFromArray([
-                [-0.1, 0.0, 0,1], 
+                [-0.1, 0.0, 0.4], 
                 [-0.1, 0.0, 0.1], 
                 [-0,1, 0.0, 0.1]], Cv.Mat.CV32F)
         }
+        visible: false
     }
     
     Filter2D{
-        input : src.output
+        id: f2d
+        input : src.result
         kernel : kernel.mat
-        borderType : CopyMakeBorder.BORDER_DEFAULT
+    }
+    
+    Cv.ImageView {
+        image: f2d.result
     }
 }

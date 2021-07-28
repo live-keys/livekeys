@@ -83,6 +83,8 @@ public slots:
     QMat* copyMakeBorder(QMat* input,
                          int top, int bottom, int left, int right,
                          int borderType = BORDER_DEFAULT, const QColor& color = QColor());
+
+    QMat* convertTo8U(QMat* input);
 private:
     lv::ViewEngine* engine();
 };

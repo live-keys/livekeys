@@ -4,6 +4,8 @@ HEADERS += \
     $$PWD/qfeaturedetection.h \
     $$PWD/qfilteringoperations.h \
     $$PWD/qhoughlinesp.h \
+    $$PWD/qprojectionmapper.h \
+    $$PWD/qprojectionsurface.h \
     $$PWD/qshapedescriptors.h \
     $$PWD/lcvimgproc_plugin.h \
     $$PWD/qtransformations.h \
@@ -20,6 +22,8 @@ SOURCES += \
     $$PWD/qfeaturedetection.cpp \
     $$PWD/qfilteringoperations.cpp \
     $$PWD/qhoughlinesp.cpp \
+    $$PWD/qprojectionmapper.cpp \
+    $$PWD/qprojectionsurface.cpp \
     $$PWD/qshapedescriptors.cpp \
     $$PWD/qtransformations.cpp \
     $$PWD/qtransformimage.cpp \
