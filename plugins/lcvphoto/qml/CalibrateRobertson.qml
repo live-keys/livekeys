@@ -8,7 +8,7 @@ Act{
     property var times: []
     property int maxIter: 30
     property real threshold: 0.01
-    property var calibrateRobertson: CvCalibrateRobertson {
+    property var calibrateRobertson: CalibrateRobertsonInternal {
         maxIter: root.maxIter
         threshold: root.threshold
     }

@@ -9,7 +9,7 @@ Act{
     property int excludeRange: 4
     property bool cut: true
 
-    property var alignMtb: CvAlignMTB {
+    property var alignMtb: AlignMTBInternal {
         maxBits: root.maxBits
         excludeRange: root.excludeRange
         cut: root.cut

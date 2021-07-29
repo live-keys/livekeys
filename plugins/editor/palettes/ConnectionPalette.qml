@@ -143,14 +143,11 @@ CodePalette{
                         qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x + 113, paneCoords.y - 75), lk.layers.editor.environment.placement.bottom)
                         return
                     }
-                    qmlSuggestionBox = paletteControls.createSuggestionBox()
+                    qmlSuggestionBox = paletteControls.createSuggestionBox(null, palette.inputFont)
                     qmlSuggestionBox.width = Qt.binding(function(){ return input.width })
                     qmlSuggestionBox.height = 200
                     qmlSuggestionBox.x = 0
 
-                    qmlSuggestionBox.fontFamily = palette.inputFont.family
-                    qmlSuggestionBox.fontSize = palette.inputFont.pixelSize
-                    qmlSuggestionBox.smallFontSize = palette.inputFont.pixelSize - 2
                     qmlSuggestionBox.visible = Qt.binding(function(){ return palette.codeModel.isEnabled })
 
                     qmlSuggestionBox.opacity = Qt.binding(function(){

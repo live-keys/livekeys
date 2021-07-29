@@ -8,7 +8,7 @@ Act{
     property int mode: 0
     property bool tryUseGpu: true
 
-    property var stitcher: Photo.CvStitcher {
+    property var stitcher: Photo.StitcherInternal {
         mode: root.mode
         tryUseGpu: root.tryUseGpu
     }

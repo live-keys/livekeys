@@ -7,6 +7,15 @@ import workspace.icons 1.0 as Icons
 Item{
     id: propertyContainer
 
+    function __initialize(editor, ef){
+        propertyContainer.title = ef.identifier()
+        propertyContainer.editor = editor
+        propertyContainer.documentHandler = editor.documentHandler
+        propertyContainer.editingFragment = ef
+        if ( ef.codeHandler.isForAnObject(ef))
+            propertyContainer.isAnObject = true
+    }
+
     property string title: "Object"
     objectName: "propertyContainer"
 

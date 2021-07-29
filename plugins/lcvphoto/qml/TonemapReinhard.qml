@@ -10,7 +10,7 @@ Act{
     property real lightAdapt: 1.0
     property real colorAdapt: 0.0
 
-    property var tonemapReinhard: CvTonemapReinhard {
+    property var tonemapReinhard: TonemapReinhardInternal {
         gamma: root.gamma
         intensity: root.intensity
         lightAdapt: root.lightAdapt

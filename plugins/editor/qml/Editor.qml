@@ -492,7 +492,6 @@ Rectangle{
 
             if (qmlSuggestionBox){
                 qmlSuggestionBox.visible = true
-                qmlSuggestionBox.opacity = 0.95
                 qmlSuggestionBox.parent.updatePlacement(
                     rect,
                     Qt.point(
@@ -500,13 +499,7 @@ Rectangle{
                         lk.layers.editor.environment.placement.bottom)
 
             } else {
-                qmlSuggestionBox = paletteControls.createSuggestionBox()
-
-                qmlSuggestionBox.fontFamily = textEdit.font.family
-                qmlSuggestionBox.fontSize = textEdit.font.pixelSize
-                qmlSuggestionBox.smallFontSize = textEdit.font.pixelSize - 2
-
-                qmlSuggestionBox.opacity = 0.95
+                qmlSuggestionBox = paletteControls.createSuggestionBox(null, textEdit.font)
                 qmlSuggestionBox.model = documentHandler.completionModel
 
                 var editorBox = lk.layers.editor.environment.createEditorBox(

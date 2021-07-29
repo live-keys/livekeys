@@ -94,6 +94,18 @@ Item{
             textStyle: propertyItem.style.textStyle
         }
 
+        Input.Label{
+            id: typeLabel
+            anchors.verticalCenter : parent.verticalCenter
+            anchors.left: propertyLabel.right
+            anchors.leftMargin: 5
+            text: propertyItem.editingFragment && !propertyItem.isForObject ? propertyItem.editingFragment.typeName() : ""
+            textStyle: Input.TextStyle {
+                font: propertyItem.style.textStyle.font
+                color: "gray"
+            }
+        }
+
         Loader{
             id: iconLoader
             anchors.verticalCenter: parent.verticalCenter

@@ -309,7 +309,7 @@ Qan.NodeItem{
             editingFragment.codeHandler.populateObjectInfoForFragment(obj)
 
             var object = obj.objectInfo()
-            addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), ObjectGraph.PortMode.None, object.connection)
+            addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), object.id ? ObjectGraph.PortMode.OutPort: ObjectGraph.PortMode.None, object.connection)
         }
         function onPropertyAdded(ef, expandDefault){
             editingFragment.codeHandler.populatePropertyInfoForFragment(ef)

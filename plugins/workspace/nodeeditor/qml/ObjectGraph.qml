@@ -202,7 +202,11 @@ Rectangle{
         }
         else {
             name = srcPort.objectProperty.propertyName
-            value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+            if (name.indexOf('#') !== -1)
+                value = name.substr(name.indexOf('#') +1)
+            else
+                value = srcPort.objectProperty.node.item.id + "." + srcPort.objectProperty.propertyName
+
         }
 
         var srcLocation = srcPort.objectProperty.editingFragment.location
