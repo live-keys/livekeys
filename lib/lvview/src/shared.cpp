@@ -20,6 +20,7 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 #include <QDateTime>
+#include <QSizeF>
 #include <QJSValue>
 #include <QJSValueIterator>
 
@@ -55,6 +56,12 @@ QJSValue Shared::transfer(const QVariant &v, QJSEngine *engine){
         return va;
     } else if ( v.type() == QVariant::String) {
         return QJSValue(v.toString());
+    } else if ( v.type() == QVariant::Size || v.type() == QVariant::SizeF ){
+        QSizeF vs = v.toSizeF();
+
+        QJSValue sizeFn = engine->globalObject().property("Qt").property("size");
+        QJSValue vsjs = sizeFn.call(QJSValueList() << vs.width() << vs.height());
+        return vsjs;
     } else if ( v.type() == QVariant::Bool ){
         return QJSValue(v.toBool());
     } else if ( v.type() == QVariant::Int ){

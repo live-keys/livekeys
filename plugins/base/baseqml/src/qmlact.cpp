@@ -75,7 +75,8 @@ void QmlAct::componentComplete(){
              name != "returns" &&
              name != "result" &&
              name != "trigger" &&
-             name != "worker")
+             name != "worker" &&
+             name != "unwrap")
         {
             QQmlProperty pp(this, name);
             pp.connectNotifySignal(this, SLOT(__propertyChange()));
@@ -109,8 +110,35 @@ void QmlAct::setResult(const QJSValue &result){
         ViewContext::instance().engine()->throwError(&e, this);
         return;
     }
-    m_result = result;
-    emit resultChanged();
+
+
+    if ( m_returns.isArray() ){
+        ViewEngine* engine = ViewContext::instance().engine();
+        QJSValue resultWrap = engine->engine()->newObject();
+        resultWrap.setProperty("result", result);
+
+        QJSValueIterator it(m_returns);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QString propertyName = it.value().toString();
+                if ( propertyName != "result" ){
+                    QQmlProperty qp(this, propertyName);
+                    if ( qp.isValid() ){
+                        resultWrap.setProperty(propertyName, Shared::transfer(qp.read(), engine->engine()));
+                    }
+                }
+            }
+        }
+
+        m_result = resultWrap;
+        emit resultChanged();
+
+    } else {
+        m_result = result;
+        emit resultChanged();
+    }
+
 }
 
 void QmlAct::extractSource(ViewEngine* ve){
@@ -225,6 +253,30 @@ void QmlAct::__propertyChange(){
     }
 }
 
+void QmlAct::setUnwrap(QJSValue unwrap){
+    if ( unwrap.isObject() ){
+
+        auto trigger = m_trigger;
+        m_trigger = QmlAct::Manual;
+
+        QJSValueIterator it(unwrap);
+        while ( it.hasNext() ){
+            it.next();
+            QQmlProperty pp(this, it.name());
+            if ( pp.isValid() && pp.isWritable() ){
+                pp.write(it.value().toVariant());
+            }
+        }
+
+        m_trigger = trigger;
+        if ( m_trigger == QmlAct::PropertyChange ){
+            exec();
+        }
+    }
+
+    emit unwrapChanged();
+}
+
 bool QmlAct::event(QEvent *ev){
     QmlWorkerPool::TaskReadyEvent* tr = dynamic_cast<QmlWorkerPool::TaskReadyEvent*>(ev);
     if (!tr)
@@ -269,18 +321,14 @@ void QmlAct::setRun(QJSValue run){
     emit runChanged();
 }
 
-void QmlAct::setReturns(QString returns){
-    if (m_returns == returns)
-        return;
+void QmlAct::setReturns(QJSValue returns){
 
-    if ( m_isComponentComplete ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set return type after component is complete.", Exception::toCode("~ActConfig"));
-        ViewContext::instance().engine()->throwError(&e, this);
-        return;
-    }
-
-    if ( returns == "qml/object" ){
-        m_result = QJSValue(QJSValue::NullValue);
+    if ( !m_isComponentComplete ){
+        if ( returns.isString() && returns.toString() == "qml/object" ){
+            m_result = QJSValue(QJSValue::NullValue);
+        }
+//        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set return type after component is complete.", Exception::toCode("~ActConfig"));
+//        ViewContext::instance().engine()->throwError(&e, this);
     }
 
     m_returns = returns;

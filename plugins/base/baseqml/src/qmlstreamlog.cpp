@@ -17,12 +17,14 @@ void QmlStreamLog::setStream(QmlStream *stream){
 
     if ( m_stream ){
         m_stream->unsubscribeObject(this);
+        Shared::unref(m_stream);
     }
 
     m_stream = stream;
     emit streamChanged();
 
     if ( m_stream ){
+        Shared::ref(m_stream);
         m_stream->forward(this, &QmlStreamLog::onStreamData);
     }
 }
@@ -36,8 +38,10 @@ void QmlStreamLog::onStreamData(QObject *that, const QJSValue &val){
 }
 
 QmlStreamLog::~QmlStreamLog(){
-    if ( m_stream )
+    if ( m_stream ){
+        Shared::unref(m_stream);
         m_stream->unsubscribeObject(this);
+    }
 }
 
 }// namespace

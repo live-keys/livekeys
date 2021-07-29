@@ -25,6 +25,8 @@
 #include <QJSValue>
 #include <QQmlProperty>
 
+#include <tuple>
+
 namespace lv{
 
 class DocumentQmlChannels;
@@ -77,7 +79,8 @@ public:
         const QString& declaration,
         const QString& path,
         QObject* parent = nullptr,
-        QQmlContext* context = nullptr
+        QQmlContext* context = nullptr,
+        QList<std::tuple<QString, QString, QString> > props = QList<std::tuple<QString, QString, QString> >()
     );
 
     void setPaletteForBinding(CodePalette* palette);
@@ -185,6 +188,7 @@ public slots:
     void writeCode(const QString& code);
 
     QObject* readObject();
+    QObject* propertyObject();
 
     QVariant parse();
     void updateBindings();
@@ -215,7 +219,7 @@ signals:
     void typeChanged();
     void isNullChanged();
 private:
-    static QString buildCode(const QJSValue& value);
+    static QString buildCode(const QJSValue& value, bool additionalBraces = false);
     void checkIsNull();
 
     QmlDeclaration::Ptr  m_declaration;

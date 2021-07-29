@@ -60,7 +60,7 @@ QtObject{
             width: 300
             height: 200
 
-            //HERE: Fix this
+            //TODO: Fix this
 
             onItemAdded: {
                 if ( !parent  )

@@ -4,14 +4,18 @@ HEADERS += \
     $$PWD/base_plugin.h \
     $$PWD/environment.h \
     $$PWD/lvbaseqmlglobal.h \
+    $$PWD/qmlarrange.h \
+    $$PWD/qmlcollector.h \
     $$PWD/qmlexec.h \
     $$PWD/qmlindexselector.h \
     $$PWD/qmlpropertylog.h \
     $$PWD/qmlscript.h \
+    $$PWD/qmlsplit.h \
     $$PWD/qmlstreamact.h \
     $$PWD/qmlstreamoperator.h \
     $$PWD/qmlstreamsink.h \
     $$PWD/qmlstreamvalue.h \
+    $$PWD/qmlstreamvalueawait.h \
     $$PWD/qmlthreadinfo.h \
     $$PWD/qmltime.h \
     $$PWD/qmlworkerpoolobject.h \
@@ -30,14 +34,18 @@ HEADERS += \
 SOURCES += \
     $$PWD/base_plugin.cpp \
     $$PWD/environment.cpp \
+    $$PWD/qmlarrange.cpp \
+    $$PWD/qmlcollector.cpp \
     $$PWD/qmlexec.cpp \
     $$PWD/qmlindexselector.cpp \
     $$PWD/qmlpropertylog.cpp \
     $$PWD/qmlscript.cpp \
+    $$PWD/qmlsplit.cpp \
     $$PWD/qmlstreamact.cpp \
     $$PWD/qmlstreamoperator.cpp \
     $$PWD/qmlstreamvalue.cpp \
     $$PWD/qmlstreamsink.cpp \
+    $$PWD/qmlstreamvalueawait.cpp \
     $$PWD/qmlthreadinfo.cpp \
     $$PWD/qmltime.cpp \
     $$PWD/qmlworkerinterface.cpp \

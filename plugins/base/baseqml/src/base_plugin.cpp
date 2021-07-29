@@ -33,9 +33,13 @@
 #include "groupcollector.h"
 #include "qmlstreamfilter.h"
 #include "qmlstreamvalue.h"
+#include "qmlstreamvalueawait.h"
 #include "qmlstreamact.h"
 #include "qmlthreadinfo.h"
 #include "qmltime.h"
+#include "qmlarrange.h"
+#include "qmlcollector.h"
+#include "qmlsplit.h"
 #include "qmlstreamoperator.h"
 
 #include <qqml.h>
@@ -78,10 +82,14 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlContainer>(       uri, 1, 0, "Container");
     qmlRegisterType<lv::QmlOpening>(         uri, 1, 0, "Opening");
     qmlRegisterType<lv::QmlFollowUp>(        uri, 1, 0, "FollowUp");
+    qmlRegisterType<lv::QmlArrange>(         uri, 1, 0, "Arrange");
+    qmlRegisterType<lv::QmlSplit>(           uri, 1, 0, "Split");
+    qmlRegisterType<lv::QmlCollector>(       uri, 1, 0, "Collector");
     qmlRegisterType<lv::GroupCollector>(     uri, 1, 0, "GroupCollector");
     qmlRegisterType<lv::QmlStreamFilter>(    uri, 1, 0, "StreamFilter");
     qmlRegisterType<lv::QmlStreamSink>(      uri, 1, 0, "StreamSink");
     qmlRegisterType<lv::QmlStreamValue>(     uri, 1, 0, "StreamValue");
+    qmlRegisterType<lv::QmlStreamValueAwait>(uri, 1, 0, "StreamValueAwait");
     qmlRegisterType<lv::QmlStreamAct>(       uri, 1, 0, "StreamAct");
     qmlRegisterType<lv::QmlStreamOperator>(  uri, 1, 0, "StreamOperator");
 

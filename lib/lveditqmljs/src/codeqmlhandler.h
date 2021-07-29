@@ -200,11 +200,11 @@ public slots:
         const QString& name,
         bool assignDefault = false,
         lv::QmlEditFragment* parentGroup = nullptr);
-    int addItem(int position, const QString& object, const QString& type);
+    int addItem(int position, const QString& object, const QString& type, const QJSValue& properties = QJSValue());
     void addObjectForProperty(lv::QmlEditFragment* propertyFragment);
     int insertRootItem(const QString &ctype);
     int addEvent(int position, const QString &object, const QString &type, const QString &name);
-    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", QObject* currentApp = nullptr);
+    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     lv::QmlEditFragment* createObject(int position, const QString& type, lv::QmlEditFragment* parent, QObject* currentApp = nullptr);
 
@@ -230,7 +230,7 @@ public slots:
     void __aboutToDelete();
 
 private:
-    void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "");
+    void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     QmlDeclaration::Ptr createImportDeclaration();
 

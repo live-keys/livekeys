@@ -27,7 +27,7 @@ The above command will output tyep information about the `base` plugin in the co
 the desired plugin:
 
 ```
-./livekeys --global editqml/plugininfo base > plugins/base>
+./livekeys --global editqml/plugininfo base > plugins/base
 ```
 
 ### Note if you're compiling livekeys manually

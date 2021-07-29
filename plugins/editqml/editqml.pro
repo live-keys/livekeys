@@ -33,6 +33,7 @@ OTHER_FILES += \
     $$PWD/qml/live.package.json
 
 DISTFILES += \
+    qml/AddExtraPropertiesBox.qml \
     qml/AddQmlBox.qml \
     qml/ObjectContainer.qml \
     qml/ObjectContainerTop.qml \

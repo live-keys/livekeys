@@ -49,6 +49,8 @@ QMAKE_EXTRA_TARGETS += first palettecopy samplescopy
 
 
 DISTFILES += \
+    palettes/ActReturnsPalette.qml \
+    palettes/ArrangePalette.qml \
     palettes/ExecPropertiesPalette.json \
     palettes/StreamLogPropertiesPalette.json \
     palettes/ActTriggerTypePalette.qml \

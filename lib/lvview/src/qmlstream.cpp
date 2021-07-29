@@ -70,7 +70,7 @@ void QmlStream::PropertyObserver::push(ViewEngine*, QObject *object){
 // ----------------------------------------------------------------------------
 
 QmlStream::QmlStream(QObject *parent)
-    : QObject(parent)
+    : Shared(parent)
     , m_provider(nullptr)
     , m_idCounter(1)
     , m_observers(new std::list<QmlStream::Observer*>())
@@ -80,7 +80,7 @@ QmlStream::QmlStream(QObject *parent)
 }
 
 QmlStream::QmlStream(QmlStreamProvider *provider, QObject *parent)
-    : QObject(parent)
+    : Shared(parent)
     , m_provider(provider)
     , m_idCounter(1)
     , m_observers(new std::list<QmlStream::Observer*>())
