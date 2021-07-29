@@ -294,17 +294,12 @@ Rectangle{
                     if ( selection.extraProperties ){
                         paletteControls.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
-                                var opos = editingFragment.codeHandler.addItem(
-                                    selection.position, selection.objectType, selection.name, propertiesToAdd
-                                )
-                                editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name, propertiesToAdd)
-                                var ef = editingFragment.codeHandler.openNestedConnection(
-                                    editingFragment, opos
-                                )
-                                cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
-
+                                var ch = editingFragment.codeHandler
+                                var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)
+                                ch.addItemToRuntime(editingFragment, selection.name, propertiesToAdd)
+                                var ef = ch.openNestedConnection(editingFragment, opos)
                                 if (ef)
-                                    editingFragment.signalObjectAdded(ef, cursorCoords)
+                                    editingFragment.signalObjectAdded(ef)
 
                             },
                             onCancelled: function(){}
@@ -312,17 +307,12 @@ Rectangle{
 
 
                     } else {
-                        var opos = editingFragment.codeHandler.addItem(
-                            selection.position, selection.objectType, selection.name
-                        )
-                        editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name)
-                        var ef = editingFragment.codeHandler.openNestedConnection(
-                            editingFragment, opos
-                        )
-                        cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
-
+                        var ch = editingFragment.codeHandler
+                        var opos = ch.addItem(selection.position, selection.objectType, selection.name)
+                        ch.addItemToRuntime(editingFragment, selection.name)
+                        var ef = ch.openNestedConnection(editingFragment, opos)
                         if (ef)
-                            editingFragment.signalObjectAdded(ef, cursorCoords)
+                            editingFragment.signalObjectAdded(ef)
                     }
 
 

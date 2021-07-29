@@ -36,6 +36,13 @@ QmlBindingChannel::Ptr QmlBindingChannel::create(
     return bc;
 }
 
+QmlBindingChannel::Ptr QmlBindingChannel::createForImports(QmlBindingPath::Ptr bindingPath, Runnable *runnable)
+{
+    QmlBindingChannel::Ptr bc = QmlBindingChannel::create(bindingPath, runnable);
+    bc->m_type = QmlBindingChannel::Imports;
+    return bc;
+}
+
 QmlBindingChannel::QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable *runnable, QObject *parent)
     : QObject(parent)
     , m_bindingPath(bindingPath)

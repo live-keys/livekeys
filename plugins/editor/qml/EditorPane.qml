@@ -298,7 +298,7 @@ Workspace.Pane{
                         lk.layers.workspace.extensions.editqml.shapeLayout(root, root.paneState.layout)
                     } else {
                         // shape all
-                        lk.layers.workspace.extensions.editqml.shapeAllInEditor(root)
+                        lk.layers.workspace.extensions.editqml.shapeAll(root)
                     }
                 }
             }
