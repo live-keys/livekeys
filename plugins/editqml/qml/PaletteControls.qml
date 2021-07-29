@@ -329,19 +329,6 @@ QtObject{
             })
 
             lk.layers.window.dialogs.overlayBox(boxItem)
-
-        }
-    }
-
-    function openDefaultPalette(editingFragment, paletteBoxParent, objectRoot){
-        if (!editingFragment) return
-        var editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
-        var defaultPaletteName = editor.documentHandler.codeHandler.defaultPalette(editingFragment)
-        if ( defaultPaletteName.length ){
-            openPaletteByName(defaultPaletteName,
-                              editingFragment,
-                              paletteBoxParent,
-                              objectRoot)
         }
     }
 
@@ -354,6 +341,12 @@ QtObject{
         if ( !ef )
             return
         var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
+
+        if ( paletteName === root.defaultPalette ){
+            paletteName = ef.codeHandler.defaultPalette(ef)
+        }
+        if ( !paletteName.length )
+            return
 
         var palette = editor.documentHandler.codeHandler.expand(ef, {
             "palettes" : [paletteName]
@@ -385,28 +378,6 @@ QtObject{
                 objectContainer.expand()
         } else {
             objectContainer.expandOptions(palette) // expand json palette
-        }
-
-        return paletteBox
-    }
-
-    function openPaletteByName(paletteName, editingFragment, paletteBoxParent, objectRoot){
-        if ( !editingFragment )
-            return
-        var editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
-
-        var palette = editor.documentHandler.codeHandler.expand(editingFragment, {
-            "palettes" : [paletteName]
-        })
-        var paletteBox = wrapPaletteInContainer(palette, paletteBoxParent, { moveEnabled: false })
-
-        if ( objectRoot ){
-            if ( palette.item ){ // send expand signal
-                if ( objectRoot.compact )
-                    objectRoot.expand()
-            } else {
-                objectRoot.expandOptions(palette) // expand json palette
-            }
         }
 
         return paletteBox
@@ -454,9 +425,7 @@ QtObject{
         childObjectContainer.parentObjectContainer = parentObjectContainer
 
         if (expandDefault) {
-            openDefaultPalette(ef,
-                               childObjectContainer.paletteGroup,
-                               childObjectContainer)
+            openPaletteInObjectContainer(childObjectContainer, root.defaultPalette)
         }
 
 
@@ -710,7 +679,7 @@ QtObject{
             propertyContainer.valueContainer = createPaletteGroup(null, ef)
 
             if (expandDefault){
-                openDefaultPalette(ef, propertyContainer.valueContainer)
+                openPaletteInPropertyContainer(propertyContainer, root.defaultPalette)
             }
         }
         ef.visualParent.owner = propertyContainer
@@ -936,10 +905,7 @@ QtObject{
     }
 
     function openDefaults(objectContainer){
-        openDefaultPalette(objectContainer.editingFragment,
-                           objectContainer.paletteGroup,
-                           objectContainer)
-
+        openPaletteInObjectContainer(objectContainer, root.defaultPalette)
         openNestedProperties(objectContainer, true)
     }
 

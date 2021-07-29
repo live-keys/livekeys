@@ -57,7 +57,7 @@ Qan.NodeItem{
     resizable: false
 
     function expandDefaultPalette(){
-        paletteControls.openDefaultPalette(editingFragment, paletteContainer, root)
+        paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
     }
 
     function expandOptions(options){
