@@ -21,3 +21,4 @@ WorkspaceTheme          1.0 WorkspaceTheme.qml
 WorkspaceControl        1.0 WorkspaceControl.qml
 LoadingAnimation        1.0 LoadingAnimation.qml
 DocumentationView       1.0 DocumentationView.qml
+DropDownList            1.0 DropDownList.qml

@@ -291,17 +291,40 @@ Rectangle{
                     box.destroy()
                 },
                 onAccepted: function(box, selection){
-                    var opos = editingFragment.codeHandler.addItem(
-                        selection.position, selection.objectType, selection.name
-                    )
-                    editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name, project.appRoot())
-                    var ef = editingFragment.codeHandler.openNestedConnection(
-                        editingFragment, opos
-                    )
-                    cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+                    if ( selection.extraProperties ){
+                        paletteControls.views.openAddExtraPropertiesBox(selection.name, {
+                            onAccepted: function(propertiesToAdd){
+                                var opos = editingFragment.codeHandler.addItem(
+                                    selection.position, selection.objectType, selection.name, propertiesToAdd
+                                )
+                                editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name, propertiesToAdd)
+                                var ef = editingFragment.codeHandler.openNestedConnection(
+                                    editingFragment, opos
+                                )
+                                cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
 
-                    if (ef)
-                        editingFragment.signalObjectAdded(ef, cursorCoords)
+                                if (ef)
+                                    editingFragment.signalObjectAdded(ef, cursorCoords)
+
+                            },
+                            onCancelled: function(){}
+                        })
+
+
+                    } else {
+                        var opos = editingFragment.codeHandler.addItem(
+                            selection.position, selection.objectType, selection.name
+                        )
+                        editingFragment.codeHandler.addItemToRuntime(editingFragment, selection.name)
+                        var ef = editingFragment.codeHandler.openNestedConnection(
+                            editingFragment, opos
+                        )
+                        cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
+
+                        if (ef)
+                            editingFragment.signalObjectAdded(ef, cursorCoords)
+                    }
+
 
                     box.child.finalize()
                 }

@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/fs_plugin.h \
     $$PWD/listdir.h \
     $$PWD/qmldir.h \
+    $$PWD/qmldirectoryread.h \
     $$PWD/qmlfile.h \
     $$PWD/qmlfilereader.h \
     $$PWD/qmlfiledescriptor.h \
@@ -15,6 +16,7 @@ SOURCES += \
     $$PWD/fs_plugin.cpp \
     $$PWD/listdir.cpp \
     $$PWD/qmldir.cpp \
+    $$PWD/qmldirectoryread.cpp \
     $$PWD/qmlfile.cpp \
     $$PWD/qmlfilereader.cpp \
     $$PWD/qmlfiledescriptor.cpp \

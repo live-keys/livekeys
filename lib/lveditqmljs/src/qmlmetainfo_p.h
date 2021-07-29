@@ -1,23 +1,27 @@
-#ifndef QMLMEMORYINFO_H
-#define QMLMEMORYINFO_H
+#ifndef LVQMLMEMORYINFO_H
+#define LVQMLMEMORYINFO_H
 
 #include <QObject>
+#include <QJSValue>
 
 namespace lv {
 
-class QmlMetaInfo : public QObject
-{
+class QmlMetaInfo : public QObject{
+
     Q_OBJECT
+
 public:
     explicit QmlMetaInfo(QObject *parent = nullptr);
+    ~QmlMetaInfo();
 
 public slots:
-    static bool isCppOwned(QObject* obj);
-    static bool isJsOwned(QObject* obj);
-    static QObject* cppParent(QObject* obj);
-    static bool isWritable(QObject* obj, QString name);
+    bool isCppOwned(QObject* obj);
+    bool isJsOwned(QObject* obj);
+    QObject* cppParent(QObject* obj);
+    bool isWritable(QObject* obj, QString name);
+    QJSValue listProperties(QObject* obj);
 };
 
 }
 
-#endif // QMLMEMORYINFO_H
+#endif // LVQMLMEMORYINFO_H

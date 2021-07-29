@@ -23,8 +23,12 @@
 #include "live/visuallogqt.h"
 #include "live/exception.h"
 
+#include <set>
+
 #include <QFile>
 #include <QTimer>
+#include <QJSValue>
+#include <QJSValueIterator>
 #include <QDebug>
 
 const int QVideoDecoder::FramesToGC = 10;
@@ -52,6 +56,7 @@ QVideoDecoder::QVideoDecoder(QObject *parent)
     , m_stream(nullptr)
     , m_properties(new QVideoDecoder::Properties)
     , m_decodedFramesToGC(0)
+    , m_streamType("qml/lcvcore#Mat")
 {
 }
 
@@ -178,9 +183,34 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
 
 void QVideoDecoder::__matReady(){
     if ( m_worker ){
+
         QMat* m = m_worker->takeMat();
         lv::Shared::ownJs(m);
-        m_stream->push(m);
+
+        if ( m_streamType.isString() ){
+            m_stream->push(m);
+        } else if ( m_streamType.isArray() ){
+            std::set<QString> types;
+            QJSValueIterator it(m_streamType);
+            while ( it.hasNext() ){
+                it.next();
+                if ( it.name() != "length" ){
+                    types.insert(it.value().toString());
+                }
+            }
+
+            lv::ViewEngine* ve = lv::ViewEngine::grab(this);
+            QJSValue result = ve->engine()->newObject();
+
+            if ( types.find("image") != types.end() ){
+                result.setProperty("image", ve->engine()->newQObject(m));
+            }
+            if ( types.find("frameNumber") != types.end() ){
+                result.setProperty("frameNumber", m_properties->currentFrame - 1);
+            }
+            m_stream->push(result);
+        }
+
         emit currentFrameChanged();
         ++m_decodedFramesToGC;
         if ( m_decodedFramesToGC > QVideoDecoder::FramesToGC ){
@@ -196,4 +226,13 @@ QString QVideoDecoder::file() const{
     if ( m_worker )
         return m_worker->file();
     return QString();
+}
+
+void QVideoDecoder::setStreamType(QJSValue type){
+    if ( type.isArray() ){
+        m_streamType = type;
+    } else {
+        m_streamType = QJSValue("qml/lcvcore#Mat");
+    }
+    emit streamTypeChanged();
 }

@@ -1277,7 +1277,7 @@ void CodeQmlHandler::__aboutToDelete()
     }
 }
 
-void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype){
+void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
     Q_D(CodeQmlHandler);
 
     if ( !edit )
@@ -1304,8 +1304,41 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
                 creationCtx = new QQmlContext(qmlContext(creationObj));
         }
 
+        // Handle properties
+
+        QList<std::tuple<QString, QString, QString> > props;
+        if ( properties.isArray() ){
+            QJSValueIterator it(properties);
+            while ( it.hasNext() ){
+                it.next();
+                if ( it.name() != "length" ){
+                    QJSValue propertyConfig = it.value();
+
+                    if ( !propertyConfig.hasOwnProperty("name") || !propertyConfig.hasOwnProperty("type") ){
+                        lv::Exception e = CREATE_EXCEPTION(
+                            lv::Exception, "Property 'name' and 'type' are required.", lv::Exception::toCode("~Attributes")
+                        );
+                        m_engine->throwError(&e, this);
+                        return;
+                    }
+
+                    QString name = propertyConfig.property("name").toString();
+                    QString type = propertyConfig.property("type").toString();
+                    QString value = "";
+                    if ( propertyConfig.hasOwnProperty("value") ){
+                        value = propertyConfig.property("value").toString();
+                    } else {
+                        value = QmlTypeInfo::typeDefaultValue(type);
+                    }
+
+                    props.append(std::make_tuple(type, name, value));
+                }
+            }
+        }
+
+
         QObject* result = QmlEditFragment::createObject(
-            d->documentInfo(), type + "{}", creationPath, nullptr, creationCtx
+            d->documentInfo(), type, creationPath, nullptr, creationCtx, props
         );
         if ( !result )
             THROW_EXCEPTION(lv::Exception, "Failed to create object: " + type.toStdString(), Exception::toCode("~CreateObject"));
@@ -2121,7 +2154,6 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     if ( !m_document || !editParent )
         return nullptr;
     Q_D(CodeQmlHandler);
-
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
@@ -2130,6 +2162,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
         return nullptr;
 
     QmlDeclaration::Ptr declaration = properties.first();
+
 
     auto test = findFragmentByPosition(declaration->position());
     if (test && test->declaration()->position() == declaration->position()) // it was already opened
@@ -2872,6 +2905,8 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(int position, int filter, lv::Qml
         return nullptr;
 
     QmlScopeSnap scope = d->snapScope();
+    d->syncObjects(m_document);
+    scope.document->createRanges();
 
     int insertionPosition = 0;
     QmlDeclaration::Ptr declaration = nullptr;
@@ -3192,7 +3227,9 @@ int CodeQmlHandler::addEvent(
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype){
+int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype, const QJSValue &properties){
+    Q_D(CodeQmlHandler);
+
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
     int blockEnd = qvs.getBlockEnd(position);
@@ -3214,6 +3251,39 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
         type = ctype;
     }
 
+    // Handle property insertions
+
+    QStringList propertyDeclarations;
+    if ( properties.isArray() ){
+        QJSValueIterator it(properties);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QJSValue propertyConfig = it.value();
+
+                if ( !propertyConfig.hasOwnProperty("name") || !propertyConfig.hasOwnProperty("type") ){
+                    lv::Exception e = CREATE_EXCEPTION(
+                        lv::Exception, "Property 'name' and 'type' are required.", lv::Exception::toCode("~Attributes")
+                    );
+                    m_engine->throwError(&e, this);
+                    return -1;
+                }
+
+                QString name = propertyConfig.property("name").toString();
+                QString type = propertyConfig.property("type").toString();
+                QString value = "";
+                if ( propertyConfig.hasOwnProperty("value") ){
+                    value = propertyConfig.property("value").toString();
+                } else {
+                    value = QmlTypeInfo::typeDefaultValue(type);
+                }
+
+                propertyDeclarations.append("property " + type + " " + name + ": " + value);
+            }
+        }
+    }
+
+
     QString insertionText;
     int insertionPosition = position;
     int cursorPosition = position;
@@ -3223,7 +3293,12 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     if ( tbStart == tbEnd ){ // inline object declaration
         insertionPosition = blockEnd;
         insertionText = "; " + type + "{";
-        if (id != "") insertionText += " id: " + id + " ";
+        if (id != "") {
+            insertionText += " id: " + id + "; ";
+        }
+        if ( !propertyDeclarations.isEmpty() ){
+            insertionText += propertyDeclarations.join("; ");
+        }
         insertionText += "} ";
         cursorPosition = insertionPosition + type.size() + 3;
     } else { // multiline object declaration
@@ -3240,7 +3315,12 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
         }
 
         insertionText = indent + type + "{\n";
-        if (id != "") insertionText += indent + "    id: " + id + "\n";
+        if (id != "") {
+            insertionText += indent + "    id: " + id + "\n";
+        }
+        if ( !propertyDeclarations.isEmpty() ){
+            insertionText += indent + "    " + propertyDeclarations.join("\n" + indent + "    ") + "\n";
+        }
         insertionText += indent + "}\n";
         cursorPosition = insertionPosition + indent.size() + type.size() + 1;
     }
@@ -3254,6 +3334,9 @@ int CodeQmlHandler::addItem(int position, const QString &, const QString &ctype)
     m_document->removeEditingState(ProjectDocument::Palette);
 
     m_scopeTimer.stop();
+
+    d->documentChanged();
+
     updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
@@ -3320,7 +3403,7 @@ int CodeQmlHandler::insertRootItem(const QString &name)
         return -1;
 
     QObject* newRoot = QmlEditFragment::createObject(
-        d->documentInfo(), type + "{}", "temp", r->viewContext()
+        d->documentInfo(), type, "temp", r->viewContext()
     );
 
     if ( !newRoot )
@@ -3332,9 +3415,9 @@ int CodeQmlHandler::insertRootItem(const QString &name)
     return insertionPosition + 2;
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, QObject *){
+void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
     try{
-        addItemToRunTimeImpl(edit, ctype);
+        addItemToRunTimeImpl(edit, ctype, properties);
     } catch ( lv::Exception& e ){
         m_engine->throwError(&e, this);
     }
@@ -4168,7 +4251,6 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
 
     QVariantMap propMap;
 
-
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
@@ -4178,7 +4260,6 @@ void CodeQmlHandler::populatePropertyInfoForFragment(QmlEditFragment *edit)
     QmlScopeSnap scope = d->snapScope();
 
     if (edit->isGroup()){
-
         propMap.insert("name", edit->identifier());
         propMap.insert("isWritable", false);
 

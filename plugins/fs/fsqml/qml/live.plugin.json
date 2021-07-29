@@ -4,6 +4,7 @@
     "libraryModules" : ["lvfs"],
     "palettes" : {
         "palettes/VisualFileSelectorPalette.qml" : "qml/fs#VisualFileSelector",
-        "palettes/VisualFileSelectorPropertiesPalette.json" : "qml/fs#VisualFileSelector"
+        "palettes/VisualFileSelectorPropertiesPalette.json" : "qml/fs#VisualFileSelector",
+        "palettes/DirectoryReadPalette.qml" : "qml/fs#DirectoryRead"
     }
 }

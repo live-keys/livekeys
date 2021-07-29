@@ -20,7 +20,8 @@ class LV_BASEQML_EXPORT QmlAct : public QObject, public QQmlParserStatus{
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(QJSValue run                   READ run     WRITE setRun     NOTIFY runChanged)
     Q_PROPERTY(QJSValue args                  READ args    WRITE setArgs    NOTIFY argsChanged)
-    Q_PROPERTY(QString returns                READ returns WRITE setReturns NOTIFY returnsChanged)
+    Q_PROPERTY(QJSValue unwrap                READ unwrap  WRITE setUnwrap  NOTIFY unwrapChanged)
+    Q_PROPERTY(QJSValue returns               READ returns WRITE setReturns NOTIFY returnsChanged)
     Q_PROPERTY(QJSValue result                READ result  NOTIFY resultChanged)
     Q_PROPERTY(Trigger trigger                READ trigger WRITE setTrigger NOTIFY triggerChanged)
     Q_PROPERTY(lv::QmlWorkerInterface* worker READ worker  WRITE setWorker NOTIFY workerChanged)
@@ -59,8 +60,8 @@ public:
     void setResult(const QJSValue& result);
     void setResult(const QVariant& result);
 
-    QString returns() const;
-    void setReturns(QString returns);
+    QJSValue returns() const;
+    void setReturns(QJSValue returns);
 
     lv::QmlWorkerInterface* worker() const;
     void setWorker(lv::QmlWorkerInterface* worker);
@@ -69,6 +70,9 @@ public:
 
     Trigger trigger() const;
     void setTrigger(Trigger trigger);
+
+    QJSValue unwrap() const;
+    void setUnwrap(QJSValue unwrap);
 
     bool isRunning() const;
 
@@ -85,6 +89,7 @@ signals:
     void workerChanged();
     void returnsChanged();
     void triggerChanged();
+    void unwrapChanged();
 
 protected:
     void classBegin() override{}
@@ -98,7 +103,7 @@ private:
     QJSValue m_result;
     QJSValue m_run;
     QJSValue m_args;
-    QString  m_returns;
+    QJSValue m_returns;
     QList<QPair<int, QQmlProperty>> m_argBindings;
     QJSValueList m_argList;
 
@@ -124,7 +129,7 @@ inline const QJSValue& QmlAct::run() const{
     return m_run;
 }
 
-inline QString QmlAct::returns() const{
+inline QJSValue QmlAct::returns() const{
     return m_returns;
 }
 
@@ -146,6 +151,10 @@ inline void QmlAct::setTrigger(QmlAct::Trigger trigger){
 
 inline bool QmlAct::isRunning() const{
     return m_currentTask;
+}
+
+inline QJSValue QmlAct::unwrap() const{
+    return QJSValue();
 }
 
 } // namespace

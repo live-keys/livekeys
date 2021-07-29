@@ -112,13 +112,22 @@ Module {
         }
         Property { name: "run"; type: "QJSValue" }
         Property { name: "args"; type: "QJSValue" }
-        Property { name: "returns"; type: "QString" }
+        Property { name: "returns"; type: "QJSValue" }
         Property { name: "result"; type: "QJSValue"; isReadonly: true }
         Property { name: "trigger"; type: "Trigger" }
         Property { name: "worker"; type: "lv::QmlWorkerInterface"; isPointer: true }
         Signal { name: "complete" }
         Method { name: "exec" }
         Method { name: "__propertyChange" }
+    }
+    Component {
+        name: "lv::QmlArrange"
+        prototype: "QObject"
+        exports: ["base/Arrange 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "input"; type: "QJSValue" }
+        Property { name: "map"; type: "QJSValue" }
+        Property { name: "result"; type: "QJSValue"; isReadonly: true }
     }
     Component {
         name: "lv::QmlClipboard"

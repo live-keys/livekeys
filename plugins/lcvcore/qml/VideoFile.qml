@@ -8,6 +8,7 @@ ImageView{
     VideoDecoder{
         id: decoder
         loop: true
+        streamType: root.streamType
     }
 
     property alias fps: decoder.fps
@@ -15,6 +16,7 @@ ImageView{
     property alias currentFrame: decoder.currentFrame
     property alias totalFrames: decoder.totalFrames
     property alias stream: decoder.stream
+    property var streamType: 'qml/lcvcore#Mat'
 
     function seekTo(value){
         decoder.seekTo(value)

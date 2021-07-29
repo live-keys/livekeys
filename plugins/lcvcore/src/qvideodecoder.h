@@ -29,7 +29,8 @@ class QVideoDecoder : public QObject{
     Q_OBJECT
     Q_PROPERTY(int     totalFrames   READ totalFrames  NOTIFY totalFramesChanged)
     Q_PROPERTY(QString file          READ file         NOTIFY fileChanged)
-    Q_PROPERTY(lv::QmlStream* stream READ stream      NOTIFY streamChanged)
+    Q_PROPERTY(lv::QmlStream* stream READ stream       NOTIFY streamChanged)
+    Q_PROPERTY(QJSValue streamType   READ streamType   WRITE setStreamType   NOTIFY streamTypeChanged)
     Q_PROPERTY(bool    paused        READ paused       WRITE setPaused       NOTIFY pausedChanged)
     Q_PROPERTY(qreal   fps           READ fps          WRITE setFps          NOTIFY fpsChanged)
     Q_PROPERTY(int     currentFrame  READ currentFrame WRITE seekTo          NOTIFY currentFrameChanged)
@@ -74,6 +75,9 @@ public:
 
     lv::QmlStream* stream();
 
+    QJSValue streamType() const;
+    void setStreamType(QJSValue streamType);
+
 public slots:
     void __matReady();
     void seekTo(int frame);
@@ -87,6 +91,7 @@ signals:
     void totalFramesChanged();
     void loopChanged();
     void streamChanged();
+    void streamTypeChanged();
 
 private:
     void initializeMatSize();
@@ -97,6 +102,7 @@ private:
     lv::QmlStream*             m_stream;
     QVideoDecoder::Properties* m_properties;
     int                        m_decodedFramesToGC;
+    QJSValue                   m_streamType;
 };
 
 inline qreal QVideoDecoder::fps() const{
@@ -109,6 +115,10 @@ inline bool QVideoDecoder::loop() const{
 
 inline lv::QmlStream *QVideoDecoder::stream(){
     return m_stream;
+}
+
+inline QJSValue QVideoDecoder::streamType() const{
+    return m_streamType;
 }
 
 inline bool QVideoDecoder::paused() const{

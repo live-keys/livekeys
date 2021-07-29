@@ -5,13 +5,15 @@
 #include <QJSValue>
 #include <QQmlEngine>
 #include <QQmlProperty>
+
+#include "live/shared.h"
 #include "live/lvviewglobal.h"
 
 namespace lv{
 
 class ViewEngine;
 class QmlStreamProvider;
-class LV_VIEW_EXPORT QmlStream : public QObject{
+class LV_VIEW_EXPORT QmlStream : public Shared{
 
     Q_OBJECT
 
