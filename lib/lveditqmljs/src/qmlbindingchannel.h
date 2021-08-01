@@ -20,6 +20,7 @@ class QmlBindingChannel : public QObject{
 
 public:
     enum Type{
+        Imports,
         Property,
         ListIndex,
         Method,
@@ -46,6 +47,9 @@ public:
         const QQmlProperty& property,
         const QMetaMethod& method
     );
+    static QmlBindingChannel::Ptr createForImports(
+        QmlBindingPath::Ptr bindingPath,
+        Runnable* runnable);
 
     QmlBindingChannel(QmlBindingPath::Ptr bindingPath, Runnable* runnable, QObject *parent = nullptr);
     virtual ~QmlBindingChannel();

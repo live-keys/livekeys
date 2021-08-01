@@ -20,9 +20,9 @@ Item{
     property var objectGraph: node ? node.item.objectGraph : null
     property var editingFragment: null
     property alias propertyTitle: propertyTitle
-    property alias paletteContainer: paletteContainer
+    property alias paletteListContainer: paletteContainer
 
-    property var isForObject: editingFragment && editingFragment.location === QmlEditFragment.Object
+    property var isAnObject: editingFragment && editingFragment.location === QmlEditFragment.Object
     property var editor: null
     property bool isMethod: false
 
@@ -39,7 +39,7 @@ Item{
         paletteContainer.updateContentWidth()
 
     anchors.left: parent.left
-    anchors.leftMargin: isForObject ? 30 : 0
+    anchors.leftMargin: isAnObject ? 30 : 0
     height: propertyTitle.height + paletteContainer.height
 
     property int contentWidth: 355 - anchors.leftMargin
@@ -71,7 +71,7 @@ Item{
             graph.removePort(node, propertyItem.outPort)
         }
 
-        var children = propertyItem.paletteContainer.children
+        var children = propertyItem.paletteListContainer.children
         for (var idx = 0; idx < children.length; ++idx)
             children[idx].destroy()
 
@@ -99,7 +99,7 @@ Item{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: propertyLabel.right
             anchors.leftMargin: 5
-            text: propertyItem.editingFragment && !propertyItem.isForObject ? propertyItem.editingFragment.typeName() : ""
+            text: propertyItem.editingFragment && !propertyItem.isAnObject ? propertyItem.editingFragment.typeName() : ""
             textStyle: Input.TextStyle {
                 font: propertyItem.style.textStyle.font
                 color: "gray"
@@ -120,7 +120,7 @@ Item{
 
 
         Item{
-            visible:!isForObject
+            visible:!isAnObject
             id: paletteAddButton
             anchors.right: parent.right
             anchors.rightMargin: 25
@@ -153,7 +153,7 @@ Item{
         }
 
         Item{
-            visible: !isForObject
+            visible: !isAnObject
             id: closeObjectItem
             anchors.right: parent.right
             anchors.rightMargin: 0

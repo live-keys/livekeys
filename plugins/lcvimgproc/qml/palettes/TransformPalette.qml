@@ -70,7 +70,7 @@ CodePalette{
                 p.editingFragment.valueLength() - 1
             paletteControls.addItemToRuntimeWithNotification(container, position, "TransformImage", name, false)
 
-            var children = container.objectName === "objectContainer" ? container.groupsContainer.children : container.propertyContainer.children
+            var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]
 
         } else { // inside palette

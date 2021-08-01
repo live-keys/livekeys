@@ -2094,6 +2094,13 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
     QmlEditFragment* ef = nullptr;
     if ( declaration->isForImports() ){
         ef = new QmlEditFragment(declaration, this);
+        QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
+        if ( documentChannel ){
+            QmlBindingPath::Ptr bp = QmlBindingPath::create();
+            bp->appendContextValue("imports");
+            auto ch = QmlBindingChannel::createForImports(bp, documentChannel->runnable());
+            ef->setChannel(ch);
+        }
     } else {
         ef = createInjectionChannel(declaration);
     }

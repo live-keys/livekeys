@@ -22,7 +22,7 @@ Item{
     property QtObject theme: lk.layers.workspace.themes.current
 
     property Item paletteGroup : null
-    property alias groupsContainer: container
+    property alias paletteListContainer: container
     property QtObject editingFragment : null
 
     property QtObject documentHandler : null

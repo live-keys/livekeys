@@ -8,7 +8,7 @@ Item{
     objectName: "objectContainer"
 
     property alias paletteGroup: objectContainer.paletteGroup
-    property alias groupsContainer: container
+    property alias paletteListContainer: container
     property alias pane: objectContainer.pane
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
@@ -17,7 +17,7 @@ Item{
         root.editingFragment = ef
         root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
-        var paletteBoxGroup = paletteControls.createPaletteGroup(root.groupsContainer, ef)
+        var paletteBoxGroup = paletteControls.createPaletteGroup(root.paletteListContainer, ef)
 
         paletteBoxGroup.leftPadding = 7
         paletteBoxGroup.topPadding = 7
@@ -27,9 +27,9 @@ Item{
 
     function recalculateContentWidth(){
         var max = 0
-        for (var i=0; i<groupsContainer.children.length; ++i)
+        for (var i=0; i<paletteListContainer.children.length; ++i)
         {
-            var child = groupsContainer.children[i]
+            var child = paletteListContainer.children[i]
             if (child.objectName === "objectContainer"){ // objectContainer
                 if (child.contentWidth + 30 > max) max = child.contentWidth + 30
             } else if (child.objectName === "propertyContainer" && child.isAnObject){ // propertyContainer
@@ -66,7 +66,7 @@ Item{
     property alias compact: objectContainer.compact
     property alias topSpacing: objectContainer.topSpacing
     property alias propertiesOpened: objectContainer.propertiesOpened
-    property var sortChildren: groupsContainer.sortChildren
+    property var sortChildren: paletteListContainer.sortChildren
 
     property var parentObjectContainer: null
     property var isForProperty: false
@@ -121,8 +121,8 @@ Item{
     }
 
     function destroyObjectContainer(oc){
-        for (var pi = 0; pi < oc.groupsContainer.children.length; ++pi){
-            var child = oc.groupsContainer.children[pi]
+        for (var pi = 0; pi < oc.paletteListContainer.children.length; ++pi){
+            var child = oc.paletteListContainer.children[pi]
             if (child.objectName === "paletteGroup"){
                 var pg = child
                 for (var xi = 0; xi < pg.children.length; ++xi)
@@ -202,7 +202,7 @@ Item{
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
                     if (paletteGroup.palettesOpened.indexOf(palettes[i]) !== -1) continue
-                    paletteControls.openPaletteByName(palettes[i], objectContainer.editingFragment, paletteGroup)
+                    paletteControls.openPaletteInObjectContainer(objectContainer, palettes[i])
                 }
             }
 
@@ -254,7 +254,7 @@ Item{
                             }
 
                             if (pg.palettesOpened && pg.palettesOpened.indexOf(propPalette) !== -1) break
-                            paletteControls.openPaletteByName(propPalette, ef, pg)
+                            paletteControls.openPaletteInPropertyContainer(container.children[j], propPalette)
                             break
                         }
 
@@ -271,7 +271,8 @@ Item{
         }
 
         function expand(){
-            if (!compact) return
+            if (!compact)
+                return
             compact = false
             if (paletteControls.instructionsShaping) return
             paletteControls.openEmptyNestedObjects(root)
@@ -328,7 +329,7 @@ Item{
         property Connections addFragmentToContainerConn: Connections{
             target: editingFragment
             ignoreUnknownSignals: true
-            function onObjectAdded(obj, cursorCoords){
+            function onObjectAdded(obj){
                 if (compact)
                     expand()
                 else
@@ -337,8 +338,7 @@ Item{
                 var child = container.children[container.children.length-1]
                 var codeHandler = objectContainer.editor.documentHandler.codeHandler
                 var id = child.editingFragment.objectId()
-                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
-
+//                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
                 // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
 
                 container.sortChildren()

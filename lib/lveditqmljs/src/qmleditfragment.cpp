@@ -789,9 +789,9 @@ void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, bool expandDefaul
     emit propertyAdded(ef, expandDefault);
 }
 
-void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef, QPointF cursorCoords)
+void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef)
 {
-    emit objectAdded(ef, cursorCoords);
+    emit objectAdded(ef);
 }
 
 

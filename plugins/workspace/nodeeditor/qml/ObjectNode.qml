@@ -20,7 +20,7 @@ Qan.NodeItem{
     property var properties: []
     property var propertiesOpened: []
     property var outPort: null
-    property alias propertyContainer: propertyContainer
+    property alias propertyContainer: objectNodePropertyList
     property alias paletteContainer: paletteContainer
 
     property var nodeParent: null
@@ -39,17 +39,17 @@ Qan.NodeItem{
             max = paletteContainer.width + 10
         }
 
-        for (var i = 0; i < propertyContainer.children.length; ++i){
-            if (propertyContainer.children[i].contentWidth > max){
-                max = propertyContainer.children[i].contentWidth
+        for (var i = 0; i < objectNodePropertyList.children.length; ++i){
+            if (objectNodePropertyList.children[i].contentWidth > max){
+                max = objectNodePropertyList.children[i].contentWidth
             }
         }
 
 
         if (max !== root.width){
             root.width = max
-            for (var i = 0; i < propertyContainer.children.length; ++i){
-                propertyContainer.children[i].width = max - propertyContainer.children[i].anchors.leftMargin
+            for (var i = 0; i < objectNodePropertyList.children.length; ++i){
+                objectNodePropertyList.children[i].width = max - objectNodePropertyList.children[i].anchors.leftMargin
             }
         }
     }
@@ -57,7 +57,7 @@ Qan.NodeItem{
     resizable: false
 
     function expandDefaultPalette(){
-        paletteControls.openDefaultPalette(editingFragment, paletteContainer, root)
+        paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
     }
 
     function expandOptions(options){
@@ -68,7 +68,7 @@ Qan.NodeItem{
             for ( var i = 0; i < palettes.length; ++i){
                 if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
 
-                paletteControls.openPaletteByName(palettes[i], root.editingFragment, paletteContainer)
+                paletteControls.openPaletteInObjectContainer(root, palettes[i])
             }
         }
 
@@ -105,11 +105,11 @@ Qan.NodeItem{
                 if (ef) {
                     root.editingFragment.signalPropertyAdded(ef, false)
                     if (propPalette.length === 0) continue
-                    for (var j = 0; j < propertyContainer.children.length; ++j){
-                        if (propertyContainer.children[j].propertyName !== propName) continue
-                        if (propertyContainer.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
+                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
+                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
+                        if (objectNodePropertyList.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
-                        paletteControls.openPaletteByName(propPalette, ef, propertyContainer.children[j].paletteContainer)
+                        paletteControls.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
                         break
                     }
                 } else {
@@ -185,7 +185,7 @@ Qan.NodeItem{
     Rectangle{
         id: wrapper
         width: parent.width
-        height: nodeTitle.height + paletteContainer.height + propertyContainer.height + 40
+        height: nodeTitle.height + paletteContainer.height + objectNodePropertyList.height + 40
         color: root.nodeStyle.background
         radius: root.nodeStyle.radius
         border.color: root.nodeStyle.borderColor
@@ -278,7 +278,7 @@ Qan.NodeItem{
         }
         
         Column{
-            id: propertyContainer
+            id: objectNodePropertyList
             spacing: 10
             anchors.top: parent.top
             anchors.topMargin: 50 + paletteContainer.height
@@ -303,7 +303,7 @@ Qan.NodeItem{
             if (removeNode)
                 removeNode(nodeParent)
         }
-        function onObjectAdded(obj, cursorCoords){
+        function onObjectAdded(obj){
             if (!addSubobject) return
 
             editingFragment.codeHandler.populateObjectInfoForFragment(obj)
