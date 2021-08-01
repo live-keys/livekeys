@@ -15,10 +15,6 @@ WorkspaceExtension{
             root.add(activeIndex, objectsOnly, forRoot)
         }
 
-        function shapeRootObject(editor, codeHandler, callback){
-            root.shapeRootObject(editor, codeHandler, callback)
-        }
-
         function shapeLayout(editorPane, layout){
             var codeHandler = editorPane.editor.documentHandler.codeHandler
             var rootPosition = codeHandler.findRootPosition()
@@ -32,30 +28,23 @@ WorkspaceExtension{
             })
         }
 
-        function shapeAllInEditor(editor){
+        function shapeAll(editor, callback){
             var codeHandler = editor.documentHandler.codeHandler
 
             if (editor.loading){
                 editor.stopLoadingMode()
-                rootPosition = -1
                 return
             }
 
-            shapeImports(editor, codeHandler)
-            rootPosition = codeHandler.findRootPosition()
+            paletteControls.shapeImports(editor)
+            var rootPosition = codeHandler.findRootPosition()
 
             if ( rootPosition >= 0){
-                shapeRootObject(editor, codeHandler)
+                paletteControls.shapeRoot(editor, callback)
             } else {
                 editor.editor.addRootButton.visible = true
             }
         }
-
-
-        function shapeImports(editor, codeHandler){
-            root.shapeImports(editor, codeHandler)
-        }
-        property alias rootPosition: root.rootPosition
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
@@ -85,115 +74,48 @@ WorkspaceExtension{
         return str.indexOf(suffix, str.length - suffix.length) !== -1;
     }
 
-    function edit(){
+    function getActiveQmlPane(){
         var activePane = lk.layers.workspace.panes.activePane
-
         if ( activePane.objectName === 'editor' &&
              activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            globals.paletteControls.edit(activePane)
+             canBeQml(activePane.document) ){
+            return activePane
         }
+        return null
+    }
+
+    function edit(){
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
+
+        globals.paletteControls.edit(activePane)
     }
 
     function palette(){
-        var activePane = lk.layers.workspace.panes.activePane
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
 
-        if ( activePane.objectName === 'editor' &&
-             activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            globals.paletteControls.palette(activePane)
-        }
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteControls.userOpenPaletteAtPosition(activePane, userPosition)
     }
 
     function shape(){
-        var activePane = lk.layers.workspace.panes.activePane
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
 
-        if ( activePane.objectName === 'editor' &&
-             activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            globals.paletteControls.shape(activePane)
-        }
-    }
-
-    function shapeImports(editor, codeHandler){
-        var importsPosition = codeHandler.findImportsPosition()
-        var paletteImports = codeHandler.findPalettes(importsPosition)
-        if (paletteImports) {
-            var position = paletteImports.declaration.position
-            paletteImports.data = globals.paletteControls.filterOutPalettes(paletteImports.data)
-            var pc = globals.paletteControls.shapePalette(editor, paletteImports.data[0].name, position)
-            pc.item.width = Qt.binding(function(){
-                if (!pc.item.parent || !pc.item.parent.parent) return
-                var editorSize = editor.width - editor.editor.lineSurfaceWidth - 30 - pc.item.parent.parent.headerWidth
-                return editorSize > 280 ? editorSize : 280
-            })
-        }
-    }
-
-    function shapeRootObject(editor, codeHandler, callback){
-
-        editor.startLoadingMode()
-
-        codeHandler.removeSyncImportsListeners()
-        codeHandler.onImportsScanned(function(){
-
-            editor.stopLoadingMode()
-
-            if (rootPosition === -1){
-                return
-            }
-
-            var palettesForRoot = codeHandler.findPalettes(rootPosition)
-            if (palettesForRoot){
-                if (callback)
-                    callback()
-                else {
-                    var position = palettesForRoot.declaration.position
-                    palettesForRoot.data = globals.paletteControls.filterOutPalettes(palettesForRoot.data)
-                    var oc = globals.paletteControls.shapePalette(
-                        editor,
-                        palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
-                        position
-                    )
-                    oc.contentWidth = Qt.binding(function(){
-                        return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
-                    })
-
-                    editor.editor.rootShaped = true
-                }
-            } else {
-                throw linkError(new Error("Failed to shape root object."), null)
-            }
-        })
-
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteControls.userShapePaletteAtPosition(activePane, userPosition)
     }
 
     function shapeAll(){
-        var activePane = lk.layers.workspace.panes.activePane
-        if ( activePane.objectName !== 'editor' ||
-             !activePane.document ||
-             !canBeQml(activePane.document) ) return
-
-        var editor = activePane
-        var codeHandler = editor.documentHandler.codeHandler
-
-        if (editor.loading){
-            editor.stopLoadingMode()
-            rootPosition = -1
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
             return
-        }
 
-        shapeImports(editor, codeHandler)
-        rootPosition = codeHandler.findRootPosition()
-
-        if ( rootPosition >= 0){
-            shapeRootObject(editor, codeHandler)
-        } else {
-            editor.editor.addRootButton.visible = true
-        }
+        globals.shapeAll(activePane)
     }
 
     function addProperty(){

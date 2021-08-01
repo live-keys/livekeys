@@ -53,7 +53,7 @@ QtObject{
 
             editor.editor.rootShaped = true
 
-            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteByName('NodePalette', oc.editingFragment, oc.groupsContainer.children[0], oc)
+            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
 
             pb.child.resize(oc.width - 50, editor.height - 170)
         })
