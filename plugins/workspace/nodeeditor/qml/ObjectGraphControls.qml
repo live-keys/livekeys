@@ -4,6 +4,8 @@ QtObject{
 
     objectName: "objectgraph"
 
+    property Component objectNodeProperty: ObjectNodeMember{}
+
     function removeActiveItem(){
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activeItem.objectName === 'objectGraph' ){
@@ -11,6 +13,26 @@ QtObject{
                 activeItem.removeEdge(activeItem.selectedEdge)
             }
         }
+    }
+
+    function removeObjectNode(graph, node){
+        --palette.numOfObjects
+        if (node.item.selected)
+            --numOfSelectedNodes
+        if (numOfSelectedNodes === 0)
+            root.activateFocus()
+
+        // clear everything inside node
+
+        var children = node.item.propertyContainer.children
+        for (var i = 0; i < children.length; ++i){
+            children[i].destroyObjectNodeProperty()
+        }
+
+        if (node.item.outPort)
+            graph.removePort(node, node.item.outPort)
+
+        graph.removeNode(node)
     }
 
     function nodeEditMode(){
@@ -33,30 +55,16 @@ QtObject{
         panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
         fe.document = project.openTextFile(project.active.path)
 
-
         var editor = fe
         var codeHandler = editor.documentHandler.codeHandler
-        var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
-        lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
-        lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
-            var palettesForRoot = codeHandler.findPalettes(rootPosition)
-            var pos = palettesForRoot.declaration.position
-            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
-            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
-                editor,
-                palettesForRoot.data.length > 0 ? palettesForRoot.data[0] : "",
-                pos
-            )
-            oc.contentWidth = Qt.binding(function(){
-                return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
-            })
+        var rootPosition = codeHandler.findRootPosition()
 
-            editor.editor.rootShaped = true
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
-            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
-
-            pb.child.resize(oc.width - 50, editor.height - 170)
+        paletteControls.shapeImports(editor)
+        paletteControls.shapeRoot(editor, function(objectContainer){
+            var nodePalette = paletteControls.openPaletteInObjectContainer(objectContainer, 'NodePalette')
+            nodePalette.child.resize(objectContainer.width - 50, editor.height - 170)
         })
-
     }
 }

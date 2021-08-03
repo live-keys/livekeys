@@ -128,6 +128,7 @@ public:
     QList<RangeProperty*> propertiesBetween(int start, int end, RangeObject* root = nullptr);
     QList<RangeObject*>   objectsBetween(int start, int end, RangeObject* root = nullptr);
     RangeObject* objectAtPosition(int position, RangeObject* root = nullptr);
+    RangeObject* objectThatWrapsPosition(int position, RangeObject* root = nullptr);
 
 private:
     DocumentQmlValueObjects();

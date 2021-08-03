@@ -10,65 +10,28 @@ import visual.input 1.0 as Input
 
 Rectangle{
     id: root
+    objectName: "objectGraph"
     
     width: 500
     height: 700
     clip: true
-
-    objectName: "objectGraph"
 
     color: root.style.backgroundColor
     radius: root.style.radius
     border.width: root.style.borderWidth
     border.color: root.isInteractive ? root.style.highlightBorderColor : root.style.borderColor
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
-    property QtObject theme: lk.layers.workspace.themes.current
-
-    property QtObject defaultStyle : QtObject{
-        property color backgroundColor: '#000511'
-        property color backgroundGridColor: '#222'
-
-        property color borderColor: '#333'
-        property color highlightBorderColor: '#555'
-        property double borderWidth: 1
-        property double radius: 5
-
-        property color connectorEdgeColor: '#666'
-        property color connectorColor: '#666'
-
-        property color selectionColor: "#fff"
-        property double selectionWeight: 1
-
-        property QtObject objectNodeStyle : QtObject{
-            property color background: "yellow"
-            property double radius: 15
-            property color borderColor: "#555"
-            property double borderWidth: 1
-
-            property color titleBackground: "#666"
-            property double titleRadius: 5
-            property QtObject titleTextStyle : Input.TextStyle{}
-        }
-
-        property QtObject propertyDelegateStyle : QtObject{
-            property color background: "#333"
-            property double radius: 5
-            property QtObject textStyle: Input.TextStyle{}
-        }
-    }
+    property QtObject style: ObjectGraphStyle{}
 
     function activateFocus(){
         if ( activeFocus )
             return
 
         if ( lk.layers.workspace ){
-
             var p = root
             while ( p && !p.paneType ){
                 p = p.parent
             }
-
             if( p ){
                 lk.layers.workspace.panes.activateItem(root, p)
             } else {
@@ -77,6 +40,10 @@ Rectangle{
         } else {
             root.forceActiveFocus()
         }
+    }
+
+    onActiveFocusChanged: {
+        checkFocus()
     }
 
     function redrawGrid(){
@@ -93,38 +60,6 @@ Rectangle{
         }
     }
 
-    property QtObject style: defaultStyle
-
-    
-    property Component propertyDestructorFactory: Component {
-        Connections {
-            id: pdf
-            target: null
-            property var node: null
-            ignoreUnknownSignals: true
-            function onPropertyToBeDestroyed(name){
-                node.item.removePropertyName(name)
-                pdf.destroy()
-            }
-            function onWidthChanged(){
-                var maxWidth = 340
-                if (!node || !node.propertyContainer) return
-                for (var i=0; i < node.propertyContainer.children.length; ++i)
-                {
-                    var child = node.propertyContainer.children[i]
-                    if (child.width > maxWidth) maxWidth = child.width
-                }
-
-                if (maxWidth !== node.width)
-                    node.width = maxWidth
-            }
-        }
-    }
-
-    onActiveFocusChanged: {
-        checkFocus()
-    }
-
     function checkFocus(){
         var interac = false
         if ( activeFocus ){
@@ -136,10 +71,12 @@ Rectangle{
         isInteractive = interac
     }
 
+    property var insertPort: graph.insertPort
     property var isInteractive: false
     property var connections: []
-    property Component propertyDelegate : ObjectNodeProperty{
-        style: root.style.propertyDelegateStyle
+
+    property Component propertyDelegate : ObjectNodeMember{
+        style: root.style.objectNodeMemberStyle
     }
 
     property Item activeItem: null
@@ -150,7 +87,8 @@ Rectangle{
     property var editingFragment: null
 
     onEditingFragmentChanged: {
-        if (!editingFragment) return
+        if (!editingFragment)
+            return
         editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
     }
 
@@ -177,7 +115,6 @@ Rectangle{
     onClicked: {
         deselectEdge()
     }
-
 
     onUserEdgeInserted: {
         var item = edge.item
@@ -272,6 +209,8 @@ Rectangle{
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
 
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+
         var addBoxItem = paletteControls.views.openAddOptionsBox(
             addOptions,
             root.editingFragment.codeHandler,
@@ -361,8 +300,6 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-
-
         if (dstPort.objectProperty && dstPort.objectProperty.editingFragment){
             var ef = dstPort.objectProperty.editingFragment
             var value = ef.defaultValue()
@@ -377,33 +314,10 @@ Rectangle{
         if ( edge === selectedEdge )
             selectedEdge = null
     }
-
-
-    function removeObjectNode(node){
-        --palette.numOfObjects
-        if (node.item.selected)
-            --numOfSelectedNodes
-        if (numOfSelectedNodes === 0)
-            root.activateFocus()
-
-        // clear everything inside node
-
-        var children = node.item.propertyContainer.children
-        for (var i = 0; i < children.length; ++i){
-            children[i].destroyObjectNodeProperty()
-        }
-
-        if (node.item.outPort)
-            graph.removePort(node, node.item.outPort)
-
-        graph.removeNode(node)
-    }
     
     function addObjectNode(x, y, label){
         var node = graph.insertNode()
         node.item.nodeParent = node
-        node.item.removeNode = removeObjectNode
-        node.item.addSubobject = addObjectNodeProperty
         node.item.connectable = Qan.NodeItem.UnConnectable
         node.item.x = x
         node.item.y = y
@@ -425,68 +339,6 @@ Rectangle{
         }
         
         return node
-    }
-    
-    function addObjectNodeProperty(node, propertyName, ports, editingFragment, options){
-        var item = node.item
-        var propertyItem = root.propertyDelegate.createObject(item.propertyContainer)
-
-        propertyItem.propertyName = propertyName
-        propertyItem.node = node
-
-        propertyItem.editingFragment = editingFragment
-        if ( options && options.hasOwnProperty('isMethod') ){
-            propertyItem.isMethod = options.isMethod
-        }
-
-        var isForObject = propertyItem.isForObject
-        propertyItem.width = node.item.width - (isForObject ? 30 : 0)
-
-        if (editingFragment) editingFragment.incrementRefCount()
-
-        propertyItem.editor = root.editor
-
-        var pdestructor = propertyDestructorFactory.createObject()
-        pdestructor.target = propertyItem
-        pdestructor.node = node
-
-        connections.push(pdestructor)
-
-        if ( ports & ObjectGraph.PortMode.InPort ){
-            var port = graph.insertPort(node, Qan.NodeItem.Left, Qan.Port.In);
-            port.label = propertyName + " In"
-            port.y = Qt.binding(
-                function(){
-                    if (!node.item) return 0
-                    return node.item.paletteContainer.height +
-                           propertyItem.y +
-                           (propertyItem.propertyTitle.height / 2) +
-                           42
-                }
-            )
-
-            propertyItem.inPort = port
-            port.objectProperty = propertyItem
-        }
-        if ((ports === ObjectGraph.PortMode.OutPort) || (node.item.id !== "" && ports === (ObjectGraph.PortMode.OutPort | ObjectGraph.PortMode.InPort)) ){
-            var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
-            port.label = propertyName + " Out"
-            port.y = Qt.binding(
-                function(){
-                    if (!node || !node.item) return 0
-                    return node.item.paletteContainer.height +
-                           propertyItem.y +
-                           (propertyItem.propertyTitle.height / 2) +
-                           42
-                }
-            )
-            propertyItem.outPort = port
-            port.objectProperty = propertyItem
-        }
-        
-        node.item.properties.push(propertyItem)
-
-        return propertyItem
     }
     
     Qan.GraphView {
@@ -535,7 +387,7 @@ Rectangle{
     ResizeArea{
         minimumHeight: 200
         minimumWidth: 400
-        onResizeFinished: { graphView.redrawGrid() }
+        onResizeFinished: { root.redrawGrid() }
     }
 }
 

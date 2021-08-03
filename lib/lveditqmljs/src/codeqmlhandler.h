@@ -93,6 +93,8 @@ public:
 
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QmlEditFragment* parent = nullptr);
 
+    bool isForAnObject(const QmlDeclaration::Ptr& declaration);
+
     bool addEditingFragment(QmlEditFragment *edit);
     void removeEditingFragment(QmlEditFragment* edit);
 
@@ -133,9 +135,8 @@ public slots:
 
     QList<int> languageFeatures() const;
 
-    void populateNestedObjectsForFragment(lv::QmlEditFragment* ef);
-    void populateObjectInfoForFragment(lv::QmlEditFragment* ef);
-    void populatePropertyInfoForFragment(lv::QmlEditFragment* ef);
+    QList<QObject*> openNestedFragments(lv::QmlEditFragment* edit, const QJSValue& options = QJSValue());
+
     QVariantMap propertiesWritable(lv::QmlEditFragment* ef);
 
     // Help
@@ -157,8 +158,6 @@ public slots:
     lv::QmlEditFragment* openConnection(int position);
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     lv::QmlEditFragment* createReadOnlyPropertyFragment(lv::QmlEditFragment* parentFragment, QString name);
-    QList<QObject*> openNestedObjects(lv::QmlEditFragment* edit);
-    QList<QObject*> openNestedProperties(lv::QmlEditFragment* edit);
     void removeConnection(lv::QmlEditFragment* edit);
     void eraseObject(lv::QmlEditFragment* edit, bool removeFragment = true);
 
@@ -192,18 +191,14 @@ public slots:
 
     // Add Property Management
 
-    lv::QmlAddContainer* getAddOptions(int position, int filter = 0, lv::QmlEditFragment* fragment = nullptr);
-    int addProperty(
-        int position,
-        const QString& object,
-        const QString& type,
-        const QString& name,
-        bool assignDefault = false,
-        lv::QmlEditFragment* parentGroup = nullptr);
-    int addItem(int position, const QString& object, const QString& type, const QJSValue& properties = QJSValue());
+    lv::QmlAddContainer* getAddOptions(QJSValue value);
+
+    int addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
+    int addObjectToCode(int position, const QString& type, const QJSValue& properties = QJSValue());
+    int addEventToCode(int position, const QString &name);
+    int addRootObjectToCode(const QString &ctype);
+
     void addObjectForProperty(lv::QmlEditFragment* propertyFragment);
-    int insertRootItem(const QString &ctype);
-    int addEvent(int position, const QString &object, const QString &type, const QString &name);
     void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     lv::QmlEditFragment* createObject(int position, const QString& type, lv::QmlEditFragment* parent, QObject* currentApp = nullptr);
@@ -231,6 +226,9 @@ public slots:
 
 private:
     void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+
+    lv::QmlAddContainer* getAddOptionsForFragment(QmlEditFragment* edit, bool isReadOnly = false);
+    lv::QmlAddContainer* getAddOptionsForPosition(int position);
 
     QmlDeclaration::Ptr createImportDeclaration();
 
@@ -293,7 +291,6 @@ private:
 
     QString getBlockIndent(const QTextBlock& bl);
     bool isBlockEmptySpace(const QTextBlock& bl);
-    bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
     QJSValue findPalettesForDeclaration(QmlDeclaration::Ptr decl);
 

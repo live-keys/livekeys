@@ -39,12 +39,14 @@ class CodeCompletionModel;
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QObject*             visualParent READ visualParent WRITE setVisualParent NOTIFY visualParentChanged)
-    Q_PROPERTY(int                  refCount     READ refCount     NOTIFY refCountChanged)
-    Q_PROPERTY(Location             location     READ location     CONSTANT)
-    Q_PROPERTY(QJSValue             whenBinding  READ whenBinding  WRITE setWhenBinding NOTIFY whenBindingChanged)
-    Q_PROPERTY(lv::CodeQmlHandler*  codeHandler  READ codeHandler  CONSTANT)
-    Q_PROPERTY(bool                 isNull       READ isNull       NOTIFY isNullChanged)
+    Q_PROPERTY(QObject*             visualParent  READ visualParent  WRITE setVisualParent NOTIFY visualParentChanged)
+    Q_PROPERTY(int                  refCount      READ refCount      NOTIFY refCountChanged)
+    Q_PROPERTY(Location             location      READ location      CONSTANT)
+    Q_PROPERTY(Location             valueLocation READ valueLocation CONSTANT)
+    Q_PROPERTY(bool                 isWritable    READ isWritable    CONSTANT)
+    Q_PROPERTY(QJSValue             whenBinding   READ whenBinding   WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(lv::CodeQmlHandler*  codeHandler   READ codeHandler   CONSTANT)
+    Q_PROPERTY(bool                 isNull        READ isNull        NOTIFY isNullChanged)
     Q_ENUMS(FragmentType)
 
 public:
@@ -125,6 +127,11 @@ public:
     QSharedPointer<QmlBindingPath> fullBindingPath();
 
     Location location() const;
+    Location valueLocation() const;
+    bool isWritable() const;
+    lv::CodeQmlHandler* codeHandler() const;
+
+    void setObjectId(QString id);
 
 public slots:
     int fragmentType() const;
@@ -132,9 +139,7 @@ public slots:
     void addFragmentType(FragmentType type);
     void removeFragmentType(FragmentType type);
 
-    const QList<lv::QmlEditFragment*> childFragments();
-
-    lv::CodeQmlHandler* codeHandler() const;
+    const QList<lv::QmlEditFragment*>& childFragments();
 
     void commit(const QVariant& value);
 
@@ -151,6 +156,7 @@ public slots:
 
     QString defaultValue() const;
     QString readValueText() const;
+    QJSValue readValueConnection() const;
 
     int totalPalettes() const;
     lv::QmlEditFragment* parentFragment();
@@ -173,14 +179,13 @@ public slots:
     QVariantList nestedObjectsInfo();
     QVariantMap  objectInfo();
 
-    void signalPropertyAdded(lv::QmlEditFragment* ef, bool expandDefault = true);
+    void signalPropertyAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
     void signalObjectAdded(lv::QmlEditFragment* ef);
     void incrementRefCount();
     void decrementRefCount();
     int refCount();
 
     void removeChildFragment(QmlEditFragment* edit);
-    void setObjectId(QString id);
     QString objectId();
 
     void writeProperties(const QJSValue& properties);
@@ -212,7 +217,7 @@ signals:
     void paletteListEmpty();
 
     void objectAdded(lv::QmlEditFragment* obj);
-    void propertyAdded(lv::QmlEditFragment* ef, bool expandDefault);
+    void propertyAdded(lv::QmlEditFragment* ef, QJSValue context);
 
     void refCountChanged();
     void whenBindingChanged();
@@ -240,7 +245,7 @@ private:
     QVariantMap             m_objectInfo;
     int                     m_refCount;
     QString                 m_objectId;
-    Location                m_location;
+    Location                m_valueLocation;
     QJSValue                m_whenBinding;
     int                     m_fragmentType;
     lv::CodeQmlHandler*     m_codeHandler;
@@ -270,7 +275,7 @@ inline QList<CodePalette *>::iterator QmlEditFragment::end(){
     return m_palettes.end();
 }
 
-inline const QList<QmlEditFragment *> QmlEditFragment::childFragments(){
+inline const QList<QmlEditFragment *>& QmlEditFragment::childFragments(){
     return m_childFragments;
 }
 
@@ -281,10 +286,6 @@ inline QmlDeclaration::Ptr QmlEditFragment::declaration() const{
 
 inline QObject *QmlEditFragment::visualParent() const{
     return m_visualParent;
-}
-
-inline QmlEditFragment::Location QmlEditFragment::location() const{
-    return m_location;
 }
 
 inline int QmlEditFragment::position(){

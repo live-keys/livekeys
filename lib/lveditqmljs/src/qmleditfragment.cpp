@@ -55,15 +55,19 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHan
     , m_codeHandler(codeHandler)
 {
     if (m_declaration->isForSlot()){
-        m_location = Slot;
+        m_valueLocation = Slot;
     } else if (m_declaration->isForComponent() ){
-        m_location = Component;
+        m_valueLocation = Component;
     } else if (m_declaration->isForImports()){
-        m_location = Imports;
-    } else if (m_declaration->isForObject()){
-        m_location = Object;
-    } else if (m_declaration->isForProperty()){
-        m_location = Property;
+        m_valueLocation = Imports;
+    } else if ( m_declaration->isForList() ){
+        m_valueLocation = Object;
+    } else {
+        if ( codeHandler->isForAnObject(declaration) ){
+            m_valueLocation = Object;
+        } else {
+            m_valueLocation = Property;
+        }
     }
 }
 
@@ -335,10 +339,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
 }
 
 void QmlEditFragment::write(const QJSValue value){
-    m_codeHandler->populatePropertyInfoForFragment(this);
-    bool isWritable = m_objectInfo.value("isWritable").toBool();
-
-    if (isWritable || m_declaration->isForSlot()){
+    if ( isWritable() || m_declaration->isForSlot()){
         writeCode(buildCode(value));
     }
 }
@@ -474,6 +475,54 @@ QString QmlEditFragment::readValueText() const{
     tc.setPosition(valuePosition());
     tc.setPosition(valuePosition() + valueLength(), QTextCursor::KeepAnchor);
     return tc.selectedText();
+}
+
+QJSValue QmlEditFragment::readValueConnection() const{
+    QString content = readValueText();
+    QmlJS::Scanner scanner;
+    QList<QmlJS::Token> tokens = scanner(content);
+
+    QStringList expression;
+    QStringList functionArgs;
+    bool isFunction = false;
+
+    for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+        QmlJS::Token token = *it;
+        if ( token.kind == QmlJS::Token::Identifier ){
+            if  ( isFunction ){
+                functionArgs.append(content.mid(token.begin(), token.length));
+            } else {
+                expression.append(content.mid(token.begin(), token.length));
+            }
+        } else if ( token.kind == QmlJS::Token::LeftParenthesis ){
+            if ( isFunction )
+                return QJSValue();
+            isFunction = true;
+        } else if ( token.kind == QmlJS::Token::Dot || token.kind == QmlJS::Token::Comma || token.kind == QmlJS::Token::RightParenthesis ){
+        } else {
+            return QJSValue();
+        }
+    }
+
+    ViewEngine* engine = ViewContext::instance().engine();
+    QJSValue result = engine->engine()->newObject();
+    QJSValue resultExpression = engine->engine()->newArray(expression.length());
+    for ( int i = 0; i < expression.length(); ++i ){
+        resultExpression.setProperty(i, expression[i]);
+    }
+    result.setProperty("expression", resultExpression);
+    if ( isFunction ){
+        QJSValue resultArguments = engine->engine()->newArray(functionArgs.length());
+        for ( int j = 0; j < functionArgs.length(); ++j ){
+            resultArguments.setProperty(j, functionArgs[j]);
+        }
+        result.setProperty("isFunction", isFunction);
+        result.setProperty("arguments", resultArguments);
+    }
+
+    return result;
+
+
 }
 
 void QmlEditFragment::updatePaletteValue(CodePalette *palette){
@@ -717,7 +766,6 @@ void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
     else {
         removeFragmentType(QmlEditFragment::Builder);
     }
-
 }
 
 QSharedPointer<QmlBindingPath> QmlEditFragment::fullBindingPath(){
@@ -747,6 +795,10 @@ void QmlEditFragment::addFragmentType(QmlEditFragment::FragmentType type)
 void QmlEditFragment::removeFragmentType(QmlEditFragment::FragmentType type)
 {
     m_fragmentType &= ~type;
+}
+
+bool QmlEditFragment::isWritable() const{
+    return m_declaration->isWritable();
 }
 
 void QmlEditFragment::commit(const QVariant &value){
@@ -784,9 +836,9 @@ QVariantMap QmlEditFragment::objectInfo()
     return m_objectInfo;
 }
 
-void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, bool expandDefault)
+void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, const QJSValue &context)
 {
-    emit propertyAdded(ef, expandDefault);
+    emit propertyAdded(ef, context);
 }
 
 void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef)
@@ -905,6 +957,17 @@ QString QmlEditFragment::buildCode(const QJSValue &value, bool additionalBraces)
         return value.toString();
     }
     return "";
+}
+
+QmlEditFragment::Location QmlEditFragment::location() const{
+    if ( m_valueLocation == Object ){
+        return m_declaration->isForList() ? Object : Property;
+    }
+    return m_valueLocation;
+}
+
+QmlEditFragment::Location QmlEditFragment::valueLocation() const{
+    return m_valueLocation;
 }
 
 }// namespace

@@ -2,28 +2,17 @@ import QtQuick 2.0
 import live 1.0
 import editor 1.0
 import editor.private 1.0
+import editqml 1.0 as EditQml
 
 Item{
     id: root
     objectName: "objectContainer"
 
-    property alias paletteGroup: objectContainer.paletteGroup
     property alias paletteListContainer: container
-    property alias pane: objectContainer.pane
+    property alias pane: objectContainerFrame.pane
     property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
 
-    function __initialize(editor, ef){
-        root.editor = editor
-        root.editingFragment = ef
-        root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-
-        var paletteBoxGroup = paletteControls.createPaletteGroup(root.paletteListContainer, ef)
-
-        paletteBoxGroup.leftPadding = 7
-        paletteBoxGroup.topPadding = 7
-        root.paletteGroup = paletteBoxGroup
-
-    }
+    //TODO: See if this should be private
 
     function recalculateContentWidth(){
         var max = 0
@@ -50,6 +39,84 @@ Item{
         }
     }
 
+    // interface functions
+
+    function __initialize(editor, ef){
+        root.editor = editor
+        root.editingFragment = ef
+        root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+
+        var paletteBoxGroup = paletteControls.__factories.createPaletteGroup(root.paletteListContainer, ef)
+
+        paletteBoxGroup.leftPadding = 7
+        paletteBoxGroup.topPadding = 7
+        objectContainerFrame.paletteGroup = paletteBoxGroup
+    }
+
+    function addProperty(ef){
+        var pc = propertyByName(ef.identifier())
+        if ( pc )
+            return pc
+
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var propertyContainer = paletteControls.__factories.createPropertyContainer(root.editor, ef, root.paletteListContainer)
+
+        ef.visualParent = propertyContainer
+        ef.incrementRefCount()
+
+        root.propertiesOpened.push(ef.identifier())
+        root.sortChildren()
+
+        return propertyContainer
+    }
+
+    function propertyByName(name){
+        for (var i = 1; i < container.children.length; ++i){
+            if (!container.children[i])
+                continue
+            if (container.children[i].objectName === "propertyContainer"){
+                if ( container.children[i].editingFragment.identifier() === name )
+                    return container.children[i]
+            }
+        }
+        return null
+    }
+
+    function addChildObject(ef){
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+
+        var childObjectContainer = paletteControls.__factories.createObjectContainer(root.editor, ef, root.paletteListContainer)
+        childObjectContainer.parentObjectContainer = root
+        childObjectContainer.x = 20
+        childObjectContainer.y = 10
+
+        ef.incrementRefCount()
+
+        return childObjectContainer
+    }
+
+    function paletteByName(name){
+        for ( var i = 0; i < objectContainerFrame.paletteGroup.children.length; ++i ){
+            if ( objectContainerFrame.paletteGroup.children[i].name === name )
+                return objectContainerFrame.paletteGroup.children[i]
+        }
+        return null
+    }
+
+    function paletteGroup(){
+        return objectContainerFrame.paletteGroup
+    }
+
+    function getPane(){
+        var pane = root.parent
+        while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+            pane = pane.parent
+        }
+        return pane
+    }
+
+    property bool supportsFunctions: false
+
     onContentWidthChanged: {
         if (parentObjectContainer){
             parentObjectContainer.recalculateContentWidth()
@@ -59,21 +126,21 @@ Item{
     property double containerContentWidth : 0
     property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.lineSurfaceWidth - 50 : 0
 
-    property alias editingFragment : objectContainer.editingFragment
-    property alias editor : objectContainer.editor
-    property alias title : objectContainer.title
-    property alias titleHeight : objectContainer.titleHeight
-    property alias compact: objectContainer.compact
-    property alias topSpacing: objectContainer.topSpacing
-    property alias propertiesOpened: objectContainer.propertiesOpened
+    property alias editingFragment : objectContainerFrame.editingFragment
+    property alias editor : objectContainerFrame.editor
+    property alias title : objectContainerFrame.title
+    property alias titleHeight : objectContainerFrame.titleHeight
+    property alias compact: objectContainerFrame.compact
+    property alias topSpacing: objectContainerFrame.topSpacing
+    property alias propertiesOpened: objectContainerFrame.propertiesOpened
     property var sortChildren: paletteListContainer.sortChildren
 
     property var parentObjectContainer: null
     property var isForProperty: false
     property QtObject theme: lk.layers.workspace.themes.current
 
-    width: objectContainer.width
-    height: objectContainer.pane ? 30 : objectContainer.height
+    width: objectContainerFrame.width
+    height: objectContainerFrame.pane ? 30 : objectContainerFrame.height
 
     property int contentWidth: containerContentWidth
 
@@ -87,7 +154,7 @@ Item{
             anchors.leftMargin: 10
             width: parent.width - 20
             anchors.verticalCenter: parent.verticalCenter
-            text: objectContainer.title
+            text: objectContainerFrame.title
             clip: true
             elide: Text.ElideRight
             color: '#82909b'
@@ -95,29 +162,15 @@ Item{
     }
 
     function expand(){
-        objectContainer.expand()
+        objectContainerFrame.expand()
     }
 
     function collapse(){
-        objectContainer.collapse()
+        objectContainerFrame.collapse()
     }
 
     function expandOptions(options){
-        objectContainer.expandOptions(options)
-    }
-
-    function addObjectFragmentToContainer(ef){
-        if (!ef) return
-
-        var childObjectContainer =
-                paletteControls.addChildObjectContainer(root, ef)
-
-        childObjectContainer.x = 20
-        childObjectContainer.y = 10
-
-        ef.incrementRefCount()
-
-        return childObjectContainer
+        objectContainerFrame.expandOptions(options)
     }
 
     function destroyObjectContainer(oc){
@@ -153,7 +206,7 @@ Item{
     }
 
     Item{
-        id: objectContainer
+        id: objectContainerFrame
         objectName: "objectContainerFrame"
 
         property string title: "Object"
@@ -189,20 +242,20 @@ Item{
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
-            objectContainer.parent = objectContainer.wrapper
-            objectContainer.pane.removePane()
-            objectContainer.pane = null
+            objectContainerFrame.parent = objectContainerFrame.wrapper
+            objectContainerFrame.pane.removePane()
+            objectContainerFrame.pane = null
             root.placeHolder.parent = null
         }
 
         function expandOptions(options){
-            var codeHandler = objectContainer.editor.documentHandler.codeHandler
+            var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
 
             if ( 'palettes' in options){
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
                     if (paletteGroup.palettesOpened.indexOf(palettes[i]) !== -1) continue
-                    paletteControls.openPaletteInObjectContainer(objectContainer, palettes[i])
+                    paletteControls.openPaletteInObjectContainer(objectContainerFrame, palettes[i])
                 }
             }
 
@@ -211,7 +264,7 @@ Item{
                 for ( var i = 0; i < newProps.length; ++i ){
 
                     var propName = newProps[i][0]
-                    var propType = codeHandler.propertyType(objectContainer.editingFragment, propName)
+                    var propType = codeHandler.propertyType(objectContainerFrame.editingFragment, propName)
 
                     var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
 
@@ -224,20 +277,17 @@ Item{
                         ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
                     } else {
 
-                        var ppos = codeHandler.addProperty(
+                        var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
+                        var ppos = codeHandler.addPropertyToCode(
                             root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
-                            root.editingFragment.typeName(),
-                            propType,
                             propName,
-                            true
+                            defaultValue
                         )
-                        ef = codeHandler.openNestedConnection(
-                            root.editingFragment, ppos
-                        )
+                        ef = codeHandler.openNestedConnection( root.editingFragment, ppos )
                     }
 
                     if (ef) {
-                        objectContainer.editingFragment.signalPropertyAdded(ef, false)
+                        objectContainerFrame.editingFragment.signalPropertyAdded(ef, false)
                         if (propPalette.length === 0) continue
 
                         for (var j = 0; j < container.children.length; ++j)
@@ -274,14 +324,30 @@ Item{
             if (!compact)
                 return
             compact = false
-            if (paletteControls.instructionsShaping) return
-            paletteControls.openEmptyNestedObjects(root)
-            paletteControls.openDefaults(root)
+
+            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+
+            if (paletteControls.instructionsShaping)
+                return
+
+            var objects = root.editor.documentHandler.codeHandler.openNestedFragments(root.editingFragment, ['objects'])
+            for (var i=0; i < objects.length; ++i){
+                var childObjectContainer = root.addChildObject(objects[i])
+            }
+            paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
+
+            var codeHandler = root.editor.documentHandler.codeHandler
+            var properties = codeHandler.openNestedFragments(root.editingFragment, ['properties'])
+            for (var i = 0; i < properties.length; ++i){
+                var pc = addProperty(properties[i])
+                paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+//                paletteControls.__private.addPropertyContainer(root, properties[i], true)
+            }
 
             var id = editingFragment.objectId()
-            var check = (objectContainer.title.indexOf('#') === -1)
+            var check = (objectContainerFrame.title.indexOf('#') === -1)
             if (id && check)
-                objectContainer.title = objectContainer.title + "#" + id
+                objectContainerFrame.title = objectContainerFrame.title + "#" + id
 
             container.sortChildren()
         }
@@ -319,8 +385,8 @@ Item{
                     p.destroy()
                 } else { // if this is nested
                     //TODO: Check if this is nested within a property container
-                    if ( objectContainer.pane )
-                        objectContainer.closeAsPane()
+                    if ( objectContainerFrame.pane )
+                        objectContainerFrame.closeAsPane()
                     destroyObjectContainer(root)
                 }
             }
@@ -333,10 +399,10 @@ Item{
                 if (compact)
                     expand()
                 else
-                    addObjectFragmentToContainer(obj)
+                    addChildObject(obj)
 
                 var child = container.children[container.children.length-1]
-                var codeHandler = objectContainer.editor.documentHandler.codeHandler
+                var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
                 var id = child.editingFragment.objectId()
 //                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
                 // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
@@ -344,41 +410,33 @@ Item{
                 container.sortChildren()
             }
             function onPropertyAdded(ef, expandDefault){
-                for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
-                    if (objectContainer.propertiesOpened[i] === ef.identifier()){
-                        if (compact) expand()
-                        return
-                    }
-                }
-                editor.documentHandler.codeHandler.populateNestedObjectsForFragment(editingFragment)
-
-                if (compact) expand()
-                paletteControls.addPropertyContainer(root, ef, expandDefault)
-                container.sortChildren()
+                var pc = root.addProperty(ef)
+                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
             }
         }
 
         Item{
             id: objectContainerTitleWrap
             y: topSpacing
-            height: objectContainer.pane ? 0 : titleHeight
+            height: objectContainerFrame.pane ? 0 : titleHeight
             width: parent.width
 
             ObjectContainerTop{
                 id: objectContainerTitle
                 anchors.fill: parent
-                compact: objectContainer.compact
+                compact: objectContainerFrame.compact
                 objectContainer: root
                 color: {
-                    return objectContainer.pane ? objectContainer.pane.topColor
-                                                : objectContainer.activeFocus
+                    return objectContainerFrame.pane ? objectContainerFrame.pane.topColor
+                                                : objectContainerFrame.activeFocus
                                                   ? theme.colorScheme.middlegroundOverlayDominant
                                                   : theme.colorScheme.middlegroundOverlay
                 }
                 isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
 
                 onToggleCompact: {
-                    if ( objectContainer.compact )
+                    if ( objectContainerFrame.compact )
                         expand()
                     else
                         collapse()
@@ -402,17 +460,17 @@ Item{
                     }
                 }
                 onAssignFocus: {
-                    lk.layers.workspace.panes.activateItem(objectContainer, objectContainer.editor)
+                    lk.layers.workspace.panes.activateItem(objectContainerFrame, objectContainerFrame.editor)
                 }
 
                 onRebuild : {
                     editingFragment.rebuild()
                 }
                 onPaletteToPane : {
-                    paletteControls.paletteToPane(objectContainer)
+                    paletteControls.objectContainerToPane(root)
                 }
                 onClose : {
-                    paletteControls.closeObjectContainer(objectContainer)
+                    paletteControls.closeObjectContainer(objectContainerFrame)
                 }
                 onAddPalette: {
                     var pane = container.parent
@@ -427,8 +485,8 @@ Item{
                         coords.y -= 30 // if this container is in the title of a pane
 
                     var paletteList = paletteControls.views.openPaletetListBoxForContainer(
-                        objectContainer,
-                        paletteGroup,
+                        root,
+                        paletteGroup(),
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
                         PaletteControls.PaletteListMode.ObjectContainer
                     )
@@ -438,11 +496,11 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.compose(objectContainer)
+                    paletteControls.userAddToObjectContainer(root)
                 }
 
                 onCreateObject: {
-                    var codeHandler = objectContainer.editor.documentHandler.codeHandler
+                    var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
                     codeHandler.addObjectForProperty(editingFragment)
                     codeHandler.addItemToRuntime(editingFragment)
                 }
@@ -499,8 +557,7 @@ Item{
                 }
 
                 function sortChildren(){
-
-                    if (!objectContainer.parent)
+                    if (!objectContainerFrame.parent)
                         return
                     if (children.length === 0)
                         return

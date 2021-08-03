@@ -58,7 +58,7 @@ CodePalette{
         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
         fragment.writeProperties({"destination": {"__ref": value}})
-        fragment.codeHandler.openNestedProperties(fragment)
+        fragment.codeHandler.openNestedFragments(fragment, ['properties'])
         var destProp = fragment.codeHandler.findChildPropertyFragmentByName(fragment, "destination")
         destProp.commit([p1, p2, p3, p4])
     }
@@ -85,7 +85,6 @@ CodePalette{
             }
         }
 
-
         Input.SelectableListView {
             width: 250
             height: 269
@@ -107,7 +106,7 @@ CodePalette{
                     var surfaceFragment = findSurfaceFragment()
                     if (!surfaceFragment) return
                     surfaceFragment.writeProperties({'input': {"__ref": input.text} })
-                    surfaceFragment.codeHandler.openNestedProperties(surfaceFragment)
+                    surfaceFragment.codeHandler.openNestedFragments(surfaceFragment, ['properties'])
                     var inputProp = surfaceFragment.codeHandler.findChildPropertyFragmentByName(surfaceFragment, "input")
                     try{
                         var result = inputProp.bindExpression(input.text)

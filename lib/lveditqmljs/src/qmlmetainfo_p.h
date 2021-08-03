@@ -20,6 +20,7 @@ public slots:
     QObject* cppParent(QObject* obj);
     bool isWritable(QObject* obj, QString name);
     QJSValue listProperties(QObject* obj);
+    QString defaultTypeValue(const QString& type);
 };
 
 }
