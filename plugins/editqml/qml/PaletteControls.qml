@@ -338,7 +338,7 @@ QtObject{
         function openAddOptionsBox(addContainer, codeHandler, editorBoxParams, handlers){
             var addBoxItem = __factories.createAddQmlBox(null)
             addBoxItem.addContainer = addContainer
-            addBoxItem.codeQmlHandler = codeHandler
+            addBoxItem.languageQmlHandler = codeHandler
 
             addBoxItem.categories = handlers.categories
 
@@ -619,7 +619,7 @@ QtObject{
         editor.documentHandler.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports)
-            editor.documentHandler.codeHandler.importsShaped = true //TODO: Move to CodeQmlHandler
+            editor.documentHandler.codeHandler.importsShaped = true //TODO: Move to LanguageQmlHandler
 
         ef.incrementRefCount()
 
@@ -853,7 +853,7 @@ QtObject{
 
         // This will have to be transfered to addContainer
         //TODO: will need to set this as a parameter
-//        var filter = 0 | (isForNode ? CodeQmlHandler.ForNode : 0) | (isGroup ? CodeQmlHandler.ReadOnly : 0)
+//        var filter = 0 | (isForNode ? LanguageQmlHandler.ForNode : 0) | (isGroup ? LanguageQmlHandler.ReadOnly : 0)
 
         var addContainer = codeHandler.getAddOptions({ editFragment: container.editFragment, isReadOnly: isGroup })
         if ( !addContainer )

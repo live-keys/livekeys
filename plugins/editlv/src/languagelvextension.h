@@ -15,7 +15,7 @@ namespace lv{
 
 class Settings;
 class ProjectQmlScope;
-class CodeQmlHandler;
+class LanguageQmlHandler;
 class ProjectQmlScanner;
 
 class LanguageLvExtension : public QObject, public QQmlParserStatus{
@@ -34,7 +34,7 @@ public:
     void removeLanguageHandler(LanguageLvHandler* handler);
 
 public slots:
-    QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
+    QObject* createHandler(ProjectDocument* document, CodeHandler* handler);
 
 private:
     Q_DISABLE_COPY(LanguageLvExtension)

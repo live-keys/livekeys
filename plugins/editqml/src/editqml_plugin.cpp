@@ -35,7 +35,7 @@ void EditQmlPlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlDocumentSyntax>(     uri, 1, 0, "QmlDocumentSyntax");
 
     qmlRegisterUncreatableType<lv::QmlImportsModel>(
-        uri, 1, 0, "QmlImportsModel", "\'QmlImportsModel\' is created from a CodeQmlHandler object.");
+        uri, 1, 0, "QmlImportsModel", "\'QmlImportsModel\' is created from a LanguageQmlHandler object.");
     qmlRegisterUncreatableType<lv::QmlDocumentSyntaxValue>(
         uri, 1, 0, "QmlDocumentSyntaxValue", "\'QmlDocumentSyntaxValue\' is available through the QmlDocumentSyntax object.");
 }

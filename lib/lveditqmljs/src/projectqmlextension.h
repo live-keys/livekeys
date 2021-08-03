@@ -31,7 +31,7 @@ class Settings;
 class Workspace;
 class QmlJsSettings;
 class ProjectQmlScope;
-class CodeQmlHandler;
+class LanguageQmlHandler;
 class ProjectQmlScanner;
 class QmlProjectMonitor;
 class QmlLanguageScanner;
@@ -52,8 +52,8 @@ public:
     QmlProjectMonitor* scanMonitor();
     QmlBindingChannelsDispatcher* channelsDispatcher();
 
-    void addCodeQmlHandler(CodeQmlHandler* handler);
-    void removeCodeQmlHandler(CodeQmlHandler* handler);
+    void addLanguageQmlHandler(LanguageQmlHandler* handler);
+    void removeLanguageQmlHandler(LanguageQmlHandler* handler);
 
     PaletteContainer* paletteContainer();
 
@@ -71,7 +71,7 @@ public:
         QByteArray *stream);
 
 public slots:
-    QObject* createHandler(ProjectDocument* document, DocumentHandler* handler);
+    QObject* createHandler(ProjectDocument* document, CodeHandler* handler);
 
 private:
     Q_DISABLE_COPY(ProjectQmlExtension)
@@ -80,7 +80,7 @@ private:
     ViewEngine*                   m_engine;
     QmlJsSettings*                m_settings;
     QmlProjectMonitor*            m_scanMonitor;
-    QList<CodeQmlHandler*>        m_codeHandlers;
+    QList<LanguageQmlHandler*>        m_codeHandlers;
     PaletteContainer*             m_paletteContainer;
     QmlBindingChannelsDispatcher* m_channelDispatcher;
 };

@@ -9,7 +9,7 @@
 
 namespace lv{
 
-class CodeQmlHandler;
+class LanguageQmlHandler;
 class QmlBindingChannelsDispatcher;
 
 /// \private
@@ -28,7 +28,7 @@ public:
     };
 
 public:
-    explicit DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDispatcher, CodeQmlHandler* handler);
+    explicit DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDispatcher, LanguageQmlHandler* handler);
     ~DocumentQmlChannels() override;
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -70,7 +70,7 @@ private:
     void initialize();
 
     int                    m_selectedIndex;
-    CodeQmlHandler*        m_codeHandler;
+    LanguageQmlHandler*        m_codeHandler;
     QHash<int, QByteArray> m_roles;
     QmlBindingChannel::Ptr m_selectedChannel;
 

@@ -14,7 +14,7 @@
 
 namespace lv{
 
-class CodeQmlHandler;
+class LanguageQmlHandler;
 
 class LV_EDITQMLJS_EXPORT QmlLanguageScanner : public QObject{
 
@@ -23,7 +23,7 @@ class LV_EDITQMLJS_EXPORT QmlLanguageScanner : public QObject{
 public:
     class DocumentTransport{
     public:
-        CodeQmlHandler* codeHandler;
+        LanguageQmlHandler* codeHandler;
         DocumentQmlInfo::Ptr documentInfo;
     };
 
@@ -48,7 +48,7 @@ public:
 
 public slots:
     void processQueue();
-    void scanDocument(const QString& path, const QString& content, CodeQmlHandler* handler);
+    void scanDocument(const QString& path, const QString& content, LanguageQmlHandler* handler);
 
 signals:
     void documentScanReady(DocumentTransport* transport);

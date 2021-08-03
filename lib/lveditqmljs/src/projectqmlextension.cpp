@@ -19,7 +19,7 @@
 #include "live/projectfile.h"
 #include "live/settings.h"
 #include "live/viewengine.h"
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 #include "live/editorsettings.h"
 #include "live/editorglobalobject.h"
 
@@ -84,7 +84,7 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
  */
 ProjectQmlExtension::~ProjectQmlExtension(){
     for ( auto it = m_codeHandlers.begin(); it != m_codeHandlers.end(); ++it ){
-        CodeQmlHandler* cqh = *it;
+        LanguageQmlHandler* cqh = *it;
         cqh->resetProjectQmlExtension();
     }
     m_codeHandlers.clear();
@@ -130,7 +130,7 @@ void ProjectQmlExtension::componentComplete(){
  *
  * CodeHandlers are updated each time the engine recompiles the code.
  */
-void ProjectQmlExtension::addCodeQmlHandler(CodeQmlHandler *handler){
+void ProjectQmlExtension::addLanguageQmlHandler(LanguageQmlHandler *handler){
     m_codeHandlers.append(handler);
 }
 
@@ -139,7 +139,7 @@ void ProjectQmlExtension::addCodeQmlHandler(CodeQmlHandler *handler){
  *
  * Note that this does not destroy the object.
  */
-void ProjectQmlExtension::removeCodeQmlHandler(CodeQmlHandler *handler){
+void ProjectQmlExtension::removeLanguageQmlHandler(LanguageQmlHandler *handler){
     m_codeHandlers.removeAll(handler);
 }
 
@@ -153,8 +153,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
-    qmlRegisterUncreatableType<lv::CodeQmlHandler>(
-        uri, 1, 0, "CodeQmlHandler", "CodeQmlHandler can only be accessed through the Editor.documentHandler");
+    qmlRegisterUncreatableType<lv::LanguageQmlHandler>(
+        uri, 1, 0, "LanguageQmlHandler", "LanguageQmlHandler can only be accessed through the Editor.documentHandler");
     qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(
         uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.documentHandler.codeHandler.editContainer");
     qmlRegisterUncreatableType<lv::DocumentQmlChannels>(
@@ -207,10 +207,10 @@ QmlLibraryInfo::ScanStatus ProjectQmlExtension::loadPluginInfoInternal(
 
 
 /**
- * \brief Creates a CodeQmlHandler for the given \p document
+ * \brief Creates a LanguageQmlHandler for the given \p document
  */
-QObject *ProjectQmlExtension::createHandler(ProjectDocument* document, DocumentHandler *handler){
-    return new CodeQmlHandler(m_engine, m_project, m_settings, this, document, handler);
+QObject *ProjectQmlExtension::createHandler(ProjectDocument* document, CodeHandler *handler){
+    return new LanguageQmlHandler(m_engine, m_project, m_settings, this, document, handler);
 }
 
 }// namespace

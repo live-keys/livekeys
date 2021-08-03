@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 #include "qmljshighlighter_p.h"
 #include "qmljssettings.h"
 #include "qmljs/qmljsscanner.h"
@@ -68,14 +68,14 @@
 
 namespace lv{
 
-// CodeQmlHandlerPrivate
+// LanguageQmlHandlerPrivate
 // ----------------------------------------------------------------------------
 
 /// \private
-class CodeQmlHandlerPrivate{
+class LanguageQmlHandlerPrivate{
 
 public:
-    CodeQmlHandlerPrivate()
+    LanguageQmlHandlerPrivate()
         : m_documentParseSync(false)
         , m_documentBackgroundParseSync(false)
         , m_documentValueObjectsSync(false)
@@ -274,11 +274,11 @@ namespace qmlhandler_helpers{
     }
 }
 
-// CodeQmlHandler implementation
+// LanguageQmlHandler implementation
 // ----------------------------------------------------------------------------
 
 /**
- * \class lv::CodeQmlHandler
+ * \class lv::LanguageQmlHandler
  * \ingroup lveditqmljs
  * \brief Main code handler for the qml extension.
  *
@@ -287,17 +287,17 @@ namespace qmlhandler_helpers{
  */
 
 /**
- * \brief CodeQmlHandler constructor
+ * \brief LanguageQmlHandler constructor
  *
  * This is called through the ProjectQmlHandler.
  */
-CodeQmlHandler::CodeQmlHandler(
+LanguageQmlHandler::LanguageQmlHandler(
         ViewEngine *engine,
         Project *,
         QmlJsSettings *settings,
         ProjectQmlExtension *projectHandler,
         ProjectDocument* document,
-        DocumentHandler *handler)
+        CodeHandler *handler)
     : QObject(handler)
     , m_target(nullptr)
     , m_highlighter(new QmlJsHighlighter(settings, handler, nullptr))
@@ -308,21 +308,21 @@ CodeQmlHandler::CodeQmlHandler(
     , m_editFragment(nullptr)
     , m_editContainer(new QmlEditFragmentContainer(this))
     , m_bindingChannels(nullptr)
-    , d_ptr(new CodeQmlHandlerPrivate)
+    , d_ptr(new LanguageQmlHandlerPrivate)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     d->projectHandler = projectHandler;
 
     m_scopeTimer.setInterval(1000);
     m_scopeTimer.setSingleShot(true);
     connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(__aboutToDelete()));
 
-    d->projectHandler->addCodeQmlHandler(this);
+    d->projectHandler->addLanguageQmlHandler(this);
     d->projectHandler->scanMonitor()->addScopeListener(this);
     connect(d->projectHandler->scanMonitor(), &QmlProjectMonitor::libraryScanQueueCleared,
-            this, &CodeQmlHandler::__whenLibraryScanQueueCleared);
+            this, &LanguageQmlHandler::__whenLibraryScanQueueCleared);
 
     setDocument(document);
 
@@ -330,13 +330,13 @@ CodeQmlHandler::CodeQmlHandler(
 }
 
 /**
- * \brief CodeQmlHandler destructor
+ * \brief LanguageQmlHandler destructor
  */
-CodeQmlHandler::~CodeQmlHandler(){
-    Q_D(CodeQmlHandler);
+LanguageQmlHandler::~LanguageQmlHandler(){
+    Q_D(LanguageQmlHandler);
 
     if ( d->projectHandler ){
-        d->projectHandler->removeCodeQmlHandler(this);
+        d->projectHandler->removeLanguageQmlHandler(this);
         d->projectHandler->scanMonitor()->removeScopeListener(this);
     }
 
@@ -348,7 +348,7 @@ CodeQmlHandler::~CodeQmlHandler(){
  *
  * Handles bracket and paranthesis auto-completion together with suggestions population.
  */
-void CodeQmlHandler::assistCompletion(
+void LanguageQmlHandler::assistCompletion(
         QTextCursor& cursor,
         const QChar& insertion,
         bool manuallyTriggered,
@@ -538,19 +538,19 @@ void CodeQmlHandler::assistCompletion(
 /**
  * \brief Assints the document that will be used by this class.
  */
-void CodeQmlHandler::setDocument(ProjectDocument *document){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::setDocument(ProjectDocument *document){
+    Q_D(LanguageQmlHandler);
     m_document      = document;
     m_target        = document->textDocument();
     m_highlighter->setTarget(m_target);
 
     if ( m_document ){
         connect(m_document->textDocument(), &QTextDocument::contentsChange,
-                this, &CodeQmlHandler::__documentContentsChanged);
-        connect(m_document, &ProjectDocument::formatChanged, this, &CodeQmlHandler::__documentFormatUpdate);
+                this, &LanguageQmlHandler::__documentContentsChanged);
+        connect(m_document, &ProjectDocument::formatChanged, this, &LanguageQmlHandler::__documentFormatUpdate);
         connect(
             m_document->textDocument(), &QTextDocument::cursorPositionChanged,
-            this, &CodeQmlHandler::__cursorWritePositionChanged
+            this, &LanguageQmlHandler::__cursorWritePositionChanged
         );
 
         m_editContainer->clearAllFragments();
@@ -565,8 +565,8 @@ void CodeQmlHandler::setDocument(ProjectDocument *document){
 /**
  * \brief DocumentContentsChanged handler
  */
-void CodeQmlHandler::__documentContentsChanged(int position, int, int){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::__documentContentsChanged(int position, int, int){
+    Q_D(LanguageQmlHandler);
     d->documentChanged();
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
         if ( m_editFragment ){
@@ -581,13 +581,13 @@ void CodeQmlHandler::__documentContentsChanged(int position, int, int){
     }
 }
 
-void CodeQmlHandler::__documentFormatUpdate(int position, int length){
+void LanguageQmlHandler::__documentFormatUpdate(int position, int length){
     rehighlightSection(position, position + length);
 }
 
 /// \private
-void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+void LanguageQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh && dh->editorFocus() && cursor.position() == dh->currentCursorPosition() &&
          !m_document->editingStateIs(ProjectDocument::Assisted) &&
          !m_document->editingStateIs(ProjectDocument::Silent)
@@ -612,15 +612,15 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
 /**
  * \brief Called when a new scope is available from the scanMonitor
  */
-void CodeQmlHandler::updateScope(){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::updateScope(){
+    Q_D(LanguageQmlHandler);
     if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
 }
 
-void CodeQmlHandler::rehighlightSection(int start, int end){
+void LanguageQmlHandler::rehighlightSection(int start, int end){
     QTextBlock bl = m_target->findBlock(start);
     while ( bl.isValid() && bl.position() < end){
         rehighlightBlock(bl);
@@ -628,13 +628,13 @@ void CodeQmlHandler::rehighlightSection(int start, int end){
     }
 }
 
-void CodeQmlHandler::resetProjectQmlExtension(){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::resetProjectQmlExtension(){
+    Q_D(LanguageQmlHandler);
     d->projectHandler = nullptr;
 }
 
-QString CodeQmlHandler::getHelpEntity(int position){
-    Q_D(CodeQmlHandler);
+QString LanguageQmlHandler::getHelpEntity(int position){
+    Q_D(LanguageQmlHandler);
     if ( !m_document )
         return nullptr;
 
@@ -781,7 +781,7 @@ QString CodeQmlHandler::getHelpEntity(int position){
     return "";
 }
 
-void CodeQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, QmlSuggestionModel *model, bool isForNode)
+void LanguageQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, QmlSuggestionModel *model, bool isForNode)
 {
     for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
         const QmlTypeInfo::Ptr& ti = *it;
@@ -857,7 +857,7 @@ void CodeQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &
     }
 }
 
-void CodeQmlHandler::addObjectsToModel(const QmlScopeSnap &scope, QmlSuggestionModel *model)
+void LanguageQmlHandler::addObjectsToModel(const QmlScopeSnap &scope, QmlSuggestionModel *model)
 {
     // import global objects
 
@@ -949,14 +949,14 @@ void CodeQmlHandler::addObjectsToModel(const QmlScopeSnap &scope, QmlSuggestionM
 /**
  * \brief Calls a new rehighlight on the specified block
  */
-void CodeQmlHandler::rehighlightBlock(const QTextBlock &block){
+void LanguageQmlHandler::rehighlightBlock(const QTextBlock &block){
     if ( m_highlighter ){
         m_highlighter->rehighlightBlock(block);
     }
 }
 
-QmlDeclaration::Ptr CodeQmlHandler::getDeclarationViaCompletionContext(int position){
-    Q_D(const CodeQmlHandler);
+QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int position){
+    Q_D(const LanguageQmlHandler);
 
     // get imports
 
@@ -1119,8 +1119,8 @@ QmlDeclaration::Ptr CodeQmlHandler::getDeclarationViaCompletionContext(int posit
     return nullptr;
 }
 
-QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarationsViaParsedDocument(int position, int length){
-    Q_D(CodeQmlHandler);
+QList<QmlDeclaration::Ptr> LanguageQmlHandler::getDeclarationsViaParsedDocument(int position, int length){
+    Q_D(LanguageQmlHandler);
 
     QList<QmlDeclaration::Ptr> declarations;
     d->syncParse(m_document);
@@ -1191,7 +1191,7 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarationsViaParsedDocument(int 
 /**
  * \brief Get a list of declarations from a specific cursor
  */
-QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int length){
+QList<QmlDeclaration::Ptr> LanguageQmlHandler::getDeclarations(int position, int length){
     QList<QmlDeclaration::Ptr> properties;
 //    int length = position.selectionEnd() - position.selectionStart();
 
@@ -1215,8 +1215,8 @@ QList<QmlDeclaration::Ptr> CodeQmlHandler::getDeclarations(int position, int len
  * each component resides, and use those binding paths to connect the position of the
  * code structure to the same values within the runtime.
  */
-QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
-    Q_D(CodeQmlHandler);
+QmlEditFragment *LanguageQmlHandler::createInjectionChannel(QmlDeclaration::Ptr declaration, QmlEditFragment* parentEdit){
+    Q_D(LanguageQmlHandler);
 
     if ( m_document ){
         d->syncParse(m_document);
@@ -1279,7 +1279,7 @@ QmlEditFragment *CodeQmlHandler::createInjectionChannel(QmlDeclaration::Ptr decl
     return nullptr;
 }
 
-void CodeQmlHandler::__aboutToDelete()
+void LanguageQmlHandler::__aboutToDelete()
 {
     cancelEdit();
 
@@ -1288,8 +1288,8 @@ void CodeQmlHandler::__aboutToDelete()
     }
 }
 
-void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+    Q_D(LanguageQmlHandler);
 
     if ( !edit )
         return;
@@ -1387,8 +1387,8 @@ void CodeQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &
     }
 }
 
-QmlAddContainer* CodeQmlHandler::getAddOptionsForFragment(QmlEditFragment *fragment, bool isReadOnly){
-    Q_D(CodeQmlHandler);
+QmlAddContainer* LanguageQmlHandler::getAddOptionsForFragment(QmlEditFragment *fragment, bool isReadOnly){
+    Q_D(LanguageQmlHandler);
     if ( !m_document || !m_target )
         return nullptr;
 
@@ -1432,9 +1432,9 @@ QmlAddContainer* CodeQmlHandler::getAddOptionsForFragment(QmlEditFragment *fragm
     return addContainer;
 }
 
-QmlAddContainer* CodeQmlHandler::getAddOptionsForPosition(int position){
+QmlAddContainer* LanguageQmlHandler::getAddOptionsForPosition(int position){
 
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     if ( !m_document || !m_target )
         return nullptr;
 
@@ -1510,13 +1510,13 @@ QmlAddContainer* CodeQmlHandler::getAddOptionsForPosition(int position){
     return addContainer;
 }
 
-QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
+QVariantList LanguageQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
 {
     return ef->nestedObjectsInfo();
 }
 
-QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
-    Q_D(CodeQmlHandler);
+QmlDeclaration::Ptr LanguageQmlHandler::createImportDeclaration(){
+    Q_D(LanguageQmlHandler);
     d->syncParse(m_document);
 
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();
@@ -1548,7 +1548,7 @@ QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
 /**
  * \brief Adds an editing fragment to the current document
  */
-bool CodeQmlHandler::addEditFragment(QmlEditFragment *edit){
+bool LanguageQmlHandler::addEditFragment(QmlEditFragment *edit){
     //TOMOVE
     return m_editContainer->addEdit(edit);
 }
@@ -1556,13 +1556,13 @@ bool CodeQmlHandler::addEditFragment(QmlEditFragment *edit){
 /**
  * \brief Removes an editing fragment from this document
  */
-void CodeQmlHandler::removeEditFragment(QmlEditFragment *edit){
+void LanguageQmlHandler::removeEditFragment(QmlEditFragment *edit){
     //TOMOVE
     m_editContainer->removeEdit(edit);
 }
 
-int CodeQmlHandler::findImportsPosition(){
-    Q_D(CodeQmlHandler);
+int LanguageQmlHandler::findImportsPosition(){
+    Q_D(LanguageQmlHandler);
     d->syncParse(m_document);
 
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();
@@ -1580,8 +1580,8 @@ int CodeQmlHandler::findImportsPosition(){
     return 0;
 }
 
-int CodeQmlHandler::findRootPosition(){
-    Q_D(CodeQmlHandler);
+int LanguageQmlHandler::findRootPosition(){
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -1592,35 +1592,35 @@ int CodeQmlHandler::findRootPosition(){
     return -1;
 }
 
-lv::QmlEditFragment *CodeQmlHandler::findObjectFragmentByPosition(int position)
+lv::QmlEditFragment *LanguageQmlHandler::findObjectFragmentByPosition(int position)
 {
     //TOMOVE
     return m_editContainer->findObjectFragmentByPosition(position);
 }
 
-lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
+lv::QmlEditFragment *LanguageQmlHandler::findFragmentByPosition(int position)
 {
     //TOMOVE
     return m_editContainer->findFragmentByPosition(position);
 }
 
-QJSValue CodeQmlHandler::editFragments(){
+QJSValue LanguageQmlHandler::editFragments(){
     //TOMOVE
     return m_editContainer->allEdits();
 }
 
-lv::QmlEditFragment* CodeQmlHandler::findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const
+lv::QmlEditFragment* LanguageQmlHandler::findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const
 {
     //TOMOVE
     return m_editContainer->findChildPropertyFragmentByName(parent, name);
 }
 
-void CodeQmlHandler::toggleComment(int position, int length)
+void LanguageQmlHandler::toggleComment(int position, int length)
 {
     if ( !m_document )
         return;
 
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -1656,13 +1656,13 @@ void CodeQmlHandler::toggleComment(int position, int length)
     }
 }
 
-void CodeQmlHandler::suggestionsForProposedExpression(
+void LanguageQmlHandler::suggestionsForProposedExpression(
         QmlDeclaration::Ptr declaration,
         const QString &expression,
         CodeCompletionModel *model,
         bool suggestFunctions) const
 {
-    Q_D(const CodeQmlHandler);
+    Q_D(const LanguageQmlHandler);
 
     QmlScopeSnap scope = d->snapScope();
 
@@ -1727,8 +1727,8 @@ void CodeQmlHandler::suggestionsForProposedExpression(
     model->setSuggestions(suggestions, filter);
 }
 
-bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
-    Q_D(CodeQmlHandler);
+bool LanguageQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const QString &expression){
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -2013,8 +2013,8 @@ bool CodeQmlHandler::findBindingForExpression(lv::QmlEditFragment *edit, const Q
     return true;
 }
 
-bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, const QString &expression){
-    Q_D(CodeQmlHandler);
+bool LanguageQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, const QString &expression){
+    Q_D(LanguageQmlHandler);
 
     QmlScopeSnap scope = d->snapScope();
 
@@ -2185,30 +2185,30 @@ bool CodeQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit, con
     return true;
 }
 
-QmlUsageGraphScanner *CodeQmlHandler::createScanner(){
-    Q_D(CodeQmlHandler);
+QmlUsageGraphScanner *LanguageQmlHandler::createScanner(){
+    Q_D(LanguageQmlHandler);
     return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
 }
 
-QList<int> CodeQmlHandler::languageFeatures() const{
+QList<int> LanguageQmlHandler::languageFeatures() const{
     return {
-        DocumentHandler::LanguageHelp,
-        DocumentHandler::LanguageScope,
-        DocumentHandler::LanguageHighlighting,
-        DocumentHandler::LanguageCodeCompletion,
-        DocumentHandler::LanguageLayout
+        CodeHandler::LanguageHelp,
+        CodeHandler::LanguageScope,
+        CodeHandler::LanguageHighlighting,
+        CodeHandler::LanguageCodeCompletion,
+        CodeHandler::LanguageLayout
     };
 }
 
-QString CodeQmlHandler::help(int position){
+QString LanguageQmlHandler::help(int position){
     return getHelpEntity(position);
 }
 
-QmlEditFragment *CodeQmlHandler::openConnection(int position){
+QmlEditFragment *LanguageQmlHandler::openConnection(int position){
     if ( !m_document )
         return nullptr;
 
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -2284,17 +2284,17 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh )
         dh->requestCursorPosition(ef->valuePosition());
 
     return ef;
 }
 
-QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParent, int position){
+QmlEditFragment *LanguageQmlHandler::openNestedConnection(QmlEditFragment* editParent, int position){
     if ( !m_document || !editParent )
         return nullptr;
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     d->syncParse(m_document);
     d->syncObjects(m_document);
 
@@ -2352,18 +2352,18 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh )
         dh->requestCursorPosition(ef->valuePosition());
 
     return ef;
 }
 
-lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
+lv::QmlEditFragment *LanguageQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
 {
     if ( !m_document )
         return nullptr;
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     d->syncObjects(m_document);
 
     QmlScopeSnap scope = d->snapScope();
@@ -2407,8 +2407,8 @@ lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragm
     return result;
 }
 
-QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, const QJSValue &options){
-    Q_D(CodeQmlHandler);
+QList<QObject *> LanguageQmlHandler::openNestedFragments(QmlEditFragment *edit, const QJSValue &options){
+    Q_D(LanguageQmlHandler);
 
     QList<QObject*> fragments;
     d->syncParse(m_document);
@@ -2554,7 +2554,7 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
 
                         rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
-                        DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+                        CodeHandler* dh = static_cast<CodeHandler*>(parent());
                         if ( dh )
                             dh->requestCursorPosition(ef->valuePosition());
 
@@ -2643,11 +2643,11 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
     return fragments;
 }
 
-void CodeQmlHandler::removeConnection(QmlEditFragment *edit){
+void LanguageQmlHandler::removeConnection(QmlEditFragment *edit){
     m_editContainer->derefEdit(edit);
 }
 
-void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
+void LanguageQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     QList<QObject*> toRemove;
 
     bool objectProperty = false;
@@ -2733,8 +2733,8 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     }
 }
 
-QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &propertyName){
-    Q_D(CodeQmlHandler);
+QString LanguageQmlHandler::propertyType(QmlEditFragment *edit, const QString &propertyName){
+    Q_D(LanguageQmlHandler);
     QmlScopeSnap snap = d->snapScope();
 
     QmlInheritanceInfo ii = snap.getTypePath(edit->declaration()->type());
@@ -2746,7 +2746,7 @@ QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &prope
     return "";
 }
 
-QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
+QJSValue LanguageQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
     if (!fragment || !fragment->declaration())
         return QJSValue();
 
@@ -2756,7 +2756,7 @@ QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment)
 /**
  * \brief Finds the available list of palettes at the current \p cursor position
  */
-QJSValue CodeQmlHandler::findPalettes(int position){
+QJSValue LanguageQmlHandler::findPalettes(int position){
     if ( !m_document )
         return QJSValue();
 
@@ -2770,14 +2770,14 @@ QJSValue CodeQmlHandler::findPalettes(int position){
     return findPalettesForDeclaration(declarations.first());
 }
 
-bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
+bool LanguageQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
     return isForAnObject(ef->declaration());
 }
 
 /**
  * \brief Removes a palette given its container object.
  */
-lv::QmlEditFragment *CodeQmlHandler::removePalette(lv::CodePalette *palette){
+lv::QmlEditFragment *LanguageQmlHandler::removePalette(lv::CodePalette *palette){
     if ( !palette )
         return nullptr;
 
@@ -2788,7 +2788,7 @@ lv::QmlEditFragment *CodeQmlHandler::removePalette(lv::CodePalette *palette){
     return edit;
 }
 
-QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
+QString LanguageQmlHandler::defaultPalette(QmlEditFragment *fragment){
     if ( !fragment )
         return nullptr;
 
@@ -2816,8 +2816,8 @@ QString CodeQmlHandler::defaultPalette(QmlEditFragment *fragment){
  *
  * \returns A pointer to the opened lv::CodePalette.
  */
-CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, QString paletteName){
-    Q_D(CodeQmlHandler);
+CodePalette *LanguageQmlHandler::openBinding(QmlEditFragment *edit, QString paletteName){
+    Q_D(LanguageQmlHandler);
     if ( !m_document || !edit )
         return nullptr;
 
@@ -2844,7 +2844,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, QString paletteN
 
     rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh )
         dh->requestCursorPosition(edit->valuePosition());
 
@@ -2857,7 +2857,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, QString paletteN
  *
  * Mostly used for fragments
  */
-QJSValue CodeQmlHandler::contextBlockRange(int position){
+QJSValue LanguageQmlHandler::contextBlockRange(int position){
     DocumentQmlValueScanner vs(m_document, position, 0);
     int start = vs.getBlockStart(position);
     int end   = vs.getBlockEnd(start + 1);
@@ -2869,8 +2869,8 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
     return ob;
 }
 
-lv::QmlImportsModel *CodeQmlHandler::importsModel(){
-    Q_D(CodeQmlHandler);
+lv::QmlImportsModel *LanguageQmlHandler::importsModel(){
+    Q_D(LanguageQmlHandler);
 
     lv::QmlImportsModel* result = new QmlImportsModel(m_engine, this);
     d->syncObjects(m_document);
@@ -2885,7 +2885,7 @@ lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     return result;
 }
 
-QJSValue CodeQmlHandler::declarationInfo(int position, int length){
+QJSValue LanguageQmlHandler::declarationInfo(int position, int length){
     if ( !m_document )
         return QJSValue();
 
@@ -2901,7 +2901,7 @@ QJSValue CodeQmlHandler::declarationInfo(int position, int length){
 /**
  * \brief Closes the bindings between the given position and length
  */
-void CodeQmlHandler::closeBinding(int position, int length){
+void LanguageQmlHandler::closeBinding(int position, int length){
     if ( !m_document )
         return;
 
@@ -2921,8 +2921,8 @@ void CodeQmlHandler::closeBinding(int position, int length){
     rehighlightSection(position, position + length);
 }
 
-QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
-    Q_D(CodeQmlHandler);
+QJSValue LanguageQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
+    Q_D(LanguageQmlHandler);
     if ( val.hasProperty("palettes") ){
         QJSValue palettesVal = val.property("palettes");
         QJSValueIterator palettesIt(palettesVal);
@@ -2963,8 +2963,8 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
 /**
  * \brief Opens an editing palette for the given \p edit fragment
  */
-lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
-    Q_D(CodeQmlHandler);
+lv::CodePalette* LanguageQmlHandler::edit(lv::QmlEditFragment *edit){
+    Q_D(LanguageQmlHandler);
     if ( !m_document )
         return nullptr;
 
@@ -3017,7 +3017,7 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
     m_document->addEditingState(ProjectDocument::Overlay);
     m_editFragment = edit;
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     rehighlightSection(edit->valuePosition(), edit->valuePosition() + edit->valueLength());
     if ( dh ){
         dh->requestCursorPosition(edit->valuePosition());
@@ -3029,7 +3029,7 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
 /**
  * \brief Cancels the current editing palette
  */
-void CodeQmlHandler::cancelEdit(){
+void LanguageQmlHandler::cancelEdit(){
     m_document->removeEditingState(ProjectDocument::Overlay);
     if ( m_editFragment ){
         removeEditFragment(m_editFragment);
@@ -3041,7 +3041,7 @@ void CodeQmlHandler::cancelEdit(){
  *
  * Returns an lv::QmlAddContainer for all the options
  */
-QmlAddContainer *CodeQmlHandler::getAddOptions(QJSValue value){
+QmlAddContainer *LanguageQmlHandler::getAddOptions(QJSValue value){
     if ( !value.isObject() )
         return nullptr;
 
@@ -3063,13 +3063,13 @@ QmlAddContainer *CodeQmlHandler::getAddOptions(QJSValue value){
 /**
  * \brief Add a property given the \p addText at the specified \p position
  */
-int CodeQmlHandler::addPropertyToCode(
+int LanguageQmlHandler::addPropertyToCode(
         int position,
         const QString &name,
         const QString& value,
         lv::QmlEditFragment* parentGroup)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -3119,7 +3119,7 @@ int CodeQmlHandler::addPropertyToCode(
         QString propertyName = p->name().join(".");
 
         if ( propertyName == fullName ){ // property already exists, simply position the cursor accordingly
-            lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+            lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
             if ( dh )
                 dh->requestCursorPosition(p->valueBegin);
             return p->begin;
@@ -3163,7 +3163,7 @@ int CodeQmlHandler::addPropertyToCode(
     m_scopeTimer.stop();
     updateScope();
 
-    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh ){
         dh->requestCursorPosition(cursorPosition);
     }
@@ -3171,8 +3171,8 @@ int CodeQmlHandler::addPropertyToCode(
     return cursorPosition - fullName.size() - 2;
 }
 
-int CodeQmlHandler::addEventToCode(int position, const QString &name){
-    Q_D(CodeQmlHandler);
+int LanguageQmlHandler::addEventToCode(int position, const QString &name){
+    Q_D(LanguageQmlHandler);
 
     d->syncParse(m_document);
     d->syncObjects(m_document);
@@ -3208,7 +3208,7 @@ int CodeQmlHandler::addEventToCode(int position, const QString &name){
         QString propertyName = p->name().join(".");
 
         if ( propertyName == name ){ // property already exists, simply position the cursor accordingly
-            lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+            lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
             if ( dh )
                 dh->requestCursorPosition(p->valueBegin);
             return p->begin;
@@ -3254,7 +3254,7 @@ int CodeQmlHandler::addEventToCode(int position, const QString &name){
     m_scopeTimer.stop();
     updateScope();
 
-    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh ){
         dh->requestCursorPosition(cursorPosition);
     }
@@ -3265,8 +3265,8 @@ int CodeQmlHandler::addEventToCode(int position, const QString &name){
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int CodeQmlHandler::addObjectToCode(int position, const QString &ctype, const QJSValue &properties){
-    Q_D(CodeQmlHandler);
+int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, const QJSValue &properties){
+    Q_D(LanguageQmlHandler);
 
     DocumentQmlValueScanner qvs(m_document, position, 1);
     int blockStart = qvs.getBlockStart(position) + 1;
@@ -3377,7 +3377,7 @@ int CodeQmlHandler::addObjectToCode(int position, const QString &ctype, const QJ
 
     updateScope();
 
-    lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if (dh){
         dh->requestCursorPosition(cursorPosition);
     }
@@ -3385,7 +3385,7 @@ int CodeQmlHandler::addObjectToCode(int position, const QString &ctype, const QJ
     return cursorPosition - 1 - type.size();
 }
 
-void CodeQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
+void LanguageQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
 {
     if (!propertyFragment)
         return;
@@ -3399,9 +3399,9 @@ void CodeQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
     updateScope();
 }
 
-int CodeQmlHandler::addRootObjectToCode(const QString &name)
+int LanguageQmlHandler::addRootObjectToCode(const QString &name)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     d->syncObjects(m_document);
 
     // add the root via code
@@ -3453,7 +3453,7 @@ int CodeQmlHandler::addRootObjectToCode(const QString &name)
     return insertionPosition + 2;
 }
 
-void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
     try{
         addItemToRunTimeImpl(edit, ctype, properties);
     } catch ( lv::Exception& e ){
@@ -3461,7 +3461,7 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     }
 }
 
-QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *)
+QmlEditFragment *LanguageQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *)
 {
     try{
         int opos = addObjectToCode(position, "", type);
@@ -3473,8 +3473,8 @@ QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type,
     return nullptr;
 }
 
-QJSValue CodeQmlHandler::getDocumentIds(){
-    Q_D(CodeQmlHandler);
+QJSValue LanguageQmlHandler::getDocumentIds(){
+    Q_D(LanguageQmlHandler);
     QmlScopeSnap scope = d->snapScope();
     QStringList ids = scope.document->extractIds();
 
@@ -3486,8 +3486,8 @@ QJSValue CodeQmlHandler::getDocumentIds(){
     return result;
 }
 
-void CodeQmlHandler::suggestCompletion(int cursorPosition){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+void LanguageQmlHandler::suggestCompletion(int cursorPosition){
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( !m_document || !dh )
         return;
 
@@ -3503,7 +3503,7 @@ void CodeQmlHandler::suggestCompletion(int cursorPosition){
     );
 }
 
-int CodeQmlHandler::checkPragma(int position)
+int LanguageQmlHandler::checkPragma(int position)
 {
     QString content = m_document->contentString();
     QString sub = content.left(position);
@@ -3516,8 +3516,8 @@ int CodeQmlHandler::checkPragma(int position)
 /**
  * \brief Handler for when a new document scope is ready
  */
-void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
+    Q_D(LanguageQmlHandler);
     if ( !documentInfo->isParsedCorrectly() && documentInfo->imports().isEmpty() ){
         documentInfo->transferImports(d->documentInfo()->imports());
     }
@@ -3539,11 +3539,11 @@ void CodeQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
     }
 }
 
-DocumentHandler *CodeQmlHandler::documentHandler() const{
-    return qobject_cast<DocumentHandler*>(parent());
+CodeHandler *LanguageQmlHandler::documentHandler() const{
+    return qobject_cast<CodeHandler*>(parent());
 }
 
-void CodeQmlHandler::__whenLibraryScanQueueCleared(){
+void LanguageQmlHandler::__whenLibraryScanQueueCleared(){
     QLinkedList<QJSValue> callbacks = m_importsScannedListeners;
     m_importsScannedListeners.clear();
 
@@ -3555,15 +3555,15 @@ void CodeQmlHandler::__whenLibraryScanQueueCleared(){
     }
 }
 
-bool CodeQmlHandler::areImportsScanned(){
-    Q_D(CodeQmlHandler);
+bool LanguageQmlHandler::areImportsScanned(){
+    Q_D(LanguageQmlHandler);
     d->syncParse(m_document);
     QmlScopeSnap scope = d->snapScope();
     return scope.areDocumentLibrariesReady();
 }
 
-void CodeQmlHandler::onDocumentParse(QJSValue callback){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::onDocumentParse(QJSValue callback){
+    Q_D(LanguageQmlHandler);
     if ( d->wasDocumentUpdatedFromBackground() ){
         callback.call(QJSValueList() << true);
     } else {
@@ -3575,7 +3575,7 @@ void CodeQmlHandler::onDocumentParse(QJSValue callback){
     }
 }
 
-void CodeQmlHandler::onImportsScanned(QJSValue callback){
+void LanguageQmlHandler::onImportsScanned(QJSValue callback){
     if ( areImportsScanned() ){
         QJSValue res = callback.call();
         if ( res.isError() ){
@@ -3586,18 +3586,18 @@ void CodeQmlHandler::onImportsScanned(QJSValue callback){
     }
 }
 
-void CodeQmlHandler::removeSyncImportsListeners(){
+void LanguageQmlHandler::removeSyncImportsListeners(){
     m_importsScannedListeners.clear();
 }
 
 /**
  * \brief Handler for when a new project scope is ready
  */
-void CodeQmlHandler::__newProjectScopeReady(){
+void LanguageQmlHandler::__newProjectScopeReady(){
     m_newScope = true;
 }
 
-void CodeQmlHandler::suggestionsForGlobalQmlContext(
+void LanguageQmlHandler::suggestionsForGlobalQmlContext(
         const QmlCompletionContext &,
         QList<CodeCompletionSuggestion> &suggestions
 ){
@@ -3605,7 +3605,7 @@ void CodeQmlHandler::suggestionsForGlobalQmlContext(
     suggestions << CodeCompletionSuggestion("pragma Singleton", "", "", "pragma Singleton");
 }
 
-void CodeQmlHandler::suggestionsForImport(
+void LanguageQmlHandler::suggestionsForImport(
         const QmlCompletionContext& context,
         QList<CodeCompletionSuggestion> &suggestions)
 {
@@ -3615,7 +3615,7 @@ void CodeQmlHandler::suggestionsForImport(
     std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
 }
 
-void CodeQmlHandler::suggestionsForStringImport(
+void LanguageQmlHandler::suggestionsForStringImport(
         const QString& enteredPath,
         QList<CodeCompletionSuggestion> &suggestions,
         QString& filter)
@@ -3630,7 +3630,7 @@ void CodeQmlHandler::suggestionsForStringImport(
     std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
 }
 
-void CodeQmlHandler::suggestionsForRecursiveImport(
+void LanguageQmlHandler::suggestionsForRecursiveImport(
         int index,
         const QString& dir,
         const QStringList& expression,
@@ -3651,11 +3651,11 @@ void CodeQmlHandler::suggestionsForRecursiveImport(
     }
 }
 
-void CodeQmlHandler::suggestionsForNamespaceTypes(
+void LanguageQmlHandler::suggestionsForNamespaceTypes(
     const QString &typeNameSpace,
     QList<CodeCompletionSuggestion> &suggestions) const
 {
-    Q_D(const CodeQmlHandler);
+    Q_D(const LanguageQmlHandler);
     QmlScopeSnap scope = d->snapScope();
 
     if ( typeNameSpace.isEmpty() ){
@@ -3690,8 +3690,8 @@ void CodeQmlHandler::suggestionsForNamespaceTypes(
     }
 }
 
-void CodeQmlHandler::suggestionsForNamespaceImports(QList<CodeCompletionSuggestion> &suggestions){
-    Q_D(CodeQmlHandler);
+void LanguageQmlHandler::suggestionsForNamespaceImports(QList<CodeCompletionSuggestion> &suggestions){
+    Q_D(LanguageQmlHandler);
     QMap<QString, QString> imports;
     DocumentQmlInfo::Ptr document = d->documentInfo();
 
@@ -3710,8 +3710,8 @@ void CodeQmlHandler::suggestionsForNamespaceImports(QList<CodeCompletionSuggesti
     suggestions << localSuggestions;
 }
 
-void CodeQmlHandler::suggestionsForDocumentsIds(QList<CodeCompletionSuggestion> &suggestions) const{
-    Q_D(const CodeQmlHandler);
+void LanguageQmlHandler::suggestionsForDocumentsIds(QList<CodeCompletionSuggestion> &suggestions) const{
+    Q_D(const LanguageQmlHandler);
     QStringList ids = d->documentInfo()->extractIds();
     ids.sort();
     foreach( const QString& id, ids ){
@@ -3719,12 +3719,12 @@ void CodeQmlHandler::suggestionsForDocumentsIds(QList<CodeCompletionSuggestion> 
     }
 }
 
-void CodeQmlHandler::suggestionsForLeftBind(
+void LanguageQmlHandler::suggestionsForLeftBind(
         const QmlCompletionContext& context,
         int cursorPosition,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     if ( context.objectTypePath().size() == 0 )
         return;
     
@@ -3768,12 +3768,12 @@ void CodeQmlHandler::suggestionsForLeftBind(
     }
 }
 
-void CodeQmlHandler::suggestionsForRightBind(
+void LanguageQmlHandler::suggestionsForRightBind(
         const QmlCompletionContext& context,
         int cursorPosition,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
 
     QmlScopeSnap scope = d->snapScope();
 
@@ -3830,12 +3830,12 @@ void CodeQmlHandler::suggestionsForRightBind(
     }
 }
 
-void CodeQmlHandler::suggestionsForLeftSignalBind(
+void LanguageQmlHandler::suggestionsForLeftSignalBind(
         const QmlCompletionContext& context,
         int cursorPosition,
         QList<CodeCompletionSuggestion> &suggestions)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     QmlScopeSnap scope = d->snapScope();
 
     DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(cursorPosition);
@@ -3851,7 +3851,7 @@ void CodeQmlHandler::suggestionsForLeftSignalBind(
     qmlhandler_helpers::suggestionsForObjectPath(typePath, true, true, true, true, true, ": ", suggestions);
 }
 
-QString CodeQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
+QString LanguageQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
     QTextBlock block = cursor.block();
     int localCursorPosition = cursor.positionInBlock();
     QString blockString = block.text();
@@ -3863,7 +3863,7 @@ QString CodeQmlHandler::extractQuotedString(const QTextCursor &cursor) const{
         return blockString.mid(0, localCursorPosition);
 }
 
-QString CodeQmlHandler::getBlockIndent(const QTextBlock &bl){
+QString LanguageQmlHandler::getBlockIndent(const QTextBlock &bl){
     QString blockText = bl.text();
 
     for ( int i = 0; i < blockText.length(); ++i ){
@@ -3873,7 +3873,7 @@ QString CodeQmlHandler::getBlockIndent(const QTextBlock &bl){
     return blockText;
 }
 
-bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
+bool LanguageQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
     QString blockText = bl.text();
     for ( auto it = blockText.begin(); it != blockText.end(); ++it )
         if ( !it->isSpace() )
@@ -3882,7 +3882,7 @@ bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
     return true;
 }
 
-bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
+bool LanguageQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     if ( !declaration->type().path().isEmpty() )
         return true;
     if (declaration->type().name() == "import")
@@ -3892,11 +3892,11 @@ bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
     return QmlTypeInfo::isObject(declaration->type().name());
 }
 
-QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration)
+QJSValue LanguageQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration)
 {
     // every fragment has a declaration -> should end up here
 
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     QmlScopeSnap scope = d->snapScope();
 
     QList<PaletteLoader*> result = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
@@ -3961,7 +3961,7 @@ QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declarat
     return res;
 }
 
-void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
+void LanguageQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, QmlEditFragment *fragment, QmlBindingPath::Ptr bindingPath){
     QmlBindingChannel::Ptr documentChannel = m_bindingChannels->selectedChannel();
 
     if ( documentChannel ){
@@ -4001,7 +4001,7 @@ void CodeQmlHandler::createChannelForFragment(QmlEditFragment *parentFragment, Q
 
 }
 
-QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
+QJSValue LanguageQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
 {
     QJSValue result = m_engine->engine()->newObject();
     result.setProperty("position", declaration->position());
@@ -4023,12 +4023,12 @@ QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
     return result;
 }
 
-bool CodeQmlHandler::importsShaped() const
+bool LanguageQmlHandler::importsShaped() const
 {
     return m_importsShaped;
 }
 
-void CodeQmlHandler::setImportsShaped(bool importsShaped)
+void LanguageQmlHandler::setImportsShaped(bool importsShaped)
 {
     if (m_importsShaped == importsShaped)
         return;
@@ -4036,12 +4036,12 @@ void CodeQmlHandler::setImportsShaped(bool importsShaped)
     emit importsShapedChanged();
 }
 
-bool CodeQmlHandler::rootShaped() const
+bool LanguageQmlHandler::rootShaped() const
 {
     return m_rootShaped;
 }
 
-void CodeQmlHandler::setRootShaped(bool rootShaped)
+void LanguageQmlHandler::setRootShaped(bool rootShaped)
 {
     if (m_rootShaped == rootShaped)
         return;
@@ -4050,9 +4050,9 @@ void CodeQmlHandler::setRootShaped(bool rootShaped)
 }
 
 //TO REROUTE
-QVariantMap CodeQmlHandler::propertiesWritable(QmlEditFragment *ef)
+QVariantMap LanguageQmlHandler::propertiesWritable(QmlEditFragment *ef)
 {
-    Q_D(CodeQmlHandler);
+    Q_D(LanguageQmlHandler);
     QVariantMap result;
 
     if ( !m_document || !m_target )

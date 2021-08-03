@@ -163,7 +163,7 @@ void QmlLanguageScanner::processQueue(){
     m_isProcessing = false;
 }
 
-void QmlLanguageScanner::scanDocument(const QString &path, const QString &content, CodeQmlHandler *handler){
+void QmlLanguageScanner::scanDocument(const QString &path, const QString &content, LanguageQmlHandler *handler){
     DocumentQmlInfo::Ptr docinfo = DocumentQmlInfo::create(path);
     docinfo->parse(content);
     docinfo->createRanges();

@@ -20,7 +20,7 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "qmlbindingchannel.h"
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 #include "live/viewcontext.h"
 #include "documentqmlchannels.h"
 
@@ -45,7 +45,7 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject *parent)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::LanguageQmlHandler* codeHandler, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
@@ -452,9 +452,9 @@ void QmlEditFragment::updateFromPalette()
 void QmlEditFragment::suggestionsForExpression(const QString &expression, CodeCompletionModel *model, bool suggestFunctions)
 {
     QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
+    LanguageQmlHandler* qmlHandler = nullptr;
     while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        qmlHandler = qobject_cast<LanguageQmlHandler*>(editParent);
         if ( qmlHandler )
             break;
 

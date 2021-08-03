@@ -162,7 +162,7 @@ WorkspaceExtension{
             !canBeQml(activePane.document) )
             return
 
-        var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, CodeQmlHandler.NoReadOnly)
+        var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, LanguageQmlHandler.NoReadOnly)
         if ( !addContainer )
             return
 

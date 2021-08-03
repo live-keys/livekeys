@@ -1,7 +1,7 @@
 #include "qmlbindingchannelsdispatcher.h"
 #include "documentqmlchannels.h"
 
-#include "codeqmlhandler.h"
+#include "languageqmlhandler.h"
 #include "live/project.h"
 #include "live/projectfile.h"
 #include "live/projectdocument.h"
@@ -126,7 +126,7 @@ void QmlBindingChannelsDispatcher::removeDocumentChannels(DocumentQmlChannels *d
         m_channeledDocuments.remove(documentChannels);
 }
 
-void QmlBindingChannelsDispatcher::initialize(CodeQmlHandler *codeHandler, DocumentQmlChannels *documentChannels){
+void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, DocumentQmlChannels *documentChannels){
     m_channeledDocuments.insert(documentChannels);
 
     Runnable* r = m_project->runnables()->runnableAt(codeHandler->document()->file()->path());

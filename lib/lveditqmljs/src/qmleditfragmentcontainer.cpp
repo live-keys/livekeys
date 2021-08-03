@@ -1,9 +1,9 @@
 #include "qmleditfragmentcontainer.h"
-#include "codeqmlhandler.h"
+#include "languageqmlhandler.h"
 
 namespace lv{
 
-QmlEditFragmentContainer::QmlEditFragmentContainer(CodeQmlHandler *parent)
+QmlEditFragmentContainer::QmlEditFragmentContainer(LanguageQmlHandler *parent)
     : QObject(parent)
     , m_codeHandler(parent)
 {

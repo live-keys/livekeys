@@ -1,6 +1,6 @@
 #include "qmlsuggestionmodel.h"
 #include <QSet>
-#include <codeqmlhandler.h>
+#include <languageqmlhandler.h>
 
 namespace lv {
 
@@ -188,9 +188,9 @@ void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
 
             if ( !propertyName.startsWith("__") )
 //                (
-//                    (!(filter & CodeQmlHandler::NoReadOnly) || ti->propertyAt(i).isWritable)
+//                    (!(filter & LanguageQmlHandler::NoReadOnly) || ti->propertyAt(i).isWritable)
 //                    ||
-//                    ((filter & CodeQmlHandler::ReadOnly) && ti->propertyAt(i).isPointer)
+//                    ((filter & LanguageQmlHandler::ReadOnly) && ti->propertyAt(i).isPointer)
 
 //                ))
             {

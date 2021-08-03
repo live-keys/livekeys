@@ -1,5 +1,5 @@
 #include "qmlimportsmodel.h"
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 
 namespace lv{
 
@@ -28,7 +28,7 @@ int QmlImportsModel::lastBlock()
 void QmlImportsModel::commit(QString m, QString v, QString q)
 {
     if (m == "" || v == "") return;
-    auto handler = static_cast<CodeQmlHandler*>(parent());
+    auto handler = static_cast<LanguageQmlHandler*>(parent());
     if (!handler) return;
 
     QString line = QString() + "import " + m + " " + v;
@@ -50,7 +50,7 @@ void QmlImportsModel::commit(QString m, QString v, QString q)
 void QmlImportsModel::erase(int line)
 {
     int i = 0;
-    auto handler = static_cast<CodeQmlHandler*>(parent());
+    auto handler = static_cast<LanguageQmlHandler*>(parent());
     if (!handler) return;
     for (;i < m_data.size(); ++i)
         if (m_data[i].location().line() == line)
