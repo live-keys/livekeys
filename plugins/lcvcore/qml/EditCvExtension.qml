@@ -235,10 +235,10 @@ WorkspaceExtension{
                                         segment.filters = file.path
 
                                         var editor = pane
-                                        var codeHandler = editor.documentHandler.codeHandler
+                                        var codeHandler = editor.code.language
                                         var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
                                         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
-                                        lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
+                                        lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
                                             var palettesForRoot = codeHandler.findPalettes(rootPosition)
                                             var pos = palettesForRoot.declaration.position
                                             palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
@@ -290,10 +290,10 @@ WorkspaceExtension{
                                 pane.document = pd
 
                                 var editor = pane
-                                var codeHandler = editor.documentHandler.codeHandler
+                                var codeHandler = editor.code.language
                                 var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
                                 lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
-                                lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
+                                lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
                                     var palettesForRoot = codeHandler.findPalettes(rootPosition)
                                     var pos = palettesForRoot.declaration.position
                                     palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)

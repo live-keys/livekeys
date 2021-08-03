@@ -3,7 +3,7 @@
 
 #include <QTextDocument>
 
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/syntaxhighlighter.h"
 
 #include "live/mlnode.h"
@@ -25,7 +25,7 @@ public:
         QmlLanguageObject* language,
         const MLNode& settings,
         const std::string& pattern,
-        DocumentHandler* handler,
+        CodeHandler* handler,
         QTextDocument* parent);
     ~QueryHighlighter() override;
 

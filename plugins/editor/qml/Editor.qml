@@ -11,12 +11,12 @@ Rectangle{
     id: root
 
     property alias textEdit: textEdit
-    property alias documentHandler: textEdit.documentHandler
+    property alias code: textEdit.code
 
     property QtObject addRootButton: addRootButton
 
     property var document: null
-    onDocumentChanged: documentHandler.setDocument(document)
+    onDocumentChanged: code.setDocument(document)
 
     property int fragmentStart: 0
     property int fragmentEnd: -1
@@ -116,7 +116,7 @@ Rectangle{
     }
 
     function toggleComment(){
-        documentHandler.codeHandler.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
+        code.language.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
     }
 
     function closeDocument(){
@@ -173,8 +173,8 @@ Rectangle{
     }
 
     function getCursorFragment(){
-        if (documentHandler.has(documentHandler.LanguageScope ) ){
-            return documentHandler.contextBlockRange(textEdit.cursorPosition)
+        if (code.has(code.LanguageScope ) ){
+            return code.contextBlockRange(textEdit.cursorPosition)
         }
         return null
     }
@@ -209,8 +209,8 @@ Rectangle{
     }
 
     function assistCompletion(){
-        if (documentHandler.has(DocumentHandler.LanguageCodeCompletion))
-            documentHandler.codeHandler.suggestCompletion(textEdit.cursorPosition)
+        if (code.has(DocumentHandler.LanguageCodeCompletion))
+            code.language.suggestCompletion(textEdit.cursorPosition)
     }
 
     FontMetrics{
@@ -311,8 +311,8 @@ Rectangle{
                 fragmentStart: root.fragmentStart
                 fragmentEnd: root.fragmentEnd
 
-                documentHandler: DocumentHandler {
-                    id: documentHandler
+                code: DocumentHandler {
+                    id: code
                     editorFocus: textEdit.activeFocus
                     onCursorPositionRequest : {
                         textEdit.forceActiveFocus()
@@ -328,7 +328,7 @@ Rectangle{
                     flick.ensureVisible(cursorRectangle)
                     /// disable the model if no text has changed, let the code handler decide otherwise
                     if ( length === lastLength )
-                        documentHandler.completionModel.disable()
+                        code.completionModel.disable()
                     lastLength = length
                 }
 
@@ -350,12 +350,12 @@ Rectangle{
                 height: Math.max(paintedHeight, flick.height)
                 width: Math.max(paintedWidth, flick.width)
 
-                readOnly: root.document === null || root.document.isMonitored || (documentHandler && documentHandler.codeHandler && documentHandler.codeHandler.importsShaped && documentHandler.codeHandler.rootShaped)
+                readOnly: root.document === null || root.document.isMonitored || (code && code.language && code.language.importsShaped && code.language.rootShaped)
                 cursorVisible: !readOnly && isActive
 
                 Keys.onPressed: {
                     if ( event.key === Qt.Key_PageUp ){
-                        if ( documentHandler.completionModel.isEnabled ){
+                        if ( code.completionModel.isEnabled ){
                             qmlSuggestionBox.highlightPrevPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
@@ -372,26 +372,26 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Tab ){
                         if ( event.modifiers & Qt.ShiftModifier ){
-                            documentHandler.manageIndent(
+                            code.manageIndent(
                                 textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, true
                             )
                             event.accepted = true
                         } else if ( selectionStart !== selectionEnd ){
-                            documentHandler.manageIndent(
+                            code.manageIndent(
                                 textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, false
                             )
                             event.accepted = true
                         } else {
-                            documentHandler.insertTab(cursorPosition)
+                            code.insertTab(cursorPosition)
                             event.accepted = true
                         }
                     } else if ( event.key === Qt.Key_Backtab ){
-                        documentHandler.manageIndent(
+                        code.manageIndent(
                             textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart, true
                         )
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageDown ){
-                        if ( documentHandler.completionModel.isEnabled ){
+                        if ( code.completionModel.isEnabled ){
                             qmlSuggestionBox.highlightNextPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
@@ -403,18 +403,18 @@ Rectangle{
                         }
                         event.accepted = true
                     } else if ( event.key === Qt.Key_Down ){
-                        if ( documentHandler.completionModel.isEnabled ){
+                        if ( code.completionModel.isEnabled ){
                             event.accepted = true
                             qmlSuggestionBox.highlightNext()
                         }
                     } else if ( event.key === Qt.Key_Up ){
-                        if ( documentHandler.completionModel.isEnabled ){
+                        if ( code.completionModel.isEnabled ){
                             event.accepted = true
                             qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
-                        if ( documentHandler.completionModel.isEnabled ){
-                            documentHandler.completionModel.disable()
+                        if ( code.completionModel.isEnabled ){
+                            code.completionModel.disable()
                         }
                     } else {
                         var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -428,9 +428,9 @@ Rectangle{
 
                 Keys.onReturnPressed: {
                     event.accepted = false
-                    if ( documentHandler.completionModel.isEnabled ){
-                        documentHandler.insertCompletion(
-                            documentHandler.completionModel.completionPosition,
+                    if ( code.completionModel.isEnabled ){
+                        code.insertCompletion(
+                            code.completionModel.completionPosition,
                             cursorPosition,
                             qmlSuggestionBox.getCompletion()
                         )
@@ -467,9 +467,9 @@ Rectangle{
     }
 
     Connections{
-        target: documentHandler.completionModel
+        target: code.completionModel
         function onIsEnabledChanged(){
-            if ( !documentHandler.completionModel.isEnabled || documentHandler.completionModel.suggestionCount() === 0 ){
+            if ( !code.completionModel.isEnabled || code.completionModel.suggestionCount() === 0 ){
                 qmlSuggestionBox.visible = false
                 qmlSuggestionBox.opacity = 0
                 return
@@ -480,7 +480,7 @@ Rectangle{
             var r = textEdit.cursorRectangle
 
             var rect = {
-                x:  textEdit.positionToRectangle(documentHandler.completionModel.completionPosition).x -
+                x:  textEdit.positionToRectangle(code.completionModel.completionPosition).x -
                     flick.flickableItem.contentX +
                     167, // compensate for center alignment when creating the editor box
                 y: r.y - flick.flickableItem.contentY,
@@ -498,7 +498,7 @@ Rectangle{
 
             } else {
                 qmlSuggestionBox = paletteControls.createSuggestionBox(null, textEdit.font)
-                qmlSuggestionBox.model = documentHandler.completionModel
+                qmlSuggestionBox.model = code.completionModel
 
                 var editorBox = lk.layers.editor.environment.createEditorBox(
                     qmlSuggestionBox,

@@ -18,7 +18,7 @@
 #define LVPROJECTQMLEXTENSION_H
 
 #include "live/lveditqmljsglobal.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/palettecontainer.h"
 #include "live/qmllanguageinfo.h"
 

@@ -16,7 +16,7 @@ WorkspaceExtension{
         }
 
         function shapeLayout(editorPane, layout){
-            var codeHandler = editorPane.editor.documentHandler.codeHandler
+            var codeHandler = editorPane.editor.code.language
             var rootPosition = codeHandler.findRootPosition()
             root.rootPosition = rootPosition
             shapeRootObject(editorPane, codeHandler, function(){
@@ -29,7 +29,7 @@ WorkspaceExtension{
         }
 
         function shapeAll(editor, callback){
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             if (editor.loading){
                 editor.stopLoadingMode()
@@ -134,7 +134,7 @@ WorkspaceExtension{
             return
 
         var editor = activePane
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         codeHandler.closeBinding(
             editor.textEdit.selectionStart,
@@ -162,7 +162,7 @@ WorkspaceExtension{
             !canBeQml(activePane.document) )
             return
 
-        var addContainer = activePane.documentHandler.codeHandler.getAddOptions(activePane.textEdit.cursorPosition, LanguageQmlHandler.NoReadOnly)
+        var addContainer = activePane.code.language.getAddOptions(activePane.textEdit.cursorPosition, LanguageQmlHandler.NoReadOnly)
         if ( !addContainer )
             return
 
@@ -173,7 +173,7 @@ WorkspaceExtension{
 
         var addEditorBox = globals.paletteControls.views.openAddOptionsBox(
             addContainer,
-            activePane.documentHandler.codeHandler,
+            activePane.code.language,
             {
                 aroundRect: rect,
                 panePosition: Qt.point(paneCoords.x, paneCoords.y),
@@ -186,25 +186,25 @@ WorkspaceExtension{
                 },
                 onAccepted: function(box, selection){
                     if ( selection.category === 'property' ){
-                        activePane.documentHandler.codeHandler.addProperty(
+                        activePane.code.language.addProperty(
                             selection.position, selection.objectType, selection.type, selection.name, true
                         )
                     } else if ( selection.category === 'object' ){
                         if (forRoot){
-                            var position = activePane.documentHandler.codeHandler.addRootObjectToCode(selection.name)
+                            var position = activePane.code.language.addRootObjectToCode(selection.name)
                             if (position === -1){
                                 lk.layers.workspace.messages.pushError("Error: Can't create object with name " + selection.name, 1)
                             } else {
                                 root.rootPosition = position
-                                shapeRootObject(activePane, activePane.documentHandler.codeHandler)
+                                shapeRootObject(activePane, activePane.code.language)
                             }
                         }
                         else
-                            activePane.documentHandler.codeHandler.addItem(
+                            activePane.code.language.addItem(
                                 selection.position, selection.objectType, selection.name
                             )
                     } else if ( selection.category === 'event' ){
-                        activePane.documentHandler.codeHandler.addEvent(
+                        activePane.code.language.addEvent(
                             selection.position, selection.objectType, selection.type, selection.name
                         )
                     }
@@ -261,7 +261,7 @@ WorkspaceExtension{
 
                     if ( canBeQml(item.document) ){
 
-                        var codeHandler = item.documentHandler.codeHandler
+                        var codeHandler = item.code.language
                         var declarationInfo = codeHandler.declarationInfo(
                             item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
                         );

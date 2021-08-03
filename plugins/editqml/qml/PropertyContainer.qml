@@ -10,7 +10,7 @@ Item{
     function __initialize(editor, ef){
         propertyContainer.title = ef.identifier()
         propertyContainer.editor = editor
-        propertyContainer.documentHandler = editor.documentHandler
+        propertyContainer.code = editor.code
         propertyContainer.editFragment = ef
 
         var codeHandler = ef.codeHandler
@@ -66,7 +66,7 @@ Item{
     property alias paletteListContainer: container
     property QtObject editFragment : null
 
-    property QtObject documentHandler : null
+    property QtObject code : null
     property Item editor: null
     property Item valueContainer : null
 

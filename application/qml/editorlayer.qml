@@ -68,7 +68,7 @@ EditorLayer{
                     if (child.objectName === "paletteGroup")
                         child.codeHandler.removeConnection(child.editFragment)
                     if (child.objectName === "objectContainer")
-                        child.editor.documentHandler.codeHandler.removeConnection(child.editFragment)
+                        child.editor.code.language.removeConnection(child.editFragment)
                 }
 
                 Behavior on opacity{

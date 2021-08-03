@@ -19,7 +19,7 @@
 
 namespace lv{
 
-QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler*, QTextDocument *parent)
+QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, CodeHandler*, QTextDocument *parent)
     : SyntaxHighlighter(parent)
     , m_settings(settings)
 {

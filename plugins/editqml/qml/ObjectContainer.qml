@@ -249,7 +249,7 @@ Item{
         }
 
         function expandOptions(options){
-            var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
+            var codeHandler = objectContainerFrame.editor.code.language
 
             if ( 'palettes' in options){
                 var palettes = options['palettes']
@@ -330,13 +330,13 @@ Item{
             if (paletteControls.instructionsShaping)
                 return
 
-            var objects = root.editor.documentHandler.codeHandler.openNestedFragments(root.editFragment, ['objects'])
+            var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
             for (var i=0; i < objects.length; ++i){
                 var childObjectContainer = root.addChildObject(objects[i])
             }
             paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
 
-            var codeHandler = root.editor.documentHandler.codeHandler
+            var codeHandler = root.editor.code.language
             var properties = codeHandler.openNestedFragments(root.editFragment, ['properties'])
             for (var i = 0; i < properties.length; ++i){
                 var pc = addProperty(properties[i])
@@ -356,7 +356,7 @@ Item{
             if (compact) return
             for ( var i = 1; i < container.children.length; ++i ){
                 var edit = container.children[i].editFragment
-                editor.documentHandler.codeHandler.removeConnection(edit)
+                editor.code.language.removeConnection(edit)
             }
 
             for (var i=1; i < container.children.length; ++i)
@@ -402,7 +402,7 @@ Item{
                     addChildObject(obj)
 
                 var child = container.children[container.children.length-1]
-                var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
+                var codeHandler = objectContainerFrame.editor.code.language
                 var id = child.editFragment.objectId()
 //                child.title = child.editFragment.typeName() + (id ? "#"+id : "")
                 // paletteControls.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
@@ -455,7 +455,7 @@ Item{
                         paletteConnection.editFragment = null
                     } else {
                         paletteConnection.forceActiveFocus()
-                        paletteConnection.model = editor.documentHandler.codeHandler.bindingChannels
+                        paletteConnection.model = editor.code.language.bindingChannels
                         paletteConnection.editFragment = editFragment
                     }
                 }
@@ -500,7 +500,7 @@ Item{
                 }
 
                 onCreateObject: {
-                    var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
+                    var codeHandler = objectContainerFrame.editor.code.language
                     codeHandler.addObjectForProperty(editFragment)
                     codeHandler.addItemToRuntime(editFragment)
                 }

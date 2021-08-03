@@ -43,7 +43,7 @@ Rectangle{
     onEditFragmentChanged: {
         if (!editFragment)
             return
-        editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
+        editor = editFragment.codeHandler.code.textEdit().getEditor()
     }
 
     property bool paletteSwapVisible: false

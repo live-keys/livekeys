@@ -34,7 +34,7 @@
 #include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
 
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/codecompletionsuggestion.h"
 #include "live/projectfile.h"
 #include "live/project.h"
@@ -3539,7 +3539,7 @@ void LanguageQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo)
     }
 }
 
-CodeHandler *LanguageQmlHandler::documentHandler() const{
+CodeHandler *LanguageQmlHandler::code() const{
     return qobject_cast<CodeHandler*>(parent());
 }
 

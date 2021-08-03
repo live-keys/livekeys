@@ -161,7 +161,7 @@ CodePalette{
         if (!editFragment)
             return
 
-        editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
+        editor = editFragment.codeHandler.code.textEdit().getEditor()
 
         objectGraph.editFragment = editFragment
         nodeItem.init()

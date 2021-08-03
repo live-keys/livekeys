@@ -152,13 +152,13 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
-        uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.documentHandler.codeQmlHandler.");
+        uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.code.language.");
     qmlRegisterUncreatableType<lv::LanguageQmlHandler>(
-        uri, 1, 0, "LanguageQmlHandler", "LanguageQmlHandler can only be accessed through the Editor.documentHandler");
+        uri, 1, 0, "LanguageQmlHandler", "LanguageQmlHandler can only be accessed through the Editor.code");
     qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(
-        uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.documentHandler.codeHandler.editContainer");
+        uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.code.language.editContainer");
     qmlRegisterUncreatableType<lv::DocumentQmlChannels>(
-        uri, 1, 0, "DocumentQmlChannels", "DocumentQmlChannels can only be accessed through the Editor.documentHandler.codeHandler.bindingChannels");
+        uri, 1, 0, "DocumentQmlChannels", "DocumentQmlChannels can only be accessed through the Editor.code.language.bindingChannels");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(

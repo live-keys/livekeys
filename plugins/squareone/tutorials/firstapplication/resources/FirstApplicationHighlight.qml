@@ -100,7 +100,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
             var editFragments = codeHandler.editFragments()
 
             for ( var i = 0; i < editFragments.length; ++i ){
@@ -123,7 +123,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 
@@ -148,7 +148,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 
@@ -172,7 +172,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 
@@ -196,7 +196,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 
@@ -271,7 +271,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 
@@ -318,7 +318,7 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
             var editFragments = codeHandler.editFragments()
 

@@ -11,7 +11,7 @@ WorkspaceControl{
             return
 
         var editor = editorPane.editor
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         var editFragments = codeHandler.editFragments()
 

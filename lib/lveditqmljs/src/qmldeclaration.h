@@ -34,7 +34,7 @@ public:
     typedef QSharedPointer<const QmlDeclaration> ConstPtr;
 
     friend class ProjectDocument;
-    friend class DocumentHandler;
+    friend class CodeHandler;
 
     /** ProjectDocument section type. */
     enum SectionType{

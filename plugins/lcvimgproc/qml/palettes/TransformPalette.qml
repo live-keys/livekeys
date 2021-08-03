@@ -143,7 +143,7 @@ CodePalette{
                         } else {
                             if (!crop)
                                 return
-                            var codeHandler = crop.visualParent.documentHandler.codeHandler
+                            var codeHandler = crop.visualParent.code.language
                             fragment = paletteControls.addPropertyByFragment(crop, "region")
                         }
                         var toWrite = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
@@ -205,7 +205,7 @@ CodePalette{
                         } else {
                             if (!resize)
                                 return
-                            var codeHandler = resize.visualParent.documentHandler.codeHandler
+                            var codeHandler = resize.visualParent.code.language
                             fragment = paletteControls.addPropertyByFragment(resize, "size")
                         }
                         var toWrite = '"' + Math.round(width) + "x" + Math.round(height) + '"'
@@ -253,7 +253,7 @@ CodePalette{
                         } else {
                             if (!rotate)
                                 return
-                            var codeHandler = rotate.visualParent.documentHandler.codeHandler
+                            var codeHandler = rotate.visualParent.code.language
                             fragment = paletteControls.addPropertyByFragment(rotate, "degrees")
                         }
                         fragment.write(-angle)
@@ -298,7 +298,7 @@ CodePalette{
                         } else {
                             if (!perspective)
                                 return
-                            var codeHandler = perspective.visualParent.documentHandler.codeHandler
+                            var codeHandler = perspective.visualParent.code.language
                             fragment = paletteControls.addPropertyByFragment(perspective, "points")
                         }
                         var value = '['

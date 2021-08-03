@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QQmlParserStatus>
 
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/project.h"
 #include "live/viewengine.h"
 #include "projectlvmonitor.h"

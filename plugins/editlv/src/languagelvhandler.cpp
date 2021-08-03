@@ -1,7 +1,7 @@
 #include "languagelvhandler.h"
 #include "languagelvhighlighter.h"
 
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/projectdocument.h"
 
 #include "languagelvextension.h"
@@ -24,7 +24,7 @@ LanguageLvHandler::LanguageLvHandler(
         EditLvSettings *settings,
         LanguageLvExtension *languageExtension,
         ProjectDocument *document,
-        DocumentHandler *handler)
+        CodeHandler *handler)
     : QObject(handler)
     , d_ptr(new LanguageLvHandlerPrivate)
     , m_settings(settings)
@@ -44,8 +44,8 @@ LanguageLvHandler::LanguageLvHandler(
 
     connect(&m_scopeTimer, &QTimer::timeout, this, &LanguageLvHandler::__updateScope);
 
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
-    connect(dh, &DocumentHandler::aboutToDeleteHandler, this, &LanguageLvHandler::__aboutToDelete);
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
+    connect(dh, &CodeHandler::aboutToDeleteHandler, this, &LanguageLvHandler::__aboutToDelete);
 
     d->languageExtension->addLanguageHandler(this);
 
@@ -237,13 +237,13 @@ QList<int> LanguageLvHandler::languageFeatures() const{
     return {
 //        DocumentHandler::LanguageHelp,
 //        DocumentHandler::LanguageScope,
-        DocumentHandler::LanguageHighlighting,
-        DocumentHandler::LanguageCodeCompletion
+        CodeHandler::LanguageHighlighting,
+        CodeHandler::LanguageCodeCompletion
     };
 }
 
 void LanguageLvHandler::suggestCompletion(int cursorPosition){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( !m_document || !dh )
         return;
 
@@ -271,7 +271,7 @@ void LanguageLvHandler::__documentFormatUpdate(int /*position*/, int /*length*/)
 }
 
 void LanguageLvHandler::__cursorWritePositionChanged(QTextCursor cursor){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh && dh->editorFocus() && cursor.position() == dh->currentCursorPosition() &&
          !m_document->editingStateIs(ProjectDocument::Assisted) &&
          !m_document->editingStateIs(ProjectDocument::Silent)

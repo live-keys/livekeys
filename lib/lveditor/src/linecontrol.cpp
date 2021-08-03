@@ -41,10 +41,10 @@ int LineControl::addCollapse(int pos, int num)
     LineSection ls(pos, num + 1, 1, LineSection::Collapsed);
 
     if (m_textEdit &&
-        m_textEdit->documentHandler() &&
-        m_textEdit->documentHandler()->textDocument()){
+        m_textEdit->code() &&
+        m_textEdit->code()->textDocument()){
 
-        auto doc = m_textEdit->documentHandler()->textDocument();
+        auto doc = m_textEdit->code()->textDocument();
 
         ls.startPos = doc->findBlockByNumber(pos).position();
         ls.endPos = doc->findBlockByNumber(pos + num).position() + doc->findBlockByNumber(pos + num).length() - 1;
@@ -280,7 +280,7 @@ int LineControl::visibleToAbsolute(int visible)
         else abs = -1; // not mapping to an absolute line
     }
 
-    if (abs >= m_textEdit->documentHandler()->textDocument()->blockCount()) return -1;
+    if (abs >= m_textEdit->code()->textDocument()->blockCount()) return -1;
     return abs;
 }
 
@@ -368,7 +368,7 @@ void LineControl::setDirtyPos(int dirtyPos)
 void LineControl::lineNumberChange()
 {
     m_prevLineNumber = m_lineNumber;
-    m_lineNumber = m_textEdit->documentHandler()->textDocument()->blockCount();
+    m_lineNumber = m_textEdit->code()->textDocument()->blockCount();
     if (m_prevLineNumber == m_lineNumber) return;
 
     int delta = m_lineNumber - m_prevLineNumber;
@@ -639,7 +639,7 @@ void LineControl::handlePositiveShifting(int pos, int added)
 
         if (lsp->type == LineSection::Fragment && lsp->position != 0) // handles end fragment bounds
         {
-            lsp->endPos = m_textEdit->documentHandler()->textDocument()->characterCount() -1;
+            lsp->endPos = m_textEdit->code()->textDocument()->characterCount() -1;
         }
     }
 }
@@ -704,7 +704,7 @@ int LineControl::firstContentLine()
 
 int LineControl::lastContentLine()
 {
-    int blockCount = m_textEdit->documentHandler()->textDocument()->blockCount();
+    int blockCount = m_textEdit->code()->textDocument()->blockCount();
     if (m_sections.empty()) return blockCount;
     auto last = m_sections[m_sections.size()-1];
     if (last.type == LineSection::Fragment && last.position + last.range == blockCount)

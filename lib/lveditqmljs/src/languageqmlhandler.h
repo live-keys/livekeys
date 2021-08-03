@@ -57,7 +57,7 @@ class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(LanguageQmlHandler)
-    Q_PROPERTY(lv::CodeHandler* documentHandler        READ documentHandler CONSTANT)
+    Q_PROPERTY(lv::CodeHandler* code        READ code CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
     Q_PROPERTY(bool importsShaped                          READ importsShaped   WRITE setImportsShaped NOTIFY importsShapedChanged)
@@ -123,7 +123,7 @@ public:
 
     QmlEditFragmentContainer *editContainer();
     DocumentQmlChannels* bindingChannels() const;
-    CodeHandler* documentHandler() const;
+    CodeHandler* code() const;
 
 
     bool rootShaped() const;
@@ -330,7 +330,6 @@ private:
     QScopedPointer<LanguageQmlHandlerPrivate> d_ptr;
 
     Q_DECLARE_PRIVATE(LanguageQmlHandler)
-    lv::CodeHandler* m_documentHandler;
 };
 
 inline ProjectDocument *LanguageQmlHandler::document() const{
