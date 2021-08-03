@@ -150,7 +150,8 @@ inline QmlBindingChannel::Type QmlBindingChannel::type() const{
         return QmlBindingChannel::Method;
     } else if ( m_property.object() ){
         return QmlBindingChannel::Property;
-    }
+    } else if (m_type == QmlBindingChannel::Imports)
+        return m_type;
     return QmlBindingChannel::Object;
 }
 
