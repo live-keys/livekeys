@@ -2,7 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 2.1
 import editor 1.0
 import editor.private 1.0
-import editqml 1.0
+import editqml 1.0 as EditQml
 
 import workspace.quickqanava 2.0 as Qan
 import visual.input 1.0 as Input
@@ -17,16 +17,17 @@ Qan.NodeItem{
 
     objectName: "objectNode"
     property string label: ''
-    property var properties: []
+
+    property var members: []
+
     property var propertiesOpened: []
     property var outPort: null
-    property alias propertyContainer: objectNodePropertyList
-    property alias paletteContainer: paletteContainer
+    property alias propertyContainer: nodeMemberContainer
+    property alias paletteListContainer: paletteContainer
 
     property var nodeParent: null
     property var editingFragment: null
     property var removeNode: null
-    property var addSubobject: null
     property string id: ""
     property var editor: null
     property var objectGraph: null
@@ -39,21 +40,94 @@ Qan.NodeItem{
             max = paletteContainer.width + 10
         }
 
-        for (var i = 0; i < objectNodePropertyList.children.length; ++i){
-            if (objectNodePropertyList.children[i].contentWidth > max){
-                max = objectNodePropertyList.children[i].contentWidth
+        for (var i = 0; i < nodeMemberContainer.children.length; ++i){
+            if (nodeMemberContainer.children[i].contentWidth > max){
+                max = nodeMemberContainer.children[i].contentWidth
             }
         }
 
 
         if (max !== root.width){
             root.width = max
-            for (var i = 0; i < objectNodePropertyList.children.length; ++i){
-                objectNodePropertyList.children[i].width = max - objectNodePropertyList.children[i].anchors.leftMargin
+            for (var i = 0; i < nodeMemberContainer.children.length; ++i){
+                nodeMemberContainer.children[i].width = max - nodeMemberContainer.children[i].anchors.leftMargin
             }
         }
     }
 
+    function paletteByName(name){
+        var pg = paletteGroup()
+        for ( var i = 0; i < pg.children.length; ++i ){
+            if ( pg.children[i].name === name )
+                return pg.children[i]
+        }
+        return null
+    }
+
+    function paletteGroup(){
+        return paletteContainer
+    }
+
+    function getPane(){
+        var pane = root.parent
+        while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
+            pane = pane.parent
+        }
+        return pane
+    }
+
+    function propertyByName(name){
+        for (var i = 0; i < nodeMemberContainer.children.length; ++i){
+            var child = nodeMemberContainer.children[i]
+            if ( !child.isAnObject && child.propertyName === name )
+                return child
+        }
+        return null
+    }
+
+    function addProperty(ef){
+        var name = ef.identifier()
+
+        var propMember = propertyByName(name)
+        if ( propMember )
+            return propMember
+
+        propertiesOpened.push(name)
+
+        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
+
+        //TODO: Rename  objectNodeProperty and propertyContainer
+        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
+        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
+        nodeMember.__initialize(nodeParent, nodeStyle, ef)
+
+        if ( (ef.isWritable || ef.location === EditQml.QmlEditFragment.Slot) ){
+            nodeMember.addInPort()
+        }
+        if (nodeParent.item.id !== "" && (ef.isWritable || ef.location === EditQml.QmlEditFragment.Slot) ){
+            nodeMember.addOutPort()
+        }
+
+        root.members.push(nodeMember)
+
+        return nodeMember
+    }
+
+    function addChildObject(ef){
+        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
+
+        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
+        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
+        nodeMember.__initialize(nodeParent, nodeStyle, ef)
+
+        if ( ef.objectId() )
+            nodeMember.addOutPort()
+    }
+
+    function sortChildren(){}
+    function expand(){}
+
+    property bool supportsFunctions: true
     resizable: false
 
     function expandDefaultPalette(){
@@ -88,30 +162,25 @@ Qan.NodeItem{
                 {
                     ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
                 } else {
-                    var ppos = codeHandler.addProperty(
+                    var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
+                    var ppos = codeHandler.addPropertyToCode(
                         root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
-                        root.editingFragment.typeName(),
-                        propType,
                         propName,
-                        true
+                        defaultValue
                     )
-                    ef = codeHandler.openNestedConnection(
-                        root.editingFragment, ppos
-                    )
+                    ef = codeHandler.openNestedConnection(root.editingFragment, ppos)
                 }
-
-
 
                 if (ef) {
                     root.editingFragment.signalPropertyAdded(ef, false)
                     if (propPalette.length === 0) continue
-                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
-                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
-                        if (objectNodePropertyList.children[j].paletteContainer.palettesOpened.indexOf(propPalette) !== -1) break
+//                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
+//                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
+//                        if (objectNodePropertyList.children[j].paletteListContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
-                        paletteControls.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
-                        break
-                    }
+//                        paletteControls.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
+//                        break
+//                    }
                 } else {
                     lk.layers.workspace.messages.pushError("ObjectNode: Can't open declared palette for property " + propName, 1)
                 }
@@ -120,7 +189,7 @@ Qan.NodeItem{
         }
     }
 
-    function removePropertyName(name){
+    function removeMemberByName(name){
         propertiesOpened = propertiesOpened.filter(function(value, index, arr){
             return value !== name
         })
@@ -169,23 +238,12 @@ Qan.NodeItem{
         objectGraph.checkFocus()
     }
 
-    property QtObject defaultStyle : QtObject{
-        property color background: "#112"
-        property double radius: 15
-        property color borderColor: "#555"
-        property double borderWidth: 1
-
-        property color titleBackground: "#666"
-        property double titleRadius: 5
-        property QtObject titleTextStyle : Input.TextStyle{}
-    }
-
-    property QtObject nodeStyle : defaultStyle
+    property QtObject nodeStyle : ObjectNodeStyle{}
 
     Rectangle{
         id: wrapper
         width: parent.width
-        height: nodeTitle.height + paletteContainer.height + objectNodePropertyList.height + 40
+        height: nodeTitle.height + paletteContainer.height + nodeMemberContainer.height + 40
         color: root.nodeStyle.background
         radius: root.nodeStyle.radius
         border.color: root.nodeStyle.borderColor
@@ -241,7 +299,10 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.compose(root)
+                        paletteControls.userAddToObjectContainer(root, {
+                            onCancelled: function(){ root.objectGraph.activateFocus() },
+                            onAccepted: function(){ root.objectGraph.activateFocus() }
+                        })
                     }
                 }
             }
@@ -276,9 +337,17 @@ Qan.NodeItem{
                 }
             }
         }
+
+        EditQml.PaletteGroup{
+            id: paletteContainer
+            anchors.top: parent.top
+            anchors.topMargin: nodeTitle.height
+            onChildrenChanged: resizeNode()
+            editingFragment: root.editingFragment
+        }
         
         Column{
-            id: objectNodePropertyList
+            id: nodeMemberContainer
             spacing: 10
             anchors.top: parent.top
             anchors.topMargin: 50 + paletteContainer.height
@@ -286,13 +355,6 @@ Qan.NodeItem{
             anchors.leftMargin: 5
         }
 
-        PaletteGroup {
-            anchors.top: parent.top
-            anchors.topMargin: nodeTitle.height
-            id: paletteContainer
-            onChildrenChanged: resizeNode()
-            editingFragment: root.editingFragment
-        }
     }
 
     Connections {
@@ -303,29 +365,11 @@ Qan.NodeItem{
             if (removeNode)
                 removeNode(nodeParent)
         }
-        function onObjectAdded(obj){
-            if (!addSubobject) return
-
-            editingFragment.codeHandler.populateObjectInfoForFragment(obj)
-
-            var object = obj.objectInfo()
-            addSubobject(nodeParent, object.name + (object.id ? ("#" + object.id) : ""), object.id ? ObjectGraph.PortMode.OutPort: ObjectGraph.PortMode.None, object.connection)
+        function onObjectAdded(ef){
+            root.addChildObject(ef)
         }
         function onPropertyAdded(ef, expandDefault){
-            editingFragment.codeHandler.populatePropertyInfoForFragment(ef)
-
-            var prop = ef.objectInfo()
-            var name = ef.identifier()
-            for (var i=0; i < propertiesOpened.length; ++i){
-                if (!propertiesOpened[i].toString().localeCompare(name)) return
-            }
-            propertiesOpened.push(name)
-            var portState = ObjectGraph.PortMode.OutPort
-
-            if (prop.isWritable || ef.location === QmlEditFragment.Slot) {
-                portState = portState | ObjectGraph.PortMode.InPort
-            }
-            addSubobject(nodeParent, name, portState, prop.connection)
+            root.addProperty(ef)
         }
 
     }

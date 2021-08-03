@@ -6,7 +6,9 @@ WorkspaceExtension{
     id: root
     objectName: "workspace"
 
-    property ObjectGraphControls objectGraphControls: ObjectGraphControls{}
+    globals: QtObject{
+        property ObjectGraphControls objectGraphControls: ObjectGraphControls{}
+    }
 
     function addEditorPane(){
         var pane = lk.layers.workspace.panes.createPane('editor')
@@ -39,8 +41,8 @@ WorkspaceExtension{
         'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
         'addEditor' : [root.addEditorPane, "Add editor pane"],
         'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
-        "node_delete_active": [objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
-        "nodeEditMode" : [objectGraphControls.nodeEditMode, "Switch to node editing mode."]
+        "node_delete_active": [globals.objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
+        "nodeEditMode" : [globals.objectGraphControls.nodeEditMode, "Switch to node editing mode."]
     }
 
     // quick node editing

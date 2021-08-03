@@ -89,7 +89,8 @@ WorkspaceExtension{
         if ( !activePane )
             return
 
-        globals.paletteControls.edit(activePane)
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteControls.openEditPaletteAtPosition(activePane, userPosition)
     }
 
     function palette(){
@@ -116,6 +117,29 @@ WorkspaceExtension{
             return
 
         globals.shapeAll(activePane)
+    }
+
+    function bind(){
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
+
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteControls.userBind(activePane, userPosition)
+    }
+
+    function unbind(){
+        var activePane = lk.layers.workspace.panes.activePane
+        if ( !activePane )
+            return
+
+        var editor = activePane
+        var codeHandler = editor.documentHandler.codeHandler
+
+        codeHandler.closeBinding(
+            editor.textEdit.selectionStart,
+            editor.textEdit.selectionEnd - editor.textEdit.selectionStart
+        )
     }
 
     function addProperty(){
@@ -167,7 +191,7 @@ WorkspaceExtension{
                         )
                     } else if ( selection.category === 'object' ){
                         if (forRoot){
-                            var position = activePane.documentHandler.codeHandler.insertRootItem(selection.name)
+                            var position = activePane.documentHandler.codeHandler.addRootObjectToCode(selection.name)
                             if (position === -1){
                                 lk.layers.workspace.messages.pushError("Error: Can't create object with name " + selection.name, 1)
                             } else {
@@ -198,39 +222,11 @@ WorkspaceExtension{
 
     }
 
-    function bind(){
-        var activePane = lk.layers.workspace.panes.activePane
-
-        if ( activePane.objectName === 'editor' &&
-             activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            globals.paletteControls.bind(activePane)
-        }
-    }
-
-    function unbind(){
-        var activePane = lk.layers.workspace.panes.activePane
-
-        if ( activePane.objectName === 'editor' &&
-             activePane.document &&
-             canBeQml(activePane.document) )
-        {
-            var editor = activePane
-            var codeHandler = editor.documentHandler.codeHandler
-
-            codeHandler.closeBinding(
-                editor.textEdit.selectionStart,
-                editor.textEdit.selectionEnd - editor.textEdit.selectionStart
-            )
-        }
-    }
-
     function objectContainerAdd(){
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.compose(activeItem)
+            lk.layers.workspace.extensions.editqml.paletteControls.userAddToObjectContainer(activeItem)
         }
     }
 

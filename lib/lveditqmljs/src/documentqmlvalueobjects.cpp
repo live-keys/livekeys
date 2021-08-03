@@ -476,6 +476,29 @@ DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::objectAtPosition(
     return nullptr;
 }
 
+DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::objectThatWrapsPosition(int position, DocumentQmlValueObjects::RangeObject *root){
+    if ( root == nullptr )
+        root = m_root;
+
+    if ( root->begin == position )
+        return root;
+
+    DocumentQmlValueObjects::RangeObject* base = nullptr;
+    if ( root->begin <= position && root->end >= position ){
+        base = root;
+
+        for ( int i = 0; i < root->children.size(); ++i ){
+            if ( root->children[i]->begin <= position && root->children[i]->end >= position ){
+                DocumentQmlValueObjects::RangeObject* ro = objectThatWrapsPosition(position, root->children[i]);
+                if (ro)
+                    return ro;
+            }
+        }
+    }
+
+    return base;
+}
+
 QString DocumentQmlValueObjects::toStringRecursive(
         DocumentQmlValueObjects::RangeObject *object,
         int indent) const

@@ -19,26 +19,30 @@ CodePalette{
     property QtObject theme: lk.layers.workspace.themes.current
 
     function addObject(object, cursorCoords){
-        var n
+        var objectName = object.typeName()
+        var objectId = object.objectId()
+
+        var n = null
         if (cursorCoords){
-            n = objectGraph.addObjectNode(cursorCoords.x, cursorCoords.y, (object.name + (object.id ? ("#" + object.id) : "")))
+            n = objectGraph.addObjectNode(
+                    cursorCoords.x,
+                    cursorCoords.y,
+                    (objectName + (objectId ? ("#" + objectId) : ""))
+                )
+        } else {
+            n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (objectName + (objectId ? ("#" + objectId) : "")))
         }
-        else
-            n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (object.name + (object.id ? ("#" + object.id) : "")))
 
         ++numOfObjects
 
-        if (object.id)
-        {
-           objectsWithId[object.id] = n
+        if (objectId){
+           objectsWithId[objectId] = n
         }
 
         allObjects.push(n)
 
-        if (object.connection){
-            n.item.editingFragment = object.connection
-            object.connection.incrementRefCount()
-        }
+        n.item.editingFragment = object
+        object.incrementRefCount()
 
         n.item.expandDefaultPalette()
         return n
@@ -57,46 +61,40 @@ CodePalette{
         }
 
         function init(){
-            var objectList = editFragment.nestedObjectsInfo()
+
             var props = []
-            for (var i = 0; i < objectList.length; ++i)
-            {
-                var object = objectList[i]
-                var n = addObject(object)
 
-                for (var j = 0; j < object.properties.length; ++j){
-                    var property = object.properties[j]
+            var codeHandler = editFragment.codeHandler
+            var childFragmentList = codeHandler.openNestedFragments(editFragment)
+            for ( var i = 0; i < childFragmentList.length; ++i ){
+                var childFragment = childFragmentList[i]
+                if ( childFragment.location !== QmlEditFragment.Object )
+                    continue;
 
-                    var p = null
-                    if (n.item.propertiesOpened.indexOf(property.name) === -1){
-                        p = objectGraph.addObjectNodeProperty(n, property.name, ObjectGraph.PortMode.OutPort | (property.isWritable ? ObjectGraph.PortMode.InPort : 0), property.connection)
-                        n.item.propertiesOpened.push(property.name)
-                        p.z = 1000 - j
+                var n = addObject(childFragment)
+
+                var currentChildNestedFragments = codeHandler.openNestedFragments(childFragment)
+
+                for (var j = 0; j < currentChildNestedFragments.length; ++j ){
+                    var current = currentChildNestedFragments[j]
+                    if ( current.location === QmlEditFragment.Object ){
+                        n.item.addChildObject(current)
                     } else {
-                        var children = n.item.propertyContainer.children
-                        for (var idx = 0; idx < children.length; ++idx)
-                            if (children[idx].propertyName === property.name){
-                                p = children[idx]
-                                break
+                        var p = n.item.addProperty(current)
+                        p.z = 1000 - j
+
+                        var currentConnection = current.readValueConnection()
+                        if ( currentConnection ){
+                            //TODO: Do for length === 1 (local properties && direct object references && functions)
+                            if ( currentConnection.expression.length === 2 ){
+                                if (p.inPort)
+                                    props.push({"port": p.inPort, "value": currentConnection.expression})
+                                else
+                                    props.push({"value": object.properties[j].value})
                             }
-                    }
-
-                    if (property.value.length === 2)
-                    {
-                        if (p.inPort)
-                            props.push({"port": p.inPort, "value": property.value})
-                        else
-                            props.push({"value": property.value})
+                        }
                     }
                 }
-
-
-                for (var so = 0; so < object.subobjects.length; ++so)
-                {
-                    var subobject = object.subobjects[so]
-                    objectGraph.addObjectNodeProperty(n, subobject.name + (subobject.id ? ("#" + subobject.id) : ""), subobject.id ? ObjectGraph.PortMode.OutPort : ObjectGraph.PortMode.None, subobject.connection)
-                }
-
             }
 
             for (var k = 0; k < props.length; ++k){
@@ -105,18 +103,10 @@ CodePalette{
                 if (node)
                 {
                     var nodeProps = node.item.properties
-                    for (var pp = 0; pp < nodeProps.length; ++pp)
-                    {
-                        var propp = node.item.properties[pp]
-                        var found = false
-                        if (propp.propertyName === props[k].value[1]){
-                            objectGraph.bindPorts(propp.outPort, props[k].port)
-                            found = true
-                            break
-                        }
-
-                    }
-                    if (!found){
+                    var propp = node.item.propertyByName(props[k].value[1])
+                    if ( propp ){
+                        objectGraph.bindPorts(propp.outPort, props[k].port)
+                    } else {
                         node.item.addPropertyToNodeByName(props[k].value[1])
                         for (var ppx = 0; ppx < nodeProps.length; ++ppx)
                         {
@@ -168,9 +158,11 @@ CodePalette{
 
 
     onInit: {
-        if (!editFragment) return
+        if (!editFragment)
+            return
+
         editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
-        editFragment.codeHandler.populateNestedObjectsForFragment(editFragment)
+
         objectGraph.editingFragment = editFragment
         nodeItem.init()
         editFragment.objectAdded.connect(function(obj, cursorCoords){

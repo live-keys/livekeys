@@ -72,7 +72,7 @@ Column{
     onWidthChanged: {
         // objectNodeProperty palette
         var p = parent
-        while (p && p.objectName !== "objectNodeProperty")
+        while (p && p.objectName !== "objectNodeMember")
             p = p.parent
 
         if (p){
@@ -106,6 +106,8 @@ Column{
             return
 
         var objectContainer = p
+
+        //TODO: Emit signal
         objectContainer.recalculateContentWidth()
     }
 

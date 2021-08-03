@@ -82,7 +82,8 @@ QmlDeclaration::QmlDeclaration(
         const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument *document)
+        ProjectDocument *document,
+        bool isWritable)
     : m_section(ProjectDocumentSection::create(QmlDeclaration::Section, identifierPosition, identifierLength))
     , m_identifierLength(identifierLength)
     , m_identifierChain(identifierChain)
@@ -90,6 +91,7 @@ QmlDeclaration::QmlDeclaration(
     , m_parentType(parentType)
     , m_valueObjectScopeOffset(-1)
     , m_valueOffset(-1)
+    , m_isWritable(isWritable)
     , m_document(document)
 {
 }
@@ -122,13 +124,13 @@ QmlDeclaration::Ptr QmlDeclaration::create(
  * Receives \p identifierChain, \p identifierType, \p parentType, \p identifierPosition, a
  * \p identifierLength and a \p document
  */
-QmlDeclaration::Ptr QmlDeclaration::create(
-        const QStringList &identifierChain,
+QmlDeclaration::Ptr QmlDeclaration::create(const QStringList &identifierChain,
         const QmlTypeReference &type,
         const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument *document)
+        ProjectDocument *document,
+        bool isWritable)
 {
     return QmlDeclaration::Ptr(new QmlDeclaration(
         identifierChain,
@@ -136,7 +138,8 @@ QmlDeclaration::Ptr QmlDeclaration::create(
         parentType,
         identifierPosition,
         identifierLength,
-        document
+        document,
+        isWritable
     ));
 }
 
@@ -174,8 +177,7 @@ bool QmlDeclaration::isForSlot() const{
     return m_type.language() == QmlTypeReference::Qml && m_type.name() == "slot";
 }
 
-bool QmlDeclaration::isForImports() const
-{
+bool QmlDeclaration::isForImports() const{
     return m_type.language() == QmlTypeReference::Qml && m_type.name() == "import";
 }
 

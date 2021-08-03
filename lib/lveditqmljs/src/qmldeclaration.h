@@ -58,7 +58,8 @@ public:
         const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument* document = nullptr
+        ProjectDocument* document = nullptr,
+        bool isWritable = false
     );
 
     ~QmlDeclaration();
@@ -96,6 +97,8 @@ public:
     bool isForSlot() const;
     bool isForImports() const;
 
+    bool isWritable() const;
+
 private:
     QmlDeclaration(
         const QStringList& identifierChain,
@@ -106,14 +109,13 @@ private:
         const QmlTypeReference& parentType,
         ProjectDocument* document = nullptr
     );
-    QmlDeclaration(
-        const QStringList &identifierChain,
+    QmlDeclaration(const QStringList &identifierChain,
         const QmlTypeReference &type,
         const QmlTypeReference &parentType,
         int identifierPosition,
         int identifierLength,
-        ProjectDocument* document = nullptr
-    );
+        ProjectDocument* document = nullptr,
+        bool isWritable = false);
 
 private:
     Q_DISABLE_COPY(QmlDeclaration)
@@ -127,6 +129,8 @@ private:
 
     int             m_valueObjectScopeOffset;
     int             m_valueOffset;
+
+    bool            m_isWritable;
 
     ProjectDocument* m_document;
 };
@@ -203,6 +207,10 @@ inline void QmlDeclaration::setValueLength(int valueLength){
 /// \brief Checks wether this is a list-child declaration instead of a property-based one
 inline bool QmlDeclaration::isForList() const{
     return m_parentType.isEmpty();
+}
+
+inline bool QmlDeclaration::isWritable() const{
+    return m_isWritable;
 }
 
 /// \brief Returns the current lv::ProjectDocument section.

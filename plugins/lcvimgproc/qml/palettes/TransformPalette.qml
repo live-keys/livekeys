@@ -68,7 +68,7 @@ CodePalette{
             var position =
                 p.editingFragment.valuePosition() +
                 p.editingFragment.valueLength() - 1
-            paletteControls.addItemToRuntimeWithNotification(container, position, "TransformImage", name, false)
+            paletteControls.addObjectToObjectContainer(container, position, "TransformImage", name, false)
 
             var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]
@@ -81,7 +81,11 @@ CodePalette{
             }
             var position = ef.valuePosition() + ef.valueLength() - 1
 
-            var childEf = paletteControls.addItemToRuntime(ef, position, "TransformImage", name)
+            var codeHandler = ef.codeHandler
+            var opos = codeHandler.addObjectToCode(position, name)
+            codeHandler.addItemToRuntime(ef, name)
+            var childEf = codeHandler.openNestedConnection(ef, opos)
+
             childEf.visualParent = p
             return childEf
         }
