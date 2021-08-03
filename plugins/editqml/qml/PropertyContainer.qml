@@ -11,7 +11,7 @@ Item{
         propertyContainer.title = ef.identifier()
         propertyContainer.editor = editor
         propertyContainer.documentHandler = editor.documentHandler
-        propertyContainer.editingFragment = ef
+        propertyContainer.editFragment = ef
 
         var codeHandler = ef.codeHandler
         var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
@@ -64,7 +64,7 @@ Item{
 
 //    property Item paletteGroup : null
     property alias paletteListContainer: container
-    property QtObject editingFragment : null
+    property QtObject editFragment : null
 
     property QtObject documentHandler : null
     property Item editor: null
@@ -80,8 +80,8 @@ Item{
     property Component methodIcon: Icons.MenuIcon{}
     property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.middlegroundOverlayDominantBorder; width: 15; height: 15 }
 
-    property Connections editingFragmentRemovals: Connections{
-        target: editingFragment
+    property Connections editFragmentRemovals: Connections{
+        target: editFragment
         function onAboutToBeRemoved(){
             if (!isAnObject)
                 propertyContainer.destroy()
@@ -120,11 +120,11 @@ Item{
             anchors.right: parent.right
             anchors.rightMargin: 20
             sourceComponent: {
-                if ( !propertyContainer.editingFragment )
+                if ( !propertyContainer.editFragment )
                     return null
-                return propertyContainer.editingFragment.location === EditQml.QmlEditFragment.Slot
+                return propertyContainer.editFragment.location === EditQml.QmlEditFragment.Slot
                     ? propertyContainer.eventIcon
-                    : propertyContainer.editingFragment.isMethod() ? propertyContainer.methodIcon : null
+                    : propertyContainer.editFragment.isMethod() ? propertyContainer.methodIcon : null
             }
         }
 
@@ -199,15 +199,15 @@ Item{
                 onClicked: {
                     var objectContainer = propertyContainer.parent.parent.parent
 
-                    propertyContainer.editingFragment.decrementRefCount()
-                    if (propertyContainer.editingFragment.refCount === 0)
-                        objectContainer.editingFragment.removeChildFragment(propertyContainer.editingFragment)
+                    propertyContainer.editFragment.decrementRefCount()
+                    if (propertyContainer.editFragment.refCount === 0)
+                        objectContainer.editFragment.removeChildFragment(propertyContainer.editFragment)
 
                     // remove name from objectContainer
                     objectContainer.propertiesOpened =
                             objectContainer.propertiesOpened.filter(
                                 function(value, index, arr){
-                                    return value !== propertyContainer.editingFragment.identifier()
+                                    return value !== propertyContainer.editFragment.identifier()
                                 }
                             )
                     propertyContainer.destroy()

@@ -204,7 +204,7 @@ QtObject{
         }
 
         function openPaletteListForNode(container, paletteGroup, parent){
-            var palettes = container.editingFragment.codeHandler.findPalettesFromFragment(editingFragment)
+            var palettes = container.editFragment.codeHandler.findPalettesFromFragment(editFragment)
             palettes.data = filterOutPalettes(palettes.data, paletteGroup.palettesOpened, true)
             if (!palettes.data || palettes.data.length === 0) return null
 
@@ -215,7 +215,7 @@ QtObject{
                     container.objectGraph.activateFocus()
                 },
                 onSelected: function(index){
-                    var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                    var palette = container.editor.documentHandler.codeHandler.expand(container.editFragment, {
                         "palettes" : [palettes.data[index].name]
                     })
 
@@ -245,7 +245,7 @@ QtObject{
         }
 
         function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
-            var palettes = container.editingFragment.codeHandler.findPalettesFromFragment(container.editingFragment)
+            var palettes = container.editFragment.codeHandler.findPalettesFromFragment(container.editFragment)
             palettes.data = filterOutPalettes(
                 palettes.data,
                 paletteGroup.palettesOpened,
@@ -276,7 +276,7 @@ QtObject{
             }
 
             var selectedHandler = function(index, paletteListBox){
-                var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                var palette = container.editor.documentHandler.codeHandler.expand(container.editFragment, {
                     "palettes" : [palettes.data[index].name]
                 })
 
@@ -572,7 +572,7 @@ QtObject{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = __private.createEditorObjectContainerBoxForFragment(ef, editor.textEdit)
-                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition()){
+                if (objectContainer.editFragment.position() === codeHandler.findRootPosition()){
                     objectContainer.contentWidth = Qt.binding(function(){
                         return objectContainer.containerContentWidth > objectContainer.editorContentWidth
                                 ? objectContainer.containerContentWidth
@@ -716,7 +716,7 @@ QtObject{
         if ( paletteItem )
             return paletteItem
 
-        var ef = propertyContainer.editingFragment
+        var ef = propertyContainer.editFragment
         if ( !ef )
             return
         var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
@@ -735,7 +735,7 @@ QtObject{
     }
 
     function openPaletteInObjectContainer(objectContainer, paletteName){
-        var ef = objectContainer.editingFragment
+        var ef = objectContainer.editFragment
         var paletteBoxParent = objectContainer.paletteListContainer.children[0]
         var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
         var ch = ef.codeHandler
@@ -763,7 +763,7 @@ QtObject{
 
     function addPropertyToObjectContainer(objectContainer, position, name, type, readOnly){
         //name = selection.name
-        var codeHandler = objectContainer.editingFragment.codeHandler
+        var codeHandler = objectContainer.editFragment.codeHandler
 
         // check if property is opened already
         for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
@@ -774,7 +774,7 @@ QtObject{
         }
         objectContainer.expand()
 
-        var propsWritable = codeHandler.propertiesWritable(objectContainer.editingFragment)
+        var propsWritable = codeHandler.propertiesWritable(objectContainer.editFragment)
 
         var ef = null
 
@@ -785,14 +785,14 @@ QtObject{
 
         if (isWritable){
             var defaultValue = EditQml.MetaInfo.defaultTypeValue(type)
-            var groupParentFragment = objectContainer.editingFragment.isGroup() ? objectContainer.editingFragment : null
+            var groupParentFragment = objectContainer.editFragment.isGroup() ? objectContainer.editFragment : null
             var ppos = codeHandler.addPropertyToCode( position, name, defaultValue, groupParentFragment)
-            ef = codeHandler.openNestedConnection(objectContainer.editingFragment, ppos)
+            ef = codeHandler.openNestedConnection(objectContainer.editFragment, ppos)
 
-            if (objectContainer.editingFragment.isGroup())
+            if (objectContainer.editFragment.isGroup())
                 ef.addFragmentType(EditQml.QmlEditFragment.GroupChild)
         } else {
-            ef = codeHandler.createReadOnlyPropertyFragment(objectContainer.editingFragment, name)
+            ef = codeHandler.createReadOnlyPropertyFragment(objectContainer.editFragment, name)
         }
 
         if (!ef) {
@@ -800,7 +800,7 @@ QtObject{
             return
         }
 
-        objectContainer.editingFragment.signalPropertyAdded(ef)
+        objectContainer.editFragment.signalPropertyAdded(ef)
 
         var paletteList = ef.paletteList()
         for ( var i = 0; i < paletteList.length; ++i ){
@@ -821,23 +821,23 @@ QtObject{
         }
 
         var ppos = codeHandler.addEventToCode(position, name)
-        var ef = codeHandler.openNestedConnection(container.editingFragment, ppos)
+        var ef = codeHandler.openNestedConnection(container.editFragment, ppos)
         if (ef){
-            container.editingFragment.signalPropertyAdded(ef)
+            container.editFragment.signalPropertyAdded(ef)
         }
         return ef
     }
 
     function addObjectToObjectContainer(container, position, type, extraProperties){
-        var codeHandler = container.editingFragment.codeHandler
+        var codeHandler = container.editFragment.codeHandler
 
         var opos = codeHandler.addObjectToCode(position, type, extraProperties)
-        codeHandler.addItemToRuntime(container.editingFragment, type, extraProperties)
-        var ef = codeHandler.openNestedConnection(container.editingFragment, opos)
+        codeHandler.addItemToRuntime(container.editFragment, type, extraProperties)
+        var ef = codeHandler.openNestedConnection(container.editFragment, opos)
         if (!ef)
             return
 
-        container.editingFragment.signalObjectAdded(ef)
+        container.editFragment.signalObjectAdded(ef)
         container.sortChildren()
     }
 
@@ -845,9 +845,9 @@ QtObject{
         var codeHandler = container.editor.documentHandler.codeHandler
 
         var isForNode = container.objectName === "objectNode"
-        var isGroup = container.editingFragment.isGroup()
+        var isGroup = container.editFragment.isGroup()
 
-        var position = container.editingFragment.position()
+        var position = container.editFragment.position()
         if (isGroup)
             position += 1
 
@@ -855,7 +855,7 @@ QtObject{
         //TODO: will need to set this as a parameter
 //        var filter = 0 | (isForNode ? CodeQmlHandler.ForNode : 0) | (isGroup ? CodeQmlHandler.ReadOnly : 0)
 
-        var addContainer = codeHandler.getAddOptions({ editFragment: container.editingFragment, isReadOnly: isGroup })
+        var addContainer = codeHandler.getAddOptions({ editFragment: container.editFragment, isReadOnly: isGroup })
         if ( !addContainer )
             return
 
@@ -933,8 +933,8 @@ QtObject{
     }
 
     function eraseObject(objectContainer){
-        var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
-        objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment, !objectContainer.isForProperty)
+        var rootDeleted = (objectContainer.editFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
+        objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
 
         if (rootDeleted) {
             objectContainer.editor.rootShaped = false
@@ -955,10 +955,10 @@ QtObject{
         var codeHandler = objectContainer.editor.documentHandler.codeHandler
         objectContainer.collapse()
         var rootPos = codeHandler.findRootPosition()
-        if (rootPos === objectContainer.editingFragment.position())
+        if (rootPos === objectContainer.editFragment.position())
             objectContainer.editor.rootShaped = false
 
-        codeHandler.removeConnection(objectContainer.editingFragment)
+        codeHandler.removeConnection(objectContainer.editFragment)
 
         var p = objectContainer.parent.parent
         if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -1018,7 +1018,7 @@ QtObject{
             return
 
         var objectContainer = createObjectContainerForFragment(ef)
-        if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+        if (objectContainer.editFragment.position() === codeHandler.findRootPosition())
             objectContainer.contentWidth = Qt.binding(function(){
                 return objectContainer.containerContentWidth > objectContainer.editorContentWidth
                         ? objectContainer.containerContentWidth
@@ -1034,9 +1034,9 @@ QtObject{
 
     function shapeContainerWithInstructions(objectContainer, instructions){
         var editor = objectContainer.editor
-        if (instructions['type'] !== objectContainer.editingFragment.type()) return
+        if (instructions['type'] !== objectContainer.editFragment.type()) return
 
-        var objects = objectContainer.editor.documentHandler.codeHandler.openNestedFragments(objectContainer.editingFragment, ['objects'])
+        var objects = objectContainer.editor.documentHandler.codeHandler.openNestedFragments(objectContainer.editFragment, ['objects'])
 
         var containers = []
         for (var i=0; i < objects.length; ++i){
@@ -1130,7 +1130,7 @@ QtObject{
         }
 
         var codeHandler = container.editor.documentHandler.codeHandler
-        return addPropertyByFragment(container.editingFragment, name)
+        return addPropertyByFragment(container.editFragment, name)
     }
 
     function addPropertyByFragment(ef, name){
@@ -1167,10 +1167,10 @@ QtObject{
         var codeHandler = editor.documentHandler.codeHandler
 
         var result = null
-        var editingFragments = codeHandler.editingFragments()
-        for ( var i = 0; i < editingFragments.length; ++i ){
-            if (editingFragments[i].location === EditQml.QmlEditFragment.Object){
-                result = convertObjectIntoInstructions(editingFragments[i])
+        var editFragments = codeHandler.editFragments()
+        for ( var i = 0; i < editFragments.length; ++i ){
+            if (editFragments[i].location === EditQml.QmlEditFragment.Object){
+                result = convertObjectIntoInstructions(editFragments[i])
             }
         }
 

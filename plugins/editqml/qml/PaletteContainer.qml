@@ -17,7 +17,7 @@ Rectangle{
     objectName: "paletteContainer"
 
     property QtObject theme: lk.layers.workspace.themes.current
-    property var editingFragment: null
+    property var editFragment: null
     property double minimumWidth: compact ? 0 : 200
     property double headerWidth: compact ? compactHeaderWidth + 10 : 5
     property int compactHeaderWidth: isCompactVertical ? 20 : 35
@@ -40,10 +40,10 @@ Rectangle{
     property Item pane: null
     property Item dragPane: null
 
-    onEditingFragmentChanged: {
-        if (!editingFragment)
+    onEditFragmentChanged: {
+        if (!editFragment)
             return
-        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+        editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
     }
 
     property bool paletteSwapVisible: false
@@ -80,25 +80,25 @@ Rectangle{
     }
 
     function viewPaletteConnections(){
-        if ( !editingFragment )
+        if ( !editFragment )
             return
 
         if ( paletteConnection.model ){
             paletteConnection.model = null
-            paletteConnection.editingFragment = null
+            paletteConnection.editFragment = null
         } else {
             paletteConnection.forceActiveFocus()
-            paletteConnection.model = editingFragment.codeHandler.bindingChannels
-            paletteConnection.editingFragment = editingFragment
+            paletteConnection.model = editFragment.codeHandler.bindingChannels
+            paletteConnection.editFragment = editFragment
         }
     }
 
     function rebuild(){
-        var editingFragment = paletteContainer.parent.editingFragment
-        if ( !editingFragment )
+        var editFragment = paletteContainer.parent.editFragment
+        if ( !editFragment )
             return
 
-        editingFragment.rebuild()
+        editFragment.rebuild()
     }
 
     function closeAsPane(){
@@ -137,17 +137,17 @@ Rectangle{
             p = p.parent
         }
         p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== paletteContainer.palette.name })
-        editingFragment.codeHandler.removePalette(paletteContainer.palette)
+        editFragment.codeHandler.removePalette(paletteContainer.palette)
     }
 
     Component.onCompleted: {
         var paletteGroup = paletteContainer.parent
 
-        if ( paletteGroup.editingFragment) {
-            paletteContainer.editingFragment = paletteGroup.editingFragment
-            paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
-            paletteGroup.editingFragment.connectionChanged.connect(function(){
-                paletteContainer.isBuilder = paletteGroup.editingFragment.isBuilder()
+        if ( paletteGroup.editFragment) {
+            paletteContainer.editFragment = paletteGroup.editFragment
+            paletteContainer.isBuilder = paletteGroup.editFragment.isBuilder()
+            paletteGroup.editFragment.connectionChanged.connect(function(){
+                paletteContainer.isBuilder = paletteGroup.editFragment.isBuilder()
             })
         }
     }

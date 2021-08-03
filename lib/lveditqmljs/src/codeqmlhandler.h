@@ -95,8 +95,8 @@ public:
 
     bool isForAnObject(const QmlDeclaration::Ptr& declaration);
 
-    bool addEditingFragment(QmlEditFragment *edit);
-    void removeEditingFragment(QmlEditFragment* edit);
+    bool addEditFragment(QmlEditFragment *edit);
+    void removeEditFragment(QmlEditFragment* edit);
 
     QmlJsSettings* settings();
 
@@ -145,7 +145,7 @@ public slots:
 
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
-    QJSValue editingFragments();
+    QJSValue editFragments();
 
     lv::QmlEditFragment* findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const;
 
@@ -311,7 +311,7 @@ private:
     bool                   m_newScope;
     QTimer                 m_scopeTimer;
 
-    QmlEditFragment*              m_editingFragment; // single editing fragment
+    QmlEditFragment*              m_editFragment; // single edit fragment
     QmlEditFragmentContainer*     m_editContainer;
 
     DocumentQmlChannels*   m_bindingChannels;

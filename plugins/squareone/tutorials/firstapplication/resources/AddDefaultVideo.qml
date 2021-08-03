@@ -13,10 +13,10 @@ WorkspaceControl{
         var editor = editorPane.editor
         var codeHandler = editor.documentHandler.codeHandler
 
-        var editingFragments = codeHandler.editingFragments()
+        var editFragments = codeHandler.editFragments()
 
-        for ( var i = 0; i < editingFragments.length; ++i ){
-            var itemEdit = editingFragments[i]
+        for ( var i = 0; i < editFragments.length; ++i ){
+            var itemEdit = editFragments[i]
             if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                 var childFragments = itemEdit.getChildFragments()
                 for ( var j = 0; j < childFragments.length; ++j ){

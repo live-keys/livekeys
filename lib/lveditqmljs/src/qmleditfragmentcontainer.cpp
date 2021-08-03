@@ -57,9 +57,9 @@ void QmlEditFragmentContainer::derefEdit(QmlEditFragment *edit){
                     emit editCountChanged();
 
                     //TOWORKAROUND
-                    if ( m_codeHandler->m_editingFragment == edit ){
+                    if ( m_codeHandler->m_editFragment == edit ){
                         m_codeHandler->m_document->removeEditingState(ProjectDocument::Overlay);
-                        m_codeHandler->m_editingFragment = nullptr;
+                        m_codeHandler->m_editFragment = nullptr;
                     }
                     edit->emitRemoval();
                     edit->deleteLater();
@@ -99,9 +99,9 @@ void QmlEditFragmentContainer::removeEdit(QmlEditFragment *edit){
                 emit editCountChanged();
 
                 //TOWORKAROUND
-                if ( m_codeHandler->m_editingFragment == edit ){
+                if ( m_codeHandler->m_editFragment == edit ){
                     m_codeHandler->m_document->removeEditingState(ProjectDocument::Overlay);
-                    m_codeHandler->m_editingFragment = nullptr;
+                    m_codeHandler->m_editFragment = nullptr;
                 }
                 edit->emitRemoval();
                 edit->deleteLater();

@@ -66,15 +66,15 @@ CodePalette{
 
         if (container){ // inside shaping
             var position =
-                p.editingFragment.valuePosition() +
-                p.editingFragment.valueLength() - 1
+                p.editFragment.valuePosition() +
+                p.editFragment.valueLength() - 1
             paletteControls.addObjectToObjectContainer(container, position, "TransformImage", name, false)
 
             var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]
 
         } else { // inside palette
-            var ef = p.editingFragment
+            var ef = p.editFragment
             while (p && p.objectName !== "editorType")
             {
                 p = p.parent
@@ -136,7 +136,7 @@ CodePalette{
                         var valueToAssign = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
 
                         var fragment = null
-                        if (crop.editingFragment){ //objectContainer
+                        if (crop.editFragment){ //objectContainer
                             fragment = paletteControls.addPropertyByName(crop, "region")
                             if (crop.objectName === "objectContainer")
                                 crop.expand()
@@ -198,7 +198,7 @@ CodePalette{
                         var resize = addTransformation("Resize")
 
                         var fragment = null
-                        if (resize.editingFragment){
+                        if (resize.editFragment){
                             fragment = paletteControls.addPropertyByName(resize, "size")
                             if (resize.objectName === "objectContainer")
                                 resize.expand()
@@ -246,7 +246,7 @@ CodePalette{
                         var rotate = addTransformation("Rotate")
 
                         var fragment = null
-                        if (rotate.editingFragment){
+                        if (rotate.editFragment){
                             fragment = paletteControls.addPropertyByName(rotate, "degrees")
                             if (rotate.objectName === "objectContainer")
                                 rotate.expand()
@@ -291,7 +291,7 @@ CodePalette{
                     onApply: {
                         var perspective = addTransformation("Perspective")
                         var fragment = null
-                        if (perspective.editingFragment){
+                        if (perspective.editFragment){
                             fragment = paletteControls.addPropertyByName(perspective, "points")
                             if (perspective.objectName === "objectContainer")
                                 perspective.expand()

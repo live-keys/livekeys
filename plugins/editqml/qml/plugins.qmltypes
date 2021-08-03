@@ -59,7 +59,7 @@ Module {
             type: "lv::QmlEditFragment*"
             Parameter { name: "position"; type: "int" }
         }
-        Method { name: "editingFragments"; type: "QJSValue" }
+        Method { name: "editFragments"; type: "QJSValue" }
         Method {
             name: "toggleComment"
             Parameter { name: "position"; type: "int" }
@@ -187,7 +187,7 @@ Module {
             name: "removeLineAtPosition"
             Parameter { name: "pos"; type: "int" }
         }
-        Method { name: "removeAllEditingFragments" }
+        Method { name: "removeAllEditFragments" }
         Method {
             name: "findImportsPosition"
             type: "int"

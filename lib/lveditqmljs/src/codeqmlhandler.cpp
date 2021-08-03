@@ -305,7 +305,7 @@ CodeQmlHandler::CodeQmlHandler(
     , m_engine(engine)
     , m_completionContextFinder(new QmlCompletionContextFinder)
     , m_newScope(false)
-    , m_editingFragment(nullptr)
+    , m_editFragment(nullptr)
     , m_editContainer(new QmlEditFragmentContainer(this))
     , m_bindingChannels(nullptr)
     , d_ptr(new CodeQmlHandlerPrivate)
@@ -569,9 +569,9 @@ void CodeQmlHandler::__documentContentsChanged(int position, int, int){
     Q_D(CodeQmlHandler);
     d->documentChanged();
     if ( !m_document->editingStateIs(ProjectDocument::Silent) ){
-        if ( m_editingFragment ){
-            if ( position < m_editingFragment->valuePosition() ||
-                 position > m_editingFragment->valuePosition() + m_editingFragment->valueLength() )
+        if ( m_editFragment ){
+            if ( position < m_editFragment->valuePosition() ||
+                 position > m_editFragment->valuePosition() + m_editFragment->valueLength() )
             {
                 cancelEdit();
             }
@@ -1548,7 +1548,7 @@ QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
 /**
  * \brief Adds an editing fragment to the current document
  */
-bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
+bool CodeQmlHandler::addEditFragment(QmlEditFragment *edit){
     //TOMOVE
     return m_editContainer->addEdit(edit);
 }
@@ -1556,7 +1556,7 @@ bool CodeQmlHandler::addEditingFragment(QmlEditFragment *edit){
 /**
  * \brief Removes an editing fragment from this document
  */
-void CodeQmlHandler::removeEditingFragment(QmlEditFragment *edit){
+void CodeQmlHandler::removeEditFragment(QmlEditFragment *edit){
     //TOMOVE
     m_editContainer->removeEdit(edit);
 }
@@ -1604,7 +1604,7 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
     return m_editContainer->findFragmentByPosition(position);
 }
 
-QJSValue CodeQmlHandler::editingFragments(){
+QJSValue CodeQmlHandler::editFragments(){
     //TOMOVE
     return m_editContainer->allEdits();
 }
@@ -2259,18 +2259,18 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
                 [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
     {
         auto projectDocument = section->document();
-        auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+        auto editFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
         if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
 
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+            int length = editFragment->declaration()->valueLength();
+            editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
 
         } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-            removeEditingFragment(editingFragment);
+            removeEditFragment(editFragment);
         } else {
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+            int length = editFragment->declaration()->valueLength();
+            editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
         }
     });
 
@@ -2279,7 +2279,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
         inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
     }
 
-    addEditingFragment(ef);
+    addEditFragment(ef);
     ef->setParent(this);
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
@@ -2328,18 +2328,18 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
                 [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
     {
         auto projectDocument = section->document();
-        auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+        auto editFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
         if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
 
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+            int length = editFragment->declaration()->valueLength();
+            editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
 
         } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-            removeEditingFragment(editingFragment);
+            removeEditFragment(editFragment);
         } else {
-            int length = editingFragment->declaration()->valueLength();
-            editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+            int length = editFragment->declaration()->valueLength();
+            editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
         }
     });
 
@@ -2531,18 +2531,18 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
                                     [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
                         {
                             auto projectDocument = section->document();
-                            auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+                            auto editFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
                             if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
 
-                                int length = editingFragment->declaration()->valueLength();
-                                editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                                int length = editFragment->declaration()->valueLength();
+                                editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
 
                             } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-                                removeEditingFragment(editingFragment);
+                                removeEditFragment(editFragment);
                             } else {
-                                int length = editingFragment->declaration()->valueLength();
-                                editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                                int length = editFragment->declaration()->valueLength();
+                                editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
                             }
                         });
 
@@ -2618,18 +2618,18 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
                             [this](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText)
                 {
                     auto projectDocument = section->document();
-                    auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+                    auto editFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
                     if ( projectDocument->editingStateIs(ProjectDocument::Runtime) ){
 
-                        int length = editingFragment->declaration()->valueLength();
-                        editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                        int length = editFragment->declaration()->valueLength();
+                        editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
 
                     } else if ( !projectDocument->editingStateIs(ProjectDocument::Silent) ){
-                        removeEditingFragment(editingFragment);
+                        removeEditFragment(editFragment);
                     } else {
-                        int length = editingFragment->declaration()->valueLength();
-                        editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+                        int length = editFragment->declaration()->valueLength();
+                        editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
                     }
                 });
 
@@ -2723,7 +2723,7 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     if (!removeFragment)
         return;
 
-    removeEditingFragment(edit);
+    removeEditFragment(edit);
 
     if ( !toRemove.isEmpty() ){
         for ( QObject* o : toRemove ){
@@ -2986,10 +2986,10 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
 
 
     for ( auto it = toRemove.begin(); it != toRemove.end(); ++it ){
-        removeEditingFragment(*it);
+        removeEditFragment(*it);
     }
-    if ( m_editingFragment && m_editingFragment != edit )
-        removeEditingFragment(m_editingFragment);
+    if ( m_editFragment && m_editFragment != edit )
+        removeEditFragment(m_editFragment);
 
     PaletteLoader* loader = d->projectHandler->paletteContainer()->findPalette("edit/qml");
     CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(loader);
@@ -2997,10 +2997,10 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
     edit->addPalette(palette);
 
     edit->declaration()->section()->onTextChanged([](ProjectDocumentSection::Ptr section, int, int charsRemoved, const QString& addedText){
-        auto editingFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
+        auto editFragment = reinterpret_cast<QmlEditFragment*>(section->userData());
 
-        int length = editingFragment->declaration()->valueLength();
-        editingFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
+        int length = editFragment->declaration()->valueLength();
+        editFragment->declaration()->setValueLength(length - charsRemoved + addedText.size());
     });
 
     palette->setEditFragment(edit);
@@ -3011,11 +3011,11 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
             edit->commit(cp->value());
         }
         m_document->removeEditingState(ProjectDocument::Overlay);
-        removeEditingFragment(edit);
+        removeEditFragment(edit);
     });
 
     m_document->addEditingState(ProjectDocument::Overlay);
-    m_editingFragment = edit;
+    m_editFragment = edit;
 
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     rehighlightSection(edit->valuePosition(), edit->valuePosition() + edit->valueLength());
@@ -3031,8 +3031,8 @@ lv::CodePalette* CodeQmlHandler::edit(lv::QmlEditFragment *edit){
  */
 void CodeQmlHandler::cancelEdit(){
     m_document->removeEditingState(ProjectDocument::Overlay);
-    if ( m_editingFragment ){
-        removeEditingFragment(m_editingFragment);
+    if ( m_editFragment ){
+        removeEditFragment(m_editFragment);
     }
 }
 

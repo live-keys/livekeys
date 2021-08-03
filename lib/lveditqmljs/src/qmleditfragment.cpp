@@ -875,7 +875,7 @@ void QmlEditFragment::__channelObjectErased(){
         return;
 
     if ( m_channel->type() == QmlBindingChannel::Object ){
-        m_codeHandler->removeEditingFragment(this);
+        m_codeHandler->removeEditFragment(this);
     } else if ( m_channel->type() == QmlBindingChannel::ListIndex ){
         auto parentFrag = parentFragment();
         if (parentFrag){
@@ -885,7 +885,7 @@ void QmlEditFragment::__channelObjectErased(){
                 cf->channel()->updateConnection(cf->channel()->listIndex()-1);
             }
         }
-        m_codeHandler->removeEditingFragment(this);
+        m_codeHandler->removeEditFragment(this);
     }
 }
 

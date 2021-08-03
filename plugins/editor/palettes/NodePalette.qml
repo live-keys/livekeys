@@ -41,7 +41,7 @@ CodePalette{
 
         allObjects.push(n)
 
-        n.item.editingFragment = object
+        n.item.editFragment = object
         object.incrementRefCount()
 
         n.item.expandDefaultPalette()
@@ -134,11 +134,11 @@ CodePalette{
                 var numofProps = allObjects[i].item.propertyContainer.children.length
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]
-                    if (child.editingFragment)
-                        editFragment.codeHandler.removeConnection(child.editingFragment)
+                    if (child.editFragment)
+                        editFragment.codeHandler.removeConnection(child.editFragment)
                     child.destroy()
                 }
-                editFragment.codeHandler.removeConnection(allObjects[i].item.editingFragment)
+                editFragment.codeHandler.removeConnection(allObjects[i].item.editFragment)
             }
 
             allObjects = []
@@ -151,7 +151,7 @@ CodePalette{
             height: 300
             palette: palette
             editor: palette.editor
-            editingFragment: palette.editFragment
+            editFragment: palette.editFragment
             style: theme.nodeEditor
         }
     }
@@ -163,7 +163,7 @@ CodePalette{
 
         editor = editFragment.codeHandler.documentHandler.textEdit().getEditor()
 
-        objectGraph.editingFragment = editFragment
+        objectGraph.editFragment = editFragment
         nodeItem.init()
         editFragment.objectAdded.connect(function(obj, cursorCoords){
             addObject(obj.objectInfo(), cursorCoords)
