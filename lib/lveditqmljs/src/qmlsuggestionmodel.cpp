@@ -86,7 +86,7 @@ void QmlSuggestionModel::setTypeFilter(const QString &typeFilter)
     endResetModel();
 }
 
-void QmlSuggestionModel::setCategoryFilter(const int cat)
+void QmlSuggestionModel::setCategoryFilter(int cat)
 {
     if ( m_categoryFilter == cat )
         return;
@@ -140,7 +140,7 @@ void QmlSuggestionModel::updateFilters(){
     }
 }
 
-void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath, int filter){
+void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceInfo &typePath){
 
     QmlPropertyInfo qpi = typePath.defaultProperty();
     if ( qpi.isValid() ){
@@ -167,7 +167,7 @@ void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
                     name,
                     QmlSuggestionModel::ItemData::Event)
                 );
-            } else if ( method.functionType != QmlFunctionInfo::SlotGenerated && (filter & CodeQmlHandler::ForNode)){
+            } else if ( method.functionType != QmlFunctionInfo::SlotGenerated ){
                 auto name = method.name;
 
                 addItem(QmlSuggestionModel::ItemData(
@@ -186,13 +186,14 @@ void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
         for ( int i = 0; i < ti->totalProperties(); ++i ){
             QString propertyName = ti->propertyAt(i).name;
 
-            if ( !propertyName.startsWith("__") &&
-                (
-                    (!(filter & CodeQmlHandler::NoReadOnly) || ti->propertyAt(i).isWritable)
-                    ||
-                    ((filter & CodeQmlHandler::ReadOnly) && ti->propertyAt(i).isPointer)
+            if ( !propertyName.startsWith("__") )
+//                (
+//                    (!(filter & CodeQmlHandler::NoReadOnly) || ti->propertyAt(i).isWritable)
+//                    ||
+//                    ((filter & CodeQmlHandler::ReadOnly) && ti->propertyAt(i).isPointer)
 
-                )){
+//                ))
+            {
 
                 addItem(
                     QmlSuggestionModel::ItemData(

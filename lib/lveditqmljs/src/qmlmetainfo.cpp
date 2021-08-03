@@ -1,5 +1,6 @@
 #include "qmlmetainfo_p.h"
 #include "live/viewengine.h"
+#include "live/qmllanguageinfo.h"
 
 #include <QQmlEngine>
 #include <QQmlProperty>
@@ -49,6 +50,10 @@ QJSValue QmlMetaInfo::listProperties(QObject *obj){
         v.setProperty(i, properties[i]);
     }
     return v;
+}
+
+QString QmlMetaInfo::defaultTypeValue(const QString &type){
+    return QmlTypeInfo::typeDefaultValue(type);
 }
 
 }

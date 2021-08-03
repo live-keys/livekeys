@@ -191,7 +191,10 @@ QmlEditFragment *QmlEditFragmentContainer::findFragmentByPosition(int position){
         {
             q.clear();
             result = edit;
-            for (auto it = edit->childFragments().begin(); it != edit->childFragments().end(); ++it){
+
+            auto childFragments = edit->childFragments();
+
+            for (auto it = childFragments.begin(); it != childFragments.end(); ++it){
                 q.push_back(*it);
             }
         }

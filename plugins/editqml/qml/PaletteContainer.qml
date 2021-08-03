@@ -41,7 +41,8 @@ Rectangle{
     property Item dragPane: null
 
     onEditingFragmentChanged: {
-        if (!editingFragment) return
+        if (!editingFragment)
+            return
         editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
     }
 

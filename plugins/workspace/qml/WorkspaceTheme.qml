@@ -4,6 +4,7 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import workspace 1.0
 import workspace.icons 1.0
+import workspace.nodeeditor 1.0
 import timeline 1.0
 import visual.input 1.0 as Input
 
@@ -484,36 +485,37 @@ Theme{
 
     // Node Editor
 
-    property QtObject nodeEditor : QtObject{
-        property color backgroundColor: root.colorScheme.background
-        property color backgroundGridColor: root.colorScheme.middleground
+    property QtObject nodeEditor : ObjectGraphStyle{
+        backgroundColor: root.colorScheme.background
+        backgroundGridColor: root.colorScheme.middleground
 
-        property color borderColor: root.colorScheme.middlegroundOverlayDominant
-        property color highlightBorderColor: root.colorScheme.middlegroundOverlayDominantBorder
-        property double borderWidth: 1
-        property double radius: 3
+        borderColor: root.colorScheme.middlegroundOverlayDominant
+        highlightBorderColor: root.colorScheme.middlegroundOverlayDominantBorder
+        borderWidth: 1
+        radius: 3
 
-        property color connectorEdgeColor: root.colorScheme.middlegroundOverlayDominant
-        property color connectorColor: root.colorScheme.middlegroundOverlayDominant
+        connectorEdgeColor: root.colorScheme.middlegroundOverlayDominant
+        connectorColor: root.colorScheme.middlegroundOverlayDominant
 
-        property color selectionColor: root.colorScheme.foreground
-        property double selectionWeight: 1
+        selectionColor: root.colorScheme.foreground
+        selectionWeight: 1
 
-        property QtObject objectNodeStyle : QtObject{
-            property color background: root.colorScheme.middleground
-            property double radius: 15
-            property color borderColor: root.colorScheme.middlegroundOverlayDominant
-            property double borderWidth: 1
+        objectNodeStyle : ObjectNodeStyle{
+            background: root.colorScheme.middleground
+            radius: 15
+            borderColor: root.colorScheme.middlegroundOverlayDominant
+            borderWidth: 1
 
-            property color titleBackground: root.colorScheme.middlegroundOverlayDominant
-            property double titleRadius: 3
-            property QtObject titleTextStyle : Input.TextStyle{}
+            titleBackground: root.colorScheme.middlegroundOverlayDominant
+            titleRadius: 3
+            titleTextStyle : Input.TextStyle{}
         }
-
-        property QtObject propertyDelegateStyle : QtObject{
-            property color background: root.colorScheme.middlegroundOverlay
-            property double radius: 5
-            property QtObject textStyle: Input.TextStyle{}
+        objectNodeMemberStyle: ObjectNodeMemberStyle{
+            background: root.colorScheme.middlegroundOverlay
+            radius: 5
+            textStyle: Input.TextStyle{}
+            methodIcon: FunctionIcon{ color: colorScheme.foregroundFaded; width: 15; height: 15 }
+            eventIcon: EventIcon{ color: colorScheme.foregroundFaded; width: 15; height: 15 }
         }
     }
 

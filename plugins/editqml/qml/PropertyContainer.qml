@@ -12,8 +12,49 @@ Item{
         propertyContainer.editor = editor
         propertyContainer.documentHandler = editor.documentHandler
         propertyContainer.editingFragment = ef
-        if ( ef.codeHandler.isForAnObject(ef))
+
+        var codeHandler = ef.codeHandler
+        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+
+        if ( codeHandler.isForAnObject(ef)){
             propertyContainer.isAnObject = true
+
+            var childObjectContainer = paletteControls.__factories.createObjectContainer(editor, ef, null)
+
+//            childObjectContainer.parentObjectContainer = parentObjectContainer //TOMOVE
+            propertyContainer.childObjectContainer = childObjectContainer
+            propertyContainer.valueContainer = childObjectContainer
+            childObjectContainer.isForProperty = true
+
+        } else {
+            propertyContainer.isAnObject = false
+            propertyContainer.valueContainer = paletteControls.__factories.createPaletteGroup(null, ef)
+        }
+    }
+
+    function expand(){
+        if ( childObjectContainer ){
+            childObjectContainer.expand()
+        }
+    }
+
+    function paletteByName(name){
+        if ( isAnObject )
+            return childObjectContainer.paletteByName(name)
+
+        for ( var i = 0; i < valueContainer.children.length; ++i ){
+            if ( valueContainer.children[i].name === name )
+                return valueContainer.children[i]
+        }
+
+        return null
+    }
+
+    function paletteGroup(){
+        if ( isAnObject )
+            return childObjectContainer.paletteGroup()
+
+        return valueContainer
     }
 
     property string title: "Object"
@@ -21,7 +62,7 @@ Item{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
-    property Item paletteGroup : null
+//    property Item paletteGroup : null
     property alias paletteListContainer: container
     property QtObject editingFragment : null
 
@@ -108,6 +149,7 @@ Item{
 
             width: 15
             height: 20
+            visible: !propertyContainer.isAnObject
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add.png"

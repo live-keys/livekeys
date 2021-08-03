@@ -72,14 +72,14 @@ public:
     int addPosition() const;
 
     void updateFilters();
-    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath, int filter = 0);
+    void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath);
     void addObjectsToModel(const QmlScopeSnap& scope);
 
 public slots:
     void setFilter(const QString& filter);
     void setImportFilter(const QString& importFilter);
     void setTypeFilter(const QString& typeFilter);
-    void setCategoryFilter(const int cat);
+    void setCategoryFilter(int cat);
 
     QStringList importSpaces() const;
     QStringList types() const;
