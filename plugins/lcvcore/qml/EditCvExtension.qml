@@ -251,7 +251,7 @@ WorkspaceExtension{
                                                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                             })
 
-                                            editor.editor.rootShaped = true
+                                            codeHandler.rootShaped = true
 
                                             var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
 
@@ -306,7 +306,7 @@ WorkspaceExtension{
                                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                     })
 
-                                    editor.editor.rootShaped = true
+                                    codeHandler.rootShaped = true
 
                                     var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
 

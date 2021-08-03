@@ -4023,6 +4023,32 @@ QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
     return result;
 }
 
+bool CodeQmlHandler::importsShaped() const
+{
+    return m_importsShaped;
+}
+
+void CodeQmlHandler::setImportsShaped(bool importsShaped)
+{
+    if (m_importsShaped == importsShaped)
+        return;
+    m_importsShaped = importsShaped;
+    emit importsShapedChanged();
+}
+
+bool CodeQmlHandler::rootShaped() const
+{
+    return m_rootShaped;
+}
+
+void CodeQmlHandler::setRootShaped(bool rootShaped)
+{
+    if (m_rootShaped == rootShaped)
+        return;
+    m_rootShaped = rootShaped;
+    emit rootShapedChanged();
+}
+
 //TO REROUTE
 QVariantMap CodeQmlHandler::propertiesWritable(QmlEditFragment *ef)
 {

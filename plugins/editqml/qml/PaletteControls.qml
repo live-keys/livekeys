@@ -157,7 +157,7 @@ QtObject{
                 objectContainer.contentWidth = Qt.binding(function(){
                     return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
                 })
-                editor.rootShaped = true
+                codeHandler.rootShaped = true
             }
             return objectContainer
         }
@@ -619,7 +619,7 @@ QtObject{
         editor.documentHandler.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports)
-            editor.editor.importsShaped = true //TODO: Move to CodeQmlHandler
+            editor.documentHandler.codeHandler.importsShaped = true //TODO: Move to CodeQmlHandler
 
         ef.incrementRefCount()
 
@@ -661,7 +661,7 @@ QtObject{
             oc.contentWidth = Qt.binding(function(){
                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
             })
-            editor.editor.rootShaped = true
+            codeHandler.rootShaped = true
             if ( callback ){
                 callback(oc)
             }
@@ -937,7 +937,7 @@ QtObject{
         objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
 
         if (rootDeleted) {
-            objectContainer.editor.rootShaped = false
+            objectContainer.editFragment.codeHandler.rootShaped = false
             objectContainer.editor.addRootButton.visible = true
         }
 
@@ -956,7 +956,7 @@ QtObject{
         objectContainer.collapse()
         var rootPos = codeHandler.findRootPosition()
         if (rootPos === objectContainer.editFragment.position())
-            objectContainer.editor.rootShaped = false
+            codeHandler.rootShaped = false
 
         codeHandler.removeConnection(objectContainer.editFragment)
 
@@ -1174,7 +1174,7 @@ QtObject{
             }
         }
 
-        if (editor.importsShaped)
+        if (codeHandler.importsShaped)
             result['shapeImports'] = true
 
         return result
@@ -1212,9 +1212,9 @@ QtObject{
         var properties = []
         for (var i = 0; i < childFragments.length; ++i){
             var frag = childFragments[i]
-            if (frag.location === QmlEditFragment.Object)
+            if (frag.location === EditQml.QmlEditFragment.Object)
                 objects.push(convertObjectIntoInstructions(frag))
-            if (frag.location === QmlEditFragment.Property)
+            if (frag.location === EditQml.QmlEditFragment.Property)
                 properties.push(convertPropertyIntoInstructions(frag))
         }
 

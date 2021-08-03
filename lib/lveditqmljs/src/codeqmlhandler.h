@@ -60,7 +60,8 @@ class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
     Q_PROPERTY(lv::DocumentHandler* documentHandler        READ documentHandler CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
-
+    Q_PROPERTY(bool importsShaped                          READ importsShaped   WRITE setImportsShaped NOTIFY importsShapedChanged)
+    Q_PROPERTY(bool rootShaped                             READ rootShaped      WRITE setRootShaped    NOTIFY rootShapedChanged)
 public:
     friend class ProjectQmlExtension;
     friend class QmlEditFragmentContainer;
@@ -125,6 +126,14 @@ public:
     DocumentHandler* documentHandler() const;
 
 
+    bool rootShaped() const;
+    void setRootShaped(bool rootShaped);
+
+    bool importsShaped() const;
+    void setImportsShaped(bool importsShaped);
+signals:
+    void importsShapedChanged();
+    void rootShapedChanged();
 public slots:
     void __whenLibraryScanQueueCleared();
     bool areImportsScanned();
@@ -315,6 +324,8 @@ private:
     QmlEditFragmentContainer*     m_editContainer;
 
     DocumentQmlChannels*   m_bindingChannels;
+    bool                   m_importsShaped;
+    bool                   m_rootShaped;
 
     QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
 

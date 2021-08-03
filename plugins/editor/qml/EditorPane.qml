@@ -284,14 +284,14 @@ Workspace.Pane{
                         if (loading)
                             lk.layers.workspace.commands.execute("editqml.shape_all")
 
-                        if (editor.rootShaped){
+                        if (documentHandler.codeHandler.rootShaped){
                             root.paneState.layout = paletteControls.convertStateIntoInstructions()
                         } else {
                             root.paneState.layout = null
                         }
                         documentHandler.codeHandler.editContainer.clearAllFragments()
-                        editor.importsShaped = false
-                        editor.rootShaped = false
+                        documentHandler.codeHandler.importsShaped = false
+                        documentHandler.codeHandler.rootShaped = false
                     }
                 } else {
                     if (root.paneState.layout){
@@ -524,7 +524,7 @@ Workspace.Pane{
         anchors.topMargin: 30
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
-        lineSurfaceVisible: !(editor.importsShaped && editor.rootShaped)
+        lineSurfaceVisible: !(documentHandler && documentHandler.codeHandler && documentHandler.codeHandler.importsShaped && documentHandler.codeHandler.rootShaped)
 
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = documentHandler.has(DocumentHandler.LanguageLayout)

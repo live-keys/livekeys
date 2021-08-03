@@ -130,7 +130,7 @@ Rectangle{
 
     function closePalette(){
         if (paletteContainer.palette.type === "qml/import"){
-            paletteContainer.palette.item.editor.importsShaped = false
+            editFragment.codeHandler.importsShaped = false
         }
         var p = parent
         while (p && p.objectName !== "paletteGroup"){

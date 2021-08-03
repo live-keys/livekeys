@@ -51,7 +51,7 @@ Column{
             }
 
             if (ed && paletteGroup.editFragment && paletteGroup.editFragment.location === QmlEditFragment.Imports){
-                ed.importsShaped = false
+                paletteGroup.editFragment.codeHandler.importsShaped = false
             }
 
             if ( p && p.objectName === 'editorBox' ){

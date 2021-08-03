@@ -377,7 +377,7 @@ Item{
                 var p = root.parent
 
                 if (editFragment.position() === rootPosition)
-                    editor.rootShaped = false
+                    editFragment.codeHandler.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
