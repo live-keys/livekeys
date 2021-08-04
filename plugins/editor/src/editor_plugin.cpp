@@ -20,7 +20,7 @@
 #include "live/visuallog.h"
 #include "live/settings.h"
 #include "live/workspaceextension.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/theme.h"
 #include "live/documentationloader.h"
 
@@ -34,7 +34,7 @@
 
 void EditorPlugin::registerTypes(const char *uri){
     // @uri editor
-    qmlRegisterType<lv::DocumentHandler>(uri, 1, 0, "DocumentHandler");
+    qmlRegisterType<lv::CodeHandler>(uri, 1, 0, "DocumentHandler");
     qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
     qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");
     qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "WorkspaceExtension");

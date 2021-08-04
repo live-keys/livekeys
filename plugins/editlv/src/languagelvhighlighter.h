@@ -4,7 +4,7 @@
 #include <QTextDocument>
 
 #include "editlvsettings.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/syntaxhighlighter.h"
 
 #include "live/elements/languageparser.h"
@@ -17,7 +17,7 @@ namespace lv{
 class LanguageLvHighlighter : public SyntaxHighlighter{
 
 public:
-    explicit LanguageLvHighlighter(EditLvSettings* settings, DocumentHandler* handler, el::DocumentTree* tree, QTextDocument *parent = nullptr);
+    explicit LanguageLvHighlighter(EditLvSettings* settings, CodeHandler* handler, el::DocumentTree* tree, QTextDocument *parent = nullptr);
     ~LanguageLvHighlighter() override;
 
     void setTarget(QTextDocument* target);

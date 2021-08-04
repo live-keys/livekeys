@@ -67,7 +67,7 @@ void LanguageLvExtension::removeLanguageHandler(LanguageLvHandler *handler){
     m_codeHandlers.removeAll(handler);
 }
 
-QObject *LanguageLvExtension::createHandler(ProjectDocument *document, DocumentHandler *handler){
+QObject *LanguageLvExtension::createHandler(ProjectDocument *document, CodeHandler *handler){
     return new LanguageLvHandler(m_engine, m_project, m_settings, this, document, handler);
 }
 

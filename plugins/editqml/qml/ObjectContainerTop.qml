@@ -113,7 +113,7 @@ Rectangle{
         Item {
             id: createObjectButton
             anchors.verticalCenter: parent.verticalCenter
-            visible: objectContainer.isForProperty && objectContainer.editingFragment && objectContainer.editingFragment.isNull
+            visible: objectContainer.isForProperty && objectContainer.editFragment && objectContainer.editFragment.isNull
             width: 15
             height: 15
 
@@ -146,7 +146,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: titleHeight
-            visible: objectContainer.editingFragment && !objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
+            visible: objectContainer.editFragment && !objectContainer.editFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-erase-object.png"
@@ -194,7 +194,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: objectContainer.editingFragment
+            visible: objectContainer.editFragment
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-connections.png"
@@ -241,10 +241,10 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: objectContainer.editingFragment
-                  && objectContainer.editingFragment.type() !== 'qml/QtQuick#Component'
-                  && !(objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
-                  && !objectContainer.editingFragment.isOfFragmentType(QmlEditFragment.Group))
+            visible: objectContainer.editFragment
+                  && objectContainer.editFragment.type() !== 'qml/QtQuick#Component'
+                  && !(objectContainer.editFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
+                  && !objectContainer.editFragment.isOfFragmentType(QmlEditFragment.Group))
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add-property.png"
@@ -268,7 +268,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: 20
-            visible: !(objectContainer.editingFragment && objectContainer.editingFragment.parentFragment()) && !objectContainer.pane
+            visible: !(objectContainer.editFragment && objectContainer.editFragment.parentFragment()) && !objectContainer.pane
             Icons.XIcon{
                 anchors.centerIn: parent
                 width: 8

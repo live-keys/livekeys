@@ -6,7 +6,7 @@
 
 namespace lv{
 
-class CodeQmlHandler;
+class LanguageQmlHandler;
 class DocumentQmlChannels;
 
 /// \private
@@ -18,7 +18,7 @@ public:
     explicit QmlBindingChannelsDispatcher(Project* project, QObject *parent = nullptr);
     ~QmlBindingChannelsDispatcher() override;
 
-    void initialize(CodeQmlHandler* codeHandler, DocumentQmlChannels* documentChannels);
+    void initialize(LanguageQmlHandler* codeHandler, DocumentQmlChannels* documentChannels);
     void removeDocumentChannels(DocumentQmlChannels* documentChannels);
 
 signals:

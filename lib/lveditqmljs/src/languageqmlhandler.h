@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVCODEQMLHANDLER_H
-#define LVCODEQMLHANDLER_H
+#ifndef LVLANGUAGEQMLHANDLER_H
+#define LVLANGUAGEQMLHANDLER_H
 
 #include "live/lveditqmljsglobal.h"
 #include "live/projectdocument.h"
@@ -53,29 +53,30 @@ class QmlUsageGraphScanner;
 class QmlSuggestionModel;
 class QmlMetaTypeInfo;
 
-class CodeQmlHandlerPrivate;
-class LV_EDITQMLJS_EXPORT CodeQmlHandler : public QObject{
+class LanguageQmlHandlerPrivate;
+class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
 
     Q_OBJECT
-    Q_DISABLE_COPY(CodeQmlHandler)
-    Q_PROPERTY(lv::DocumentHandler* documentHandler        READ documentHandler CONSTANT)
+    Q_DISABLE_COPY(LanguageQmlHandler)
+    Q_PROPERTY(lv::CodeHandler* code        READ code CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
-
+    Q_PROPERTY(bool importsShaped                          READ importsShaped   WRITE setImportsShaped NOTIFY importsShapedChanged)
+    Q_PROPERTY(bool rootShaped                             READ rootShaped      WRITE setRootShaped    NOTIFY rootShapedChanged)
 public:
     friend class ProjectQmlExtension;
     friend class QmlEditFragmentContainer;
 
 public:
-    explicit CodeQmlHandler(
+    explicit LanguageQmlHandler(
         ViewEngine* engine,
         Project* project,
         QmlJsSettings *settings,
         ProjectQmlExtension* projectHandler,
         ProjectDocument *document,
-        DocumentHandler* handler = nullptr
+        CodeHandler* handler = nullptr
     );
-    ~CodeQmlHandler() override;
+    ~LanguageQmlHandler() override;
 
     void assistCompletion(
         QTextCursor& cursor,
@@ -93,8 +94,8 @@ public:
 
     QmlEditFragment* createInjectionChannel(QmlDeclaration::Ptr property, QmlEditFragment* parent = nullptr);
 
-    bool addEditingFragment(QmlEditFragment *edit);
-    void removeEditingFragment(QmlEditFragment* edit);
+    bool addEditFragment(QmlEditFragment *edit);
+    void removeEditFragment(QmlEditFragment* edit);
 
     QmlJsSettings* settings();
 
@@ -112,8 +113,20 @@ public:
 
     QmlEditFragmentContainer *editContainer();
     DocumentQmlChannels* bindingChannels() const;
-    DocumentHandler* documentHandler() const;
+    CodeHandler* code() const;
 
+    bool rootShaped() const;
+    void setRootShaped(bool rootShaped);
+
+    bool importsShaped() const;
+    void setImportsShaped(bool importsShaped);
+
+signals:
+    void importsShapedChanged();
+    void rootShapedChanged();
+
+public slots:
+    //TOCHECK IF THESE ARE SLOTS
     bool areImportsScanned();
 
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
@@ -138,7 +151,7 @@ public slots:
     lv::QmlEditFragment* openNestedConnection(lv::QmlEditFragment* edit, int position);
     lv::QmlEditFragment* openReadOnlyPropertyConnection(lv::QmlEditFragment* parentFragment, QString name);
     QList<QObject*> openNestedFragments(lv::QmlEditFragment* edit, const QJSValue& options = QJSValue());
-    QJSValue editingFragments();
+    QJSValue editFragments();
 
     void removeConnection(lv::QmlEditFragment* edit);
     void eraseObject(lv::QmlEditFragment* edit, bool removeFragment = true);
@@ -274,6 +287,7 @@ private:
 
     void createChannelForFragment(QmlEditFragment* parentFragment, QmlEditFragment* fragment, QmlBindingPath::Ptr bindingPath);
     QJSValue declarationToQml(QmlDeclaration::Ptr decl);
+
 private:
     QTextDocument*      m_target;
     QmlJsHighlighter*   m_highlighter;
@@ -289,34 +303,35 @@ private:
     bool                   m_newScope;
     QTimer                 m_scopeTimer;
 
-    QmlEditFragment*              m_editingFragment; // single editing fragment
+    QmlEditFragment*              m_editFragment; // single edit fragment
     QmlEditFragmentContainer*     m_editContainer;
 
     DocumentQmlChannels*   m_bindingChannels;
+    bool                   m_importsShaped;
+    bool                   m_rootShaped;
 
-    QScopedPointer<CodeQmlHandlerPrivate> d_ptr;
+    QScopedPointer<LanguageQmlHandlerPrivate> d_ptr;
 
-    Q_DECLARE_PRIVATE(CodeQmlHandler)
-    lv::DocumentHandler* m_documentHandler;
+    Q_DECLARE_PRIVATE(LanguageQmlHandler)
 };
 
-inline ProjectDocument *CodeQmlHandler::document() const{
+inline ProjectDocument *LanguageQmlHandler::document() const{
     return m_document;
 }
 
 /// \brief Returns the settings associated with this object.
-inline QmlJsSettings *CodeQmlHandler::settings(){
+inline QmlJsSettings *LanguageQmlHandler::settings(){
     return m_settings;
 }
 
-inline QmlEditFragmentContainer *CodeQmlHandler::editContainer(){
+inline QmlEditFragmentContainer *LanguageQmlHandler::editContainer(){
     return m_editContainer;
 }
 
-inline DocumentQmlChannels *CodeQmlHandler::bindingChannels() const{
+inline DocumentQmlChannels *LanguageQmlHandler::bindingChannels() const{
     return m_bindingChannels;
 }
 
 }// namespace
 
-#endif // LVCODEQMLHANDLER_H
+#endif // LVLANGUAGEQMLHANDLER_H

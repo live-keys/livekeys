@@ -30,7 +30,7 @@ public:
             const MLNode& initialSettings,
             ViewEngine *engine,
             ProjectDocument *document,
-            DocumentHandler *handler);
+            CodeHandler *handler);
     ~QmlScriptLanguageHandler() override;
 
     void assistCompletion(

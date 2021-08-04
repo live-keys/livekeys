@@ -121,7 +121,7 @@ QtObject{
 
         function createEditorPaletteBoxForFragment(ef, parent){
             var codeHandler = ef.codeHandler
-            var editor = codeHandler.documentHandler.textEdit().getEditor()
+            var editor = codeHandler.code.textEdit().getEditor()
             var editorBox = lk.layers.editor.environment.createEmptyEditorBox(parent)
             var paletteBoxGroup = __factories.createPaletteGroup(lk.layers.editor.environment.content, ef)
 
@@ -137,8 +137,8 @@ QtObject{
         }
 
         function createEditorObjectContainerBoxForFragment(ef, parent){
-            var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
-            var codeHandler = editor.documentHandler.codeHandler
+            var editor = ef.codeHandler.code.textEdit().getEditor()
+            var codeHandler = editor.code.language
 
             var editorBox = lk.layers.editor.environment.createEmptyEditorBox(parent)
             var objectContainer = __factories.createObjectContainer(editor, ef, lk.layers.editor.environment.content)
@@ -157,7 +157,7 @@ QtObject{
                 objectContainer.contentWidth = Qt.binding(function(){
                     return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
                 })
-                editor.rootShaped = true
+                codeHandler.rootShaped = true
             }
             return objectContainer
         }
@@ -204,7 +204,7 @@ QtObject{
         }
 
         function openPaletteListForNode(container, paletteGroup, parent){
-            var palettes = container.editingFragment.codeHandler.findPalettesFromFragment(editingFragment)
+            var palettes = container.editFragment.codeHandler.findPalettesFromFragment(editFragment)
             palettes.data = filterOutPalettes(palettes.data, paletteGroup.palettesOpened, true)
             if (!palettes.data || palettes.data.length === 0) return null
 
@@ -215,7 +215,7 @@ QtObject{
                     container.objectGraph.activateFocus()
                 },
                 onSelected: function(index){
-                    var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                    var palette = container.editor.code.language.expand(container.editFragment, {
                         "palettes" : [palettes.data[index].name]
                     })
 
@@ -245,7 +245,7 @@ QtObject{
         }
 
         function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
-            var palettes = container.editingFragment.codeHandler.findPalettesFromFragment(container.editingFragment)
+            var palettes = container.editFragment.codeHandler.findPalettesFromFragment(container.editFragment)
             palettes.data = filterOutPalettes(
                 palettes.data,
                 paletteGroup.palettesOpened,
@@ -276,7 +276,7 @@ QtObject{
             }
 
             var selectedHandler = function(index, paletteListBox){
-                var palette = container.editor.documentHandler.codeHandler.expand(container.editingFragment, {
+                var palette = container.editor.code.language.expand(container.editFragment, {
                     "palettes" : [palettes.data[index].name]
                 })
 
@@ -309,7 +309,7 @@ QtObject{
                     }
                     p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== container.palette.name })
                     container.parent = null
-                    container.documentHandler.codeHandler.removePalette(container.palette)
+                    container.code.language.removePalette(container.palette)
                     container.destroy()
                 }
 
@@ -338,7 +338,7 @@ QtObject{
         function openAddOptionsBox(addContainer, codeHandler, editorBoxParams, handlers){
             var addBoxItem = __factories.createAddQmlBox(null)
             addBoxItem.addContainer = addContainer
-            addBoxItem.codeQmlHandler = codeHandler
+            addBoxItem.languageQmlHandler = codeHandler
 
             addBoxItem.categories = handlers.categories
 
@@ -408,7 +408,7 @@ QtObject{
 
 
     function userOpenPaletteAtPosition(editor, userPosition, callback){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var palettes = codeHandler.findPalettes(userPosition)
         if ( !palettes )
             return
@@ -454,14 +454,14 @@ QtObject{
     }
 
     function openPaletteAtPosition(editor, paletteName, position){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var ef = codeHandler.openConnection(position)
         if (!ef){
             lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
             return
         }
         ef.incrementRefCount()
-        var palette = editor.documentHandler.codeHandler.expand(ef, {
+        var palette = editor.code.language.expand(ef, {
             "palettes" : [paletteName]
         })
 
@@ -486,7 +486,7 @@ QtObject{
     }
 
     function openEditPaletteAtPosition(editor, position){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         var rect = editor.editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -516,7 +516,7 @@ QtObject{
     }
 
     function userShapePaletteAtPosition(editor, userPosition){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var palettes = codeHandler.findPalettes(userPosition)
         if ( !palettes )
             return
@@ -556,7 +556,7 @@ QtObject{
     }
 
     function shapePaletteAtPosition(editor, paletteName, position){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var ef = codeHandler.openConnection(position)
 
         if (!ef){
@@ -572,7 +572,7 @@ QtObject{
         if ( paletteBoxGroup === null ){
             if (forAnObject){
                 objectContainer = __private.createEditorObjectContainerBoxForFragment(ef, editor.textEdit)
-                if (objectContainer.editingFragment.position() === codeHandler.findRootPosition()){
+                if (objectContainer.editFragment.position() === codeHandler.findRootPosition()){
                     objectContainer.contentWidth = Qt.binding(function(){
                         return objectContainer.containerContentWidth > objectContainer.editorContentWidth
                                 ? objectContainer.containerContentWidth
@@ -616,10 +616,10 @@ QtObject{
         if (forImports){
             frameBoxPosition = codeHandler.checkPragma(ef.position())
         }
-        editor.documentHandler.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
+        editor.code.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports)
-            editor.editor.importsShaped = true //TODO: Move to CodeQmlHandler
+            editor.code.language.importsShaped = true //TODO: Move to LanguageQmlHandler
 
         ef.incrementRefCount()
 
@@ -627,7 +627,7 @@ QtObject{
     }
 
     function shapeImports(editor){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var importsPosition = codeHandler.findImportsPosition()
         var paletteImports = codeHandler.findPalettes(importsPosition)
         if (paletteImports) {
@@ -647,7 +647,7 @@ QtObject{
     }
 
     function shapeRoot(editor, callback){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         editor.startLoadingMode()
         codeHandler.removeSyncImportsListeners()
@@ -661,7 +661,7 @@ QtObject{
             oc.contentWidth = Qt.binding(function(){
                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
             })
-            editor.editor.rootShaped = true
+            codeHandler.rootShaped = true
             if ( callback ){
                 callback(oc)
             }
@@ -669,7 +669,7 @@ QtObject{
     }
 
     function userBind(editor, userPosition){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         var palettes = codeHandler.findPalettes(userPosition)
         if ( !palettes )
@@ -716,10 +716,10 @@ QtObject{
         if ( paletteItem )
             return paletteItem
 
-        var ef = propertyContainer.editingFragment
+        var ef = propertyContainer.editFragment
         if ( !ef )
             return
-        var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
+        var editor = ef.codeHandler.code.textEdit().getEditor()
 
         if ( paletteName === root.defaultPalette ){
             paletteName = ef.codeHandler.defaultPalette(ef)
@@ -727,7 +727,7 @@ QtObject{
         if ( !paletteName.length )
             return
 
-        var palette = editor.documentHandler.codeHandler.expand(ef, {
+        var palette = editor.code.language.expand(ef, {
             "palettes" : [paletteName]
         })
         var paletteBox = __private.wrapPaletteInContainer(palette, propertyContainer.paletteGroup(), { moveEnabled: false })
@@ -735,9 +735,9 @@ QtObject{
     }
 
     function openPaletteInObjectContainer(objectContainer, paletteName){
-        var ef = objectContainer.editingFragment
+        var ef = objectContainer.editFragment
         var paletteBoxParent = objectContainer.paletteListContainer.children[0]
-        var editor = ef.codeHandler.documentHandler.textEdit().getEditor()
+        var editor = ef.codeHandler.code.textEdit().getEditor()
         var ch = ef.codeHandler
         if (!ef)
             return
@@ -763,7 +763,7 @@ QtObject{
 
     function addPropertyToObjectContainer(objectContainer, position, name, type, readOnly){
         //name = selection.name
-        var codeHandler = objectContainer.editingFragment.codeHandler
+        var codeHandler = objectContainer.editFragment.codeHandler
 
         // check if property is opened already
         for (var i = 0; i < objectContainer.propertiesOpened.length; ++i){
@@ -774,21 +774,21 @@ QtObject{
         }
         objectContainer.expand()
 
-        var metaTypeInfo = codeHandler.typeInfo(objectContainer.editingFragment.type())
+        var metaTypeInfo = codeHandler.typeInfo(objectContainer.editFragment.type())
         var propertyInfo = metaTypeInfo.propertyInfo(name)
 
         var ef = null
         var isWritable = readOnly ? false : propertyInfo.isWritable
         if (isWritable){
             var defaultValue = EditQml.MetaInfo.defaultTypeValue(type)
-            var groupParentFragment = objectContainer.editingFragment.isGroup() ? objectContainer.editingFragment : null
+            var groupParentFragment = objectContainer.editFragment.isGroup() ? objectContainer.editFragment : null
             var ppos = codeHandler.addPropertyToCode( position, name, defaultValue, groupParentFragment)
-            ef = codeHandler.openNestedConnection(objectContainer.editingFragment, ppos)
+            ef = codeHandler.openNestedConnection(objectContainer.editFragment, ppos)
 
-            if (objectContainer.editingFragment.isGroup())
+            if (objectContainer.editFragment.isGroup())
                 ef.addFragmentType(EditQml.QmlEditFragment.GroupChild)
         } else {
-            ef = codeHandler.openReadOnlyPropertyConnection(objectContainer.editingFragment, name)
+            ef = codeHandler.openReadOnlyPropertyConnection(objectContainer.editFragment, name)
         }
 
         if (!ef) {
@@ -796,7 +796,7 @@ QtObject{
             return
         }
 
-        objectContainer.editingFragment.signalChildAdded(ef)
+        objectContainer.editFragment.signalChildAdded(ef)
 
         var paletteList = ef.paletteList()
         for ( var i = 0; i < paletteList.length; ++i ){
@@ -818,41 +818,41 @@ QtObject{
 
         var codeHandler = container.editingFragment.codeHandler
         var ppos = codeHandler.addEventToCode(position, name)
-        var ef = codeHandler.openNestedConnection(container.editingFragment, ppos)
+        var ef = codeHandler.openNestedConnection(container.editFragment, ppos)
         if (ef){
-            container.editingFragment.signalChildAdded(ef)
+            container.editFragment.signalChildAdded(ef)
         }
         return ef
     }
 
     function addObjectToObjectContainer(container, position, type, extraProperties){
-        var codeHandler = container.editingFragment.codeHandler
+        var codeHandler = container.editFragment.codeHandler
 
         var opos = codeHandler.addObjectToCode(position, type, extraProperties)
-        codeHandler.addItemToRuntime(container.editingFragment, type, extraProperties)
-        var ef = codeHandler.openNestedConnection(container.editingFragment, opos)
+        codeHandler.addItemToRuntime(container.editFragment, type, extraProperties)
+        var ef = codeHandler.openNestedConnection(container.editFragment, opos)
         if (!ef)
             return
 
-        container.editingFragment.signalChildAdded(ef)
+        container.editFragment.signalChildAdded(ef)
         container.sortChildren()
     }
 
     function userAddToObjectContainer(container, handlers){
-        var codeHandler = container.editor.documentHandler.codeHandler
+        var codeHandler = container.editor.code.language
 
         var isForNode = container.objectName === "objectNode"
-        var isGroup = container.editingFragment.isGroup()
+        var isGroup = container.editFragment.isGroup()
 
-        var position = container.editingFragment.position()
+        var position = container.editFragment.position()
         if (isGroup)
             position += 1
 
         // This will have to be transfered to addContainer
         //TODO: will need to set this as a parameter
-//        var filter = 0 | (isForNode ? CodeQmlHandler.ForNode : 0) | (isGroup ? CodeQmlHandler.ReadOnly : 0)
+//        var filter = 0 | (isForNode ? LanguageQmlHandler.ForNode : 0) | (isGroup ? LanguageQmlHandler.ReadOnly : 0)
 
-        var addContainer = codeHandler.getAddOptions({ editFragment: container.editingFragment, isReadOnly: isGroup })
+        var addContainer = codeHandler.getAddOptions({ editFragment: container.editFragment, isReadOnly: isGroup })
         if ( !addContainer )
             return
 
@@ -928,11 +928,11 @@ QtObject{
     }
 
     function eraseObject(objectContainer){
-        var rootDeleted = (objectContainer.editingFragment.position() === objectContainer.editor.documentHandler.codeHandler.findRootPosition())
-        objectContainer.editor.documentHandler.codeHandler.eraseObject(objectContainer.editingFragment, !objectContainer.isForProperty)
+        var rootDeleted = (objectContainer.editFragment.position() === objectContainer.editor.code.language.findRootPosition())
+        objectContainer.editor.code.language.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
 
         if (rootDeleted) {
-            objectContainer.editor.rootShaped = false
+            objectContainer.editFragment.codeHandler.rootShaped = false
             objectContainer.editor.addRootButton.visible = true
         }
 
@@ -944,13 +944,13 @@ QtObject{
     function closeObjectContainer(objectContainer){
         if ( objectContainer.pane )
             objectContainer.closeAsPane()
-        var codeHandler = objectContainer.editor.documentHandler.codeHandler
+        var codeHandler = objectContainer.editor.code.language
         objectContainer.collapse()
         var rootPos = codeHandler.findRootPosition()
-        if (rootPos === objectContainer.editingFragment.position())
-            objectContainer.editor.rootShaped = false
+        if (rootPos === objectContainer.editFragment.position())
+            codeHandler.rootShaped = false
 
-        codeHandler.removeConnection(objectContainer.editingFragment)
+        codeHandler.removeConnection(objectContainer.editFragment)
 
         var p = objectContainer.parent.parent
         if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -994,7 +994,7 @@ QtObject{
     function shapeAtPositionWithInstructions(editor, position, instructions){
 
         instructionsShaping = true
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         if ("shapeImports" in instructions){
             lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
@@ -1006,7 +1006,7 @@ QtObject{
             return
 
         var objectContainer = createObjectContainerForFragment(ef)
-        if (objectContainer.editingFragment.position() === codeHandler.findRootPosition())
+        if (objectContainer.editFragment.position() === codeHandler.findRootPosition())
             objectContainer.contentWidth = Qt.binding(function(){
                 return objectContainer.containerContentWidth > objectContainer.editorContentWidth
                         ? objectContainer.containerContentWidth
@@ -1015,16 +1015,16 @@ QtObject{
 
         ef.incrementRefCount()
 
-        editor.documentHandler.frameBox(objectContainer.parent, ef.position(), ef.length())
+        editor.code.frameBox(objectContainer.parent, ef.position(), ef.length())
         shapeContainerWithInstructions(objectContainer, instructions)
         instructionsShaping = false
     }
 
     function shapeContainerWithInstructions(objectContainer, instructions){
         var editor = objectContainer.editor
-        if (instructions['type'] !== objectContainer.editingFragment.type()) return
+        if (instructions['type'] !== objectContainer.editFragment.type()) return
 
-        var objects = objectContainer.editor.documentHandler.codeHandler.openNestedFragments(objectContainer.editingFragment, ['objects'])
+        var objects = objectContainer.editor.code.language.openNestedFragments(objectContainer.editFragment, ['objects'])
 
         var containers = []
         for (var i=0; i < objects.length; ++i){
@@ -1080,7 +1080,7 @@ QtObject{
         if (ef.visualParent && ef.visualParent.owner)
             propertyContainer = ef.visualParent.owner
         else {
-            var codeHandler = objectContainer.editor.documentHandler.codeHandler
+            var codeHandler = objectContainer.editor.code.language
             propertyContainer = __factories.createPropertyContainer(objectContainer.paletteListContainer, objectContainer.editor, ef)
         }
 
@@ -1117,8 +1117,8 @@ QtObject{
             }
         }
 
-        var codeHandler = container.editor.documentHandler.codeHandler
-        return addPropertyByFragment(container.editingFragment, name)
+        var codeHandler = container.editor.code.language
+        return addPropertyByFragment(container.editFragment, name)
     }
 
     function addPropertyByFragment(ef, name){
@@ -1152,17 +1152,17 @@ QtObject{
     }
 
     function convertEditorStateIntoInstructions(editor){
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
 
         var result = null
-        var editingFragments = codeHandler.editingFragments()
-        for ( var i = 0; i < editingFragments.length; ++i ){
-            if (editingFragments[i].location === EditQml.QmlEditFragment.Object){
-                result = convertObjectIntoInstructions(editingFragments[i])
+        var editFragments = codeHandler.editFragments()
+        for ( var i = 0; i < editFragments.length; ++i ){
+            if (editFragments[i].location === EditQml.QmlEditFragment.Object){
+                result = convertObjectIntoInstructions(editFragments[i])
             }
         }
 
-        if (editor.importsShaped)
+        if (codeHandler.importsShaped)
             result['shapeImports'] = true
 
         return result

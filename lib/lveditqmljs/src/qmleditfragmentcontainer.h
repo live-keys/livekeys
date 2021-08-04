@@ -10,7 +10,7 @@
 namespace lv{
 
 class QmlEditFragment;
-class CodeQmlHandler;
+class LanguageQmlHandler;
 
 class LV_EDITQMLJS_EXPORT QmlEditFragmentContainer : public QObject{
 
@@ -18,10 +18,10 @@ class LV_EDITQMLJS_EXPORT QmlEditFragmentContainer : public QObject{
     Q_PROPERTY(int editCount READ editCount NOTIFY editCountChanged)
 
 public:
-    friend class CodeQmlHandler;
+    friend class LanguageQmlHandler;
 
 public:
-    explicit QmlEditFragmentContainer(CodeQmlHandler *parent = nullptr);
+    explicit QmlEditFragmentContainer(LanguageQmlHandler *parent = nullptr);
     ~QmlEditFragmentContainer() override;
 
     int editCount() const;
@@ -44,7 +44,7 @@ signals:
 
 private:
     QLinkedList<QmlEditFragment*> m_edits; // opened fragments
-    CodeQmlHandler*               m_codeHandler;
+    LanguageQmlHandler*               m_codeHandler;
 };
 
 inline int QmlEditFragmentContainer::editCount() const{

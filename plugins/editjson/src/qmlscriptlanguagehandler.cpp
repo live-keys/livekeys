@@ -2,7 +2,7 @@
 #include "queryhighlighter.h"
 
 #include "live/editorsettings.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/projectdocument.h"
 
 #include "live/mlnodetoqml.h"
@@ -17,7 +17,7 @@ QmlScriptLanguageHandler::QmlScriptLanguageHandler(
         const MLNode& initialSettings,
         ViewEngine* engine,
         ProjectDocument *document,
-        DocumentHandler *handler)
+        CodeHandler *handler)
     : QObject(handler)
     , m_highlighter(nullptr)
     , m_engine(engine)
@@ -160,7 +160,7 @@ QList<int> QmlScriptLanguageHandler::languageFeatures() const{
 }
 
 void QmlScriptLanguageHandler::suggestCompletion(int cursorPosition){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( !m_document || !dh )
         return;
 
@@ -190,7 +190,7 @@ void QmlScriptLanguageHandler::createHighlighter(const QString &capturePattern, 
     MLNode hlnode;
     ml::fromQml(highlights, hlnode);
 
-    DocumentHandler* doc = qobject_cast<DocumentHandler*>(parent());
+    CodeHandler* doc = qobject_cast<CodeHandler*>(parent());
 
     m_highlighter = new QueryHighlighter(m_language, hlnode, capturePattern.toStdString(), doc, m_document->textDocument());
 }
@@ -201,7 +201,7 @@ void QmlScriptLanguageHandler::__documentFormatUpdate(int /*position*/, int /*le
 }
 
 void QmlScriptLanguageHandler::__cursorWritePositionChanged(QTextCursor cursor){
-    DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
+    CodeHandler* dh = static_cast<CodeHandler*>(parent());
     if ( dh && dh->editorFocus() && cursor.position() == dh->currentCursorPosition() &&
          !m_document->editingStateIs(ProjectDocument::Assisted) &&
          !m_document->editingStateIs(ProjectDocument::Silent)

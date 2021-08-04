@@ -1,6 +1,7 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/live/codehandler.h \
     $$PWD/live/document.h \
     $$PWD/live/documentationloader.h \
     $$PWD/live/hookcontainer.h \
@@ -11,7 +12,6 @@ HEADERS += \
     $$PWD/live/codecompletionmodel.h \
     $$PWD/live/codecompletionsuggestion.h \
     $$PWD/live/editorsettings.h \
-    $$PWD/live/documenthandler.h \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/editorglobalobject.h \
     $$PWD/live/editorprivate_plugin.h \

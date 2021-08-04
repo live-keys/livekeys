@@ -4,6 +4,7 @@ INCLUDEPATH += $$PWD \
 HEADERS += \
     $$PWD/codecompletionmodel.h \
     $$PWD/codecompletionsuggestion.h \
+    $$PWD/codehandler.h \
     $$PWD/codepalette.h \
     $$PWD/commands.h \
     $$PWD/commandsmodel.h \
@@ -11,7 +12,6 @@ HEADERS += \
     $$PWD/document.h \
     $$PWD/documentation.h \
     $$PWD/documentationloader.h \
-    $$PWD/documenthandler.h \
     $$PWD/editorglobalobject.h \
     $$PWD/editorlayer.h \
     $$PWD/editorprivate_plugin.h \
@@ -48,6 +48,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/codecompletionmodel.cpp \
     $$PWD/codecompletionsuggestion.cpp \
+    $$PWD/codehandler.cpp \
     $$PWD/codepalette.cpp \
     $$PWD/commands.cpp \
     $$PWD/commandsmodel.cpp \
@@ -55,7 +56,6 @@ SOURCES += \
     $$PWD/document.cpp \
     $$PWD/documentation.cpp \
     $$PWD/documentationloader.cpp \
-    $$PWD/documenthandler.cpp \
     $$PWD/editorglobalobject.cpp \
     $$PWD/editorlayer.cpp \
     $$PWD/editorprivate_plugin.cpp \

@@ -33,7 +33,7 @@
 #include "live/packagegraph.h"
 
 #include "live/project.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/editorprivate_plugin.h"
 
 #include "qmlengineinterceptor.h"

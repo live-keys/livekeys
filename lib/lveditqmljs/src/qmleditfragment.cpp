@@ -20,7 +20,7 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "qmlbindingchannel.h"
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 #include "live/viewcontext.h"
 #include "documentqmlchannels.h"
 
@@ -45,7 +45,7 @@ namespace lv{
  *
  * The Fragment is constructed from a \p declaration object and a \p palette object.
  */
-QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHandler* codeHandler, QObject *parent)
+QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::LanguageQmlHandler* codeHandler, QObject *parent)
     : QObject(parent)
     , m_declaration(declaration)
     , m_bindingPalette(nullptr)
@@ -474,9 +474,9 @@ void QmlEditFragment::__updateFromPalette()
 void QmlEditFragment::suggestionsForExpression(const QString &expression, CodeCompletionModel *model, bool suggestFunctions)
 {
     QObject* editParent = parent();
-    CodeQmlHandler* qmlHandler = nullptr;
+    LanguageQmlHandler* qmlHandler = nullptr;
     while ( editParent ){
-        qmlHandler = qobject_cast<CodeQmlHandler*>(editParent);
+        qmlHandler = qobject_cast<LanguageQmlHandler*>(editParent);
         if ( qmlHandler )
             break;
 
@@ -868,7 +868,7 @@ void QmlEditFragment::__channelObjectErased(){
         return;
 
     if ( m_channel->type() == QmlBindingChannel::Object ){
-        m_codeHandler->removeEditingFragment(this);
+        m_codeHandler->removeEditFragment(this);
     } else if ( m_channel->type() == QmlBindingChannel::ListIndex ){
         auto parentFrag = parentFragment();
         if (parentFrag){
@@ -878,7 +878,7 @@ void QmlEditFragment::__channelObjectErased(){
                 cf->channel()->updateConnection(cf->channel()->listIndex()-1);
             }
         }
-        m_codeHandler->removeEditingFragment(this);
+        m_codeHandler->removeEditFragment(this);
     }
 }
 

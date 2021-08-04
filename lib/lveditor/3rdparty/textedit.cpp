@@ -4041,16 +4041,16 @@ void TextEditPrivate::implicitHeightChanged()
 #endif
 }
 
-DocumentHandler* TextEdit::documentHandler()
+CodeHandler* TextEdit::code()
 {
     Q_D(TextEdit);
-    return d->documentHandler;
+    return d->code;
 }
 
-void TextEdit::setDocumentHandler(DocumentHandler *dh)
+void TextEdit::setCode(CodeHandler *dh)
 {
     Q_D(TextEdit);
-    d->documentHandler = dh;
+    d->code = dh;
     dh->setTextEdit(this);
 }
 

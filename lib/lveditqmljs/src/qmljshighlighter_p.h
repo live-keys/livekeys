@@ -42,7 +42,7 @@ public:
     };
 
 public:
-    QmlJsHighlighter(QmlJsSettings* settings, DocumentHandler* handler, QTextDocument *parent = nullptr);
+    QmlJsHighlighter(QmlJsSettings* settings, CodeHandler* handler, QTextDocument *parent = nullptr);
 
     void setTarget(QTextDocument* target);
 

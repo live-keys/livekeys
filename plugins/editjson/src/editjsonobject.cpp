@@ -48,7 +48,7 @@ EditJsonObject::EditJsonObject(QQmlEngine* parent)
 
 QObject* EditJsonObject::createHandler(
         ProjectDocument *document,
-        DocumentHandler *handler,
+        CodeHandler *handler,
         const QString &settingsCategory,
         const QJSValue &initialSettings)
 {

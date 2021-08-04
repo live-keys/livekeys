@@ -44,12 +44,12 @@ Workspace.Pane{
         paneState = { document : document }
     }
 
-    property alias documentHandler: editor.documentHandler
+    property alias code: editor.code
     property alias textEdit: editor.textEdit
     property alias loading: loadingAnimation.visible
     property var panes: null
 
-    property bool codeOnly: !(documentHandler.codeHandler && documentHandler.codeHandler.editContainer.editCount !== 0)
+    property bool codeOnly: !(code.language && code.language.editContainer.editCount !== 0)
 
     onCodeOnlyChanged: {
         if (codeOnly){
@@ -82,12 +82,12 @@ Workspace.Pane{
     }
 
     paneHelp : function(){
-        if ( documentHandler && documentHandler.has(DocumentHandler.LanguageHelp) ){
+        if ( code && code.has(DocumentHandler.LanguageHelp) ){
             var helpPath = ''
-            if ( documentHandler.completionModel.isEnabled && editor.qmlSuggestionBox){
+            if ( code.completionModel.isEnabled && editor.qmlSuggestionBox){
                 helpPath = editor.qmlSuggestionBox.getDocumentation()
             } else {
-                helpPath = documentHandler.codeHandler.help(textEdit.cursorPosition)
+                helpPath = code.language.help(textEdit.cursorPosition)
             }
 
             if ( helpPath.length > 0 ){
@@ -278,20 +278,20 @@ Workspace.Pane{
 
                 if (!codeOnly)
                 {
-                    if (documentHandler.codeHandler)
+                    if (code.language)
                     {
                         // unfortunate naming, but this actually disables loading
                         if (loading)
                             lk.layers.workspace.commands.execute("editqml.shape_all")
 
-                        if (editor.rootShaped){
+                        if (code.language.rootShaped){
                             root.paneState.layout = paletteControls.convertStateIntoInstructions()
                         } else {
                             root.paneState.layout = null
                         }
-                        documentHandler.codeHandler.editContainer.clearAllFragments()
-                        editor.importsShaped = false
-                        editor.rootShaped = false
+                        code.language.editContainer.clearAllFragments()
+                        code.language.importsShaped = false
+                        code.language.rootShaped = false
                     }
                 } else {
                     if (root.paneState.layout){
@@ -509,7 +509,7 @@ Workspace.Pane{
                         return
                     }
 
-                    var codeHandler = editor.documentHandler.codeHandler
+                    var codeHandler = editor.code.language
                     var rootPosition = codeHandler.findRootPosition()
 
                     lk.layers.workspace.extensions.editqml.shapeLayout(root, layout)
@@ -524,10 +524,10 @@ Workspace.Pane{
         anchors.topMargin: 30
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
-        lineSurfaceVisible: !(editor.importsShaped && editor.rootShaped)
+        lineSurfaceVisible: !(code && code.language && code.language.importsShaped && code.language.rootShaped)
 
         onDocumentChanged: {
-            editorAddRemoveMenu.supportsShaping = documentHandler.has(DocumentHandler.LanguageLayout)
+            editorAddRemoveMenu.supportsShaping = code.has(DocumentHandler.LanguageLayout)
         }
     }
 

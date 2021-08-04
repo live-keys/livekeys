@@ -4,7 +4,7 @@
 #include "live/project.h"
 #include "live/projectdocument.h"
 #include "live/runnablecontainer.h"
-#include "live/codeqmlhandler.h"
+#include "live/languageqmlhandler.h"
 #include "live/projectfile.h"
 #include "live/hookcontainer.h"
 #include "qmlwatcher.h"
@@ -93,7 +93,7 @@ QmlBindingChannel::Ptr traversePath(QmlBindingPath::Ptr path, Runnable* r, QmlBi
 
 }// namespace
 
-DocumentQmlChannels::DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDispatcher, CodeQmlHandler *handler)
+DocumentQmlChannels::DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDispatcher, LanguageQmlHandler *handler)
     : QAbstractListModel(handler)
     , m_selectedIndex(-1)
     , m_codeHandler(handler)

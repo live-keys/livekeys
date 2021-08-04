@@ -37,7 +37,7 @@ public:
         EditLvSettings *settings,
         LanguageLvExtension* projectHandler,
         ProjectDocument *document,
-        DocumentHandler* handler = nullptr
+        CodeHandler* handler = nullptr
     );
     ~LanguageLvHandler() override;
 

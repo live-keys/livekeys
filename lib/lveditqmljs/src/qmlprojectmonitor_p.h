@@ -28,7 +28,7 @@ namespace lv{
 
 class ViewEngine;
 class Project;
-class CodeQmlHandler;
+class LanguageQmlHandler;
 class ProjectQmlScanner;
 class ProjectQmlExtension;
 
@@ -51,16 +51,16 @@ public:
     );
     ~QmlProjectMonitor();
 
-    void queueDocumentScan(const QString& path, const QString& content, CodeQmlHandler* codeHandler);
+    void queueDocumentScan(const QString& path, const QString& content, LanguageQmlHandler* codeHandler);
 
-    void removeScopeListener(CodeQmlHandler* handler);
-    void addScopeListener(CodeQmlHandler* handler);
+    void removeScopeListener(LanguageQmlHandler* handler);
+    void addScopeListener(LanguageQmlHandler* handler);
 
     ProjectQmlScope::Ptr projectScope();
     bool hasProjectScope();
 
 signals:
-    void requestDocumentScan(const QString& path, const QString& content, CodeQmlHandler* handler);
+    void requestDocumentScan(const QString& path, const QString& content, LanguageQmlHandler* handler);
     void libraryScanQueueCleared();
 
 public slots:
@@ -74,7 +74,7 @@ private:
     ProjectQmlExtension*  m_projectHandler;
     Project*              m_project;
     ViewEngine*           m_engine;
-    QSet<CodeQmlHandler*> m_scopeListeners;
+    QSet<LanguageQmlHandler*> m_scopeListeners;
     ProjectQmlScope::Ptr  m_projectScope;
 };
 

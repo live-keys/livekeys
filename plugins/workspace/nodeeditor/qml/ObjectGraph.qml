@@ -84,12 +84,12 @@ Rectangle{
     property alias nodeDelegate : graph.nodeDelegate
     property var palette: null
     property var editor: null
-    property var editingFragment: null
+    property var editFragment: null
 
-    onEditingFragmentChanged: {
-        if (!editingFragment)
+    onEditFragmentChanged: {
+        if (!editFragment)
             return
-        editor = editingFragment.codeHandler.documentHandler.textEdit().getEditor()
+        editor = editFragment.codeHandler.code.textEdit().getEditor()
     }
 
     property alias zoom: graphView.zoom
@@ -146,7 +146,7 @@ Rectangle{
 
         }
 
-        var srcLocation = srcPort.objectProperty.editingFragment.location
+        var srcLocation = srcPort.objectProperty.editFragment.location
 
         if (srcLocation === QmlEditFragment.Slot)
         {
@@ -154,25 +154,25 @@ Rectangle{
             var nodeId = dstPort.objectProperty.node.item.id
 
             if (nodeId === "") return
-            // if (dstPort.objectProperty.editingFragment) return
+            // if (dstPort.objectProperty.editFragment) return
 
             var funcName = dstPort.objectProperty.propertyName
             value = nodeId + "." + funcName + "()"
 
-            if (!srcPort.objectProperty.editingFragment)
+            if (!srcPort.objectProperty.editFragment)
                 return
 
-            var result = srcPort.objectProperty.editingFragment.bindFunctionExpression(value)
+            var result = srcPort.objectProperty.editFragment.bindFunctionExpression(value)
             if ( result ){
-                srcPort.objectProperty.editingFragment.write(
+                srcPort.objectProperty.editFragment.write(
                     {'__ref': value}
                 )
             }
         } else {
-            if (dstPort.objectProperty.editingFragment){
-                var result = dstPort.objectProperty.editingFragment.bindExpression(value)
+            if (dstPort.objectProperty.editFragment){
+                var result = dstPort.objectProperty.editFragment.bindExpression(value)
                 if ( result ){
-                    dstPort.objectProperty.editingFragment.write(
+                    dstPort.objectProperty.editFragment.write(
                         {'__ref': value}
                     )
                 }
@@ -203,8 +203,8 @@ Rectangle{
     }
 
     onDoubleClicked: {
-        var position = root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1
-        var addOptions = root.editingFragment.codeHandler.getAddOptions(position)
+        var position = root.editFragment.valuePosition() + root.editFragment.valueLength() - 1
+        var addOptions = root.editFragment.codeHandler.getAddOptions(position)
 
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
@@ -213,7 +213,7 @@ Rectangle{
 
         var addBoxItem = paletteControls.views.openAddOptionsBox(
             addOptions,
-            root.editingFragment.codeHandler,
+            root.editFragment.codeHandler,
             {
                 aroundRect: Qt.rect(pos.x, pos.y, 1, 1),
                 panePosition: cursorCoords,
@@ -233,12 +233,12 @@ Rectangle{
                     if ( selection.extraProperties ){
                         paletteControls.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
-                                var ch = editingFragment.codeHandler
+                                var ch = editFragment.codeHandler
                                 var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)
-                                ch.addItemToRuntime(editingFragment, selection.name, propertiesToAdd)
-                                var ef = ch.openNestedConnection(editingFragment, opos)
+                                ch.addItemToRuntime(editFragment, selection.name, propertiesToAdd)
+                                var ef = ch.openNestedConnection(editFragment, opos)
                                 if (ef)
-                                    editingFragment.signalChildAdded(ef)
+                                    editFragment.signalChildAdded(ef)
 
                             },
                             onCancelled: function(){}
@@ -246,12 +246,12 @@ Rectangle{
 
 
                     } else {
-                        var ch = editingFragment.codeHandler
+                        var ch = editFragment.codeHandler
                         var opos = ch.addItem(selection.position, selection.objectType, selection.name)
-                        ch.addItemToRuntime(editingFragment, selection.name)
-                        var ef = ch.openNestedConnection(editingFragment, opos)
+                        ch.addItemToRuntime(editFragment, selection.name)
+                        var ef = ch.openNestedConnection(editFragment, opos)
                         if (ef)
-                            editingFragment.signalChildAdded(ef)
+                            editFragment.signalChildAdded(ef)
                     }
                     box.child.finalize()
                 }
@@ -298,11 +298,11 @@ Rectangle{
         var srcPort = item.sourceItem
         var dstPort = item.destinationItem
 
-        if (dstPort.objectProperty && dstPort.objectProperty.editingFragment){
-            var ef = dstPort.objectProperty.editingFragment
+        if (dstPort.objectProperty && dstPort.objectProperty.editFragment){
+            var ef = dstPort.objectProperty.editFragment
             var value = ef.defaultValue()
             var result = ef.bindExpression('null')
-            dstPort.objectProperty.editingFragment.write(
+            dstPort.objectProperty.editFragment.write(
                 {'__ref': value}
             )
             ef.commit(value)

@@ -46,7 +46,7 @@ Item{
     property Item inPort : null
     property Item outPort : null
     property QtObject node : null
-    property var editingFragment: null
+    property var editFragment: null
 
     property var isAnObject: false
     property bool isMethod: false
@@ -100,7 +100,7 @@ Item{
         root.title = root.propertyName
         root.subtitle = editFragment.typeName()
         root.node = node
-        root.editingFragment = editFragment
+        root.editFragment = editFragment
 
         //TODO: Handle functions
         //        if ( options && options.hasOwnProperty('isMethod') ){
@@ -186,7 +186,7 @@ Item{
             anchors.left: propertyLabel.right
             anchors.leftMargin: 5
             sourceComponent: {
-                return root.editingFragment && root.editingFragment.location === QmlEditFragment.Slot
+                return root.editFragment && root.editFragment.location === QmlEditFragment.Slot
                     ? root.eventIcon
                     : root.isMethod ? root.methodIcon : null
             }
@@ -246,8 +246,8 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    editingFragment.codeHandler.removeConnection(editingFragment)
-                    if (editingFragment.refCount > 0)
+                    editFragment.codeHandler.removeConnection(editFragment)
+                    if (editFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()
                     }
@@ -273,12 +273,12 @@ Item{
         onChildrenChanged: {
             updateContentWidth()
         }
-        editingFragment: root.editingFragment
+        editFragment: root.editFragment
 
     }
     
     Connections {
-        target: editingFragment
+        target: editFragment
         function onAboutToBeRemoved(){
             destroyObjectNodeProperty()
         }

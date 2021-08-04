@@ -26,7 +26,7 @@ Qan.NodeItem{
     property alias paletteListContainer: paletteContainer
 
     property var nodeParent: null
-    property var editingFragment: null
+    property var editFragment: null
     property var removeNode: null
     property string id: ""
     property var editor: null
@@ -154,7 +154,7 @@ Qan.NodeItem{
     }
 
     function expandOptions(options){
-        var codeHandler = editingFragment.codeHandler
+        var codeHandler = editFragment.codeHandler
 
         if ( 'palettes' in options){
             var palettes = options['palettes']
@@ -171,7 +171,7 @@ Qan.NodeItem{
 
                 var propName = newProps[i][0]
 
-                var metaTypeInfo = codeHandler.typeInfo(root.editingFragment.type())
+                var metaTypeInfo = codeHandler.typeInfo(root.editFragment.type())
                 var propertyInfo = metaTypeInfo.propertyInfo(propName)
                 if ( !propertyInfo )
                     continue
@@ -185,19 +185,19 @@ Qan.NodeItem{
                 var ef = null
                 if (newProps[i].length > 2)
                 {
-                    ef = codeHandler.openReadOnlyPropertyConnection(root.editingFragment, propName)
+                    ef = codeHandler.openReadOnlyPropertyConnection(root.editFragment, propName)
                 } else {
                     var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
                     var ppos = codeHandler.addPropertyToCode(
-                        root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
+                        root.editFragment.valuePosition() + root.editFragment.valueLength() - 1,
                         propName,
                         defaultValue
                     )
-                    ef = codeHandler.openNestedConnection(root.editingFragment, ppos)
+                    ef = codeHandler.openNestedConnection(root.editFragment, ppos)
                 }
 
                 if (ef) {
-                    root.editingFragment.signalChildAdded(ef, false)
+                    root.editFragment.signalChildAdded(ef, false)
                     if (propPalette.length === 0) continue
 //                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
 //                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
@@ -227,10 +227,10 @@ Qan.NodeItem{
             }
         }
 
-        var codeHandler = editingFragment.codeHandler
+        var codeHandler = editFragment.codeHandler
 
-        var position = editingFragment.valuePosition() +
-                       editingFragment.valueLength() - 1
+        var position = editFragment.valuePosition() +
+                       editFragment.valueLength() - 1
 
         var addContainer = codeHandler.getAddOptions(position)
         if ( !addContainer )
@@ -368,7 +368,7 @@ Qan.NodeItem{
             anchors.top: parent.top
             anchors.topMargin: nodeTitle.height
             onChildrenChanged: resizeNode()
-            editingFragment: root.editingFragment
+            editFragment: root.editFragment
         }
         
         Column{
@@ -382,7 +382,7 @@ Qan.NodeItem{
     }
 
     Connections {
-        target: editingFragment
+        target: editFragment
         ignoreUnknownSignals: true
         function onChildAdded(ef, context){
             if ( ef.location === EditQml.QmlEditFragment.Object ){

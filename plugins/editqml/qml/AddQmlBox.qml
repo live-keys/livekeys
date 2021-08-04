@@ -47,7 +47,7 @@ Rectangle{
     property int fontSize: root.theme.inputLabelStyle.textStyle.font.pixelSize
 
     property int smallFontSize: 9
-    property var codeQmlHandler: null
+    property var languageQmlHandler: null
 
     border.color: root.theme.colorScheme.middlegroundOverlayDominant
     border.width: 1
@@ -287,11 +287,11 @@ Rectangle{
                         var id = listView.currentItem.code
                         var result = id[0].toLowerCase() + id.substring(1)
                         var index = 1
-                        if (codeQmlHandler)
+                        if (languageQmlHandler)
                         {
 
                             var origResult = result
-                            var docIds = codeQmlHandler.getDocumentIds()
+                            var docIds = languageQmlHandler.getDocumentIds()
 
                             while (true)
                             {

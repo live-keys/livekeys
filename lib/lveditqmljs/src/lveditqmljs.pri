@@ -4,6 +4,7 @@ HEADERS += \
     $$PWD/documentqmlchannels.h \
     $$PWD/documentqmlinfo.h \
     $$PWD/documentqmlranges_p.h \
+    $$PWD/languageqmlhandler.h \
     $$PWD/qmlbindingchannel.h \
     $$PWD/qmlbindingchannelsdispatcher.h \
     $$PWD/qmlbindingpath.h \
@@ -20,7 +21,6 @@ HEADERS += \
     $$PWD/documentqmlvalueobjects.h \
     $$PWD/documentqmlvaluescanner_p.h \
     $$PWD/qmljssettings.h \
-    $$PWD/codeqmlhandler.h \
     $$PWD/lveditqmljsglobal.h \
     $$PWD/projectqmlextension.h \
     $$PWD/qmljsbuiltintypes_p.h \
@@ -44,6 +44,7 @@ SOURCES += \
     $$PWD/documentqmlchannels.cpp \
     $$PWD/documentqmlinfo.cpp \
     $$PWD/documentqmlranges.cpp \
+    $$PWD/languageqmlhandler.cpp \
     $$PWD/qmlbindingchannel.cpp \
     $$PWD/qmlbindingchannelsdispatcher.cpp \
     $$PWD/qmlbindingpath.cpp \
@@ -58,7 +59,6 @@ SOURCES += \
     $$PWD/documentqmlvaluescanner.cpp \
     $$PWD/qmljssettings.cpp \
     $$PWD/qmljshighlighter.cpp \
-    $$PWD/codeqmlhandler.cpp \
     $$PWD/projectqmlextension.cpp \
     $$PWD/qmljsbuiltintypes.cpp \
     $$PWD/qmlmetainfo.cpp \

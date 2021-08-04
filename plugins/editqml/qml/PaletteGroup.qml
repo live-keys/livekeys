@@ -9,17 +9,17 @@ Column{
     objectName: "paletteGroup"
 
     function __initialize(ef){
-        paletteGroup.editingFragment = ef
+        paletteGroup.editFragment = ef
         paletteGroup.codeHandler = ef.codeHandler
         ef.visualParent = paletteGroup
     }
 
-    property QtObject editingFragment : null
+    property QtObject editFragment : null
     property QtObject codeHandler : null
     property var owner: null
     property var palettesOpened: []
-    property Connections editingFragmentRemovals: Connections{
-        target: editingFragment
+    property Connections editFragmentRemovals: Connections{
+        target: editFragment
         function onAboutToRemovePalette(palette){
             var p = palette.item.parent
             while ( p && p.objectName !== "paletteContainer" )
@@ -30,14 +30,14 @@ Column{
         }
         function onPaletteListEmpty(){
             var box = paletteGroup.parent
-            if ( editingFragment.bindingPalette() ){
+            if ( editFragment.bindingPalette() ){
                 if ( box.objectName === 'editorBox' ){
                     paletteGroup.destroy()
                     box.destroy()
                 }
             } else {
                 if ( box && box.objectName === 'editorBox' ){
-                    editingFragment.codeHandler.removeConnection(editingFragment)
+                    editFragment.codeHandler.removeConnection(editFragment)
                     paletteGroup.destroy()
                 }
             }
@@ -50,8 +50,8 @@ Column{
                 ed = ed.parent
             }
 
-            if (ed && paletteGroup.editingFragment && paletteGroup.editingFragment.location === QmlEditFragment.Imports){
-                ed.importsShaped = false
+            if (ed && paletteGroup.editFragment && paletteGroup.editFragment.location === QmlEditFragment.Imports){
+                paletteGroup.editFragment.codeHandler.importsShaped = false
             }
 
             if ( p && p.objectName === 'editorBox' ){
@@ -66,7 +66,7 @@ Column{
 
     function closePalettes(){
         for (var i = 0; i < paletteGroup.children.length; ++i)
-            editingFragment.codeHandler.removePalette(paletteGroup.children[i].palette)
+            editFragment.codeHandler.removePalette(paletteGroup.children[i].palette)
     }
 
     onWidthChanged: {
