@@ -238,7 +238,7 @@ Rectangle{
                                 ch.addItemToRuntime(editingFragment, selection.name, propertiesToAdd)
                                 var ef = ch.openNestedConnection(editingFragment, opos)
                                 if (ef)
-                                    editingFragment.signalObjectAdded(ef)
+                                    editingFragment.signalChildAdded(ef)
 
                             },
                             onCancelled: function(){}
@@ -251,10 +251,8 @@ Rectangle{
                         ch.addItemToRuntime(editingFragment, selection.name)
                         var ef = ch.openNestedConnection(editingFragment, opos)
                         if (ef)
-                            editingFragment.signalObjectAdded(ef)
+                            editingFragment.signalChildAdded(ef)
                     }
-
-
                     box.child.finalize()
                 }
             }

@@ -25,6 +25,7 @@ HEADERS += \
     $$PWD/projectqmlextension.h \
     $$PWD/qmljsbuiltintypes_p.h \
     $$PWD/qmlmetainfo_p.h \
+    $$PWD/qmlmetatypeinfo_p.h \
     $$PWD/qmlprojectmonitor_p.h \
     $$PWD/qmladdcontainer.h \
     $$PWD/qmleditfragment.h \
@@ -61,6 +62,7 @@ SOURCES += \
     $$PWD/projectqmlextension.cpp \
     $$PWD/qmljsbuiltintypes.cpp \
     $$PWD/qmlmetainfo.cpp \
+    $$PWD/qmlmetatypeinfo.cpp \
     $$PWD/qmlprojectmonitor.cpp \
     $$PWD/qmladdcontainer.cpp \
     $$PWD/qmleditfragment.cpp \

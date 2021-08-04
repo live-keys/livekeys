@@ -774,15 +774,11 @@ QtObject{
         }
         objectContainer.expand()
 
-        var propsWritable = codeHandler.propertiesWritable(objectContainer.editingFragment)
+        var metaTypeInfo = codeHandler.typeInfo(objectContainer.editingFragment.type())
+        var propertyInfo = metaTypeInfo.propertyInfo(name)
 
         var ef = null
-
-        var isWritable = propsWritable[name]
-        if (readOnly){
-            isWritable = false
-        }
-
+        var isWritable = readOnly ? false : propertyInfo.isWritable
         if (isWritable){
             var defaultValue = EditQml.MetaInfo.defaultTypeValue(type)
             var groupParentFragment = objectContainer.editingFragment.isGroup() ? objectContainer.editingFragment : null
@@ -792,7 +788,7 @@ QtObject{
             if (objectContainer.editingFragment.isGroup())
                 ef.addFragmentType(EditQml.QmlEditFragment.GroupChild)
         } else {
-            ef = codeHandler.createReadOnlyPropertyFragment(objectContainer.editingFragment, name)
+            ef = codeHandler.openReadOnlyPropertyConnection(objectContainer.editingFragment, name)
         }
 
         if (!ef) {
@@ -800,7 +796,7 @@ QtObject{
             return
         }
 
-        objectContainer.editingFragment.signalPropertyAdded(ef)
+        objectContainer.editingFragment.signalChildAdded(ef)
 
         var paletteList = ef.paletteList()
         for ( var i = 0; i < paletteList.length; ++i ){
@@ -820,10 +816,11 @@ QtObject{
             }
         }
 
+        var codeHandler = container.editingFragment.codeHandler
         var ppos = codeHandler.addEventToCode(position, name)
         var ef = codeHandler.openNestedConnection(container.editingFragment, ppos)
         if (ef){
-            container.editingFragment.signalPropertyAdded(ef)
+            container.editingFragment.signalChildAdded(ef)
         }
         return ef
     }
@@ -837,7 +834,7 @@ QtObject{
         if (!ef)
             return
 
-        container.editingFragment.signalObjectAdded(ef)
+        container.editingFragment.signalChildAdded(ef)
         container.sortChildren()
     }
 
@@ -914,11 +911,9 @@ QtObject{
                     } else if ( selection.category === 'event' ){ // event
                         addEventToObjectContainer(container, selection.position, selection.name)
 
-                    } else if (isForNode && selection.category === 'function' ){
+                    } else if ( selection.category === 'function' ){
                         var node = container.nodeParent.item
-                        //TODO: remove isForNode in favor of addFunctionProperty
-                        //HERE
-//                        container.nodeParent.item.addSubobject(container.nodeParent, selection.name, container.nodeParent.item.id ? ObjectGraph.PortMode.InPort : ObjectGraph.PortMode.None, null, {isMethod: true})
+                        node.addFunctionProperty(selection.name)
                     }
 
                     box.child.finalize()
@@ -945,9 +940,6 @@ QtObject{
             objectContainer.collapse()
         }
     }
-
-    // populateObjectInfo()
-    // instructions
 
     function closeObjectContainer(objectContainer){
         if ( objectContainer.pane )
@@ -1000,10 +992,6 @@ QtObject{
     // -----------------------------------------------
 
     function shapeAtPositionWithInstructions(editor, position, instructions){
-
-        //TODO: shapePaletteAtPosition
-        //TODO: shapeImports
-        //TODO: When ready: continue with instructions
 
         instructionsShaping = true
         var codeHandler = editor.documentHandler.codeHandler
@@ -1157,7 +1145,7 @@ QtObject{
         var propEf = codeHandler.openNestedConnection(ef, ppos)
 
         if (propEf) {
-            ef.signalPropertyAdded(propEf, false)
+            ef.signalChildAdded(propEf, false)
         }
 
         return propEf
@@ -1212,9 +1200,9 @@ QtObject{
         var properties = []
         for (var i = 0; i < childFragments.length; ++i){
             var frag = childFragments[i]
-            if (frag.location === QmlEditFragment.Object)
+            if (frag.location === EditQml.QmlEditFragment.Object)
                 objects.push(convertObjectIntoInstructions(frag))
-            if (frag.location === QmlEditFragment.Property)
+            if (frag.location === EditQml.QmlEditFragment.Property)
                 properties.push(convertPropertyIntoInstructions(frag))
         }
 

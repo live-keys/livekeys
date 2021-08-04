@@ -63,7 +63,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::CodeQmlHan
     } else if ( m_declaration->isForList() ){
         m_valueLocation = Object;
     } else {
-        if ( codeHandler->isForAnObject(declaration) ){
+        if ( QmlTypeInfo::isObject(m_declaration->type().name()) ){
             m_valueLocation = Object;
         } else {
             m_valueLocation = Property;
@@ -156,7 +156,8 @@ void QmlEditFragment::checkIfGroup()
     else if (declaration()->type().name() != "import" && declaration()->type().name() != "slot")
         isForAnObject = QmlTypeInfo::isObject(declaration()->type().name());
 
-    if (!isForAnObject) return;
+    if (!isForAnObject)
+        return;
 
     if (declaration()->type().language() == QmlTypeReference::Cpp){
         addFragmentType(QmlEditFragment::FragmentType::Group);
@@ -256,7 +257,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         return;
     }
 
-    QVariantMap propsWritable = m_codeHandler->propertiesWritable(this);
+    QmlInheritanceInfo typeInfo = m_codeHandler->inheritanceInfo(type());
 
     int valuePosition = declaration()->valuePosition();
     int valueLength   = declaration()->valueLength();
@@ -299,7 +300,18 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         }
 
         if ( leftOverProperties.contains(propertyName)){
-            if (propsWritable.value(propertyName).toBool()){
+
+            bool propWritable = false;
+            for ( auto typeIt = typeInfo.nodes.begin(); typeIt != typeInfo.nodes.end(); ++typeIt ){
+                QmlTypeInfo::Ptr ti = *typeIt;
+                QmlPropertyInfo pi = ti->propertyAt(propertyName);
+                if ( pi.isValid() ){
+                    propWritable = pi.isWritable;
+                    break;
+                }
+            }
+
+            if (propWritable){
                 source.replace(p->valueBegin, p->end - p->valueBegin, buildCode(properties.property(propertyName), true));
             }
             leftOverProperties.remove(propertyName);
@@ -330,7 +342,18 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
     }
 
     for ( auto it = leftOverProperties.begin(); it != leftOverProperties.end(); ++it ){
-        if (propsWritable.value(*it).toBool()){
+
+        bool propWritable = false;
+        for ( auto typeIt = typeInfo.nodes.begin(); typeIt != typeInfo.nodes.end(); ++typeIt ){
+            QmlTypeInfo::Ptr ti = *typeIt;
+            QmlPropertyInfo pi = ti->propertyAt(*it);
+            if ( pi.isValid() ){
+                propWritable = pi.isWritable;
+                break;
+            }
+        }
+
+        if (propWritable){
             source.insert(writeIndex + 1, "\n" + indent + *it + ": " + buildCode(properties.property(*it), true));
         }
     }
@@ -435,13 +458,12 @@ QVariant QmlEditFragment::parse()
     }
 }
 
-void QmlEditFragment::updateBindings()
-{
+void QmlEditFragment::updateBindings(){
     if (bindingPalette())
         m_whenBinding.call();
 }
 
-void QmlEditFragment::updateFromPalette()
+void QmlEditFragment::__updateFromPalette()
 {
     CodePalette* palette = qobject_cast<CodePalette*>(sender());
     if ( palette ){
@@ -651,7 +673,7 @@ void QmlEditFragment::__selectedChannelChanged(){
         if ( m_channel ){
             m_channel->setEnabled(true);
             if ( m_channel->listIndex() == -1 ){
-                m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+                m_channel->property().connectNotifySignal(this, SLOT(__updateValue()));
             }
             for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
                 updatePaletteValue(*it);
@@ -663,7 +685,7 @@ void QmlEditFragment::__selectedChannelChanged(){
             if ( m_channel ){
                 m_channel->setEnabled(true);
                 if ( m_channel->listIndex() == -1 ){
-                    m_channel->property().connectNotifySignal(this, SLOT(updateValue()));
+                    m_channel->property().connectNotifySignal(this, SLOT(__updateValue()));
                 }
                 for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
                     updatePaletteValue(*it);
@@ -684,10 +706,10 @@ QString QmlEditFragment::typeName() const{
     return m_declaration->type().name();
 }
 
-QString QmlEditFragment::identifier() const
-{
+QString QmlEditFragment::identifier() const{
     const QStringList& ic = m_declaration->identifierChain();
-    if (ic.size() == 0) return "";
+    if (ic.size() == 0)
+        return "";
     return ic[ic.size()-1];
 }
 
@@ -695,21 +717,25 @@ QString QmlEditFragment::objectInitializerType() const{
     return m_objectInitializeType.join();
 }
 
-QList<QObject*> QmlEditFragment::paletteList() const{
-    QList<QObject*> result;
-    for (CodePalette* palette : m_palettes)
-        result.append(palette);
+QJSValue QmlEditFragment::paletteList() const{
+    ViewEngine* engine = ViewContext::instance().engine();
+    QJSValue result = engine->engine()->newArray(m_palettes.length());
+    for ( int i = 0; i < m_palettes.length(); ++i ){
+        result.setProperty(i, engine->engine()->newQObject(m_palettes[i]));
+    }
     return result;
 }
 
-QList<QObject *> QmlEditFragment::getChildFragments() const{
-    QList<QObject*> result;
-    for (QmlEditFragment* edit : m_childFragments)
-        result.append(edit);
+QJSValue QmlEditFragment::getChildFragments() const{
+    ViewEngine* engine = ViewContext::instance().engine();
+    QJSValue result = engine->engine()->newArray(m_childFragments.length());
+    for ( int i = 0; i < m_childFragments.length(); ++i ){
+        result.setProperty(i, engine->engine()->newQObject(m_childFragments[i]));
+    }
     return result;
 }
 
-void QmlEditFragment::updateValue(){
+void QmlEditFragment::__updateValue(){
     QmlBindingChannel::Ptr inputPath = m_channel;
 
     if ( inputPath && inputPath->listIndex() == -1 ){
@@ -727,23 +753,8 @@ void QmlEditFragment::updateValue(){
 void QmlEditFragment::__inputRunnableObjectReady(){
     QmlBindingChannel::Ptr inputChannel = m_channel;
     if ( inputChannel && inputChannel->listIndex() == -1 ){
-        inputChannel->property().connectNotifySignal(this, SLOT(updateValue()));
+        inputChannel->property().connectNotifySignal(this, SLOT(__updateValue()));
     }
-}
-
-void QmlEditFragment::addNestedObjectInfo(QVariantMap& object)
-{
-    m_nestedObjectsInfo.push_back(object);
-}
-
-void QmlEditFragment::clearNestedObjectsInfo()
-{
-    m_nestedObjectsInfo = QVariantList();
-}
-
-void QmlEditFragment::setObjectInfo(QVariantMap &info)
-{
-    m_objectInfo = info;
 }
 
 void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
@@ -826,26 +837,9 @@ int QmlEditFragment::refCount()
     return m_refCount;
 }
 
-QVariantList QmlEditFragment::nestedObjectsInfo()
-{
-    return m_nestedObjectsInfo;
+void QmlEditFragment::signalChildAdded(QmlEditFragment *ef, const QJSValue &context){
+    emit childAdded(ef, context);
 }
-
-QVariantMap QmlEditFragment::objectInfo()
-{
-    return m_objectInfo;
-}
-
-void QmlEditFragment::signalPropertyAdded(QmlEditFragment *ef, const QJSValue &context)
-{
-    emit propertyAdded(ef, context);
-}
-
-void QmlEditFragment::signalObjectAdded(QmlEditFragment *ef)
-{
-    emit objectAdded(ef);
-}
-
 
 bool QmlEditFragment::bindExpression(const QString &expression){
     if ( m_codeHandler )
@@ -861,8 +855,7 @@ bool QmlEditFragment::bindFunctionExpression(const QString &expression){
     return false;
 }
 
-bool QmlEditFragment::isNull()
-{
+bool QmlEditFragment::isNull(){
     return readValueText() == "null";
 }
 

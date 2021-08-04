@@ -16,7 +16,7 @@ Item{
         var codeHandler = ef.codeHandler
         var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
-        if ( codeHandler.isForAnObject(ef)){
+        if ( ef.valueLocation === EditQml.QmlEditFragment.Object ){
             propertyContainer.isAnObject = true
 
             var childObjectContainer = paletteControls.__factories.createObjectContainer(editor, ef, null)

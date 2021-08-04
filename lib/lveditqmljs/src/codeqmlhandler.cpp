@@ -52,6 +52,7 @@
 #include "qmlsuggestionmodel.h"
 #include "qmlbuilder.h"
 #include "qmlwatcher.h"
+#include "qmlmetatypeinfo_p.h"
 
 #include <QJSValueIterator>
 #include <QQmlEngine>
@@ -315,7 +316,7 @@ CodeQmlHandler::CodeQmlHandler(
 
     m_scopeTimer.setInterval(1000);
     m_scopeTimer.setSingleShot(true);
-    connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(updateScope()));
+    connect(&m_scopeTimer, SIGNAL(timeout()), this, SLOT(__updateScope()));
     DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     connect(dh, SIGNAL(aboutToDeleteHandler()), this, SLOT(__aboutToDelete()));
 
@@ -612,7 +613,7 @@ void CodeQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
 /**
  * \brief Called when a new scope is available from the scanMonitor
  */
-void CodeQmlHandler::updateScope(){
+void CodeQmlHandler::__updateScope(){
     Q_D(CodeQmlHandler);
     if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
         d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
@@ -1510,11 +1511,6 @@ QmlAddContainer* CodeQmlHandler::getAddOptionsForPosition(int position){
     return addContainer;
 }
 
-QVariantList CodeQmlHandler::nestedObjectsInfo(lv::QmlEditFragment* ef)
-{
-    return ef->nestedObjectsInfo();
-}
-
 QmlDeclaration::Ptr CodeQmlHandler::createImportDeclaration(){
     Q_D(CodeQmlHandler);
     d->syncParse(m_document);
@@ -1607,12 +1603,6 @@ lv::QmlEditFragment *CodeQmlHandler::findFragmentByPosition(int position)
 QJSValue CodeQmlHandler::editingFragments(){
     //TOMOVE
     return m_editContainer->allEdits();
-}
-
-lv::QmlEditFragment* CodeQmlHandler::findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const
-{
-    //TOMOVE
-    return m_editContainer->findChildPropertyFragmentByName(parent, name);
 }
 
 void CodeQmlHandler::toggleComment(int position, int length)
@@ -2276,7 +2266,7 @@ QmlEditFragment *CodeQmlHandler::openConnection(int position){
 
     QmlBindingChannel::Ptr inputChannel = ef->channel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
-        inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
+        inputChannel->property().connectNotifySignal(ef, SLOT(__updateValue()));
     }
 
     addEditingFragment(ef);
@@ -2345,7 +2335,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
 
     QmlBindingChannel::Ptr inputChannel = ef->channel();
     if ( inputChannel && inputChannel->listIndex() == -1 ){
-        inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
+        inputChannel->property().connectNotifySignal(ef, SLOT(__updateValue()));
     }
 
     editParent->addChildFragment(ef);
@@ -2359,7 +2349,7 @@ QmlEditFragment *CodeQmlHandler::openNestedConnection(QmlEditFragment* editParen
     return ef;
 }
 
-lv::QmlEditFragment *CodeQmlHandler::createReadOnlyPropertyFragment(QmlEditFragment *parentFragment, QString propertyName)
+lv::QmlEditFragment *CodeQmlHandler::openReadOnlyPropertyConnection(QmlEditFragment *parentFragment, QString propertyName)
 {
     if ( !m_document )
         return nullptr;
@@ -2462,7 +2452,17 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
             // iterate group properties
             for (int n = 0; n < rp->name().length(); ++n){
                 QString propName = rp->name()[n];
-                auto child = findChildPropertyFragmentByName(parentEdit, propName);
+
+                QmlEditFragment* child = nullptr;
+                auto children = parentEdit->childFragments();
+                for ( auto it = children.begin(); it != children.end(); ++it ){
+                    if ( (*it)->identifier() == propName ){
+                        child = *it;
+                        break;
+                    }
+                }
+
+
                 if (!child) {
                     if ( n == rp->name().length()-1 ){
 
@@ -2548,7 +2548,7 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
 
                         QmlBindingChannel::Ptr inputChannel = ef->channel();
                         if ( inputChannel && inputChannel->listIndex() == -1 ){
-                            inputChannel->property().connectNotifySignal(ef, SLOT(updateValue()));
+                            inputChannel->property().connectNotifySignal(ef, SLOT(__updateValue()));
                         }
                         parentEdit->addChildFragment(ef);
 
@@ -2560,7 +2560,7 @@ QList<QObject *> CodeQmlHandler::openNestedFragments(QmlEditFragment *edit, cons
 
                         child = ef;
                     } else {
-                        child = createReadOnlyPropertyFragment(parentEdit, propName);
+                        child = openReadOnlyPropertyConnection(parentEdit, propName);
                     }
                 }
 
@@ -2718,7 +2718,7 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
     }
 
     edit->writeCode(objectProperty ? "null" : "");
-    edit->updateValue();
+    edit->__updateValue();
 
     if (!removeFragment)
         return;
@@ -2731,19 +2731,6 @@ void CodeQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment){
         }
         m_bindingChannels->desyncInactiveChannels();
     }
-}
-
-QString CodeQmlHandler::propertyType(QmlEditFragment *edit, const QString &propertyName){
-    Q_D(CodeQmlHandler);
-    QmlScopeSnap snap = d->snapScope();
-
-    QmlInheritanceInfo ii = snap.getTypePath(edit->declaration()->type());
-    for ( const QmlTypeInfo::Ptr& ti : ii.nodes ){
-        QmlPropertyInfo pi = ti->propertyAt(propertyName);
-        if ( pi.isValid() )
-            return pi.typeName.name();
-    }
-    return "";
 }
 
 QJSValue CodeQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
@@ -2768,10 +2755,6 @@ QJSValue CodeQmlHandler::findPalettes(int position){
 
 
     return findPalettesForDeclaration(declarations.first());
-}
-
-bool CodeQmlHandler::isForAnObject(lv::QmlEditFragment *ef){
-    return isForAnObject(ef->declaration());
 }
 
 /**
@@ -2840,7 +2823,7 @@ CodePalette *CodeQmlHandler::openBinding(QmlEditFragment *edit, QString paletteN
     edit->setBindingPalette(palette);
     edit->initializePaletteValue(palette);
 
-    connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
+    connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::__updateFromPalette);
 
     rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -2871,9 +2854,9 @@ QJSValue CodeQmlHandler::contextBlockRange(int position){
 
 lv::QmlImportsModel *CodeQmlHandler::importsModel(){
     Q_D(CodeQmlHandler);
+    d->syncObjects(m_document);
 
     lv::QmlImportsModel* result = new QmlImportsModel(m_engine, this);
-    d->syncObjects(m_document);
 
     DocumentQmlInfo::Ptr docinfo = d->documentInfo();
     if ( !docinfo->isParsedCorrectly() ){
@@ -2947,7 +2930,7 @@ QJSValue CodeQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
                 edit->addPalette(palette);
                 edit->initializePaletteValue(palette);
 
-                connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::updateFromPalette);
+                connect(palette, &CodePalette::valueChanged, edit, &QmlEditFragment::__updateFromPalette);
 
                 rehighlightSection(edit->position(), edit->valuePosition() + edit->valueLength());
 
@@ -3161,7 +3144,7 @@ int CodeQmlHandler::addPropertyToCode(
     m_document->removeEditingState(ProjectDocument::Palette);
 
     m_scopeTimer.stop();
-    updateScope();
+    __updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if ( dh ){
@@ -3252,7 +3235,7 @@ int CodeQmlHandler::addEventToCode(int position, const QString &name){
     m_document->removeEditingState(ProjectDocument::Palette);
 
     m_scopeTimer.stop();
-    updateScope();
+    __updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if ( dh ){
@@ -3375,7 +3358,7 @@ int CodeQmlHandler::addObjectToCode(int position, const QString &ctype, const QJ
 
     d->documentChanged();
 
-    updateScope();
+    __updateScope();
 
     lv::DocumentHandler* dh = static_cast<DocumentHandler*>(parent());
     if (dh){
@@ -3396,7 +3379,7 @@ void CodeQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
     QString codeToWrite = typeName + "{\n" + indent + "    \n" + indent + "}\n";
     propertyFragment->writeCode(codeToWrite);
     m_scopeTimer.stop();
-    updateScope();
+    __updateScope();
 }
 
 int CodeQmlHandler::addRootObjectToCode(const QString &name)
@@ -3428,7 +3411,7 @@ int CodeQmlHandler::addRootObjectToCode(const QString &name)
     cs.endEditBlock();
     m_document->removeEditingState(ProjectDocument::Palette);
     m_scopeTimer.stop();
-    updateScope();
+    __updateScope();
 
     d->syncObjects(m_document);
 
@@ -3459,18 +3442,6 @@ void CodeQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctyp
     } catch ( lv::Exception& e ){
         m_engine->throwError(&e, this);
     }
-}
-
-QmlEditFragment *CodeQmlHandler::createObject(int position, const QString &type, QmlEditFragment *parent, QObject *)
-{
-    try{
-        int opos = addObjectToCode(position, "", type);
-        addItemToRunTimeImpl(parent, type);
-        return openNestedConnection(parent, opos);
-    } catch ( lv::Exception& e ){
-        m_engine->throwError(&e, this);
-    }
-    return nullptr;
 }
 
 QJSValue CodeQmlHandler::getDocumentIds(){
@@ -3511,6 +3482,20 @@ int CodeQmlHandler::checkPragma(int position)
     if (find != -1)
         return find;
     return position;
+}
+
+
+QmlInheritanceInfo CodeQmlHandler::inheritanceInfo(const QString &typeName){
+    Q_D(CodeQmlHandler);
+    QmlScopeSnap snap = d->snapScope();
+
+    return snap.getTypePath(QmlTypeReference::split(typeName));
+}
+
+QmlMetaTypeInfo *CodeQmlHandler::typeInfo(const QString &typeName){
+    QmlMetaTypeInfo* mti = new QmlMetaTypeInfo(inheritanceInfo(typeName), m_engine);
+    QQmlEngine::setObjectOwnership(mti, QQmlEngine::CppOwnership);
+    return mti;
 }
 
 /**
@@ -3562,7 +3547,7 @@ bool CodeQmlHandler::areImportsScanned(){
     return scope.areDocumentLibrariesReady();
 }
 
-void CodeQmlHandler::onDocumentParse(QJSValue callback){
+void CodeQmlHandler::onDocumentParsed(QJSValue callback){
     Q_D(CodeQmlHandler);
     if ( d->wasDocumentUpdatedFromBackground() ){
         callback.call(QJSValueList() << true);
@@ -3882,16 +3867,6 @@ bool CodeQmlHandler::isBlockEmptySpace(const QTextBlock &bl){
     return true;
 }
 
-bool CodeQmlHandler::isForAnObject(const lv::QmlDeclaration::Ptr &declaration){
-    if ( !declaration->type().path().isEmpty() )
-        return true;
-    if (declaration->type().name() == "import")
-        return false;
-    if (declaration->type().name() == "slot")
-        return false;
-    return QmlTypeInfo::isObject(declaration->type().name());
-}
-
 QJSValue CodeQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr declaration)
 {
     // every fragment has a declaration -> should end up here
@@ -4020,53 +3995,6 @@ QJSValue CodeQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
         result.setProperty("type", "slot");
     }
     result.setProperty("hasObject", declaration->isForObject());
-    return result;
-}
-
-//TO REROUTE
-QVariantMap CodeQmlHandler::propertiesWritable(QmlEditFragment *ef)
-{
-    Q_D(CodeQmlHandler);
-    QVariantMap result;
-
-    if ( !m_document || !m_target )
-        return result;
-
-    if (ef->location() != QmlEditFragment::Object) return result;
-
-    d->syncObjects(m_document);
-
-
-    QmlScopeSnap scope = d->snapScope();
-
-    QmlInheritanceInfo typePath;
-
-    if (ef->isGroup()){
-        typePath = scope.generateTypePathFromClassName(ef->declaration()->type().name(), ef->declaration()->type().path());
-    }
-    else {
-        QTextCursor cursor(m_target);
-        cursor.setPosition(ef->valuePosition() + ef->valueLength()-1);
-        QmlCompletionContext::ConstPtr ctx = m_completionContextFinder->getContext(cursor);
-
-        ctx->expressionPath();
-        if (!ctx->objectTypePath().empty()){
-            QString type = ctx->objectTypeName();
-            QString typeNamespace = ctx->objectTypePath().size() > 1 ? ctx->objectTypePath()[0] : "";
-            typePath = scope.getTypePath(typeNamespace, type);
-        }
-    }
-
-    for ( auto it = typePath.nodes.begin(); it != typePath.nodes.end(); ++it ){
-        const QmlTypeInfo::Ptr& ti = *it;
-        for ( int i = 0; i < ti->totalProperties(); ++i ){
-            QString propertyName = ti->propertyAt(i).name;
-            if ( !propertyName.startsWith("__") ){
-                result.insert(propertyName, ti->propertyAt(i).isWritable);
-            }
-        }
-    }
-
     return result;
 }
 

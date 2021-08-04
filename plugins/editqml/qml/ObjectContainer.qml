@@ -70,6 +70,10 @@ Item{
         return propertyContainer
     }
 
+    function addFunctionProperty(name){
+        return null
+    }
+
     function propertyByName(name){
         for (var i = 1; i < container.children.length; ++i){
             if (!container.children[i])
@@ -254,7 +258,6 @@ Item{
             if ( 'palettes' in options){
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
-                    if (paletteGroup.palettesOpened.indexOf(palettes[i]) !== -1) continue
                     paletteControls.openPaletteInObjectContainer(objectContainerFrame, palettes[i])
                 }
             }
@@ -264,17 +267,22 @@ Item{
                 for ( var i = 0; i < newProps.length; ++i ){
 
                     var propName = newProps[i][0]
-                    var propType = codeHandler.propertyType(objectContainerFrame.editingFragment, propName)
+
+                    var metaTypeInfo = codeHandler.typeInfo(objectContainerFrame.editingFragment.type())
+                    var propertyInfo = metaTypeInfo.propertyInfo(propName)
+                    if ( !propertyInfo )
+                        continue
+                    var propType = metaTypeInfo.typeName(propertyInfo.type)
 
                     var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
 
-                    if ( propType === '' ) continue
-
+                    if ( propType === '' )
+                        continue
 
                     var ef = null
                     if (newProps[i].length > 2)
                     {
-                        ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
+                        ef = codeHandler.openReadOnlyPropertyConnection(root.editingFragment, propName)
                     } else {
 
                         var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
@@ -287,7 +295,7 @@ Item{
                     }
 
                     if (ef) {
-                        objectContainerFrame.editingFragment.signalPropertyAdded(ef, false)
+                        objectContainerFrame.editingFragment.signalChildAdded(ef, false)
                         if (propPalette.length === 0) continue
 
                         for (var j = 0; j < container.children.length; ++j)
@@ -395,24 +403,24 @@ Item{
         property Connections addFragmentToContainerConn: Connections{
             target: editingFragment
             ignoreUnknownSignals: true
-            function onObjectAdded(obj){
-                if (compact)
-                    expand()
-                else
-                    addChildObject(obj)
+            function onChildAdded(ef, context){
+                if ( ef.location === EditQml.QmlEditFragment.Object ){
+                    if (compact)
+                        expand()
+                    else
+                        addChildObject(ef)
 
-                var child = container.children[container.children.length-1]
-                var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
-                var id = child.editingFragment.objectId()
-//                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
-                // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
+                    var child = container.children[container.children.length-1]
+                    var id = child.editingFragment.objectId()
+    //                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
+                    // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
 
-                container.sortChildren()
-            }
-            function onPropertyAdded(ef, expandDefault){
-                var pc = root.addProperty(ef)
-                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+                    container.sortChildren()
+                } else {
+                    var pc = root.addProperty(ef)
+                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                    paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+                }
             }
         }
 

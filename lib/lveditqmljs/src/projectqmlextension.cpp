@@ -35,6 +35,7 @@
 #include "qmltokenizer_p.h"
 #include "qmlsyntax_p.h"
 #include "qmlmetainfo_p.h"
+#include "qmlmetatypeinfo_p.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -163,6 +164,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
         uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlMetaTypeInfo>(
+        uri, 1, 0, "QmlMetaTypeInfo", "QmlMetaTypeInfo can only be accessed through the qmledit extension.");
 
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
     qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);
