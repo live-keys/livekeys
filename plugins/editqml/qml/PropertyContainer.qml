@@ -13,7 +13,7 @@ Item{
         propertyContainer.code = editor.code
         propertyContainer.editFragment = ef
 
-        var codeHandler = ef.codeHandler
+        var codeHandler = ef.language
         var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
         if ( ef.valueLocation === EditQml.QmlEditFragment.Object ){
@@ -30,6 +30,7 @@ Item{
             propertyContainer.isAnObject = false
             propertyContainer.valueContainer = paletteControls.__factories.createPaletteGroup(null, ef)
         }
+        ef.visualParent = propertyContainer
     }
 
     function expand(){
@@ -55,6 +56,10 @@ Item{
             return childObjectContainer.paletteGroup()
 
         return valueContainer
+    }
+
+    function getLayoutState(){
+        return {}
     }
 
     property string title: "Object"

@@ -2427,7 +2427,7 @@ QList<QObject *> LanguageQmlHandler::openNestedFragments(QmlEditFragment *edit, 
         iterateObjects    = true;
     }
 
-    if (edit->isGroup()){
+    if (edit->isGroup() && iterateProperties ){
         auto children = edit->childFragments();
         for (auto child: children)
             fragments.push_back(qobject_cast<QObject*>(child));
@@ -2435,13 +2435,19 @@ QList<QObject *> LanguageQmlHandler::openNestedFragments(QmlEditFragment *edit, 
     }
 
     DocumentQmlValueObjects::Ptr objects = d->documentObjects();
-    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(edit->position());
 
+    int objectPosition = edit->position();
+    if ( edit->location() == QmlEditFragment::Property ){
+        objectPosition = edit->valuePosition();
+    }
+
+    DocumentQmlValueObjects::RangeObject* currentOb = objects->objectAtPosition(objectPosition);
     if ( !currentOb )
         return fragments;
 
     // iterate properties
     if ( iterateProperties ){
+
         for ( int i = 0; i < currentOb->properties.size(); ++i ){
             DocumentQmlValueObjects::RangeProperty* rp = currentOb->properties[i];
 
@@ -3033,7 +3039,7 @@ QmlAddContainer *LanguageQmlHandler::getAddOptions(QJSValue value){
     if ( value.hasProperty("position") ){
         return getAddOptionsForPosition(value.property("position").toInt());
     } else if ( value.hasProperty("editFragment") ){
-        bool isReadOnly = value.hasProperty("readOnly") ? value.property("readOnly").toBool() : false;
+        bool isReadOnly = value.hasProperty("isReadOnly") ? value.property("isReadOnly").toBool() : false;
         QmlEditFragment* ef = qobject_cast<QmlEditFragment*>(value.property("editFragment").toQObject());
         if ( !ef ){
             lv::Exception e = CREATE_EXCEPTION(lv::Exception, "getAddOptions: Cannot capture edit fragment.", lv::Exception::toCode("NullPointer"));
@@ -3487,14 +3493,14 @@ int LanguageQmlHandler::checkPragma(int position)
 }
 
 
-QmlInheritanceInfo CodeQmlHandler::inheritanceInfo(const QString &typeName){
-    Q_D(CodeQmlHandler);
+QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QString &typeName){
+    Q_D(LanguageQmlHandler);
     QmlScopeSnap snap = d->snapScope();
 
     return snap.getTypePath(QmlTypeReference::split(typeName));
 }
 
-QmlMetaTypeInfo *CodeQmlHandler::typeInfo(const QString &typeName){
+QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QString &typeName){
     QmlMetaTypeInfo* mti = new QmlMetaTypeInfo(inheritanceInfo(typeName), m_engine);
     QQmlEngine::setObjectOwnership(mti, QQmlEngine::CppOwnership);
     return mti;

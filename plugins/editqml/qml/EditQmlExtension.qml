@@ -15,19 +15,6 @@ WorkspaceExtension{
             root.add(activeIndex, objectsOnly, forRoot)
         }
 
-        function shapeLayout(editorPane, layout){
-            var codeHandler = editorPane.editor.code.language
-            var rootPosition = codeHandler.findRootPosition()
-            root.rootPosition = rootPosition
-            shapeRootObject(editorPane, codeHandler, function(){
-                lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
-                    editorPane,
-                    rootPosition,
-                    layout
-                )
-            })
-        }
-
         function shapeAll(editor, callback){
             var codeHandler = editor.code.language
 
@@ -58,8 +45,6 @@ WorkspaceExtension{
     }
 
     objectName : "editqml"
-
-    property int rootPosition: -1
 
     function canBeQml(document){
         if ( endsWith(document.file.path, '.qml') ||
@@ -195,7 +180,6 @@ WorkspaceExtension{
                             if (position === -1){
                                 lk.layers.workspace.messages.pushError("Error: Can't create object with name " + selection.name, 1)
                             } else {
-                                root.rootPosition = position
                                 shapeRootObject(activePane, activePane.code.language)
                             }
                         }

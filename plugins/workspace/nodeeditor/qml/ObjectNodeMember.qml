@@ -246,7 +246,7 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    editFragment.codeHandler.removeConnection(editFragment)
+                    editFragment.language.removeConnection(editFragment)
                     if (editFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()

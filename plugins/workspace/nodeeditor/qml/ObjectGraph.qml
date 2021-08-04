@@ -89,7 +89,7 @@ Rectangle{
     onEditFragmentChanged: {
         if (!editFragment)
             return
-        editor = editFragment.codeHandler.code.textEdit().getEditor()
+        editor = editFragment.language.code.textEdit().getEditor()
     }
 
     property alias zoom: graphView.zoom
@@ -204,7 +204,7 @@ Rectangle{
 
     onDoubleClicked: {
         var position = root.editFragment.valuePosition() + root.editFragment.valueLength() - 1
-        var addOptions = root.editFragment.codeHandler.getAddOptions(position)
+        var addOptions = root.editFragment.language.getAddOptions(position)
 
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
@@ -213,7 +213,7 @@ Rectangle{
 
         var addBoxItem = paletteControls.views.openAddOptionsBox(
             addOptions,
-            root.editFragment.codeHandler,
+            root.editFragment.language,
             {
                 aroundRect: Qt.rect(pos.x, pos.y, 1, 1),
                 panePosition: cursorCoords,
@@ -233,7 +233,7 @@ Rectangle{
                     if ( selection.extraProperties ){
                         paletteControls.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
-                                var ch = editFragment.codeHandler
+                                var ch = editFragment.language
                                 var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)
                                 ch.addItemToRuntime(editFragment, selection.name, propertiesToAdd)
                                 var ef = ch.openNestedConnection(editFragment, opos)
@@ -246,7 +246,7 @@ Rectangle{
 
 
                     } else {
-                        var ch = editFragment.codeHandler
+                        var ch = editFragment.language
                         var opos = ch.addItem(selection.position, selection.objectType, selection.name)
                         ch.addItemToRuntime(editFragment, selection.name)
                         var ef = ch.openNestedConnection(editFragment, opos)

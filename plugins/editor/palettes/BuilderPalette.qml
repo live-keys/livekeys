@@ -53,7 +53,7 @@ CodePalette{
             var comp = lk.engine.createComponent(builderComponentCode, "Builder.qml")
             palette.value = comp
 
-            var imports = editFragment.codeHandler.importsModel()
+            var imports = editFragment.language.importsModel()
             if ( imports ){
                 var editQmlImport = imports.getImportAtUri('editqml')
                 if ( editQmlImport ){

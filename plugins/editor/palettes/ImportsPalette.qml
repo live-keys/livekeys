@@ -230,8 +230,8 @@ CodePalette{
     }
 
     onInit: {
-        palette.item.model = palette.editFragment.codeHandler.importsModel()
-        palette.item.editor = palette.editFragment.codeHandler.code.textEdit().getEditor()
+        palette.item.model = palette.editFragment.language.importsModel()
+        palette.item.editor = palette.editFragment.language.code.textEdit().getEditor()
 
         editFragment.whenBinding = function(){
             editFragment.write(palette.value)

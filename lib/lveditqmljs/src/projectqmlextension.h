@@ -80,7 +80,7 @@ private:
     ViewEngine*                   m_engine;
     QmlJsSettings*                m_settings;
     QmlProjectMonitor*            m_scanMonitor;
-    QList<LanguageQmlHandler*>        m_codeHandlers;
+    QList<LanguageQmlHandler*>    m_languageHandlers;
     PaletteContainer*             m_paletteContainer;
     QmlBindingChannelsDispatcher* m_channelDispatcher;
 };

@@ -52,7 +52,7 @@ QmlEditFragment::QmlEditFragment(QmlDeclaration::Ptr declaration, lv::LanguageQm
     , m_visualParent(nullptr)
     , m_refCount(0)
     , m_fragmentType(0)
-    , m_codeHandler(codeHandler)
+    , m_language(codeHandler)
 {
     if (m_declaration->isForSlot()){
         m_valueLocation = Slot;
@@ -139,7 +139,7 @@ bool QmlEditFragment::isBuilder() const{
 
 void QmlEditFragment::rebuild(){
     if ( m_channel->isBuilder() ){
-        codeHandler()->bindingChannels()->rebuild();
+        language()->bindingChannels()->rebuild();
     }
 }
 
@@ -224,7 +224,7 @@ void QmlEditFragment::addChildFragment(QmlEditFragment *edit){
     m_childFragments.append(edit);
     edit->setParent(this);
     if ( m_channel ){
-        DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
+        DocumentQmlChannels* channels = m_language->bindingChannels();
         disconnect(channels, &DocumentQmlChannels::selectedChannelChanged, edit, &QmlEditFragment::__selectedChannelChanged);
     }
 }
@@ -257,7 +257,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         return;
     }
 
-    QmlInheritanceInfo typeInfo = m_codeHandler->inheritanceInfo(type());
+    QmlInheritanceInfo typeInfo = m_language->inheritanceInfo(type());
 
     int valuePosition = declaration()->valuePosition();
     int valueLength   = declaration()->valueLength();
@@ -681,7 +681,7 @@ void QmlEditFragment::__selectedChannelChanged(){
         }
     } else {
         if ( m_channel ){
-            m_channel = DocumentQmlChannels::traverseBindingPathFrom(m_codeHandler->bindingChannels()->selectedChannel(), m_channel->bindingPath());
+            m_channel = DocumentQmlChannels::traverseBindingPathFrom(m_language->bindingChannels()->selectedChannel(), m_channel->bindingPath());
             if ( m_channel ){
                 m_channel->setEnabled(true);
                 if ( m_channel->listIndex() == -1 ){
@@ -760,7 +760,7 @@ void QmlEditFragment::__inputRunnableObjectReady(){
 void QmlEditFragment::setChannel(QSharedPointer<QmlBindingChannel> channel){
     if ( !m_channel ){
         if ( !parentFragment() ){
-            DocumentQmlChannels* channels = m_codeHandler->bindingChannels();
+            DocumentQmlChannels* channels = m_language->bindingChannels();
             connect(channels, &DocumentQmlChannels::selectedChannelChanged, this, &QmlEditFragment::__selectedChannelChanged);
         }
     }
@@ -842,14 +842,14 @@ void QmlEditFragment::signalChildAdded(QmlEditFragment *ef, const QJSValue &cont
 }
 
 bool QmlEditFragment::bindExpression(const QString &expression){
-    if ( m_codeHandler )
-        return m_codeHandler->findBindingForExpression(this, expression);
+    if ( m_language )
+        return m_language->findBindingForExpression(this, expression);
     return false;
 }
 
 bool QmlEditFragment::bindFunctionExpression(const QString &expression){
-    if (m_codeHandler){
-        return m_codeHandler->findFunctionBindingForExpression(this, expression);
+    if (m_language){
+        return m_language->findFunctionBindingForExpression(this, expression);
     }
 
     return false;
@@ -868,7 +868,7 @@ void QmlEditFragment::__channelObjectErased(){
         return;
 
     if ( m_channel->type() == QmlBindingChannel::Object ){
-        m_codeHandler->removeEditFragment(this);
+        m_language->removeEditFragment(this);
     } else if ( m_channel->type() == QmlBindingChannel::ListIndex ){
         auto parentFrag = parentFragment();
         if (parentFrag){
@@ -878,7 +878,7 @@ void QmlEditFragment::__channelObjectErased(){
                 cf->channel()->updateConnection(cf->channel()->listIndex()-1);
             }
         }
-        m_codeHandler->removeEditFragment(this);
+        m_language->removeEditFragment(this);
     }
 }
 

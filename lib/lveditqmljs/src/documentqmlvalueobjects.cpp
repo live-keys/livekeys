@@ -472,6 +472,16 @@ DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::objectAtPosition(
                 return ro;
         }
     }
+    for ( int i = 0; i < root->properties.size(); ++i ){
+        DocumentQmlValueObjects::RangeProperty* prop = root->properties[i];
+        if ( prop->child ){
+            if ( prop->child->begin <= position && prop->child->end >= position ){
+                DocumentQmlValueObjects::RangeObject* ro = objectAtPosition(position, prop->child);
+                if (ro)
+                    return ro;
+            }
+        }
+    }
 
     return nullptr;
 }

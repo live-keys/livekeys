@@ -45,6 +45,7 @@ Item{
         root.editor = editor
         root.editFragment = ef
         root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
+        ef.visualParent = root
 
         var paletteBoxGroup = paletteControls.__factories.createPaletteGroup(root.paletteListContainer, ef)
 
@@ -61,7 +62,6 @@ Item{
         var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
         var propertyContainer = paletteControls.__factories.createPropertyContainer(root.editor, ef, root.paletteListContainer)
 
-        ef.visualParent = propertyContainer
         ef.incrementRefCount()
 
         root.propertiesOpened.push(ef.identifier())
@@ -117,6 +117,10 @@ Item{
             pane = pane.parent
         }
         return pane
+    }
+
+    function getLayoutState(){
+        return { isCollapsed: root.compact }
     }
 
     property bool supportsFunctions: false
@@ -335,21 +339,24 @@ Item{
 
             var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
 
-            if (paletteControls.instructionsShaping)
-                return
-
             var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
+
             for (var i=0; i < objects.length; ++i){
-                var childObjectContainer = root.addChildObject(objects[i])
+                if ( !objects[i].visualParent ){
+                    root.addChildObject(objects[i])
+                }
             }
             paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
 
             var codeHandler = root.editor.code.language
+
             var properties = codeHandler.openNestedFragments(root.editFragment, ['properties'])
+
             for (var i = 0; i < properties.length; ++i){
-                var pc = addProperty(properties[i])
-                paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
-//                paletteControls.__private.addPropertyContainer(root, properties[i], true)
+                if ( !properties[i].visualParent ){
+                    var pc = addProperty(properties[i])
+                    paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+                }
             }
 
             var id = editFragment.objectId()
@@ -361,7 +368,13 @@ Item{
         }
 
         function collapse(){
-            if (compact) return
+            if (compact)
+                return
+            if ( root.editFragment.isGroup() ){
+                compact = true
+                return
+            }
+
             for ( var i = 1; i < container.children.length; ++i ){
                 var edit = container.children[i].editFragment
                 editor.code.language.removeConnection(edit)
@@ -381,11 +394,16 @@ Item{
                 objectContainerTitle.isBuilder = root.editFragment.isBuilder()
             }
             function onAboutToBeRemoved(){
-                if (isForProperty) return
+                if (isForProperty)
+                    return
                 var p = root.parent
 
+                //TODO: Move to LanguageQmlHandler
+                var language = editFragment.language
+                var rootPosition = language.findRootPosition()
+
                 if (editFragment.position() === rootPosition)
-                    editFragment.codeHandler.rootShaped = false
+                    editFragment.language.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -410,8 +428,8 @@ Item{
                     else
                         addChildObject(ef)
 
-                    var child = container.children[container.children.length-1]
-                    var id = child.editFragment.objectId()
+//                    var child = container.children[container.children.length-1]
+//                    var id = child.editFragment.objectId()
     //                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
                     // paletteControls.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
 

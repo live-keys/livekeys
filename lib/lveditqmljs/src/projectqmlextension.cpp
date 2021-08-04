@@ -84,11 +84,11 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
  * @brief ProjectQmlExtension destructor
  */
 ProjectQmlExtension::~ProjectQmlExtension(){
-    for ( auto it = m_codeHandlers.begin(); it != m_codeHandlers.end(); ++it ){
+    for ( auto it = m_languageHandlers.begin(); it != m_languageHandlers.end(); ++it ){
         LanguageQmlHandler* cqh = *it;
         cqh->resetProjectQmlExtension();
     }
-    m_codeHandlers.clear();
+    m_languageHandlers.clear();
 }
 
 /**
@@ -132,7 +132,7 @@ void ProjectQmlExtension::componentComplete(){
  * CodeHandlers are updated each time the engine recompiles the code.
  */
 void ProjectQmlExtension::addLanguageQmlHandler(LanguageQmlHandler *handler){
-    m_codeHandlers.append(handler);
+    m_languageHandlers.append(handler);
 }
 
 /**
@@ -141,7 +141,7 @@ void ProjectQmlExtension::addLanguageQmlHandler(LanguageQmlHandler *handler){
  * Note that this does not destroy the object.
  */
 void ProjectQmlExtension::removeLanguageQmlHandler(LanguageQmlHandler *handler){
-    m_codeHandlers.removeAll(handler);
+    m_languageHandlers.removeAll(handler);
 }
 
 /**

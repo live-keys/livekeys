@@ -276,6 +276,7 @@ Workspace.Pane{
             onClicked: {
                 lk.layers.workspace.panes.activePane = root
 
+                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
                 if (!codeOnly)
                 {
                     if (code.language)
@@ -285,7 +286,7 @@ Workspace.Pane{
                             lk.layers.workspace.commands.execute("editqml.shape_all")
 
                         if (code.language.rootShaped){
-                            root.paneState.layout = paletteControls.convertStateIntoInstructions()
+                            root.paneState.layout = paletteControls.getEditorLayout(root)
                         } else {
                             root.paneState.layout = null
                         }
@@ -295,10 +296,10 @@ Workspace.Pane{
                     }
                 } else {
                     if (root.paneState.layout){
-                        lk.layers.workspace.extensions.editqml.shapeLayout(root, root.paneState.layout)
+                        paletteControls.expandLayout(root, root.paneState.layout)
                     } else {
                         // shape all
-                        lk.layers.workspace.extensions.editqml.shapeAll(root)
+                        lk.layers.workspace.extensions.editqml.shapeAll(root, function(ef){ if ( ef.visualParent.expand) ef.visualParent.expand() })
                     }
                 }
             }
@@ -422,7 +423,7 @@ Workspace.Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
 
-                var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                var layout = lk.layers.workspace.extensions.editqml.paletteControls.getEditorLayout(editor)
                 if ( !layout ){
                     lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
                     return
@@ -509,10 +510,9 @@ Workspace.Pane{
                         return
                     }
 
-                    var codeHandler = editor.code.language
-                    var rootPosition = codeHandler.findRootPosition()
-
-                    lk.layers.workspace.extensions.editqml.shapeLayout(root, layout)
+                    var rootPosition = editor.code.language.findRootPosition()
+                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                    paletteControls.expandLayout(root, layout)
                 })
             }
         }

@@ -58,7 +58,7 @@ CodePalette{
         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
         fragment.writeProperties({"destination": {"__ref": value}})
-        fragment.codeHandler.openNestedFragments(fragment, ['properties'])
+        fragment.language.openNestedFragments(fragment, ['properties'])
 
         var destProp = null
         var childFragments = fragment.getChildFragments()
@@ -115,7 +115,7 @@ CodePalette{
                     var surfaceFragment = findSurfaceFragment()
                     if (!surfaceFragment) return
                     surfaceFragment.writeProperties({'input': {"__ref": input.text} })
-                    surfaceFragment.codeHandler.openNestedFragments(surfaceFragment, ['properties'])
+                    surfaceFragment.language.openNestedFragments(surfaceFragment, ['properties'])
 
                     var inputProp = null
                     var childFragments = surfaceFragment.getChildFragments()

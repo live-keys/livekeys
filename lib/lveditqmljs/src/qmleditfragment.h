@@ -39,14 +39,14 @@ class CodeCompletionModel;
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QObject*             visualParent  READ visualParent  WRITE setVisualParent NOTIFY visualParentChanged)
-    Q_PROPERTY(int                  refCount      READ refCount      NOTIFY refCountChanged)
-    Q_PROPERTY(Location             location      READ location      CONSTANT)
-    Q_PROPERTY(Location             valueLocation READ valueLocation CONSTANT)
-    Q_PROPERTY(bool                 isWritable    READ isWritable    CONSTANT)
-    Q_PROPERTY(QJSValue             whenBinding   READ whenBinding   WRITE setWhenBinding NOTIFY whenBindingChanged)
-    Q_PROPERTY(lv::LanguageQmlHandler*  codeHandler   READ codeHandler   CONSTANT)
-    Q_PROPERTY(bool                 isNull        READ isNull        NOTIFY isNullChanged)
+    Q_PROPERTY(QObject*                visualParent  READ visualParent  WRITE setVisualParent NOTIFY visualParentChanged)
+    Q_PROPERTY(int                     refCount      READ refCount      NOTIFY refCountChanged)
+    Q_PROPERTY(Location                location      READ location      CONSTANT)
+    Q_PROPERTY(Location                valueLocation READ valueLocation CONSTANT)
+    Q_PROPERTY(bool                    isWritable    READ isWritable    CONSTANT)
+    Q_PROPERTY(QJSValue                whenBinding   READ whenBinding   WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(lv::LanguageQmlHandler* language      READ language      CONSTANT)
+    Q_PROPERTY(bool                    isNull        READ isNull        NOTIFY isNullChanged)
     Q_ENUMS(FragmentType)
 
 public:
@@ -126,7 +126,7 @@ public:
     Location location() const;
     Location valueLocation() const;
     bool isWritable() const;
-    lv::LanguageQmlHandler* codeHandler() const;
+    lv::LanguageQmlHandler* language() const;
 
     void setObjectId(QString id);
     const QList<lv::QmlEditFragment*>& childFragments();
@@ -236,15 +236,15 @@ private:
     Location                m_valueLocation;
     QJSValue                m_whenBinding;
     int                     m_fragmentType;
-    lv::LanguageQmlHandler*     m_codeHandler;
+    lv::LanguageQmlHandler* m_language;
 };
 
 inline CodePalette *QmlEditFragment::bindingPalette(){
     return m_bindingPalette;
 }
 
-inline lv::LanguageQmlHandler *QmlEditFragment::codeHandler() const {
-    return m_codeHandler;
+inline lv::LanguageQmlHandler *QmlEditFragment::language() const {
+    return m_language;
 }
 
 inline bool QmlEditFragment::hasPalette(CodePalette *palette){

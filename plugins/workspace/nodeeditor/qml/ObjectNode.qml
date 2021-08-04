@@ -154,7 +154,7 @@ Qan.NodeItem{
     }
 
     function expandOptions(options){
-        var codeHandler = editFragment.codeHandler
+        var codeHandler = editFragment.language
 
         if ( 'palettes' in options){
             var palettes = options['palettes']
@@ -227,7 +227,7 @@ Qan.NodeItem{
             }
         }
 
-        var codeHandler = editFragment.codeHandler
+        var codeHandler = editFragment.language
 
         var position = editFragment.valuePosition() +
                        editFragment.valueLength() - 1
