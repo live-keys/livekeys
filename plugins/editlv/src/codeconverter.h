@@ -24,7 +24,7 @@ public:
     QJSValue& whenBinding();
     void setWhenBinding(const QJSValue& whenBinding);
 
-    LvEditFragment* editingFragment();
+    LvEditFragment* editFragment();
 
     static QObject* create(
         const el::ParsedDocument& pd,
@@ -62,7 +62,7 @@ inline void CodeConverter::setWhenBinding(const QJSValue& whenBinding){
     emit whenBindingChanged();
 }
 
-inline LvEditFragment *CodeConverter::editingFragment(){
+inline LvEditFragment *CodeConverter::editFragment(){
     return m_edit;
 }
 

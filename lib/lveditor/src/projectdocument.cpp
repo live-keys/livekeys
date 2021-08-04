@@ -17,7 +17,7 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "live/lockedfileiosession.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/project.h"
 #include "live/visuallog.h"
 #include "textdocumentlayout.h"
@@ -683,8 +683,8 @@ void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, 
     QString addedText = "";
     if ( charsAdded == 1 ){
         QChar c = d_ptr->textDocument->characterAt(position);
-        if ( c == DocumentHandler::ParagraphSeparator )
-            c = DocumentHandler::NewLine;
+        if ( c == CodeHandler::ParagraphSeparator )
+            c = CodeHandler::NewLine;
         addedText = c;
     } else if ( charsAdded > 0 ){
         QTextCursor cursor(d_ptr->textDocument);

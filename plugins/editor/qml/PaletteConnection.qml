@@ -30,7 +30,7 @@ Rectangle{
     property alias connectionCount : connectionList.count
     property alias model : connectionList.model
 
-    property QtObject editingFragment: null
+    property QtObject editFragment: null
 
     property Input.TextStyle labelStyle: theme.inputLabelStyle.textStyle
     property Input.TextStyle smallLabelStyle: theme.smallLabelStyle
@@ -109,7 +109,7 @@ Rectangle{
             anchors.left: parent.left
             anchors.leftMargin: 15
             textStyle: root.labelStyle
-            text: root.editingFragment ? root.editingFragment.typeName() : ''
+            text: root.editFragment ? root.editFragment.typeName() : ''
         }
     }
 
@@ -128,7 +128,7 @@ Rectangle{
             spacing: 5
             Repeater{
                 id: modelSplitter
-                model: editingFragment ? editingFragment.bindingPath() : []
+                model: editFragment ? editFragment.bindingPath() : []
 
                 Item{
                     anchors.top: parent.top

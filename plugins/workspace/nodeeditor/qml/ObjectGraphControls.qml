@@ -56,7 +56,7 @@ QtObject{
         fe.document = project.openTextFile(project.active.path)
 
         var editor = fe
-        var codeHandler = editor.documentHandler.codeHandler
+        var codeHandler = editor.code.language
         var rootPosition = codeHandler.findRootPosition()
 
         var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls

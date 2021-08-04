@@ -100,11 +100,11 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
-            var editingFragments = codeHandler.editingFragments()
+            var codeHandler = editor.code.language
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var importEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var importEdit = editFragments[i]
                 if ( importEdit.type() === 'qml/import' ){
                     var coords = importEdit.visualParent.mapToItem(editor, 0, 0)
                     var editorCoords = editorPane.mapGlobalPosition()
@@ -123,12 +123,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var objectContainer = itemEdit.visualParent.parent.parent.parent
 
@@ -148,12 +148,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var objectContainer = itemEdit.visualParent.parent.parent.parent
 
@@ -172,12 +172,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var objectContainer = itemEdit.visualParent.parent.parent.parent
 
@@ -196,12 +196,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var objectContainer = itemEdit.visualParent.parent.parent.parent
 
@@ -271,12 +271,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var childFragments = itemEdit.getChildFragments()
                     for ( var j = 0; j < childFragments.length; ++j ){
@@ -318,12 +318,12 @@ WorkspaceControl{
                 return
 
             var editor = editorPane.editor
-            var codeHandler = editor.documentHandler.codeHandler
+            var codeHandler = editor.code.language
 
-            var editingFragments = codeHandler.editingFragments()
+            var editFragments = codeHandler.editFragments()
 
-            for ( var i = 0; i < editingFragments.length; ++i ){
-                var itemEdit = editingFragments[i]
+            for ( var i = 0; i < editFragments.length; ++i ){
+                var itemEdit = editFragments[i]
                 if ( itemEdit.type() === 'qml/QtQuick#Item' ){
                     var childFragments = itemEdit.getChildFragments()
                     for ( var j = 0; j < childFragments.length; ++j ){

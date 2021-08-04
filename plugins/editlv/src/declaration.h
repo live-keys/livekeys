@@ -32,7 +32,7 @@ public:
     typedef std::shared_ptr<const Declaration> ConstPtr;
 
     friend class lv::ProjectDocument;
-    friend class lv::DocumentHandler;
+    friend class lv::CodeHandler;
 
     /** ProjectDocument section type. */
     enum SectionType{

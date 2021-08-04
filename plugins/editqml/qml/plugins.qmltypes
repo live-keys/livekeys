@@ -9,9 +9,9 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: []
     Component {
-        name: "lv::CodeQmlHandler"
+        name: "lv::LanguageQmlHandler"
         prototype: "QObject"
-        exports: ["editqml/CodeQmlHandler 1.0"]
+        exports: ["editqml/LanguageQmlHandler 1.0"]
         isCreatable: false
         exportMetaObjectRevisions: [0]
         Property { name: "numberOfConnections"; type: "int"; isReadonly: true }
@@ -59,7 +59,7 @@ Module {
             type: "lv::QmlEditFragment*"
             Parameter { name: "position"; type: "int" }
         }
-        Method { name: "editingFragments"; type: "QJSValue" }
+        Method { name: "editFragments"; type: "QJSValue" }
         Method {
             name: "toggleComment"
             Parameter { name: "position"; type: "int" }
@@ -187,7 +187,7 @@ Module {
             name: "removeLineAtPosition"
             Parameter { name: "pos"; type: "int" }
         }
-        Method { name: "removeAllEditingFragments" }
+        Method { name: "removeAllEditFragments" }
         Method {
             name: "findImportsPosition"
             type: "int"
@@ -443,7 +443,7 @@ Module {
         Method {
             name: "bindingModel"
             type: "lv::QmlBindingSpanModel*"
-            Parameter { name: "codeHandler"; type: "lv::CodeQmlHandler"; isPointer: true }
+            Parameter { name: "codeHandler"; type: "lv::LanguageQmlHandler"; isPointer: true }
         }
         Method { name: "type"; type: "QString" }
         Method { name: "typeName"; type: "QString" }

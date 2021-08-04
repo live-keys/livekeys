@@ -37,7 +37,7 @@ namespace lv{
 
 class QmlLanguageScanMonitor;
 class QmlLanguageScanner;
-class CodeQmlHandler;
+class LanguageQmlHandler;
 
 class LV_EDITQMLJS_EXPORT ProjectQmlScope : public QObject{
 

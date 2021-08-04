@@ -51,8 +51,8 @@ class KeyMap;
 class VisualLogModel;
 class VisualLogQmlObject;
 class Project;
-class DocumentHandler;
-class CodeQmlHandler;
+class CodeHandler;
+class LanguageQmlHandler;
 class PackageGraph;
 class Layer;
 

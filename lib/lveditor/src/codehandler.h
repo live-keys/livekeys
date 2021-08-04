@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVDOCUMENTHANDLER_H
-#define LVDOCUMENTHANDLER_H
+#ifndef LVCODEHANDLER_H
+#define LVCODEHANDLER_H
 
 #include <QObject>
 #include <QQuickItem>
@@ -34,12 +34,12 @@ class ViewEngine;
 class Extensions;
 class Project;
 
-class LV_EDITOR_EXPORT DocumentHandler : public QObject, public QQmlParserStatus{
+class LV_EDITOR_EXPORT CodeHandler : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::CodeCompletionModel* completionModel READ completionModel CONSTANT)
-    Q_PROPERTY(QObject*                 codeHandler     READ codeHandler     NOTIFY codeHandlerChanged)
+    Q_PROPERTY(QObject*                 language        READ language        NOTIFY languageChanged)
     Q_PROPERTY(bool editorFocus                         READ editorFocus     WRITE setEditorFocus NOTIFY editorFocusChanged)
     Q_ENUMS(LanguageFeatures)
 
@@ -62,8 +62,8 @@ public:
     static const QChar NewLine;
 
 public:
-    explicit DocumentHandler(QObject* parent = nullptr);
-    ~DocumentHandler();
+    explicit CodeHandler(QObject* parent = nullptr);
+    ~CodeHandler();
 
     QTextDocument *textDocument();
 
@@ -94,7 +94,7 @@ public:
     /**
      * \brief Code handler getter
      */
-    QObject *codeHandler();
+    QObject *language();
 
     void requestCursorPosition(int position);
 
@@ -125,7 +125,7 @@ signals:
     /** Editor focus changed */
     void editorFocusChanged();
     /** Code handler changed */
-    void codeHandlerChanged();
+    void languageChanged();
     /** Triggered just before the handler is to be destroyed */
     void aboutToDeleteHandler();
 
@@ -135,7 +135,7 @@ private:
 
     QChar                 m_lastChar;
     CodeCompletionModel*  m_completionModel;
-    QObject*              m_codeHandler;
+    QObject*              m_language;
     ProjectDocument*      m_projectDocument;
     int                   m_indentSize;
     QString               m_indentContent;
@@ -152,42 +152,42 @@ private:
 /**
  * \brief Returns the target text document
  */
-inline QTextDocument *DocumentHandler::textDocument(){
+inline QTextDocument *CodeHandler::textDocument(){
     return m_projectDocument ? m_projectDocument->textDocument() : nullptr;
 }
 
-inline lv::CodeCompletionModel *DocumentHandler::completionModel() const{
+inline lv::CodeCompletionModel *CodeHandler::completionModel() const{
     return m_completionModel;
 }
 
 /** \brief Returns the TextEdit */
-inline TextEdit *DocumentHandler::textEdit(){
+inline TextEdit *CodeHandler::textEdit(){
     return m_textEdit;
 }
 
 /** \brief Returns true if the current editor has focus */
-inline bool DocumentHandler::editorFocus() const{
+inline bool CodeHandler::editorFocus() const{
     return m_editorFocus;
 }
 
 /**
  * \brief Sets the focus state of the editor
  */
-inline void DocumentHandler::setEditorFocus(bool editorFocus){
+inline void CodeHandler::setEditorFocus(bool editorFocus){
     if ( m_editorFocus == editorFocus )
         return;
     m_editorFocus = editorFocus;
     emit editorFocusChanged();
 }
 
-inline QObject *DocumentHandler::codeHandler(){
-    return m_codeHandler;
+inline QObject *CodeHandler::language(){
+    return m_language;
 }
 
 /**
  * \brief Indent size setter
  */
-inline void DocumentHandler::setIndentSize(int size){
+inline void CodeHandler::setIndentSize(int size){
     m_indentContent.clear();
     m_indentContent.fill(QChar(' '), size);
     m_indentSize = size;
@@ -195,4 +195,4 @@ inline void DocumentHandler::setIndentSize(int size){
 
 }// namespace
 
-#endif // LVDOCUMENTHANDLER_H
+#endif // LVCODEHANDLER_H

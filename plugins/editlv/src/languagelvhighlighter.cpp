@@ -8,7 +8,7 @@
 
 namespace lv{
 
-LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, DocumentHandler *, el::DocumentTree* tree, QTextDocument *parent)
+LanguageLvHighlighter::LanguageLvHighlighter(EditLvSettings *settings, CodeHandler *, el::DocumentTree* tree, QTextDocument *parent)
     : SyntaxHighlighter(parent)
     , m_languageQuery(nullptr)
     , m_settings(settings)

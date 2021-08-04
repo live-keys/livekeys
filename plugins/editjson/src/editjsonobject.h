@@ -5,7 +5,7 @@
 #include <QQmlParserStatus>
 
 #include "live/projectdocument.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "live/editorsettings.h"
 
 #include "qmllanguageobject.h"
@@ -39,7 +39,7 @@ public:
 public slots:
     QObject *createHandler(
         ProjectDocument* document,
-        DocumentHandler* handler,
+        CodeHandler* handler,
         const QString& settingsCategory,
         const QJSValue& initialSettings
     );

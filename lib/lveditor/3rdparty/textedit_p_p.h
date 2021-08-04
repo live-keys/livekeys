@@ -43,7 +43,7 @@
 #include "textedit_p.h"
 #include "private/qquickimplicitsizeitem_p_p.h"
 #include "private/qquickitem_p.h"
-#include "documenthandler.h"
+#include "codehandler.h"
 #include <QtQml/qqml.h>
 #include <QtCore/qlist.h>
 #include <climits>
@@ -138,7 +138,7 @@ public:
     TextEditPrivate()
         : readOnly(false), color(QRgb(0xFF000000)), selectionColor(QRgb(0xFF000080)), selectedTextColor(QRgb(0xFFFFFFFF))
         , textMargin(0.0), xoff(0), yoff(0)
-        , font(sourceFont), documentHandler(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr), control(nullptr)
+        , font(sourceFont), code(nullptr), cursorComponent(nullptr), cursorItem(nullptr), document(nullptr), control(nullptr)
         /*, paletteManager(new PaletteManager)*/, lineControl(nullptr), lineSurface(nullptr)
         , lastSelectionStart(0), lastSelectionEnd(0), lineCount(0)
         , clearSelectionOnFocus(false)
@@ -232,7 +232,7 @@ public:
     QFont sourceFont;
     QFont font;
 
-    lv::DocumentHandler* documentHandler;
+    lv::CodeHandler* code;
 
     QQmlComponent* cursorComponent;
     QQuickItem* cursorItem;

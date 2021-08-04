@@ -17,7 +17,7 @@
 #include "editorprivate_plugin.h"
 #include "live/applicationcontext.h"
 #include "live/settings.h"
-#include "live/documenthandler.h"
+#include "live/codehandler.h"
 #include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
 #include "projectnavigationmodel.h"

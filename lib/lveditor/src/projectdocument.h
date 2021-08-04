@@ -35,7 +35,7 @@ class Project;
 class ProjectFile;
 class ProjectDocument;
 class ProjectDocumentBlockData;
-class DocumentHandler;
+class CodeHandler;
 class ProjectDocumentPrivate;
 
 class LV_EDITOR_EXPORT ProjectDocumentMarker{

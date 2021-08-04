@@ -17,7 +17,7 @@
 #include "qmlprojectmonitor_p.h"
 #include "projectqmlextension.h"
 #include "plugintypesfacade.h"
-#include "codeqmlhandler.h"
+#include "languageqmlhandler.h"
 #include "qmllibrarydependency.h"
 
 #include "live/viewengine.h"
@@ -54,17 +54,17 @@ QmlProjectMonitor::~QmlProjectMonitor(){
 void QmlProjectMonitor::queueDocumentScan(
         const QString &path,
         const QString &content,
-        CodeQmlHandler *codeHandler)
+        LanguageQmlHandler *codeHandler)
 {
     m_scopeListeners.insert(codeHandler);
     emit requestDocumentScan(path, content, codeHandler);
 }
 
-void QmlProjectMonitor::removeScopeListener(CodeQmlHandler *handler){
+void QmlProjectMonitor::removeScopeListener(LanguageQmlHandler *handler){
     m_scopeListeners.remove(handler);
 }
 
-void QmlProjectMonitor::addScopeListener(CodeQmlHandler *handler){
+void QmlProjectMonitor::addScopeListener(LanguageQmlHandler *handler){
     m_scopeListeners.insert(handler);
 }
 

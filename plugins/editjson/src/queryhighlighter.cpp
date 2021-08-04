@@ -11,7 +11,7 @@ QueryHighlighter::QueryHighlighter(
         QmlLanguageObject* language,
         const MLNode &settings,
         const std::string &pattern,
-        DocumentHandler *,
+        CodeHandler *,
         QTextDocument *parent)
     : SyntaxHighlighter(parent)
     , m_parser(nullptr)

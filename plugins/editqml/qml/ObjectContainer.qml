@@ -43,7 +43,7 @@ Item{
 
     function __initialize(editor, ef){
         root.editor = editor
-        root.editingFragment = ef
+        root.editFragment = ef
         root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
         var paletteBoxGroup = paletteControls.__factories.createPaletteGroup(root.paletteListContainer, ef)
@@ -75,7 +75,7 @@ Item{
             if (!container.children[i])
                 continue
             if (container.children[i].objectName === "propertyContainer"){
-                if ( container.children[i].editingFragment.identifier() === name )
+                if ( container.children[i].editFragment.identifier() === name )
                     return container.children[i]
             }
         }
@@ -126,7 +126,7 @@ Item{
     property double containerContentWidth : 0
     property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.lineSurfaceWidth - 50 : 0
 
-    property alias editingFragment : objectContainerFrame.editingFragment
+    property alias editFragment : objectContainerFrame.editFragment
     property alias editor : objectContainerFrame.editor
     property alias title : objectContainerFrame.title
     property alias titleHeight : objectContainerFrame.titleHeight
@@ -213,7 +213,7 @@ Item{
 
         property Item paletteGroup : null
         property alias groupsContainer: container
-        property QtObject editingFragment : null
+        property QtObject editFragment : null
         property Item editor: null
 
         property alias objectContainerTitle: objectContainerTitle
@@ -249,7 +249,7 @@ Item{
         }
 
         function expandOptions(options){
-            var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
+            var codeHandler = objectContainerFrame.editor.code.language
 
             if ( 'palettes' in options){
                 var palettes = options['palettes']
@@ -264,7 +264,7 @@ Item{
                 for ( var i = 0; i < newProps.length; ++i ){
 
                     var propName = newProps[i][0]
-                    var propType = codeHandler.propertyType(objectContainerFrame.editingFragment, propName)
+                    var propType = codeHandler.propertyType(objectContainerFrame.editFragment, propName)
 
                     var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
 
@@ -274,20 +274,20 @@ Item{
                     var ef = null
                     if (newProps[i].length > 2)
                     {
-                        ef = codeHandler.createReadOnlyPropertyFragment(root.editingFragment, propName)
+                        ef = codeHandler.createReadOnlyPropertyFragment(root.editFragment, propName)
                     } else {
 
                         var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
                         var ppos = codeHandler.addPropertyToCode(
-                            root.editingFragment.valuePosition() + root.editingFragment.valueLength() - 1,
+                            root.editFragment.valuePosition() + root.editFragment.valueLength() - 1,
                             propName,
                             defaultValue
                         )
-                        ef = codeHandler.openNestedConnection( root.editingFragment, ppos )
+                        ef = codeHandler.openNestedConnection( root.editFragment, ppos )
                     }
 
                     if (ef) {
-                        objectContainerFrame.editingFragment.signalPropertyAdded(ef, false)
+                        objectContainerFrame.editFragment.signalPropertyAdded(ef, false)
                         if (propPalette.length === 0) continue
 
                         for (var j = 0; j < container.children.length; ++j)
@@ -330,21 +330,21 @@ Item{
             if (paletteControls.instructionsShaping)
                 return
 
-            var objects = root.editor.documentHandler.codeHandler.openNestedFragments(root.editingFragment, ['objects'])
+            var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
             for (var i=0; i < objects.length; ++i){
                 var childObjectContainer = root.addChildObject(objects[i])
             }
             paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
 
-            var codeHandler = root.editor.documentHandler.codeHandler
-            var properties = codeHandler.openNestedFragments(root.editingFragment, ['properties'])
+            var codeHandler = root.editor.code.language
+            var properties = codeHandler.openNestedFragments(root.editFragment, ['properties'])
             for (var i = 0; i < properties.length; ++i){
                 var pc = addProperty(properties[i])
                 paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
 //                paletteControls.__private.addPropertyContainer(root, properties[i], true)
             }
 
-            var id = editingFragment.objectId()
+            var id = editFragment.objectId()
             var check = (objectContainerFrame.title.indexOf('#') === -1)
             if (id && check)
                 objectContainerFrame.title = objectContainerFrame.title + "#" + id
@@ -355,8 +355,8 @@ Item{
         function collapse(){
             if (compact) return
             for ( var i = 1; i < container.children.length; ++i ){
-                var edit = container.children[i].editingFragment
-                editor.documentHandler.codeHandler.removeConnection(edit)
+                var edit = container.children[i].editFragment
+                editor.code.language.removeConnection(edit)
             }
 
             for (var i=1; i < container.children.length; ++i)
@@ -367,17 +367,17 @@ Item{
             propertiesOpened.length = 0
         }
 
-        property Connections editingFragmentRemovals: Connections{
-            target: editingFragment
+        property Connections editFragmentRemovals: Connections{
+            target: editFragment
             function onConnectionChanged(){
-                objectContainerTitle.isBuilder = root.editingFragment.isBuilder()
+                objectContainerTitle.isBuilder = root.editFragment.isBuilder()
             }
             function onAboutToBeRemoved(){
                 if (isForProperty) return
                 var p = root.parent
 
-                if (editingFragment.position() === rootPosition)
-                    editor.rootShaped = false
+                if (editFragment.position() === rootPosition)
+                    editFragment.codeHandler.rootShaped = false
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -393,7 +393,7 @@ Item{
         }
 
         property Connections addFragmentToContainerConn: Connections{
-            target: editingFragment
+            target: editFragment
             ignoreUnknownSignals: true
             function onObjectAdded(obj){
                 if (compact)
@@ -402,10 +402,10 @@ Item{
                     addChildObject(obj)
 
                 var child = container.children[container.children.length-1]
-                var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
-                var id = child.editingFragment.objectId()
-//                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
-                // paletteControls.openDefaultPalette(child.editingFragment, editor, child.paletteGroup, child)
+                var codeHandler = objectContainerFrame.editor.code.language
+                var id = child.editFragment.objectId()
+//                child.title = child.editFragment.typeName() + (id ? "#"+id : "")
+                // paletteControls.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
 
                 container.sortChildren()
             }
@@ -433,7 +433,7 @@ Item{
                                                   ? theme.colorScheme.middlegroundOverlayDominant
                                                   : theme.colorScheme.middlegroundOverlay
                 }
-                isBuilder: root.editingFragment ? root.editingFragment.isBuilder() : false
+                isBuilder: root.editFragment ? root.editFragment.isBuilder() : false
 
                 onToggleCompact: {
                     if ( objectContainerFrame.compact )
@@ -452,11 +452,11 @@ Item{
                 onToggleConnections: {
                     if ( paletteConnection.model ){
                         paletteConnection.model = null
-                        paletteConnection.editingFragment = null
+                        paletteConnection.editFragment = null
                     } else {
                         paletteConnection.forceActiveFocus()
-                        paletteConnection.model = editor.documentHandler.codeHandler.bindingChannels
-                        paletteConnection.editingFragment = editingFragment
+                        paletteConnection.model = editor.code.language.bindingChannels
+                        paletteConnection.editFragment = editFragment
                     }
                 }
                 onAssignFocus: {
@@ -464,7 +464,7 @@ Item{
                 }
 
                 onRebuild : {
-                    editingFragment.rebuild()
+                    editFragment.rebuild()
                 }
                 onPaletteToPane : {
                     paletteControls.objectContainerToPane(root)
@@ -500,9 +500,9 @@ Item{
                 }
 
                 onCreateObject: {
-                    var codeHandler = objectContainerFrame.editor.documentHandler.codeHandler
-                    codeHandler.addObjectForProperty(editingFragment)
-                    codeHandler.addItemToRuntime(editingFragment)
+                    var codeHandler = objectContainerFrame.editor.code.language
+                    codeHandler.addObjectForProperty(editFragment)
+                    codeHandler.addItemToRuntime(editFragment)
                 }
             }
         }

@@ -43,7 +43,7 @@
 
 #include "private/qquickimplicitsizeitem_p.h"
 #include <QtGui/qtextoption.h>
-#include "documenthandler.h"
+#include "codehandler.h"
 #include "qquickpainteditem.h"
 #include <set>
 #ifdef LV_EDITOR_DEBUG
@@ -109,7 +109,7 @@ class TextEdit : public QQuickImplicitSizeItem
     Q_PROPERTY(qreal rightPadding READ rightPadding WRITE setRightPadding RESET resetRightPadding NOTIFY rightPaddingChanged REVISION 6)
     Q_PROPERTY(qreal bottomPadding READ bottomPadding WRITE setBottomPadding RESET resetBottomPadding NOTIFY bottomPaddingChanged REVISION 6)
     Q_PROPERTY(QString preeditText READ preeditText NOTIFY preeditTextChanged REVISION 7)
-    Q_PROPERTY(lv::DocumentHandler* documentHandler READ documentHandler WRITE setDocumentHandler NOTIFY documentHandlerChanged)
+    Q_PROPERTY(lv::CodeHandler* code READ code WRITE setCode NOTIFY codeChanged)
     Q_PROPERTY(int fragmentStart READ fragmentStart WRITE setFragmentStart RESET resetFragmentStart NOTIFY fragmentStartChanged)
     Q_PROPERTY(int fragmentEnd READ fragmentEnd WRITE setFragmentEnd RESET resetFragmentEnd NOTIFY fragmentEndChanged)
     Q_PROPERTY(int lineNumber READ lineNumber NOTIFY lineNumberChanged)
@@ -323,8 +323,8 @@ public:
     int lineNumber() const;
     int columnNumber() const;
 
-    lv::DocumentHandler* documentHandler();
-    void setDocumentHandler(lv::DocumentHandler* dh);
+    lv::CodeHandler* code();
+    void setCode(lv::CodeHandler* dh);
 
     void linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem* palette, int start, int end);
     void linePaletteRemoved(QQuickItem* palette);
@@ -382,7 +382,7 @@ Q_SIGNALS:
     void inputMethodHintsChanged();
     void renderTypeChanged();
     void textDocumentChanged();
-    void documentHandlerChanged();
+    void codeChanged();
     Q_REVISION(6) void editingFinished();
     Q_REVISION(6) void paddingChanged();
     Q_REVISION(6) void topPaddingChanged();
@@ -476,7 +476,7 @@ protected:
 
     friend class TextUtil;
     friend class LineSurface;
-    friend class DocumentHandler;
+    friend class CodeHandler;
     friend class TextControl;
 #ifdef LV_EDITOR_DEBUG
     friend class TextEditNodeDebugModel;
