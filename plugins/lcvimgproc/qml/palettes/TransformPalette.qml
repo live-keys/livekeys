@@ -68,7 +68,7 @@ CodePalette{
             var position =
                 p.editFragment.valuePosition() +
                 p.editFragment.valueLength() - 1
-            paletteFunctions.addObjectToObjectContainer(container, position, "TransformImage", name, false)
+            paletteFunctions.addObjectToObjectContainer(container, name, null, position)
 
             var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]
@@ -83,7 +83,7 @@ CodePalette{
 
             var codeHandler = ef.language
             var opos = codeHandler.addObjectToCode(position, name)
-            codeHandler.addItemToRuntime(ef, name)
+            codeHandler.createObjectInRuntime(ef, name)
             var childEf = codeHandler.openNestedConnection(ef, opos)
             childEf.visualParent = p
             return childEf

@@ -1291,7 +1291,7 @@ void LanguageQmlHandler::__aboutToDelete()
     }
 }
 
-void LanguageQmlHandler::addItemToRunTimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     if ( !edit )
@@ -2343,6 +2343,9 @@ QmlEditFragment *LanguageQmlHandler::openNestedConnection(QmlEditFragment* editP
     }
 
     editParent->addChildFragment(ef);
+    if ( editParent->isOfFragmentType(QmlEditFragment::FragmentType::Group) ){
+        ef->addFragmentType(QmlEditFragment::GroupChild);
+    }
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 
@@ -2743,7 +2746,7 @@ void LanguageQmlHandler::eraseObject(QmlEditFragment *edit, bool removeFragment)
     }
 }
 
-QJSValue LanguageQmlHandler::findPalettesFromFragment(lv::QmlEditFragment* fragment){
+QJSValue LanguageQmlHandler::findPalettesForFragment(lv::QmlEditFragment* fragment){
     if (!fragment || !fragment->declaration())
         return QJSValue();
 
@@ -3378,7 +3381,7 @@ int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, cons
     return cursorPosition - 1 - type.size();
 }
 
-void LanguageQmlHandler::addObjectForProperty(QmlEditFragment *propertyFragment)
+void LanguageQmlHandler::createObjectForProperty(QmlEditFragment *propertyFragment)
 {
     if (!propertyFragment)
         return;
@@ -3446,9 +3449,9 @@ int LanguageQmlHandler::addRootObjectToCode(const QString &name)
     return insertionPosition + 2;
 }
 
-void LanguageQmlHandler::addItemToRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
     try{
-        addItemToRunTimeImpl(edit, ctype, properties);
+        createObjectInRuntimeImpl(edit, ctype, properties);
     } catch ( lv::Exception& e ){
         m_engine->throwError(&e, this);
     }
@@ -3994,15 +3997,15 @@ QJSValue LanguageQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
     result.setProperty("type", declaration->type().join());
     result.setProperty("parentType", declaration->parentType().join());
     if ( declaration->isForComponent() ){
-        result.setProperty("type", "component");
+        result.setProperty("location", "component");
     } else if ( declaration->isForImports() ){
-        result.setProperty("type", "imports");
+        result.setProperty("location", "imports");
     } else if ( declaration->isForList() ){
-        result.setProperty("type", "list");
+        result.setProperty("location", "list");
     } else if ( declaration->isForProperty() ){
-        result.setProperty("type", "property");
+        result.setProperty("location", "property");
     } else if ( declaration->isForSlot() ){
-        result.setProperty("type", "slot");
+        result.setProperty("location", "slot");
     }
     result.setProperty("hasObject", declaration->isForObject());
     return result;

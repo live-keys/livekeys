@@ -121,6 +121,8 @@ public:
     QmlEditFragment *rootFragment() const;
     void setRootFragment(QmlEditFragment *rootFragment);
 
+    QmlInheritanceInfo inheritanceInfo(const QString& name);
+
 signals:
     void importsFragmentChanged();
     void rootFragmentChanged();
@@ -131,7 +133,6 @@ public slots:
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
 
-    QmlInheritanceInfo inheritanceInfo(const QString& name);
 
 public slots:
     void onDocumentParsed(QJSValue callback);
@@ -160,7 +161,7 @@ public slots:
     //TOMOVE: In findPalettesFromFragment
     QString defaultPalette(lv::QmlEditFragment* fragment);
 
-    QJSValue findPalettesFromFragment(lv::QmlEditFragment* fragment);
+    QJSValue findPalettesForFragment(lv::QmlEditFragment* fragment);
     QJSValue findPalettes(int position);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
     lv::CodePalette* openBinding(lv::QmlEditFragment* edit, QString paletteName);
@@ -198,8 +199,8 @@ public slots:
     int addEventToCode(int position, const QString &name);
     int addRootObjectToCode(const QString &ctype);
 
-    void addObjectForProperty(lv::QmlEditFragment* propertyFragment);
-    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectForProperty(lv::QmlEditFragment* propertyFragment);
+    void createObjectInRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     // Registered slots
 
@@ -215,7 +216,7 @@ public slots:
 
 private:
     void setDocument(ProjectDocument* document);
-    void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectInRuntimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     lv::QmlAddContainer* getAddOptionsForFragment(QmlEditFragment* edit, bool isReadOnly = false);
     lv::QmlAddContainer* getAddOptionsForPosition(int position);
