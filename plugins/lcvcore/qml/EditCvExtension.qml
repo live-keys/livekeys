@@ -241,8 +241,8 @@ WorkspaceExtension{
                                         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
                                             var palettesForRoot = codeHandler.findPalettes(rootPosition)
                                             var pos = palettesForRoot.declaration.position
-                                            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
-                                            var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot.data)
+                                            var oc = lk.layers.workspace.extensions.editqml.paletteFunctions.shapePalette(
                                                 editor,
                                                 palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
                                                 pos
@@ -251,9 +251,9 @@ WorkspaceExtension{
                                                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                             })
 
-                                            codeHandler.rootShaped = true
+                                            codeHandler.rootFragment = oc.editFragment
 
-                                            var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
+                                            var pb = lk.layers.workspace.extensions.editqml.paletteFunctions.openPaletteInObjectContainer(oc, 'NodePalette')
 
                                             pb.child.resize(oc.width - 50, editor.height - 170)
                                         })
@@ -296,8 +296,8 @@ WorkspaceExtension{
                                 lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
                                     var palettesForRoot = codeHandler.findPalettes(rootPosition)
                                     var pos = palettesForRoot.declaration.position
-                                    palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteControls.filterOutPalettes(palettesForRoot.data)
-                                    var oc = lk.layers.workspace.extensions.editqml.paletteControls.shapePalette(
+                                    palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot.data)
+                                    var oc = lk.layers.workspace.extensions.editqml.paletteFunctions.shapePalette(
                                         editor,
                                         palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
                                         pos
@@ -306,9 +306,9 @@ WorkspaceExtension{
                                         return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                                     })
 
-                                    codeHandler.rootShaped = true
+                                    codeHandler.rootFragment = oc.editFragment
 
-                                    var pb = lk.layers.workspace.extensions.editqml.paletteControls.openPaletteInObjectContainer(oc, 'NodePalette')
+                                    var pb = lk.layers.workspace.extensions.editqml.paletteFunctions.openPaletteInObjectContainer(oc, 'NodePalette')
 
                                     pb.child.resize(oc.width - 50, editor.height - 170)
                                 })

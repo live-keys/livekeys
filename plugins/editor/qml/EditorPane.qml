@@ -37,7 +37,7 @@ Workspace.Pane{
 
     property alias editor: editor
     property alias document: editor.document
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     property var document: null
     onDocumentChanged: {
@@ -276,7 +276,7 @@ Workspace.Pane{
             onClicked: {
                 lk.layers.workspace.panes.activePane = root
 
-                var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
                 if (!codeOnly)
                 {
                     if (code.language)
@@ -285,18 +285,18 @@ Workspace.Pane{
                         if (loading)
                             lk.layers.workspace.commands.execute("editqml.shape_all")
 
-                        if (code.language.rootShaped){
-                            root.paneState.layout = paletteControls.getEditorLayout(root)
+                        if (code.language.rootFragment){
+                            root.paneState.layout = paletteFunctions.getEditorLayout(root)
                         } else {
                             root.paneState.layout = null
                         }
                         code.language.editContainer.clearAllFragments()
-                        code.language.importsShaped = false
-                        code.language.rootShaped = false
+                        code.language.importsFragment = null
+                        code.language.rootFragment = null
                     }
                 } else {
                     if (root.paneState.layout){
-                        paletteControls.expandLayout(root, root.paneState.layout)
+                        paletteFunctions.expandLayout(root, root.paneState.layout)
                     } else {
                         // shape all
                         lk.layers.workspace.extensions.editqml.shapeAll(root, function(ef){ if ( ef.visualParent.expand) ef.visualParent.expand() })
@@ -423,7 +423,7 @@ Workspace.Pane{
             onClicked: {
                 editorAddRemoveMenu.visible = false
 
-                var layout = lk.layers.workspace.extensions.editqml.paletteControls.getEditorLayout(editor)
+                var layout = lk.layers.workspace.extensions.editqml.paletteFunctions.getEditorLayout(editor)
                 if ( !layout ){
                     lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
                     return
@@ -456,7 +456,7 @@ Workspace.Pane{
                 editorAddRemoveMenu.visible = false
                 lk.layers.window.dialogs.saveFile({filters: ["Layout files (*.qmla)"]}, function(url){
                     var layoutFile = Fs.UrlInfo.toLocalFile(url)
-                    var layout = lk.layers.workspace.extensions.editqml.paletteControls.convertEditorStateIntoInstructions(editor)
+                    var layout = lk.layers.workspace.extensions.editqml.paletteFunctions.convertEditorStateIntoInstructions(editor)
                     if ( !layout ){
                         lk.layers.workspace.messages.pushWarning("The document needs to be shaped before layout can be saved.", 100)
                         return
@@ -511,8 +511,8 @@ Workspace.Pane{
                     }
 
                     var rootPosition = editor.code.language.findRootPosition()
-                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                    paletteControls.expandLayout(root, layout)
+                    var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+                    paletteFunctions.expandLayout(root, layout)
                 })
             }
         }
@@ -524,7 +524,7 @@ Workspace.Pane{
         anchors.topMargin: 30
         color: root.color
         lineSurfaceColor: root.lineSurfaceColor
-        lineSurfaceVisible: !(code && code.language && code.language.importsShaped && code.language.rootShaped)
+        lineSurfaceVisible: !(code && code.language && code.language.importsFragment && code.language.rootFragment)
 
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = code.has(DocumentHandler.LanguageLayout)

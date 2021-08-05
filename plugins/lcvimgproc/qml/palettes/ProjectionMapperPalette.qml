@@ -34,7 +34,7 @@ CodePalette{
 
     property bool isEditing: false
     property int currentIndex: -1
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     function findSurfaceFragment(){
         var childFrags = editFragment.getChildFragments()

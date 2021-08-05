@@ -10,7 +10,7 @@ Item{
 
     property alias paletteListContainer: container
     property alias pane: objectContainerFrame.pane
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     //TODO: See if this should be private
 
@@ -47,7 +47,7 @@ Item{
         root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
         ef.visualParent = root
 
-        var paletteBoxGroup = paletteControls.__factories.createPaletteGroup(root.paletteListContainer, ef)
+        var paletteBoxGroup = paletteFunctions.__factories.createPaletteGroup(root.paletteListContainer, ef)
 
         paletteBoxGroup.leftPadding = 7
         paletteBoxGroup.topPadding = 7
@@ -59,8 +59,8 @@ Item{
         if ( pc )
             return pc
 
-        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-        var propertyContainer = paletteControls.__factories.createPropertyContainer(root.editor, ef, root.paletteListContainer)
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+        var propertyContainer = paletteFunctions.__factories.createPropertyContainer(root.editor, ef, root.paletteListContainer)
 
         ef.incrementRefCount()
 
@@ -87,9 +87,9 @@ Item{
     }
 
     function addChildObject(ef){
-        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
-        var childObjectContainer = paletteControls.__factories.createObjectContainer(root.editor, ef, root.paletteListContainer)
+        var childObjectContainer = paletteFunctions.__factories.createObjectContainer(root.editor, ef, root.paletteListContainer)
         childObjectContainer.parentObjectContainer = root
         childObjectContainer.x = 20
         childObjectContainer.y = 10
@@ -262,7 +262,7 @@ Item{
             if ( 'palettes' in options){
                 var palettes = options['palettes']
                 for ( var i = 0; i < palettes.length; ++i){
-                    paletteControls.openPaletteInObjectContainer(objectContainerFrame, palettes[i])
+                    paletteFunctions.openPaletteInObjectContainer(objectContainerFrame, palettes[i])
                 }
             }
 
@@ -316,7 +316,7 @@ Item{
                             }
 
                             if (pg.palettesOpened && pg.palettesOpened.indexOf(propPalette) !== -1) break
-                            paletteControls.openPaletteInPropertyContainer(container.children[j], propPalette)
+                            paletteFunctions.openPaletteInPropertyContainer(container.children[j], propPalette)
                             break
                         }
 
@@ -337,7 +337,7 @@ Item{
                 return
             compact = false
 
-            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+            var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
             var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
 
@@ -346,7 +346,7 @@ Item{
                     root.addChildObject(objects[i])
                 }
             }
-            paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
+            paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
 
             var codeHandler = root.editor.code.language
 
@@ -355,7 +355,7 @@ Item{
             for (var i = 0; i < properties.length; ++i){
                 if ( !properties[i].visualParent ){
                     var pc = addProperty(properties[i])
-                    paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+                    paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
                 }
             }
 
@@ -403,7 +403,7 @@ Item{
                 var rootPosition = language.findRootPosition()
 
                 if (editFragment.position() === rootPosition)
-                    editFragment.language.rootShaped = false
+                    editFragment.language.rootFragment = null
 
                 if (!p) return
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
@@ -431,13 +431,13 @@ Item{
 //                    var child = container.children[container.children.length-1]
 //                    var id = child.editFragment.objectId()
     //                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
-                    // paletteControls.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
+                    // paletteFunctions.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
 
                     container.sortChildren()
                 } else {
                     var pc = root.addProperty(ef)
-                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                    paletteControls.openPaletteInPropertyContainer(pc, paletteControls.defaultPalette)
+                    var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+                    paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
                 }
             }
         }
@@ -469,7 +469,7 @@ Item{
                 }
                 onErase: {
                     try{
-                        paletteControls.eraseObject(root)
+                        paletteFunctions.eraseObject(root)
                     } catch ( e ){
                         var eunwrap = lk.engine.unwrapError(e)
                         lk.layers.workspace.messages.pushError(eunwrap.message, eunwrap.code)
@@ -493,10 +493,10 @@ Item{
                     editFragment.rebuild()
                 }
                 onPaletteToPane : {
-                    paletteControls.objectContainerToPane(root)
+                    paletteFunctions.objectContainerToPane(root)
                 }
                 onClose : {
-                    paletteControls.closeObjectContainer(objectContainerFrame)
+                    paletteFunctions.closeObjectContainer(objectContainerFrame)
                 }
                 onAddPalette: {
                     var pane = container.parent
@@ -510,7 +510,7 @@ Item{
                     if ( container.pane )
                         coords.y -= 30 // if this container is in the title of a pane
 
-                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
+                    var paletteList = paletteFunctions.views.openPaletetListBoxForContainer(
                         root,
                         paletteGroup(),
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
@@ -522,7 +522,7 @@ Item{
                     }
                 }
                 onCompose : {
-                    paletteControls.userAddToObjectContainer(root)
+                    paletteFunctions.userAddToObjectContainer(root)
                 }
 
                 onCreateObject: {

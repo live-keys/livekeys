@@ -350,7 +350,7 @@ Rectangle{
                 height: Math.max(paintedHeight, flick.height)
                 width: Math.max(paintedWidth, flick.width)
 
-                readOnly: root.document === null || root.document.isMonitored || (code && code.language && code.language.importsShaped && code.language.rootShaped)
+                readOnly: root.document === null || root.document.isMonitored || (code && code.language && code.language.importsFragment && code.language.rootFragment)
                 cursorVisible: !readOnly && isActive
 
                 Keys.onPressed: {
@@ -497,7 +497,7 @@ Rectangle{
                         lk.layers.editor.environment.placement.bottom)
 
             } else {
-                qmlSuggestionBox = paletteControls.createSuggestionBox(null, textEdit.font)
+                qmlSuggestionBox = paletteFunctions.createSuggestionBox(null, textEdit.font)
                 qmlSuggestionBox.model = code.completionModel
 
                 var editorBox = lk.layers.editor.environment.createEditorBox(

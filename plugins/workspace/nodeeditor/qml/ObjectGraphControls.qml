@@ -59,11 +59,11 @@ QtObject{
         var codeHandler = editor.code.language
         var rootPosition = codeHandler.findRootPosition()
 
-        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
-        paletteControls.shapeImports(editor)
-        paletteControls.shapeRoot(editor, function(objectContainer){
-            var nodePalette = paletteControls.openPaletteInObjectContainer(objectContainer, 'NodePalette')
+        paletteFunctions.shapeImports(editor)
+        paletteFunctions.shapeRoot(editor, function(objectContainer){
+            var nodePalette = paletteFunctions.openPaletteInObjectContainer(objectContainer, 'NodePalette')
             nodePalette.child.resize(objectContainer.width - 50, editor.height - 170)
         })
     }

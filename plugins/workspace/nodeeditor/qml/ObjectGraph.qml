@@ -209,9 +209,9 @@ Rectangle{
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
 
-        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
-        var addBoxItem = paletteControls.views.openAddOptionsBox(
+        var addBoxItem = paletteFunctions.views.openAddOptionsBox(
             addOptions,
             root.editFragment.language,
             {
@@ -231,7 +231,7 @@ Rectangle{
                 },
                 onAccepted: function(box, selection){
                     if ( selection.extraProperties ){
-                        paletteControls.views.openAddExtraPropertiesBox(selection.name, {
+                        paletteFunctions.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
                                 var ch = editFragment.language
                                 var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)

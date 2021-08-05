@@ -157,7 +157,7 @@ QtObject{
                 objectContainer.contentWidth = Qt.binding(function(){
                     return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
                 })
-                languageHandler.rootShaped = true
+                languageHandler.rootFragment = ef
             }
             return objectContainer
         }
@@ -622,7 +622,7 @@ QtObject{
         editor.code.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports)
-            editor.code.language.importsShaped = true //TODO: Move to LanguageQmlHandler
+            editor.code.language.importsFragment = ef //TODO: Move to LanguageQmlHandler
 
         ef.incrementRefCount()
 
@@ -664,7 +664,7 @@ QtObject{
             oc.contentWidth = Qt.binding(function(){
                 return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
             })
-            languageHandler.rootShaped = true
+            languageHandler.rootFragment = oc.editFragment
             if ( callback ){
                 callback(oc.editFragment)
             }
@@ -936,7 +936,7 @@ QtObject{
         objectContainer.editor.code.language.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
 
         if (rootDeleted) {
-            objectContainer.editFragment.language.rootShaped = false
+            objectContainer.editFragment.language.rootFragment = null
             objectContainer.editor.addRootButton.visible = true
         }
 
@@ -952,7 +952,7 @@ QtObject{
         objectContainer.collapse()
         var rootPos = languageHandler.findRootPosition()
         if (rootPos === objectContainer.editFragment.position())
-            languageHandler.rootShaped = false
+            languageHandler.rootFragment = null
 
         languageHandler.removeConnection(objectContainer.editFragment)
 
@@ -1003,7 +1003,7 @@ QtObject{
             }
         }
 
-        if (languageHandler.importsShaped)
+        if (languageHandler.importsFragment)
             result['shapeImports'] = true
 
         return result

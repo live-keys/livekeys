@@ -32,7 +32,7 @@ Qan.NodeItem{
     property var editor: null
     property var objectGraph: null
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     function resizeNode(){
         var max = 350
@@ -150,7 +150,7 @@ Qan.NodeItem{
     resizable: false
 
     function expandDefaultPalette(){
-        paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
+        paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
     }
 
     function expandOptions(options){
@@ -161,7 +161,7 @@ Qan.NodeItem{
             for ( var i = 0; i < palettes.length; ++i){
                 if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
 
-                paletteControls.openPaletteInObjectContainer(root, palettes[i])
+                paletteFunctions.openPaletteInObjectContainer(root, palettes[i])
             }
         }
 
@@ -203,7 +203,7 @@ Qan.NodeItem{
 //                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
 //                        if (objectNodePropertyList.children[j].paletteListContainer.palettesOpened.indexOf(propPalette) !== -1) break
 
-//                        paletteControls.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
+//                        paletteFunctions.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
 //                        break
 //                    }
                 } else {
@@ -305,7 +305,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.eraseObject(root)
+                        paletteFunctions.eraseObject(root)
                     }
                 }
             }
@@ -324,7 +324,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteControls.userAddToObjectContainer(root, {
+                        paletteFunctions.userAddToObjectContainer(root, {
                             onCancelled: function(){ root.objectGraph.activateFocus() },
                             onAccepted: function(){ root.objectGraph.activateFocus() }
                         })
@@ -348,7 +348,7 @@ Qan.NodeItem{
                     anchors.fill: parent
                     onClicked: {
                         root.selected = false
-                        var paletteList = paletteControls.views.openPaletteListForNode(
+                        var paletteList = paletteFunctions.views.openPaletteListForNode(
                             root,
                             paletteContainer,
                             wrapper
