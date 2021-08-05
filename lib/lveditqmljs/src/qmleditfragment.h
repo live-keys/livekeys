@@ -132,18 +132,12 @@ public:
     const QList<lv::QmlEditFragment*>& childFragments();
     void checkIfGroup();
 
-public slots:
-    //TOMOVE
-    int fragmentType() const;
-    bool isOfFragmentType(FragmentType type) const;
-    void addFragmentType(FragmentType type);
     void removeFragmentType(FragmentType type);
+    void addFragmentType(FragmentType type);
+    bool isOfFragmentType(FragmentType type) const;
     bool isGroup() const;
 
-    void signalChildAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
-    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
-    // ----------------------
-
+public slots:
     int position();
     int valuePosition() const;
     int valueLength() const;
@@ -154,6 +148,7 @@ public slots:
     QString identifier() const;
     QString objectInitializerType() const;
     QString objectId();
+    int fragmentType() const;
 
     bool isBuilder() const;
     void rebuild();
@@ -191,6 +186,8 @@ public slots:
     void decrementRefCount();
     int refCount();
 
+    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
+    void signalChildAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
 
     void __updateFromPalette();
     void __updateValue();

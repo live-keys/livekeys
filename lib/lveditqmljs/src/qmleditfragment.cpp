@@ -473,18 +473,8 @@ void QmlEditFragment::__updateFromPalette()
 
 void QmlEditFragment::suggestionsForExpression(const QString &expression, CodeCompletionModel *model, bool suggestFunctions)
 {
-    QObject* editParent = parent();
-    LanguageQmlHandler* qmlHandler = nullptr;
-    while ( editParent ){
-        qmlHandler = qobject_cast<LanguageQmlHandler*>(editParent);
-        if ( qmlHandler )
-            break;
-
-        editParent = editParent->parent();
-    }
-
-    if (qmlHandler){
-        qmlHandler->suggestionsForProposedExpression(declaration(), expression, model, suggestFunctions);
+    if (m_language){
+        m_language->suggestionsForProposedExpression(declaration(), expression, model, suggestFunctions);
     }
 }
 

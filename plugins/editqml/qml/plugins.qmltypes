@@ -249,13 +249,13 @@ Module {
             Parameter { name: "name"; type: "QString" }
         }
         Method {
-            name: "addItemToRuntime"
+            name: "createObjectInRuntime"
             Parameter { name: "edit"; type: "lv::QmlEditFragment"; isPointer: true }
             Parameter { name: "type"; type: "QString" }
             Parameter { name: "currentApp"; type: "QObject"; isPointer: true }
         }
         Method {
-            name: "addItemToRuntime"
+            name: "createObjectInRuntime"
             Parameter { name: "edit"; type: "lv::QmlEditFragment"; isPointer: true }
             Parameter { name: "type"; type: "QString" }
         }

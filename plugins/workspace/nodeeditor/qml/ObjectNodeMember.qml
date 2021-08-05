@@ -152,6 +152,23 @@ Item{
         root.destroy()
     }
 
+    function paletteByName(name){
+        var pg = paletteContainer
+        for ( var i = 0; i < pg.children.length; ++i ){
+            if ( pg.children[i].name === name )
+                return pg.children[i]
+        }
+        return null
+    }
+
+    function paletteGroup(){
+        return paletteContainer
+    }
+
+    function expand(){}
+
+    property QtObject childObjectContainer: null
+
     Rectangle {
         id: propertyTitle
         radius: root.style.radius
