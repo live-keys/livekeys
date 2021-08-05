@@ -43,7 +43,7 @@ Rectangle{
     onEditFragmentChanged: {
         if (!editFragment)
             return
-        editor = editFragment.codeHandler.code.textEdit().getEditor()
+        editor = editFragment.language.code.textEdit().getEditor()
     }
 
     property bool paletteSwapVisible: false
@@ -88,7 +88,7 @@ Rectangle{
             paletteConnection.editFragment = null
         } else {
             paletteConnection.forceActiveFocus()
-            paletteConnection.model = editFragment.codeHandler.bindingChannels
+            paletteConnection.model = editFragment.language.bindingChannels
             paletteConnection.editFragment = editFragment
         }
     }
@@ -130,14 +130,14 @@ Rectangle{
 
     function closePalette(){
         if (paletteContainer.palette.type === "qml/import"){
-            editFragment.codeHandler.importsShaped = false
+            editFragment.language.importsShaped = false
         }
         var p = parent
         while (p && p.objectName !== "paletteGroup"){
             p = p.parent
         }
         p.palettesOpened = p.palettesOpened.filter(function(name){ return name !== paletteContainer.palette.name })
-        editFragment.codeHandler.removePalette(paletteContainer.palette)
+        editFragment.language.removePalette(paletteContainer.palette)
     }
 
     Component.onCompleted: {

@@ -66,7 +66,7 @@ EditorLayer{
                     if (!child) return;
 
                     if (child.objectName === "paletteGroup")
-                        child.codeHandler.removeConnection(child.editFragment)
+                        child.editFragment.language.removeConnection(child.editFragment)
                     if (child.objectName === "objectContainer")
                         child.editor.code.language.removeConnection(child.editFragment)
                 }

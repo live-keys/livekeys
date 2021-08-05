@@ -24,7 +24,7 @@ CodePalette {
         ]
 
         function lcvImgProcQualifier(){
-            var imports = editFragment.codeHandler.importsModel()
+            var imports = editFragment.language.importsModel()
             if (!imports)
                 return ''
 

@@ -96,7 +96,7 @@ QmlBindingChannel::Ptr traversePath(QmlBindingPath::Ptr path, Runnable* r, QmlBi
 DocumentQmlChannels::DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDispatcher, LanguageQmlHandler *handler)
     : QAbstractListModel(handler)
     , m_selectedIndex(-1)
-    , m_codeHandler(handler)
+    , m_languageHandler(handler)
     , m_channelDispatcher(channelDispatcher)
 {
     m_roles[DocumentQmlChannels::Path]         = "path";
@@ -104,7 +104,7 @@ DocumentQmlChannels::DocumentQmlChannels(QmlBindingChannelsDispatcher* channelDi
     m_roles[DocumentQmlChannels::RunnableName] = "runnableName";
     m_roles[DocumentQmlChannels::IsInSync]     = "isInSync";
 
-    m_channelDispatcher->initialize(m_codeHandler, this);
+    m_channelDispatcher->initialize(m_languageHandler, this);
 }
 
 DocumentQmlChannels::~DocumentQmlChannels(){
@@ -258,7 +258,7 @@ void DocumentQmlChannels::removeIndirectChannels(){
 }
 
 ProjectDocument *DocumentQmlChannels::document() const{
-    return m_codeHandler->document();
+    return m_languageHandler->document();
 }
 
 /**

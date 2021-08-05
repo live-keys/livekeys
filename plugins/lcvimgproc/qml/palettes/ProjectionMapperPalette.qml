@@ -58,8 +58,17 @@ CodePalette{
         value += 'Qt.point(' + Math.round(p3.x) + ", " + Math.round(p3.y) +'), '
         value += 'Qt.point(' + Math.round(p4.x) + ", " + Math.round(p4.y) +')]'
         fragment.writeProperties({"destination": {"__ref": value}})
-        fragment.codeHandler.openNestedFragments(fragment, ['properties'])
-        var destProp = fragment.codeHandler.findChildPropertyFragmentByName(fragment, "destination")
+        fragment.language.openNestedFragments(fragment, ['properties'])
+
+        var destProp = null
+        var childFragments = fragment.getChildFragments()
+        for ( var i = 0; i < childFragments.length; ++i ){
+            var childFragment = childFragments[i]
+            if ( childFragment.identifier() === 'destination' ){
+                destProp = childFragment
+                break
+            }
+        }
         destProp.commit([p1, p2, p3, p4])
     }
 
@@ -106,8 +115,18 @@ CodePalette{
                     var surfaceFragment = findSurfaceFragment()
                     if (!surfaceFragment) return
                     surfaceFragment.writeProperties({'input': {"__ref": input.text} })
-                    surfaceFragment.codeHandler.openNestedFragments(surfaceFragment, ['properties'])
-                    var inputProp = surfaceFragment.codeHandler.findChildPropertyFragmentByName(surfaceFragment, "input")
+                    surfaceFragment.language.openNestedFragments(surfaceFragment, ['properties'])
+
+                    var inputProp = null
+                    var childFragments = surfaceFragment.getChildFragments()
+                    for ( var i = 0; i < childFragments.length; ++i ){
+                        var childFragment = childFragments[i]
+                        if ( childFragment.identifier() === 'input' ){
+                            inputProp = childFragment
+                            break
+                        }
+                    }
+
                     try{
                         var result = inputProp.bindExpression(input.text)
                         if ( !result ){

@@ -113,6 +113,25 @@ Qan.NodeItem{
         return nodeMember
     }
 
+    function addFunctionProperty(name){
+        var propMember = propertyByName(name)
+        if ( propMember )
+            return propMember
+
+        //TODO: Rename  objectNodeProperty and propertyContainer
+        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
+        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
+        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
+        nodeMember.__initializeFunction(nodeParent, nodeStyle, name)
+
+        if ( nodeParent.item.id !== '' )
+            nodeMember.addInPort()
+
+        root.members.push(nodeMember)
+
+        return nodeMember
+    }
+
     function addChildObject(ef){
         var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
 
@@ -135,7 +154,7 @@ Qan.NodeItem{
     }
 
     function expandOptions(options){
-        var codeHandler = editFragment.codeHandler
+        var codeHandler = editFragment.language
 
         if ( 'palettes' in options){
             var palettes = options['palettes']
@@ -151,16 +170,22 @@ Qan.NodeItem{
             for ( var i = 0; i < newProps.length; ++i ){
 
                 var propName = newProps[i][0]
-                var propType = codeHandler.propertyType(root.editFragment, propName)
+
+                var metaTypeInfo = codeHandler.typeInfo(root.editFragment.type())
+                var propertyInfo = metaTypeInfo.propertyInfo(propName)
+                if ( !propertyInfo )
+                    continue
+                var propType = metaTypeInfo.typeName(propertyInfo.type)
 
                 var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
 
-                if ( propType === '' ) continue
+                if ( propType === '' )
+                    continue
 
                 var ef = null
                 if (newProps[i].length > 2)
                 {
-                    ef = codeHandler.createReadOnlyPropertyFragment(root.editFragment, propName)
+                    ef = codeHandler.openReadOnlyPropertyConnection(root.editFragment, propName)
                 } else {
                     var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
                     var ppos = codeHandler.addPropertyToCode(
@@ -172,7 +197,7 @@ Qan.NodeItem{
                 }
 
                 if (ef) {
-                    root.editFragment.signalPropertyAdded(ef, false)
+                    root.editFragment.signalChildAdded(ef, false)
                     if (propPalette.length === 0) continue
 //                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
 //                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
@@ -202,7 +227,7 @@ Qan.NodeItem{
             }
         }
 
-        var codeHandler = editFragment.codeHandler
+        var codeHandler = editFragment.language
 
         var position = editFragment.valuePosition() +
                        editFragment.valueLength() - 1
@@ -354,23 +379,22 @@ Qan.NodeItem{
             anchors.left: parent.left
             anchors.leftMargin: 5
         }
-
     }
 
     Connections {
         target: editFragment
         ignoreUnknownSignals: true
+        function onChildAdded(ef, context){
+            if ( ef.location === EditQml.QmlEditFragment.Object ){
+                root.addChildObject(ef)
+            } else {
+                root.addProperty(ef)
+            }
+        }
         function onAboutToBeRemoved(){
             paletteContainer.closePalettes()
             if (removeNode)
                 removeNode(nodeParent)
         }
-        function onObjectAdded(ef){
-            root.addChildObject(ef)
-        }
-        function onPropertyAdded(ef, expandDefault){
-            root.addProperty(ef)
-        }
-
     }
 }

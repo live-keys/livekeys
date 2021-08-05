@@ -39,14 +39,14 @@ class CodeCompletionModel;
 class LV_EDITQMLJS_EXPORT QmlEditFragment : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QObject*             visualParent  READ visualParent  WRITE setVisualParent NOTIFY visualParentChanged)
-    Q_PROPERTY(int                  refCount      READ refCount      NOTIFY refCountChanged)
-    Q_PROPERTY(Location             location      READ location      CONSTANT)
-    Q_PROPERTY(Location             valueLocation READ valueLocation CONSTANT)
-    Q_PROPERTY(bool                 isWritable    READ isWritable    CONSTANT)
-    Q_PROPERTY(QJSValue             whenBinding   READ whenBinding   WRITE setWhenBinding NOTIFY whenBindingChanged)
-    Q_PROPERTY(lv::LanguageQmlHandler*  codeHandler   READ codeHandler   CONSTANT)
-    Q_PROPERTY(bool                 isNull        READ isNull        NOTIFY isNullChanged)
+    Q_PROPERTY(QObject*                visualParent  READ visualParent  WRITE setVisualParent NOTIFY visualParentChanged)
+    Q_PROPERTY(int                     refCount      READ refCount      NOTIFY refCountChanged)
+    Q_PROPERTY(Location                location      READ location      CONSTANT)
+    Q_PROPERTY(Location                valueLocation READ valueLocation CONSTANT)
+    Q_PROPERTY(bool                    isWritable    READ isWritable    CONSTANT)
+    Q_PROPERTY(QJSValue                whenBinding   READ whenBinding   WRITE setWhenBinding NOTIFY whenBindingChanged)
+    Q_PROPERTY(lv::LanguageQmlHandler* language      READ language      CONSTANT)
+    Q_PROPERTY(bool                    isNull        READ isNull        NOTIFY isNullChanged)
     Q_ENUMS(FragmentType)
 
 public:
@@ -63,6 +63,7 @@ public:
         Property,
         Slot
     };
+    Q_ENUM(Location)
 
     enum FragmentType {
         Builder = 1,
@@ -71,7 +72,6 @@ public:
         GroupChild = 8
     };
 
-    Q_ENUM(Location)
 public:
     QmlEditFragment(QmlDeclaration::Ptr declaration, lv::LanguageQmlHandler* codeHandler, QObject* parent = nullptr);
     virtual ~QmlEditFragment();
@@ -114,9 +114,6 @@ public:
     const QmlTypeReference& objectInitializeType() const;
 
     void emitRemoval();
-    void addNestedObjectInfo(QVariantMap& info);
-    void clearNestedObjectsInfo();
-    void setObjectInfo(QVariantMap& info);
 
     QJSValue& whenBinding();
     void setWhenBinding(const QJSValue& whenBinding);
@@ -129,85 +126,77 @@ public:
     Location location() const;
     Location valueLocation() const;
     bool isWritable() const;
-    lv::LanguageQmlHandler* codeHandler() const;
+    lv::LanguageQmlHandler* language() const;
 
     void setObjectId(QString id);
+    const QList<lv::QmlEditFragment*>& childFragments();
+    void checkIfGroup();
 
 public slots:
+    //TOMOVE
     int fragmentType() const;
     bool isOfFragmentType(FragmentType type) const;
     void addFragmentType(FragmentType type);
     void removeFragmentType(FragmentType type);
+    bool isGroup() const;
 
-    const QList<lv::QmlEditFragment*>& childFragments();
-
-    void commit(const QVariant& value);
+    void signalChildAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
+    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
+    // ----------------------
 
     int position();
     int valuePosition() const;
     int valueLength() const;
     int length() const;
 
-    bool isBuilder() const;
-    void rebuild();
-
-    bool isGroup() const;
-    void checkIfGroup();
-
-    QString defaultValue() const;
-    QString readValueText() const;
-    QJSValue readValueConnection() const;
-
-    int totalPalettes() const;
-    lv::QmlEditFragment* parentFragment();
-    lv::CodePalette* bindingPalette();
-    QStringList bindingPath();
-
-    void __selectedChannelChanged();
-
     QString type() const;
     QString typeName() const;
     QString identifier() const;
     QString objectInitializerType() const;
-
-    QList<QObject*> paletteList() const;
-    QList<QObject*> getChildFragments() const;
-
-    void updateValue();
-    void __inputRunnableObjectReady();
-
-    QVariantList nestedObjectsInfo();
-    QVariantMap  objectInfo();
-
-    void signalPropertyAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
-    void signalObjectAdded(lv::QmlEditFragment* ef);
-    void incrementRefCount();
-    void decrementRefCount();
-    int refCount();
-
-    void removeChildFragment(QmlEditFragment* edit);
     QString objectId();
+
+    bool isBuilder() const;
+    void rebuild();
+    QStringList bindingPath();
+
+    bool isNull();
+    bool isMethod();
+
+    void commit(const QVariant& value);
+    QObject* readObject();
+    QObject* propertyObject();
+
+    QString defaultValue() const;
+    QString readValueText() const;
+    QJSValue readValueConnection() const;
+    QVariant parse();
+
+    bool bindExpression(const QString& expression);
+    bool bindFunctionExpression(const QString& expression);
 
     void writeProperties(const QJSValue& properties);
     void write(const QJSValue options);
     void writeCode(const QString& code);
 
-    QObject* readObject();
-    QObject* propertyObject();
-
-    QVariant parse();
+    int totalPalettes() const;
+    QJSValue paletteList() const;
+    lv::CodePalette* bindingPalette();
     void updateBindings();
 
-    void updateFromPalette();
+    lv::QmlEditFragment* parentFragment();
+    QJSValue getChildFragments() const;
+    void removeChildFragment(QmlEditFragment* edit);
 
-    void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
-    bool bindExpression(const QString& expression);
-    bool bindFunctionExpression(const QString& expression);
+    void incrementRefCount();
+    void decrementRefCount();
+    int refCount();
 
-    bool isNull();
-    bool isMethod();
 
+    void __updateFromPalette();
+    void __updateValue();
     void __channelObjectErased();
+    void __inputRunnableObjectReady();
+    void __selectedChannelChanged();
 
 signals:
     void visualParentChanged();
@@ -217,12 +206,13 @@ signals:
     void paletteListEmpty();
 
     void objectAdded(lv::QmlEditFragment* obj);
-    void propertyAdded(lv::QmlEditFragment* ef, QJSValue context);
+    void childAdded(lv::QmlEditFragment* ef, QJSValue context);
 
     void refCountChanged();
     void whenBindingChanged();
     void typeChanged();
     void isNullChanged();
+
 private:
     static QString buildCode(const QJSValue& value, bool additionalBraces = false);
     void checkIsNull();
@@ -241,22 +231,20 @@ private:
     QObject*                m_visualParent;
 
     QmlTypeReference        m_objectInitializeType;
-    QVariantList            m_nestedObjectsInfo;
-    QVariantMap             m_objectInfo;
     int                     m_refCount;
     QString                 m_objectId;
     Location                m_valueLocation;
     QJSValue                m_whenBinding;
     int                     m_fragmentType;
-    lv::LanguageQmlHandler*     m_codeHandler;
+    lv::LanguageQmlHandler* m_language;
 };
 
 inline CodePalette *QmlEditFragment::bindingPalette(){
     return m_bindingPalette;
 }
 
-inline lv::LanguageQmlHandler *QmlEditFragment::codeHandler() const {
-    return m_codeHandler;
+inline lv::LanguageQmlHandler *QmlEditFragment::language() const {
+    return m_language;
 }
 
 inline bool QmlEditFragment::hasPalette(CodePalette *palette){

@@ -35,6 +35,7 @@
 #include "qmltokenizer_p.h"
 #include "qmlsyntax_p.h"
 #include "qmlmetainfo_p.h"
+#include "qmlmetatypeinfo_p.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -83,11 +84,11 @@ ProjectQmlExtension::ProjectQmlExtension(QObject *parent)
  * @brief ProjectQmlExtension destructor
  */
 ProjectQmlExtension::~ProjectQmlExtension(){
-    for ( auto it = m_codeHandlers.begin(); it != m_codeHandlers.end(); ++it ){
+    for ( auto it = m_languageHandlers.begin(); it != m_languageHandlers.end(); ++it ){
         LanguageQmlHandler* cqh = *it;
         cqh->resetProjectQmlExtension();
     }
-    m_codeHandlers.clear();
+    m_languageHandlers.clear();
 }
 
 /**
@@ -131,7 +132,7 @@ void ProjectQmlExtension::componentComplete(){
  * CodeHandlers are updated each time the engine recompiles the code.
  */
 void ProjectQmlExtension::addLanguageQmlHandler(LanguageQmlHandler *handler){
-    m_codeHandlers.append(handler);
+    m_languageHandlers.append(handler);
 }
 
 /**
@@ -140,7 +141,7 @@ void ProjectQmlExtension::addLanguageQmlHandler(LanguageQmlHandler *handler){
  * Note that this does not destroy the object.
  */
 void ProjectQmlExtension::removeLanguageQmlHandler(LanguageQmlHandler *handler){
-    m_codeHandlers.removeAll(handler);
+    m_languageHandlers.removeAll(handler);
 }
 
 /**
@@ -163,6 +164,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
         uri, 1, 0, "QmlSuggestionModel", "QmlSuggestionModel can only be accessed through the qmledit extension.");
+    qmlRegisterUncreatableType<lv::QmlMetaTypeInfo>(
+        uri, 1, 0, "QmlMetaTypeInfo", "QmlMetaTypeInfo can only be accessed through the qmledit extension.");
 
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
     qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);

@@ -10,12 +10,11 @@ Column{
 
     function __initialize(ef){
         paletteGroup.editFragment = ef
-        paletteGroup.codeHandler = ef.codeHandler
-        ef.visualParent = paletteGroup
+        if ( !ef.visualParent )
+            ef.visualParent = paletteGroup
     }
 
     property QtObject editFragment : null
-    property QtObject codeHandler : null
     property var owner: null
     property var palettesOpened: []
     property Connections editFragmentRemovals: Connections{
@@ -37,7 +36,7 @@ Column{
                 }
             } else {
                 if ( box && box.objectName === 'editorBox' ){
-                    editFragment.codeHandler.removeConnection(editFragment)
+                    editFragment.language.removeConnection(editFragment)
                     paletteGroup.destroy()
                 }
             }
@@ -51,7 +50,7 @@ Column{
             }
 
             if (ed && paletteGroup.editFragment && paletteGroup.editFragment.location === QmlEditFragment.Imports){
-                paletteGroup.editFragment.codeHandler.importsShaped = false
+                paletteGroup.editFragment.language.importsShaped = false
             }
 
             if ( p && p.objectName === 'editorBox' ){
@@ -66,7 +65,7 @@ Column{
 
     function closePalettes(){
         for (var i = 0; i < paletteGroup.children.length; ++i)
-            editFragment.codeHandler.removePalette(paletteGroup.children[i].palette)
+            editFragment.language.removePalette(paletteGroup.children[i].palette)
     }
 
     onWidthChanged: {

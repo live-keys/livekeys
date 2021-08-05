@@ -118,6 +118,15 @@ Item{
         root.width = node.item.width - (root.isAnObject ? 30 : 0)
     }
 
+    function __initializeFunction(node, style, name){
+        root.style = style
+        root.propertyName = name
+        root.title = root.propertyName
+        root.node = node
+        root.width = node.item.width
+        root.isMethod = true
+    }
+
     function destroyObjectNodeProperty(){
         root.node.item.removeMemberByName(propertyName)
 
@@ -237,7 +246,7 @@ Item{
                 id: paletteCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    editFragment.codeHandler.removeConnection(editFragment)
+                    editFragment.language.removeConnection(editFragment)
                     if (editFragment.refCount > 0)
                     {
                         destroyObjectNodeProperty()

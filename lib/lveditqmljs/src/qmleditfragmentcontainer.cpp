@@ -203,16 +203,4 @@ QmlEditFragment *QmlEditFragmentContainer::findFragmentByPosition(int position){
     return result;
 }
 
-QmlEditFragment *QmlEditFragmentContainer::findChildPropertyFragmentByName(QmlEditFragment *parent, QString name) const{
-    if ( !parent )
-        return nullptr;
-    QList<QObject *> children = parent->getChildFragments();
-    for (int i = 0; i < children.length(); ++i){
-        lv::QmlEditFragment* child = qobject_cast<lv::QmlEditFragment*>(children[i]);
-        if (child->identifier() == name) return child;
-    }
-
-    return nullptr;
-}
-
 }// namespace

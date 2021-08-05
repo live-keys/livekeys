@@ -64,7 +64,7 @@ CodePalette{
 
             var props = []
 
-            var codeHandler = editFragment.codeHandler
+            var codeHandler = editFragment.language
             var childFragmentList = codeHandler.openNestedFragments(editFragment)
             for ( var i = 0; i < childFragmentList.length; ++i ){
                 var childFragment = childFragmentList[i]
@@ -135,10 +135,10 @@ CodePalette{
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]
                     if (child.editFragment)
-                        editFragment.codeHandler.removeConnection(child.editFragment)
+                        editFragment.language.removeConnection(child.editFragment)
                     child.destroy()
                 }
-                editFragment.codeHandler.removeConnection(allObjects[i].item.editFragment)
+                editFragment.language.removeConnection(allObjects[i].item.editFragment)
             }
 
             allObjects = []
@@ -161,7 +161,7 @@ CodePalette{
         if (!editFragment)
             return
 
-        editor = editFragment.codeHandler.code.textEdit().getEditor()
+        editor = editFragment.language.code.textEdit().getEditor()
 
         objectGraph.editFragment = editFragment
         nodeItem.init()
