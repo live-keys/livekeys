@@ -81,11 +81,10 @@ CodePalette{
             }
             var position = ef.valuePosition() + ef.valueLength() - 1
 
-            var codeHandler = ef.codeHandler
+            var codeHandler = ef.language
             var opos = codeHandler.addObjectToCode(position, name)
             codeHandler.addItemToRuntime(ef, name)
             var childEf = codeHandler.openNestedConnection(ef, opos)
-
             childEf.visualParent = p
             return childEf
         }
@@ -143,7 +142,7 @@ CodePalette{
                         } else {
                             if (!crop)
                                 return
-                            var codeHandler = crop.visualParent.code.language
+                            var codeHandler = crop.language
                             fragment = paletteControls.addPropertyByFragment(crop, "region")
                         }
                         var toWrite = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
@@ -205,7 +204,7 @@ CodePalette{
                         } else {
                             if (!resize)
                                 return
-                            var codeHandler = resize.visualParent.code.language
+                            var codeHandler = resize.language
                             fragment = paletteControls.addPropertyByFragment(resize, "size")
                         }
                         var toWrite = '"' + Math.round(width) + "x" + Math.round(height) + '"'
@@ -253,7 +252,7 @@ CodePalette{
                         } else {
                             if (!rotate)
                                 return
-                            var codeHandler = rotate.visualParent.code.language
+                            var codeHandler = rotate.language
                             fragment = paletteControls.addPropertyByFragment(rotate, "degrees")
                         }
                         fragment.write(-angle)
@@ -298,7 +297,7 @@ CodePalette{
                         } else {
                             if (!perspective)
                                 return
-                            var codeHandler = perspective.visualParent.code.language
+                            var codeHandler = perspective.language
                             fragment = paletteControls.addPropertyByFragment(perspective, "points")
                         }
                         var value = '['

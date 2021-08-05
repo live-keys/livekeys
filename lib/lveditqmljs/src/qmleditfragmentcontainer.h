@@ -38,7 +38,6 @@ public slots:
     //TOMOVE
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
-    lv::QmlEditFragment* findChildPropertyFragmentByName(lv::QmlEditFragment* parent, QString name) const;
 
 signals:
     void editCountChanged();

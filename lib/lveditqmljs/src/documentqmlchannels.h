@@ -70,7 +70,7 @@ private:
     void initialize();
 
     int                    m_selectedIndex;
-    LanguageQmlHandler*        m_codeHandler;
+    LanguageQmlHandler*        m_languageHandler;
     QHash<int, QByteArray> m_roles;
     QmlBindingChannel::Ptr m_selectedChannel;
 
