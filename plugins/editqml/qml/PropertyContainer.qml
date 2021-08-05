@@ -21,7 +21,12 @@ Item{
 
             var childObjectContainer = paletteControls.__factories.createObjectContainer(editor, ef, null)
 
-//            childObjectContainer.parentObjectContainer = parentObjectContainer //TOMOVE
+            var p = propertyContainer
+            while (p && p.objectName !== "objectContainer"){
+                p = p.parent
+            }
+            if (p)
+                childObjectContainer.parentObjectContainer = p
             propertyContainer.childObjectContainer = childObjectContainer
             propertyContainer.valueContainer = childObjectContainer
             childObjectContainer.isForProperty = true
