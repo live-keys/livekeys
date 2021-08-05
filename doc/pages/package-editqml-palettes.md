@@ -4,14 +4,14 @@
 To capture the palette functions object, we do:
 
 ```js
-var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 ```
 
 
 #### Querying the user for a palette to open at a certain position
 
 ```js
-paletteControls.userOpenPaletteAtPosition(editor, position, function(palette){
+paletteFunctions.userOpenPaletteAtPosition(editor, position, function(palette){
     if ( palette )
         console.log("PALETTE OPENED:" + palette.name)
     var paletteBox = palette.editFragment.visualParent // Access to the paletteBox
@@ -21,13 +21,13 @@ paletteControls.userOpenPaletteAtPosition(editor, position, function(palette){
 #### Opening a specific palette at a position
 
 ```js
-var palette = paletteControls.userOpenPaletteAtPosition(editor, "PALETTE_NAME", position)
+var palette = paletteFunctions.userOpenPaletteAtPosition(editor, "PALETTE_NAME", position)
 ```
 
 #### Querying the user to shape a certain position into a palette
 
 ```js
-paletteControls.userShapePaletteAtPosition(editor, position, function(palette){
+paletteFunctions.userShapePaletteAtPosition(editor, position, function(palette){
     if ( palette )
         console.log("PALETTE OPENED:" + palette.name)
     var paletteBox = palette.editFragment.visualParent // Access to the paletteBox
@@ -38,7 +38,7 @@ paletteControls.userShapePaletteAtPosition(editor, position, function(palette){
 #### Shaping at a certain position
 
 ```js
-var result = paletteControls.shapePaletteAtPosition(editor, position)
+var result = paletteFunctions.shapePaletteAtPosition(editor, position)
 console.log(result.objectContainer) // if shaping was done on an object
 console.log(result.palette) // the palette that was shaped
 ```

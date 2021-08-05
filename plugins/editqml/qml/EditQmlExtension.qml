@@ -9,7 +9,7 @@ WorkspaceExtension{
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
 
     globals : ProjectQmlExtension{
-        property PaletteControls paletteControls: PaletteControls{}
+        property PaletteFunctions paletteFunctions: PaletteFunctions{}
 
         function add(activeIndex, objectsOnly, forRoot){
             root.add(activeIndex, objectsOnly, forRoot)
@@ -23,11 +23,11 @@ WorkspaceExtension{
                 return
             }
 
-            paletteControls.shapeImports(editor)
+            paletteFunctions.shapeImports(editor)
             var rootPosition = codeHandler.findRootPosition()
 
             if ( rootPosition >= 0){
-                paletteControls.shapeRoot(editor, callback)
+                paletteFunctions.shapeRoot(editor, callback)
             } else {
                 editor.editor.addRootButton.visible = true
             }
@@ -75,7 +75,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.openEditPaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.openEditPaletteAtPosition(activePane, userPosition)
     }
 
     function palette(){
@@ -84,7 +84,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userOpenPaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.userOpenPaletteAtPosition(activePane, userPosition)
     }
 
     function shape(){
@@ -93,7 +93,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userShapePaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.userShapePaletteAtPosition(activePane, userPosition)
     }
 
     function shapeAll(){
@@ -110,7 +110,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userBind(activePane, userPosition)
+        globals.paletteFunctions.userBind(activePane, userPosition)
     }
 
     function unbind(){
@@ -156,7 +156,7 @@ WorkspaceExtension{
 
         var categories = objectsOnly ? ['objects'] : ['objects', 'properties', 'events']
 
-        var addEditorBox = globals.paletteControls.views.openAddOptionsBox(
+        var addEditorBox = globals.paletteFunctions.views.openAddOptionsBox(
             addContainer,
             activePane.code.language,
             {
@@ -210,7 +210,7 @@ WorkspaceExtension{
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.userAddToObjectContainer(activeItem)
+            lk.layers.workspace.extensions.editqml.paletteFunctions.userAddToObjectContainer(activeItem)
         }
     }
 

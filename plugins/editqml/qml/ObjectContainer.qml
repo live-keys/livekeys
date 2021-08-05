@@ -514,7 +514,7 @@ Item{
                         root,
                         paletteGroup(),
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
-                        PaletteControls.PaletteListMode.ObjectContainer
+                        PaletteFunctions.PaletteListMode.ObjectContainer
                     )
                     if (paletteList){
                         paletteList.width = 250

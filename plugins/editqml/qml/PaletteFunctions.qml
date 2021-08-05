@@ -247,7 +247,7 @@ QtObject{
             palettes.data = filterOutPalettes(
                 palettes.data,
                 paletteGroup.palettesOpened,
-                mode === PaletteControls.PaletteListMode.ObjectContainer
+                mode === PaletteFunctions.PaletteListMode.ObjectContainer
             )
 
             if (!palettes.data || palettes.data.length === 0) return null
@@ -278,7 +278,7 @@ QtObject{
                     "palettes" : [palettes.data[index].name]
                 })
 
-                var objectRoot = mode === PaletteControls.PaletteListMode.ObjectContainer
+                var objectRoot = mode === PaletteFunctions.PaletteListMode.ObjectContainer
                                ? container.parent
                                : (container.objectName === "objectNode" ? container : null)
                 var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
@@ -292,14 +292,14 @@ QtObject{
                 }
 
                 if (paletteBox){
-                    if (mode === PaletteControls.PaletteListMode.ObjectContainer){
+                    if (mode === PaletteFunctions.PaletteListMode.ObjectContainer){
                         paletteBox.moveEnabledSet = false
-                    } else if (mode === PaletteControls.PaletteListMode.PaletteContainer){
+                    } else if (mode === PaletteFunctions.PaletteListMode.PaletteContainer){
                         paletteBox.moveEnabledSet = container.moveEnabledGet
                     }
                 }
 
-                if (swap === PaletteControls.PaletteListSwap.Swap){
+                if (swap === PaletteFunctions.PaletteListSwap.Swap){
 
                     var p = container.parent
                     while (p && p.objectName !== "paletteGroup"){
