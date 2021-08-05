@@ -202,7 +202,7 @@ QtObject{
         }
 
         function openPaletteListForNode(container, paletteGroup, parent){
-            var palettes = container.editFragment.language.findPalettesFromFragment(container.editFragment)
+            var palettes = container.editFragment.language.findPalettesForFragment(container.editFragment)
             palettes.data = filterOutPalettes(palettes.data, paletteGroup.palettesOpened, true)
             if (!palettes.data || palettes.data.length === 0) return null
 
@@ -243,7 +243,7 @@ QtObject{
         }
 
         function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
-            var palettes = container.editFragment.language.findPalettesFromFragment(container.editFragment)
+            var palettes = container.editFragment.language.findPalettesForFragment(container.editFragment)
             palettes.data = filterOutPalettes(
                 palettes.data,
                 paletteGroup.palettesOpened,

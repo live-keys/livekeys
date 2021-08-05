@@ -58,7 +58,7 @@ class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(LanguageQmlHandler)
-    Q_PROPERTY(lv::CodeHandler* code        READ code CONSTANT)
+    Q_PROPERTY(lv::CodeHandler* code                       READ code CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
     Q_PROPERTY(bool importsShaped                          READ importsShaped   WRITE setImportsShaped NOTIFY importsShapedChanged)
@@ -121,6 +121,8 @@ public:
     bool importsShaped() const;
     void setImportsShaped(bool importsShaped);
 
+    QmlInheritanceInfo inheritanceInfo(const QString& name);
+
 signals:
     void importsShapedChanged();
     void rootShapedChanged();
@@ -132,7 +134,6 @@ public slots:
     lv::QmlEditFragment* findObjectFragmentByPosition(int position);
     lv::QmlEditFragment* findFragmentByPosition(int position);
 
-    QmlInheritanceInfo inheritanceInfo(const QString& name);
 
 public slots:
     void onDocumentParsed(QJSValue callback);
@@ -161,7 +162,7 @@ public slots:
     //TOMOVE: In findPalettesFromFragment
     QString defaultPalette(lv::QmlEditFragment* fragment);
 
-    QJSValue findPalettesFromFragment(lv::QmlEditFragment* fragment);
+    QJSValue findPalettesForFragment(lv::QmlEditFragment* fragment);
     QJSValue findPalettes(int position);
     lv::QmlEditFragment* removePalette(lv::CodePalette* palette);
     lv::CodePalette* openBinding(lv::QmlEditFragment* edit, QString paletteName);
@@ -199,8 +200,8 @@ public slots:
     int addEventToCode(int position, const QString &name);
     int addRootObjectToCode(const QString &ctype);
 
-    void addObjectForProperty(lv::QmlEditFragment* propertyFragment);
-    void addItemToRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectForProperty(lv::QmlEditFragment* propertyFragment);
+    void createObjectInRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     // Registered slots
 
@@ -216,7 +217,7 @@ public slots:
 
 private:
     void setDocument(ProjectDocument* document);
-    void addItemToRunTimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectInRuntimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
 
     lv::QmlAddContainer* getAddOptionsForFragment(QmlEditFragment* edit, bool isReadOnly = false);
     lv::QmlAddContainer* getAddOptionsForPosition(int position);

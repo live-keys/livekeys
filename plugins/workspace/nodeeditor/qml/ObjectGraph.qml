@@ -235,7 +235,7 @@ Rectangle{
                             onAccepted: function(propertiesToAdd){
                                 var ch = editFragment.language
                                 var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)
-                                ch.addItemToRuntime(editFragment, selection.name, propertiesToAdd)
+                                ch.createObjectInRuntime(editFragment, selection.name, propertiesToAdd)
                                 var ef = ch.openNestedConnection(editFragment, opos)
                                 if (ef)
                                     editFragment.signalChildAdded(ef)
@@ -248,7 +248,7 @@ Rectangle{
                     } else {
                         var ch = editFragment.language
                         var opos = ch.addItem(selection.position, selection.objectType, selection.name)
-                        ch.addItemToRuntime(editFragment, selection.name)
+                        ch.createObjectInRuntime(editFragment, selection.name)
                         var ef = ch.openNestedConnection(editFragment, opos)
                         if (ef)
                             editFragment.signalChildAdded(ef)
