@@ -68,7 +68,7 @@ CodePalette{
             var position =
                 p.editFragment.valuePosition() +
                 p.editFragment.valueLength() - 1
-            paletteControls.addObjectToObjectContainer(container, position, "TransformImage", name, false)
+            paletteControls.addObjectToObjectContainer(container, name, null, position)
 
             var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]

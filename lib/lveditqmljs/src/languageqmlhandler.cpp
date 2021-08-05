@@ -2341,6 +2341,9 @@ QmlEditFragment *LanguageQmlHandler::openNestedConnection(QmlEditFragment* editP
     }
 
     editParent->addChildFragment(ef);
+    if ( editParent->isOfFragmentType(QmlEditFragment::FragmentType::Group) ){
+        ef->addFragmentType(QmlEditFragment::GroupChild);
+    }
 
     rehighlightSection(ef->valuePosition(), ef->valuePosition() + ef->valueLength());
 

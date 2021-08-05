@@ -1,8 +1,15 @@
 {
     "type": "qml/QtQuick#Rectangle",
-    "properties" : [
-        ["width", "DoublePalette"],
-        ["height", "DoublePalette"]
+    "properties" : [{
+            "location": "property",
+            "name": "width",
+            "palettes": ["DoublePalette"]
+        },
+        {
+            "location": "property",
+            "name": "height",
+            "palettes": ["DoublePalette"]
+        }
     ]
 }
 

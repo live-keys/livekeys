@@ -146,7 +146,7 @@ Rectangle{
             anchors.verticalCenter: parent.verticalCenter
             width: 15
             height: titleHeight
-            visible: objectContainer.editFragment && !objectContainer.editFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
+            visible: objectContainer.editFragment && !(objectContainer.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-erase-object.png"
@@ -243,8 +243,8 @@ Rectangle{
             height: 20
             visible: objectContainer.editFragment
                   && objectContainer.editFragment.type() !== 'qml/QtQuick#Component'
-                  && !(objectContainer.editFragment.isOfFragmentType(QmlEditFragment.ReadOnly)
-                  && !objectContainer.editFragment.isOfFragmentType(QmlEditFragment.Group))
+                  && !((objectContainer.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
+                  && ! (objectContainer.editFragment.fragmentType() & QmlEditFragment.Group))
             Image{
                 anchors.centerIn: parent
                 source: "qrc:/images/palette-add-property.png"

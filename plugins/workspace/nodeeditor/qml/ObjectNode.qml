@@ -153,67 +153,6 @@ Qan.NodeItem{
         paletteControls.openPaletteInObjectContainer(root, paletteControls.defaultPalette)
     }
 
-    function expandOptions(options){
-        var codeHandler = editFragment.language
-
-        if ( 'palettes' in options){
-            var palettes = options['palettes']
-            for ( var i = 0; i < palettes.length; ++i){
-                if (paletteContainer.palettesOpened.indexOf(palettes[i]) !== -1) continue
-
-                paletteControls.openPaletteInObjectContainer(root, palettes[i])
-            }
-        }
-
-        if ( 'properties' in options){
-            var newProps = options['properties']
-            for ( var i = 0; i < newProps.length; ++i ){
-
-                var propName = newProps[i][0]
-
-                var metaTypeInfo = codeHandler.typeInfo(root.editFragment.type())
-                var propertyInfo = metaTypeInfo.propertyInfo(propName)
-                if ( !propertyInfo )
-                    continue
-                var propType = metaTypeInfo.typeName(propertyInfo.type)
-
-                var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
-
-                if ( propType === '' )
-                    continue
-
-                var ef = null
-                if (newProps[i].length > 2)
-                {
-                    ef = codeHandler.openReadOnlyPropertyConnection(root.editFragment, propName)
-                } else {
-                    var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
-                    var ppos = codeHandler.addPropertyToCode(
-                        root.editFragment.valuePosition() + root.editFragment.valueLength() - 1,
-                        propName,
-                        defaultValue
-                    )
-                    ef = codeHandler.openNestedConnection(root.editFragment, ppos)
-                }
-
-                if (ef) {
-                    root.editFragment.signalChildAdded(ef, false)
-                    if (propPalette.length === 0) continue
-//                    for (var j = 0; j < objectNodePropertyList.children.length; ++j){
-//                        if (objectNodePropertyList.children[j].propertyName !== propName) continue
-//                        if (objectNodePropertyList.children[j].paletteListContainer.palettesOpened.indexOf(propPalette) !== -1) break
-
-//                        paletteControls.openPaletteInPropertyContainer(objectNodePropertyList.children[j], palettes[i])
-//                        break
-//                    }
-                } else {
-                    lk.layers.workspace.messages.pushError("ObjectNode: Can't open declared palette for property " + propName, 1)
-                }
-
-            }
-        }
-    }
-
     function removeMemberByName(name){
         propertiesOpened = propertiesOpened.filter(function(value, index, arr){
             return value !== name

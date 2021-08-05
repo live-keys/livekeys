@@ -177,10 +177,6 @@ Item{
         objectContainerFrame.collapse()
     }
 
-    function expandOptions(options){
-        objectContainerFrame.expandOptions(options)
-    }
-
     function destroyObjectContainer(oc){
         for (var pi = 0; pi < oc.paletteListContainer.children.length; ++pi){
             var child = oc.paletteListContainer.children[pi]
@@ -256,82 +252,6 @@ Item{
             root.placeHolder.parent = null
         }
 
-        function expandOptions(options){
-            var codeHandler = objectContainerFrame.editor.code.language
-
-            if ( 'palettes' in options){
-                var palettes = options['palettes']
-                for ( var i = 0; i < palettes.length; ++i){
-                    paletteControls.openPaletteInObjectContainer(objectContainerFrame, palettes[i])
-                }
-            }
-
-            if ( 'properties' in options){
-                var newProps = options['properties']
-                for ( var i = 0; i < newProps.length; ++i ){
-
-                    var propName = newProps[i][0]
-
-                    var metaTypeInfo = codeHandler.typeInfo(objectContainerFrame.editFragment.type())
-                    var propertyInfo = metaTypeInfo.propertyInfo(propName)
-                    if ( !propertyInfo )
-                        continue
-                    var propType = metaTypeInfo.typeName(propertyInfo.type)
-
-                    var propPalette = newProps[i].length > 1 ? newProps[i][1] : ''
-
-                    if ( propType === '' )
-                        continue
-
-                    var ef = null
-                    if (newProps[i].length > 2)
-                    {
-                        ef = codeHandler.createReadOnlyPropertyFragment(root.editFragment, propName)
-                    } else {
-
-                        var defaultValue = EditQml.MetaInfo.defaultTypeValue(propType)
-                        var ppos = codeHandler.addPropertyToCode(
-                            root.editFragment.valuePosition() + root.editFragment.valueLength() - 1,
-                            propName,
-                            defaultValue
-                        )
-                        ef = codeHandler.openNestedConnection( root.editFragment, ppos )
-                    }
-
-                    if (ef) {
-                        objectContainerFrame.editFragment.signalChildAdded(ef, false)
-                        if (propPalette.length === 0) continue
-
-                        for (var j = 0; j < container.children.length; ++j)
-                        {
-                            var child = container.children[j]
-                            if (child.objectName !== "propertyContainer") continue
-                            if (child.title !== propName) continue
-
-                            var pg = null
-                            if (child.valueContainer.objectName === "objectContainer"){
-                                pg = child.valueContainer.paletteGroup
-                            } else {
-                                pg = child.valueContainer
-                            }
-
-                            if (pg.palettesOpened && pg.palettesOpened.indexOf(propPalette) !== -1) break
-                            paletteControls.openPaletteInPropertyContainer(container.children[j], propPalette)
-                            break
-                        }
-
-                    } else {
-                        lk.layers.workspace.messages.pushError("ObjectContainer: Can't open declared palette for property " + propName, 1)
-                    }
-
-                    container.sortChildren()
-                }
-
-                if (compact)
-                    expand()
-            }
-        }
-
         function expand(){
             if (!compact)
                 return
@@ -370,7 +290,7 @@ Item{
         function collapse(){
             if (compact)
                 return
-            if ( root.editFragment.isGroup() ){
+            if ( root.editFragment.fragmentType() & EditQml.QmlEditFragment.Group ){
                 compact = true
                 return
             }
