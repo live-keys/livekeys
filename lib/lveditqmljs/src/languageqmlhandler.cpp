@@ -309,6 +309,8 @@ LanguageQmlHandler::LanguageQmlHandler(
     , m_editFragment(nullptr)
     , m_editContainer(new QmlEditFragmentContainer(this))
     , m_bindingChannels(nullptr)
+    , m_importsShaped(false)
+    , m_rootShaped(false)
     , d_ptr(new LanguageQmlHandlerPrivate)
 {
     Q_D(LanguageQmlHandler);

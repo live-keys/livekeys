@@ -581,14 +581,9 @@ QtObject{
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
 
-                if ( callback )
-                    callback(ef, null)
-
             } else {
                 editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
                 paletteBoxGroup = ef.visualParent
-                if ( callback )
-                    callback(ef, null)
             }
         } else {
             var p = paletteBoxGroup
@@ -647,7 +642,6 @@ QtObject{
                 }
             })
         }
-        return paletteImports
     }
 
     function shapeRoot(editor, callback){
@@ -659,16 +653,17 @@ QtObject{
             editor.stopLoadingMode()
 
             var rootPosition = languageHandler.findRootPosition()
-            var result = shapePaletteAtPosition(editor, "", rootPosition)
-            var oc = result.objectContainer
+            var result = shapePaletteAtPosition(editor, "", rootPosition, function(ef, palette){
+                var oc = ef.visualParent
 
-            oc.contentWidth = Qt.binding(function(){
-                return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                oc.contentWidth = Qt.binding(function(){
+                    return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                })
+                languageHandler.rootShaped = true
+                if ( callback ){
+                    callback(oc.editFragment)
+                }
             })
-            languageHandler.rootShaped = true
-            if ( callback ){
-                callback(oc.editFragment)
-            }
         })
     }
 
