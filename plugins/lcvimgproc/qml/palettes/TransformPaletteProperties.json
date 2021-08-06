@@ -1,9 +1,16 @@
 {
-    "type": "qml/lcvimgproc#TranformImage",
+    "type": "qml/lcvimgproc#TransformImage",
     "palettes" : ["TransformPalette"],
     "properties" : [
-        ["input"],
-        ["result", "", "true"]
+        {
+            "location": "property",
+            "name": "input"
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 

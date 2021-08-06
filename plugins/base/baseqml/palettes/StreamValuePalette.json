@@ -1,8 +1,14 @@
 {
     "type": "qml/base#StreamValue",
     "properties" : [
-        ["stream"],
-        ["value"]
+        {
+            "location": "property",
+            "name": "stream"
+        },
+        {
+            "location": "property",
+            "name": "value"
+        }
     ]
 }
 

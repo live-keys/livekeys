@@ -279,7 +279,7 @@ QtObject{
                 })
 
                 var objectRoot = mode === PaletteFunctions.PaletteListMode.ObjectContainer
-                               ? container.parent
+                               ? container
                                : (container.objectName === "objectNode" ? container : null)
                 var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
                 if ( container ){
@@ -764,7 +764,7 @@ QtObject{
     }
 
     function addPropertyToObjectContainer(objectContainer, name, readOnly, position){
-        //name = selection.name
+
         var languageHandler = objectContainer.editFragment.language
 
         var propContainer = objectContainer.propertyByName(name)
@@ -831,7 +831,7 @@ QtObject{
         var languageHandler = container.editFragment.language
 
         var opos = languageHandler.addObjectToCode(position, type, extraProperties)
-        languageHandler.addItemToRuntime(container.editFragment, type, extraProperties)
+        languageHandler.createObjectInRuntime(container.editFragment, type, extraProperties)
         var ef = languageHandler.openNestedConnection(container.editFragment, opos)
         if (!ef)
             return null
