@@ -44,6 +44,13 @@ public:
         QStringList* propertyPath = nullptr,
         QChar *endDelimiter = nullptr);
 
+    static int getPropertyExpressionExtent(
+        QTextDocument* document,
+        int position,
+        QStringList* propertyPath = nullptr,
+        QChar *endDelimiter = nullptr,
+        int* newPosition = nullptr);
+
     int getBlockStart(int position);
     int getBlockEnd(int position);
     int getBlockExtent(int from);

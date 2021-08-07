@@ -257,7 +257,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
         return;
     }
 
-    QmlInheritanceInfo typeInfo = m_language->inheritanceInfo(type());
+    QmlInheritanceInfo typeInfo = m_language->inheritanceInfo(declaration()->type());
 
     int valuePosition = declaration()->valuePosition();
     int valueLength   = declaration()->valueLength();

@@ -816,7 +816,6 @@ void LanguageQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
                     name,
                     QmlSuggestionModel::ItemData::Function)
                 );
-
             }
         }
 
@@ -983,11 +982,16 @@ QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int p
                 propertyPosition = cursor.position();
         }
 
-        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-            m_target, cursor.position(), &expression, &expressionEndDelimiter
+        int newPosition = -1;
+
+        int propertyEnd = DocumentQmlValueScanner::getPropertyExpressionExtent(
+            m_target, cursor.position(), &expression, &expressionEndDelimiter, &newPosition
         );
 
-        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+        if ( newPosition >= 0 )
+            propertyPosition = newPosition;
+
+        propertyLength = propertyEnd - propertyPosition;
 
     } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
         expression     = ctx->propertyPath();
@@ -1034,6 +1038,7 @@ QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int p
             }
 
         } else { // dealing with a property declaration
+            d->documentInfo()->createRanges();
             QmlScopeSnap scope = d->snapScope();
 
             bool isSlot = false;
@@ -3496,16 +3501,37 @@ int LanguageQmlHandler::checkPragma(int position)
 }
 
 
-QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QString &typeName){
+QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QmlTypeReference &typeName, int position){
     Q_D(LanguageQmlHandler);
-    QmlScopeSnap snap = d->snapScope();
+    QmlScopeSnap scope = d->snapScope();
 
-    return snap.getTypePath(QmlTypeReference::split(typeName));
+    QmlInheritanceInfo typePath;
+
+    if ( position >= 0 ){
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(position + 1);
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+    }
+
+    typePath.join(scope.getTypePath(typeName));
+
+    return typePath;
 }
 
-QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QString &typeName){
-    QmlMetaTypeInfo* mti = new QmlMetaTypeInfo(inheritanceInfo(typeName), m_engine);
-    QQmlEngine::setObjectOwnership(mti, QQmlEngine::CppOwnership);
+QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QJSValue &typeOrFragment){
+    QmlMetaTypeInfo* mti = nullptr;
+    if ( typeOrFragment.isQObject() ){
+        QmlEditFragment* edit = qobject_cast<QmlEditFragment*>(typeOrFragment.toQObject());
+        if ( edit ){
+            mti = new QmlMetaTypeInfo(inheritanceInfo(edit->declaration()->type(), edit->position()), m_engine);
+            QQmlEngine::setObjectOwnership(mti, QQmlEngine::JavaScriptOwnership);
+        }
+    } else {
+        mti = new QmlMetaTypeInfo(inheritanceInfo(QmlTypeReference::split(typeOrFragment.toString())), m_engine);
+        QQmlEngine::setObjectOwnership(mti, QQmlEngine::JavaScriptOwnership);
+    }
     return mti;
 }
 

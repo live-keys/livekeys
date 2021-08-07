@@ -367,7 +367,7 @@ QtObject{
         }
 
         function openAddExtraPropertiesBox(type, handlers){
-            var boxItem = factories.addExtraPropertiesBox.createObject(null)
+            var boxItem = __factories.addExtraPropertiesBox.createObject(null)
             boxItem.type = type
             boxItem.ready.connect(function(data){
                 if ( handlers && handlers.onAccepted ){
@@ -580,15 +580,9 @@ QtObject{
 
                 paletteBoxGroup = objectContainer.paletteGroup
                 editorBox = objectContainer.parent
-
-                if ( callback )
-                    callback(ef, null)
-
             } else {
                 editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
                 paletteBoxGroup = ef.visualParent
-                if ( callback )
-                    callback(ef, null)
             }
         } else {
             var p = paletteBoxGroup
@@ -659,16 +653,19 @@ QtObject{
             editor.stopLoadingMode()
 
             var rootPosition = languageHandler.findRootPosition()
-            var result = shapePaletteAtPosition(editor, "", rootPosition)
-            var oc = result.objectContainer
+            shapePaletteAtPosition(editor, "", rootPosition, function(ef, palette){
+                var oc = ef.visualParent
 
-            oc.contentWidth = Qt.binding(function(){
-                return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                oc.contentWidth = Qt.binding(function(){
+                    return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
+                })
+                languageHandler.rootShaped = true
+                if ( callback ){
+                    callback(ef, palette)
+                }
             })
-            languageHandler.rootShaped = true
-            if ( callback ){
-                callback(oc.editFragment)
-            }
+
+
         })
     }
 
@@ -779,7 +776,7 @@ QtObject{
 
         objectContainer.expand()
 
-        var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment.type())
+        var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment)
         var propertyInfo = metaTypeInfo.propertyInfo(name)
 
         var ef = null
@@ -835,7 +832,7 @@ QtObject{
         var languageHandler = container.editFragment.language
 
         var opos = languageHandler.addObjectToCode(position, type, extraProperties)
-        languageHandler.addItemToRuntime(container.editFragment, type, extraProperties)
+        languageHandler.createObjectInRuntime(container.editFragment, type, extraProperties)
         var ef = languageHandler.openNestedConnection(container.editFragment, opos)
         if (!ef)
             return null
@@ -1151,7 +1148,7 @@ QtObject{
     }
 
     function createSuggestionBox(parent, font){
-        var sb = factories.suggestionBox.createObject(parent)
+        var sb = __factories.suggestionBox.createObject(parent)
         sb.__initialize(font)
         return sb
     }

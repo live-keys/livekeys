@@ -121,7 +121,7 @@ public:
     bool importsShaped() const;
     void setImportsShaped(bool importsShaped);
 
-    QmlInheritanceInfo inheritanceInfo(const QString& name);
+    QmlInheritanceInfo inheritanceInfo(const QmlTypeReference &name, int position = -1);
 
 signals:
     void importsShapedChanged();
@@ -176,7 +176,7 @@ public slots:
     QJSValue getDocumentIds();
     int checkPragma(int position);
 
-    lv::QmlMetaTypeInfo* typeInfo(const QString& fullTypeName);
+    lv::QmlMetaTypeInfo* typeInfo(const QJSValue& typeOrFragment);
 
     lv::QmlImportsModel* importsModel();
 

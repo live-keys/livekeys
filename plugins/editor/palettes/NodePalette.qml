@@ -165,9 +165,6 @@ CodePalette{
 
         objectGraph.editFragment = editFragment
         nodeItem.init()
-        editFragment.objectAdded.connect(function(obj, cursorCoords){
-            addObject(obj.objectInfo(), cursorCoords)
-        })
         editFragment.aboutToRemovePalette.connect(function(palette){
             nodeItem.clean()
         })

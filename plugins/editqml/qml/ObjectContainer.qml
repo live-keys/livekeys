@@ -448,7 +448,7 @@ Item{
                 onCreateObject: {
                     var codeHandler = objectContainerFrame.editor.code.language
                     codeHandler.createObjectForProperty(editFragment)
-                    codeHandler.addItemToRuntime(editFragment)
+                    codeHandler.createObjectInRuntime(editFragment)
                 }
             }
         }
