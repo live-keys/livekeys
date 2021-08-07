@@ -641,7 +641,6 @@ QtObject{
                 }
             })
         }
-        return paletteImports
     }
 
     function shapeRoot(editor, callback){
@@ -664,8 +663,6 @@ QtObject{
                     callback(ef, palette)
                 }
             })
-
-
         })
     }
 
