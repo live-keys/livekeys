@@ -471,7 +471,6 @@ Rectangle{
         function onIsEnabledChanged(){
             if ( !code.completionModel.isEnabled || code.completionModel.suggestionCount() === 0 ){
                 qmlSuggestionBox.visible = false
-                qmlSuggestionBox.opacity = 0
                 return
             }
 
@@ -492,8 +491,7 @@ Rectangle{
                 qmlSuggestionBox.visible = true
                 qmlSuggestionBox.parent.updatePlacement(
                     rect,
-                    Qt.point(
-                        paneCoords.x - 7, paneCoords.y - 43),
+                    Qt.point(paneCoords.x - 7, paneCoords.y - 43),
                         lk.layers.editor.environment.placement.bottom)
 
             } else {
