@@ -2,6 +2,7 @@ import QtQuick 2.0
 import editqml 1.0 as EditQml
 import editor 1.0
 import workspace.nodeeditor 1.0
+import visual.input 1.0 as Input
 
 QtObject{
     id: root
@@ -55,6 +56,21 @@ QtObject{
                 }
             }
         }
+
+        property Component addRootButton: Component{
+            Input.TextButton{
+                text: "Add Root"
+                objectName: "addRootButton"
+                width: 120
+                height: 30
+                property var whenClicked: null
+                onClicked: {
+                    if ( whenClicked )
+                        whenClicked()
+                }
+            }
+        }
+
         property Component suggestionBox: Component {
             SuggestionBox {
                 Behavior on opacity {
@@ -160,6 +176,39 @@ QtObject{
                 languageHandler.rootShaped = true
             }
             return objectContainer
+        }
+
+        function createAddRootButton(editor){
+            for ( var i = 0; i < editor.children.length; ++i ){
+                if ( editor.children[i].objectName === 'addRootButton' )
+                    return
+            }
+            var addRoot =  __factories.addRootButton.createObject(editor)
+            addRoot.x = editor.lineSurfaceWidth + 20
+            addRoot.y = editor.textEdit.totalHeight - 10
+            addRoot.style = root.theme.formButtonStyle
+            addRoot.whenClicked = function(){
+                root.userAddCodeToPosition(
+                    editor,
+                    editor.textEdit.text.length,
+                    ['objects'], {
+                        onAccepted: function(selection, position){
+                            editor.code.language.createRootObjectInRuntime(selection.name)
+                            root.shapeRoot(editor)
+                            addRoot.destroy()
+                        }
+                    }
+                )
+            }
+
+            return addRoot
+        }
+
+        function removeAddRootButton(editor){
+            for ( var i = 0; i < editor.children.length; ++i ){
+                if ( editor.children[i].objectName === 'addRootButton' )
+                    editor.children[i].destroy()
+            }
         }
     }
 
@@ -413,13 +462,13 @@ QtObject{
                 },
                 {
                     onCancelled: function(paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                         if ( callback )
                             callback(null)
                     },
                     onSelected: function(index, paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                         var newPalette = openPaletteAtPosition(editor, palettes.data[index].name, position, callback)
                     }
@@ -452,7 +501,7 @@ QtObject{
 
         var paletteBox = __private.wrapPaletteInContainer(palette, paletteBoxGroup)
 
-        var rect = editor.editor.getCursorRectangle()
+        var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
         // Update new placement so as to animate
@@ -465,7 +514,7 @@ QtObject{
     function openEditPaletteAtPosition(editor, position, callback){
         var languageHandler = editor.code.language
 
-        var rect = editor.editor.getCursorRectangle()
+        var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
 
         var ef = languageHandler.openConnection(editor.textEdit.cursorPosition)
@@ -531,11 +580,11 @@ QtObject{
                 },
                 {
                     onCancelled: function(paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                     },
                     onSelected: function(index, paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                         shapePaletteAtPosition(editor, palettes.data[index].name, position, function(ef, palette){
                             if ( ef.visualParent.expand )
@@ -620,19 +669,19 @@ QtObject{
             callback(ef, palette)
     }
 
-    function shapeImports(editorPane, callback){
-        var languageHandler = editorPane.code.language
+    function shapeImports(editor, callback){
+        var languageHandler = editor.code.language
         var importsPosition = languageHandler.findImportsPosition()
         var paletteImports = languageHandler.findPalettes(importsPosition)
         if (paletteImports) {
             var position = paletteImports.declaration.position
             paletteImports.data = filterOutPalettes(paletteImports.data)
 
-            shapePaletteAtPosition(editorPane, paletteImports.data[0].name, position, function(ef, palette){
+            shapePaletteAtPosition(editor, paletteImports.data[0].name, position, function(ef, palette){
                 palette.item.width = Qt.binding(function(){
                     if (!palette.item.parent || !palette.item.parent.parent)
                         return
-                    var editorSize = editorPane.width - editorPane.editor.lineSurfaceWidth - 30 - palette.item.parent.parent.headerWidth
+                    var editorSize = editor.width - editor.lineSurfaceWidth - 30 - palette.item.parent.parent.headerWidth
                     return editorSize > 280 ? editorSize : 280
                 })
 
@@ -646,12 +695,11 @@ QtObject{
     function shapeRoot(editor, callback){
         var languageHandler = editor.code.language
 
-        editor.startLoadingMode()
         languageHandler.removeSyncImportsListeners()
         languageHandler.onImportsScanned(function(){
-            editor.stopLoadingMode()
 
             var rootPosition = languageHandler.findRootPosition()
+
             shapePaletteAtPosition(editor, "", rootPosition, function(ef, palette){
                 var oc = ef.visualParent
 
@@ -693,11 +741,11 @@ QtObject{
                 },
                 {
                     onCancelled: function(paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                     },
                     onSelected: function(index, paletteListBox){
-                        editor.editor.forceFocus()
+                        editor.forceFocus()
                         paletteListBox.destroy()
                         var ef = languageHandler.openConnection(position)
                         ef.incrementRefCount()
@@ -929,7 +977,7 @@ QtObject{
 
         if (rootDeleted) {
             objectContainer.editFragment.language.rootShaped = false
-            objectContainer.editor.addRootButton.visible = true
+            __private.createAddRootButton(objectContainer.editor)
         }
 
         if ( objectContainer.isForProperty ) {
@@ -1165,6 +1213,82 @@ QtObject{
         return result
     }
 
+
+    function userAddCodeToPosition(editor, position, categories, handlers){
+        var addContainer = editor.code.language.getAddOptions({ position: position })
+        if ( !addContainer )
+            return
+
+        var rect = editor.getCursorRectangle()
+        var paneCoords = editor.mapGlobalPosition()
+
+        if ( !categories )
+            categories = ['objects', 'properties', 'events']
+
+        var addEditorBox = root.views.openAddOptionsBox(
+            addContainer,
+            editor.code.language,
+            {
+                aroundRect: rect,
+                panePosition: Qt.point(paneCoords.x, paneCoords.y),
+                relativePlacement: lk.layers.editor.environment.placement.bottom
+            },
+            {
+                categories: categories,
+                onCancelled: function(box){
+                    box.child.finalize()
+                    if ( handlers && handlers.onCancelled )
+                        handlers.onCancelled()
+                },
+                onAccepted: function(box, selection){
+                    if ( selection.category === 'property' ){
+                        var defaultValue = EditQml.MetaInfo.defaultTypeValue(selection.type)
+                        var addedPosition = editor.code.language.addPropertyToCode(
+                            selection.position, selection.name, defaultValue
+                        )
+                        if ( handlers && handlers.onAccepted ){
+                            handlers.onAccepted(selection, addedPosition)
+                        }
+                    } else if ( selection.category === 'object' ){
+                        if ( selection.extraProperties ){
+                            views.openAddExtraPropertiesBox(selection.name, {
+                                onAccepted: function(propertiesToAdd){
+                                    var addedPosition = editor.code.language.addObjectToCode(selection.position, selection.name, propertiesToAdd)
+                                    if ( handlers && handlers.onAccepted ){
+                                        handlers.onAccepted(selection, addedPosition)
+                                    }
+                                },
+                                onCancelled: function(){
+                                    if ( handlers && handlers.onCancelled ){
+                                        handlers.onCancelled()
+                                    }
+                                }
+                            })
+                        } else {
+                            var addedPosition = editor.code.language.addObjectToCode(selection.position, selection.name)
+                            if ( addedPosition >= 0 && handlers && handlers.onAccepted){
+                                handlers.onAccepted(selection, addedPosition)
+                            }
+                        }
+                    } else if ( selection.category === 'event' ){
+                        var addedPosition = editor.code.language.addEvent(selection.position, selection.name)
+                        if ( addedPosition >= 0 && handlers && handlers.onAccepted){
+                            handlers.onAccepted(selection, addedPosition)
+                        }
+                    }
+                    box.child.finalize()
+                },
+                onFinalized: function(box){
+                    box.child.destroy()
+                    box.destroy()
+                }
+            }
+        )
+
+        lk.layers.workspace.panes.setActiveItem(addEditorBox, editor.parent)
+    }
+
+
     // TOMOVE
     // -----------------------------------------------
 
@@ -1210,4 +1334,5 @@ QtObject{
 
         return propEf
     }
+
 }

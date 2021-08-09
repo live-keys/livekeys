@@ -46,16 +46,9 @@ Workspace.Pane{
 
     property alias code: editor.code
     property alias textEdit: editor.textEdit
-    property alias loading: loadingAnimation.visible
     property var panes: null
 
     property bool codeOnly: !(code.language && code.language.editContainer.editCount !== 0)
-
-    onCodeOnlyChanged: {
-        if (codeOnly){
-            editor.addRootButton.visible = false
-        }
-    }
 
     paneType: 'editor'
     paneState : { return {} }
@@ -139,48 +132,7 @@ Workspace.Pane{
     function closeDocumentAction(){ editor.closeDocumentAction() }
     function assistCompletion(){ editor.assistCompletion() }
     function getCursorRectangle(){ return editor.getCursorRectangle() }
-    function cursorWindowCoords(){
-        return editor.cursorWindowCoords(root)
-    }
-
-    Workspace.LoadingAnimation{
-        id: loadingAnimation
-        visible: false
-        x: parent.width/2 - width/2
-        y: parent.height/2 - height/2
-        z: 1000
-        size: 8
-    }
-
-    Rectangle{
-        visible: loadingAnimation.visible
-        anchors.fill: parent
-        anchors.topMargin: 30
-        color: currentTheme ? currentTheme.colorScheme.background : 'black'
-        opacity: loadingAnimation.visible ? 0.95 : 0
-        Behavior on opacity{ NumberAnimation{ duration: 250} }
-        z: 900
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: mouse.accepted = true;
-            onPressed: mouse.accepted = true;
-            onReleased: mouse.accepted = true;
-            onDoubleClicked: mouse.accepted = true;
-            onPositionChanged: mouse.accepted = true;
-            onPressAndHold: mouse.accepted = true;
-            onWheel: wheel.accepted = true;
-        }
-
-    }
-
-    function startLoadingMode(){
-        loadingAnimation.visible = true
-    }
-
-    function stopLoadingMode(){
-        loadingAnimation.visible = false
-    }
+    function cursorWindowCoords(){ return editor.cursorWindowCoords(root) }
 
     function hasActiveEditor(){
         return root.panes.activePane.objectName === 'editor'
@@ -277,16 +229,12 @@ Workspace.Pane{
                 lk.layers.workspace.panes.activePane = root
 
                 var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                if (!codeOnly)
-                {
-                    if (code.language)
-                    {
-                        // unfortunate naming, but this actually disables loading
-                        if (loading)
-                            lk.layers.workspace.commands.execute("editqml.shape_all")
+                if (!codeOnly){
+                    if (code.language){
+                        lk.layers.editor.environment.removeLoadingScreen(editor)
 
                         if (code.language.rootShaped){
-                            root.paneState.layout = paletteControls.getEditorLayout(root)
+                            root.paneState.layout = paletteControls.getEditorLayout(root.editor)
                         } else {
                             root.paneState.layout = null
                         }
@@ -296,10 +244,17 @@ Workspace.Pane{
                     }
                 } else {
                     if (root.paneState.layout){
-                        paletteControls.expandLayout(root, root.paneState.layout)
+                        paletteControls.expandLayout(root.editor, root.paneState.layout)
                     } else {
                         // shape all
-                        lk.layers.workspace.extensions.editqml.shapeAll(root, function(ef){ if ( ef.visualParent.expand) ef.visualParent.expand() })
+                        lk.layers.workspace.extensions.editqml.shapeAll(
+                            root.editor,
+                            function(ef){
+                                if ( ef && ef.visualParent.expand)
+                                    ef.visualParent.expand()
+                                lk.layers.editor.environment.removeLoadingScreen(editor)
+                            }
+                        )
                     }
                 }
             }
@@ -529,10 +484,6 @@ Workspace.Pane{
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = code.has(DocumentHandler.LanguageLayout)
         }
-    }
-
-    Component.onCompleted:{
-        editor.addRootButton.style = root.currentTheme.formButtonStyle
     }
 
 }

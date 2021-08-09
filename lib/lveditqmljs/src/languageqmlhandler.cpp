@@ -3400,58 +3400,83 @@ void LanguageQmlHandler::createObjectForProperty(QmlEditFragment *propertyFragme
     __updateScope();
 }
 
-int LanguageQmlHandler::addRootObjectToCode(const QString &name)
+void LanguageQmlHandler::createRootObjectInRuntime(const QString &ctype, const QJSValue& properties)
 {
     Q_D(LanguageQmlHandler);
     d->syncObjects(m_document);
 
-    // add the root via code
-
     QString type; QString id;
-    if (name.contains('#'))
+    if (ctype.contains('#'))
     {
-        auto spl = name.split('#');
+        auto spl = ctype.split('#');
         type = spl[0];
         id = spl[1];
-    } else type = name;
-
-    int insertionPosition = m_target->characterCount() - 1;
-
-    QString insertionText = "\n" + type + "{\n";
-    if (id != "") insertionText += "    id: " + id;
-    insertionText += "\n}\n";
-
-    m_document->addEditingState(ProjectDocument::Palette);
-    QTextCursor cs(m_target);
-    cs.setPosition(insertionPosition);
-    cs.beginEditBlock();
-    cs.insertText(insertionText);
-    cs.endEditBlock();
-    m_document->removeEditingState(ProjectDocument::Palette);
-    m_scopeTimer.stop();
-    __updateScope();
-
-    d->syncObjects(m_document);
+    } else type = ctype;
 
     QmlBindingChannel::Ptr channel = m_bindingChannels->selectedChannel();
-    if ( !channel )
-        return -1;
+    if ( !channel ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "No channel selected to create object.", lv::Exception::toCode("~Channel")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
     Runnable* r = channel->runnable();
-    if ( !r )
-        return -1;
+    if ( !r ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "Failed to create root object. Channel has no runtime.", lv::Exception::toCode("~Runtime")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
-    QObject* newRoot = QmlEditFragment::createObject(
-        d->documentInfo(), type, "temp", r->viewContext()
+    QList<std::tuple<QString, QString, QString> > props;
+    if ( properties.isArray() ){
+        QJSValueIterator it(properties);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QJSValue propertyConfig = it.value();
+
+                if ( !propertyConfig.hasOwnProperty("name") || !propertyConfig.hasOwnProperty("type") ){
+                    lv::Exception e = CREATE_EXCEPTION(
+                        lv::Exception, "Property 'name' and 'type' are required.", lv::Exception::toCode("~Attributes")
+                    );
+                    m_engine->throwError(&e, this);
+                    return;
+                }
+
+                QString name = propertyConfig.property("name").toString();
+                QString type = propertyConfig.property("type").toString();
+                QString value = "";
+                if ( propertyConfig.hasOwnProperty("value") ){
+                    value = propertyConfig.property("value").toString();
+                } else {
+                    value = QmlTypeInfo::typeDefaultValue(type);
+                }
+
+                props.append(std::make_tuple(type, name, value));
+            }
+        }
+    }
+
+    QString creationPath = m_document->file()->path();
+    creationPath.replace(".qml", "_a.qml");
+    QObject* result = QmlEditFragment::createObject(
+        d->documentInfo(), type, creationPath, nullptr, r->viewContext(), props
     );
 
-    if ( !newRoot )
-        return -1;
+    if ( !result ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "Failed to create root object.", lv::Exception::toCode("~Runtime")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
-    r->swapViewRoot(newRoot);
-    channel->updateConnection(newRoot);
-
-    return insertionPosition + 2;
+    r->swapViewRoot(result);
+    channel->updateConnection(result);
 }
 
 void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){

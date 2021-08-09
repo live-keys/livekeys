@@ -198,10 +198,10 @@ public slots:
     int addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
     int addObjectToCode(int position, const QString& type, const QJSValue& properties = QJSValue());
     int addEventToCode(int position, const QString &name);
-    int addRootObjectToCode(const QString &ctype);
 
     void createObjectForProperty(lv::QmlEditFragment* propertyFragment);
     void createObjectInRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createRootObjectInRuntime(const QString &ctype, const QJSValue& properties = QJSValue());
 
     // Registered slots
 
