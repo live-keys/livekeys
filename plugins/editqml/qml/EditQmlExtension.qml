@@ -11,10 +11,6 @@ WorkspaceExtension{
     globals : ProjectQmlExtension{
         property PaletteControls paletteControls: PaletteControls{}
 
-        function add(activeIndex, objectsOnly, forRoot){
-            root.add(activeIndex, objectsOnly, forRoot)
-        }
-
         function shapeAll(editor, callback){
             var codeHandler = editor.code.language
 

@@ -215,7 +215,7 @@ Adds property `name` to code, with the given `value`, around `position`. `positi
 
 Returns the actual postion the property was added at.
 
-#### `int addObjectToCode(int position, string type, object properties = {})`
+#### `int addObjectToCode(int position, var type, object properties = {})`
 
 Adds an object of `type` to code.  The `type` can be specified in multiple ways:
 
@@ -236,7 +236,7 @@ Adds event `name` to code around `position`. `position` is taken as a recommende
 
 Returns the actual postion the event was added at.
 
-#### `int addRootObjectToCode(string type)`
+#### `int addRootObjectToCode(var type)`
 
 Adds a root object of `type` to code. The `type` can be specified in multiple ways:
 

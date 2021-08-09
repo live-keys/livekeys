@@ -193,7 +193,7 @@ QtObject{
                     editor.textEdit.text.length,
                     ['objects'], {
                         onAccepted: function(selection, position){
-                            editor.code.language.createRootObjectInRuntime(selection.name)
+                            editor.code.language.createRootObjectInRuntime({ type: selection.name, id: selection.id })
                             root.shapeRoot(editor)
                             addRoot.destroy()
                         }
@@ -872,12 +872,11 @@ QtObject{
     }
 
     //TODO: Add return type (last child)
-    //TODO: Configure `type`: can be either object, or string
-    function addObjectToObjectContainer(container, type, extraProperties, position){
+    function addObjectToObjectContainer(container, typeOptions, extraProperties, position){
         var languageHandler = container.editFragment.language
 
-        var opos = languageHandler.addObjectToCode(position, type, extraProperties)
-        languageHandler.createObjectInRuntime(container.editFragment, type, extraProperties)
+        var opos = languageHandler.addObjectToCode(position, typeOptions, extraProperties)
+        languageHandler.createObjectInRuntime(container.editFragment, typeOptions, extraProperties)
         var ef = languageHandler.openNestedConnection(container.editFragment, opos)
         if (!ef)
             return null
@@ -943,13 +942,12 @@ QtObject{
                         if ( selection.extraProperties ){
                             views.openAddExtraPropertiesBox(selection.name, {
                                 onAccepted: function(propertiesToAdd){
-                                    addObjectToObjectContainer(container, selection.name, propertiesToAdd, selection.position )
+                                    addObjectToObjectContainer(container, { type: selection.name, id: selection.id }, propertiesToAdd, selection.position )
                                 },
                                 onCancelled: function(){}
                             })
                         } else {
-                            //TODO: use `id` instead of `selection.name` which is `Type#id`
-                            addObjectToObjectContainer(container, selection.name, null, selection.position)
+                            addObjectToObjectContainer(container, { type: selection.name, id: selection.id }, null, selection.position)
                         }
 
                     } else if ( selection.category === 'event' ){ // event
@@ -1253,7 +1251,7 @@ QtObject{
                         if ( selection.extraProperties ){
                             views.openAddExtraPropertiesBox(selection.name, {
                                 onAccepted: function(propertiesToAdd){
-                                    var addedPosition = editor.code.language.addObjectToCode(selection.position, selection.name, propertiesToAdd)
+                                    var addedPosition = editor.code.language.addObjectToCode(selection.position, { type: selection.name, id: selection.id }, propertiesToAdd)
                                     if ( handlers && handlers.onAccepted ){
                                         handlers.onAccepted(selection, addedPosition)
                                     }
@@ -1265,7 +1263,7 @@ QtObject{
                                 }
                             })
                         } else {
-                            var addedPosition = editor.code.language.addObjectToCode(selection.position, selection.name)
+                            var addedPosition = editor.code.language.addObjectToCode(selection.position, { type: selection.name, id: selection.id })
                             if ( addedPosition >= 0 && handlers && handlers.onAccepted){
                                 handlers.onAccepted(selection, addedPosition)
                             }

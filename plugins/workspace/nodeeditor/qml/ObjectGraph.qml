@@ -262,8 +262,8 @@ Rectangle{
                         paletteControls.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
                                 var ch = editFragment.language
-                                var opos = ch.addObjectToCode(selection.position, selection.name, propertiesToAdd)
-                                ch.createObjectInRuntime(editFragment, selection.name, propertiesToAdd)
+                                var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id }, propertiesToAdd)
+                                ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id }, propertiesToAdd)
                                 var ef = ch.openNestedConnection(editFragment, opos)
                                 cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
                                 if (ef)
@@ -275,8 +275,8 @@ Rectangle{
 
                     } else {
                         var ch = editFragment.language
-                        var opos = ch.addObjectToCode(selection.position, selection.name)
-                        ch.createObjectInRuntime(editFragment, selection.name)
+                        var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id } )
+                        ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id })
                         var ef = ch.openNestedConnection(editFragment, opos)
                         cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
                         if (ef)

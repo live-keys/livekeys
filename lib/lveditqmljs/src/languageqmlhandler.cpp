@@ -1296,19 +1296,11 @@ void LanguageQmlHandler::__aboutToDelete()
     }
 }
 
-void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &type, const QString& id, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     if ( !edit )
         return;
-
-    QString type; QString id;
-    if (ctype.contains('#'))
-    {
-        auto spl = ctype.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = ctype;
 
     QmlBindingChannel::Ptr bc = edit->channel();
 
@@ -3266,7 +3258,7 @@ int LanguageQmlHandler::addEventToCode(int position, const QString &name){
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, const QJSValue &properties){
+int LanguageQmlHandler::addObjectToCode(int position, const QJSValue &typeOptions, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     DocumentQmlValueScanner qvs(m_document, position, 1);
@@ -3278,17 +3270,8 @@ int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, cons
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);
 
-    QString id, type;
-    int idx = ctype.indexOf('#');
-
-    if (idx != -1)
-    {
-        type = ctype.left(idx);
-        id = ctype.mid(idx+1);
-    }
-    else {
-        type = ctype;
-    }
+    QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+    QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
 
     // Handle property insertions
 
@@ -3400,18 +3383,13 @@ void LanguageQmlHandler::createObjectForProperty(QmlEditFragment *propertyFragme
     __updateScope();
 }
 
-void LanguageQmlHandler::createRootObjectInRuntime(const QString &ctype, const QJSValue& properties)
+void LanguageQmlHandler::createRootObjectInRuntime(const QJSValue &typeOptions, const QJSValue& properties)
 {
     Q_D(LanguageQmlHandler);
     d->syncObjects(m_document);
 
-    QString type; QString id;
-    if (ctype.contains('#'))
-    {
-        auto spl = ctype.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = ctype;
+    QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+    QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
 
     QmlBindingChannel::Ptr channel = m_bindingChannels->selectedChannel();
     if ( !channel ){
@@ -3479,9 +3457,11 @@ void LanguageQmlHandler::createRootObjectInRuntime(const QString &ctype, const Q
     channel->updateConnection(result);
 }
 
-void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QJSValue &typeOptions, const QJSValue &properties){
     try{
-        createObjectInRuntimeImpl(edit, ctype, properties);
+        QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+        QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
+        createObjectInRuntimeImpl(edit, type, id, properties);
     } catch ( lv::Exception& e ){
         m_engine->throwError(&e, this);
     }
