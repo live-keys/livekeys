@@ -824,13 +824,17 @@ QtObject{
         var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment)
         var propertyInfo = metaTypeInfo.propertyInfo(name)
 
+        var populateValueFromPalette = false
+
         var ef = null
         var isWritable = readOnly ? false : propertyInfo.isWritable
         if (isWritable){
             var defaultValue = EditQml.MetaInfo.defaultTypeValue(propertyInfo.type)
             var groupParentFragment = (objectContainer.editFragment.fragmentType() & EditQml.QmlEditFragment.Group) ? objectContainer.editFragment : null
-            var ppos = languageHandler.addPropertyToCode( position, name, defaultValue, groupParentFragment)
-            ef = languageHandler.openNestedConnection(objectContainer.editFragment, ppos)
+            var addedProperty = languageHandler.addPropertyToCode( position, name, defaultValue, groupParentFragment)
+            if ( addedProperty.totalCharsAdded > 0 )
+                populateValueFromPalette = true
+            ef = languageHandler.openNestedConnection(objectContainer.editFragment, addedProperty.position)
         } else {
             ef = languageHandler.openReadOnlyPropertyConnection(objectContainer.editFragment, name)
         }
@@ -842,13 +846,16 @@ QtObject{
 
         objectContainer.editFragment.signalChildAdded(ef)
 
-        var paletteList = ef.paletteList()
-        for ( var i = 0; i < paletteList.length; ++i ){
-            if ( paletteList[i].writer ){
-                paletteList[i].writer()
-                break
+        if ( populateValueFromPalette ){
+            var paletteList = ef.paletteList()
+            for ( var i = 0; i < paletteList.length; ++i ){
+                if ( paletteList[i].writer ){
+                    paletteList[i].writer()
+                    break
+                }
             }
         }
+
 
         return objectContainer.propertyByName(name)
     }
@@ -1241,11 +1248,11 @@ QtObject{
                 onAccepted: function(box, selection){
                     if ( selection.category === 'property' ){
                         var defaultValue = EditQml.MetaInfo.defaultTypeValue(selection.type)
-                        var addedPosition = editor.code.language.addPropertyToCode(
+                        var addedProperty = editor.code.language.addPropertyToCode(
                             selection.position, selection.name, defaultValue
                         )
                         if ( handlers && handlers.onAccepted ){
-                            handlers.onAccepted(selection, addedPosition)
+                            handlers.onAccepted(selection, addedProperty.position)
                         }
                     } else if ( selection.category === 'object' ){
                         if ( selection.extraProperties ){

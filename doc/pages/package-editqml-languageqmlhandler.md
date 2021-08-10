@@ -209,11 +209,13 @@ Or a position:
 var addModel = languageHandler.getAddOptions({position: 100})
 ```
 
-#### `int addPropertyToCode(int position, string name, string value, QmlEditFragment parentGroup = null)`
+#### `object addPropertyToCode(int position, string name, string value, QmlEditFragment parentGroup = null)`
 
 Adds property `name` to code, with the given `value`, around `position`. `position` is taken as recommended position, as the handler will try to find the best position to insert the property. `parentGroup` is used for readOnly properties, i.e. (`anchors.left`)
 
-Returns the actual postion the property was added at.
+Returns an object containing the number of chars added (`totalCharsAdded`) and the actual postion the property was added at.
+
+If the property already exists in code for the given object, the position will be returned, and the number of chars added will be `0`.
 
 #### `int addObjectToCode(int position, var type, object properties = {})`
 

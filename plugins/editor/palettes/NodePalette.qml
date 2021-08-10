@@ -62,7 +62,7 @@ CodePalette{
 
         function init(){
 
-            var props = []
+            var propertyConnections = []
 
             var codeHandler = editFragment.language
             var childFragmentList = codeHandler.openNestedFragments(editFragment)
@@ -84,43 +84,82 @@ CodePalette{
                         p.z = 1000 - j
 
                         var currentConnection = current.readValueConnection()
+
                         if ( currentConnection ){
-                            //TODO: Do for length === 1 (local properties && direct object references && functions)
-                            if ( currentConnection.expression.length === 2 ){
-                                if (p.inPort)
-                                    props.push({"port": p.inPort, "value": currentConnection.expression})
-                                else
-                                    props.push({"value": object.properties[j].value})
+                            var connection = {
+                                left: {
+                                    node: n,
+                                    inPort: p.inPort,
+                                    outPort: p.outPort,
+                                    id: childFragment.objectId(),
+                                    property: current.identifier()
+                                },
+                                right: {
+                                    node: null,
+                                    inPort: null,
+                                    outPort: null,
+                                    id: currentConnection.expression.length === 2 ? currentConnection.expression[0] : '',
+                                    property: currentConnection.expression.length === 2 ? currentConnection.expression[1] : currentConnection.expression[0]
+                                },
+                                isFunction: currentConnection.isFunction ? true : false
                             }
+
+                            propertyConnections.push(connection)
                         }
                     }
                 }
             }
 
-            for (var k = 0; k < props.length; ++k){
-                var id = props[k].value[0]
-                var node = objectsWithId[id]
-                if (node)
-                {
-                    var nodeProps = node.item.properties
-                    var propp = node.item.propertyByName(props[k].value[1])
-                    if ( propp ){
-                        objectGraph.bindPorts(propp.outPort, props[k].port)
+            for ( var j = 0; j < propertyConnections.length; ++j ){
+                var propertyConnection = propertyConnections[j]
+
+                var node = null
+                if ( propertyConnection.right.id ){
+                    node = objectsWithId[propertyConnection.right.id]
+                } else {
+                    node = propertyConnection.left.node
+                }
+
+                if (node){
+                    var nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                    if ( nodeProperty ){
+                        propertyConnection.right.node = node
+                        propertyConnection.right.outPort = nodeProperty.outPort
+                        propertyConnection.right.inPort = nodeProperty.inPort
                     } else {
-                        node.item.addPropertyToNodeByName(props[k].value[1])
-                        for (var ppx = 0; ppx < nodeProps.length; ++ppx)
-                        {
-                            var proppx = node.item.properties[ppx]
-                            if (proppx.propertyName === props[k].value[1]){
-                                if (props[k].port)
-                                    objectGraph.bindPorts(proppx.outPort, props[k].port)
-                                break
-                            }
+                        if ( propertyConnection.isFunction ){
+                            nodeProperty = node.item.addFunctionProperty(propertyConnection.right.property)
+                            propertyConnection.right.node = node
+                            propertyConnection.right.inPort = nodeProperty.inPort
+                            propertyConnection.right.outPort = nodeProperty.outPort
+                        } else {
+                            var position = node.item.editFragment.valuePosition() +
+                                           node.item.editFragment.valueLength() - 1
+                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                            paletteControls.addPropertyToObjectContainer(node.item, propertyConnection.right.property, false, position)
 
+                            nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                            if ( nodeProperty ){
+                                propertyConnection.right.node = node
+                                propertyConnection.right.outPort = nodeProperty.outPort
+                                propertyConnection.right.inPort = nodeProperty.inPort
+                            }
                         }
                     }
                 }
             }
+
+            for ( var j = 0; j < propertyConnections.length; ++j ){
+                var propertyConnection = propertyConnections[j]
+                if ( propertyConnection.isFunction ){
+                    if ( propertyConnection.right.inPort && propertyConnection.left.outPort )
+                        objectGraph.bindPorts(propertyConnection.left.outPort, propertyConnection.right.inPort)
+                } else {
+                    if ( propertyConnection.right.outPort && propertyConnection.left.inPort )
+                        objectGraph.bindPorts(propertyConnection.right.outPort, propertyConnection.left.inPort)
+                }
+            }
+
             if (numOfObjects !== 0){
                 objectGraph.zoomOrigin = 0
                 objectGraph.zoom = 600.0/(numOfObjects*420.0 + 50)

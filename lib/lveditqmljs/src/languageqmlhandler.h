@@ -195,7 +195,7 @@ public slots:
     // Add Property Management
 
     lv::QmlAddContainer* getAddOptions(QJSValue value);
-    int addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
+    QJSValue addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
     int addObjectToCode(int position, const QJSValue& type, const QJSValue& properties = QJSValue());
     int addEventToCode(int position, const QString &name);
 

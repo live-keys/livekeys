@@ -3056,7 +3056,7 @@ QmlAddContainer *LanguageQmlHandler::getAddOptions(QJSValue value){
 /**
  * \brief Add a property given the \p addText at the specified \p position
  */
-int LanguageQmlHandler::addPropertyToCode(
+QJSValue LanguageQmlHandler::addPropertyToCode(
         int position,
         const QString &name,
         const QString& value,
@@ -3115,7 +3115,12 @@ int LanguageQmlHandler::addPropertyToCode(
             lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
             if ( dh )
                 dh->requestCursorPosition(p->valueBegin);
-            return p->begin;
+
+            QJSValue result = m_engine->engine()->newObject();
+            result.setProperty("position", p->begin);
+            result.setProperty("charsAdded", 0);
+
+            return result;
         }
     }
 
@@ -3161,7 +3166,11 @@ int LanguageQmlHandler::addPropertyToCode(
         dh->requestCursorPosition(cursorPosition);
     }
 
-    return cursorPosition - fullName.size() - 2;
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", cursorPosition - fullName.size() - 2);
+    result.setProperty("totalCharsAdded", insertionText.size());
+
+    return result;
 }
 
 int LanguageQmlHandler::addEventToCode(int position, const QString &name){
