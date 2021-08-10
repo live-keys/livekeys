@@ -1147,7 +1147,7 @@ QtObject{
     }
 
     function createSuggestionBox(parent, font){
-        var sb = factories.suggestionBox.createObject(parent)
+        var sb = __factories.suggestionBox.createObject(parent)
         sb.__initialize(font)
         return sb
     }
