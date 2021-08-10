@@ -28,6 +28,7 @@ Track::Track(QObject *parent)
     , m_segmentModel(new SegmentModel(this))
     , m_cursorPosition(0)
     , m_timelineReady(false)
+    , m_applicationReference(false)
     , m_activeSegment(nullptr)
 {
     connect(m_segmentModel, &QAbstractRangeModel::itemsAboutToBeChanged, this, &Track::__segmentModelItemsChanged);
@@ -186,6 +187,13 @@ void Track::timelineComplete(){
 
 void Track::notifyCursorProcessed(qint64 position){
     emit cursorProcessed(this, position);
+}
+
+void Track::setHasApplicationReference(bool value){
+    if ( m_applicationReference == value )
+        return;
+
+    m_applicationReference = value;
 }
 
 QQmlContext *Track::timelineContext(){

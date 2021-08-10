@@ -38,6 +38,8 @@ Rectangle{
 
     property SegmentInsertMenu segmentInsertMenu: segmentInsertMenu
 
+    signal trackAddedFromView(Track track)
+
     property var headerContextMenu: {
 
         function addTrack(){
@@ -55,6 +57,7 @@ Rectangle{
             videoTrack.name = 'Video Track #' + (root.timeline.trackList.totalTracks() + 1)
 
             root.timeline.appendTrack(videoTrack)
+            root.trackAddedFromView(videoTrack)
         }
 
         var menuOptions = [{
@@ -134,6 +137,7 @@ Rectangle{
                keyframeTrack.name = 'Keyframe Track #' + (root.timeline.trackList.totalTracks() + 1)
 
                root.timeline.appendTrack(keyframeTrack)
+               root.trackAddedFromView(keyframeTrack)
             }
         },{
             name: "Save",
