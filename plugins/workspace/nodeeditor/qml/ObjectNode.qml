@@ -101,11 +101,14 @@ Qan.NodeItem{
         var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
         nodeMember.__initialize(nodeParent, nodeStyle, ef)
 
-        if ( (ef.isWritable || ef.location === EditQml.QmlEditFragment.Slot) ){
-            nodeMember.addInPort()
-        }
-        if (nodeParent.item.id !== "" && (ef.isWritable || ef.location === EditQml.QmlEditFragment.Slot) ){
+        if ( ef.location === EditQml.QmlEditFragment.Slot ){
             nodeMember.addOutPort()
+        } else {
+            if ( nodeParent.item.id !== "" ){
+                nodeMember.addOutPort()
+            }
+            if ( ef.isWritable )
+                nodeMember.addInPort()
         }
 
         root.members.push(nodeMember)

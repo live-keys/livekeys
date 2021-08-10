@@ -626,9 +626,14 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
     if ( !document->isValueNull(documentValue) ){
         QmlTypeInfo::Ptr valueObj = document->extractValueObject(documentValue);
         QStringList typeName = document->extractTypeName(documentValue);
+
+        QmlInheritanceInfo typePath;
+        typePath.append(valueObj);
+
         if ( typeName.size() ){
-            result.typeReference = getTypePath(typeName);
+            typePath.join(getTypePath(typeName));
         }
+        result.typeReference = typePath;
 
         result.isId = true;
         result.documentValueObject = valueObj;
@@ -654,11 +659,15 @@ QmlScopeSnap::ExpressionChain QmlScopeSnap::evaluateExpression(
             return result;
 
         result.documentValueObject = document->extractValueObject(parentValue);
-
         QStringList typeName = document->extractTypeName(parentValue);
+
+        QmlInheritanceInfo typePath;
+        typePath.append(result.documentValueObject);
+
         if ( typeName.size() ){
-            result.typeReference = getTypePath(typeName);
+            typePath.join(getTypePath(typeName));
         }
+        result.typeReference = typePath;
 
         QStringList expressionTail = expression;
         expressionTail.removeFirst();

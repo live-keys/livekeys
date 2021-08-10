@@ -11,25 +11,28 @@ WorkspaceExtension{
     globals : ProjectQmlExtension{
         property PaletteFunctions paletteFunctions: PaletteFunctions{}
 
-        function add(activeIndex, objectsOnly, forRoot){
-            root.add(activeIndex, objectsOnly, forRoot)
-        }
-
         function shapeAll(editor, callback){
             var codeHandler = editor.code.language
 
-            if (editor.loading){
-                editor.stopLoadingMode()
+            if (lk.layers.editor.environment.hasLoadingScreen(editor)){
+                lk.layers.editor.environment.removeLoadingScreen(editor)
                 return
             }
 
+            lk.layers.editor.environment.addLoadingScreen(editor)
             paletteFunctions.shapeImports(editor)
             var rootPosition = codeHandler.findRootPosition()
 
             if ( rootPosition >= 0){
-                paletteFunctions.shapeRoot(editor, callback)
+                paletteFunctions.shapeRoot(editor, function(ef, palette){
+                    lk.layers.editor.environment.removeLoadingScreen(editor)
+                    if ( callback )
+                        callback(ef, palette)
+                })
             } else {
-                editor.editor.addRootButton.visible = true
+                paletteControls.__private.createAddRootButton(editor)
+                if ( callback )
+                    callback(null, null)
             }
         }
     }
@@ -75,7 +78,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteFunctions.openEditPaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.openEditPaletteAtPosition(activePane.editor, userPosition)
     }
 
     function palette(){
@@ -84,7 +87,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteFunctions.userOpenPaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.userOpenPaletteAtPosition(activePane.editor, userPosition)
     }
 
     function shape(){
@@ -93,7 +96,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteFunctions.userShapePaletteAtPosition(activePane, userPosition)
+        globals.paletteFunctions.userShapePaletteAtPosition(activePane.editor, userPosition)
     }
 
     function shapeAll(){
@@ -101,7 +104,7 @@ WorkspaceExtension{
         if ( !activePane )
             return
 
-        globals.shapeAll(activePane)
+        globals.shapeAll(activePane.editor)
     }
 
     function bind(){
@@ -110,11 +113,11 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteFunctions.userBind(activePane, userPosition)
+        globals.paletteFunctions.userBind(activePane.editor, userPosition)
     }
 
     function unbind(){
-        var activePane = lk.layers.workspace.panes.activePane
+        var activePane = getActiveQmlPane()
         if ( !activePane )
             return
 
@@ -127,83 +130,37 @@ WorkspaceExtension{
         )
     }
 
+    function add(){
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
+
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition)
+    }
+
     function addProperty(){
-        add(1)
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['properties'])
     }
 
     function addObject(){
-        add(2)
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
+            return
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['objects'])
     }
 
     function addEvent(){
-        add(3)
-    }
-
-    function add(activeIndex, objectsOnly, forRoot){
-        var activePane = lk.layers.workspace.panes.activePane
-
-        if (activePane.objectName !== 'editor' ||
-            !activePane.document ||
-            !canBeQml(activePane.document) )
+        var activePane = getActiveQmlPane()
+        if ( !activePane )
             return
-
-        var addContainer = activePane.code.language.getAddOptions(activePane.textEdit.cursorPosition, LanguageQmlHandler.NoReadOnly)
-        if ( !addContainer )
-            return
-
-        var rect = activePane.getCursorRectangle()
-        var paneCoords = activePane.mapGlobalPosition()
-
-        var categories = objectsOnly ? ['objects'] : ['objects', 'properties', 'events']
-
-        var addEditorBox = globals.paletteFunctions.views.openAddOptionsBox(
-            addContainer,
-            activePane.code.language,
-            {
-                aroundRect: rect,
-                panePosition: Qt.point(paneCoords.x, paneCoords.y),
-                relativePlacement: lk.layers.editor.environment.placement.bottom
-            },
-            {
-                categories: categories,
-                onCancelled: function(box){
-                    box.child.finalize()
-                },
-                onAccepted: function(box, selection){
-                    if ( selection.category === 'property' ){
-                        activePane.code.language.addProperty(
-                            selection.position, selection.objectType, selection.type, selection.name, true
-                        )
-                    } else if ( selection.category === 'object' ){
-                        if (forRoot){
-                            var position = activePane.code.language.addRootObjectToCode(selection.name)
-                            if (position === -1){
-                                lk.layers.workspace.messages.pushError("Error: Can't create object with name " + selection.name, 1)
-                            } else {
-                                shapeRootObject(activePane, activePane.code.language)
-                            }
-                        }
-                        else
-                            activePane.code.language.addItem(
-                                selection.position, selection.objectType, selection.name
-                            )
-                    } else if ( selection.category === 'event' ){
-                        activePane.code.language.addEvent(
-                            selection.position, selection.objectType, selection.type, selection.name
-                        )
-                    }
-                    box.child.finalize()
-                },
-                onFinalized: function(box){
-                    box.child.destroy()
-                    box.destroy()
-                }
-            }
-        )
-
-        addEditorBox.child.activeIndex = activeIndex ? activeIndex : 0
-        lk.layers.workspace.panes.setActiveItem(addEditorBox, activePane)
-
+        var userPosition = activePane.textEdit.cursorPosition
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['events'])
     }
 
     function objectContainerAdd(){

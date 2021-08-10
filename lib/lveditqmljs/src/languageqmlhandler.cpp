@@ -818,7 +818,6 @@ void LanguageQmlHandler::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
                     name,
                     QmlSuggestionModel::ItemData::Function)
                 );
-
             }
         }
 
@@ -985,11 +984,16 @@ QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int p
                 propertyPosition = cursor.position();
         }
 
-        int advancedLength = DocumentQmlValueScanner::getExpressionExtent(
-            m_target, cursor.position(), &expression, &expressionEndDelimiter
+        int newPosition = -1;
+
+        int propertyEnd = DocumentQmlValueScanner::getPropertyExpressionExtent(
+            m_target, cursor.position(), &expression, &expressionEndDelimiter, &newPosition
         );
 
-        propertyLength = (cursor.position() - propertyPosition) + advancedLength;
+        if ( newPosition >= 0 )
+            propertyPosition = newPosition;
+
+        propertyLength = propertyEnd - propertyPosition;
 
     } else if ( ctx->context() & QmlCompletionContext::InRhsofBinding ){
         expression     = ctx->propertyPath();
@@ -1036,6 +1040,7 @@ QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int p
             }
 
         } else { // dealing with a property declaration
+            d->documentInfo()->createRanges();
             QmlScopeSnap scope = d->snapScope();
 
             bool isSlot = false;
@@ -1291,19 +1296,11 @@ void LanguageQmlHandler::__aboutToDelete()
     }
 }
 
-void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &type, const QString& id, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     if ( !edit )
         return;
-
-    QString type; QString id;
-    if (ctype.contains('#'))
-    {
-        auto spl = ctype.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = ctype;
 
     QmlBindingChannel::Ptr bc = edit->channel();
 
@@ -3059,7 +3056,7 @@ QmlAddContainer *LanguageQmlHandler::getAddOptions(QJSValue value){
 /**
  * \brief Add a property given the \p addText at the specified \p position
  */
-int LanguageQmlHandler::addPropertyToCode(
+QJSValue LanguageQmlHandler::addPropertyToCode(
         int position,
         const QString &name,
         const QString& value,
@@ -3118,7 +3115,12 @@ int LanguageQmlHandler::addPropertyToCode(
             lv::CodeHandler* dh = static_cast<CodeHandler*>(parent());
             if ( dh )
                 dh->requestCursorPosition(p->valueBegin);
-            return p->begin;
+
+            QJSValue result = m_engine->engine()->newObject();
+            result.setProperty("position", p->begin);
+            result.setProperty("charsAdded", 0);
+
+            return result;
         }
     }
 
@@ -3164,7 +3166,11 @@ int LanguageQmlHandler::addPropertyToCode(
         dh->requestCursorPosition(cursorPosition);
     }
 
-    return cursorPosition - fullName.size() - 2;
+    QJSValue result = m_engine->engine()->newObject();
+    result.setProperty("position", cursorPosition - fullName.size() - 2);
+    result.setProperty("totalCharsAdded", insertionText.size());
+
+    return result;
 }
 
 int LanguageQmlHandler::addEventToCode(int position, const QString &name){
@@ -3261,7 +3267,7 @@ int LanguageQmlHandler::addEventToCode(int position, const QString &name){
 /**
  * \brief Adds an item given the \p addText at the specitied \p position
  */
-int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, const QJSValue &properties){
+int LanguageQmlHandler::addObjectToCode(int position, const QJSValue &typeOptions, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     DocumentQmlValueScanner qvs(m_document, position, 1);
@@ -3273,17 +3279,8 @@ int LanguageQmlHandler::addObjectToCode(int position, const QString &ctype, cons
     QTextBlock tbStart = m_target->findBlock(blockStart);
     QTextBlock tbEnd   = m_target->findBlock(blockEnd);
 
-    QString id, type;
-    int idx = ctype.indexOf('#');
-
-    if (idx != -1)
-    {
-        type = ctype.left(idx);
-        id = ctype.mid(idx+1);
-    }
-    else {
-        type = ctype;
-    }
+    QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+    QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
 
     // Handle property insertions
 
@@ -3395,63 +3392,85 @@ void LanguageQmlHandler::createObjectForProperty(QmlEditFragment *propertyFragme
     __updateScope();
 }
 
-int LanguageQmlHandler::addRootObjectToCode(const QString &name)
+void LanguageQmlHandler::createRootObjectInRuntime(const QJSValue &typeOptions, const QJSValue& properties)
 {
     Q_D(LanguageQmlHandler);
     d->syncObjects(m_document);
 
-    // add the root via code
-
-    QString type; QString id;
-    if (name.contains('#'))
-    {
-        auto spl = name.split('#');
-        type = spl[0];
-        id = spl[1];
-    } else type = name;
-
-    int insertionPosition = m_target->characterCount() - 1;
-
-    QString insertionText = "\n" + type + "{\n";
-    if (id != "") insertionText += "    id: " + id;
-    insertionText += "\n}\n";
-
-    m_document->addEditingState(ProjectDocument::Palette);
-    QTextCursor cs(m_target);
-    cs.setPosition(insertionPosition);
-    cs.beginEditBlock();
-    cs.insertText(insertionText);
-    cs.endEditBlock();
-    m_document->removeEditingState(ProjectDocument::Palette);
-    m_scopeTimer.stop();
-    __updateScope();
-
-    d->syncObjects(m_document);
+    QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+    QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
 
     QmlBindingChannel::Ptr channel = m_bindingChannels->selectedChannel();
-    if ( !channel )
-        return -1;
+    if ( !channel ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "No channel selected to create object.", lv::Exception::toCode("~Channel")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
     Runnable* r = channel->runnable();
-    if ( !r )
-        return -1;
+    if ( !r ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "Failed to create root object. Channel has no runtime.", lv::Exception::toCode("~Runtime")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
-    QObject* newRoot = QmlEditFragment::createObject(
-        d->documentInfo(), type, "temp", r->viewContext()
+    QList<std::tuple<QString, QString, QString> > props;
+    if ( properties.isArray() ){
+        QJSValueIterator it(properties);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                QJSValue propertyConfig = it.value();
+
+                if ( !propertyConfig.hasOwnProperty("name") || !propertyConfig.hasOwnProperty("type") ){
+                    lv::Exception e = CREATE_EXCEPTION(
+                        lv::Exception, "Property 'name' and 'type' are required.", lv::Exception::toCode("~Attributes")
+                    );
+                    m_engine->throwError(&e, this);
+                    return;
+                }
+
+                QString name = propertyConfig.property("name").toString();
+                QString type = propertyConfig.property("type").toString();
+                QString value = "";
+                if ( propertyConfig.hasOwnProperty("value") ){
+                    value = propertyConfig.property("value").toString();
+                } else {
+                    value = QmlTypeInfo::typeDefaultValue(type);
+                }
+
+                props.append(std::make_tuple(type, name, value));
+            }
+        }
+    }
+
+    QString creationPath = m_document->file()->path();
+    creationPath.replace(".qml", "_a.qml");
+    QObject* result = QmlEditFragment::createObject(
+        d->documentInfo(), type, creationPath, nullptr, r->viewContext(), props
     );
 
-    if ( !newRoot )
-        return -1;
+    if ( !result ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, "Failed to create root object.", lv::Exception::toCode("~Runtime")
+        );
+        m_engine->throwError(&e, this);
+        return;
+    }
 
-    r->swapViewRoot(newRoot);
-    channel->updateConnection(newRoot);
-
-    return insertionPosition + 2;
+    r->swapViewRoot(result);
+    channel->updateConnection(result);
 }
 
-void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QString &ctype, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntime(QmlEditFragment *edit, const QJSValue &typeOptions, const QJSValue &properties){
     try{
-        createObjectInRuntimeImpl(edit, ctype, properties);
+        QString id = typeOptions.isObject() && typeOptions.hasOwnProperty("id") ? typeOptions.property("id").toString() : "";
+        QString type = typeOptions.isObject() ? typeOptions.property("type").toString() : typeOptions.toString();
+        createObjectInRuntimeImpl(edit, type, id, properties);
     } catch ( lv::Exception& e ){
         m_engine->throwError(&e, this);
     }
@@ -3498,16 +3517,37 @@ int LanguageQmlHandler::checkPragma(int position)
 }
 
 
-QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QString &typeName){
+QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QmlTypeReference &typeName, int position){
     Q_D(LanguageQmlHandler);
-    QmlScopeSnap snap = d->snapScope();
+    QmlScopeSnap scope = d->snapScope();
 
-    return snap.getTypePath(QmlTypeReference::split(typeName));
+    QmlInheritanceInfo typePath;
+
+    if ( position >= 0 ){
+        DocumentQmlInfo::ValueReference documentValue = scope.document->valueAtPosition(position + 1);
+        if ( !scope.document->isValueNull(documentValue) ){
+            QmlTypeInfo::Ptr valueObject = scope.document->extractValueObject(documentValue);
+            typePath.append(valueObject);
+        }
+    }
+
+    typePath.join(scope.getTypePath(typeName));
+
+    return typePath;
 }
 
-QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QString &typeName){
-    QmlMetaTypeInfo* mti = new QmlMetaTypeInfo(inheritanceInfo(typeName), m_engine);
-    QQmlEngine::setObjectOwnership(mti, QQmlEngine::CppOwnership);
+QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QJSValue &typeOrFragment){
+    QmlMetaTypeInfo* mti = nullptr;
+    if ( typeOrFragment.isQObject() ){
+        QmlEditFragment* edit = qobject_cast<QmlEditFragment*>(typeOrFragment.toQObject());
+        if ( edit ){
+            mti = new QmlMetaTypeInfo(inheritanceInfo(edit->declaration()->type(), edit->position()), m_engine);
+            QQmlEngine::setObjectOwnership(mti, QQmlEngine::JavaScriptOwnership);
+        }
+    } else {
+        mti = new QmlMetaTypeInfo(inheritanceInfo(QmlTypeReference::split(typeOrFragment.toString())), m_engine);
+        QQmlEngine::setObjectOwnership(mti, QQmlEngine::JavaScriptOwnership);
+    }
     return mti;
 }
 

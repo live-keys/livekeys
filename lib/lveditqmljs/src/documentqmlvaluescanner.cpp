@@ -152,8 +152,9 @@ int DocumentQmlValueScanner::getExpressionExtent(
                 }
                 wasSpace = false;
             } else if ( blockCh->isLetter() || *blockCh == QChar::fromLatin1('_') ){
-                if ( expressionPath )
+                if ( expressionPath ){
                     lastWord += *blockCh;
+                }
                 wasSpace = false;
             } else if ( blockCh->isNumber() ){
                 if ( wasSpace )
@@ -179,6 +180,87 @@ int DocumentQmlValueScanner::getExpressionExtent(
     }
 
     return propertyLength;
+}
+
+int DocumentQmlValueScanner::getPropertyExpressionExtent(
+        QTextDocument *document,
+        int position,
+        QStringList *expressionPath,
+        QChar *endDelimiter,
+        int* newPosition)
+{
+    QString lastWord;
+    if ( expressionPath )
+        lastWord = expressionPath->size() > 0 ? expressionPath->takeLast() : "";
+
+    QTextBlock block = document->findBlock(position);
+
+    int propertyEnd = position;
+
+    bool wasSpace = false;
+    bool wasDot = false;
+
+    if (newPosition )
+        *newPosition = -1;
+
+    int positionInBlock = position - block.position();
+    while( block.isValid() ){
+        QString blockText = block.text().mid(positionInBlock);
+        for ( int i = 0; i < blockText.length(); ++i ){
+            propertyEnd = block.position() + positionInBlock + i;
+            QChar blockCh = blockText[i];
+            if ( blockCh == QChar('.') ){
+                if ( expressionPath ){
+                    expressionPath->append(lastWord);
+                    lastWord = "";
+                }
+                wasSpace = false;
+                wasDot = true;
+            } else if ( blockCh.isLetter() || blockCh == QChar::fromLatin1('_') ){
+                if ( wasSpace && !wasDot ){ // reset
+                    if ( newPosition )
+                        *newPosition = block.position() + positionInBlock + i;
+                    if ( expressionPath ){
+                        expressionPath->clear();
+                        lastWord = "";
+                    }
+                }
+
+                if ( expressionPath ){
+                    // reset position if no expression up to this point was found
+                    if ( expressionPath->isEmpty() && lastWord.isEmpty() ){
+                        if ( newPosition )
+                            *newPosition = block.position() + positionInBlock + i;
+                    }
+
+                    lastWord += blockCh;
+                }
+                wasSpace = false;
+                wasDot = false;
+            } else if ( blockCh.isNumber() ){
+                if ( wasSpace )
+                    return 0;
+                if ( expressionPath )
+                    lastWord += blockCh;
+                wasSpace = false;
+                wasDot = false;
+            } else if ( blockCh.isSpace( ) ){
+                wasSpace = true;
+            } else {
+                if ( expressionPath )
+                    expressionPath->append(lastWord);
+                if ( endDelimiter )
+                    *endDelimiter = blockCh;
+                return propertyEnd;
+            }
+        }
+
+        block           = block.next();
+        wasSpace        = true;
+        positionInBlock = 0;
+    }
+
+    return propertyEnd;
 }
 
 int DocumentQmlValueScanner::getBlockStart(int position){
