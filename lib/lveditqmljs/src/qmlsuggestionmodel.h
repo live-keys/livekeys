@@ -73,7 +73,7 @@ public:
 
     void updateFilters();
     void addPropertiesAndFunctionsToModel(const QmlInheritanceInfo& typePath);
-    void addObjectsToModel(const QmlScopeSnap& scope);
+    void addObjectsToModel(const QmlScopeSnap& scope, bool addCreatable = true, bool addSingletons = true);
 
 public slots:
     void setFilter(const QString& filter);

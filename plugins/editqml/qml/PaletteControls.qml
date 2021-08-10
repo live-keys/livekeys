@@ -823,6 +823,10 @@ QtObject{
 
         var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment)
         var propertyInfo = metaTypeInfo.propertyInfo(name)
+        if ( !propertyInfo ){
+            lk.layers.workspace.messages.pushError("Error: Failed to get property info for '" + name +  "", 1)
+            return null
+        }
 
         var populateValueFromPalette = false
 
@@ -840,7 +844,7 @@ QtObject{
         }
 
         if (!ef) {
-            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
+            lk.layers.workspace.messages.pushError("Error: Failed to create property inside object: " + name, 1)
             return null
         }
 
