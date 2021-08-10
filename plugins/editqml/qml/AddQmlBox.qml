@@ -472,12 +472,12 @@ Rectangle{
         }
         else if (selector === 2){
             var result = code
-            if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
             selection = {
                 category: 'object',
                 position: root.addContainer.model.addPosition,
                 objectType: root.addContainer.objectType,
-                name: result,
+                name: code,
+                id: idChecked ? idInput.text : '',
                 extraProperties: extraPropertiesChecked
             }
         } else if (selector === 3){

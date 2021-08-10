@@ -109,9 +109,11 @@ public:
 
         if ( path ){
             path->clear();
+
             for ( int i = start; i < tokens.size(); ++i ){
-                if ( tokens.at(i).kind == Token::Identifier )
+                if ( tokens.at(i).kind == Token::Identifier ){
                     path->append(blockText.mid(tokens.at(i).begin(), tokens.at(i).length));
+                }
             }
             if ( tokens.size() > 0 ){
                 if ( tokens.last().kind == Token::Dot )
@@ -172,13 +174,13 @@ QmlCompletionContext::ConstPtr QmlCompletionContextFinder::getContext(const QTex
     if ( !finder.isInStringLiteral() ){
         ExpressionUnderCursor euc;
         euc(cursor, &path);
-        if ( finder.isInLhsOfBinding() )
+        if ( finder.isInLhsOfBinding() ){
             propertyNamePosition = euc.startOffset;
+        }
     }
     QStringList objectTypePath = finder.qmlObjectTypeName();
 
     if ( finder.isInImport() && !finder.libVersionImport().isEmpty() ){
-
 
         QStringList lib;
         QStringList libAndVersion = finder.libVersionImport().split(" ");

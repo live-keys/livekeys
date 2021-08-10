@@ -121,7 +121,7 @@ public:
     QmlEditFragment *rootFragment() const;
     void setRootFragment(QmlEditFragment *rootFragment);
 
-    QmlInheritanceInfo inheritanceInfo(const QString& name);
+    QmlInheritanceInfo inheritanceInfo(const QmlTypeReference &name, int position = -1);
 
 signals:
     void importsFragmentChanged();
@@ -175,7 +175,7 @@ public slots:
     QJSValue getDocumentIds();
     int checkPragma(int position);
 
-    lv::QmlMetaTypeInfo* typeInfo(const QString& fullTypeName);
+    lv::QmlMetaTypeInfo* typeInfo(const QJSValue& typeOrFragment);
 
     lv::QmlImportsModel* importsModel();
 
@@ -194,13 +194,13 @@ public slots:
     // Add Property Management
 
     lv::QmlAddContainer* getAddOptions(QJSValue value);
-    int addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
-    int addObjectToCode(int position, const QString& type, const QJSValue& properties = QJSValue());
+    QJSValue addPropertyToCode(int position, const QString& name, const QString& value, lv::QmlEditFragment* parentGroup = nullptr);
+    int addObjectToCode(int position, const QJSValue& type, const QJSValue& properties = QJSValue());
     int addEventToCode(int position, const QString &name);
-    int addRootObjectToCode(const QString &ctype);
 
     void createObjectForProperty(lv::QmlEditFragment* propertyFragment);
-    void createObjectInRuntime(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectInRuntime(lv::QmlEditFragment* edit, const QJSValue& typeOptions = QJSValue(), const QJSValue& properties = QJSValue());
+    void createRootObjectInRuntime(const QJSValue &typeOptions, const QJSValue& properties = QJSValue());
 
     // Registered slots
 
@@ -216,7 +216,7 @@ public slots:
 
 private:
     void setDocument(ProjectDocument* document);
-    void createObjectInRuntimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QJSValue& properties = QJSValue());
+    void createObjectInRuntimeImpl(lv::QmlEditFragment* edit, const QString& type = "", const QString &identifier = "", const QJSValue& properties = QJSValue());
 
     lv::QmlAddContainer* getAddOptionsForFragment(QmlEditFragment* edit, bool isReadOnly = false);
     lv::QmlAddContainer* getAddOptionsForPosition(int position);

@@ -170,12 +170,9 @@ Item{
     function toggleVisibility(){
         var pfs = root.panes.focusPane('projectFileSystem')
 
-        if (pfs)
-        {
+        if (pfs){
             root.panes.removePane(pfs)
-        }
-        else
-        {
+        } else {
             pfs = root.panes.createPane('projectFileSystem')
 
             var containerUsed = root.panes.container
@@ -429,13 +426,15 @@ Item{
                         button1Function : function(mbox){
                             doc.save()
                             project.closeFile(path)
-                            if (callback) callback()
+                            if (callback)
+                                callback()
                             mbox.close()
                         },
                         button2Name : 'No',
                         button2Function : function(mbox){
                             project.closeFile(path)
-                            if (callback) callback()
+                            if (callback)
+                                callback()
                             mbox.close()
                         },
                         button3Name : 'Cancel',
@@ -445,7 +444,8 @@ Item{
                         returnPressed : function(mbox){
                             doc.save()
                             project.closeFile(path)
-                            if (callback) callback()
+                            if (callback)
+                                callback()
                             mbox.close()
                         }
                     })
