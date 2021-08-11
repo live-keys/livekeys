@@ -881,14 +881,14 @@ QString DocumentQmlInfo::Import::toString() const{
         return "import " + m_relativeUri  +
                 (m_versionMajor >= 0
                     ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
-                    : "");
+                    : "") + (m_as.isEmpty() ? "" : " as " + m_as);
     } else if ( m_type == DocumentQmlInfo::Import::Invalid || m_relativeUri.isEmpty() ){
         return "";
     } else {
         return "import \"" + m_relativeUri + "\"" +
                   (m_versionMajor >= 0
                       ? " " + QString::number(m_versionMajor) + "." + QString::number(m_versionMinor)
-                      : "");
+                      : "") + (m_as.isEmpty() ? "" : " as " + m_as);
     }
 }
 
