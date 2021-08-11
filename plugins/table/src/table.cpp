@@ -40,9 +40,12 @@ Qt::ItemFlags Table::flags(const QModelIndex &) const
 QVariant Table::data(const QModelIndex &index, int) const
 {
     if (index.row() >= m_data.size()){
-        return QVariant("");
+        return QVariant();
     }
     auto& row = m_data[index.row()];
+    if (index.column() >= columnCount()){
+        return QVariant();
+    }
     if (index.column() >= row.size()){
         return QVariant("");
     }

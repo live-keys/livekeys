@@ -9,7 +9,7 @@ import QtQuick.tooling 1.2
 Module {
     dependencies: []
     Component {
-        name: "QTable"
+        name: "lv::Table"
         prototype: "QAbstractTableModel"
         exports: ["table/Table 1.0"]
         exportMetaObjectRevisions: [0]

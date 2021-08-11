@@ -1,5 +1,5 @@
-#ifndef QTABLE_H
-#define QTABLE_H
+#ifndef LVTABLE_H
+#define LVTABLE_H
 
 #include <QAbstractTableModel>
 #include "tableheader.h"
@@ -51,4 +51,4 @@ inline QHash<int, QByteArray> Table::roleNames() const
 
 } // namespace
 
-#endif // QTABLE_H
+#endif // LVTABLE_H
