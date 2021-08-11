@@ -1,10 +1,25 @@
 {
     "type": "qml/lcvcore#BlankImage",
     "properties" : [
-        ["size", "SizePalette"],
-        ["fill", "ColorPalette"],
-        ["reference", ""],
-        ["result", "", "true"]
+        {
+            "location": "property",
+            "name": "size",
+            "palettes": ["SizePalette"]
+        },
+        {
+            "location": "property",
+            "name": "fill",
+            "palettes": ["ColorPalette"]
+        },
+        {
+            "location": "property",
+            "name": "reference"
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 

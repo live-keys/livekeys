@@ -58,11 +58,11 @@ class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
 
     Q_OBJECT
     Q_DISABLE_COPY(LanguageQmlHandler)
-    Q_PROPERTY(lv::CodeHandler* code                       READ code CONSTANT)
-    Q_PROPERTY(lv::QmlEditFragmentContainer* editContainer READ editContainer   CONSTANT)
-    Q_PROPERTY(lv::DocumentQmlChannels* bindingChannels    READ bindingChannels CONSTANT)
-    Q_PROPERTY(bool importsShaped                          READ importsShaped   WRITE setImportsShaped NOTIFY importsShapedChanged)
-    Q_PROPERTY(bool rootShaped                             READ rootShaped      WRITE setRootShaped    NOTIFY rootShapedChanged)
+    Q_PROPERTY(lv::CodeHandler*                 code            READ code                   CONSTANT)
+    Q_PROPERTY(lv::QmlEditFragmentContainer*    editContainer   READ editContainer          CONSTANT)
+    Q_PROPERTY(lv::DocumentQmlChannels*         bindingChannels READ bindingChannels        CONSTANT)
+    Q_PROPERTY(QmlEditFragment*                 importsFragment READ importsFragment  WRITE setImportsFragment NOTIFY importsFragmentChanged)
+    Q_PROPERTY(QmlEditFragment*                 rootFragment    READ rootFragment     WRITE setRootFragment    NOTIFY rootFragmentChanged)
 public:
     friend class ProjectQmlExtension;
     friend class QmlEditFragmentContainer;
@@ -115,18 +115,17 @@ public:
     DocumentQmlChannels* bindingChannels() const;
     CodeHandler* code() const;
 
-    bool rootShaped() const;
-    void setRootShaped(bool rootShaped);
+    QmlEditFragment *importsFragment() const;
+    void setImportsFragment(QmlEditFragment *importsFragment);
 
-    bool importsShaped() const;
-    void setImportsShaped(bool importsShaped);
+    QmlEditFragment *rootFragment() const;
+    void setRootFragment(QmlEditFragment *rootFragment);
 
     QmlInheritanceInfo inheritanceInfo(const QmlTypeReference &name, int position = -1);
 
 signals:
-    void importsShapedChanged();
-    void rootShapedChanged();
-
+    void importsFragmentChanged();
+    void rootFragmentChanged();
 public slots:
     //TOCHECK IF THESE ARE SLOTS
     bool areImportsScanned();
@@ -308,8 +307,8 @@ private:
     QmlEditFragmentContainer*     m_editContainer;
 
     DocumentQmlChannels*   m_bindingChannels;
-    bool                   m_importsShaped;
-    bool                   m_rootShaped;
+    QmlEditFragment*       m_importsFragment;
+    QmlEditFragment*       m_rootFragment;
 
     QScopedPointer<LanguageQmlHandlerPrivate> d_ptr;
 

@@ -1,7 +1,10 @@
 {
     "type": "qml/base#StreamLog",
     "properties" : [
-        ["stream"]
+        {
+            "location": "property",
+            "name": "stream"
+        }
     ]
 }
 

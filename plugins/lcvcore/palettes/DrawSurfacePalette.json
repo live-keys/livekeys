@@ -2,8 +2,15 @@
     "type": "qml/lcvcore#DrawSurface",
     "palettes": ["DrawPalette"],
     "properties" : [
-        ["input"],
-        ["result", "", "true"]
+        {
+            "location": "property",
+            "name": "input"
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 

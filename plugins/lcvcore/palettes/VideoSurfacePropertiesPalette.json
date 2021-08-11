@@ -2,7 +2,10 @@
     "type": "qml/lcvcore#VideoSurfaceView",
     "palettes": ["VideoSurfacePalette"],
     "properties" : [
-        ["timeline"]
+        {
+            "location": "property",
+            "name": "timeline"
+        }
     ]
 }
 

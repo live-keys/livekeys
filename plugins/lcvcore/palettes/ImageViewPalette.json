@@ -1,7 +1,11 @@
 {
     "type": "qml/lcvcore#ImageView",
     "properties" : [
-        ["image", "ImagePalette"]
+        {
+            "location": "property",
+            "name": "image",
+            "palettes": ["ImagePalette"]
+        }
     ]
 }
 

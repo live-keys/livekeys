@@ -2,7 +2,15 @@
     "type": "qml/lcvcore#GalleryFileSelector",
     "palettes": ["GalleryFileSelectorPalette"],
     "properties" : [
-        ["workingDirectory", "FolderPathPalette"],
-        ["selectedFile", "", "true"]
+        {
+            "location": "property",
+            "name": "workingDirectory",
+            "palettes": ["FolderPathPalette"]
+        },
+        {
+            "location": "property",
+            "name": "selectedFile",
+            "readOnly": true
+        }
     ]
 }

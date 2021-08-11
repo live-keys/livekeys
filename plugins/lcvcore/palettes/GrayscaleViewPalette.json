@@ -1,7 +1,11 @@
 {
     "type": "qml/lcvcore#GrayscaleView",
     "properties" : [
-        ["input", "ConnectionPalette"]
+        {
+            "location": "property",
+            "name": "input",
+            "palettes": ["ConnectionPalette"]
+        }
     ]
 }
 

@@ -226,9 +226,9 @@ Item{
                 id: paletteAddMouse
                 anchors.fill: parent
                 onClicked: {
-                    var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+                    var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
                     var coords = root.mapToItem(node.item, 0, 0)
-                    var paletteList = paletteControls.views.openPaletteListForNode(
+                    var paletteList = paletteFunctions.views.openPaletteListForNode(
                         root,
                         paletteContainer,
                         node.item

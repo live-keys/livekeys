@@ -9,7 +9,7 @@ WorkspaceExtension{
     property WorkspaceTheme currentTheme: lk.layers.workspace.themes.current
 
     globals : ProjectQmlExtension{
-        property PaletteControls paletteControls: PaletteControls{}
+        property PaletteFunctions paletteFunctions: PaletteFunctions{}
 
         function shapeAll(editor, callback){
             var codeHandler = editor.code.language
@@ -20,11 +20,11 @@ WorkspaceExtension{
             }
 
             lk.layers.editor.environment.addLoadingScreen(editor)
-            paletteControls.shapeImports(editor)
+            paletteFunctions.shapeImports(editor)
             var rootPosition = codeHandler.findRootPosition()
 
             if ( rootPosition >= 0){
-                paletteControls.shapeRoot(editor, function(ef, palette){
+                paletteFunctions.shapeRoot(editor, function(ef, palette){
                     lk.layers.editor.environment.removeLoadingScreen(editor)
                     if ( callback )
                         callback(ef, palette)
@@ -78,7 +78,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.openEditPaletteAtPosition(activePane.editor, userPosition)
+        globals.paletteFunctions.openEditPaletteAtPosition(activePane.editor, userPosition)
     }
 
     function palette(){
@@ -87,7 +87,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userOpenPaletteAtPosition(activePane.editor, userPosition)
+        globals.paletteFunctions.userOpenPaletteAtPosition(activePane.editor, userPosition)
     }
 
     function shape(){
@@ -96,7 +96,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userShapePaletteAtPosition(activePane.editor, userPosition)
+        globals.paletteFunctions.userShapePaletteAtPosition(activePane.editor, userPosition)
     }
 
     function shapeAll(){
@@ -113,7 +113,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userBind(activePane.editor, userPosition)
+        globals.paletteFunctions.userBind(activePane.editor, userPosition)
     }
 
     function unbind(){
@@ -136,7 +136,7 @@ WorkspaceExtension{
             return
 
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userAddCodeToPosition(activePane.editor, userPosition)
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition)
     }
 
     function addProperty(){
@@ -144,7 +144,7 @@ WorkspaceExtension{
         if ( !activePane )
             return
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userAddCodeToPosition(activePane.editor, userPosition, ['properties'])
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['properties'])
     }
 
     function addObject(){
@@ -152,7 +152,7 @@ WorkspaceExtension{
         if ( !activePane )
             return
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userAddCodeToPosition(activePane.editor, userPosition, ['objects'])
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['objects'])
     }
 
     function addEvent(){
@@ -160,14 +160,14 @@ WorkspaceExtension{
         if ( !activePane )
             return
         var userPosition = activePane.textEdit.cursorPosition
-        globals.paletteControls.userAddCodeToPosition(activePane.editor, userPosition, ['events'])
+        globals.paletteFunctions.userAddCodeToPosition(activePane.editor, userPosition, ['events'])
     }
 
     function objectContainerAdd(){
         var activePane = lk.layers.workspace.panes.activePane
         var activeItem = lk.layers.workspace.panes.activeItem
         if ( activePane.paneType === 'editor' && activeItem.objectName === 'objectContainerFrame' ){
-            lk.layers.workspace.extensions.editqml.paletteControls.userAddToObjectContainer(activeItem)
+            lk.layers.workspace.extensions.editqml.paletteFunctions.userAddToObjectContainer(activeItem)
         }
     }
 

@@ -1,10 +1,23 @@
 {
     "type": "qml/lcvimgproc#Blend",
     "properties" : [
-        ["input1"],
-        ["input2"],
-        ["mask"],
-        ["result", "", "true"]
+        {
+            "location": "property",
+            "name": "input1"
+        },
+        {
+            "location": "property",
+            "name": "input2"
+        },
+        {
+            "location": "property",
+            "name": "mask"
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 
