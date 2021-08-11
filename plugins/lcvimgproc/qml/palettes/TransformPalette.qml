@@ -48,7 +48,7 @@ CodePalette{
         property Component cancelButton: theme.buttons.cancel
     }
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     function addTransformation(name){
         var p = palette.item
@@ -68,7 +68,7 @@ CodePalette{
             var position =
                 p.editFragment.valuePosition() +
                 p.editFragment.valueLength() - 1
-            paletteControls.addObjectToObjectContainer(container, name, null, position)
+            paletteFunctions.addObjectToObjectContainer(container, name, null, position)
 
             var children = container.objectName === "objectContainer" ? container.paletteListContainer.children : container.propertyContainer.children
             return children[children.length - 1]
@@ -136,14 +136,14 @@ CodePalette{
 
                         var fragment = null
                         if (crop.editFragment){ //objectContainer
-                            fragment = paletteControls.addPropertyByName(crop, "region")
+                            fragment = paletteFunctions.addPropertyByName(crop, "region")
                             if (crop.objectName === "objectContainer")
                                 crop.expand()
                         } else {
                             if (!crop)
                                 return
                             var codeHandler = crop.language
-                            fragment = paletteControls.addPropertyByFragment(crop, "region")
+                            fragment = paletteFunctions.addPropertyByFragment(crop, "region")
                         }
                         var toWrite = '"' + Math.round(x) + "," + Math.round(y) + "," + Math.round(width) + "x" + Math.round(height) + '"'
                         fragment.write({"__ref": toWrite})
@@ -198,14 +198,14 @@ CodePalette{
 
                         var fragment = null
                         if (resize.editFragment){
-                            fragment = paletteControls.addPropertyByName(resize, "size")
+                            fragment = paletteFunctions.addPropertyByName(resize, "size")
                             if (resize.objectName === "objectContainer")
                                 resize.expand()
                         } else {
                             if (!resize)
                                 return
                             var codeHandler = resize.language
-                            fragment = paletteControls.addPropertyByFragment(resize, "size")
+                            fragment = paletteFunctions.addPropertyByFragment(resize, "size")
                         }
                         var toWrite = '"' + Math.round(width) + "x" + Math.round(height) + '"'
                         fragment.write({"__ref": toWrite})
@@ -246,14 +246,14 @@ CodePalette{
 
                         var fragment = null
                         if (rotate.editFragment){
-                            fragment = paletteControls.addPropertyByName(rotate, "degrees")
+                            fragment = paletteFunctions.addPropertyByName(rotate, "degrees")
                             if (rotate.objectName === "objectContainer")
                                 rotate.expand()
                         } else {
                             if (!rotate)
                                 return
                             var codeHandler = rotate.language
-                            fragment = paletteControls.addPropertyByFragment(rotate, "degrees")
+                            fragment = paletteFunctions.addPropertyByFragment(rotate, "degrees")
                         }
                         fragment.write(-angle)
                         fragment.commit(-angle)
@@ -291,14 +291,14 @@ CodePalette{
                         var perspective = addTransformation("Perspective")
                         var fragment = null
                         if (perspective.editFragment){
-                            fragment = paletteControls.addPropertyByName(perspective, "points")
+                            fragment = paletteFunctions.addPropertyByName(perspective, "points")
                             if (perspective.objectName === "objectContainer")
                                 perspective.expand()
                         } else {
                             if (!perspective)
                                 return
                             var codeHandler = perspective.language
-                            fragment = paletteControls.addPropertyByFragment(perspective, "points")
+                            fragment = paletteFunctions.addPropertyByFragment(perspective, "points")
                         }
                         var value = '['
                         value += 'Qt.point(' + Math.round(p1.x) + ", " + Math.round(p1.y) +'), '

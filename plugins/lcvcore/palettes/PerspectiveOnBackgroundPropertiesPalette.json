@@ -2,9 +2,19 @@
     "type": "qml/lcvcore#PerspectiveOnBackground",
     "palettes": ["PerspectiveOnBackgroundPalette"],
     "properties" : [
-        ["input"],
-        ["background"],
-        ["result", "", "true"]
+        {
+            "location": "property",
+            "name": "input"
+        },
+        {
+            "location": "property",
+            "name": "background"
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 

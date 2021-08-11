@@ -14,21 +14,26 @@ Item{
         propertyContainer.editFragment = ef
 
         var codeHandler = ef.language
-        var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
         if ( ef.valueLocation === EditQml.QmlEditFragment.Object ){
             propertyContainer.isAnObject = true
 
-            var childObjectContainer = paletteControls.__factories.createObjectContainer(editor, ef, null)
+            var childObjectContainer = paletteFunctions.__factories.createObjectContainer(editor, ef, null)
 
-//            childObjectContainer.parentObjectContainer = parentObjectContainer //TOMOVE
+            var p = propertyContainer
+            while (p && p.objectName !== "objectContainer"){
+                p = p.parent
+            }
+            if (p)
+                childObjectContainer.parentObjectContainer = p
             propertyContainer.childObjectContainer = childObjectContainer
             propertyContainer.valueContainer = childObjectContainer
             childObjectContainer.isForProperty = true
 
         } else {
             propertyContainer.isAnObject = false
-            propertyContainer.valueContainer = paletteControls.__factories.createPaletteGroup(null, ef)
+            propertyContainer.valueContainer = paletteFunctions.__factories.createPaletteGroup(null, ef)
         }
         ef.visualParent = propertyContainer
     }
@@ -80,7 +85,7 @@ Item{
     property bool isAnObject: false
     property var childObjectContainer: null
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     property Component methodIcon: Icons.MenuIcon{}
     property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.middlegroundOverlayDominantBorder; width: 15; height: 15 }
@@ -169,11 +174,11 @@ Item{
                     }
                     var coords = paletteAddButton.mapToItem(pane, 0, 0)
 
-                    var paletteList = paletteControls.views.openPaletetListBoxForContainer(
+                    var paletteList = paletteFunctions.views.openPaletetListBoxForContainer(
                         propertyContainer,
                         propertyContainer.valueContainer,
                         Qt.rect(coords.x + 150, coords.y, 30, 30),
-                        PaletteControls.PaletteListMode.PropertyContainer
+                        PaletteFunctions.PaletteListMode.PropertyContainer
                     )
 
                     if (paletteList){

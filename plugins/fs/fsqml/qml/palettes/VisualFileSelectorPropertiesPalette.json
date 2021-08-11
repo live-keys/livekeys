@@ -2,9 +2,21 @@
     "type": "qml/lcvcore#VisualFileSelector",
     "palettes": ["VisualFileSelectorPalette"],
     "properties" : [
-        ["workingDirectory", "FolderPathPalette"],
-        ["selectedFile", "", "true"],
-        ["highlightedFile", "", "true"]
+        {
+            "location": "property",
+            "name": "workingDirectory",
+            "palettes": ["FolderPathPalette"]
+        },
+        {
+            "location": "property",
+            "name": "selectedFile",
+            "readOnly": true
+        },
+        {
+            "location": "property",
+            "name": "highlightedFile",
+            "readOnly": true
+        }
     ]
 }
 

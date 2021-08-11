@@ -1,8 +1,16 @@
 {
     "type": "qml/lcvcore#ImageFile",
     "properties" : [
-        ["source", "FilePathPalette"],
-        ["output", "", "true"]
+        {
+            "location": "property",
+            "name": "source",
+            "palettes": ["FilePathPalette"]
+        },
+        {
+            "location": "property",
+            "name": "output",
+            "readOnly": true
+        }
     ]
 }
 

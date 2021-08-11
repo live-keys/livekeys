@@ -309,8 +309,8 @@ LanguageQmlHandler::LanguageQmlHandler(
     , m_editFragment(nullptr)
     , m_editContainer(new QmlEditFragmentContainer(this))
     , m_bindingChannels(nullptr)
-    , m_importsShaped(false)
-    , m_rootShaped(false)
+    , m_importsFragment(nullptr)
+    , m_rootFragment(nullptr)
     , d_ptr(new LanguageQmlHandlerPrivate)
 {
     Q_D(LanguageQmlHandler);
@@ -4074,30 +4074,31 @@ QJSValue LanguageQmlHandler::declarationToQml(QmlDeclaration::Ptr declaration)
     return result;
 }
 
-bool LanguageQmlHandler::importsShaped() const
+QmlEditFragment *LanguageQmlHandler::rootFragment() const
 {
-    return m_importsShaped;
+    return m_rootFragment;
 }
 
-void LanguageQmlHandler::setImportsShaped(bool importsShaped)
+void LanguageQmlHandler::setRootFragment(QmlEditFragment *rootFragment)
 {
-    if (m_importsShaped == importsShaped)
+    if (m_rootFragment == rootFragment)
         return;
-    m_importsShaped = importsShaped;
-    emit importsShapedChanged();
+
+    m_rootFragment = rootFragment;
+    emit rootFragmentChanged();
 }
 
-bool LanguageQmlHandler::rootShaped() const
+QmlEditFragment *LanguageQmlHandler::importsFragment() const
 {
-    return m_rootShaped;
+    return m_importsFragment;
 }
 
-void LanguageQmlHandler::setRootShaped(bool rootShaped)
+void LanguageQmlHandler::setImportsFragment(QmlEditFragment *importsFragment)
 {
-    if (m_rootShaped == rootShaped)
+    if (m_importsFragment == importsFragment)
         return;
-    m_rootShaped = rootShaped;
-    emit rootShapedChanged();
+    m_importsFragment = importsFragment;
+    emit importsFragmentChanged();
 }
 
 }// namespace

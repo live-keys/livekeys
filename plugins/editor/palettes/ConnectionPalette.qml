@@ -32,7 +32,7 @@ CodePalette{
         weight: Font.Normal
     })
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -143,7 +143,7 @@ CodePalette{
                         qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x + 113, paneCoords.y - 75), lk.layers.editor.environment.placement.bottom)
                         return
                     }
-                    qmlSuggestionBox = paletteControls.createSuggestionBox(null, palette.inputFont)
+                    qmlSuggestionBox = paletteFunctions.createSuggestionBox(null, palette.inputFont)
                     qmlSuggestionBox.width = Qt.binding(function(){ return input.width })
                     qmlSuggestionBox.height = 200
                     qmlSuggestionBox.x = 0

@@ -21,7 +21,8 @@ SUBDIRS += \
     lcvimgproc \
     lcvfeatures2d \
     lcvphoto \
-    lcvvideo
+    lcvvideo \
+    table
 
 # --- Subdir configuration ---
 
@@ -36,6 +37,7 @@ lcvphoto.subdir         = $$PWD/lcvphoto
 lcvvideo.subdir         = $$PWD/lcvvideo
 timeline.subdir         = $$PWD/timeline
 visual.subdir           = $$PWD/visual
+table.subdir            = $$PWD/table
 
 # --- Dependency configuration ---
 

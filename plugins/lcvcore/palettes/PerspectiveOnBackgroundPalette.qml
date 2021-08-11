@@ -32,7 +32,7 @@ CodePalette{
         property Component cancelButton: theme.buttons.cancel
     }
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     item: Item{
         id: paletteItem

@@ -173,7 +173,7 @@ QtObject{
                 objectContainer.contentWidth = Qt.binding(function(){
                     return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
                 })
-                languageHandler.rootShaped = true
+                languageHandler.rootFragment = ef
             }
             return objectContainer
         }
@@ -296,7 +296,7 @@ QtObject{
             palettes.data = filterOutPalettes(
                 palettes.data,
                 paletteGroup.palettesOpened,
-                mode === PaletteControls.PaletteListMode.ObjectContainer
+                mode === PaletteFunctions.PaletteListMode.ObjectContainer
             )
 
             if (!palettes.data || palettes.data.length === 0) return null
@@ -327,8 +327,8 @@ QtObject{
                     "palettes" : [palettes.data[index].name]
                 })
 
-                var objectRoot = mode === PaletteControls.PaletteListMode.ObjectContainer
-                               ? container.parent
+                var objectRoot = mode === PaletteFunctions.PaletteListMode.ObjectContainer
+                               ? container
                                : (container.objectName === "objectNode" ? container : null)
                 var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
                 if ( container ){
@@ -341,14 +341,14 @@ QtObject{
                 }
 
                 if (paletteBox){
-                    if (mode === PaletteControls.PaletteListMode.ObjectContainer){
+                    if (mode === PaletteFunctions.PaletteListMode.ObjectContainer){
                         paletteBox.moveEnabledSet = false
-                    } else if (mode === PaletteControls.PaletteListMode.PaletteContainer){
+                    } else if (mode === PaletteFunctions.PaletteListMode.PaletteContainer){
                         paletteBox.moveEnabledSet = container.moveEnabledGet
                     }
                 }
 
-                if (swap === PaletteControls.PaletteListSwap.Swap){
+                if (swap === PaletteFunctions.PaletteListSwap.Swap){
 
                     var p = container.parent
                     while (p && p.objectName !== "paletteGroup"){
@@ -662,7 +662,7 @@ QtObject{
         editor.code.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
 
         if (forImports)
-            editor.code.language.importsShaped = true //TODO: Move to LanguageQmlHandler
+            editor.code.language.importsFragment = ef //TODO: Move to LanguageQmlHandler
 
         ef.incrementRefCount()
         if ( callback )
@@ -706,11 +706,12 @@ QtObject{
                 oc.contentWidth = Qt.binding(function(){
                     return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
                 })
-                languageHandler.rootShaped = true
+                languageHandler.rootFragment = oc.editFragment
                 if ( callback ){
                     callback(ef, palette)
                 }
             })
+
         })
     }
 
@@ -810,7 +811,7 @@ QtObject{
     }
 
     function addPropertyToObjectContainer(objectContainer, name, readOnly, position){
-        //name = selection.name
+
         var languageHandler = objectContainer.editFragment.language
 
         var propContainer = objectContainer.propertyByName(name)
@@ -985,7 +986,7 @@ QtObject{
         objectContainer.editor.code.language.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
 
         if (rootDeleted) {
-            objectContainer.editFragment.language.rootShaped = false
+            objectContainer.editFragment.language.rootFragment = null
             __private.createAddRootButton(objectContainer.editor)
         }
 
@@ -1001,7 +1002,7 @@ QtObject{
         objectContainer.collapse()
         var rootPos = languageHandler.findRootPosition()
         if (rootPos === objectContainer.editFragment.position())
-            languageHandler.rootShaped = false
+            languageHandler.rootFragment = null
 
         languageHandler.removeConnection(objectContainer.editFragment)
 
@@ -1054,7 +1055,7 @@ QtObject{
             }
         }
 
-        if (languageHandler.importsShaped)
+        if (languageHandler.importsFragment)
             result['shapeImports'] = true
 
         return result

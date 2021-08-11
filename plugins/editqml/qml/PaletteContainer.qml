@@ -55,7 +55,7 @@ Rectangle{
     property double titleLeftMargin : 50
     property double titleRightMargin : 50
 
-    property var paletteControls: lk.layers.workspace.extensions.editqml.paletteControls
+    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
 
     function swapOrAddPalette(swap){
         var pane = editor.parent
@@ -66,11 +66,11 @@ Rectangle{
         var coords = paletteContainer.mapToItem(pane, 0, 0)
         coords.y -= 35;
 
-        var paletteList = paletteControls.views.openPaletetListBoxForContainer(
+        var paletteList = paletteFunctions.views.openPaletetListBoxForContainer(
             paletteContainer,
             paletteContainer.parent,
             Qt.rect(coords.x - 180 / 2, coords.y, 30, 30),
-            PaletteControls.PaletteListMode.PaletteContainer,
+            PaletteFunctions.PaletteListMode.PaletteContainer,
             swap)
 
         if (paletteList){
@@ -130,7 +130,7 @@ Rectangle{
 
     function closePalette(){
         if (paletteContainer.palette.type === "qml/import"){
-            editFragment.language.importsShaped = false
+            editFragment.language.importsFragment = null
         }
         var p = parent
         while (p && p.objectName !== "paletteGroup"){
@@ -229,10 +229,10 @@ Rectangle{
                     paletteContainer.closePalette()
                 })
                 item.swapPalette.connect(function(){
-                    paletteContainer.swapOrAddPalette(PaletteControls.PaletteListSwap.Swap)
+                    paletteContainer.swapOrAddPalette(PaletteFunctions.PaletteListSwap.Swap)
                 })
                 item.addPalette.connect(function(){
-                    paletteContainer.swapOrAddPalette(PaletteControls.PaletteListSwap.NoSwap)
+                    paletteContainer.swapOrAddPalette(PaletteFunctions.PaletteListSwap.NoSwap)
                 })
                 item.viewConnections.connect(function(){
                     paletteContainer.viewPaletteConnections()

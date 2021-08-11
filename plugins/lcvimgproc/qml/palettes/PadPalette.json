@@ -1,12 +1,35 @@
 {
     "type": "qml/lcvimgproc#Pad",
     "properties" : [
-        ["input"],
-        ["top", "IntPalette"],
-        ["right", "IntPalette"],
-        ["bottom", "IntPalette"],
-        ["left", "IntPalette"],
-        ["result"]
+        {
+            "location": "property",
+            "name": "input"
+        },
+        {
+            "location": "property",
+            "name": "top",
+            "palettes": ["IntPalette"]
+        },
+        {
+            "location": "property",
+            "name": "right",
+            "palettes": ["IntPalette"]
+        },
+        {
+            "location": "property",
+            "name": "bottom",
+            "palettes": ["IntPalette"]
+        },
+        {
+            "location": "property",
+            "name": "left",
+            "palettes": ["IntPalette"]
+        },
+        {
+            "location": "property",
+            "name": "result",
+            "readOnly": true
+        }
     ]
 }
 

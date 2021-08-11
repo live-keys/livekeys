@@ -2,10 +2,25 @@
     "type": "qml/base#Exec",
     "palettes" : ["ExecPalette"],
     "properties" : [
-        ["path", "TextPalette"],
-        ["args", "StringListPalette"],
-        ["input"],
-        ["out", "", "true"]
+        {
+            "location": "property",
+            "name": "path",
+            "palettes": ["TextPalette"]
+        },
+        {
+            "location": "property",
+            "name": "args",
+            "palettes": ["StringListPalette"]
+        },
+        {
+            "location": "property",
+            "name": "input"
+        },
+        {
+            "location": "property",
+            "name": "out",
+            "readOnly": true
+        }
     ]
 }
 
