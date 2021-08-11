@@ -610,4 +610,11 @@ Module {
             Parameter { name: "file"; type: "QString" }
         }
     }
+    Component {
+        name: "lv::VideoTrack"
+        prototype: "lv::Track"
+        exports: ["lcvcore/VideoTrack 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "surface"; type: "lv::VideoSurface"; isPointer: true }
+    }
 }

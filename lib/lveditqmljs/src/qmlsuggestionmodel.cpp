@@ -231,26 +231,22 @@ void QmlSuggestionModel::addPropertiesAndFunctionsToModel(const QmlInheritanceIn
     }
 }
 
-void QmlSuggestionModel::addObjectsToModel(const QmlScopeSnap &scope)
+void QmlSuggestionModel::addObjectsToModel(const QmlScopeSnap &scope, bool addCreatable, bool addSingletons)
 {
     // import global objects
 
-    QStringList exports;
     QmlLibraryInfo::Ptr lib = scope.project->libraryInfo(scope.document->path());
-    if ( lib ){
-        exports = lib->listExports();
-    }
 
-    foreach( const QString& e, exports ){
-        if ( e != scope.document->componentName() ){
+    for ( auto it = lib->exports().begin(); it != lib->exports().end(); ++it ){
+        if ( it.key() != scope.document->componentName() ){
             addItem(
                 QmlSuggestionModel::ItemData(
-                    e,
+                    it.key(),
                     "",
                     "",
                     "implicit",
                     scope.document->path(),
-                    e,
+                    it.key(),
                     QmlSuggestionModel::ItemData::Object)
             );
         }
@@ -258,22 +254,27 @@ void QmlSuggestionModel::addObjectsToModel(const QmlScopeSnap &scope)
 
     for( const QString& defaultLibrary: scope.project->defaultLibraries() ){
         QmlLibraryInfo::Ptr defaultLib = scope.project->libraryInfo(defaultLibrary);
-        QStringList defaultExports;
         if ( defaultLib ){
-            defaultExports = defaultLib->listExports();
-        }
-        for( const QString& de: defaultExports ){
-            if ( de != "Component"){
-                addItem(
-                    QmlSuggestionModel::ItemData(
-                        de,
-                        "",
-                        "",
-                        "QtQml",
-                        "QtQml",
-                        de,
-                        QmlSuggestionModel::ItemData::Object)
-                );
+            for ( auto it = defaultLib->exports().begin(); it != defaultLib->exports().end(); ++it ){
+                QmlTypeInfo::Ptr typeInfo = it.value();
+                bool add =
+                        (typeInfo->isCreatable() && addCreatable) ||
+                        (typeInfo->isSingleton() && addSingletons);
+
+                if ( typeInfo->exportType().name() == "Component" )
+                    add = false;
+
+                if ( add ){
+                    addItem(QmlSuggestionModel::ItemData(
+                            it.value()->exportType().name(),
+                            "",
+                            "",
+                            "QtQml",
+                            "QtQml",
+                            it.value()->exportType().name(),
+                            QmlSuggestionModel::ItemData::Object
+                    ));
+                }
             }
         }
     }
@@ -293,24 +294,28 @@ void QmlSuggestionModel::addObjectsToModel(const QmlScopeSnap &scope)
 
         foreach( const DocumentQmlInfo::Import& imp, scope.document->imports() ){
             if ( imp.as() == *it ){
-                QStringList libexports;
                 QmlLibraryInfo::Ptr implib = scope.project->libraryInfo(imp.uri());
-                if ( !lib.isNull() ){
-                    libexports = implib->listExports();
-                }
+                if ( !implib.isNull() ){
+                    for ( auto it = implib->exports().begin(); it != implib->exports().end(); ++it ){
+                        QmlTypeInfo::Ptr typeInfo = it.value();
+                        bool add =
+                                (typeInfo->isCreatable() && addCreatable) ||
+                                (typeInfo->isSingleton() && addSingletons);
 
-                for ( const QString& exp: libexports ){
-                    if ( exp != "Component"){
-                        addItem(
-                            QmlSuggestionModel::ItemData(
-                                exp,
+                        if ( typeInfo->exportType().name() == "Component" )
+                            add = false;
+
+                        if ( add ){
+                            addItem(QmlSuggestionModel::ItemData(
+                                typeInfo->exportType().name(),
                                 "",
                                 "",
                                 imp.uri(),
                                 imp.uri(),
-                                exp,
-                                QmlSuggestionModel::ItemData::Object)
-                        );
+                                typeInfo->exportType().name(),
+                                QmlSuggestionModel::ItemData::Object
+                            ));
+                        }
                     }
                 }
             }

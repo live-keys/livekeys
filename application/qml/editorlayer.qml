@@ -5,6 +5,7 @@ import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0
+import workspace 1.0
 import live 1.0
 
 EditorLayer{
@@ -46,6 +47,68 @@ EditorLayer{
             eb.setChild(child, aroundRect, panePosition, relativePlacement)
             return eb;
         }
+
+
+        function addLoadingScreen(editor){
+            var anim = __loadingScreen.createObject(editor)
+            anim.visible = true
+            return anim
+        }
+
+        function hasLoadingScreen(editor){
+            for ( var i = 0; i < editor.children.length; ++i ){
+                var child = editor.children[i]
+                if ( child.objectName === 'loadingAnimation' )
+                    return true
+            }
+            return false
+        }
+
+        function removeLoadingScreen(editor){
+            for ( var i = 0; i < editor.children.length; ++i ){
+                var child = editor.children[i]
+                if ( child.objectName === 'loadingAnimation' )
+                    child.destroy()
+            }
+        }
+
+        property Component __loadingScreen : Item{
+            anchors.fill: parent
+            objectName: 'loadingAnimation'
+            visible: false
+
+            property color backgroundColor: 'black'
+
+            LoadingAnimation{
+                id: loadingAnimation
+                visible: parent.visible
+                x: parent.width / 2 - width / 2
+                y: parent.height / 2 - height / 2
+                z: 1000
+                size: 8
+            }
+
+            Rectangle{
+                visible: parent.visible
+                anchors.fill: parent
+                color: parent.backgroundColor
+                opacity: parent.visible ? 0.95 : 0
+                Behavior on opacity{ NumberAnimation{ duration: 250} }
+                z: 900
+
+                MouseArea{
+                    anchors.fill: parent
+                    onClicked: mouse.accepted = true;
+                    onPressed: mouse.accepted = true;
+                    onReleased: mouse.accepted = true;
+                    onDoubleClicked: mouse.accepted = true;
+                    onPositionChanged: mouse.accepted = true;
+                    onPressAndHold: mouse.accepted = true;
+                    onWheel: wheel.accepted = true;
+                }
+            }
+        }
+
 
         property Component editorBoxFactory: Component{
 

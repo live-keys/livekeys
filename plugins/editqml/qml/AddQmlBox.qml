@@ -472,12 +472,12 @@ Rectangle{
         }
         else if (selector === 2){
             var result = code
-            if (idChecked && idInput.text !== "") result = result + "#" + idInput.text
             selection = {
                 category: 'object',
                 position: root.addContainer.model.addPosition,
                 objectType: root.addContainer.objectType,
-                name: result,
+                name: code,
+                id: idChecked ? idInput.text : '',
                 extraProperties: extraPropertiesChecked
             }
         } else if (selector === 3){
@@ -516,16 +516,17 @@ Rectangle{
             width: root.width / 2
 
             model: {
-                if (!root.addContainer) return null
+                if (!root.addContainer)
+                    return null
                 var types = root.addContainer.model.types()
                 var importSpaces = root.addContainer.model.importSpaces()
 
                 if (activeIndex === 0){
-                    for (var i=1; i < types.length; ++i)
+                    for (var i = 1; i < types.length; ++i)
                         types[i] = "c  " + types[i]
 
                     importSpaces.splice(0,1)
-                    for (var i=0; i < importSpaces.length; ++i)
+                    for (var i = 0; i < importSpaces.length; ++i)
                         importSpaces[i] = "{  " + importSpaces[i]
 
                     return types.concat(importSpaces)

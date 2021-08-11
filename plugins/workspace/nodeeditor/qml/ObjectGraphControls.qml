@@ -62,7 +62,8 @@ QtObject{
         var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 
         paletteFunctions.shapeImports(editor)
-        paletteFunctions.shapeRoot(editor, function(objectContainer){
+        paletteFunctions.shapeRoot(editor, function(ef){
+            var objectContainer = ef.visualParent
             var nodePalette = paletteFunctions.openPaletteInObjectContainer(objectContainer, 'NodePalette')
             nodePalette.child.resize(objectContainer.width - 50, editor.height - 170)
         })

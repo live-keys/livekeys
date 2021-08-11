@@ -112,6 +112,34 @@ Rectangle{
     signal edgeClicked(QtObject edge)
     signal clicked()
 
+    Connections{
+        target: editFragment
+        function onChildAdded(ef, context){
+            var objectName = ef.typeName()
+            var objectId = ef.objectId()
+
+            var cursorCoords = null
+            if ( context && context.location === 'ObjectGraph.AddObject' ){
+                cursorCoords = context.coords
+            }
+
+            var n = null
+            if (cursorCoords){
+                n = root.addObjectNode(
+                        cursorCoords.x,
+                        cursorCoords.y,
+                        (objectName + (objectId ? ("#" + objectId) : ""))
+                    )
+            } else {
+                n = root.addObjectNode(graph.getNodeCount() * 420 + 50, 50, (objectName + (objectId ? ("#" + objectId) : "")))
+            }
+            n.item.editFragment = ef
+            ef.incrementRefCount()
+
+            n.item.expandDefaultPalette()
+        }
+    }
+
     onClicked: {
         deselectEdge()
     }
@@ -204,7 +232,7 @@ Rectangle{
 
     onDoubleClicked: {
         var position = root.editFragment.valuePosition() + root.editFragment.valueLength() - 1
-        var addOptions = root.editFragment.language.getAddOptions(position)
+        var addOptions = root.editFragment.language.getAddOptions({ editFragment: root.editFragment })
 
         var coords = root.editor.parent.mapGlobalPosition()
         var cursorCoords = Qt.point(coords.x, coords.y)
@@ -234,12 +262,12 @@ Rectangle{
                         paletteFunctions.views.openAddExtraPropertiesBox(selection.name, {
                             onAccepted: function(propertiesToAdd){
                                 var ch = editFragment.language
-                                var opos = ch.addItem(selection.position, selection.objectType, selection.name, propertiesToAdd)
-                                ch.createObjectInRuntime(editFragment, selection.name, propertiesToAdd)
+                                var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id }, propertiesToAdd)
+                                ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id }, propertiesToAdd)
                                 var ef = ch.openNestedConnection(editFragment, opos)
+                                cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
                                 if (ef)
-                                    editFragment.signalChildAdded(ef)
-
+                                    editFragment.signalChildAdded(ef, {location: 'ObjectGraph.AddObject', coords: cursorCoords })
                             },
                             onCancelled: function(){}
                         })
@@ -247,11 +275,12 @@ Rectangle{
 
                     } else {
                         var ch = editFragment.language
-                        var opos = ch.addItem(selection.position, selection.objectType, selection.name)
-                        ch.createObjectInRuntime(editFragment, selection.name)
+                        var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id } )
+                        ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id })
                         var ef = ch.openNestedConnection(editFragment, opos)
+                        cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
                         if (ef)
-                            editFragment.signalChildAdded(ef)
+                            editFragment.signalChildAdded(ef, {location: 'ObjectGraph.AddObject', coords: cursorCoords} )
                     }
                     box.child.finalize()
                 }

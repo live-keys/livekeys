@@ -60,7 +60,7 @@ void Timeline::appendTrackToList(QQmlListProperty<QObject> *list, QObject *track
         THROW_QMLERROR(Exception, "Timeline: Trying to append a child that's not a track.", Exception::toCode("~Track"), that);
         return;
     }
-
+    track->setHasApplicationReference(true);
     that->appendTrack(track);
 }
 
@@ -159,7 +159,6 @@ void Timeline::__tick(){
             updateCursorPosition(0);
         }
     }
-
 }
 
 void Timeline::__trackCursorProcessed(Track* track, qint64 position){
@@ -217,14 +216,181 @@ void Timeline::__trackCursorProcessed(Track* track, qint64 position){
     emit cursorPositionProcessed(position);
 }
 
+void Timeline::deserializeWithCheck(Timeline *timeline, ViewEngine *engine, const MLNode &node){
+    timeline->stop();
+
+    if ( timeline->m_properties && !timeline->m_properties->isEmpty() ){
+        QJSValue val = engine->engine()->newObject();
+        val.setProperty("message", "Failed to load file. Properties was already declared in this timeline.");
+        emit timeline->fileLoadFailed(val);
+        return;
+    }
+
+    const MLNode::ArrayType& nodeTracks = node["tracks"].asArray();
+
+    QList<Track*> applicationTracks, commonTracks;
+    QList<QString> fileTracks;
+    for ( int i = 0; i < timeline->m_trackList->totalTracks(); ++i ){
+        applicationTracks.append(timeline->m_trackList->trackAt(i));
+    }
+
+    for ( auto it = nodeTracks.begin(); it != nodeTracks.end(); ++it ){
+        MLNode nodeTrack = *it;
+        QString type = QString::fromStdString(nodeTrack["type"].asString());
+        QString name = QString::fromStdString(nodeTrack["name"].asString());
+
+        bool found = false;
+        for ( auto it = applicationTracks.begin(); it != applicationTracks.end(); ++it ){
+            Track* tr = *it;
+            if ( tr->typeReference() == type && tr->name() == name ){
+                applicationTracks.erase(it);
+                commonTracks.append(tr);
+                found = true;
+                break;
+            }
+        }
+
+        if ( !found ){
+            fileTracks.append(name);
+        }
+    }
+
+    if ( applicationTracks.size() > 0 || fileTracks.size() > 0 ){
+        QJSValue val = engine->engine()->newObject();
+        val.setProperty("message", "Failed to load file. Tracks do not overlap");
+        QJSValue leftApplicationTracks = engine->engine()->newArray(applicationTracks.size());
+        for ( int i = 0; i < applicationTracks.size(); ++i ){
+            QJSValue applicationTrack = engine->engine()->newObject();
+            applicationTrack.setProperty("name", applicationTracks[i]->name());
+            applicationTrack.setProperty("type", applicationTracks[i]->typeReference());
+
+            leftApplicationTracks.setProperty(i, applicationTrack);
+        }
+
+        QJSValue leftFileTracks = engine->engine()->newArray(fileTracks.size());
+        for ( int i = 0; i < fileTracks.size(); ++i ){
+            QJSValue fileTrack = engine->engine()->newObject();
+            fileTrack.setProperty("name", fileTracks[i]);
+            leftFileTracks.setProperty(i, fileTrack);
+        }
+        val.setProperty("tracksFromApplication", leftApplicationTracks);
+        val.setProperty("tracksFromFile", leftFileTracks);
+        emit timeline->fileLoadFailed(val);
+        return;
+    }
+
+    for ( int i = 0; i < timeline->m_trackList->totalTracks(); ++i ){
+        Track* tr = timeline->m_trackList->trackAt(i);
+        tr->segmentModel()->clearSegments();
+    }
+
+    timeline->setCursor(0);
+
+    delete timeline->m_properties;
+    timeline->m_properties = nullptr;
+
+    try{
+        timeline->m_contentLength = node["length"].asInt();
+        timeline->setFps(node["fps"].asFloat());
+
+        TimelineProperties* properties = new TimelineProperties(timeline);
+        timeline->m_properties = properties;
+
+        if ( node.hasKey("properties") ){
+
+            MLNode propertiesNode = node["properties"];
+
+            for ( auto it = propertiesNode.begin(); it != propertiesNode.end(); ++it ){
+                std::string key = it.key();
+
+                QString factory = QString::fromStdString(it.value()["factory"].asString());
+
+                ViewEngine::ComponentResult::Ptr factoryComp = engine->createPluginObject(factory, nullptr);
+                if ( factoryComp->hasError() ){
+                    factoryComp->jsThrowError();
+                } else {
+
+                    QVariant result;
+                    QMetaObject::invokeMethod(factoryComp->object, "create", Qt::DirectConnection, Q_RETURN_ARG(QVariant, result));
+
+                    TimelineObjectProperty* property = qobject_cast<TimelineObjectProperty*>(result.value<QObject*>());
+                    if ( !property )
+                        THROW_EXCEPTION(Exception, "Timeline: Failed to load property from file: " + key, Exception::toCode("~Timeline"));
+
+                    QQmlEngine::setObjectOwnership(property, QQmlEngine::CppOwnership);
+
+                    property->deserialize(engine, it.value());
+
+                    properties->insert(QString::fromStdString(key.c_str()), QVariant::fromValue(property));
+                }
+            }
+
+            emit timeline->propertiesChanged();
+        }
+
+        const MLNode::ArrayType& tracks = node["tracks"].asArray();
+
+        for ( auto it = tracks.begin(); it != tracks.end(); ++it ){
+
+            for ( int i = 0; i < timeline->m_trackList->totalTracks(); ++i ){
+                Track* track = timeline->m_trackList->trackAt(i);
+
+                QString type = QString::fromStdString((*it)["type"].asString());
+                QString name = QString::fromStdString((*it)["name"].asString());
+                if ( track->name() == name && track->typeReference() == type ){
+                    Track::deserialize(track, engine, *it);
+                }
+            }
+        }
+    } catch ( Exception& e ){
+        engine->throwError(&e, timeline);
+        return;
+    }
+}
+
+void Timeline::loadDataFromFile(bool checkTracks){
+    if ( m_file.isEmpty() ){
+        return;
+    }
+
+    QFile file(m_file);
+    if ( !file.exists() ){
+        THROW_QMLERROR(Exception, "Timeline: Failed to find file: " + m_file.toStdString(), Exception::toCode("~File"), this);
+        return;
+    }
+
+    if ( !file.open(QIODevice::ReadOnly) ){
+        THROW_QMLERROR(Exception, "Failed to open file for reading: " + m_file.toStdString(), Exception::toCode("~File"), this);
+        return;
+    }
+
+    QByteArray content = file.readAll();
+
+    try {
+        MLNode contentNode;
+        ml::fromJson(content.data(), contentNode);
+        if ( checkTracks ){
+            deserializeWithCheck(this, ViewEngine::grab(this), contentNode);
+        } else {
+            deserialize(this, ViewEngine::grab(this), contentNode);
+        }
+    } catch (Exception& e) {
+        ViewContext::instance().engine()->throwError(&e, this);
+        return;
+    }
+}
+
 void Timeline::appendTrack(lv::Track *track){
     connect(track, &Track::cursorProcessed, this, &Timeline::__trackCursorProcessed);
     track->setParent(this);
     m_trackList->appendTrack(track);
     track->setContentLength(m_contentLength);
-    track->timelineComplete();
-    //TODO: WIll need to reupdate all tracks at that cursor position
-    track->updateCursorPosition(m_cursorPosition);
+
+    if ( m_isComponentComplete ){
+        track->timelineComplete();
+        //TODO: WIll need to reupdate all tracks at that cursor position
+        track->updateCursorPosition(m_cursorPosition);
+    }
     emit trackListChanged();
 }
 
@@ -292,6 +458,7 @@ void Timeline::deserialize(Timeline *timeline, ViewEngine *engine, const MLNode 
 
     delete timeline->m_properties;
     timeline->m_properties = nullptr;
+
     emit timeline->isRunningChanged();
 
     try{
@@ -368,10 +535,10 @@ void Timeline::componentComplete(){
 
     if ( !m_file.isEmpty() ){
         if ( m_trackList->totalTracks() != 0 ){
-            qWarning("Cannot assign a file and directly initialize tracks for the timeline.");
-            return;
+            loadDataFromFile(true);
+        } else {
+            loadDataFromFile(false);
         }
-        load();
     } else {
         for ( int i = 0; i < m_trackList->totalTracks(); ++i ){
             Track* track = m_trackList->trackAt(i);
@@ -391,32 +558,7 @@ void Timeline::refreshPosition(){
 }
 
 void Timeline::load(){
-    if ( m_file.isEmpty() ){
-        return;
-    }
-
-    QFile file(m_file);
-    if ( !file.exists() ){
-        THROW_QMLERROR(Exception, "Timeline: Failed to find file: " + m_file.toStdString(), Exception::toCode("~File"), this);
-        return;
-    }
-
-    if ( !file.open(QIODevice::ReadOnly) ){
-        THROW_QMLERROR(Exception, "Failed to open file for reading: " + m_file.toStdString(), Exception::toCode("~File"), this);
-        return;
-    }
-
-    QByteArray content = file.readAll();
-
-    try {
-        MLNode contentNode;
-        ml::fromJson(content.data(), contentNode);
-        deserialize(this, ViewEngine::grab(this), contentNode);
-    } catch (Exception& e) {
-        ViewContext::instance().engine()->throwError(&e, this);
-        return;
-    }
-
+    loadDataFromFile(false);
 }
 
 void Timeline::save(){

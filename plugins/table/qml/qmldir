@@ -1,0 +1,6 @@
+module table
+plugin table
+
+depends QtQuick 2.3
+
+TableEditor     1.0 TableEditor.qml

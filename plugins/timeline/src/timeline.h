@@ -81,6 +81,8 @@ public:
     void signalTrackNameChanged(Track* track);
 
     bool isRecording() const;
+    void setRecord(bool isRecording);
+
     void refreshPosition();
 
 public slots:
@@ -93,14 +95,12 @@ public slots:
 
     QString positionToLabel(qint64 frameNumber, bool shortZero = false);
 
-    void __tick();
-    void __trackCursorProcessed(Track* track, qint64 position);
-
     void load();
     void save();
     void saveAs(const QString& path);
 
-    void setRecord(bool isRecording);
+    void __tick();
+    void __trackCursorProcessed(Track* track, qint64 position);
 
 signals:
     void contentLengthChanged();
@@ -115,8 +115,11 @@ signals:
     void trackListChanged();
     void trackNameChanged(Track* track);
     void isRecordingChanged();
+    void fileLoadFailed(QJSValue reason);
 
 private:
+    static void deserializeWithCheck(Timeline *timeline, ViewEngine *engine, const MLNode &node);
+    void loadDataFromFile(bool checkTracks);
     void updateCursorPosition(qint64 position);
 
     qint64 m_cursorPosition;

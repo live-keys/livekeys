@@ -35,6 +35,14 @@ Rectangle{
 
     property var qmlSuggestionBox: null
 
+    function mapGlobalPosition(){
+        if ( parent && parent.paneType === 'editor' ){
+            return parent.mapGlobalPosition()
+        } else {
+            return mapToGlobal(0, 0)
+        }
+    }
+
     function forceFocus(){
         textEdit.forceActiveFocus()
     }
@@ -212,6 +220,7 @@ Rectangle{
         if (code.has(DocumentHandler.LanguageCodeCompletion))
             code.language.suggestCompletion(textEdit.cursorPosition)
     }
+
 
     FontMetrics{
         id: editorMetrics
@@ -471,7 +480,6 @@ Rectangle{
         function onIsEnabledChanged(){
             if ( !code.completionModel.isEnabled || code.completionModel.suggestionCount() === 0 ){
                 qmlSuggestionBox.visible = false
-                qmlSuggestionBox.opacity = 0
                 return
             }
 
@@ -492,8 +500,7 @@ Rectangle{
                 qmlSuggestionBox.visible = true
                 qmlSuggestionBox.parent.updatePlacement(
                     rect,
-                    Qt.point(
-                        paneCoords.x - 7, paneCoords.y - 43),
+                    Qt.point(paneCoords.x - 7, paneCoords.y - 43),
                         lk.layers.editor.environment.placement.bottom)
 
             } else {
@@ -512,23 +519,6 @@ Rectangle{
 
         }
 
-    }
-
-    Input.TextButton{
-        id: addRootButton
-        anchors.left: lineSurfaceBackground.right
-        anchors.leftMargin: 10
-        anchors.top: parent.top
-        anchors.topMargin: textEdit.totalHeight + 10
-        text: "Add root Item"
-        width: 120
-        height: 30
-        visible: false
-        property var callback: null
-        onClicked: {
-            visible = false
-            lk.layers.workspace.extensions.editqml.add(2, true, true)
-        }
     }
 
     Component.onDestruction: {
