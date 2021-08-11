@@ -166,6 +166,7 @@ Item {
 
                     MouseArea {
                         id: dragArea
+                        cursorShape: Qt.SizeHorCursor
                         anchors.fill: parent
                         drag.axis: Drag.XAxis
                         drag.target: parent

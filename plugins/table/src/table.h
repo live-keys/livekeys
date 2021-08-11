@@ -2,19 +2,22 @@
 #define QTABLE_H
 
 #include <QAbstractTableModel>
+#include "tableheader.h"
 
-class QTable : public QAbstractTableModel
+namespace lv {
+
+class Table : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(QTable* headerModel READ headerModel CONSTANT)
-    Q_PROPERTY(QTable* rowModel    READ rowModel    CONSTANT)
+    Q_PROPERTY(TableHeader* headerModel READ headerModel CONSTANT)
+    // Q_PROPERTY(Table* rowModel    READ rowModel    CONSTANT)
     enum Roles{
         Value = Qt::UserRole + 1
     };
 public:
 
-    explicit QTable(QObject *parent = nullptr);
-    ~QTable();
+    explicit Table(QObject *parent = nullptr);
+    ~Table();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -23,8 +26,8 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    QTable *headerModel() const;
-    QTable *rowModel() const;
+    TableHeader *headerModel() const;
+    // Table *rowModel() const;
 
     void initializeData();
 public slots:
@@ -32,20 +35,20 @@ public slots:
     void addColumn();
     void removeColumn(int idx);
 private:
-    static QString letterIndex(int idx);
-    QTable(bool dummy);
 
-    Q_DISABLE_COPY(QTable)
+    Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
     std::vector<std::vector<QString>> m_data;
 
-    QTable*                           m_headerModel;
-    QTable*                           m_rowModel;
+    TableHeader*                     m_headerModel;
+    // Table*                           m_rowModel;
 };
 
-inline QHash<int, QByteArray> QTable::roleNames() const
+inline QHash<int, QByteArray> Table::roleNames() const
 {
     return m_roles;
 }
+
+} // namespace
 
 #endif // QTABLE_H

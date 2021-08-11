@@ -1,5 +1,5 @@
 #include "table_plugin.h"
-#include "qtable.h"
+#include "table.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
@@ -7,5 +7,5 @@
 
 void TablePlugin::registerTypes(const char *uri)
 {
-    qmlRegisterType<QTable>(uri, 1, 0, "Table");
+    qmlRegisterType<lv::Table>(uri, 1, 0, "Table");
 }

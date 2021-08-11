@@ -1,27 +1,27 @@
-#include "qtable.h"
+#include "table.h"
 #include <QDebug>
 
-QTable::QTable(QObject *parent)
+namespace lv {
+
+Table::Table(QObject *parent)
     : QAbstractTableModel(parent)
-    , m_headerModel(new QTable(false))
-    , m_rowModel(new QTable(false))
+    , m_headerModel(new TableHeader(this))
 {
-    m_headerModel->m_data = {{}};
     m_roles[Value] = "value";
     initializeData();
 }
 
-QTable::~QTable()
+Table::~Table()
 {
 
 }
 
-int QTable::rowCount(const QModelIndex &) const
+int Table::rowCount(const QModelIndex &) const
 {
     return m_data.size();
 }
 
-int QTable::columnCount(const QModelIndex &) const
+int Table::columnCount(const QModelIndex &) const
 {
     int max = 0;
     for (auto row: m_data)
@@ -31,13 +31,13 @@ int QTable::columnCount(const QModelIndex &) const
     return max;
 }
 
-Qt::ItemFlags QTable::flags(const QModelIndex &) const
+Qt::ItemFlags Table::flags(const QModelIndex &) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
 
-QVariant QTable::data(const QModelIndex &index, int) const
+QVariant Table::data(const QModelIndex &index, int) const
 {
     if (index.row() >= m_data.size()){
         return QVariant("");
@@ -49,7 +49,7 @@ QVariant QTable::data(const QModelIndex &index, int) const
     return row[index.column()];
 }
 
-bool QTable::setData(const QModelIndex &index, const QVariant &value, int)
+bool Table::setData(const QModelIndex &index, const QVariant &value, int)
 {
     if (index.row() >= m_data.size()){
         return false;
@@ -63,19 +63,16 @@ bool QTable::setData(const QModelIndex &index, const QVariant &value, int)
 
     m_data[index.row()][index.column()] = value.toString();
     emit dataChanged(index, index);
+
+    return true;
 }
 
-QTable *QTable::headerModel() const
+TableHeader *Table::headerModel() const
 {
     return m_headerModel;
 }
 
-QTable *QTable::rowModel() const
-{
-    return m_rowModel;
-}
-
-void QTable::initializeData()
+void Table::initializeData()
 {
     beginInsertRows(QModelIndex(), 0, 3);
     m_data = {
@@ -86,15 +83,10 @@ void QTable::initializeData()
     };
     endInsertRows();
 
-    m_headerModel->beginInsertRows(QModelIndex(),0,0);
-    int colNum = columnCount();
-    for (int i = 0; i < colNum; ++i){
-        m_headerModel->setData(QAbstractItemModel::createIndex(0, i), QTable::letterIndex(i));
-    }
-    m_headerModel->endInsertRows();
+    m_headerModel->initalizeData(columnCount());
 }
 
-void QTable::addRow()
+void Table::addRow()
 {
     int rowIndex = rowCount();
 
@@ -107,7 +99,7 @@ void QTable::addRow()
     endInsertRows();
 }
 
-void QTable::addColumn()
+void Table::addColumn()
 {
     int colIndex = columnCount();
     beginInsertColumns(QModelIndex(), colIndex, colIndex);
@@ -117,12 +109,10 @@ void QTable::addColumn()
         setData(QAbstractItemModel::createIndex(i, colIndex), "");
     endInsertColumns();
 
-    m_headerModel->beginInsertColumns(QModelIndex(),colIndex,colIndex);
-    m_headerModel->setData(QAbstractItemModel::createIndex(0, colIndex), QTable::letterIndex(colIndex));
-    m_headerModel->endInsertColumns();
+    m_headerModel->addColumn();
 }
 
-void QTable::removeColumn(int idx)
+void Table::removeColumn(int idx)
 {
     if (idx >= columnCount()) return;
 
@@ -132,30 +122,7 @@ void QTable::removeColumn(int idx)
         m_data[i].erase(m_data[i].begin()+idx);
     }
     endRemoveColumns();
-
-    m_headerModel->beginRemoveColumns(QModelIndex(),idx,idx);
-    m_headerModel->m_data[0].erase(m_headerModel->m_data[0].begin() + idx);
-    m_headerModel->endRemoveColumns();
+    m_headerModel->removeColumn();
 }
 
-QString QTable::letterIndex(int idx)
-{
-    int rem = idx%26;
-    QString value = QString(static_cast<char>(static_cast<int>('A') + rem));
-    idx /= 26;
-
-    while (idx){
-        int rem = idx%26;
-        idx = idx/26;
-        value = QString(static_cast<char>(static_cast<int>('A') + rem - 1)) + value;
-    }
-    return value;
-}
-
-QTable::QTable(bool)
-    : QAbstractTableModel(nullptr)
-    , m_headerModel(nullptr)
-    , m_rowModel(nullptr)
-{
-    m_roles[Value] = "value";
-}
+} // namespace
