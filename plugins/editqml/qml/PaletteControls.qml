@@ -262,7 +262,7 @@ QtObject{
                     container.objectGraph.activateFocus()
                 },
                 onSelected: function(index){
-                    var palette = container.editor.code.language.expand(container.editFragment, {
+                    var palette = container.editFragment.language.expand(container.editFragment, {
                         "palettes" : [palettes.data[index].name]
                     })
 
