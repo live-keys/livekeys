@@ -21,6 +21,7 @@ public slots:
     bool isWritable(QObject* obj, QString name);
     QJSValue listProperties(QObject* obj);
     QString defaultTypeValue(const QString& type);
+    QString typeName(const QString& typeReference);
 };
 
 }

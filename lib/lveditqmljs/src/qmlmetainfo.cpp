@@ -56,4 +56,8 @@ QString QmlMetaInfo::defaultTypeValue(const QString &type){
     return QmlTypeInfo::typeDefaultValue(type);
 }
 
+QString QmlMetaInfo::typeName(const QString &typeReference){
+    return QmlTypeReference::split(typeReference).name();
+}
+
 }

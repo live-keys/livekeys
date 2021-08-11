@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
+import editqml 1.0 as EditQml
 import live 1.0
 import lcvcore 1.0
 import timeline 1.0
@@ -112,6 +113,52 @@ CodePalette{
             anchors.fill: parent
             focus : true
             timelineStyle: theme.timelineStyle
+            onTrackAddedFromView: {
+                var addReference = false
+                if ( timelineArea.timeline.trackList.totalTracks() > 0 ){
+                    var tr = timelineArea.timeline.trackList.trackAt(0)
+                    if ( tr.hasApplicationReference ){
+                        addReference = true
+                    }
+                }
+
+                if ( addReference ){
+
+                    var typeName = EditQml.MetaInfo.typeName(track.typeReference())
+                    var partId = ''
+                    var id = ''
+                    if ( typeName.length ){
+                        partId = typeName[0].toLowerCase() + typeName.substring(1)
+                        id = partId
+                        var index = 1
+                        var docIds = editFragment.language.getDocumentIds()
+
+                        while(true){
+                            var found = false
+                            for ( var i = 0; i < docIds.length; ++i ){
+                                if ( docIds[i] === id ){
+                                    found = true
+                                    break
+                                }
+                            }
+                            if ( !found )
+                                break
+                            ++index
+                            id = partId + index
+                        }
+                    }
+
+                    var position = editFragment.valuePosition() + editFragment.valueLength() - 1
+                    var pos = editFragment.language.addObjectToCode(position, {id: id, type: track.typeReference()})
+                    var ef = editFragment.language.openNestedConnection(editFragment, pos)
+                    if ( ef ){
+                        ef.writeProperties({
+                            name: track.name
+                        })
+                        editFragment.signalChildAdded(ef)
+                    }
+                }
+            }
             handleContextMenu: function(item){
                 if ( item.objectName === 'timelineTrackTitle' ){
                     timelineArea.trackTitleRightClicked(item.trackIndex, item)

@@ -20,7 +20,8 @@ class MLNode;
 class LV_TIMELINE_EXPORT Track : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(QString name                       READ name WRITE setName NOTIFY nameChanged)
+    Q_PROPERTY(QString name                       READ name                    WRITE setName                    NOTIFY nameChanged)
+    Q_PROPERTY(bool hasApplicationReference       READ hasApplicationReference WRITE setHasApplicationReference NOTIFY hasApplicationReferenceChanged)
     Q_PROPERTY(lv::SegmentModel* segmentModel     READ segmentModel CONSTANT )
     Q_PROPERTY(QQmlListProperty<QObject> segments READ segments)
     Q_CLASSINFO("DefaultProperty", "segments")
@@ -61,12 +62,14 @@ public:
 
     virtual void setSegmentPosition(Segment* segment, unsigned int position);
     virtual void setSegmentLength(Segment* segment, unsigned int length);
-    virtual QString typeReference() const;
 
     QObject *timelineProperties() const;
 
     virtual void timelineComplete();
     void notifyCursorProcessed(qint64 position);
+
+    void setHasApplicationReference(bool value);
+    bool hasApplicationReference() const;
 
     QQmlContext* timelineContext();
 
@@ -80,10 +83,12 @@ public slots:
 
     void __segmentModelItemsChanged(qint64 startPosition, qint64 endPosition);
 
+    virtual QString typeReference() const;
     virtual QJSValue configuredProperties(lv::Segment*) const;
 
 signals:
     void nameChanged();
+    void hasApplicationReferenceChanged();
     void cursorProcessed(Track* track, qint64 position);
 
 protected:
@@ -96,6 +101,7 @@ private:
 
     qint64        m_cursorPosition;
     bool          m_timelineReady;
+    bool          m_applicationReference;
 
     Segment*      m_activeSegment;
 };
@@ -106,6 +112,10 @@ inline const QString &Track::name() const{
 
 inline SegmentModel *Track::segmentModel(){
     return m_segmentModel;
+}
+
+inline bool Track::hasApplicationReference() const{
+    return m_applicationReference;
 }
 
 inline qint64 Track::cursorPosition() const{
