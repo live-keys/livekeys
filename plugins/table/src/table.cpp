@@ -10,6 +10,7 @@ Table::Table(QObject *parent)
     , m_isComponentComplete(false)
     , m_headerModel(new TableHeader(this))
     , m_rowModel(new TableRowsInfo(this))
+    , m_isComponentComplete(false)
 {
     m_roles[Value] = "value";
 }
