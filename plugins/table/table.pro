@@ -27,4 +27,5 @@ OTHER_FILES *= \
     qml/plugins.qmltypes
 
 DISTFILES += \
-    qml/TableEditor.qml
+    qml/TableEditor.qml \
+    qml/TableEditorStyle.qml
