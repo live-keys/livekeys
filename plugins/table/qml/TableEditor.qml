@@ -24,10 +24,12 @@ Item {
         property var headerWidth: 40
         property var borderWidth: 2
         property var minimumCellWidth: 40
+        property var minimumCellHeight: 10
     }
 
-    property int rows: 3
-    property int cols: 5
+    property int rows: 0
+    property int cols: 0
+
 
     onTableChanged: {
         if (!table){
@@ -43,7 +45,18 @@ Item {
         headerTableView.columnWidths = colWidths
         headerTableView.contentWidth = cols > 0 ? cols*colWidths[0] : 0
         headerTableView.forceLayout()
-        contentTableView.forceLayout()
+
+        var rowHts = []
+        for (var j=0; j < rows; ++j){
+            rowHts.push(root.style.defaultCellHeight + root.style.borderWidth)
+        }
+
+
+        rowTableView.rowHeights = rowHts
+        rowTableView.contentHeight = rows  > 0 ? rows*rowHts[0] : 0
+        rowTableView.forceLayout()
+
+        // contentTableView.forceLayout()
     }
 
     Row {
@@ -61,7 +74,13 @@ Item {
 
             onClicked: {
                 table.addRow()
+                rowTableView.rowHeights.push(root.style.defaultCellHeight + root.style.borderWidth)
                 ++rows
+
+                rowTableView.contentHeight += root.style.defaultCellHeight + root.style.borderWidth
+                rowTableView.forceLayout()
+
+                // contentTableView.forceLayout()
            }
         }
 
@@ -80,22 +99,117 @@ Item {
 
                 headerTableView.contentWidth += root.style.defaultCellWidth + root.style.borderWidth
                 headerTableView.forceLayout()
-                contentTableView.forceLayout()
+                // contentTableView.forceLayout()
 
             }
         }
     }
 
     Column {
+        anchors.top: buttonTray.bottom
+        width: root.style.defaultCellWidth / 2
+        height: root.height-buttonTray.height
+        Rectangle {
+            width: root.style.defaultCellWidth / 2
+            height: root.style.headerHeight
+            color: "red"
+        }
+
+        TableView {
+            id: rowTableView
+            width: parent.width
+            height: parent.height - root.style.defaultCellHeight
+            clip: true
+            model: !table || !table.rowModel ? 0 : table.rowModel
+
+            property var rowHeights: []
+            property var contentHeight: 0
+
+            interactive: false
+            rowHeightProvider: function(row){
+                console.log("provider " + row + ": " + rowHeights[row])
+                return rowHeights[row]
+            }
+
+            // contentY: contentTableView.contentY
+            delegate: Column {
+
+                Item {
+                    width: root.style.defaultCellWidth / 2
+                    height: parent.height - root.style.borderWidth
+
+                    Input.InputBox {
+                        id: rowLabel
+                        anchors.fill: parent
+                        color: root.style.headerColor
+                        border.width: 0
+                        radius: 0
+                        style: Input.InputBoxStyle {
+                            textStyle: Input.TextStyle{
+                                color: "white"
+                            }
+
+                        }
+                        text: model.value
+                        enabled: false
+
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        onDoubleClicked: {
+                        }
+                    }
+                }
+
+                Rectangle {
+                    id: separatorVer
+                    z: 10
+                    height: root.style.borderWidth
+                    width: root.style.defaultCellWidth / 2
+                    color: root.style.separatorColor
+
+                    property var __tempContentHeight: 0
+
+
+                    Drag.active: dragAreaVer.drag.active
+
+                    Drag.onActiveChanged: {
+                        if (Drag.active){
+                            __tempContentHeight = rowTableView.contentHeight - rowTableView.rowHeights[index]
+                        }
+                    }
+
+                    MouseArea {
+                        id: dragAreaVer
+                        cursorShape: Qt.SizeVerCursor
+                        anchors.fill: parent
+                        drag.axis: Drag.YAxis
+                        drag.target: parent
+                        drag.minimumY: rowLabel.y + root.style.minumumCellHeight
+                    }
+
+                    onYChanged: {
+                        if (!Drag.active) return
+                        console.log("++: " + y)
+                    }
+                }
+            }
+
+        }
+    }
+
+    Column {
         id: colRoot
-        width: root.width
+        width: root.width - root.style.defaultCellWidth / 2
         height: root.height-buttonTray.height
         anchors.top: buttonTray.bottom
-
+        anchors.left: parent.left
+        anchors.leftMargin: root.style.defaultCellWidth / 2
 
         TableView {
             id: headerTableView
-            width: root.width
+            width: parent.width
             height: root.style.headerHeight
             clip: true
             model: !table || !table.headerModel ? 0 : table.headerModel
@@ -108,7 +222,7 @@ Item {
                 return columnWidths[column]
             }
 
-            contentX: contentTableView.contentX
+            // contentX: contentTableView.contentX
             delegate: Row {
 
                 Item {
@@ -156,11 +270,7 @@ Item {
 
                     Drag.onActiveChanged: {
                         if (Drag.active){
-                            __tempContentWidth = 0
-                            for (var i=0; i < headerTableView.columnWidths.length; ++i){
-                                if (i === index) continue
-                                __tempContentWidth += headerTableView.columnWidths[i]
-                            }
+                            __tempContentWidth = headerTableView.contentWidth - headerTableView.columnWidths[index]
                         }
                     }
 
@@ -176,11 +286,9 @@ Item {
                     onXChanged: {
                         if (!Drag.active) return
                         headerTableView.columnWidths[index] = x - headerCol.x + root.style.borderWidth
-
                         headerTableView.contentWidth = __tempContentWidth + headerTableView.columnWidths[index]
-
                         headerTableView.forceLayout()
-                        contentTableView.forceLayout()
+                        // contentTableView.forceLayout()
 
                     }
                 }
@@ -189,12 +297,15 @@ Item {
 
         Controls.ScrollView {
             id: scrollView
-            width: contentTableView.contentWidth < root.width ? contentTableView.contentWidth : root.width
-            height: colRoot.height-root.style.headerHeight
+            width: contentTableView.contentWidth < parent.width ? contentTableView.contentWidth : parent.width
+            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
+                  ? contentTableView.contentHeight
+                  : parent.height-root.style.headerHeight
+
             TableView {
                 id: contentTableView
                 contentWidth: headerTableView.contentWidth
-                contentHeight: rows*(root.style.defaultCellHeight + root.style.borderWidth)
+                contentHeight: rowTableView.contentHeight
                 clip: true
                 model: table
 
@@ -203,9 +314,13 @@ Item {
 
                 }
 
+                rowHeightProvider: function(row){
+                    return rowTableView.rowHeights[row]
+                }
+
                 delegate: Item {
 
-                    height: root.style.defaultCellHeight
+                    implicitWidth: width
                     implicitHeight: height
                     Input.InputBox {
                         id: input

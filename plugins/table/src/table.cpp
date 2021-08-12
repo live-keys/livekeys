@@ -1,14 +1,16 @@
 #include "table.h"
 #include <QDebug>
+#include "tableheader.h"
+#include "tablerows.h"
 
 namespace lv {
 
 Table::Table(QObject *parent)
     : QAbstractTableModel(parent)
     , m_headerModel(new TableHeader(this))
+    , m_rowModel(new TableRows(this))
 {
     m_roles[Value] = "value";
-    initializeData();
 }
 
 Table::~Table()
@@ -55,19 +57,25 @@ QVariant Table::data(const QModelIndex &index, int) const
 bool Table::setData(const QModelIndex &index, const QVariant &value, int)
 {
     if (index.row() >= m_data.size()){
-        return false;
+        for (int i = m_data.size(); i<=index.row();++i)
+            addRow();
     }
 
-    if (index.column() >= m_data[index.row()].size()){
-        int colCount = std::max(columnCount(), index.column()+1);
-        for (int i=m_data[index.row()].size(); i < colCount; ++i)
-            m_data[index.row()].push_back("");
-    }
+    int oldColumnCount = columnCount();
 
+    if (index.column() >= oldColumnCount){
+        for (int i = oldColumnCount; i<=index.column();++i)
+            addColumn();
+    }
     m_data[index.row()][index.column()] = value.toString();
     emit dataChanged(index, index);
 
     return true;
+}
+
+void Table::componentComplete()
+{
+    emit complete();
 }
 
 TableHeader *Table::headerModel() const
@@ -75,18 +83,9 @@ TableHeader *Table::headerModel() const
     return m_headerModel;
 }
 
-void Table::initializeData()
+TableRows *Table::rowModel() const
 {
-    beginInsertRows(QModelIndex(), 0, 3);
-    m_data = {
-        {"a", "b", "c"},
-        {"d", "e"},
-        {"g", "f", "h", "i", "j", "K"},
-        {"g", "f", "h", "i", "j", "K"}
-    };
-    endInsertRows();
-
-    m_headerModel->initalizeData(columnCount());
+    return m_rowModel;
 }
 
 void Table::addRow()
@@ -98,8 +97,10 @@ void Table::addRow()
 
     int colNum = columnCount();
     for (int i=0; i < colNum; ++i)
-        setData(QAbstractItemModel::createIndex(rowIndex, i), "");
+        m_data[rowIndex].push_back("");
     endInsertRows();
+
+    m_rowModel->addRow();
 }
 
 void Table::addColumn()
@@ -109,7 +110,7 @@ void Table::addColumn()
 
     int rowNum = rowCount();
     for (int i = 0; i < rowNum; ++i)
-        setData(QAbstractItemModel::createIndex(i, colIndex), "");
+        m_data[i].push_back("");
     endInsertColumns();
 
     m_headerModel->addColumn();
@@ -126,6 +127,11 @@ void Table::removeColumn(int idx)
     }
     endRemoveColumns();
     m_headerModel->removeColumn();
+}
+
+void Table::assignCell(int row, int col, QString value)
+{
+    setData(QAbstractItemModel::createIndex(row, col), value);
 }
 
 } // namespace
