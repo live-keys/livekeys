@@ -1,6 +1,7 @@
 import QtQuick 2.12
 import QtQuick.Window 2.12
 import QtQuick.Controls 1.2 as Controls
+import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import base 1.0
@@ -51,51 +52,93 @@ Rectangle{
         contentTableView.forceLayout()
     }
 
-    Row {
-        id: buttonTray
-        width: root.width
-        height: 50
+    property Item cellInputBox: Input.InputBox {
+         id: input
+         width: 100
+         height: 30
+         color: "lightgray"
+         border.width: 1
+         radius: 0
+         style: root.style.cellInputStyle
+         onActiveFocusLost: {
+             root.table.assignCell(editCell.row, editCell.column, input.text)
+             root.disableCellInput()
+         }
+     }
 
-        Input.RectangleButton{
-            width: 90
-            height: 40
-
-            content: Input.Label {
-                text: "Add row"
-            }
-
-            onClicked: {
-                table.addRow()
-//                rowTableView.forceLayout()
-                // contentTableView.forceLayout()
-           }
-        }
-
-        Input.RectangleButton{
-            width: 90
-            height: 40
-
-            content: Input.Label {
-                text: "Add column"
-            }
-
-            onClicked: {
-                table.addColumn()
-//                headerTableView.forceLayout()
-                // contentTableView.forceLayout()
-
-            }
-        }
+    property var editCell: ({ row: -1, column: -1 })
+    signal cellRightClicked(int row, int column, Item delegate)
+    signal cellDoubleClicked(int row, int column, Item delegate)
+    onCellDoubleClicked: {
+        enableCellInput(delegate, row, column)
     }
 
+    function enableCellInput(delegate, row, column){
+        editCell.row = row
+        editCell.column = column
+
+        root.cellInputBox.parent = contentTableView
+        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
+        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
+        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
+        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
+        root.cellInputBox.text = delegate.value
+        root.cellInputBox.forceFocus()
+    }
+
+    function disableCellInput(){
+        editCell.row = -1
+        editCell.column = -1
+        root.cellInputBox.parent = null
+    }
+
+    function __notifyEditOutOfView(delegate){
+        root.cellInputBox.x = -root.cellInputBox.width
+        root.cellInputBox.y = -root.cellInputBox.height
+    }
+    function __notifyEditInView(delegate){
+        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
+        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
+        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
+        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
+    }
+
+
+
     Column {
-        anchors.top: buttonTray.bottom
         width: root.style.defaultCellWidth / 2
-        height: root.height-buttonTray.height
+        height: root.height
         Rectangle {
             width: root.style.defaultCellWidth / 2
             height: root.style.headerHeight
             color: "red"
+
+            Row {
+                id: buttonTray
+                width: 40
+                height: 30
+
+                Input.RectangleButton{
+                    width: 20
+                    height: 30
+
+                    content: Input.Label {
+                        text: "R"
+                    }
+                    onClicked: root.table.addRows(1)
+                }
+
+                Input.RectangleButton{
+                    width: 20
+                    height: 30
+
+                    content: Input.Label {
+                        text: "C"
+                    }
+
+                    onClicked: table.addColumns(1)
+                }
+            }
         }
 
         TableView {
@@ -108,7 +151,7 @@ Rectangle{
             interactive: false
             rowHeightProvider: table.rowInfo.rowHeight
 
-            // contentY: contentTableView.contentY
+            contentY: contentTableView.contentY
             delegate: Item{
                 id: rowInfoDelegate // width -> providerWidth
                 implicitWidth: root.style.rowInfoWidth
@@ -179,63 +222,11 @@ Rectangle{
         }
     }
 
-    property Item cellInputBox: Input.InputBox {
-         id: input
-         width: 100
-         height: 30
-         color: "lightgray"
-         border.width: 1
-         radius: 0
-         style: root.style.cellInputStyle
-         onActiveFocusLost: {
-             root.table.assignCell(editCell.row, editCell.column, input.text)
-             root.disableCellInput()
-         }
-     }
-
-    property var editCell: ({ row: -1, column: -1 })
-    signal cellRightClicked(int row, int column, Item delegate)
-    signal cellDoubleClicked(int row, int column, Item delegate)
-    onCellDoubleClicked: {
-        enableCellInput(delegate, row, column)
-    }
-
-    function enableCellInput(delegate, row, column){
-        editCell.row = row
-        editCell.column = column
-
-        root.cellInputBox.parent = contentTableView
-        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
-        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
-        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
-        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
-        root.cellInputBox.text = delegate.value
-        root.cellInputBox.forceFocus()
-    }
-
-    function disableCellInput(){
-        editCell.row = -1
-        editCell.column = -1
-        root.cellInputBox.parent = null
-    }
-
-    function __notifyEditOutOfView(delegate){
-        root.cellInputBox.x = -root.cellInputBox.width
-        root.cellInputBox.y = -root.cellInputBox.height
-    }
-    function __notifyEditInView(delegate){
-        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
-        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
-        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
-        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
-    }
-
 
     Column {
         id: colRoot
         width: root.width - root.style.defaultCellWidth / 2
-        height: root.height-buttonTray.height
-        anchors.top: buttonTray.bottom
+        height: root.height
         anchors.left: parent.left
         anchors.leftMargin: root.style.defaultCellWidth / 2
 
@@ -249,7 +240,7 @@ Rectangle{
             interactive: false
             columnWidthProvider: table.header.columnWidth
 
-            // contentX: contentTableView.contentX
+            contentX: contentTableView.contentX
             delegate: Item{
                 id: hedaerDelegate // width -> providerWidth
                 implicitHeight: root.style.headerHeight
@@ -327,12 +318,36 @@ Rectangle{
         Controls.ScrollView {
             id: scrollView
 
-            width: 5000
-            height: 5000
-//            width: contentTableView.contentWidth < parent.width ? contentTableView.contentWidth : parent.width
-//            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
-//                  ? contentTableView.contentHeight
-//                  : parent.height-root.style.headerHeight
+//            width: 500
+            height: contentTableView.contentHeight + 10 < parent.height ? contentTableView.contentHeight + 10 : parent.height
+            width: contentTableView.contentWidth + 10 < parent.width ? contentTableView.contentWidth + 10 : parent.width
+
+            //            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
+            //                  ? contentTableView.contentHeight
+            //                  : parent.height-root.style.headerHeight
+            style: ScrollViewStyle {
+                transientScrollBars: false
+                handle: Item {
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle {
+                        color: "#1f2227"
+                        anchors.fill: parent
+                    }
+                }
+                scrollBarBackground: Item{
+                    implicitWidth: 10
+                    implicitHeight: 10
+                    Rectangle{
+                        anchors.fill: parent
+                        color: root.color
+                    }
+                }
+                decrementControl: null
+                incrementControl: null
+                frame: Item{}
+                corner: Rectangle{color: root.color}
+            }
 
             TableView {
                 id: contentTableView
@@ -343,9 +358,13 @@ Rectangle{
                 model: table
 
                 columnSpacing: root.style.cellBorderSize
-                columnWidthProvider: table.header.columnWidth
+                columnWidthProvider: function(column){
+                    return table.header.columnWidth(column) - 1
+                }
                 rowSpacing: root.style.cellBorderSize
-                rowHeightProvider: table.rowInfo.rowHeight
+                rowHeightProvider: function(row){
+                    return table.rowInfo.rowHeight(row) - 1
+                }
 
                 delegate: Rectangle{
                     id: tableDelegate
