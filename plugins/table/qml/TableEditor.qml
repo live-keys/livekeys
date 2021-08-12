@@ -6,15 +6,29 @@ import live 1.0
 import base 1.0
 import visual.input 1.0 as Input
 
-Item {
+Rectangle{
     id: root
+    color: style.cellBorderColor
 
     property var table: null
 
-    property QtObject __theme: lk.layers.workspace.themes.current
-
     property QtObject style: QtObject{
-        property Component addButton: __theme.buttons.add
+        property color cellBackgroundColor: '#fff'
+        property color cellBorderColor: '#aaa'
+        property double cellBorderSize: 1
+        property QtObject cellTextStyle: Input.TextStyle{}
+
+        property color selectedCellBorderColor: '#333'
+        property color selectedCellBackgroundColor: '#aaa'
+        property QtObject selectedCellTextStyle: Input.TextStyle{}
+
+        property QtObject cellInputStyle: Input.InputBoxStyle{}
+
+        property color headerCellBackgroundColor: '#ccc'
+        property color headerCellBorderColor: '#aaa'
+        property double headerCellBorderSize: 2
+        property QtObject headerCellTextStyle: Input.TextStyle{}
+
         property color headerColor: "#333333"
         property color separatorColor: "white"
         property color borderColor: "black"
@@ -27,21 +41,12 @@ Item {
     }
 
     property int rows: 3
-    property int cols: 5
 
     onTableChanged: {
         if (!table){
-            rows = cols = 0
             return
         }
         rows = table.rowCount()
-        cols = table.columnCount()
-        var colWidths = []
-        for (var i=0; i < cols; ++i){
-            colWidths.push(root.style.defaultCellWidth + root.style.borderWidth)
-        }
-        headerTableView.columnWidths = colWidths
-        headerTableView.contentWidth = cols > 0 ? cols*colWidths[0] : 0
         headerTableView.forceLayout()
         contentTableView.forceLayout()
     }
@@ -75,10 +80,7 @@ Item {
 
             onClicked: {
                 table.addColumn()
-                headerTableView.columnWidths.push(root.style.defaultCellWidth + root.style.borderWidth)
                 ++cols
-
-                headerTableView.contentWidth += root.style.defaultCellWidth + root.style.borderWidth
                 headerTableView.forceLayout()
                 contentTableView.forceLayout()
 
@@ -86,10 +88,64 @@ Item {
         }
     }
 
+    property Item cellInputBox: Input.InputBox {
+         id: input
+         width: 100
+         height: 30
+         color: "lightgray"
+         border.width: 1
+         radius: 0
+         style: root.style.cellInputStyle
+         onActiveFocusLost: {
+             //TODO: Assign table value
+//             model.value = input.text
+//             input.enabled = false
+             root.disableCellInput()
+         }
+     }
+
+    property var editCell: ({ row: -1, column: -1 })
+    signal cellRightClicked(int row, int column, Item delegate)
+    signal cellDoubleClicked(int row, int column, Item delegate)
+    onCellDoubleClicked: {
+        enableCellInput(delegate, row, column)
+    }
+
+    function enableCellInput(delegate, row, column){
+        editCell.row = row
+        editCell.column = column
+
+        root.cellInputBox.parent = contentTableView
+        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
+        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
+        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
+        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
+        root.cellInputBox.text = delegate.value
+        root.cellInputBox.forceFocus()
+    }
+
+    function disableCellInput(){
+        editCell.row = -1
+        editCell.column = -1
+        root.cellInputBox.parent = null
+    }
+
+    function __notifyEditOutOfView(delegate){
+        root.cellInputBox.x = -root.cellInputBox.width
+        root.cellInputBox.y = -root.cellInputBox.height
+    }
+    function __notifyEditInView(delegate){
+        root.cellInputBox.x = Qt.binding(function(){ return delegate.x - contentTableView.contentX })
+        root.cellInputBox.y = Qt.binding(function(){ return delegate.y - contentTableView.contentY })
+        root.cellInputBox.width = Qt.binding(function(){ return delegate.width })
+        root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
+    }
+
+
     Column {
         id: colRoot
         width: root.width
-        height: root.height-buttonTray.height
+        height: root.height - buttonTray.height
         anchors.top: buttonTray.bottom
 
 
@@ -98,22 +154,25 @@ Item {
             width: root.width
             height: root.style.headerHeight
             clip: true
-            model: !table || !table.headerModel ? 0 : table.headerModel
-
-            property var columnWidths: []
-            property var contentWidth: 0
+            model: !table || !table.header ? null : table.header
 
             interactive: false
-            columnWidthProvider: function(column){
-                return columnWidths[column]
-            }
+            columnWidthProvider: table.header.columnWidth
 
             contentX: contentTableView.contentX
-            delegate: Row {
+            delegate: Item{
+                id: hedaerDelegate // width -> providerWidth
+                implicitHeight: root.style.headerHeight
 
                 Item {
+                    id: headerColumnContainer
                     width: parent.width - root.style.borderWidth
-                    height: root.style.headerHeight
+                    onWidthChanged: {
+                        if ( !dragArea.drag.active )
+                            separator.x = width
+                    }
+
+                    height: parent.height
 
                     Input.InputBox {
                         id: headerCol
@@ -127,9 +186,8 @@ Item {
                             }
 
                         }
-                        text: model.value
+                        text: model.name
                         enabled: false
-
                     }
 
                     MouseArea {
@@ -145,24 +203,12 @@ Item {
                 Rectangle {
                     id: separator
                     z: 10
+
                     height: root.style.headerHeight
                     width: root.style.borderWidth
                     color: root.style.separatorColor
 
-                    property var __tempContentWidth: 0
-
-
                     Drag.active: dragArea.drag.active
-
-                    Drag.onActiveChanged: {
-                        if (Drag.active){
-                            __tempContentWidth = 0
-                            for (var i=0; i < headerTableView.columnWidths.length; ++i){
-                                if (i === index) continue
-                                __tempContentWidth += headerTableView.columnWidths[i]
-                            }
-                        }
-                    }
 
                     MouseArea {
                         id: dragArea
@@ -174,14 +220,15 @@ Item {
                     }
 
                     onXChanged: {
-                        if (!Drag.active) return
-                        headerTableView.columnWidths[index] = x - headerCol.x + root.style.borderWidth
+                        if (!Drag.active)
+                            return
 
-                        headerTableView.contentWidth = __tempContentWidth + headerTableView.columnWidths[index]
+                        headerCol.width = x
 
+                        var newWidth = x - headerCol.x + root.style.borderWidth
+                        table.header.updateColumnWidth(index, newWidth)
                         headerTableView.forceLayout()
                         contentTableView.forceLayout()
-
                     }
                 }
             }
@@ -191,6 +238,7 @@ Item {
             id: scrollView
             width: contentTableView.contentWidth < root.width ? contentTableView.contentWidth : root.width
             height: colRoot.height-root.style.headerHeight
+
             TableView {
                 id: contentTableView
                 contentWidth: headerTableView.contentWidth
@@ -198,52 +246,56 @@ Item {
                 clip: true
                 model: table
 
-                columnWidthProvider: function(column){
-                    return headerTableView.columnWidths[column]
+                columnSpacing: root.style.cellBorderSize
+                columnWidthProvider: table.header.columnWidth
 
-                }
+                delegate: Rectangle{
+                    id: tableDelegate
+                    implicitHeight: root.style.defaultCellHeight
+                    color: selected ? root.style.selectedCellBackgroundColor : root.style.cellBackgroundColor
+                    border.width : selected ? 1 : 0
+                    border.color: root.style.selectedCellBorderColor
 
-                delegate: Item {
+                    property string value: model.value
+                    property bool selected: false
 
-                    height: root.style.defaultCellHeight
-                    implicitHeight: height
-                    Input.InputBox {
-                        id: input
-                        anchors.fill: parent
-                        color: enabled ? "lightgray" : "white"
-                        border.width: 1
-                        radius: 0
-                        style: Input.InputBoxStyle {
-                            textStyle: Input.TextStyle{
-                                color: "black"
-                            }
 
-                        }
+                    Text{
+                        id: cellText
+                        anchors.left: parent.left
+                        anchors.leftMargin: 3
+                        anchors.top: parent.top
+                        anchors.topMargin: 3
                         text: model.value
-                        enabled: false
-
-                        onActiveFocusLost: {
-                            model.value = input.text
-                            input.enabled = false
-                        }
                     }
-
 
                     MouseArea {
-                        id: ma
-                        enabled: !input.enabled
+                        id: cellMouseArea
                         anchors.fill: parent
-                        onDoubleClicked: {
-                            input.enabled = true
-                            input.forceFocus()
-                        }
-
-
+                        onDoubleClicked: root.cellDoubleClicked(row, column, tableDelegate)
+                        onClicked: tableDelegate.forceActiveFocus()
                     }
 
-                    Keys.onReturnPressed: {
-                        model.value = input.text
-                        input.enabled = false
+                    Component.onCompleted: {
+                        if ( row === root.editCell.row && column === root.editCell.column){
+                            root.__notifyEditInView(tableDelegate)
+                        }
+                    }
+                    Component.onDestruction: {
+                        if ( row === root.editCell.row && column === root.editCell.column){
+                            root.__notifyEditOutOfView(tableDelegate)
+                        }
+                    }
+
+                    TableView.onReused: {
+                        if ( row === root.editCell.row && column === root.editCell.column){
+                            root.__notifyEditInView(tableDelegate)
+                        }
+                    }
+                    TableView.onPooled: {
+                        if ( row === root.editCell.row && column === root.editCell.column){
+                            root.__notifyEditOutOfView(tableDelegate)
+                        }
                     }
                 }
 

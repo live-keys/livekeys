@@ -70,7 +70,7 @@ bool Table::setData(const QModelIndex &index, const QVariant &value, int)
     return true;
 }
 
-TableHeader *Table::headerModel() const
+TableHeader *Table::header() const
 {
     return m_headerModel;
 }
@@ -102,14 +102,14 @@ void Table::addRow()
     endInsertRows();
 }
 
-void Table::addColumn()
-{
+void Table::addColumn(){
     int colIndex = columnCount();
     beginInsertColumns(QModelIndex(), colIndex, colIndex);
 
     int rowNum = rowCount();
     for (int i = 0; i < rowNum; ++i)
         setData(QAbstractItemModel::createIndex(i, colIndex), "");
+
     endInsertColumns();
 
     m_headerModel->addColumn();

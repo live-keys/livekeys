@@ -9,7 +9,8 @@ namespace lv {
 class Table : public QAbstractTableModel
 {
     Q_OBJECT
-    Q_PROPERTY(TableHeader* headerModel READ headerModel CONSTANT)
+    Q_PROPERTY(TableHeader* header READ header CONSTANT)
+
     // Q_PROPERTY(Table* rowModel    READ rowModel    CONSTANT)
     enum Roles{
         Value = Qt::UserRole + 1
@@ -26,7 +27,7 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    TableHeader *headerModel() const;
+    TableHeader *header() const;
     // Table *rowModel() const;
 
     void initializeData();
