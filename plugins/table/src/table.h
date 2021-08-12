@@ -2,16 +2,20 @@
 #define LVTABLE_H
 
 #include <QAbstractTableModel>
-#include "tableheader.h"
+#include <QQmlParserStatus>
 
 namespace lv {
 
-class Table : public QAbstractTableModel
+class TableHeader;
+class TableRows;
+
+class Table : public QAbstractTableModel, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_PROPERTY(TableHeader* header READ header CONSTANT)
-
-    // Q_PROPERTY(Table* rowModel    READ rowModel    CONSTANT)
+    
+    Q_PROPERTY(lv::TableHeader* header   READ header   CONSTANT)
+    Q_PROPERTY(lv::TableRows*   rowModel READ rowModel CONSTANT)
+    
     enum Roles{
         Value = Qt::UserRole + 1
     };
@@ -27,22 +31,30 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    TableHeader *header() const;
-    // Table *rowModel() const;
+    void classBegin() override {}
+    virtual void componentComplete() override;
 
-    void initializeData();
+    lv::TableHeader *header() const;
+    lv::TableRows *rowModel() const;
+
+signals:
+    void complete();
+    void rowAdded();
+    void columnAdded();
 public slots:
     void addRow();
     void addColumn();
     void removeColumn(int idx);
+    void assignCell(int row, int col, QString value);
 private:
 
     Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
     std::vector<std::vector<QString>> m_data;
+    bool                              m_isComponentComplete;
 
-    TableHeader*                     m_headerModel;
-    // Table*                           m_rowModel;
+    TableHeader*                      m_headerModel;
+    TableRows*                        m_rowModel;
 };
 
 inline QHash<int, QByteArray> Table::roleNames() const
