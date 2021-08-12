@@ -67,7 +67,7 @@ void QmlDirectoryRead::start(){
         m_dit = nullptr;
     }
 
-    m_stream = new QmlStream(this);
+    m_stream = new QmlStream(this, this);
     Shared::ref(m_stream);
     emit streamChanged();
 

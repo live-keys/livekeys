@@ -11,15 +11,19 @@ QmlStreamValueAwait::QmlStreamValueAwait(QObject *parent)
     : QObject(parent)
     , m_isComponentComplete(false)
     , m_isRunning(false)
+    , m_inStreamValue(false)
     , m_follow(nullptr)
     , m_stream(nullptr)
     , m_act(nullptr)
+    , m_next(nullptr)
 {
 }
 
 QmlStreamValueAwait::~QmlStreamValueAwait(){
-    if ( m_stream )
+    if ( m_stream ){
+        Shared::unref(m_stream);
         m_stream->unsubscribeObject(this);
+    }
 }
 
 void QmlStreamValueAwait::streamHandler(QObject *that, const QJSValue &val){
@@ -65,12 +69,6 @@ void QmlStreamValueAwait::__streamRemoved(){
     m_stream = nullptr;
 }
 
-void QmlStreamValueAwait::__actResultReady(){
-//    m_isRunning = false;
-    if ( m_stream->provider() )
-        m_stream->provider()->resume();
-}
-
 void QmlStreamValueAwait::__updateFollowsObject(){
     QmlStreamFilter* filter = qobject_cast<QmlStreamFilter*>(m_follow);
     if ( filter ){
@@ -85,18 +83,41 @@ void QmlStreamValueAwait::__updateFollowsObject(){
     }
 }
 
+void QmlStreamValueAwait::__actResultReady(){
+    m_isRunning = false;
+    if ( m_stream && m_stream->provider() )
+        m_stream->provider()->resume();
+}
+
 void QmlStreamValueAwait::onStreamValue(const QJSValue &val){
     if ( m_isRunning && m_act ){ // if there's an act set, wait for result
         return;
     }
+    if ( m_inStreamValue){ // avoid recursive signal callbacks (binding loops) and return to event loop
+        m_next = new QJSValue(val);
+        if ( m_act && m_stream->provider() ){
+            m_stream->provider()->wait();
+        }
+        return;
+    }
 
-//    m_isRunning = true;
+    m_inStreamValue = true;
+    m_isRunning = true;
     if ( m_act && m_stream->provider() ){
-//        m_stream->provider()->wait();
+        m_stream->provider()->wait();
     }
 
     m_current = val;
     emit valueChanged();
+
+    while ( m_next ) { // iterate as long as new values come along during recursive calls from valueChanged()
+        m_current = *m_next;
+        delete m_next;
+        m_next = nullptr;
+        emit valueChanged();
+    }
+
+    m_inStreamValue = false;
 }
 
 void QmlStreamValueAwait::removeFollowsObject(){
@@ -116,6 +137,7 @@ void QmlStreamValueAwait::setStream(QmlStream *stream){
     }
 
     if( m_stream ){
+        Shared::unref(m_stream);
         m_stream->unsubscribeObject(this);
         disconnect(m_stream, &QObject::destroyed, this, &QmlStreamValueAwait::__streamRemoved);
     }
@@ -123,6 +145,7 @@ void QmlStreamValueAwait::setStream(QmlStream *stream){
     m_stream = stream;
     m_stream->forward(this, &QmlStreamValueAwait::streamHandler);
     connect(m_stream, &QObject::destroyed, this, &QmlStreamValueAwait::__streamRemoved);
+    Shared::ref(m_stream);
 
     emit streamChanged();
 }
