@@ -9,6 +9,7 @@ Table::Table(QObject *parent)
     : QAbstractTableModel(parent)
     , m_headerModel(new TableHeader(this))
     , m_rowModel(new TableRows(this))
+    , m_isComponentComplete(false)
 {
     m_roles[Value] = "value";
 }
@@ -75,10 +76,11 @@ bool Table::setData(const QModelIndex &index, const QVariant &value, int)
 
 void Table::componentComplete()
 {
+    m_isComponentComplete = true;
     emit complete();
 }
 
-TableHeader *Table::headerModel() const
+TableHeader *Table::header() const
 {
     return m_headerModel;
 }
@@ -103,8 +105,7 @@ void Table::addRow()
     m_rowModel->addRow();
 }
 
-void Table::addColumn()
-{
+void Table::addColumn(){
     int colIndex = columnCount();
     beginInsertColumns(QModelIndex(), colIndex, colIndex);
 
