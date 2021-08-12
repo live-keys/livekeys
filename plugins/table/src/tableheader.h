@@ -38,6 +38,8 @@ public:
     int defaultColumnWidth() const;
     void setDefaultColumnWidth(int defaultColumnSize);
 
+    int size() const;
+
 public slots:
     void updateColumnWidth(int index, int width);
     int columnWidth(int index);
@@ -50,7 +52,7 @@ private:
 
     QHash<int, QByteArray> m_roles;
     int                    m_defaultColumnWidth;
-    QList<ColumnData> m_data;
+    QList<ColumnData>      m_data;
 };
 
 inline QHash<int, QByteArray> TableHeader::roleNames() const{

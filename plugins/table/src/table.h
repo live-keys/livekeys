@@ -7,14 +7,14 @@
 namespace lv {
 
 class TableHeader;
-class TableRows;
+class TableRowsInfo;
 
 class Table : public QAbstractTableModel, public QQmlParserStatus
 {
     Q_OBJECT
     
-    Q_PROPERTY(lv::TableHeader* header   READ header   CONSTANT)
-    Q_PROPERTY(lv::TableRows*   rowModel READ rowModel CONSTANT)
+    Q_PROPERTY(lv::TableHeader*   header   READ header  CONSTANT)
+    Q_PROPERTY(lv::TableRowsInfo* rowInfo  READ rowInfo CONSTANT)
     
     enum Roles{
         Value = Qt::UserRole + 1
@@ -35,26 +35,27 @@ public:
     virtual void componentComplete() override;
 
     lv::TableHeader *header() const;
-    lv::TableRows *rowModel() const;
+    lv::TableRowsInfo *rowInfo() const;
 
 signals:
     void complete();
     void rowAdded();
     void columnAdded();
+
 public slots:
-    void addRow();
-    void addColumn();
+    void addRows(int number = 1);
+    void addColumns(int number = 1);
     void removeColumn(int idx);
     void assignCell(int row, int col, QString value);
 private:
 
     Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
-    std::vector<std::vector<QString>> m_data;
+    QList<QList<QString>>             m_data;
     bool                              m_isComponentComplete;
 
     TableHeader*                      m_headerModel;
-    TableRows*                        m_rowModel;
+    TableRowsInfo*                    m_rowModel;
 };
 
 inline QHash<int, QByteArray> Table::roleNames() const

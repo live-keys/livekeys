@@ -35,32 +35,20 @@ Rectangle{
         property var defaultCellWidth: 90
         property var defaultCellHeight: 25
         property var headerHeight: 25
+        property var rowInfoWidth: 50
         property var headerWidth: 40
         property var borderWidth: 2
         property var minimumCellWidth: 40
-        property var minimumCellHeight: 10
+        property var minimumCellHeight: 15
     }
-
-    property int rows: 0
 
     onTableChanged: {
         if (!table){
             return
         }
-        rows = table.rowCount()
         headerTableView.forceLayout()
-
-        var rowHts = []
-        for (var j=0; j < rows; ++j){
-            rowHts.push(root.style.defaultCellHeight + root.style.borderWidth)
-        }
-
-
-        rowTableView.rowHeights = rowHts
-        rowTableView.contentHeight = rows  > 0 ? rows*rowHts[0] : 0
         rowTableView.forceLayout()
-
-        // contentTableView.forceLayout()
+        contentTableView.forceLayout()
     }
 
     Row {
@@ -78,12 +66,7 @@ Rectangle{
 
             onClicked: {
                 table.addRow()
-                rowTableView.rowHeights.push(root.style.defaultCellHeight + root.style.borderWidth)
-                ++rows
-
-                rowTableView.contentHeight += root.style.defaultCellHeight + root.style.borderWidth
-                rowTableView.forceLayout()
-
+//                rowTableView.forceLayout()
                 // contentTableView.forceLayout()
            }
         }
@@ -98,8 +81,7 @@ Rectangle{
 
             onClicked: {
                 table.addColumn()
-                ++cols
-                headerTableView.forceLayout()
+//                headerTableView.forceLayout()
                 // contentTableView.forceLayout()
 
             }
@@ -121,82 +103,79 @@ Rectangle{
             width: parent.width
             height: parent.height - root.style.defaultCellHeight
             clip: true
-            model: !table || !table.rowModel ? 0 : table.rowModel
-
-            property var rowHeights: []
-            property var contentHeight: 0
+            model: !table || !table.rowInfo ? 0 : table.rowInfo
 
             interactive: false
-            rowHeightProvider: function(row){
-                console.log("provider " + row + ": " + rowHeights[row])
-                return rowHeights[row]
-            }
+            rowHeightProvider: table.rowInfo.rowHeight
 
             // contentY: contentTableView.contentY
-            delegate: Column {
+            delegate: Item{
+                id: rowInfoDelegate // width -> providerWidth
+                implicitWidth: root.style.rowInfoWidth
 
-                Item {
-                    width: root.style.defaultCellWidth / 2
+                Item{
+                    id: rowInfoContainer
+                    width: parent.width
                     height: parent.height - root.style.borderWidth
+                    onHeightChanged: {
+                        if ( !dragArea.drag.active )
+                          separator.y = height
+                    }
 
                     Input.InputBox {
-                        id: rowLabel
+                        id: headerCol
                         anchors.fill: parent
                         color: root.style.headerColor
                         border.width: 0
                         radius: 0
                         style: Input.InputBoxStyle {
                             textStyle: Input.TextStyle{
-                                color: "white"
+                              color: "white"
                             }
-
                         }
                         text: model.value
                         enabled: false
-
                     }
 
                     MouseArea {
                         anchors.fill: parent
-                        onDoubleClicked: {
-                        }
+                        onDoubleClicked: {}
                     }
                 }
 
+
                 Rectangle {
-                    id: separatorVer
+                    id: separator
                     z: 10
+
                     height: root.style.borderWidth
-                    width: root.style.defaultCellWidth / 2
+                    width: parent.width
                     color: root.style.separatorColor
 
-                    property var __tempContentHeight: 0
-
-
-                    Drag.active: dragAreaVer.drag.active
-
-                    Drag.onActiveChanged: {
-                        if (Drag.active){
-                            __tempContentHeight = rowTableView.contentHeight - rowTableView.rowHeights[index]
-                        }
-                    }
+                    Drag.active: dragArea.drag.active
 
                     MouseArea {
-                        id: dragAreaVer
+                        id: dragArea
                         cursorShape: Qt.SizeVerCursor
                         anchors.fill: parent
                         drag.axis: Drag.YAxis
                         drag.target: parent
-                        drag.minimumY: rowLabel.y + root.style.minumumCellHeight
+                        drag.minimumY: headerCol.y + root.style.minimumCellHeight
                     }
 
                     onYChanged: {
-                        if (!Drag.active) return
-                        console.log("++: " + y)
+                        if (!Drag.active)
+                            return
+
+                        headerCol.height = y
+
+                        var newHeight = y - headerCol.y + root.style.borderWidth
+                        table.rowInfo.updateRowHeight(index, newHeight)
+                        rowTableView.forceLayout()
+                        contentTableView.forceLayout()
                     }
                 }
             }
-
         }
     }
 
@@ -209,9 +188,7 @@ Rectangle{
          radius: 0
          style: root.style.cellInputStyle
          onActiveFocusLost: {
-             //TODO: Assign table value
-//             model.value = input.text
-//             input.enabled = false
+             root.table.assignCell(editCell.row, editCell.column, input.text)
              root.disableCellInput()
          }
      }
@@ -349,31 +326,35 @@ Rectangle{
 
         Controls.ScrollView {
             id: scrollView
-            width: contentTableView.contentWidth < parent.width ? contentTableView.contentWidth : parent.width
-            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
-                  ? contentTableView.contentHeight
-                  : parent.height-root.style.headerHeight
+
+            width: 5000
+            height: 5000
+//            width: contentTableView.contentWidth < parent.width ? contentTableView.contentWidth : parent.width
+//            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
+//                  ? contentTableView.contentHeight
+//                  : parent.height-root.style.headerHeight
 
             TableView {
                 id: contentTableView
-                contentWidth: headerTableView.contentWidth
-                contentHeight: rowTableView.contentHeight
+                anchors.fill: parent
+//                contentWidth: 1headerTableView.contentWidth
+//                contentHeight: 100//rowTableView.contentHeight
                 clip: true
                 model: table
 
                 columnSpacing: root.style.cellBorderSize
                 columnWidthProvider: table.header.columnWidth
+                rowSpacing: root.style.cellBorderSize
+                rowHeightProvider: table.rowInfo.rowHeight
 
                 delegate: Rectangle{
                     id: tableDelegate
                     implicitHeight: root.style.defaultCellHeight
+                    implicitWidth: 40
                     color: selected ? root.style.selectedCellBackgroundColor : root.style.cellBackgroundColor
                     border.width : selected ? 1 : 0
                     border.color: root.style.selectedCellBorderColor
 
-                rowHeightProvider: function(row){
-                    return rowTableView.rowHeights[row]
-                }
 
                     property string value: model.value
                     property bool selected: false

@@ -20,9 +20,9 @@ int TableHeader::columnCount(const QModelIndex &) const{
 
 QVariant TableHeader::data(const QModelIndex &index, int) const{
     if (index.row() > 0)
-        return QVariant("");
+        return QVariant();
     if (index.column() >= m_data.size())
-        return QVariant("");
+        return QVariant();
 
     return m_data[index.column()].name;
 }
@@ -70,6 +70,10 @@ void TableHeader::initalizeData(int size)
     for (int i =0; i < size; ++i)
         m_data.push_back(createColumnData(i));
     endInsertColumns();
+}
+
+int TableHeader::size() const{
+    return m_data.size();
 }
 
 void TableHeader::updateColumnWidth(int index, int width){

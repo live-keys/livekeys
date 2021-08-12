@@ -1,22 +1,22 @@
 #include "table.h"
 #include <QDebug>
 #include "tableheader.h"
-#include "tablerows.h"
+#include "tablerowsinfo.h"
 
 namespace lv {
 
 Table::Table(QObject *parent)
     : QAbstractTableModel(parent)
-    , m_headerModel(new TableHeader(this))
-    , m_rowModel(new TableRows(this))
     , m_isComponentComplete(false)
+    , m_headerModel(new TableHeader(this))
+    , m_rowModel(new TableRowsInfo(this))
 {
     m_roles[Value] = "value";
 }
 
-Table::~Table()
-{
-
+Table::~Table(){
+    delete m_headerModel;
+    delete m_rowModel;
 }
 
 int Table::rowCount(const QModelIndex &) const
@@ -24,14 +24,8 @@ int Table::rowCount(const QModelIndex &) const
     return m_data.size();
 }
 
-int Table::columnCount(const QModelIndex &) const
-{
-    int max = 0;
-    for (auto row: m_data)
-        if (row.size()>max)
-            max = row.size();
-
-    return max;
+int Table::columnCount(const QModelIndex &) const{
+    return m_headerModel->size();
 }
 
 Qt::ItemFlags Table::flags(const QModelIndex &) const
@@ -57,21 +51,14 @@ QVariant Table::data(const QModelIndex &index, int) const
 
 bool Table::setData(const QModelIndex &index, const QVariant &value, int)
 {
-    if (index.row() >= m_data.size()){
-        for (int i = m_data.size(); i<=index.row();++i)
-            addRow();
+    if ( index.row() < m_data.size() && index.column() < columnCount() ){
+        m_data[index.row()][index.column()] = value.toString();
+
+        emit dataChanged(index, index);
+
+        return true;
     }
-
-    int oldColumnCount = columnCount();
-
-    if (index.column() >= oldColumnCount){
-        for (int i = oldColumnCount; i<=index.column();++i)
-            addColumn();
-    }
-    m_data[index.row()][index.column()] = value.toString();
-    emit dataChanged(index, index);
-
-    return true;
+    return false;
 }
 
 void Table::componentComplete()
@@ -85,41 +72,48 @@ TableHeader *Table::header() const
     return m_headerModel;
 }
 
-TableRows *Table::rowModel() const
+TableRowsInfo *Table::rowInfo() const
 {
     return m_rowModel;
 }
 
-void Table::addRow()
+void Table::addRows(int number)
 {
     int rowIndex = rowCount();
 
-    beginInsertRows(QModelIndex(), rowIndex, rowIndex);
-    m_data.push_back({});
+    beginInsertRows(QModelIndex(), rowIndex, rowIndex + number - 1);
 
-    int colNum = columnCount();
-    for (int i=0; i < colNum; ++i)
-        m_data[rowIndex].push_back("");
+    for ( int newRows = 0; newRows < number; ++newRows ){
+        m_data.push_back({});
+
+        int colNum = m_headerModel->size();
+        for (int i=0; i < colNum; ++i)
+            m_data[rowIndex + newRows].push_back("");
+
+        m_rowModel->addRow();
+    }
+
     endInsertRows();
-
-    m_rowModel->addRow();
 }
 
-void Table::addColumn(){
-    int colIndex = columnCount();
-    beginInsertColumns(QModelIndex(), colIndex, colIndex);
+void Table::addColumns(int number){
+    int colIndex = m_headerModel->size();
+    beginInsertColumns(QModelIndex(), colIndex, colIndex + number - 1);
 
-    int rowNum = rowCount();
-    for (int i = 0; i < rowNum; ++i)
-        m_data[i].push_back("");
+    for ( int newCols = 0; newCols < number; ++newCols ){
+        int rowNum = rowCount();
+        for (int i = 0; i < rowNum; ++i)
+            m_data[i].push_back("");
+        m_headerModel->addColumn();
+    }
+
     endInsertColumns();
-
-    m_headerModel->addColumn();
 }
 
 void Table::removeColumn(int idx)
 {
-    if (idx >= columnCount()) return;
+    if (idx >= columnCount())
+        return;
 
     beginRemoveColumns(QModelIndex(),idx, idx);
     for (int i=0; i<m_data.size(); ++i){
