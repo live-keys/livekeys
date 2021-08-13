@@ -35,16 +35,17 @@ void TableRowsInfo::addRow()
 {
     beginInsertRows(QModelIndex(), m_num, m_num);
     ++m_num;
-    rowDataAtWithCreate(m_num-1);
+    m_contentHeight += m_defaultRowHeight;
+    emit contentHeightChanged();
     endInsertRows();
 }
 
 void TableRowsInfo::initializeData(int num)
 {
     beginInsertRows(QModelIndex(), 0, num-1);
-    for (int i = 0; i < num; ++i)
-        rowDataAtWithCreate(i);
     m_num = num;
+    m_contentHeight = num*m_defaultRowHeight;
+    emit contentHeightChanged();
     endInsertRows();
 }
 
@@ -63,12 +64,15 @@ QString TableRowsInfo::toString() const{
 }
 
 void TableRowsInfo::updateRowHeight(int index, int height){
+    if (height == rowHeight(index))
+        return;
+
     auto rowData = rowDataAtWithCreate(index);
     int delta = height - rowData->height;
-    m_contentHeight += delta;
     rowData->height = height;
-    if (delta != 0)
-        emit contentHeightChanged();
+    m_contentHeight += delta;
+    emit contentHeightChanged();
+
 }
 
 int TableRowsInfo::rowHeight(int index) const{
@@ -85,8 +89,6 @@ TableRowsInfo::RowData *TableRowsInfo::rowDataAtWithCreate(int index){
     } else {
         TableRowsInfo::RowData* data = new TableRowsInfo::RowData;
         data->height = m_defaultRowHeight;
-        m_contentHeight += m_defaultRowHeight;
-        emit contentHeightChanged();
         m_data.insert(index, data);
         return data;
     }
