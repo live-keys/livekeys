@@ -21,6 +21,25 @@ CodePalette {
         TableEditor {
             anchors.fill: parent
             table: root.table
+
+            //TODO: Styling
+            //TODO: Move to extension
+//            handleContextMenu: function(item, options){
+//                var pane = null
+//                var p = parent
+//                while ( p ){
+//                    if ( p.paneType !== undefined ){
+//                        break
+//                    }
+//                    p = p.parent
+//                }
+
+//                if (p){
+//                    lk.layers.workspace.panes.activateItem(item, p)
+//                    lk.layers.workspace.panes.openContextMenu(item, p)
+
+//                }
+//            }
         }
     }
 
