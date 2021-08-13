@@ -11,7 +11,8 @@ Table::Table(QObject *parent)
     , m_headerModel(new TableHeader(this))
     , m_rowModel(new TableRowsInfo(this))
 {
-    m_roles[Value] = "value";
+    m_roles[Value]      = "value";
+    m_roles[IsSelected] = "isSelected";
 }
 
 Table::~Table(){
@@ -34,19 +35,18 @@ Qt::ItemFlags Table::flags(const QModelIndex &) const
 }
 
 
-QVariant Table::data(const QModelIndex &index, int) const
-{
-    if (index.row() >= m_data.size()){
+QVariant Table::data(const QModelIndex &index, int role) const{
+    if ( index.row() >= m_data.size() || index.column() >= columnCount() ){
         return QVariant();
     }
-    auto& row = m_data[index.row()];
-    if (index.column() >= columnCount()){
-        return QVariant();
+
+    if ( role == Table::Value ){
+        auto& row = m_data[index.row()];
+        return row[index.column()];
+    } else if ( role == Table::IsSelected){
+        return m_rowModel->isSelected(index.column(), index.row());
     }
-    if (index.column() >= row.size()){
-        return QVariant("");
-    }
-    return row[index.column()];
+    return QVariant();
 }
 
 bool Table::setData(const QModelIndex &index, const QVariant &value, int)
@@ -90,7 +90,7 @@ void Table::addRows(int number)
         for (int i=0; i < colNum; ++i)
             m_data[rowIndex + newRows].push_back("");
 
-        m_rowModel->addRow();
+        m_rowModel->notifyRowAdded();
     }
 
     endInsertRows();
@@ -105,6 +105,7 @@ void Table::addColumns(int number){
         for (int i = 0; i < rowNum; ++i)
             m_data[i].push_back("");
         m_headerModel->addColumn();
+        m_rowModel->notifyColumnAdded();
     }
 
     endInsertColumns();
@@ -127,6 +128,26 @@ void Table::removeColumn(int idx)
 void Table::assignCell(int row, int col, QString value)
 {
     setData(QAbstractItemModel::createIndex(row, col), value);
+}
+
+bool Table::select(QJSValue column, QJSValue row){
+    if ( column.isNumber() && row.isNumber() ){
+        m_rowModel->select(column.toInt(), row.toInt());
+        auto index = QAbstractItemModel::createIndex(row.toInt(), column.toInt());
+        emit dataChanged(index, index);
+        return true;
+    }
+    return false;
+}
+
+bool Table::deselect(QJSValue column, QJSValue row){
+    if ( column.isUndefined() && row.isUndefined() ){
+        beginResetModel();
+        m_rowModel->deselectAll();
+        endResetModel();
+        return true;
+    }
+    return false;
 }
 
 } // namespace

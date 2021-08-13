@@ -34,7 +34,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    void addRow();
+    void notifyRowAdded();
+    void notifyColumnAdded();
     void initializeData(int num);
 
     int defaultRowHeight() const;
@@ -43,6 +44,10 @@ public:
     QString toString() const;
 
     int contentHeight() const;
+
+    bool isSelected(int column, int row) const;
+    void select(int column, int row);
+    void deselectAll();
 
 public slots:
     void updateRowHeight(int index, int height);
