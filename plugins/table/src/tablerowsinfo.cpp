@@ -43,6 +43,8 @@ void TableRowsInfo::addRow()
 void TableRowsInfo::initializeData(int num)
 {
     beginInsertRows(QModelIndex(), 0, num-1);
+    for (int i = 0; i < num; ++i)
+        rowDataAtWithCreate(i);
     m_num = num;
     m_contentHeight = num*m_defaultRowHeight;
     emit contentHeightChanged();
