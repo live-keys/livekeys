@@ -3,6 +3,7 @@
 
 #include <QAbstractTableModel>
 #include <QQmlParserStatus>
+#include <QJSValue>
 
 namespace lv {
 
@@ -17,7 +18,8 @@ class Table : public QAbstractTableModel, public QQmlParserStatus
     Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
     
     enum Roles{
-        Value = Qt::UserRole + 1
+        Value = Qt::UserRole + 1,
+        IsSelected
     };
 public:
 
@@ -47,6 +49,10 @@ public slots:
     void addColumns(int number = 1);
     void removeColumn(int idx);
     void assignCell(int row, int col, QString value);
+
+    bool select(QJSValue column, QJSValue row);
+    bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
+
 private:
 
     Q_DISABLE_COPY(Table)

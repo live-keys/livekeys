@@ -5,11 +5,13 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import base 1.0
+import workspace.icons 1.0 as Icons
 import visual.input 1.0 as Input
 
 Rectangle{
     id: root
     color: style.cellBorderColor
+    objectName: "tableEditor"
 
     property var table: null
 
@@ -29,6 +31,8 @@ Rectangle{
         property color headerCellBorderColor: '#aaa'
         property double headerCellBorderSize: 2
         property QtObject headerCellTextStyle: Input.TextStyle{}
+
+        property color iconColor: 'black'
 
         property color headerColor: "#333333"
         property color separatorColor: "white"
@@ -52,6 +56,63 @@ Rectangle{
         contentTableView.forceLayout()
     }
 
+    property var getContextMenuOptions: function(item, options){
+        if ( item.objectName === "tableEditor" ){
+            return [{
+                name: "Add column",
+                enabled: true,
+                action: function(){
+                    table.addColumns(1)
+                }
+            },
+            {
+                name: "Add row",
+                enabled: true,
+                action: function(){
+                    root.table.addRows(1)
+                }
+            }]
+        } else if ( item.objectName === "tableDelegate" ){
+            return [{
+                name: "Remove row",
+                enabled: true,
+                action: function(){
+                    //TODO
+                }
+            },{
+                name: "Remove row",
+                enabled: true,
+                action: function(){
+                    //TODO
+                }
+            }]
+        }
+
+        return []
+    }
+
+    property var handleContextMenu: function(item, options){
+        var menuOptions = getContextMenuOptions(item, options)
+
+        for ( var i = 0; i < contextMenu.toClear.length; ++i ){
+            contextMenu.removeItem(contextMenu.toClear[i])
+        }
+
+        for ( var i = 0; i < menuOptions.length; ++i ){
+            var menuitem = contextMenu.insertItem(i, menuOptions[i].name)
+            menuitem.enabled = menuOptions[i].enabled
+            menuitem.triggered.connect(menuOptions[i].action)
+            contextMenu.toClear.push(menuitem)
+        }
+
+        contextMenu.popup()
+    }
+
+    Controls.Menu{
+        id: contextMenu
+        property var toClear: []
+    }
+
     property Item cellInputBox: Input.InputBox {
          id: input
          width: 100
@@ -67,7 +128,17 @@ Rectangle{
      }
 
     property var editCell: ({ row: -1, column: -1 })
+    signal cellClicked(int row, int column, Item delegate)
+    onCellClicked: {
+//        console.log("CELL SELECT:" + column + ";" + row)
+    }
+
     signal cellRightClicked(int row, int column, Item delegate)
+    onCellRightClicked: {
+        console.log("CELL RIGHT CLICKED")
+        handleContextMenu(delegate, {row: row, column: column})
+    }
+
     signal cellDoubleClicked(int row, int column, Item delegate)
     onCellDoubleClicked: {
         enableCellInput(delegate, row, column)
@@ -103,44 +174,21 @@ Rectangle{
         root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
     }
 
-    Rectangle {
-        id: contextMenu
+    Item{
+        id: tableOptions
         width: root.style.rowInfoWidth
         height: root.style.headerHeight
-        color: "red"
 
-        Row {
-            id: buttonTray
-            width: 40
-            height: 30
-
-            Input.RectangleButton{
-                width: 20
-                height: 30
-
-                content: Input.Label {
-                    text: "R"
-                }
-                onClicked: {
-                    root.table.addRows(1)
-                    rowTableView.forceLayout()
-                    contentTableView.forceLayout()
-                }
-            }
-
-            Input.RectangleButton{
-                width: 20
-                height: 30
-
-                content: Input.Label {
-                    text: "C"
-                }
-
-                onClicked: {
-                    table.addColumns(1)
-                    headerTableView.forceLayout()
-                    contentTableView.forceLayout()
-                }
+        Icons.MenuIcon{
+            anchors.centerIn: parent
+            height: 10
+            width: 10
+            color: root.style.iconColor
+        }
+        MouseArea{
+            anchors.fill: parent
+            onClicked: {
+                root.handleContextMenu(root)
             }
         }
     }
@@ -152,10 +200,10 @@ Rectangle{
         clip: true
         model: !table || !table.rowInfo ? 0 : table.rowInfo
 
-        anchors.top: contextMenu.bottom
+        anchors.top: tableOptions.bottom
 
         interactive: false
-        rowHeightProvider: table.rowInfo.rowHeight
+        rowHeightProvider: table ? table.rowInfo.rowHeight : null
 
         contentY: contentTableView.contentY
         delegate: Item{
@@ -234,10 +282,10 @@ Rectangle{
         height: root.style.headerHeight
         clip: true
         model: !table || !table.header ? null : table.header
-        anchors.left: contextMenu.right
+        anchors.left: tableOptions.right
 
         interactive: false
-        columnWidthProvider: table.header.columnWidth
+        columnWidthProvider: table ? table.header.columnWidth : null
 
         contentX: contentTableView.contentX
         delegate: Item{
@@ -326,8 +374,6 @@ Rectangle{
                ? contentTableView.contentWidth + 10
                : parent.width - root.style.rowInfoWidth
 
-
-
         style: ScrollViewStyle {
             transientScrollBars: false
             handle: Item {
@@ -343,21 +389,21 @@ Rectangle{
                 implicitHeight: 10
                 Rectangle{
                     anchors.fill: parent
-                    color: root.color
+                    color: root.style.cellBackgroundColor
                 }
             }
             decrementControl: null
             incrementControl: null
             frame: Item{}
-            corner: Rectangle{color: root.color}
+            corner: Rectangle{color: root.style.cellBackgroundColor}
         }
 
         TableView {
             id: contentTableView
             anchors.fill: parent
 
-            contentWidth: table.header.contentWidth
-            contentHeight: table.rowInfo.contentHeight
+            contentWidth: table ? table.header.contentWidth : 0
+            contentHeight: table ? table.rowInfo.contentHeight : 0
 
             clip: true
             model: table
@@ -375,13 +421,13 @@ Rectangle{
                 id: tableDelegate
                 implicitHeight: root.style.defaultCellHeight
                 implicitWidth: 40
-                color: selected ? root.style.selectedCellBackgroundColor : root.style.cellBackgroundColor
+                objectName: "tableDelegate"
+                color: root.style.cellBackgroundColor
                 border.width : selected ? 1 : 0
                 border.color: root.style.selectedCellBorderColor
 
-
                 property string value: model.value
-                property bool selected: false
+                property bool selected: model.isSelected
 
                 Text{
                     id: cellText
@@ -395,8 +441,29 @@ Rectangle{
                 MouseArea {
                     id: cellMouseArea
                     anchors.fill: parent
+                    acceptedButtons: Qt.LeftButton | Qt.RightButton
                     onDoubleClicked: root.cellDoubleClicked(row, column, tableDelegate)
-                    onClicked: tableDelegate.forceActiveFocus()
+                    onClicked: {
+                        if ( mouse.button === Qt.RightButton ){
+                            root.cellRightClicked(row, column, tableDelegate)
+                        } else if ( mouse.button === Qt.LeftButton ){
+                            if (mouse.modifiers & Qt.ControlModifier){
+                                if ( model.isSelected ){
+                                    //TODO
+                                } else {
+                                    table.select(column, row)
+                                }
+
+                            } else {
+                                table.deselect()
+                                table.select(column, row)
+                            }
+
+                            root.cellClicked(row, column, tableDelegate)
+                            tableDelegate.forceActiveFocus()
+                        }
+
+                    }
                 }
 
                 Component.onCompleted: {
