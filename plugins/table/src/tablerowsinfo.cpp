@@ -7,6 +7,7 @@ TableRowsInfo::TableRowsInfo(QObject* parent)
     : QAbstractTableModel(parent)
     , m_num(0)
     , m_defaultRowHeight(25)
+    , m_contentHeight(0)
 {
     m_roles[Value] = "value";
 }
@@ -34,12 +35,15 @@ void TableRowsInfo::addRow()
 {
     beginInsertRows(QModelIndex(), m_num, m_num);
     ++m_num;
+    rowDataAtWithCreate(m_num-1);
     endInsertRows();
 }
 
 void TableRowsInfo::initializeData(int num)
 {
     beginInsertRows(QModelIndex(), 0, num-1);
+    for (int i = 0; i < num; ++i)
+        rowDataAtWithCreate(i);
     m_num = num;
     endInsertRows();
 }
@@ -59,10 +63,12 @@ QString TableRowsInfo::toString() const{
 }
 
 void TableRowsInfo::updateRowHeight(int index, int height){
-    if ( height != m_defaultRowHeight ){
-        auto rowData = rowDataAtWithCreate(index);
-        rowData->height = height;
-    }
+    auto rowData = rowDataAtWithCreate(index);
+    int delta = height - rowData->height;
+    m_contentHeight += delta;
+    rowData->height = height;
+    if (delta != 0)
+        emit contentHeightChanged();
 }
 
 int TableRowsInfo::rowHeight(int index) const{
@@ -78,6 +84,9 @@ TableRowsInfo::RowData *TableRowsInfo::rowDataAtWithCreate(int index){
         return it.value();
     } else {
         TableRowsInfo::RowData* data = new TableRowsInfo::RowData;
+        data->height = m_defaultRowHeight;
+        m_contentHeight += m_defaultRowHeight;
+        emit contentHeightChanged();
         m_data.insert(index, data);
         return data;
     }
@@ -88,6 +97,11 @@ TableRowsInfo::RowData *TableRowsInfo::rowDataAt(int index) const{
     if ( it != m_data.end() )
         return it.value();
     return nullptr;
+}
+
+int TableRowsInfo::contentHeight() const
+{
+    return m_contentHeight;
 }
 
 }
