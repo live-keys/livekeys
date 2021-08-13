@@ -10,7 +10,6 @@ Table::Table(QObject *parent)
     , m_isComponentComplete(false)
     , m_headerModel(new TableHeader(this))
     , m_rowModel(new TableRowsInfo(this))
-    , m_isComponentComplete(false)
 {
     m_roles[Value] = "value";
 }
@@ -95,8 +94,6 @@ void Table::addRows(int number)
     }
 
     endInsertRows();
-
-    m_rowModel->addRow();
 }
 
 void Table::addColumns(int number){
