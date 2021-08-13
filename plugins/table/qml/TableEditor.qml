@@ -318,13 +318,9 @@ Rectangle{
         Controls.ScrollView {
             id: scrollView
 
-//            width: 500
             height: contentTableView.contentHeight + 10 < parent.height ? contentTableView.contentHeight + 10 : parent.height
             width: contentTableView.contentWidth + 10 < parent.width ? contentTableView.contentWidth + 10 : parent.width
 
-            //            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
-            //                  ? contentTableView.contentHeight
-            //                  : parent.height-root.style.headerHeight
             style: ScrollViewStyle {
                 transientScrollBars: false
                 handle: Item {
