@@ -103,323 +103,326 @@ Rectangle{
         root.cellInputBox.height = Qt.binding(function(){ return delegate.height })
     }
 
+    Rectangle {
+        id: contextMenu
+        width: root.style.rowInfoWidth
+        height: root.style.headerHeight
+        color: "red"
 
+        Row {
+            id: buttonTray
+            width: 40
+            height: 30
 
-    Column {
-        width: root.style.defaultCellWidth / 2
-        height: root.height
-        Rectangle {
-            width: root.style.defaultCellWidth / 2
-            height: root.style.headerHeight
-            color: "red"
-
-            Row {
-                id: buttonTray
-                width: 40
+            Input.RectangleButton{
+                width: 20
                 height: 30
 
-                Input.RectangleButton{
-                    width: 20
-                    height: 30
-
-                    content: Input.Label {
-                        text: "R"
-                    }
-                    onClicked: root.table.addRows(1)
+                content: Input.Label {
+                    text: "R"
                 }
-
-                Input.RectangleButton{
-                    width: 20
-                    height: 30
-
-                    content: Input.Label {
-                        text: "C"
-                    }
-
-                    onClicked: table.addColumns(1)
+                onClicked: {
+                    root.table.addRows(1)
+                    rowTableView.forceLayout()
+                    contentTableView.forceLayout()
                 }
             }
-        }
 
-        TableView {
-            id: rowTableView
-            width: parent.width
-            height: parent.height - root.style.defaultCellHeight
-            clip: true
-            model: !table || !table.rowInfo ? 0 : table.rowInfo
+            Input.RectangleButton{
+                width: 20
+                height: 30
 
-            interactive: false
-            rowHeightProvider: table.rowInfo.rowHeight
-
-            contentY: contentTableView.contentY
-            delegate: Item{
-                id: rowInfoDelegate // width -> providerWidth
-                implicitWidth: root.style.rowInfoWidth
-
-                Item{
-                    id: rowInfoContainer
-                    width: parent.width
-                    height: parent.height - root.style.borderWidth
-                    onHeightChanged: {
-                        if ( !dragArea.drag.active )
-                          separator.y = height
-                    }
-
-                    Input.InputBox {
-                        id: headerCol
-                        anchors.fill: parent
-                        color: root.style.headerColor
-                        border.width: 0
-                        radius: 0
-                        style: Input.InputBoxStyle {
-                            textStyle: Input.TextStyle{
-                              color: "white"
-                            }
-                        }
-                        text: model.value
-                        enabled: false
-                    }
-
-                    MouseArea {
-                        anchors.fill: parent
-                        onDoubleClicked: {}
-                    }
+                content: Input.Label {
+                    text: "C"
                 }
 
-
-                Rectangle {
-                    id: separator
-                    z: 10
-
-                    height: root.style.borderWidth
-                    width: parent.width
-                    color: root.style.separatorColor
-
-                    Drag.active: dragArea.drag.active
-
-                    MouseArea {
-                        id: dragArea
-                        cursorShape: Qt.SizeVerCursor
-                        anchors.fill: parent
-                        drag.axis: Drag.YAxis
-                        drag.target: parent
-                        drag.minimumY: headerCol.y + root.style.minimumCellHeight
-                    }
-
-                    onYChanged: {
-                        if (!Drag.active)
-                            return
-
-                        headerCol.height = y
-
-                        var newHeight = y - headerCol.y + root.style.borderWidth
-                        table.rowInfo.updateRowHeight(index, newHeight)
-                        rowTableView.forceLayout()
-                        contentTableView.forceLayout()
-                    }
+                onClicked: {
+                    table.addColumns(1)
+                    headerTableView.forceLayout()
+                    contentTableView.forceLayout()
                 }
             }
         }
     }
 
+    TableView {
+        id: rowTableView
+        width: root.style.rowInfoWidth
+        height: parent.height - root.style.headerHeight
+        clip: true
+        model: !table || !table.rowInfo ? 0 : table.rowInfo
 
-    Column {
-        id: colRoot
-        width: root.width - root.style.defaultCellWidth / 2
-        height: root.height
-        anchors.left: parent.left
-        anchors.leftMargin: root.style.defaultCellWidth / 2
+        anchors.top: contextMenu.bottom
 
-        TableView {
-            id: headerTableView
-            width: parent.width
-            height: root.style.headerHeight
-            clip: true
-            model: !table || !table.header ? null : table.header
+        interactive: false
+        rowHeightProvider: table.rowInfo.rowHeight
 
-            interactive: false
-            columnWidthProvider: table.header.columnWidth
+        contentY: contentTableView.contentY
+        delegate: Item{
+            id: rowInfoDelegate
+            implicitWidth: root.style.rowInfoWidth
 
-            contentX: contentTableView.contentX
-            delegate: Item{
-                id: hedaerDelegate // width -> providerWidth
-                implicitHeight: root.style.headerHeight
+            Item{
+                id: rowInfoContainer
+                width: parent.width
+                height: parent.height - root.style.borderWidth
+                onHeightChanged: {
+                    if ( !dragAreaY.drag.active )
+                      separatorY.y = height
+                }
 
-                Item {
-                    id: headerColumnContainer
-                    width: parent.width - root.style.borderWidth
-                    onWidthChanged: {
-                        if ( !dragArea.drag.active )
-                            separator.x = width
-                    }
-
-                    height: parent.height
-
-                    Input.InputBox {
-                        id: headerCol
-                        anchors.fill: parent
-                        color: root.style.headerColor
-                        border.width: 0
-                        radius: 0
-                        style: Input.InputBoxStyle {
-                            textStyle: Input.TextStyle{
-                                color: "white"
-                            }
-
+                Input.InputBox {
+                    id: rowBox
+                    anchors.fill: parent
+                    color: root.style.headerColor
+                    border.width: 0
+                    radius: 0
+                    style: Input.InputBoxStyle {
+                        textStyle: Input.TextStyle{
+                          color: "white"
                         }
-                        text: model.name
-                        enabled: false
                     }
+                    text: model.value
+                    enabled: false
+                }
 
-                    MouseArea {
-                        anchors.fill: parent
-                        onDoubleClicked: {
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: {}
+                }
+            }
+
+
+            Rectangle {
+                id: separatorY
+                z: 10
+
+                height: root.style.borderWidth
+                width: parent.width
+                color: root.style.separatorColor
+
+                Drag.active: dragAreaY.drag.active
+
+                MouseArea {
+                    id: dragAreaY
+                    cursorShape: Qt.SizeVerCursor
+                    anchors.fill: parent
+                    drag.axis: Drag.YAxis
+                    drag.target: parent
+                    drag.minimumY: rowBox.y + root.style.minimumCellHeight
+                }
+
+                onYChanged: {
+                    if (!Drag.active)
+                        return
+
+                    rowBox.height = y
+
+                    var newHeight = y - rowBox.y + root.style.borderWidth
+                    table.rowInfo.updateRowHeight(index, newHeight)
+                    rowTableView.forceLayout()
+                    contentTableView.forceLayout()
+                }
+            }
+        }
+
+    }
+
+    TableView {
+        id: headerTableView
+        width: parent.width - root.style.rowInfoWidth
+        height: root.style.headerHeight
+        clip: true
+        model: !table || !table.header ? null : table.header
+        anchors.left: contextMenu.right
+
+        interactive: false
+        columnWidthProvider: table.header.columnWidth
+
+        contentX: contentTableView.contentX
+        delegate: Item{
+            id: hedaerDelegate // width -> providerWidth
+            implicitHeight: root.style.headerHeight
+
+            Item {
+                id: headerColumnContainer
+                width: parent.width - root.style.borderWidth
+                onWidthChanged: {
+                    if ( !dragAreaX.drag.active )
+                        separatorX.x = width
+                }
+
+                height: parent.height
+
+                Input.InputBox {
+                    id: headerCol
+                    anchors.fill: parent
+                    color: root.style.headerColor
+                    border.width: 0
+                    radius: 0
+                    style: Input.InputBoxStyle {
+                        textStyle: Input.TextStyle{
+                            color: "white"
+                        }
+
+                    }
+                    text: model.name
+                    enabled: false
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    onDoubleClicked: {
 //                            table.removeColumn(column)
 //                            --cols
-                        }
                     }
                 }
+            }
 
 
+            Rectangle {
+                id: separatorX
+                z: 10
+
+                height: root.style.headerHeight
+                width: root.style.borderWidth
+                color: root.style.separatorColor
+
+                Drag.active: dragAreaX.drag.active
+
+                MouseArea {
+                    id: dragAreaX
+                    cursorShape: Qt.SizeHorCursor
+                    anchors.fill: parent
+                    drag.axis: Drag.XAxis
+                    drag.target: parent
+                    drag.minimumX: headerCol.x + root.style.minimumCellWidth
+                }
+
+                onXChanged: {
+                    if (!Drag.active)
+                        return
+
+                    headerCol.width = x
+
+                    var newWidth = x - headerCol.x + root.style.borderWidth
+                    table.header.updateColumnWidth(index, newWidth)
+                    headerTableView.forceLayout()
+                    contentTableView.forceLayout()
+                }
+            }
+        }
+    }
+
+    Controls.ScrollView {
+        id: scrollView
+        anchors.left: rowTableView.right
+        anchors.top: headerTableView.bottom
+
+        height: contentTableView.contentHeight + 10 < parent.height - root.style.headerHeight
+                ? contentTableView.contentHeight + 10
+                : parent.height - root.style.headerHeight
+        width: contentTableView.contentWidth + 10 < parent.width - root.style.rowInfoWidth
+               ? contentTableView.contentWidth + 10
+               : parent.width - root.style.rowInfoWidth
+
+
+
+        style: ScrollViewStyle {
+            transientScrollBars: false
+            handle: Item {
+                implicitWidth: 10
+                implicitHeight: 10
                 Rectangle {
-                    id: separator
-                    z: 10
-
-                    height: root.style.headerHeight
-                    width: root.style.borderWidth
-                    color: root.style.separatorColor
-
-                    Drag.active: dragArea.drag.active
-
-                    MouseArea {
-                        id: dragArea
-                        cursorShape: Qt.SizeHorCursor
-                        anchors.fill: parent
-                        drag.axis: Drag.XAxis
-                        drag.target: parent
-                        drag.minimumX: headerCol.x + root.style.minimumCellWidth
-                    }
-
-                    onXChanged: {
-                        if (!Drag.active)
-                            return
-
-                        headerCol.width = x
-
-                        var newWidth = x - headerCol.x + root.style.borderWidth
-                        table.header.updateColumnWidth(index, newWidth)
-                        headerTableView.forceLayout()
-                        contentTableView.forceLayout()
-                    }
+                    color: "#1f2227"
+                    anchors.fill: parent
                 }
             }
+            scrollBarBackground: Item{
+                implicitWidth: 10
+                implicitHeight: 10
+                Rectangle{
+                    anchors.fill: parent
+                    color: root.color
+                }
+            }
+            decrementControl: null
+            incrementControl: null
+            frame: Item{}
+            corner: Rectangle{color: root.color}
         }
 
-        Controls.ScrollView {
-            id: scrollView
+        TableView {
+            id: contentTableView
+            anchors.fill: parent
 
-//            width: 500
-            height: contentTableView.contentHeight + 10 < parent.height ? contentTableView.contentHeight + 10 : parent.height
-            width: contentTableView.contentWidth + 10 < parent.width ? contentTableView.contentWidth + 10 : parent.width
+            contentWidth: table.header.contentWidth
+            contentHeight: table.rowInfo.contentHeight
 
-            //            height: contentTableView.contentHeight < parent.height-root.style.headerHeight
-            //                  ? contentTableView.contentHeight
-            //                  : parent.height-root.style.headerHeight
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#1f2227"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.color
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Item{}
-                corner: Rectangle{color: root.color}
+            clip: true
+            model: table
+
+            columnSpacing: root.style.cellBorderSize
+            columnWidthProvider: function(column){
+                return table.header.columnWidth(column) - 1
+            }
+            rowSpacing: root.style.cellBorderSize
+            rowHeightProvider: function(row){
+                return table.rowInfo.rowHeight(row) - 1
             }
 
-            TableView {
-                id: contentTableView
-                anchors.fill: parent
-//                contentWidth: 1headerTableView.contentWidth
-//                contentHeight: 100//rowTableView.contentHeight
-                clip: true
-                model: table
+            delegate: Rectangle{
+                id: tableDelegate
+                implicitHeight: root.style.defaultCellHeight
+                implicitWidth: 40
+                color: selected ? root.style.selectedCellBackgroundColor : root.style.cellBackgroundColor
+                border.width : selected ? 1 : 0
+                border.color: root.style.selectedCellBorderColor
 
-                columnSpacing: root.style.cellBorderSize
-                columnWidthProvider: function(column){
-                    return table.header.columnWidth(column) - 1
+
+                property string value: model.value
+                property bool selected: false
+
+                Text{
+                    id: cellText
+                    anchors.left: parent.left
+                    anchors.leftMargin: 3
+                    anchors.top: parent.top
+                    anchors.topMargin: 3
+                    text: model.value
                 }
-                rowSpacing: root.style.cellBorderSize
-                rowHeightProvider: function(row){
-                    return table.rowInfo.rowHeight(row) - 1
+
+                MouseArea {
+                    id: cellMouseArea
+                    anchors.fill: parent
+                    onDoubleClicked: root.cellDoubleClicked(row, column, tableDelegate)
+                    onClicked: tableDelegate.forceActiveFocus()
                 }
 
-                delegate: Rectangle{
-                    id: tableDelegate
-                    implicitHeight: root.style.defaultCellHeight
-                    implicitWidth: 40
-                    color: selected ? root.style.selectedCellBackgroundColor : root.style.cellBackgroundColor
-                    border.width : selected ? 1 : 0
-                    border.color: root.style.selectedCellBorderColor
-
-
-                    property string value: model.value
-                    property bool selected: false
-
-                    Text{
-                        id: cellText
-                        anchors.left: parent.left
-                        anchors.leftMargin: 3
-                        anchors.top: parent.top
-                        anchors.topMargin: 3
-                        text: model.value
+                Component.onCompleted: {
+                    if ( row === root.editCell.row && column === root.editCell.column){
+                        root.__notifyEditInView(tableDelegate)
                     }
-
-                    MouseArea {
-                        id: cellMouseArea
-                        anchors.fill: parent
-                        onDoubleClicked: root.cellDoubleClicked(row, column, tableDelegate)
-                        onClicked: tableDelegate.forceActiveFocus()
-                    }
-
-                    Component.onCompleted: {
-                        if ( row === root.editCell.row && column === root.editCell.column){
-                            root.__notifyEditInView(tableDelegate)
-                        }
-                    }
-                    Component.onDestruction: {
-                        if ( row === root.editCell.row && column === root.editCell.column){
-                            root.__notifyEditOutOfView(tableDelegate)
-                        }
-                    }
-
-                    TableView.onReused: {
-                        if ( row === root.editCell.row && column === root.editCell.column){
-                            root.__notifyEditInView(tableDelegate)
-                        }
-                    }
-                    TableView.onPooled: {
-                        if ( row === root.editCell.row && column === root.editCell.column){
-                            root.__notifyEditOutOfView(tableDelegate)
-                        }
+                }
+                Component.onDestruction: {
+                    if ( row === root.editCell.row && column === root.editCell.column){
+                        root.__notifyEditOutOfView(tableDelegate)
                     }
                 }
 
+                TableView.onReused: {
+                    if ( row === root.editCell.row && column === root.editCell.column){
+                        root.__notifyEditInView(tableDelegate)
+                    }
+                }
+                TableView.onPooled: {
+                    if ( row === root.editCell.row && column === root.editCell.column){
+                        root.__notifyEditOutOfView(tableDelegate)
+                    }
+                }
             }
+
         }
-
     }
 
 }

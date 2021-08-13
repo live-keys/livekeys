@@ -13,8 +13,8 @@ class Table : public QAbstractTableModel, public QQmlParserStatus
 {
     Q_OBJECT
     
-    Q_PROPERTY(lv::TableHeader*   header   READ header  CONSTANT)
-    Q_PROPERTY(lv::TableRowsInfo* rowInfo  READ rowInfo CONSTANT)
+    Q_PROPERTY(lv::TableHeader*   header        READ header         CONSTANT)
+    Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
     
     enum Roles{
         Value = Qt::UserRole + 1

@@ -6,6 +6,7 @@ namespace lv {
 TableHeader::TableHeader(QObject *parent)
     : QAbstractListModel(parent)
     , m_defaultColumnWidth(100)
+    , m_contentWidth(0)
 {
     m_roles[Name] = "name";
 }
@@ -79,7 +80,11 @@ int TableHeader::size() const{
 void TableHeader::updateColumnWidth(int index, int width){
     if ( index >= m_data.size() )
         return;
+    int delta = width - m_data[index].width;
     m_data[index].width = width;
+    m_contentWidth += delta;
+    if (delta != 0)
+        emit contentWidthChanged();
 }
 
 int TableHeader::columnWidth(int index){
@@ -102,7 +107,14 @@ TableHeader::ColumnData TableHeader::createColumnData(int idx){
     TableHeader::ColumnData data;
     data.name = name;
     data.width = m_defaultColumnWidth;
+    m_contentWidth += m_defaultColumnWidth;
+    emit contentWidthChanged();
     return data;
+}
+
+int TableHeader::contentWidth() const
+{
+    return m_contentWidth;
 }
 
 
