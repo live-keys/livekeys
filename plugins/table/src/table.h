@@ -1,18 +1,25 @@
-#ifndef QTABLE_H
-#define QTABLE_H
+#ifndef LVTABLE_H
+#define LVTABLE_H
 
 #include <QAbstractTableModel>
-#include "tableheader.h"
+#include <QQmlParserStatus>
+#include <QJSValue>
 
 namespace lv {
 
-class Table : public QAbstractTableModel
+class TableHeader;
+class TableRowsInfo;
+
+class Table : public QAbstractTableModel, public QQmlParserStatus
 {
     Q_OBJECT
-    Q_PROPERTY(TableHeader* headerModel READ headerModel CONSTANT)
-    // Q_PROPERTY(Table* rowModel    READ rowModel    CONSTANT)
+    
+    Q_PROPERTY(lv::TableHeader*   header        READ header         CONSTANT)
+    Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
+    
     enum Roles{
-        Value = Qt::UserRole + 1
+        Value = Qt::UserRole + 1,
+        IsSelected
     };
 public:
 
@@ -26,22 +33,37 @@ public:
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
     bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
 
-    TableHeader *headerModel() const;
-    // Table *rowModel() const;
+    void classBegin() override {}
+    virtual void componentComplete() override;
 
-    void initializeData();
+    lv::TableHeader *header() const;
+    lv::TableRowsInfo *rowInfo() const;
+
+signals:
+    void complete();
+    void rowAdded();
+    void columnAdded();
+
 public slots:
-    void addRow();
-    void addColumn();
+    void addRows(int number = 1);
+    void addColumns(int number = 1);
     void removeColumn(int idx);
+    void removeRow(int idx);
+    void assignCell(int row, int col, QString value);
+
+    bool select(QJSValue column, QJSValue row);
+    bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
+
+    void clearTable();
 private:
 
     Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
-    std::vector<std::vector<QString>> m_data;
+    QList<QList<QString>>             m_data;
+    bool                              m_isComponentComplete;
 
-    TableHeader*                     m_headerModel;
-    // Table*                           m_rowModel;
+    TableHeader*                      m_headerModel;
+    TableRowsInfo*                    m_rowModel;
 };
 
 inline QHash<int, QByteArray> Table::roleNames() const
@@ -51,4 +73,4 @@ inline QHash<int, QByteArray> Table::roleNames() const
 
 } // namespace
 
-#endif // QTABLE_H
+#endif // LVTABLE_H

@@ -55,10 +55,12 @@ private:
 
     bool           m_isComponentComplete;
     bool           m_isRunning;
+    bool           m_inStreamValue;
     QObject*       m_follow;
     lv::QmlStream* m_stream;
     lv::QmlAct*    m_act;
     QJSValue       m_current;
+    QJSValue*      m_next;
     QString        m_valueType;
 };
 

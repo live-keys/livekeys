@@ -1,19 +1,23 @@
 #include "table.h"
 #include <QDebug>
+#include "tableheader.h"
+#include "tablerowsinfo.h"
 
 namespace lv {
 
 Table::Table(QObject *parent)
     : QAbstractTableModel(parent)
+    , m_isComponentComplete(false)
     , m_headerModel(new TableHeader(this))
+    , m_rowModel(new TableRowsInfo(this))
 {
-    m_roles[Value] = "value";
-    initializeData();
+    m_roles[Value]      = "value";
+    m_roles[IsSelected] = "isSelected";
 }
 
-Table::~Table()
-{
-
+Table::~Table(){
+    delete m_headerModel;
+    delete m_rowModel;
 }
 
 int Table::rowCount(const QModelIndex &) const
@@ -21,14 +25,8 @@ int Table::rowCount(const QModelIndex &) const
     return m_data.size();
 }
 
-int Table::columnCount(const QModelIndex &) const
-{
-    int max = 0;
-    for (auto row: m_data)
-        if (row.size()>max)
-            max = row.size();
-
-    return max;
+int Table::columnCount(const QModelIndex &) const{
+    return m_headerModel->size();
 }
 
 Qt::ItemFlags Table::flags(const QModelIndex &) const
@@ -37,84 +35,86 @@ Qt::ItemFlags Table::flags(const QModelIndex &) const
 }
 
 
-QVariant Table::data(const QModelIndex &index, int) const
-{
-    if (index.row() >= m_data.size()){
-        return QVariant("");
+QVariant Table::data(const QModelIndex &index, int role) const{
+    if ( index.row() >= m_data.size() || index.column() >= columnCount() ){
+        return QVariant();
     }
-    auto& row = m_data[index.row()];
-    if (index.column() >= row.size()){
-        return QVariant("");
+
+    if ( role == Table::Value ){
+        auto& row = m_data[index.row()];
+        return row[index.column()];
+    } else if ( role == Table::IsSelected){
+        return m_rowModel->isSelected(index.column(), index.row());
     }
-    return row[index.column()];
+    return QVariant();
 }
 
 bool Table::setData(const QModelIndex &index, const QVariant &value, int)
 {
-    if (index.row() >= m_data.size()){
-        return false;
+    if ( index.row() < m_data.size() && index.column() < columnCount() ){
+        m_data[index.row()][index.column()] = value.toString();
+
+        emit dataChanged(index, index);
+
+        return true;
     }
-
-    if (index.column() >= m_data[index.row()].size()){
-        int colCount = std::max(columnCount(), index.column()+1);
-        for (int i=m_data[index.row()].size(); i < colCount; ++i)
-            m_data[index.row()].push_back("");
-    }
-
-    m_data[index.row()][index.column()] = value.toString();
-    emit dataChanged(index, index);
-
-    return true;
+    return false;
 }
 
-TableHeader *Table::headerModel() const
+void Table::componentComplete()
+{
+    m_isComponentComplete = true;
+    emit complete();
+}
+
+TableHeader *Table::header() const
 {
     return m_headerModel;
 }
 
-void Table::initializeData()
+TableRowsInfo *Table::rowInfo() const
 {
-    beginInsertRows(QModelIndex(), 0, 3);
-    m_data = {
-        {"a", "b", "c"},
-        {"d", "e"},
-        {"g", "f", "h", "i", "j", "K"},
-        {"g", "f", "h", "i", "j", "K"}
-    };
-    endInsertRows();
-
-    m_headerModel->initalizeData(columnCount());
+    return m_rowModel;
 }
 
-void Table::addRow()
+void Table::addRows(int number)
 {
     int rowIndex = rowCount();
 
-    beginInsertRows(QModelIndex(), rowIndex, rowIndex);
-    m_data.push_back({});
+    beginInsertRows(QModelIndex(), rowIndex, rowIndex + number - 1);
 
-    int colNum = columnCount();
-    for (int i=0; i < colNum; ++i)
-        setData(QAbstractItemModel::createIndex(rowIndex, i), "");
+    for ( int newRows = 0; newRows < number; ++newRows ){
+        m_data.push_back({});
+
+        int colNum = m_headerModel->size();
+        for (int i=0; i < colNum; ++i)
+            m_data[rowIndex + newRows].push_back("");
+
+        m_rowModel->notifyRowAdded();
+    }
+
     endInsertRows();
 }
 
-void Table::addColumn()
-{
-    int colIndex = columnCount();
-    beginInsertColumns(QModelIndex(), colIndex, colIndex);
+void Table::addColumns(int number){
+    int colIndex = m_headerModel->size();
+    beginInsertColumns(QModelIndex(), colIndex, colIndex + number - 1);
 
-    int rowNum = rowCount();
-    for (int i = 0; i < rowNum; ++i)
-        setData(QAbstractItemModel::createIndex(i, colIndex), "");
+    for ( int newCols = 0; newCols < number; ++newCols ){
+        int rowNum = rowCount();
+        for (int i = 0; i < rowNum; ++i)
+            m_data[i].push_back("");
+        m_headerModel->addColumn();
+        m_rowModel->notifyColumnAdded();
+    }
+
     endInsertColumns();
-
-    m_headerModel->addColumn();
 }
 
 void Table::removeColumn(int idx)
 {
-    if (idx >= columnCount()) return;
+    if (idx >= columnCount())
+        return;
 
     beginRemoveColumns(QModelIndex(),idx, idx);
     for (int i=0; i<m_data.size(); ++i){
@@ -122,7 +122,54 @@ void Table::removeColumn(int idx)
         m_data[i].erase(m_data[i].begin()+idx);
     }
     endRemoveColumns();
-    m_headerModel->removeColumn();
+    m_headerModel->removeColumn(idx);
+    m_rowModel->removeColumn(idx);
+}
+
+void Table::removeRow(int idx)
+{
+    if (idx >= rowCount())
+        return;
+
+    beginRemoveRows(QModelIndex(), idx, idx);
+    m_data.erase(m_data.begin() + idx);
+    m_rowModel->removeRow(idx);
+
+    endRemoveRows();
+}
+
+void Table::assignCell(int row, int col, QString value)
+{
+    setData(QAbstractItemModel::createIndex(row, col), value);
+}
+
+bool Table::select(QJSValue column, QJSValue row){
+    if ( column.isNumber() && row.isNumber() ){
+        m_rowModel->select(column.toInt(), row.toInt());
+        auto index = QAbstractItemModel::createIndex(row.toInt(), column.toInt());
+        emit dataChanged(index, index);
+        return true;
+    }
+    return false;
+}
+
+bool Table::deselect(QJSValue column, QJSValue row){
+    if ( column.isUndefined() && row.isUndefined() ){
+        beginResetModel();
+        m_rowModel->deselectAll();
+        endResetModel();
+        return true;
+    }
+    return false;
+}
+
+void Table::clearTable()
+{
+    for (int i =0; i<m_data.size(); ++i)
+        for (int j=0; j<m_data[i].size(); ++j)
+            m_data[i][j] = "";
+    emit dataChanged(QAbstractItemModel::createIndex(0, 0),
+                     QAbstractItemModel::createIndex(m_data.size()-1, m_data[m_data.size()-1].size()-1));
 }
 
 } // namespace
