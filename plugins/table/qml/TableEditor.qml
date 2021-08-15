@@ -58,7 +58,8 @@ Rectangle{
 
     property var getContextMenuOptions: function(item, options){
         if ( item.objectName === "tableEditor" ){
-            return [{
+            return [
+            {
                 name: "Add column",
                 enabled: true,
                 action: function(){
@@ -71,19 +72,28 @@ Rectangle{
                 action: function(){
                     root.table.addRows(1)
                 }
+            },
+            {
+                name: "Clear table",
+                enabled: true,
+                action: function(){
+                    root.table.clearTable()
+                }
             }]
         } else if ( item.objectName === "tableDelegate" ){
-            return [{
+            return [
+            {
                 name: "Remove row",
                 enabled: true,
                 action: function(){
-                    //TODO
+                    root.table.removeRow(options.row)
                 }
-            },{
-                name: "Remove row",
+            },
+            {
+                name: "Remove column",
                 enabled: true,
                 action: function(){
-                    //TODO
+                    root.table.removeColumn(options.column)
                 }
             }]
         }

@@ -58,6 +58,34 @@ void TableRowsInfo::initializeData(int num)
     endInsertRows();
 }
 
+void TableRowsInfo::removeRow(int idx)
+{
+    beginRemoveRows(QModelIndex(), idx, idx);
+    m_contentHeight -= rowHeight(idx);
+    emit contentHeightChanged();
+    m_data.remove(idx);
+    QList<int> keys = m_data.keys();
+    QMap<int, RowData*> copy;
+    for (auto key: keys){
+        if (key < idx)
+            copy[key] = m_data[key];
+        else
+            copy[key-1] = m_data[key];
+    }
+    m_data.swap(copy);
+    --m_num;
+
+    endRemoveRows();
+}
+
+void TableRowsInfo::removeColumn(int idx)
+{
+    for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
+        auto rowInfo = *it;
+        (*it)->cells.erase((*it)->cells.begin()+idx);
+    }
+}
+
 QString TableRowsInfo::toString() const{
     QString result;
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
