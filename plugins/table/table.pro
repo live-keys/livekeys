@@ -6,7 +6,9 @@ include($$getGlobalFile(plugin.pri))
 
 uri = table
 
-linkLocalLibrary(lveditor,    lveditor)
+linkLocalLibrary(lvbase,    lvbase)
+linkLocalLibrary(lvview,    lvview)
+linkLocalLibrary(lveditor,  lveditor)
 
 # Source
 

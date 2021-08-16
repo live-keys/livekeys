@@ -9,6 +9,7 @@ namespace lv {
 
 class TableHeader;
 class TableRowsInfo;
+class TableDataSource;
 
 class Table : public QAbstractTableModel, public QQmlParserStatus
 {
@@ -16,6 +17,7 @@ class Table : public QAbstractTableModel, public QQmlParserStatus
     
     Q_PROPERTY(lv::TableHeader*   header        READ header         CONSTANT)
     Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
+    Q_PROPERTY(lv::TableDataSource* dataSource  READ dataSource     WRITE setDataSource NOTIFY dataSourceChanged)
     
     enum Roles{
         Value = Qt::UserRole + 1,
@@ -38,11 +40,15 @@ public:
 
     lv::TableHeader *header() const;
     lv::TableRowsInfo *rowInfo() const;
+    lv::TableDataSource* dataSource() const;
+
+    void setDataSource(lv::TableDataSource* dataSource);
 
 signals:
     void complete();
     void rowAdded();
     void columnAdded();
+    void dataSourceChanged();
 
 public slots:
     void addRows(int number = 1);
@@ -54,19 +60,21 @@ public slots:
     bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
 
 private:
-
     Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
-    QList<QList<QString>>             m_data;
     bool                              m_isComponentComplete;
 
     TableHeader*                      m_headerModel;
     TableRowsInfo*                    m_rowModel;
+    TableDataSource*                  m_dataSource;
 };
 
-inline QHash<int, QByteArray> Table::roleNames() const
-{
+inline QHash<int, QByteArray> Table::roleNames() const{
     return m_roles;
+}
+
+inline TableDataSource *Table::dataSource() const{
+    return m_dataSource;
 }
 
 } // namespace

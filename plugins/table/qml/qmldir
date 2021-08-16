@@ -3,4 +3,5 @@ plugin table
 
 depends QtQuick 2.3
 
-TableEditor     1.0 TableEditor.qml
+TableEditor      1.0 TableEditor.qml
+TableEditorStyle 1.0 TableEditorStyle.qml

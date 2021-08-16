@@ -2258,6 +2258,16 @@ void TextEdit::createAllViewportNodes(QString)
 
 }
 
+
+//Sections (palette/collapse)
+//  -> scrollPositon with viewport
+//  -> which nodes are in view
+//     ->
+
+//   -> OBS: Shifts only happen during palette height changes, newlines, etc
+
+
+
 void TextEdit::refreshAfterPaletteChange(int pos, int delta)
 {
     Q_D(TextEdit);

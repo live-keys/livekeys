@@ -5,6 +5,8 @@ import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import live 1.0
 import base 1.0
+import fs 1.0
+import table 1.0
 import workspace.icons 1.0 as Icons
 import visual.input 1.0 as Input
 
@@ -15,37 +17,7 @@ Rectangle{
 
     property var table: null
 
-    property QtObject style: QtObject{
-        property color cellBackgroundColor: '#fff'
-        property color cellBorderColor: '#aaa'
-        property double cellBorderSize: 1
-        property QtObject cellTextStyle: Input.TextStyle{}
-
-        property color selectedCellBorderColor: '#333'
-        property color selectedCellBackgroundColor: '#aaa'
-        property QtObject selectedCellTextStyle: Input.TextStyle{}
-
-        property QtObject cellInputStyle: Input.InputBoxStyle{}
-
-        property color headerCellBackgroundColor: '#ccc'
-        property color headerCellBorderColor: '#aaa'
-        property double headerCellBorderSize: 2
-        property QtObject headerCellTextStyle: Input.TextStyle{}
-
-        property color iconColor: 'black'
-
-        property color headerColor: "#333333"
-        property color separatorColor: "white"
-        property color borderColor: "black"
-        property var defaultCellWidth: 90
-        property var defaultCellHeight: 25
-        property var headerHeight: 25
-        property var rowInfoWidth: 50
-        property var headerWidth: 40
-        property var borderWidth: 2
-        property var minimumCellWidth: 40
-        property var minimumCellHeight: 15
-    }
+    property QtObject style: TableEditorStyle{}
 
     onTableChanged: {
         if (!table){
@@ -58,7 +30,7 @@ Rectangle{
 
     property var getContextMenuOptions: function(item, options){
         if ( item.objectName === "tableEditor" ){
-            return [{
+            var initial = [{
                 name: "Add column",
                 enabled: true,
                 action: function(){
@@ -72,6 +44,37 @@ Rectangle{
                     root.table.addRows(1)
                 }
             }]
+
+            if ( table.dataSource instanceof LocalDataSource ){
+                initial.push({
+                     name: "Save...",
+                     enabled: true,
+                     action: function(){
+                         lk.layers.window.dialogs.saveFile(
+                             { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
+                             function(url){
+                                 var path = UrlInfo.toLocalFile(url)
+                                 table.dataSource.writeToFile(path)
+                             }
+                         )
+                     }
+                 }, {
+                     name: "Open...",
+                     enabled: true,
+                     action: function(){
+                         lk.layers.window.dialogs.openFile(
+                             { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
+                             function(url){
+                                 var path = UrlInfo.toLocalFile(url)
+                                 table.dataSource.readFromFile(path)
+                             }
+                         )
+                     }
+                 })
+            }
+
+            return initial
+
         } else if ( item.objectName === "tableDelegate" ){
             return [{
                 name: "Remove row",
@@ -117,7 +120,6 @@ Rectangle{
          id: input
          width: 100
          height: 30
-         color: "lightgray"
          border.width: 1
          radius: 0
          style: root.style.cellInputStyle
@@ -135,7 +137,6 @@ Rectangle{
 
     signal cellRightClicked(int row, int column, Item delegate)
     onCellRightClicked: {
-        console.log("CELL RIGHT CLICKED")
         handleContextMenu(delegate, {row: row, column: column})
     }
 
@@ -176,8 +177,8 @@ Rectangle{
 
     Item{
         id: tableOptions
-        width: root.style.rowInfoWidth
-        height: root.style.headerHeight
+        width: root.style.headerCellWidth
+        height: root.style.headerCellHeight
 
         Icons.MenuIcon{
             anchors.centerIn: parent
@@ -195,8 +196,8 @@ Rectangle{
 
     TableView {
         id: rowTableView
-        width: root.style.rowInfoWidth
-        height: parent.height - root.style.headerHeight
+        width: root.style.headerCellWidth
+        height: parent.height - root.style.headerCellHeight
         clip: true
         model: !table || !table.rowInfo ? 0 : table.rowInfo
 
@@ -208,30 +209,27 @@ Rectangle{
         contentY: contentTableView.contentY
         delegate: Item{
             id: rowInfoDelegate
-            implicitWidth: root.style.rowInfoWidth
+            implicitWidth: root.style.headerCellWidth
 
-            Item{
+            Rectangle{
                 id: rowInfoContainer
                 width: parent.width
-                height: parent.height - root.style.borderWidth
+                height: parent.height - root.style.headerCellBorderSize
+                color: root.style.headerCellBackgroundColor
                 onHeightChanged: {
                     if ( !dragAreaY.drag.active )
                       separatorY.y = height
                 }
 
-                Input.InputBox {
-                    id: rowBox
-                    anchors.fill: parent
-                    color: root.style.headerColor
-                    border.width: 0
-                    radius: 0
-                    style: Input.InputBoxStyle {
-                        textStyle: Input.TextStyle{
-                          color: "white"
-                        }
-                    }
+                Text{
+                    id: cellText
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    anchors.top: parent.top
+                    anchors.topMargin: 3
                     text: model.value
-                    enabled: false
+                    color: root.style.headerCellTextStyle.color
+                    font: root.style.headerCellTextStyle.font
                 }
 
                 MouseArea {
@@ -245,9 +243,9 @@ Rectangle{
                 id: separatorY
                 z: 10
 
-                height: root.style.borderWidth
+                height: root.style.headerCellBorderSize
                 width: parent.width
-                color: root.style.separatorColor
+                color: root.style.headerCellBorderColor
 
                 Drag.active: dragAreaY.drag.active
 
@@ -257,16 +255,16 @@ Rectangle{
                     anchors.fill: parent
                     drag.axis: Drag.YAxis
                     drag.target: parent
-                    drag.minimumY: rowBox.y + root.style.minimumCellHeight
+                    drag.minimumY: rowInfoContainer.y + root.style.minimumCellHeight
                 }
 
                 onYChanged: {
                     if (!Drag.active)
                         return
 
-                    rowBox.height = y
+                    rowInfoContainer.height = y
 
-                    var newHeight = y - rowBox.y + root.style.borderWidth
+                    var newHeight = y - rowInfoContainer.y + root.style.headerCellBorderSize
                     table.rowInfo.updateRowHeight(index, newHeight)
                     rowTableView.forceLayout()
                     contentTableView.forceLayout()
@@ -278,8 +276,8 @@ Rectangle{
 
     TableView {
         id: headerTableView
-        width: parent.width - root.style.rowInfoWidth
-        height: root.style.headerHeight
+        width: parent.width - root.style.headerCellWidth
+        height: root.style.headerCellHeight
         clip: true
         model: !table || !table.header ? null : table.header
         anchors.left: tableOptions.right
@@ -290,32 +288,29 @@ Rectangle{
         contentX: contentTableView.contentX
         delegate: Item{
             id: hedaerDelegate // width -> providerWidth
-            implicitHeight: root.style.headerHeight
+            implicitHeight: root.style.headerCellHeight
 
-            Item {
+            Rectangle{
                 id: headerColumnContainer
-                width: parent.width - root.style.borderWidth
+                width: parent.width - root.style.headerCellBorderSize
                 onWidthChanged: {
                     if ( !dragAreaX.drag.active )
                         separatorX.x = width
                 }
+                color: root.style.headerCellBackgroundColor
 
                 height: parent.height
 
-                Input.InputBox {
-                    id: headerCol
-                    anchors.fill: parent
-                    color: root.style.headerColor
-                    border.width: 0
-                    radius: 0
-                    style: Input.InputBoxStyle {
-                        textStyle: Input.TextStyle{
-                            color: "white"
-                        }
 
-                    }
+                Text{
+                    id: cellHeaderText
+                    anchors.left: parent.left
+                    anchors.leftMargin: 5
+                    anchors.top: parent.top
+                    anchors.topMargin: 3
                     text: model.name
-                    enabled: false
+                    color: root.style.headerCellTextStyle.color
+                    font: root.style.headerCellTextStyle.font
                 }
 
                 MouseArea {
@@ -332,9 +327,9 @@ Rectangle{
                 id: separatorX
                 z: 10
 
-                height: root.style.headerHeight
-                width: root.style.borderWidth
-                color: root.style.separatorColor
+                height: root.style.headerCellHeight
+                width: root.style.headerCellBorderSize
+                color: root.style.headerCellBorderColor
 
                 Drag.active: dragAreaX.drag.active
 
@@ -344,16 +339,16 @@ Rectangle{
                     anchors.fill: parent
                     drag.axis: Drag.XAxis
                     drag.target: parent
-                    drag.minimumX: headerCol.x + root.style.minimumCellWidth
+                    drag.minimumX: headerColumnContainer.x + root.style.minimumCellWidth
                 }
 
                 onXChanged: {
                     if (!Drag.active)
                         return
 
-                    headerCol.width = x
+                    headerColumnContainer.width = x
 
-                    var newWidth = x - headerCol.x + root.style.borderWidth
+                    var newWidth = x - headerColumnContainer.x + root.style.headerCellBorderSize
                     table.header.updateColumnWidth(index, newWidth)
                     headerTableView.forceLayout()
                     contentTableView.forceLayout()
@@ -367,12 +362,12 @@ Rectangle{
         anchors.left: rowTableView.right
         anchors.top: headerTableView.bottom
 
-        height: contentTableView.contentHeight + 10 < parent.height - root.style.headerHeight
+        height: contentTableView.contentHeight + 10 < parent.height - root.style.headerCellHeight
                 ? contentTableView.contentHeight + 10
-                : parent.height - root.style.headerHeight
-        width: contentTableView.contentWidth + 10 < parent.width - root.style.rowInfoWidth
+                : parent.height - root.style.headerCellHeight
+        width: contentTableView.contentWidth + 10 < parent.width - root.style.headerCellWidth
                ? contentTableView.contentWidth + 10
-               : parent.width - root.style.rowInfoWidth
+               : parent.width - root.style.headerCellWidth
 
         style: ScrollViewStyle {
             transientScrollBars: false
@@ -420,7 +415,7 @@ Rectangle{
             delegate: Rectangle{
                 id: tableDelegate
                 implicitHeight: root.style.defaultCellHeight
-                implicitWidth: 40
+                implicitWidth: root.style.defaultCellWidth
                 objectName: "tableDelegate"
                 color: root.style.cellBackgroundColor
                 border.width : selected ? 1 : 0
@@ -436,6 +431,8 @@ Rectangle{
                     anchors.top: parent.top
                     anchors.topMargin: 3
                     text: model.value
+                    color: root.style.cellTextStyle.color
+                    font: root.style.cellTextStyle.font
                 }
 
                 MouseArea {
