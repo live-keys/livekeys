@@ -36,6 +36,7 @@ public:
 
     void notifyRowAdded();
     void notifyColumnAdded();
+    void notifyModelReset(int newRowCount = 0);
     void initializeData(int num);
 
     void removeRow(int idx);
@@ -63,7 +64,7 @@ private:
     RowData* rowDataAtWithCreate(int index);
     RowData* rowDataAt(int index) const;
 
-    int                     m_num;
+    int                     m_rowCount;
     QHash<int, QByteArray>  m_roles;
     int                     m_defaultRowHeight;
     QMap<int, RowData*>     m_data;
