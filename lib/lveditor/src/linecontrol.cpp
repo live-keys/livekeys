@@ -321,19 +321,19 @@ int LineControl::totalOffset()
  * \brief Taking into consideration the offsets before a given visible line,
  * we calculate which absolute line of text it represents
  */
-int LineControl::displayLineToSourceLine(int visible)
+int LineControl::displayLineToSourceLine(int displayLine)
 {
     LineSection ls;
-    ls.displayLineNumber = visible;
+    ls.displayLineNumber = displayLine;
     auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
 
-    int abs = visible;
+    int abs = displayLine;
     if (upper != m_sections.begin())
     {
         auto prev = std::prev(upper);
-        if (visible >= prev->displayLineNumber + prev->displayLineSpan)
-            abs = visible - prev->lineNumberDelta() - prev->lineSpanDelta();
-        else if (prev->type == LineSection::Collapsed && visible == prev->displayLineNumber)
+        if (displayLine >= prev->displayLineNumber + prev->displayLineSpan)
+            abs = displayLine - prev->lineNumberDelta() - prev->lineSpanDelta();
+        else if (prev->type == LineSection::Collapsed && displayLine == prev->displayLineNumber)
             abs = prev->lineNumber;
         else abs = -1; // not mapping to an absolute line
     }
@@ -446,9 +446,9 @@ int LineControl::deltaToPreviousDisplayLine(int lineNumber)
  * palette or text modification, so everything after it is potentially in
  * a wrong state
  */
-void LineControl::setFirstDirtyLine(int dirtyPos)
+void LineControl::setFirstDirtyLine(int dirtyLine)
 {
-    m_firstDirtyLine = dirtyPos;
+    m_firstDirtyLine = dirtyLine;
 }
 
 /**
@@ -1040,15 +1040,15 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
 /**
  * \brief A test function to simulate change of line count
  */
-void LineControl::simulateLineCountChange(int delta)
+void LineControl::simulateLineCountChange(int deltaLines)
 {
-    if (delta == 0) return;
+    if (deltaLines == 0) return;
     m_prevLineNumber = m_lineNumber;
-    m_lineNumber += delta;
+    m_lineNumber += deltaLines;
 
     bool internal = false;
 
-    handleLineCountChanged(delta, internal);
+    handleLineCountChanged(deltaLines, internal);
 }
 
 int LineControl::maxWidth()
