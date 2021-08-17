@@ -54,11 +54,13 @@ public slots:
     void addRows(int number = 1);
     void addColumns(int number = 1);
     void removeColumn(int idx);
+    void removeRow(int idx);
     void assignCell(int row, int col, QString value);
 
     bool select(QJSValue column, QJSValue row);
     bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
 
+    void clearTable();
     void __dataSourceAboutToLoad();
     void __dataSourceFinished();
 

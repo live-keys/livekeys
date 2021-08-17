@@ -32,7 +32,7 @@ public:
     QHash<int, QByteArray> roleNames() const override;
 
     void addColumn();
-    void removeColumn();
+    void removeColumn(int idx);
     void initalizeData(int size);
     void notifyModelReset();
 

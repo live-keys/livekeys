@@ -92,7 +92,7 @@ void LvLineControlTest::addLines()
 
 
     m_lineControl->setDirtyPos(60);
-    m_lineControl->deltaLines(5);
+    m_lineControl->simulateLineCountChange(5);
     auto section1 = m_lineControl->sections()[0];
     auto section2 = m_lineControl->sections()[1];
 
@@ -103,7 +103,7 @@ void LvLineControlTest::addLines()
 void LvLineControlTest::removeLines()
 {
     m_lineControl->setDirtyPos(40);
-    m_lineControl->deltaLines(-3);
+    m_lineControl->simulateLineCountChange(-3);
     auto section1 = m_lineControl->sections()[0];
     auto section2 = m_lineControl->sections()[1];
 
@@ -118,7 +118,7 @@ void LvLineControlTest::removeLines()
 
 void LvLineControlTest::checkVisibleWithNoSections()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     auto result = m_lineControl->visibleSections(10, 20);
 
@@ -174,7 +174,7 @@ void LvLineControlTest::checkAfterCollapsedSection() {
 
 void LvLineControlTest::checkDocumentSmallerThanViewport()
 {
-    m_lineControl->deltaLines(5);
+    m_lineControl->simulateLineCountChange(5);
     auto result = m_lineControl->visibleSections(0, 10);
 
     QCOMPARE(result.size(), 1);
@@ -186,7 +186,7 @@ void LvLineControlTest::checkDocumentSmallerThanViewport()
 
 void LvLineControlTest::checkBeforePalette()
 {
-    m_lineControl->deltaLines(25);
+    m_lineControl->simulateLineCountChange(25);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(45);
@@ -266,7 +266,7 @@ void LvLineControlTest::checkAfterPalette()
 
 void LvLineControlTest::checkWithFragmentStart()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(0); // only fragments have 0 height
@@ -318,7 +318,7 @@ void LvLineControlTest::checkFragmentStartWithCollapsed()
 
 void LvLineControlTest::checkWithFragmentEnd()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(0);
@@ -373,7 +373,7 @@ void LvLineControlTest::checkFragmentEndWithPalette()
 
 void LvLineControlTest::checkWithTwoCollapses()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     m_lineControl->addCollapse(10, 3);
     m_lineControl->addCollapse(20, 5);
@@ -450,7 +450,7 @@ void LvLineControlTest::checkWithCollapsesAndFragment()
 
 void LvLineControlTest::checkWithTwoNeighboringPaletes()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(45);

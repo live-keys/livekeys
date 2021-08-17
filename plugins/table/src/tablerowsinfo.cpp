@@ -36,7 +36,8 @@ void TableRowsInfo::notifyRowAdded()
 {
     beginInsertRows(QModelIndex(), m_rowCount, m_rowCount);
     ++m_rowCount;
-    rowDataAtWithCreate(m_rowCount-1);
+    m_contentHeight += m_defaultRowHeight;
+    emit contentHeightChanged();
     endInsertRows();
 }
 
@@ -63,10 +64,38 @@ void TableRowsInfo::notifyModelReset(int newRowCount){
 void TableRowsInfo::initializeData(int num)
 {
     beginInsertRows(QModelIndex(), 0, num-1);
-    for (int i = 0; i < num; ++i)
-        rowDataAtWithCreate(i);
     m_rowCount = num;
+    m_contentHeight = num*m_defaultRowHeight;
+    emit contentHeightChanged();
     endInsertRows();
+}
+
+void TableRowsInfo::removeRow(int idx)
+{
+    beginRemoveRows(QModelIndex(), idx, idx);
+    m_contentHeight -= rowHeight(idx);
+    emit contentHeightChanged();
+    m_data.remove(idx);
+    QList<int> keys = m_data.keys();
+    QMap<int, RowData*> copy;
+    for (auto key: keys){
+        if (key < idx)
+            copy[key] = m_data[key];
+        else
+            copy[key-1] = m_data[key];
+    }
+    m_data.swap(copy);
+    --m_rowCount;
+
+    endRemoveRows();
+}
+
+void TableRowsInfo::removeColumn(int idx)
+{
+    for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
+        auto rowInfo = *it;
+        (*it)->cells.erase((*it)->cells.begin()+idx);
+    }
 }
 
 QString TableRowsInfo::toString() const{
@@ -84,12 +113,15 @@ QString TableRowsInfo::toString() const{
 }
 
 void TableRowsInfo::updateRowHeight(int index, int height){
+    if (height == rowHeight(index))
+        return;
+
     auto rowData = rowDataAtWithCreate(index);
     int delta = height - rowData->height;
-    m_contentHeight += delta;
     rowData->height = height;
-    if (delta != 0)
-        emit contentHeightChanged();
+    m_contentHeight += delta;
+    emit contentHeightChanged();
+
 }
 
 int TableRowsInfo::rowHeight(int index) const{
@@ -114,9 +146,6 @@ TableRowsInfo::RowData *TableRowsInfo::rowDataAtWithCreate(int index){
             ci.isSelected = false;
             data->cells.append(ci);
         }
-
-        m_contentHeight += m_defaultRowHeight;
-        emit contentHeightChanged();
         m_data.insert(index, data);
         return data;
     }

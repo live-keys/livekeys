@@ -2295,7 +2295,7 @@ void TextEdit::refreshAfterPaletteChange(int pos, int delta)
 void TextEdit::checkResetCollapse(int blockNumber)
 {
     Q_D(TextEdit);
-    if (d->lineControl->isJumpForwardLine(blockNumber, true) != 0)
+    if (d->lineControl->isFirstLineOfCollapse(blockNumber))
     {
         manageExpandCollapse(blockNumber, false);
     }
@@ -2651,7 +2651,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                                 nodeOffset = getDocumentLayout()->blockBoundingRect(block).topLeft();
                                 updateNodeTransform(node, nodeOffset);
 
-                                int offset = d->lineControl->drawingOffset(block.blockNumber(), false);
+                                int offset = d->lineControl->pixelDrawingOffset(block.blockNumber(), false);
                                 nodeOffset.setY(nodeOffset.y() - offset);
 
                                 nodeStart = block.position();
@@ -2945,7 +2945,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     lineControl->setBlockHeight(static_cast<int>(rect.height()));
     lineControl->setDirtyPos(0);
-    lineControl->lineNumberChange();
+    lineControl->lineCountChanged();
 
     if (lineSurface){
         lineSurface->triggerUpdate();
@@ -3152,9 +3152,9 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
         d->lineControl->setDirtyPos(d->dirtyPosition);
 
-        if (lineControl()->isJumpForwardLine(d->dirtyPosition, true) > 0){
+        if (lineControl()->isFirstLineOfCollapse(d->dirtyPosition)){
             int delta = lineControl()->removeCollapse(d->dirtyPosition);
-            lineControl()->collapseChange(d->dirtyPosition, delta);
+            lineControl()->signalRefreshAfterCollapseChange(d->dirtyPosition, delta);
         }
 
         int newTotalLines = d->document->blockCount();
@@ -3165,7 +3165,7 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     }
 
     d->updateLinesFlag = false;
-    d->lineControl->updateSectionBounds(pos, charsRemoved, charsAdded);
+    d->lineControl->contentsChange(pos, charsRemoved, charsAdded);
     d->updateLinesFlag = true;
 
     d->highlightingInProgress = true;
@@ -4095,9 +4095,7 @@ void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickIt
 void TextEdit::linePaletteRemoved(QQuickItem *palette)
 {
     Q_D(TextEdit);
-
-    int result = d->lineControl->removePalette(palette, false);
-    if (result == -1) return;
+    d->lineControl->removePalette(palette, false);
 }
 
 void TextEdit::linePaletteHeightChanged(QQuickItem *palette, int)
@@ -4210,9 +4208,9 @@ TextEditNodeDebugModel::Entry TextEdit::getDebugEntry(int pos)
     QString lineText = getDocumentLayout()->lineDocument()->findBlockByNumber(pos).text();
     QString blockText = d->document->findBlockByNumber(pos).text();
     bool hiddenByPalette = d->paletteManager->isLineUnderPalette(pos);
-    // bool hiddenByPalette = d->lineControl->hiddenByPalette(pos);
+    // bool hiddenByPalette = d->lineControl->isHiddenByPalette(pos);
     bool hiddenByCollapse = getDocumentLayout()->isHiddenByCollapse(pos);
-    // bool hiddenByCollapse = d->lineControl->hiddenByCollapse(pos);
+    // bool hiddenByCollapse = d->lineControl->isHiddenByCollapse(pos);
     int offset = d->paletteManager->drawingOffset(pos, false);
     // int offset = d->lineControl->drawingOffset(pos, false);
     return TextEditNodeDebugModel::Entry(pos, lineText, blockText, hiddenByCollapse, hiddenByPalette, offset);
@@ -4260,7 +4258,7 @@ void TextEdit::manageExpandCollapse(int pos, bool collapsed)
         delta = d->lineControl->removeCollapse(pos);
     }
 
-    d->lineControl->collapseChange(pos, delta);
+    d->lineControl->signalRefreshAfterCollapseChange(pos, delta);
 }
 
 void TextEdit::updateLineSurface(int, int, int)
@@ -4276,7 +4274,7 @@ void TextEdit::handleCursorDuringAddingSection()
     QTextCursor cursor = d->control->textCursor();
     int cursorBlock = cursor.block().blockNumber();
 
-    int firstBlock = d->lineControl->firstBlockOfTextBefore(cursorBlock);
+    int firstBlock = d->lineControl->firstVisibleLineBefore(cursorBlock);
     if (firstBlock != cursorBlock){
         cursor.beginEditBlock();
         for (int i = 0; i < cursorBlock-firstBlock; i++)

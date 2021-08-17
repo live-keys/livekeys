@@ -39,6 +39,9 @@ public:
     void notifyModelReset(int newRowCount = 0);
     void initializeData(int num);
 
+    void removeRow(int idx);
+    void removeColumn(int idx);
+
     int defaultRowHeight() const;
     void setDefaultRowHeight(int defaultRowHeight);
 

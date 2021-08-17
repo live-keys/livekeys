@@ -119,8 +119,23 @@ void Table::removeColumn(int idx)
 //            continue;
 //        m_data[i].erase(m_data[i].begin() + idx);
 //    }
-    m_headerModel->removeColumn();
+    m_headerModel->removeColumn(idx);
+    m_rowModel->removeColumn(idx);
+
     endRemoveColumns();
+}
+
+void Table::removeRow(int idx)
+{
+    if (idx >= rowCount())
+        return;
+
+    beginRemoveRows(QModelIndex(), idx, idx);
+    // TODO: Remove row in m_dataSource
+    // m_data.erase(m_data.begin() + idx);
+    m_rowModel->removeRow(idx);
+
+    endRemoveRows();
 }
 
 void Table::assignCell(int row, int col, QString value)
@@ -146,6 +161,16 @@ bool Table::deselect(QJSValue column, QJSValue row){
         return true;
     }
     return false;
+}
+
+void Table::clearTable()
+{
+// TODO: Modify in accordance with m_dataSource
+//    for (int i =0; i<m_data.size(); ++i)
+//        for (int j=0; j<m_data[i].size(); ++j)
+//            m_data[i][j] = "";
+//    emit dataChanged(QAbstractItemModel::createIndex(0, 0),
+//                     QAbstractItemModel::createIndex(m_data.size()-1, m_data[m_data.size()-1].size()-1));
 }
 
 void Table::__dataSourceAboutToLoad(){

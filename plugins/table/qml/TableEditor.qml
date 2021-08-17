@@ -43,6 +43,13 @@ Rectangle{
                 action: function(){
                     root.table.addRows(1)
                 }
+            },
+            {
+                name: "Clear table",
+                enabled: true,
+                action: function(){
+                    root.table.clearTable()
+                }
             }]
 
             if ( table.dataSource instanceof LocalDataSource ){
@@ -76,17 +83,19 @@ Rectangle{
             return initial
 
         } else if ( item.objectName === "tableDelegate" ){
-            return [{
+            return [
+            {
                 name: "Remove row",
                 enabled: true,
                 action: function(){
-                    //TODO
+                    root.table.removeRow(options.row)
                 }
-            },{
-                name: "Remove row",
+            },
+            {
+                name: "Remove column",
                 enabled: true,
                 action: function(){
-                    //TODO
+                    root.table.removeColumn(options.column)
                 }
             }]
         }

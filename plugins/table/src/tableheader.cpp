@@ -54,10 +54,14 @@ void TableHeader::addColumn()
 
 }
 
-void TableHeader::removeColumn()
+void TableHeader::removeColumn(int idx)
 {
-    beginRemoveColumns(QModelIndex(), m_data.size()-1, m_data.size()-1);
-    m_data.pop_back();
+    beginRemoveColumns(QModelIndex(), idx, idx);
+
+    m_contentWidth -= m_data[idx].width;
+    emit contentWidthChanged();
+    m_data.erase(m_data.begin()+idx);
+
     endRemoveColumns();
 }
 

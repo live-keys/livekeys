@@ -348,11 +348,6 @@ Item{
                     else
                         addChildObject(ef)
 
-//                    var child = container.children[container.children.length-1]
-//                    var id = child.editFragment.objectId()
-    //                child.title = child.editingFragment.typeName() + (id ? "#"+id : "")
-                    // paletteFunctions.openDefaultPalette(child.editFragment, editor, child.paletteGroup, child)
-
                     container.sortChildren()
                 } else {
                     var pc = root.addProperty(ef)
