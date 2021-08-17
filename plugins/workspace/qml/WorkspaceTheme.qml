@@ -6,6 +6,7 @@ import workspace 1.0
 import workspace.icons 1.0
 import workspace.nodeeditor 1.0
 import timeline 1.0
+import table 1.0
 import visual.input 1.0 as Input
 
 Theme{
@@ -540,5 +541,32 @@ Theme{
         segmentBackground: root.colorScheme.middlegroundOverlay
         segmentBorder : root.colorScheme.middlegroundOverlayBorder
         segmentBorderFocus: root.colorScheme.foregroundFaded
+    }
+
+    // Table
+
+    property QtObject tableStyle: TableEditorStyle{
+        iconColor: root.colorScheme.foregroundFaded
+        cellBackgroundColor: root.colorScheme.background
+        cellBorderColor: root.colorScheme.middleground
+        cellTextStyle: Input.TextStyle{}
+
+        selectedCellBorderColor: root.colorScheme.middlegroundOverlayDominantBorder
+        selectedCellBackgroundColor: root.colorScheme.background
+        selectedCellTextStyle: Input.TextStyle{}
+
+        cellInputStyle: root.inputStyle
+
+        headerCellBackgroundColor: root.colorScheme.middlegroundOverlay
+        headerCellBorderColor: root.colorScheme.middlegroundOverlayBorder
+        headerCellTextStyle: Input.TextStyle{
+            color: colorScheme.foreground
+            font : Qt.font({
+                family: 'Open Sans, sans-serif',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: 11
+            })
+        }
     }
 }

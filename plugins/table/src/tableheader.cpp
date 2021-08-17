@@ -77,6 +77,14 @@ void TableHeader::initalizeData(int size)
     endInsertColumns();
 }
 
+void TableHeader::notifyModelReset(){
+    beginResetModel();
+    m_data.clear();
+    endResetModel();
+    m_contentWidth = 0;
+    emit contentWidthChanged();
+}
+
 int TableHeader::size() const{
     return m_data.size();
 }
