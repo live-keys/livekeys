@@ -255,7 +255,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
     cursor.setVisualNavigation(true);
 
     LineControl* lc = textEdit->lineControl();
-    int result = lc->offsetToNextVisibleLine(cursor.block().blockNumber());
+    int result = lc->deltaToNextDisplayLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockEnd() &&(e == QKeySequence::MoveToNextChar || e ==  QKeySequence::MoveToNextWord || e == QKeySequence::MoveToEndOfLine))
@@ -296,7 +296,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
     }
 
-    result = lc->offsetToPreviousVisibleLine(cursor.block().blockNumber());
+    result = lc->deltaToPreviousDisplayLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockStart() &&(e == QKeySequence::MoveToPreviousChar || e ==  QKeySequence::MoveToPreviousWord || e == QKeySequence::MoveToStartOfLine))
@@ -1235,7 +1235,7 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QRectF r;
     int offset = 0;
     if (textEdit && textEdit->lineControl())
-        offset = textEdit->lineControl()->pixelDrawingOffset(block.blockNumber(), true);
+        offset = textEdit->lineControl()->pixelDrawingOffset(block.blockNumber());
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;

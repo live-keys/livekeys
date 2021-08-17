@@ -331,7 +331,7 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     if (!m_document) return;
 
     int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
-    int absBlockNum = m_textEdit->lineControl()->visibleLineToAbsoluteLine(visibleBlockNumber);
+    int absBlockNum = m_textEdit->lineControl()->displayLineToSourceLine(visibleBlockNumber);
 
     const QTextBlock& matchingBlock = m_textEdit->code()->textDocument()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
@@ -550,7 +550,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
                             int offset = m_bounds.first * m_textEdit->lineControl()->blockHeight();
                             if (m_textEdit && m_textEdit->lineControl())
-                                offset += m_textEdit->lineControl()->pixelDrawingOffset(block.blockNumber() + m_bounds.first, false);
+                                offset += m_textEdit->lineControl()->pixelDrawingOffset(block.blockNumber() + m_bounds.first);
                             nodeOffset.setY(nodeOffset.y() - offset);
                         }
 
