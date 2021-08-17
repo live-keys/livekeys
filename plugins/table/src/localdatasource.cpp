@@ -1,6 +1,9 @@
 #include "localdatasource.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+
+#include "csv.hpp"
+
 #include <QtDebug>
 
 #include <QFile>
@@ -49,16 +52,36 @@ void LocalDataSource::removeColumn(int idx){
 
 }
 
+int LocalDataSource::totalColumns() const{
+    return m_headers.size();
+}
+
 void LocalDataSource::readFromFile(const QString &path){
-    QFile file(path);
-    if ( !file.open(QFile::ReadOnly) ){
-        ViewEngine* engine = ViewEngine::grab(this);
-        Exception e = CREATE_EXCEPTION(lv::Exception, "Failed to read from file: " + path.toStdString() + ".", Exception::toCode("~FileWrite"));
-        engine->throwError(&e, this);
-        return;
+    beginLoadData();
+
+    m_data.clear();
+    m_headers.clear();
+
+    csv::CSVReader reader(path.toStdString());
+
+    bool firstRow = true;
+    for (csv::CSVRow& row: reader) { // Input iterator
+        QList<QString> dataRow;
+        if (firstRow){
+            for (csv::CSVField& field: row) {
+                m_headers.append("");
+                dataRow.append(QString::fromStdString(field.get<std::string>()));
+            }
+            firstRow = false;
+        } else {
+            for (csv::CSVField& field: row) {
+                dataRow.append(QString::fromStdString(field.get<std::string>()));
+            }
+        }
+        m_data.append(dataRow);
     }
 
-
+    endLoadData();
 }
 
 void LocalDataSource::writeToFile(const QString &path){

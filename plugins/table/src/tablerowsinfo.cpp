@@ -6,7 +6,7 @@ namespace lv {
 
 TableRowsInfo::TableRowsInfo(QObject* parent)
     : QAbstractTableModel(parent)
-    , m_num(0)
+    , m_rowCount(0)
     , m_defaultRowHeight(25)
     , m_contentHeight(0)
 {
@@ -15,7 +15,7 @@ TableRowsInfo::TableRowsInfo(QObject* parent)
 
 int TableRowsInfo::rowCount(const QModelIndex &) const
 {
-    return m_num;
+    return m_rowCount;
 }
 
 int TableRowsInfo::columnCount(const QModelIndex &) const
@@ -26,7 +26,7 @@ int TableRowsInfo::columnCount(const QModelIndex &) const
 QVariant TableRowsInfo::data(const QModelIndex &index, int) const{
     if (index.column() > 0)
         return QVariant();
-    if (index.row() >= m_num)
+    if (index.row() >= m_rowCount)
         return QVariant();
 
     return QString::number(index.row()+1);
@@ -34,9 +34,9 @@ QVariant TableRowsInfo::data(const QModelIndex &index, int) const{
 
 void TableRowsInfo::notifyRowAdded()
 {
-    beginInsertRows(QModelIndex(), m_num, m_num);
-    ++m_num;
-    rowDataAtWithCreate(m_num-1);
+    beginInsertRows(QModelIndex(), m_rowCount, m_rowCount);
+    ++m_rowCount;
+    rowDataAtWithCreate(m_rowCount-1);
     endInsertRows();
 }
 
@@ -48,12 +48,24 @@ void TableRowsInfo::notifyColumnAdded(){
     }
 }
 
+void TableRowsInfo::notifyModelReset(int newRowCount){
+    beginResetModel();
+    for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
+        delete it.value();
+    }
+    m_data.clear();
+    m_rowCount = newRowCount;
+    m_contentHeight = newRowCount * m_defaultRowHeight;
+    endResetModel();
+    emit contentHeightChanged();
+}
+
 void TableRowsInfo::initializeData(int num)
 {
     beginInsertRows(QModelIndex(), 0, num-1);
     for (int i = 0; i < num; ++i)
         rowDataAtWithCreate(i);
-    m_num = num;
+    m_rowCount = num;
     endInsertRows();
 }
 

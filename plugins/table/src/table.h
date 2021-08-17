@@ -14,7 +14,7 @@ class TableDataSource;
 class Table : public QAbstractTableModel, public QQmlParserStatus
 {
     Q_OBJECT
-    
+    Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::TableHeader*   header        READ header         CONSTANT)
     Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
     Q_PROPERTY(lv::TableDataSource* dataSource  READ dataSource     WRITE setDataSource NOTIFY dataSourceChanged)
@@ -59,7 +59,12 @@ public slots:
     bool select(QJSValue column, QJSValue row);
     bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
 
+    void __dataSourceAboutToLoad();
+    void __dataSourceFinished();
+
 private:
+    void assignDataSource(TableDataSource* ds);
+
     Q_DISABLE_COPY(Table)
     QHash<int, QByteArray>            m_roles;
     bool                              m_isComponentComplete;

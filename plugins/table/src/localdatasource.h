@@ -21,6 +21,7 @@ public:
     void addRow() override;
     void addColumn() override;
     void removeColumn(int idx) override;
+    int totalColumns() const override;
 
 public slots:
     void readFromFile(const QString& path);

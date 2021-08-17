@@ -1,6 +1,8 @@
 PLUGIN_NAME = table
 PLUGIN_PATH = table
 
+CONFIG += c++14
+
 # PLUGIN_NAME and PLUGIN_PATH must be set up prior to including this config file
 include($$getGlobalFile(plugin.pri))
 
@@ -9,6 +11,8 @@ uri = table
 linkLocalLibrary(lvbase,    lvbase)
 linkLocalLibrary(lvview,    lvview)
 linkLocalLibrary(lveditor,  lveditor)
+
+include($$PWD/3rdparty/csvparser.pri)
 
 # Source
 

@@ -11,10 +11,12 @@ Table::Table(QObject *parent)
     , m_isComponentComplete(false)
     , m_headerModel(new TableHeader(this))
     , m_rowModel(new TableRowsInfo(this))
-    , m_dataSource(new LocalDataSource(this))
+    , m_dataSource(nullptr)
 {
     m_roles[Value]      = "value";
     m_roles[IsSelected] = "isSelected";
+
+    assignDataSource(new LocalDataSource(this));
 }
 
 Table::~Table(){
@@ -146,12 +148,42 @@ bool Table::deselect(QJSValue column, QJSValue row){
     return false;
 }
 
+void Table::__dataSourceAboutToLoad(){
+    beginResetModel();
+}
+
+void Table::__dataSourceFinished(){
+    m_rowModel->notifyModelReset(m_dataSource->totalRows());
+    m_headerModel->notifyModelReset();
+    for ( int i = 0; i < m_dataSource->totalColumns(); ++i ){
+        m_headerModel->addColumn();
+    }
+    endResetModel();
+}
+
+void Table::assignDataSource(TableDataSource *ds){
+    if ( m_dataSource == ds )
+        return;
+    //TODO: Reference counting on data source
+    if ( m_dataSource){
+        disconnect(m_dataSource, &TableDataSource::dataAboutToLoad, this, &Table::__dataSourceAboutToLoad);
+        disconnect(m_dataSource, &TableDataSource::dataLoaded, this, &Table::__dataSourceFinished);
+    }
+
+    m_dataSource = ds;
+    if ( m_dataSource ){
+        connect(m_dataSource, &TableDataSource::dataAboutToLoad, this, &Table::__dataSourceAboutToLoad);
+        connect(m_dataSource, &TableDataSource::dataLoaded, this, &Table::__dataSourceFinished);
+    }
+
+}
+
 void Table::setDataSource(TableDataSource *dataSource)
 {
     if (m_dataSource == dataSource)
         return;
 
-    m_dataSource = dataSource;
+    assignDataSource(dataSource);
     emit dataSourceChanged();
 }
 

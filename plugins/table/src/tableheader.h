@@ -34,6 +34,7 @@ public:
     void addColumn();
     void removeColumn();
     void initalizeData(int size);
+    void notifyModelReset();
 
     int defaultColumnWidth() const;
     void setDefaultColumnWidth(int defaultColumnSize);

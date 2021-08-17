@@ -21,8 +21,8 @@ CodePalette {
         TableEditor {
             anchors.fill: parent
             table: root.table
+            style: lk.layers.workspace.themes.current.tableStyle
 
-            //TODO: Styling
             //TODO: Move to extension
 //            handleContextMenu: function(item, options){
 //                var pane = null
