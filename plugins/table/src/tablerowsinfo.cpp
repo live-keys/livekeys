@@ -85,7 +85,7 @@ void TableRowsInfo::removeRow(int idx)
             copy[key-1] = m_data[key];
     }
     m_data.swap(copy);
-    --m_num;
+    --m_rowCount;
 
     endRemoveRows();
 }
