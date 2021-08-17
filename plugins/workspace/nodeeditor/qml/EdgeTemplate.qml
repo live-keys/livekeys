@@ -284,7 +284,7 @@ Item {
                 edgeTemplate.padWidth = 25 + (edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
 
                 edgeTemplate.rightSideHeight = Qt.binding(function(){
-                    return p.height - edgeItem.p1.y + (edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
+                    return p.height - edgeItem.p1.y + (edgeItem.sourceItem && edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
                 })
                 edgeTemplate.nodeWidth = Qt.binding(function(){
                     return p.width
