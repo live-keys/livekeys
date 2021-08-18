@@ -64,30 +64,37 @@ public:
     int blockHeight() { return m_blockHeight; }
     int totalOffset();
     void reset();
-    std::vector<LineSection> sections();
-    void contentsChange(int pos, int removed, int added);
 
-    int pixelDrawingOffset(int blockNumber, bool forCursor);
-    int transposeClickedPosition(int y);
-    int totalOffset();
-    int displayLineToSourceLine(int visible);
-    int absoluteToVisible(int abs);
+    // LINE BASED FUNCTIONS
+    int addCollapse(int pos, int num);
+    int removeCollapse(int pos);
+    void addPalette(int pos, int span, QQuickItem* p, int startPos, int endPos);
+    void resizePaletteHeight(QQuickItem* p);
+    void resizePaletteWidth(QQuickItem* p);
+    void removePalette(QQuickItem* p, bool destroy = true);
 
-    bool isHiddenByPalette(int blockNumber);
-    bool isHiddenByCollapse(int blockNumber);
-    int deltaToNextDisplayLine(int blockNumber, bool forCollapse = false);
-    int deltaToPreviousDisplayLine(int blockNumber);
+    std::vector<VisibleSection> visibleSections(int firstLine, int lastLine) const;
+    void signalRefreshAfterCollapseChange(int pos, int delta);
+    int displayLineToSourceLine(int displayLine);
+
+    bool isHiddenByPalette(int lineNumber);
+    bool isHiddenByCollapse(int lineNumber);
+    bool isFirstLineOfCollapse(int lineNumber);
+    int deltaToNextDisplayLine(int lineNumber, bool forCollapse = false);
+    int deltaToPreviousDisplayLine(int lineNumber);
 
     int firstContentLine();
     int lastContentLine();
     int firstDisplayLineBefore(int lineNumber);
 
-    void signalRefreshAfterCollapseChange(int pos, int delta);
+
+    // CHARACTER BASED FUNCTIONS
+    void contentsChange(int pos, int removed, int added);
 
     // PIXEL BASED FUNCTIONS
     int transposeClickedPosition(int y);
     std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect) const;
-    int pixelDrawingOffset(int lineNumber);
+    int pixelDrawingOffset(int lineNumber, bool forCursor);
 
 signals:
     void lineControlCollapsed();
@@ -96,27 +103,32 @@ signals:
     void refreshAfterCollapseChange(int pos, int delta);
     void refreshAfterPaletteChange(int pos, int delta);
 public slots:
-    void setFirstDirtyLine(int dirtyPos);
+    void setFirstDirtyLine(int dirtyLine);
     void lineCountChanged();
-    void simulateLineCountChange(int delta);
+    void simulateLineCountChange(int deltaLines);
     int maxWidth();
 private:
     int addLineSection(LineSection ls);
     int removeLineSection(LineSection ls, bool destroy, bool restoreNestedPalettes = true);
     unsigned insertIntoSorted(LineSection ls);
-    void calculateDisplayLine(unsigned pos);
-    void applyOffsetToSectionsAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible = true);
-    void codeRemovalHandler(int pos, int removed);
-    void codeAddingHandler(int pos, int added);
-    bool handleOffsetsWithinASection(int index, int delta);
 
+    // LINE BASED FUNCTIONS
+    void calculateDisplayLine(unsigned sectionIndex);
+    void applyOffsetToSectionsAfterIndex(unsigned sectionIndex, int offset, bool offsetPositions, bool offsetVisible = true);
+    bool handleOffsetsWithinASection(int sectionIndex, int deltaLines);
     void handleLineCountChanged(int delta, bool& internal);
+
+    // POSITION BASED FUNCTIONS
+    void codeRemovalHandler(int pos, int length);
+    void codeAddingHandler(int pos, int length);
+
 
     std::vector<LineSection> m_sections;
     int m_blockHeight;
     int m_firstDirtyLine;
     int m_prevLineNumber;
     int m_lineNumber;
+    int m_totalOffset;
     TextEdit* m_textEdit;
     int m_maxWidth;
 };

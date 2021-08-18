@@ -96,7 +96,7 @@ void LineControl::addPalette(int pos, int span, QQuickItem *p, int startPos, int
  * This potentially creates offset which needs to be applied to all
  * sections after it
  */
-int LineControl::resizePaletteHeight(QQuickItem *p)
+void LineControl::resizePaletteHeight(QQuickItem *p)
 {
     auto it = m_sections.begin();
     for (; it != m_sections.end(); ++it)
@@ -115,8 +115,6 @@ int LineControl::resizePaletteHeight(QQuickItem *p)
         it->displayLineSpan = newVisibleRange;
         emit refreshAfterPaletteChange(it->lineNumber + it->lineSpan - 1, delta);
     }
-
-    return it->lineNumber;
 }
 
 /**
@@ -124,7 +122,7 @@ int LineControl::resizePaletteHeight(QQuickItem *p)
  * update it in the appropriate line section, as well as reset the
  * maximum width of the space needed to display the total content in the editor
  */
-int LineControl::resizePaletteWidth(QQuickItem *p)
+void LineControl::resizePaletteWidth(QQuickItem *p)
 {
     auto it = m_sections.begin();
     for (; it != m_sections.end(); ++it)
@@ -148,7 +146,7 @@ int LineControl::resizePaletteWidth(QQuickItem *p)
  * \brief Removes a given palette from the sections, optionally destroying it as well if
  * the flag `destroy` is set to true.
  */
-int LineControl::removePalette(QQuickItem *p, bool destroy)
+void LineControl::removePalette(QQuickItem *p, bool destroy)
 {
     unsigned i = 0;
     for (; i < m_sections.size(); ++i)
@@ -156,7 +154,7 @@ int LineControl::removePalette(QQuickItem *p, bool destroy)
          && m_sections[i].palette == p)
             break;
 
-    if (i == m_sections.size()) return -1;
+    if (i == m_sections.size()) return;
     int pos = m_sections[i].lineNumber;
     int range = m_sections[i].lineSpan;
     int delta = m_sections[i].lineSpanDelta();
@@ -325,19 +323,19 @@ int LineControl::totalOffset()
  * \brief Taking into consideration the offsets before a given visible line,
  * we calculate which absolute line of text it represents
  */
-int LineControl::displayLineToSourceLine(int visible)
+int LineControl::displayLineToSourceLine(int displayLine)
 {
     LineSection ls;
-    ls.displayLineNumber = visible;
+    ls.displayLineNumber = displayLine;
     auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareDisplayLines);
 
     int abs = displayLine;
     if (upper != m_sections.begin())
     {
         auto prev = std::prev(upper);
-        if (visible >= prev->displayLineNumber + prev->displayLineSpan)
-            abs = visible - prev->lineNumberDelta() - prev->lineSpanDelta();
-        else if (prev->type == LineSection::Collapsed && visible == prev->displayLineNumber)
+        if (displayLine >= prev->displayLineNumber + prev->displayLineSpan)
+            abs = displayLine - prev->lineNumberDelta() - prev->lineSpanDelta();
+        else if (prev->type == LineSection::Collapsed && displayLine == prev->displayLineNumber)
             abs = prev->lineNumber;
         else abs = -1; // not mapping to an absolute line
     }
@@ -482,7 +480,7 @@ void LineControl::calculateDisplayLine(unsigned pos)
  * is positioned after the given index. Optionally, it moves their positions,
  * as well as their visible positions, depending on the context.
  */
-void LineControl::applyOffsetToSectionsAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible)
+void LineControl::applyOffsetToSectionsAfterIndex(unsigned sectionIndex, int offset, bool offsetPositions, bool offsetVisible)
 {
     std::queue<LineSection*> q;
     for (unsigned i = sectionIndex + 1; i < m_sections.size(); ++i)
@@ -770,7 +768,7 @@ void LineControl::codeAddingHandler(int pos, int added)
  * so we have to handle the inner parts of a collapsed section so we maintain
  * the appropriate structure. Every inner section must be moved accordingly
  */
-bool LineControl::handleOffsetsWithinASection(int index, int delta)
+bool LineControl::handleOffsetsWithinASection(int sectionIndex, int delta)
 {
     // the lines added/removed are contained inside a single section
     LineSection& sec = m_sections[sectionIndex];
@@ -1032,7 +1030,7 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
 /**
  * \brief A test function to simulate change of line count
  */
-void LineControl::simulateLineCountChange(int delta)
+void LineControl::simulateLineCountChange(int deltaLines)
 {
     if (deltaLines == 0) return;
     m_prevLineNumber = m_lineNumber;
@@ -1040,7 +1038,7 @@ void LineControl::simulateLineCountChange(int delta)
 
     bool internal = false;
 
-    handleLineCountChanged(delta, internal);
+    handleLineCountChanged(deltaLines, internal);
 }
 
 int LineControl::maxWidth()
@@ -1058,7 +1056,7 @@ int LineControl::addLineSection(LineControl::LineSection ls)
     // Find sections whose starting position is larger than the one we're currently inserting.
     auto srch = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareLines);
     // This variable stores the visual offset (measured in lines) that this operation creates.
-    int result = 0;
+    int resultLineOffset = 0;
     std::vector<LineSection> nested;
     // Every section that's contained inside the section being inserted is stored in a `nested` container
     while (srch != m_sections.end()
@@ -1108,7 +1106,7 @@ int LineControl::addLineSection(LineControl::LineSection ls)
 
 
     // We add the offset generated by this section alone to the resulting offset
-    result += m_sections[elementPos].lineSpanDelta();
+    resultLineOffset += m_sections[elementPos].lineSpanDelta();
     // We also have to update the sections following this one with the offset it has generated
     if (m_sections[elementPos].displayLineSpan != m_sections[elementPos].lineSpan)
         applyOffsetToSectionsAfterIndex(elementPos, m_sections[elementPos].lineSpanDelta(), false);
@@ -1122,7 +1120,7 @@ int LineControl::addLineSection(LineControl::LineSection ls)
  * destroy it.
  * \returns Line offset created by the execution of this function.
  */
-int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool nesting)
+int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool restoreNestedPalettes)
 {
     auto lower = std::lower_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareLines);
     unsigned index = static_cast<unsigned>(lower-m_sections.begin());
