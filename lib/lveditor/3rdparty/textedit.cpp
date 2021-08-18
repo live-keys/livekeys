@@ -2295,7 +2295,7 @@ void TextEdit::refreshAfterPaletteChange(int pos, int delta)
 void TextEdit::checkResetCollapse(int blockNumber)
 {
     Q_D(TextEdit);
-    if (d->lineControl->isFirstLineOfCollapse(blockNumber))
+    if (d->lineControl->deltaToNextDisplayLine(blockNumber, true) != 0)
     {
         manageExpandCollapse(blockNumber, false);
     }
@@ -2651,7 +2651,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                                 nodeOffset = getDocumentLayout()->blockBoundingRect(block).topLeft();
                                 updateNodeTransform(node, nodeOffset);
 
-                                int offset = d->lineControl->pixelDrawingOffset(block.blockNumber());
+                                int offset = d->lineControl->pixelDrawingOffset(block.blockNumber(), false);
                                 nodeOffset.setY(nodeOffset.y() - offset);
 
                                 nodeStart = block.position();
@@ -3152,7 +3152,7 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
         d->lineControl->setFirstDirtyLine(d->dirtyPosition);
 
-        if (lineControl()->isFirstLineOfCollapse(d->dirtyPosition)){
+        if (lineControl()->deltaToNextDisplayLine(d->dirtyPosition, true) > 0){
             int delta = lineControl()->removeCollapse(d->dirtyPosition);
             lineControl()->signalRefreshAfterCollapseChange(d->dirtyPosition, delta);
         }

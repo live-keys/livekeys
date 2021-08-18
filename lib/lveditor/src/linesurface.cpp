@@ -292,7 +292,7 @@ void LineSurface::updateCollapseSymbols()
         if (userData) {
             if (userData->isCollapsible())
             {
-                if (m_lineControl->isFirstLineOfCollapse(curr))
+                if (m_lineControl->deltaToNextDisplayLine(curr, true) > 0) // is first line of collapse?
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, '>');
                 else
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, 'v');
@@ -550,7 +550,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
                             int offset = m_bounds.first * m_textEdit->lineControl()->blockHeight();
                             if (m_textEdit && m_textEdit->lineControl())
-                                offset += m_textEdit->lineControl()->pixelDrawingOffset(block.blockNumber() + m_bounds.first);
+                                offset += m_textEdit->lineControl()->pixelDrawingOffset(block.blockNumber() + m_bounds.first, false);
                             nodeOffset.setY(nodeOffset.y() - offset);
                         }
 

@@ -7,17 +7,17 @@
 namespace lv {
 
 std::function<bool(LineControl::LineSection, LineControl::LineSection)>
-    LineControl::LineSection::compare = [](LineSection a, LineSection b)->bool {
+    LineControl::LineSection::compareLines = [](LineSection a, LineSection b)->bool {
         return a.lineNumber < b.lineNumber;
     };
 
 std::function<bool(LineControl::LineSection, LineControl::LineSection)>
-    LineControl::LineSection::compareVisible = [](LineSection a, LineSection b)->bool {
+    LineControl::LineSection::compareDisplayLines = [](LineSection a, LineSection b)->bool {
         return a.displayLineNumber < b.displayLineNumber;
     };
 
 std::function<bool(LineControl::LineSection, LineControl::LineSection)>
-    LineControl::LineSection::compareBounds = [](LineSection a, LineSection b)->bool {
+    LineControl::LineSection::compareStartPositions = [](LineSection a, LineSection b)->bool {
         return a.startPosition < b.startPosition;
     };
 
@@ -67,7 +67,6 @@ int LineControl::removeCollapse(int pos)
     return removeLineSection(LineSection(pos, 0, 0, LineSection::Collapsed), false);
 }
 
-
 /**
  * \brief Adds a palette given by its position `pos`, the number of lines of code it's replacing
  * given by `span`, its item `p`, as well as start and end position of the code that it's replacing.
@@ -97,7 +96,7 @@ void LineControl::addPalette(int pos, int span, QQuickItem *p, int startPos, int
  * This potentially creates offset which needs to be applied to all
  * sections after it
  */
-void LineControl::resizePaletteHeight(QQuickItem *p)
+int LineControl::resizePaletteHeight(QQuickItem *p)
 {
     auto it = m_sections.begin();
     for (; it != m_sections.end(); ++it)
@@ -105,16 +104,19 @@ void LineControl::resizePaletteHeight(QQuickItem *p)
 
     if (it == m_sections.end()) return;
 
-    int newdisplayLineSpan = qCeil((p->height() > 0 ? p->height() + 10 : 0)*1.0/ m_blockHeight);
-    int delta = newdisplayLineSpan - it->displayLineSpan;
+    int newVisibleRange = qCeil((p->height() > 0 ? p->height() + 10 : 0)*1.0/ m_blockHeight);
+    int delta = newVisibleRange - it->displayLineSpan;
 
     if (delta != 0)
     {
         unsigned index = static_cast<unsigned>(it - m_sections.begin());
         applyOffsetToSectionsAfterIndex(index, delta, false);
-        it->displayLineSpan = newdisplayLineSpan;
+        m_totalOffset += delta;
+        it->displayLineSpan = newVisibleRange;
         emit refreshAfterPaletteChange(it->lineNumber + it->lineSpan - 1, delta);
     }
+
+    return it->lineNumber;
 }
 
 /**
@@ -122,7 +124,7 @@ void LineControl::resizePaletteHeight(QQuickItem *p)
  * update it in the appropriate line section, as well as reset the
  * maximum width of the space needed to display the total content in the editor
  */
-void LineControl::resizePaletteWidth(QQuickItem *p)
+int LineControl::resizePaletteWidth(QQuickItem *p)
 {
     auto it = m_sections.begin();
     for (; it != m_sections.end(); ++it)
@@ -142,12 +144,11 @@ void LineControl::resizePaletteWidth(QQuickItem *p)
     m_maxWidth = max;
 }
 
-
 /**
  * \brief Removes a given palette from the sections, optionally destroying it as well if
  * the flag `destroy` is set to true.
  */
-void LineControl::removePalette(QQuickItem *p, bool destroy)
+int LineControl::removePalette(QQuickItem *p, bool destroy)
 {
     unsigned i = 0;
     for (; i < m_sections.size(); ++i)
@@ -155,10 +156,11 @@ void LineControl::removePalette(QQuickItem *p, bool destroy)
          && m_sections[i].palette == p)
             break;
 
-    if (i == m_sections.size()) return;
+    if (i == m_sections.size()) return -1;
     int pos = m_sections[i].lineNumber;
     int range = m_sections[i].lineSpan;
     int delta = m_sections[i].lineSpanDelta();
+
 
     removeLineSection(m_sections[i], destroy);
 
@@ -188,11 +190,12 @@ void LineControl::setBlockHeight(int bh)
     {
         if (m_sections[i].type == LineSection::Collapsed) continue;
 
-        int newdisplayLineSpan = qCeil((m_sections[i].palette->height() > 0 ? m_sections[i].palette->height() + 10 : 0)*1.0/ m_blockHeight);
-        if (newdisplayLineSpan != m_sections[i].displayLineSpan)
+        int newVisibleRange = qCeil((m_sections[i].palette->height() > 0 ? m_sections[i].palette->height() + 10 : 0)*1.0/ m_blockHeight);
+        if (newVisibleRange != m_sections[i].displayLineSpan)
         {
-            applyOffsetToSectionsAfterIndex(i, newdisplayLineSpan - m_sections[i].displayLineSpan, false);
-            m_sections[i].displayLineSpan = newdisplayLineSpan;
+            applyOffsetToSectionsAfterIndex(i, newVisibleRange - m_sections[i].displayLineSpan, false);
+            m_sections[i].displayLineSpan = newVisibleRange;
+            m_totalOffset += newVisibleRange - m_sections[i].displayLineSpan;
         }
     }
 }
@@ -202,6 +205,7 @@ void LineControl::reset()
     m_prevLineNumber = m_lineNumber;
     m_lineNumber = 0;
     m_firstDirtyLine = -1;
+    // linesRemoved();
     m_sections.clear();
 }
 
@@ -225,41 +229,41 @@ void LineControl::contentsChange(int pos, int removed, int added)
         codeAddingHandler(pos, added);
 }
 
-
 /**
  * \brief Returns the vertical offset needed when drawing the node for the given
  * lineNumber, or the cursor in that block. It's given in pixels instead of lines.
  *
  */
-int LineControl::pixelDrawingOffset(int lineNumber)
+int LineControl::pixelDrawingOffset(int blockNumber, bool forCursor)
 {
     int offset = 0;
     auto upper = std::upper_bound(m_sections.begin(), m_sections.end(),
-        LineSection(lineNumber, 0, 0, LineSection::Collapsed), LineSection::compare);
+        LineSection(blockNumber, 0, 0, LineSection::Collapsed), LineSection::compareLines);
     if (upper != m_sections.begin() && !m_sections.empty())
     {
-        auto current = std::prev(upper);
-
         // The current section is the first one that's not above the given block number, which means
         // that lineNumber >= current->lineNumber.
-        if (current->type == LineSection::Collapsed && lineNumber == current->lineNumber)
+        auto prev = std::prev(upper);
+
+        if (prev->type == LineSection::Collapsed && blockNumber == prev->lineNumber)
         {
             // If the line we're drawing is the collapsed one, the offset is the
             // difference between its visiblePosition and actual position
-            offset = current->lineNumberDelta();
+            offset = prev->lineNumberDelta();
         }
-        else if (lineNumber < current->lineNumber + current->lineSpan)
+        else
+        if (blockNumber < prev->lineNumber + prev->lineSpan && !forCursor)
         {
             // If the lineNumber is inside a "hidden" part of the section,
             // we need to draw it "outside" of the viewport, which is done
             // by offsetting it in the negative direction
-            offset = -lineNumber - 2;
-        }
-        else if (lineNumber >= current->lineNumber + current->lineSpan)
+            offset = -blockNumber - 2;
+        } else
+        if (blockNumber >= prev->lineNumber + prev->lineSpan)
         {
             // The drawing offset in this case is given by the position offset of the
             // section itself, as well as the offset that it creates on its own
-            offset = current->lineNumberDelta() + current->lineSpanDelta();
+            offset = prev->lineNumberDelta() + prev->lineSpanDelta();
         }
     }
     return offset * m_blockHeight;
@@ -280,7 +284,7 @@ int LineControl::transposeClickedPosition(int y)
     search.displayLineNumber = visibleBlockClicked;
 
     auto upper = std::upper_bound(m_sections.begin(), m_sections.end(),
-        search, LineSection::compareVisible);
+        search, LineSection::compareDisplayLines);
 
     if (upper != m_sections.begin() && !m_sections.empty()) {
         auto prev = std::prev(upper);
@@ -321,19 +325,19 @@ int LineControl::totalOffset()
  * \brief Taking into consideration the offsets before a given visible line,
  * we calculate which absolute line of text it represents
  */
-int LineControl::displayLineToSourceLine(int displayLine)
+int LineControl::displayLineToSourceLine(int visible)
 {
     LineSection ls;
-    ls.displayLineNumber = displayLine;
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
+    ls.displayLineNumber = visible;
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareDisplayLines);
 
     int abs = displayLine;
     if (upper != m_sections.begin())
     {
         auto prev = std::prev(upper);
-        if (displayLine >= prev->displayLineNumber + prev->displayLineSpan)
-            abs = displayLine - prev->lineNumberDelta() - prev->lineSpanDelta();
-        else if (prev->type == LineSection::Collapsed && displayLine == prev->displayLineNumber)
+        if (visible >= prev->displayLineNumber + prev->displayLineSpan)
+            abs = visible - prev->lineNumberDelta() - prev->lineSpanDelta();
+        else if (prev->type == LineSection::Collapsed && visible == prev->displayLineNumber)
             abs = prev->lineNumber;
         else abs = -1; // not mapping to an absolute line
     }
@@ -342,43 +346,31 @@ int LineControl::displayLineToSourceLine(int displayLine)
     return abs;
 }
 
-bool LineControl::isHiddenByPalette(int lineNumber)
+bool LineControl::isHiddenByPalette(int blockNumber)
 {
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(lineNumber, 0, 0, LineSection::Palette), LineSection::compare);
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(blockNumber, 0, 0, LineSection::Palette), LineSection::compareLines);
     if (upper != m_sections.begin() && !m_sections.empty())
     {
         auto prev = std::prev(upper);
         if (prev->type == LineSection::Palette
-                && lineNumber < prev->lineNumber + prev->lineSpan)
+                && blockNumber < prev->lineNumber + prev->lineSpan)
             return true;
     }
     return false;
 }
 
-bool LineControl::isHiddenByCollapse(int lineNumber)
+bool LineControl::isHiddenByCollapse(int blockNumber)
 {
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(lineNumber, 0, 0, LineSection::Palette), LineSection::compare);
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(blockNumber, 0, 0, LineSection::Palette), LineSection::compareLines);
     if (upper != m_sections.begin() && !m_sections.empty())
     {
         auto prev = std::prev(upper);
         if (prev->type == LineSection::Collapsed
-                && lineNumber < prev->lineNumber + prev->lineSpan
-                && lineNumber != prev->lineNumber)
+                && blockNumber < prev->lineNumber + prev->lineSpan
+                && blockNumber != prev->lineNumber)
             return true;
     }
     return false;
-}
-
-bool LineControl::isFirstLineOfCollapse(int lineNumber)
-{
-    auto lower = std::lower_bound(
-        m_sections.begin(), m_sections.end(),
-        LineSection(lineNumber, 0,0,LineSection::Collapsed),
-        LineSection::compare);
-    if (lower == m_sections.end() || lower->type != LineSection::Collapsed)
-        return false;
-
-    return lower->lineNumber == lineNumber;
 }
 
 /**
@@ -386,26 +378,26 @@ bool LineControl::isFirstLineOfCollapse(int lineNumber)
  * We calculate the necessary forward skip in this function. The assumption is
  * that the `lineNumber` corresponds to a visible line
  */
-int LineControl::deltaToNextDisplayLine(int lineNumber)
+int LineControl::deltaToNextDisplayLine(int blockNumber, bool forCollapse)
 {
     auto lower = std::lower_bound(
         m_sections.begin(), m_sections.end(),
-        LineSection(lineNumber, 0,0,LineSection::Collapsed),
-        LineSection::compare);
+        LineSection(blockNumber, 0,0,LineSection::Collapsed),
+        LineSection::compareLines);
     if (lower != m_sections.end())
     {
         switch (lower->type)
         {
         case LineSection::Palette:
-            if (lineNumber + 1 == lower->lineNumber)
+            if (blockNumber + 1 == lower->lineNumber && !forCollapse)
                 return lower->lineSpan;
             break;
         case LineSection::Collapsed:
-            if (lineNumber == lower->lineNumber)
+            if (blockNumber == lower->lineNumber)
                 return lower->lineSpan - 1;
             break;
         case LineSection::Fragment:
-            if (lineNumber + 1 == lower->lineNumber)
+            if (blockNumber + 1 == lower->lineNumber && !forCollapse)
                 return -1;
             break;
         }
@@ -419,16 +411,16 @@ int LineControl::deltaToNextDisplayLine(int lineNumber)
  * We calculate the necessary backwards skip in this function. The assumption is
  * that the `lineNumber` corresponds to a visible line
  */
-int LineControl::deltaToPreviousDisplayLine(int lineNumber)
+int LineControl::deltaToPreviousDisplayLine(int blockNumber)
 {
     auto upper = std::upper_bound(
         m_sections.begin(), m_sections.end(),
-        LineSection(lineNumber, 0,0,LineSection::Collapsed),
-        LineSection::compare);
+        LineSection(blockNumber, 0,0,LineSection::Collapsed),
+        LineSection::compareLines);
     if (upper != m_sections.begin() && !m_sections.empty())
     {
         auto prev = std::prev(upper);
-        if (lineNumber == prev->lineNumber + prev->lineSpan)
+        if (blockNumber == prev->lineNumber + prev->lineSpan)
         switch (prev->type)
         {
         case LineSection::Palette:      return prev->lineSpan;
@@ -440,15 +432,14 @@ int LineControl::deltaToPreviousDisplayLine(int lineNumber)
     return 0;
 }
 
-
 /**
  * \brief Sets the line where there was any change, be it a collapse,
  * palette or text modification, so everything after it is potentially in
  * a wrong state
  */
-void LineControl::setFirstDirtyLine(int dirtyLine)
+void LineControl::setFirstDirtyLine(int dirtyPos)
 {
-    m_firstDirtyLine = dirtyLine;
+    m_firstDirtyLine = dirtyPos;
 }
 
 /**
@@ -472,18 +463,18 @@ void LineControl::lineCountChanged()
 
 unsigned LineControl::insertIntoSorted(LineControl::LineSection ls)
 {
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareLines);
     unsigned position = static_cast<unsigned>(upper - m_sections.begin());
     m_sections.insert(upper, ls);
     return position;
 }
 
-void LineControl::calculateDisplayLine(unsigned sectionIndex)
+void LineControl::calculateDisplayLine(unsigned pos)
 {
     int off = 0;
-    for (unsigned i = 0; i < sectionIndex; ++i)
+    for (unsigned i = 0; i < pos; ++i)
         off += m_sections[i].lineSpanDelta();
-    m_sections[sectionIndex].displayLineNumber = m_sections[sectionIndex].lineNumber + off;
+    m_sections[pos].displayLineNumber = m_sections[pos].lineNumber + off;
 }
 
 /**
@@ -491,7 +482,7 @@ void LineControl::calculateDisplayLine(unsigned sectionIndex)
  * is positioned after the given index. Optionally, it moves their positions,
  * as well as their visible positions, depending on the context.
  */
-void LineControl::applyOffsetToSectionsAfterIndex(unsigned sectionIndex, int offset, bool offsetPositions, bool offsetVisible)
+void LineControl::applyOffsetToSectionsAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible)
 {
     std::queue<LineSection*> q;
     for (unsigned i = sectionIndex + 1; i < m_sections.size(); ++i)
@@ -524,24 +515,24 @@ void LineControl::applyOffsetToSectionsAfterIndex(unsigned sectionIndex, int off
  * we need to remove the appropriate sections that were deleted as well,
  * and also shift everything after accordingly.
  */
-void LineControl::codeRemovalHandler(int pos, int length)
+void LineControl::codeRemovalHandler(int pos, int removed)
 {
     LineSection search;
 
     // Find sections which need to be shifted only.
-    search.startPosition = pos + length;
-    auto safe = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+    search.startPosition = pos + removed;
+    auto safe = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
 
     // Find sections that were affected by the code removal.
     search.startPosition = pos;
-    auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+    auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
 
     bool internal = false;
     if (iter != m_sections.begin())
     {
         iter = std::prev(iter);
 
-        if (iter->startPosition <= pos && pos + length <= iter->endPosition)
+        if (iter->startPosition <= pos && pos + removed <= iter->endPosition)
         {
             internal = true;
             // handling the case when removed text is inside a section (isn't reflected in the visible part of text)
@@ -558,7 +549,7 @@ void LineControl::codeRemovalHandler(int pos, int length)
                     {
                         if (pos >= parent->children[i].startPosition && pos < parent->children[i].endPosition)
                             leftIndex = i;
-                        if (pos + length >= parent->children[i].startPosition && pos + length < parent->children[i].endPosition)
+                        if (pos + removed >= parent->children[i].startPosition && pos + removed < parent->children[i].endPosition)
                             rightIndex = i;
                     }
 
@@ -601,14 +592,15 @@ void LineControl::codeRemovalHandler(int pos, int length)
                 // we shift the appropriate positions of sections that are after
                 // the last affected position
                 for (unsigned i = 0; i < parent->children.size(); ++i){
-                    if (parent->children[i].startPosition > pos + length)
+                    if (parent->children[i].startPosition > pos + removed)
                     {
-                        parent->children[i].startPosition -= length;
-                        parent->children[i].endPosition -= length;
+                        parent->children[i].startPosition -= removed;
+                        parent->children[i].endPosition -= removed;
                     }
                 }
 
-                parent->endPosition -= length;
+                parent->endPosition -= removed;
+
 
                 // if we've reached the end of descending through the hieararchy of sections,
                 // this means that we only need to remove the sections contained between
@@ -617,7 +609,7 @@ void LineControl::codeRemovalHandler(int pos, int length)
                 {
                     for (auto it = parent->children.begin(); it != parent->children.end();)
                     {
-                        if (pos < it->startPosition && it->endPosition < pos + length)
+                        if (pos < it->startPosition && it->endPosition < pos + removed)
                             it = parent->children.erase(it);
                         else ++it;
                     }
@@ -638,7 +630,7 @@ void LineControl::codeRemovalHandler(int pos, int length)
         while (true)
         {
             search.startPosition = pos;
-            auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+            auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
             if (iter != m_sections.begin())
             {
                 iter = std::prev(iter);
@@ -652,6 +644,7 @@ void LineControl::codeRemovalHandler(int pos, int length)
                 {
                     removePalette(iter->palette);
                 } else {
+                    std::vector<LineSection> nested = iter->children;
                     // This might pop out several nested collapses,
                     // which is why we have an infinite loop
                     int position = iter->lineNumber;
@@ -664,8 +657,8 @@ void LineControl::codeRemovalHandler(int pos, int length)
         // Handle the right boundary in a way similar to the one above
         while (true)
         {
-            search.startPosition = pos + length;
-            auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+            search.startPosition = pos + removed;
+            auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
             if (iter != m_sections.begin())
             {
                 iter = std::prev(iter);
@@ -673,12 +666,13 @@ void LineControl::codeRemovalHandler(int pos, int length)
             else break; // no section that contains right boundary anymore
 
             if (iter->type == LineSection::Fragment) break;
-            if (iter->startPosition < pos + length && pos + length < iter->endPosition)
+            if (iter->startPosition < pos + removed && pos + removed < iter->endPosition)
             {
                 if (iter->palette)
                 {
                     removePalette(iter->palette);
                 } else {
+                    std::vector<LineSection> nested = iter->children;
                     int pos = iter->lineNumber;
                     int delta = removeCollapse(pos);
                     signalRefreshAfterCollapseChange(pos, delta);
@@ -690,14 +684,15 @@ void LineControl::codeRemovalHandler(int pos, int length)
         while (true)
         {
             search.startPosition = pos;
-            iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+            iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
 
-            if (iter != m_sections.end() && iter->startPosition < pos + length)
+            if (iter != m_sections.end() && iter->startPosition < pos + removed)
             {
                 if (iter->palette)
                 {
                     removePalette(iter->palette);
                 } else {
+                    std::vector<LineSection> nested = iter->children;
                     int pos = iter->lineNumber;
                     int delta = removeCollapse(pos);
                     signalRefreshAfterCollapseChange(pos, delta);
@@ -707,16 +702,16 @@ void LineControl::codeRemovalHandler(int pos, int length)
             else break;
         }
 
-        search.startPosition = pos + length;
-        safe = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+        search.startPosition = pos + removed;
+        safe = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
     }
 
     // We update the boundaries of sections which are positioned after the removed code
     // TODO: This should probably consider their nested sections as well.
     for (auto it = safe; it != m_sections.end(); ++it)
     {
-        it->startPosition -= length;
-        it->endPosition -= length;
+        it->startPosition -= removed;
+        it->endPosition -= removed;
     }
 
 }
@@ -726,19 +721,18 @@ void LineControl::codeRemovalHandler(int pos, int length)
  * the task of this function, is simpler, in the sense that nothing
  * is being destroyed, merely shifted
  */
-void LineControl::codeAddingHandler(int pos, int length)
+void LineControl::codeAddingHandler(int pos, int added)
 {
     std::queue<LineSection*> q;
 
     LineSection search;
     search.startPosition = pos;
-    auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareBounds);
+    auto iter = std::upper_bound(m_sections.begin(), m_sections.end(), search, LineControl::LineSection::compareStartPositions);
 
     if (iter != m_sections.begin() && !m_sections.empty())
     {
         iter = std::prev(iter);
     }
-
 
     // For every section, nested or otherwise, that was positioned after the text insertion point,
     // we need to shift the appropriate section bounds by the amount of added characters
@@ -756,13 +750,12 @@ void LineControl::codeAddingHandler(int pos, int length)
 
         // If the section contains the text addition point, we shift the round bound only
         if (lsp->startPosition <= pos && pos < lsp->endPosition)
-            lsp->endPosition += length;
-
+            lsp->endPosition += added;
         // If the sections is after the text addition point, we shift both bounds
         if (lsp->startPosition > pos)
         {
-            lsp->startPosition += length;
-            lsp->endPosition += length;
+            lsp->startPosition += added;
+            lsp->endPosition += added;
         }
 
         if (lsp->type == LineSection::Fragment && lsp->lineNumber != 0) // handles end fragment bounds
@@ -777,7 +770,7 @@ void LineControl::codeAddingHandler(int pos, int length)
  * so we have to handle the inner parts of a collapsed section so we maintain
  * the appropriate structure. Every inner section must be moved accordingly
  */
-bool LineControl::handleOffsetsWithinASection(int sectionIndex, int lineDelta)
+bool LineControl::handleOffsetsWithinASection(int index, int delta)
 {
     // the lines added/removed are contained inside a single section
     LineSection& sec = m_sections[sectionIndex];
@@ -794,11 +787,11 @@ bool LineControl::handleOffsetsWithinASection(int sectionIndex, int lineDelta)
             q.push(&lsp->children[x]);
 
         if (lsp->lineNumber <= m_firstDirtyLine && m_firstDirtyLine < lsp->lineNumber + lsp->lineSpan)
-            lsp->lineSpan += lineDelta;
+            lsp->lineSpan += delta;
         if (lsp->lineNumber > m_firstDirtyLine)
         {
-            lsp->lineNumber += lineDelta;
-            lsp->displayLineNumber += lineDelta;
+            lsp->lineNumber += delta;
+            lsp->displayLineNumber += delta;
         }
 
         if (lsp->type == LineSection::Palette)
@@ -806,7 +799,7 @@ bool LineControl::handleOffsetsWithinASection(int sectionIndex, int lineDelta)
             // Considering the new, shifted position of a palette, we place it in the center of its designated spaces
             lsp->palette->setY(lsp->displayLineNumber * m_blockHeight + (lsp->displayLineSpan * m_blockHeight - lsp->palette->height()) / 2 + 6);
         }
-        else if (lsp->type == LineSection::Fragment && lsp->lineNumber != 0)
+        else if (lsp->type == LineSection::Fragment && lsp->lineNumber != 0) // handles end fragment bounds
         {
             // We modify the ending boundary of the end fragment
             lsp->lineSpan = m_lineNumber - lsp->lineNumber;
@@ -823,7 +816,7 @@ bool LineControl::handleOffsetsWithinASection(int sectionIndex, int lineDelta)
  */
 void LineControl::handleLineCountChanged(int delta, bool& internal)
 {
-    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_firstDirtyLine, 0,0,LineSection::Collapsed), LineSection::compare);
+    auto upper = std::upper_bound(m_sections.begin(), m_sections.end(), LineSection(m_firstDirtyLine, 0,0,LineSection::Collapsed), LineSection::compareLines);
 
     if (upper != m_sections.begin() && !m_sections.empty())
     {
@@ -862,7 +855,7 @@ int LineControl::lastContentLine()
 int LineControl::firstDisplayLineBefore(int lineNumber)
 {
     auto upper = std::upper_bound(m_sections.begin(), m_sections.end(),
-        LineSection(lineNumber, 0, 0, LineSection::Collapsed), LineSection::compare);
+        LineSection(lineNumber, 0, 0, LineSection::Collapsed), LineSection::compareLines);
 
     if (upper != m_sections.begin())
     {
@@ -944,10 +937,9 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
     LineSection ls;
     ls.displayLineNumber = firstBlock;
 
-    auto next = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareVisible);
+    auto next = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareDisplayLines);
     decltype(next) curr;
     bool noCurr = false;
-
 
     // curr is the first section that has curr->displayLineNumber <= firstBlock
     if (next != m_sections.begin())
@@ -1040,7 +1032,7 @@ std::vector<VisibleSection> LineControl::visibleSections(int firstBlock, int las
 /**
  * \brief A test function to simulate change of line count
  */
-void LineControl::simulateLineCountChange(int deltaLines)
+void LineControl::simulateLineCountChange(int delta)
 {
     if (deltaLines == 0) return;
     m_prevLineNumber = m_lineNumber;
@@ -1048,7 +1040,7 @@ void LineControl::simulateLineCountChange(int deltaLines)
 
     bool internal = false;
 
-    handleLineCountChanged(deltaLines, internal);
+    handleLineCountChanged(delta, internal);
 }
 
 int LineControl::maxWidth()
@@ -1064,9 +1056,9 @@ int LineControl::maxWidth()
 int LineControl::addLineSection(LineControl::LineSection ls)
 {
     // Find sections whose starting position is larger than the one we're currently inserting.
-    auto srch = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
+    auto srch = std::upper_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareLines);
     // This variable stores the visual offset (measured in lines) that this operation creates.
-    int resultLineOffset = 0;
+    int result = 0;
     std::vector<LineSection> nested;
     // Every section that's contained inside the section being inserted is stored in a `nested` container
     while (srch != m_sections.end()
@@ -1097,7 +1089,6 @@ int LineControl::addLineSection(LineControl::LineSection ls)
 
     ls.children = nested;
 
-
     unsigned elementPos = insertIntoSorted(ls);
 
     // We calculate the visible (line) position of the newly inserted section
@@ -1115,11 +1106,13 @@ int LineControl::addLineSection(LineControl::LineSection ls)
 
     if (ls.paletteWidth > m_maxWidth) m_maxWidth = ls.paletteWidth;
 
+
     // We add the offset generated by this section alone to the resulting offset
-    resultLineOffset += m_sections[elementPos].lineSpanDelta();
+    result += m_sections[elementPos].lineSpanDelta();
     // We also have to update the sections following this one with the offset it has generated
     if (m_sections[elementPos].displayLineSpan != m_sections[elementPos].lineSpan)
         applyOffsetToSectionsAfterIndex(elementPos, m_sections[elementPos].lineSpanDelta(), false);
+    m_totalOffset += m_sections[elementPos].lineSpanDelta();
 
     return resultLineOffset;
 }
@@ -1129,9 +1122,9 @@ int LineControl::addLineSection(LineControl::LineSection ls)
  * destroy it.
  * \returns Line offset created by the execution of this function.
  */
-int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool restoreNestedPalettes)
+int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bool nesting)
 {
-    auto lower = std::lower_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compare);
+    auto lower = std::lower_bound(m_sections.begin(), m_sections.end(), ls, LineSection::compareLines);
     unsigned index = static_cast<unsigned>(lower-m_sections.begin());
     std::vector<LineSection> nested = lower->children;
     int result = 0;
@@ -1142,7 +1135,9 @@ int LineControl::removeLineSection(LineControl::LineSection ls, bool destroy, bo
     }
 
     applyOffsetToSectionsAfterIndex(index, -m_sections[index].lineSpanDelta(), false);
+    m_totalOffset -= lower->lineSpanDelta();
 
+    result -= lower->lineSpanDelta();
     m_sections.erase(lower);
 
     if (restoreNestedPalettes)

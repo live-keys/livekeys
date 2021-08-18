@@ -1081,7 +1081,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isFirstLineOfCollapse(cursor.block().blockNumber())){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
                 textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
@@ -1117,7 +1117,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
       else if (e == QKeySequence::InsertParagraphSeparator || (e->key() == Qt::Key_Return && (e->modifiers() & Qt::ShiftModifier))) {
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isFirstLineOfCollapse(cursor.block().blockNumber())){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
                 textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
@@ -1147,7 +1147,7 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
     else if (e == QKeySequence::Paste) {
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isFirstLineOfCollapse(cursor.block().blockNumber())){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
                 textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
@@ -1190,7 +1190,7 @@ process:
         if (!text.isEmpty() && (text.at(0).isPrint() || text.at(0) == QLatin1Char('\t'))) {
             if (textEdit && textEdit->lineControl())
             {
-                if (textEdit->lineControl()->isFirstLineOfCollapse(cursor.block().blockNumber())){
+                if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                     int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
                     textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
                 }
@@ -1235,7 +1235,7 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QRectF r;
     int offset = 0;
     if (textEdit && textEdit->lineControl())
-        offset = textEdit->lineControl()->pixelDrawingOffset(block.blockNumber());
+        offset = textEdit->lineControl()->pixelDrawingOffset(block.blockNumber(), true);
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;
