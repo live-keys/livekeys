@@ -22,10 +22,10 @@ void LvLineControlTest::addingSingleCollapse()
     QCOMPARE(m_lineControl->sections().size(), 1);
     auto section = m_lineControl->sections()[0];
     QCOMPARE(section.type, LineControl::LineSection::Collapsed);
-    QCOMPARE(section.range, 4);
-    QCOMPARE(section.visibleRange, 1);
-    QCOMPARE(section.position, 10);
-    QCOMPARE(section.visiblePosition, 10);
+    QCOMPARE(section.lineSpan, 4);
+    QCOMPARE(section.displayLineSpan, 1);
+    QCOMPARE(section.lineNumber, 10);
+    QCOMPARE(section.displayLineNumber, 10);
 }
 
 void LvLineControlTest::addingSinglePalette()
@@ -39,10 +39,10 @@ void LvLineControlTest::addingSinglePalette()
     // confirm sortedness
     QCOMPARE(section1.type, LineControl::LineSection::Palette);
     QCOMPARE(section2.type, LineControl::LineSection::Collapsed);
-    QCOMPARE(section1.range, 2);
-    QCOMPARE(section1.visibleRange, 5);
+    QCOMPARE(section1.lineSpan, 2);
+    QCOMPARE(section1.displayLineSpan, 5);
     // check offset of section2
-    QCOMPARE(section2.visiblePosition, 13);
+    QCOMPARE(section2.displayLineNumber, 13);
 }
 
 void LvLineControlTest::closeCollapsed()
@@ -61,16 +61,16 @@ void LvLineControlTest::addACollapseAfterPalette()
     QCOMPARE(m_lineControl->sections()[1].type, LineControl::LineSection::Collapsed);
 
     QCOMPARE(m_lineControl->sections()[0].type, LineControl::LineSection::Palette);
-    QCOMPARE(m_lineControl->sections()[1].visiblePosition, 103);
+    QCOMPARE(m_lineControl->sections()[1].displayLineNumber, 103);
 }
 
 void LvLineControlTest::resizePalette()
 {
     m_lineControl->sections()[0].palette->setHeight(100);
     m_lineControl->resizePaletteHeight(m_lineControl->sections()[0].palette);
-    QCOMPARE(m_lineControl->sections()[0].visibleRange, 8);
-    QCOMPARE(m_lineControl->sections()[1].position, 100);
-    QCOMPARE(m_lineControl->sections()[1].visiblePosition, 106);
+    QCOMPARE(m_lineControl->sections()[0].displayLineSpan, 8);
+    QCOMPARE(m_lineControl->sections()[1].lineNumber, 100);
+    QCOMPARE(m_lineControl->sections()[1].displayLineNumber, 106);
 }
 
 void LvLineControlTest::removePalette()
@@ -80,8 +80,8 @@ void LvLineControlTest::removePalette()
     delete ptr;
     QCOMPARE(m_lineControl->sections().size(), 1);
     QCOMPARE(m_lineControl->sections()[0].type, LineControl::LineSection::Collapsed);
-    QCOMPARE(m_lineControl->sections()[0].visiblePosition, 100);
-    QCOMPARE(m_lineControl->sections()[0].position, 100);
+    QCOMPARE(m_lineControl->sections()[0].displayLineNumber, 100);
+    QCOMPARE(m_lineControl->sections()[0].lineNumber, 100);
 }
 
 void LvLineControlTest::addLines()
@@ -91,24 +91,24 @@ void LvLineControlTest::addLines()
     m_lineControl->addPalette(50, 2, item, 324, 400);
 
 
-    m_lineControl->setDirtyPos(60);
-    m_lineControl->deltaLines(5);
+    m_lineControl->setFirstDirtyLine(60);
+    m_lineControl->simulateLineCountChange(5);
     auto section1 = m_lineControl->sections()[0];
     auto section2 = m_lineControl->sections()[1];
 
-    QCOMPARE(section1.position, 50);
-    QCOMPARE(section2.position, 105); // only the collapse shifted
+    QCOMPARE(section1.lineNumber, 50);
+    QCOMPARE(section2.lineNumber, 105); // only the collapse shifted
 }
 
 void LvLineControlTest::removeLines()
 {
-    m_lineControl->setDirtyPos(40);
-    m_lineControl->deltaLines(-3);
+    m_lineControl->setFirstDirtyLine(40);
+    m_lineControl->simulateLineCountChange(-3);
     auto section1 = m_lineControl->sections()[0];
     auto section2 = m_lineControl->sections()[1];
 
-    QCOMPARE(section1.position, 47);
-    QCOMPARE(section2.position, 102); // both shifted back
+    QCOMPARE(section1.lineNumber, 47);
+    QCOMPARE(section2.lineNumber, 102); // both shifted back
 
     auto ptr = section1.palette;
     clearLineControl();
@@ -118,7 +118,7 @@ void LvLineControlTest::removeLines()
 
 void LvLineControlTest::checkVisibleWithNoSections()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     auto result = m_lineControl->visibleSections(10, 20);
 
@@ -174,7 +174,7 @@ void LvLineControlTest::checkAfterCollapsedSection() {
 
 void LvLineControlTest::checkDocumentSmallerThanViewport()
 {
-    m_lineControl->deltaLines(5);
+    m_lineControl->simulateLineCountChange(5);
     auto result = m_lineControl->visibleSections(0, 10);
 
     QCOMPARE(result.size(), 1);
@@ -186,7 +186,7 @@ void LvLineControlTest::checkDocumentSmallerThanViewport()
 
 void LvLineControlTest::checkBeforePalette()
 {
-    m_lineControl->deltaLines(25);
+    m_lineControl->simulateLineCountChange(25);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(45);
@@ -266,7 +266,7 @@ void LvLineControlTest::checkAfterPalette()
 
 void LvLineControlTest::checkWithFragmentStart()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(0); // only fragments have 0 height
@@ -318,7 +318,7 @@ void LvLineControlTest::checkFragmentStartWithCollapsed()
 
 void LvLineControlTest::checkWithFragmentEnd()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(0);
@@ -373,7 +373,7 @@ void LvLineControlTest::checkFragmentEndWithPalette()
 
 void LvLineControlTest::checkWithTwoCollapses()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     m_lineControl->addCollapse(10, 3);
     m_lineControl->addCollapse(20, 5);
@@ -450,7 +450,7 @@ void LvLineControlTest::checkWithCollapsesAndFragment()
 
 void LvLineControlTest::checkWithTwoNeighboringPaletes()
 {
-    m_lineControl->deltaLines(30);
+    m_lineControl->simulateLineCountChange(30);
 
     palettePtr1 = new QQuickItem;
     palettePtr1->setHeight(45);

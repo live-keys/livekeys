@@ -255,7 +255,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
     cursor.setVisualNavigation(true);
 
     LineControl* lc = textEdit->lineControl();
-    int result = lc->isJumpForwardLine(cursor.block().blockNumber());
+    int result = lc->deltaToNextDisplayLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockEnd() &&(e == QKeySequence::MoveToNextChar || e ==  QKeySequence::MoveToNextWord || e == QKeySequence::MoveToEndOfLine))
@@ -296,7 +296,7 @@ bool TextControlPrivate::cursorMoveKeyEvent(QKeyEvent *e)
 
     }
 
-    result = lc->isJumpBackwardsLine(cursor.block().blockNumber());
+    result = lc->deltaToPreviousDisplayLine(cursor.block().blockNumber());
     if (result != 0)
     {
         if (cursor.atBlockStart() &&(e == QKeySequence::MoveToPreviousChar || e ==  QKeySequence::MoveToPreviousWord || e == QKeySequence::MoveToStartOfLine))
@@ -832,7 +832,7 @@ void TextControl::processEvent(QEvent *e, const QMatrix &matrix)
         ev = static_cast<QMouseEvent *>(e);
         QPointF mousePos = ev->localPos();
         int oldy = mousePos.y();
-        mousePos.setY(d->textEdit->lineControl()->positionOffset(oldy));
+        mousePos.setY(d->textEdit->lineControl()->transposeClickedPosition(oldy));
 #if (QT_VERSION > QT_VERSION_CHECK(5,7,1))
         ev->setLocalPos(mousePos);
 #else
@@ -1081,9 +1081,9 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
 
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
-                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+                textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
         }
 
@@ -1117,9 +1117,9 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
       else if (e == QKeySequence::InsertParagraphSeparator || (e->key() == Qt::Key_Return && (e->modifiers() & Qt::ShiftModifier))) {
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
-                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+                textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
         }
         cursor.insertBlock();
@@ -1147,9 +1147,9 @@ void TextControlPrivate::keyPressEvent(QKeyEvent *e)
     else if (e == QKeySequence::Paste) {
         if (textEdit && textEdit->lineControl())
         {
-            if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+            if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                 int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
-                textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+                textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
             }
         }
         QClipboard::Mode mode = QClipboard::Clipboard;
@@ -1190,9 +1190,9 @@ process:
         if (!text.isEmpty() && (text.at(0).isPrint() || text.at(0) == QLatin1Char('\t'))) {
             if (textEdit && textEdit->lineControl())
             {
-                if (textEdit->lineControl()->isJumpForwardLine(cursor.block().blockNumber(), true) > 0){
+                if (textEdit->lineControl()->deltaToNextDisplayLine(cursor.block().blockNumber(), true) > 0){
                     int delta = textEdit->lineControl()->removeCollapse(cursor.block().blockNumber());
-                    textEdit->lineControl()->collapseChange(cursor.block().blockNumber(), delta);
+                    textEdit->lineControl()->signalRefreshAfterCollapseChange(cursor.block().blockNumber(), delta);
                 }
             }
             cursor.insertText(text);
@@ -1235,7 +1235,7 @@ QRectF TextControlPrivate::rectForPosition(int position) const
     QRectF r;
     int offset = 0;
     if (textEdit && textEdit->lineControl())
-        offset = textEdit->lineControl()->drawingOffset(block.blockNumber(), true);
+        offset = textEdit->lineControl()->pixelDrawingOffset(block.blockNumber(), true);
     if (line.isValid()) {
         qreal x = line.cursorToX(relativePos);
         qreal w = 0;

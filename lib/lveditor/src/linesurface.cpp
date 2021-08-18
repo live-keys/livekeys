@@ -292,7 +292,7 @@ void LineSurface::updateCollapseSymbols()
         if (userData) {
             if (userData->isCollapsible())
             {
-                if (m_lineControl->isJumpForwardLine(curr, true) > 0) // is first line of collapse?
+                if (m_lineControl->deltaToNextDisplayLine(curr, true) > 0) // is first line of collapse?
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, '>');
                 else
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, 'v');
@@ -331,7 +331,7 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     if (!m_document) return;
 
     int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
-    int absBlockNum = m_textEdit->lineControl()->visibleToAbsolute(visibleBlockNumber);
+    int absBlockNum = m_textEdit->lineControl()->displayLineToSourceLine(visibleBlockNumber);
 
     const QTextBlock& matchingBlock = m_textEdit->code()->textDocument()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
@@ -550,7 +550,7 @@ QSGNode *LineSurface::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *upd
 
                             int offset = m_bounds.first * m_textEdit->lineControl()->blockHeight();
                             if (m_textEdit && m_textEdit->lineControl())
-                                offset += m_textEdit->lineControl()->drawingOffset(block.blockNumber() + m_bounds.first, false);
+                                offset += m_textEdit->lineControl()->pixelDrawingOffset(block.blockNumber() + m_bounds.first, false);
                             nodeOffset.setY(nodeOffset.y() - offset);
                         }
 

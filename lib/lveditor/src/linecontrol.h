@@ -30,30 +30,30 @@ public:
     public:
         enum SectionType { Palette, Collapsed, Fragment };
         LineSection(int p, int l, int v, SectionType t):
-            position(p), range(l), visibleRange(v), width(0), type(t), palette(nullptr) {}
+            lineNumber(p), lineSpan(l), displayLineSpan(v), paletteWidth(0), type(t), palette(nullptr) {}
         LineSection(): LineSection(0,0,0, Palette) {}
 
-        static std::function<bool(LineSection, LineSection)> compare;
-        static std::function<bool(LineSection, LineSection)> compareVisible;
-        static std::function<bool(LineSection, LineSection)> compareBounds;
-        int rangeOffset() const;
-        int positionOffset() const;
+        static std::function<bool(LineSection, LineSection)> compareLines;
+        static std::function<bool(LineSection, LineSection)> compareDisplayLines;
+        static std::function<bool(LineSection, LineSection)> compareStartPositions;
+        int lineSpanDelta() const;
+        int lineNumberDelta() const;
 
-        int position;
-        int range;
+        int lineNumber;
+        int lineSpan;
 
-        int visiblePosition;
-        int visibleRange;
+        int displayLineNumber;
+        int displayLineSpan;
 
-        int startPos;
-        int endPos;
+        int startPosition;
+        int endPosition;
 
-        int width;
+        int paletteWidth;
 
         SectionType type;
         QQuickItem* palette;
 
-        std::vector<LineSection> nested;
+        std::vector<LineSection> children;
     };
 
     explicit LineControl(QObject *parent = nullptr);
@@ -70,24 +70,24 @@ public:
     int blockHeight() { return m_blockHeight; }
     void reset();
     std::vector<LineSection> sections();
-    void updateSectionBounds(int pos, int removed, int added);
+    void contentsChange(int pos, int removed, int added);
 
-    int drawingOffset(int blockNumber, bool forCursor);
-    int positionOffset(int y);
+    int pixelDrawingOffset(int blockNumber, bool forCursor);
+    int transposeClickedPosition(int y);
     int totalOffset();
-    int visibleToAbsolute(int visible);
+    int displayLineToSourceLine(int visible);
     int absoluteToVisible(int abs);
 
-    bool hiddenByPalette(int blockNumber);
-    bool hiddenByCollapse(int blockNumber);
-    int isJumpForwardLine(int blockNumber, bool forCollapse = false);
-    int isJumpBackwardsLine(int blockNumber);
+    bool isHiddenByPalette(int blockNumber);
+    bool isHiddenByCollapse(int blockNumber);
+    int deltaToNextDisplayLine(int blockNumber, bool forCollapse = false);
+    int deltaToPreviousDisplayLine(int blockNumber);
 
     int firstContentLine();
     int lastContentLine();
-    int firstBlockOfTextBefore(int lineNumber);
+    int firstDisplayLineBefore(int lineNumber);
 
-    void collapseChange(int pos, int delta);
+    void signalRefreshAfterCollapseChange(int pos, int delta);
 
     std::vector<VisibleSection> visibleSectionsForViewport(const QRect& rect) const;
     std::vector<VisibleSection> visibleSections(int firstLine, int lastLine) const;
@@ -98,25 +98,25 @@ signals:
     void refreshAfterCollapseChange(int pos, int delta);
     void refreshAfterPaletteChange(int pos, int delta);
 public slots:
-    void setDirtyPos(int dirtyPos);
-    void lineNumberChange();
-    void deltaLines(int delta);
+    void setFirstDirtyLine(int dirtyPos);
+    void lineCountChanged();
+    void simulateLineCountChange(int delta);
     int maxWidth();
 private:
     int addLineSection(LineSection ls);
     int removeLineSection(LineSection ls, bool destroy, bool nesting = false);
     unsigned insertIntoSorted(LineSection ls);
-    void calculateVisiblePosition(unsigned pos);
-    void offsetAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible = true);
-    void handleRemovalOfSections(int pos, int removed);
-    void handlePositiveShifting(int pos, int added);
-    bool handleInternalOffsetting(int index, int delta);
+    void calculateDisplayLine(unsigned pos);
+    void applyOffsetToSectionsAfterIndex(unsigned index, int offset, bool offsetPositions, bool offsetVisible = true);
+    void codeRemovalHandler(int pos, int removed);
+    void codeAddingHandler(int pos, int added);
+    bool handleOffsetsWithinASection(int index, int delta);
 
-    void handleLineChange(int delta, bool& internal);
+    void handleLineCountChanged(int delta, bool& internal);
 
     std::vector<LineSection> m_sections;
     int m_blockHeight;
-    int m_dirtyPos;
+    int m_firstDirtyLine;
     int m_prevLineNumber;
     int m_lineNumber;
     TextEdit* m_textEdit;
