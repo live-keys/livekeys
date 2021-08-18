@@ -159,7 +159,6 @@ void LineControl::removePalette(QQuickItem *p, bool destroy)
     int range = m_sections[i].lineSpan;
     int delta = m_sections[i].lineSpanDelta();
 
-
     removeLineSection(m_sections[i], destroy);
 
     // reevaluate max width
@@ -598,7 +597,6 @@ void LineControl::codeRemovalHandler(int pos, int removed)
                 }
 
                 parent->endPosition -= removed;
-
 
                 // if we've reached the end of descending through the hieararchy of sections,
                 // this means that we only need to remove the sections contained between
@@ -1086,6 +1084,7 @@ int LineControl::addLineSection(LineControl::LineSection ls)
     }
 
     ls.children = nested;
+
 
     unsigned elementPos = insertIntoSorted(ls);
 
