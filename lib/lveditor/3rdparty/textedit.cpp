@@ -2295,7 +2295,7 @@ void TextEdit::refreshAfterPaletteChange(int pos, int delta)
 void TextEdit::checkResetCollapse(int blockNumber)
 {
     Q_D(TextEdit);
-    if (d->lineControl->isFirstLineOfCollapse(blockNumber))
+    if (d->lineControl->deltaToNextDisplayLine(blockNumber, true) != 0)
     {
         manageExpandCollapse(blockNumber, false);
     }
@@ -2944,7 +2944,7 @@ void TextEditPrivate::setTextDocument(QTextDocument *doc)
     document->setTextWidth(-1);
     auto rect = q->getDocumentLayout()->blockBoundingRect(document->rootFrame()->begin().currentBlock());
     lineControl->setBlockHeight(static_cast<int>(rect.height()));
-    lineControl->setDirtyPos(0);
+    lineControl->setFirstDirtyLine(0);
     lineControl->lineCountChanged();
 
     if (lineSurface){
@@ -3150,9 +3150,9 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     if (d->document && getDocumentLayout())
     {
         d->dirtyPosition = d->document->findBlock(pos).blockNumber();
-        d->lineControl->setDirtyPos(d->dirtyPosition);
+        d->lineControl->setFirstDirtyLine(d->dirtyPosition);
 
-        if (lineControl()->isFirstLineOfCollapse(d->dirtyPosition)){
+        if (lineControl()->deltaToNextDisplayLine(d->dirtyPosition, true) > 0){
             int delta = lineControl()->removeCollapse(d->dirtyPosition);
             lineControl()->signalRefreshAfterCollapseChange(d->dirtyPosition, delta);
         }
@@ -3436,7 +3436,7 @@ void TextEdit::stateChangeHandler(int blockNumber)
     if (userData && userData->stateChangeFlag())
     {
         userData->setStateChangeFlag(false);
-        d->lineControl->setDirtyPos(block.blockNumber());
+        d->lineControl->setFirstDirtyLine(block.blockNumber());
         d->lineSurface->triggerUpdate();
     }
 #ifdef LV_EDITOR_DEBUG
@@ -4274,7 +4274,7 @@ void TextEdit::handleCursorDuringAddingSection()
     QTextCursor cursor = d->control->textCursor();
     int cursorBlock = cursor.block().blockNumber();
 
-    int firstBlock = d->lineControl->firstVisibleLineBefore(cursorBlock);
+    int firstBlock = d->lineControl->firstDisplayLineBefore(cursorBlock);
     if (firstBlock != cursorBlock){
         cursor.beginEditBlock();
         for (int i = 0; i < cursorBlock-firstBlock; i++)
