@@ -74,7 +74,6 @@ void TableRowsInfo::removeRow(int idx)
 {
     beginRemoveRows(QModelIndex(), idx, idx);
     m_contentHeight -= rowHeight(idx);
-    emit contentHeightChanged();
     m_data.remove(idx);
     QList<int> keys = m_data.keys();
     QMap<int, RowData*> copy;
@@ -84,6 +83,7 @@ void TableRowsInfo::removeRow(int idx)
         else
             copy[key-1] = m_data[key];
     }
+
     m_data.swap(copy);
     --m_rowCount;
 

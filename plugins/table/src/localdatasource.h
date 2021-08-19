@@ -2,6 +2,7 @@
 #define LVLOCALDATASOURCE_H
 
 #include <QObject>
+#include <QJSValue>
 #include "tabledatasource.h"
 
 namespace lv{
@@ -21,10 +22,12 @@ public:
     void addRow() override;
     void addColumn() override;
     void removeColumn(int idx) override;
+    void removeRow(int idx) override;
     int totalColumns() const override;
+    QList<QString> columnNames() const override;
 
 public slots:
-    void readFromFile(const QString& path);
+    void readFromFile(const QString& path, const QJSValue& options);
     void writeToFile(const QString& path);
 
 private:

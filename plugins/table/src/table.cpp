@@ -131,8 +131,7 @@ void Table::removeRow(int idx)
         return;
 
     beginRemoveRows(QModelIndex(), idx, idx);
-    // TODO: Remove row in m_dataSource
-    // m_data.erase(m_data.begin() + idx);
+    m_dataSource->removeRow(idx);
     m_rowModel->removeRow(idx);
 
     endRemoveRows();
@@ -180,8 +179,11 @@ void Table::__dataSourceAboutToLoad(){
 void Table::__dataSourceFinished(){
     m_rowModel->notifyModelReset(m_dataSource->totalRows());
     m_headerModel->notifyModelReset();
-    for ( int i = 0; i < m_dataSource->totalColumns(); ++i ){
-        m_headerModel->addColumn();
+
+    auto names = m_dataSource->columnNames();
+
+    for ( int i = 0; i < names.size(); ++i ){
+        m_headerModel->addColumn(names[i]);
     }
     endResetModel();
 }

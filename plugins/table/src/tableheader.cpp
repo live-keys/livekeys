@@ -46,10 +46,13 @@ bool TableHeader::setData(const QModelIndex &index, const QVariant &, int)
     return true;
 }
 
-void TableHeader::addColumn()
+void TableHeader::addColumn(const QString &name)
 {
     beginInsertColumns(QModelIndex(), m_data.size(), m_data.size());
-    m_data.push_back(createColumnData(m_data.size()));
+    auto modelData = createColumnData(m_data.size());
+    if ( !name.isEmpty() )
+        modelData.name = name;
+    m_data.push_back(modelData);
     endInsertColumns();
 
 }

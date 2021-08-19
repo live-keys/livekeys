@@ -20,8 +20,9 @@ public:
     virtual void addRow() = 0;
     virtual void addColumn() = 0;
     virtual void removeColumn(int idx) = 0;
+    virtual void removeRow(int idx) = 0;
     virtual int totalColumns() const = 0;
-
+    virtual QList<QString> columnNames() const = 0;
 
     void beginLoadData();
     void endLoadData();

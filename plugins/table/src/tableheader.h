@@ -31,7 +31,7 @@ public:
     bool setData(const QModelIndex &index, const QVariant &value = QVariant(), int role = Qt::EditRole) override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void addColumn();
+    void addColumn(const QString& name = "");
     void removeColumn(int idx);
     void initalizeData(int size);
     void notifyModelReset();
