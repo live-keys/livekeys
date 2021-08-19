@@ -211,7 +211,7 @@ std::vector<LineControl::LineSection> LineControl::sections()
 }
 
 /**
- * \brief Serves as a listener for changes in the text document.
+ * \brief Main listener for changes in the text document.
  * Calls appropriate handlers in case text was either removed or added.
  */
 void LineControl::contentsChange(int pos, int removed, int added)
@@ -224,7 +224,6 @@ void LineControl::contentsChange(int pos, int removed, int added)
     if (added > 0)
         codeAddingHandler(pos, added);
 }
-
 
 /**
  * \brief Returns the vertical offset needed when drawing the node for the given
@@ -439,7 +438,7 @@ int LineControl::offsetToPreviousVisibleLine(int blockNumber)
 
 
 /**
- * \brief Returns the line where there was any change, be it a collapse,
+ * \brief Sets the line where there was any change, be it a collapse,
  * palette or text modification, so everything after it is potentially in
  * a wrong state
  */
