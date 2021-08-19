@@ -197,12 +197,13 @@ void Table::assignDataSource(TableDataSource *ds){
         disconnect(m_dataSource, &TableDataSource::dataLoaded, this, &Table::__dataSourceFinished);
     }
 
+    __dataSourceAboutToLoad();
     m_dataSource = ds;
     if ( m_dataSource ){
         connect(m_dataSource, &TableDataSource::dataAboutToLoad, this, &Table::__dataSourceAboutToLoad);
         connect(m_dataSource, &TableDataSource::dataLoaded, this, &Table::__dataSourceFinished);
     }
-
+    __dataSourceFinished();
 }
 
 void Table::setDataSource(TableDataSource *dataSource)
