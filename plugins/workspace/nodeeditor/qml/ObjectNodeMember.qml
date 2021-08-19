@@ -62,7 +62,7 @@ Item{
         port.label = root.propertyName + " In"
         port.y = Qt.binding(
             function(){
-                if (!root.node.item)
+                if (!root.node || !root.node.item)
                     return 0
                 return root.node.item.paletteListContainer.height +
                        root.y +

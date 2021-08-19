@@ -243,7 +243,6 @@ Item {
             PathLine {
                 x: edgeItem.p1.x + edgeTemplate.padWidth
                 y: edgeTemplate.p1y
-
             }
 
             PathLine {
@@ -274,7 +273,8 @@ Item {
         target: edgeItem
         ignoreUnknownSignals: false
         function onSourceItemChanged(){
-            if (!edgeItem.sourceItem) return
+            if (!edgeItem.sourceItem)
+                return
             var p = edgeItem.sourceItem
 
             while (p && p.objectName !== "objectNode"){
@@ -284,7 +284,9 @@ Item {
                 edgeTemplate.padWidth = 25 + (edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
 
                 edgeTemplate.rightSideHeight = Qt.binding(function(){
-                    return p.height - edgeItem.p1.y + (edgeItem.sourceItem && edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length*5 : 0)
+                    var calculatedY = edgeItem && edgeItem.sourceItem && edgeItem.sourceItem.objectProperty ? edgeItem.sourceItem.objectProperty.y : 0
+                    var result = p.height - edgeItem.p1.y - calculatedY + (edgeItem.sourceItem && edgeItem.sourceItem.outEdges ? edgeItem.sourceItem.outEdges.length * 5 : 0)
+                    return result
                 })
                 edgeTemplate.nodeWidth = Qt.binding(function(){
                     return p.width
@@ -335,5 +337,4 @@ Item {
             }
         }
     }
-
 }
