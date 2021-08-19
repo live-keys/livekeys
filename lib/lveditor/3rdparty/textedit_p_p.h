@@ -72,25 +72,34 @@ public:
     class NodeAction {
     public:
         enum NodeActionType {
-            Delete, Create, Shift, Refresh, UpdateViewport,
-            DeleteRange, LineChange, EndPoint
+            Delete, Create, Shift, RefreshLines, UpdateViewport,
+            DeleteRange, LineCountChange, EndPoint
         };
 
         NodeAction(NodeActionType t, QString debug = QString(""))
             : type(t)
             , debugMessage(debug)
-            , yShift(0)
-            , position(0)
-            , offset(0)
-            , internal(false) {}
+            , yPixelShift(0)
+            , lineNumber(0)
+            , lineSpan(0)
+            , insideManagedSection(false) {}
 
         NodeActionType type;
         std::set<int> nodeNumbers;
         QString debugMessage;
-        int yShift;
-        int position;
-        int offset;
-        bool internal;
+        int yPixelShift;
+        int lineNumber;
+        int lineSpan;
+        bool insideManagedSection;
+
+        QString nodeNumbersToString(QString suffix = "\n"){
+            QString result;
+            for ( auto it = nodeNumbers.begin(); it != nodeNumbers.end(); ++it ){
+                result += QString::number(*it) + " ";
+            }
+            result += suffix;
+            return result;
+        }
     };
 
     class Node
@@ -283,7 +292,7 @@ public:
     QRect viewport;
     int totalHeight;
     int totalWidth;
-    std::vector<VisibleSection> sectionsForViewport;
+    std::vector<VisibleSection> displayedSectionsInViewport;
     std::deque<NodeAction> actionQueue;
     std::vector<std::pair<int, QQuickItem*>> displayedPalettes;
 

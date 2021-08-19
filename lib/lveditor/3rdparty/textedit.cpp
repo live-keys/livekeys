@@ -1886,8 +1886,8 @@ void TextEdit::refreshAfterCollapseChange(int pos, int delta)
 
     Action as(Action::Shift, "refreshAfterCollapseChange");
     int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
-    as.yShift = delta*lineHeight;
-    as.position = pos;
+    as.yPixelShift = delta*lineHeight;
+    as.lineNumber = pos;
     d->actionQueue.push_back(as);
 
     Action au(Action::UpdateViewport, "refreshAfterCollapseChange");
@@ -2209,11 +2209,11 @@ void TextEdit::shiftTextNodes(int delta, int pos, bool internal)
 {
     Q_D(TextEdit);
 
-    Action alc(Action::LineChange, "shiftTextNodes");
+    Action alc(Action::LineCountChange, "shiftTextNodes");
 
-    alc.position = pos;
-    alc.offset = delta;
-    alc.internal = internal;
+    alc.lineNumber = pos;
+    alc.lineSpan = delta;
+    alc.insideManagedSection = internal;
 
     d->actionQueue.push_back(alc);
 
@@ -2230,8 +2230,8 @@ void TextEdit::deleteAllTextNodes(QString)
 {
     Q_D(TextEdit);
     Action adr(Action::DeleteRange, "deleteAllTextNodes");
-    adr.position = 0;
-    adr.offset = INT_MAX;
+    adr.lineNumber = 0;
+    adr.lineSpan = INT_MAX;
     d->actionQueue.push_back(adr);
 
 }
@@ -2239,9 +2239,9 @@ void TextEdit::deleteAllTextNodes(QString)
 void TextEdit::createAllViewportNodes(QString)
 {
     Q_D(TextEdit);
-    if (!d->sectionsForViewport.empty()){
+    if (!d->displayedSectionsInViewport.empty()){
         Action ac(Action::Create, "createAllViewportNodes");
-        for (auto section: d->sectionsForViewport)
+        for (auto section: d->displayedSectionsInViewport)
         {
             if (section.palette) {
                 section.palette->setVisible(true);
@@ -2274,9 +2274,9 @@ void TextEdit::refreshAfterPaletteChange(int pos, int delta)
     updateSectionsForViewport();
 
     Action as(Action::Shift, "refreshAfterPaletteChange");
-    as.position = pos;
+    as.lineNumber = pos;
     int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
-    as.yShift = delta*lineHeight;
+    as.yPixelShift = delta*lineHeight;
     d->actionQueue.push_back(as);
 
     Action au(Action::UpdateViewport, "refreshAfterPaletteChange");
@@ -2362,11 +2362,11 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
             else
             {
 #ifdef DEBUG_ACTIONS
-                ADEBUG << "Complete Refresh";
+                ADEBUG << "CompleteRefresh{}";
 #endif
                 d->actionQueue.clear();
                 Action ad(Action::Delete);
-                ad.internal = true;
+                ad.insideManagedSection = true; // when this is true, it deletes everything
                 d->actionQueue.push_back(ad);
                 d->actionQueue.push_back(Action::UpdateViewport);
                 break;
@@ -2381,59 +2381,59 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
         TextNodeIterator nodeIterator = d->textNodeMap.begin();
 
-        if (action.type == Action::LineChange)
+        if (action.type == Action::LineCountChange)
         {
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "LINE CHANGE ACTION" << action.position << action.offset;
+            ADEBUG << "ACTION: LineCountChange{ sender:" << action.debugMessage << "; line:" << action.lineNumber << ";delta:" << action.lineSpan << "}";
 #endif
-            if (action.offset > 0)
+            if (action.lineSpan > 0)
             {
-                while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::LineChange)
+                while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::LineCountChange)
                 {
                     auto next = d->actionQueue.front(); d->actionQueue.pop_front();
-                    if (action.position + action.offset == next.position && next.offset > 0){
-                        action.offset += next.offset;
-                        action.internal = action.internal || next.internal;
+                    if (action.lineNumber + action.lineSpan == next.lineNumber && next.lineSpan > 0){
+                        action.lineSpan += next.lineSpan;
+                        action.insideManagedSection = action.insideManagedSection || next.insideManagedSection;
                     }
                 }
 
-                Action ar(Action::Refresh, "updatePaintNode lc 1");
-                ar.nodeNumbers.insert(action.position);
+                Action ar(Action::RefreshLines, "updatePaintNode:LineChange#1");
+                ar.nodeNumbers.insert(action.lineNumber);
 
-                Action as(Action::Shift, "updatePaintNode lc 2");
+                Action as(Action::Shift, "updatePaintNode:LineChange#2");
                 int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
-                as.yShift = action.internal ? 0:action.offset * lineHeight;
-                as.offset = action.offset;
-                as.position = action.position;
+                as.yPixelShift = action.insideManagedSection ? 0 : action.lineSpan * lineHeight;
+                as.lineSpan = action.lineSpan;
+                as.lineNumber = action.lineNumber;
 
-                Action au(Action::UpdateViewport, "updatePaintNode lc 3");
+                Action au(Action::UpdateViewport, "updatePaintNode:LineChange#3");
 
                 d->actionQueue.push_front(au);
                 d->actionQueue.push_front(as);
                 d->actionQueue.push_front(ar);
             }
 
-            if (action.offset < 0)
+            if (action.lineSpan < 0)
             {
-                while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::LineChange)
+                while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::LineCountChange)
                 {
                     auto next = d->actionQueue.front(); d->actionQueue.pop_front();
-                    if (next.offset < 0 && next.position - next.offset == action.position){
-                        action.position = next.position;
-                        action.offset += next.offset;
-                        action.internal = action.internal || next.internal;
+                    if (next.lineSpan < 0 && next.lineNumber - next.lineSpan == action.lineNumber){
+                        action.lineNumber = next.lineNumber;
+                        action.lineSpan += next.lineSpan;
+                        action.insideManagedSection = action.insideManagedSection || next.insideManagedSection;
                     }
                 }
 
                 Action adr(Action::DeleteRange, "updatePaintNode lc 4");
-                adr.position = action.position;
-                adr.offset = action.offset;
+                adr.lineNumber = action.lineNumber;
+                adr.lineSpan = action.lineSpan;
 
                 Action as(Action::Shift, "updatePaintNode lc 5");
                 int lineHeight = static_cast<int>(d->document->documentLayout()->blockBoundingRect(d->document->findBlockByNumber(0)).height());
-                as.yShift = action.internal ? 0: action.offset * lineHeight;
-                as.offset = action.offset;
-                as.position = action.position;
+                as.yPixelShift = action.insideManagedSection ? 0: action.lineSpan * lineHeight;
+                as.lineSpan = action.lineSpan;
+                as.lineNumber = action.lineNumber;
 
                 Action au(Action::UpdateViewport, "updatePaintNode lc 6");
 
@@ -2443,16 +2443,15 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
             }
         }
 
-        if (action.type == Action::Refresh)
+        if (action.type == Action::RefreshLines)
         {
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "REFRESH ACTION array" << action.debugMessage;
+            ADEBUG << "ACTION: RefreshLines{ textEdit:" << static_cast<void*>(this) << "; sender:" << action.debugMessage << "; " <<  "nodes:" <<  action.nodeNumbersToString("") << "}";
 #endif
             std::set<int> refresh;
             refresh = action.nodeNumbers;
 
-            while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::Refresh)
+            while (!d->actionQueue.empty() && d->actionQueue.front().type == Action::RefreshLines)
             {
                 refresh.insert(d->actionQueue.front().nodeNumbers.begin(), d->actionQueue.front().nodeNumbers.end());
                 d->actionQueue.pop_front();
@@ -2467,8 +2466,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
             for (int d: deleted) refresh.erase(d);
 
 
-            Action ad(Action::Delete, "updatePaintNode");
-            Action ac(Action::Create, "updatePaintNode");
+            Action ad(Action::Delete, "updatePaintNode:Refresh");
+            Action ac(Action::Create, "updatePaintNode:Refresh");
             ad.nodeNumbers = refresh;
             ac.nodeNumbers = refresh;
 
@@ -2479,8 +2478,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         if (action.type == Action::UpdateViewport)
         {
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "UPDATE VIEWPORT action: " << action.debugMessage;
+            ADEBUG << "ACTION: UpdateViewPort{ textEdit:" << static_cast<void*>(this) << "; sender:" << action.debugMessage << "}";
 #endif
 
             std::set<int> available;
@@ -2493,7 +2491,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
             updateSectionsForViewport();
             std::set<int> viewport;
-            for (auto sec: d->sectionsForViewport)
+            for (auto sec: d->displayedSectionsInViewport)
             {
                 if (sec.palette) continue;
 
@@ -2502,8 +2500,8 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                 }
             }
 
-            Action ad2(Action::Delete, "updatePaintNode 4");
-            Action ac2(Action::Create, "updatePaintNode 5");
+            Action ac2(Action::Create, "updatePaintNode:UpdateViewPort#1");
+            Action ad2(Action::Delete, "updatePaintNode:UpdateViewPort#2");
 
 
             std::set_difference(viewport.begin(), viewport.end(),
@@ -2522,12 +2520,12 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         {
 #ifdef DEBUG_ACTIONS
             ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "Delete Range action: " << action.position << action.offset;
+            ADEBUG << "Delete Range action: " << action.lineNumber << action.lineSpan;
 #endif
             Action ad(Action::Delete, "updatePaintNode");
             for (auto n: d->textNodeMap)
             {
-                if (n->blockNumber() >= action.position && n->blockNumber() <= action.position + qAbs(action.offset))
+                if (n->blockNumber() >= action.lineNumber && n->blockNumber() <= action.lineNumber + qAbs(action.lineSpan))
                     ad.nodeNumbers.insert(n->blockNumber());
             }
             d->actionQueue.push_front(ad);
@@ -2535,15 +2533,9 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
         if (action.type == Action::Delete)
         {
-            if (action.nodeNumbers.empty() && !action.internal) continue;
+            if (action.nodeNumbers.empty() && !action.insideManagedSection) continue;
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "Delete action: " << action.nodeNumbers.size() << action.debugMessage;
-
-            QString blocks;
-            for (auto num: action.nodeNumbers)
-                blocks += (std::to_string(num) + " ").c_str();
-            ADEBUG << blocks;
+            ADEBUG << "ACTION: Delete{ textEdit:" << static_cast<void*>(this) << "; sender:" << action.debugMessage << "; " <<  "nodes:" <<  action.nodeNumbersToString("") << "}";
 #endif
 
 #ifdef DEBUG_ACTIONS
@@ -2555,7 +2547,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 #endif
             while (nodeIterator != d->textNodeMap.end())
             {
-                if (action.internal || action.nodeNumbers.find((*nodeIterator)->blockNumber()) != action.nodeNumbers.end())
+                if (action.insideManagedSection || action.nodeNumbers.find((*nodeIterator)->blockNumber()) != action.nodeNumbers.end())
                 {
                     rootNode->removeChildNode((*nodeIterator)->textNode());
                     delete (*nodeIterator)->textNode();
@@ -2578,17 +2570,10 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
         {
             if (action.nodeNumbers.empty()) continue;
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "Create action: " << action.nodeNumbers.size() << action.debugMessage;
-
-            QString blocks;
-            for (auto num: action.nodeNumbers)
-                blocks += (std::to_string(num) + " ").c_str();
-            ADEBUG << blocks;
+            ADEBUG << "ACTION: Create{ textEdit:" << static_cast<void*>(this) << "; sender:" << action.debugMessage << "; " <<  "nodes:" <<  action.nodeNumbersToString("") << "}";
 #endif
 
 #ifdef DEBUG_ACTIONS
-
             QString nodeMapStr;
             for (auto num: d->textNodeMap)
                 nodeMapStr += (std::to_string(num->blockNumber()) + " ").c_str();
@@ -2678,9 +2663,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
 
         if (action.type == Action::Shift) {
 #ifdef DEBUG_ACTIONS
-            ADEBUG << "action from textEdit: " << static_cast<void*>(this);
-            ADEBUG << "Shift action: " << action.position << action.offset << action.yShift;
-            ADEBUG << action.debugMessage;
+            ADEBUG << "ACTION: Shift{ textEdit:" << static_cast<void*>(this) << "; sender:" << action.debugMessage << "; " << ";line:" << action.lineNumber << ";span:" << action.lineSpan << ";yPixelShift:" << action.yPixelShift << "}";
 #endif
 
 #ifdef DEBUG_ACTIONS
@@ -2691,7 +2674,7 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
             ADEBUG << "< nodeMap: " << nodeMapStr;
 #endif
 
-            while (nodeIterator != d->textNodeMap.end() && (*nodeIterator)->blockNumber() <= action.position) ++nodeIterator;
+            while (nodeIterator != d->textNodeMap.end() && (*nodeIterator)->blockNumber() <= action.lineNumber) ++nodeIterator;
 #ifdef DEBUG_ACTIONS
             QString shifted;
 #endif
@@ -2701,9 +2684,9 @@ QSGNode *TextEdit::updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *update
                 shifted += (std::to_string((*nodeIterator)->blockNumber()) + " ").c_str();
 #endif
                 QMatrix4x4 transformMatrix = (*nodeIterator)->textNode()->matrix();
-                transformMatrix.translate(0.0, static_cast<float>(action.yShift));
+                transformMatrix.translate(0.0, static_cast<float>(action.yPixelShift));
                 (*nodeIterator)->textNode()->setMatrix(transformMatrix);
-                (*nodeIterator)->moveBlockNumber(action.offset);
+                (*nodeIterator)->moveBlockNumber(action.lineSpan);
                 ++nodeIterator;
             }
 
@@ -3201,7 +3184,7 @@ void TextEdit::updateSelection()
     if (d->control->textCursor().hasSelection() || d->hadSelection) {
         std::set<int> dirty = markDirtyNodesForRange(qMin(d->lastSelectionStart, d->control->textCursor().selectionStart()), qMax(d->control->textCursor().selectionEnd(), d->lastSelectionEnd), 0);
 
-        Action ar(Action::Refresh, "updateSelection");
+        Action ar(Action::RefreshLines, "updateSelection");
         for (auto nodeNum: dirty)
         {
             auto iter = d->textNodeMap.begin() + nodeNum;
@@ -3450,7 +3433,7 @@ void TextEdit::invalidateBlockRange(int first, int last)
 
     std::set<int> inRange;
 
-    for (auto sec: d->sectionsForViewport)
+    for (auto sec: d->displayedSectionsInViewport)
     {
         if (last == -1) last = d->document->blockCount()-1;
         if (sec.palette) continue;
@@ -3465,14 +3448,14 @@ void TextEdit::invalidateBlockRange(int first, int last)
 
     polish();
 
-    Action ar(Action::Refresh, "invalidateBlockRange");
+    Action ar(Action::RefreshLines, "invalidateBlockRange");
     if (d->lineSurface)
         d->lineSurface->triggerUpdate();
 
     ar.nodeNumbers = inRange;
     if (isComponentComplete()) {
         updateSize();
-        if (d->actionQueue.empty() || d->actionQueue.back().type != Action::LineChange)
+        if (d->actionQueue.empty() || d->actionQueue.back().type != Action::LineCountChange)
             d->actionQueue.push_back(ar);
 
         d->actionQueue.push_back(Action::EndPoint);
@@ -4131,7 +4114,7 @@ void TextEdit::setViewport(QRect view)
 
     d->viewport = view;
     updateSize();
-    auto oldSections = d->sectionsForViewport;
+    auto oldSections = d->displayedSectionsInViewport;
     updateSectionsForViewport();
     emit viewportChanged();
 
@@ -4152,7 +4135,7 @@ void TextEdit::setViewport(QRect view)
             oldNodes.insert(sec.start + i);
     }
 
-    for (auto sec: d->sectionsForViewport)
+    for (auto sec: d->displayedSectionsInViewport)
     {
         if (sec.palette)
         {
@@ -4185,7 +4168,7 @@ void TextEdit::resetLineControl()
 void TextEdit::updateSectionsForViewport()
 {
     Q_D(TextEdit);
-    d->sectionsForViewport = d->lineControl->visibleSectionsForViewport(d->viewport);
+    d->displayedSectionsInViewport = d->lineControl->visibleSectionsForViewport(d->viewport);
 }
 
 int TextEdit::totalHeight() const
