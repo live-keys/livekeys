@@ -292,7 +292,7 @@ void LineSurface::updateCollapseSymbols()
         if (userData) {
             if (userData->isCollapsible())
             {
-                if (m_lineControl->isFirstLineOfCollapse(curr))
+                if (m_lineControl->deltaToNextDisplayLine(curr, true) > 0) // is first line of collapse?
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, '>');
                 else
                     changeLastCharInViewportDocumentBlock(curr-m_bounds.first, 'v');
@@ -331,7 +331,7 @@ void LineSurface::mousePressEvent(QMouseEvent* event)
     if (!m_document) return;
 
     int visibleBlockNumber = static_cast<int>(event->localPos().y()) / m_textEdit->lineControl()->blockHeight();
-    int absBlockNum = m_textEdit->lineControl()->visibleLineToAbsoluteLine(visibleBlockNumber);
+    int absBlockNum = m_textEdit->lineControl()->displayLineToSourceLine(visibleBlockNumber);
 
     const QTextBlock& matchingBlock = m_textEdit->code()->textDocument()->findBlockByNumber(absBlockNum);
     const QTextBlock& lineDocBlock = m_document->findBlockByNumber(absBlockNum - m_bounds.first);
