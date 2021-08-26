@@ -31,10 +31,12 @@ Module {
     Component {
         name: "QProjectionMapper"
         prototype: "QObject"
+        defaultProperty: "surfaces"
         exports: ["lcvimgproc/ProjectionMapper 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "backgroundImage"; type: "QMat"; isPointer: true }
         Property { name: "result"; type: "QMat"; isPointer: true }
+        Property { name: "surfaces"; type: "QObject"; isList: true; isReadonly: true }
     }
     Component {
         name: "QCvtColor"

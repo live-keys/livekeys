@@ -39,7 +39,7 @@ void QProjectionMapper::setBackgroundImage(QMat *backgroundImage)
 
 void QProjectionMapper::removeSurface(QProjectionSurface *surface)
 {
-    unsigned idx = 0;
+    int idx = 0;
     for (; idx < m_surfaces.size(); ++idx)
         if (m_surfaces[idx] == surface) break;
 
@@ -53,7 +53,7 @@ void QProjectionMapper::removeSurface(QProjectionSurface *surface)
 
 void QProjectionMapper::addSurface(QProjectionSurface *surface)
 {
-    unsigned idx = 0;
+    int idx = 0;
     for (; idx < m_surfaces.size(); ++idx)
         if (m_surfaces[idx] == surface) return;
 
@@ -70,7 +70,8 @@ int QProjectionMapper::numOfSurfaces()
 
 QProjectionSurface *QProjectionMapper::surfaceAt(int idx)
 {
-    if (idx < 0 || idx >= m_surfaces.size()) return nullptr;
+    if (idx < 0 || idx >= m_surfaces.size())
+        return nullptr;
     return m_surfaces[idx];
 }
 
@@ -91,9 +92,9 @@ void QProjectionMapper::updateModel()
         return;
     }
 
-
     auto engine = qmlEngine(this);
-    if (!engine) return;
+    if (!engine)
+        return;
     QJSValue result = engine->newArray(m_surfaces.size());
     for ( int i = 0; i < m_surfaces.size(); ++i ){
         auto id = qmlContext(m_surfaces[i])->nameForObject(m_surfaces[i]);
@@ -144,8 +145,9 @@ QMat *QProjectionMapper::applySurfaces(bool skipFocused, int idx)
     if (!m_backgroundImage) return nullptr;
     QGeometry g;
     QMat* temp = m_backgroundImage->clone();
-    for (unsigned i = 0; i < m_surfaces.size(); ++i){
-        if (skipFocused && i == idx) continue;
+    for (int i = 0; i < m_surfaces.size(); ++i){
+        if (skipFocused && i == idx)
+            continue;
         if (m_surfaces[i]->destination().isNull()) continue;
         QMat* wrap = g.perspectiveProjection(m_surfaces[i]->input(), temp, m_surfaces[i]->destination());
         delete temp;

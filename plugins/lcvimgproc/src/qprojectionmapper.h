@@ -17,7 +17,7 @@ class QProjectionMapper : public QObject
     Q_PROPERTY(QJSValue                 model               READ model              NOTIFY  modelChanged)
     Q_PROPERTY(QProjectionSurface*      focusSurface        READ focusSurface       NOTIFY focusSurfaceChanged)
     
-    Q_PROPERTY(QQmlListProperty<QObject> surfaces READ surfaces)
+    Q_PROPERTY(QQmlListProperty<QObject> surfaces READ surfaces CONSTANT)
     Q_CLASSINFO("DefaultProperty", "surfaces")
 public:
     explicit QProjectionMapper(QObject *parent = nullptr);
@@ -30,9 +30,8 @@ public:
     void addSurface(QProjectionSurface* surface);
     int numOfSurfaces();
     QProjectionSurface* surfaceAt(int idx);
+
     QMat *result() const;
-
-
     QMat *liveResult() const;
 
     QJSValue model() const;
@@ -59,9 +58,7 @@ private:
     static void surfacesClear(QQmlListProperty<QObject> *p);
     QMat* applySurfaces(bool skipFocused = false, int idx = -1);
 
-    std::vector<QProjectionSurface*> m_surfaces;
-
-    QList<QProjectionSurface*> m_surfacess;
+    QList<QProjectionSurface*> m_surfaces;
     QProjectionSurface* m_focusSurface;
     QMat* m_backgroundImage;
     QMat* m_result;
