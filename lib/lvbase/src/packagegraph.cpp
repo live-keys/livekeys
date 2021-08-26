@@ -3,6 +3,7 @@
 #include "live/plugincontext.h"
 #include "live/exception.h"
 #include "live/applicationcontext.h"
+#include "live/palettecontainer.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
 #include "live/plugincontext.h"
@@ -34,6 +35,7 @@ public:
     std::vector<std::string> packageImportPaths;
     std::map<std::string, Package::Ptr> packages;
     std::map<std::string, PackageGraph::LibraryNode*> libraries;
+    PaletteContainer* paletteContainer;
 };
 
 /**
@@ -50,12 +52,14 @@ public:
 PackageGraph::PackageGraph()
     : m_d(new PackageGraphPrivate)
 {
+    m_d->paletteContainer = new PaletteContainer();
 }
 
 /** Default destructor */
 PackageGraph::~PackageGraph(){
     clearPackages();
     clearLibraries();
+    delete m_d->paletteContainer;
     delete m_d;
 }
 
@@ -700,6 +704,10 @@ void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& d
     } else { // add package dependency instead
         addDependency(plugin->context()->package, dependsOn->context()->package);
     }
+}
+
+PaletteContainer *PackageGraph::paletteContainer() const{
+    return m_d->paletteContainer;
 }
 
 bool PackageGraph::hasDependency(const Package::Ptr &package, const Package::Ptr &dependency){

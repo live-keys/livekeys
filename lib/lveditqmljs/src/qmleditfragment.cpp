@@ -518,6 +518,8 @@ QJSValue QmlEditFragment::readValueConnection() const{
             return QJSValue();
         }
     }
+    if ( expression.length() == 1 && expression[0] == "null" )
+        return QJSValue();
 
     ViewEngine* engine = ViewContext::instance().engine();
     QJSValue result = engine->engine()->newObject();

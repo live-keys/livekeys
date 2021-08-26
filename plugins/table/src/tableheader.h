@@ -43,6 +43,8 @@ public:
 
     int contentWidth() const;
 
+    void assignColumnName(int index, const QString& name);
+
 public slots:
     void updateColumnWidth(int index, int width);
     int columnWidth(int index);

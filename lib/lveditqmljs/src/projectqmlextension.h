@@ -19,7 +19,7 @@
 
 #include "live/lveditqmljsglobal.h"
 #include "live/codehandler.h"
-#include "live/palettecontainer.h"
+#include "live/paletteloader.h"
 #include "live/qmllanguageinfo.h"
 
 #include <QObject>
@@ -55,7 +55,7 @@ public:
     void addLanguageQmlHandler(LanguageQmlHandler* handler);
     void removeLanguageQmlHandler(LanguageQmlHandler* handler);
 
-    PaletteContainer* paletteContainer();
+    PaletteLoader* paletteContainer();
 
     static void registerTypes(const char* uri);
 
@@ -81,7 +81,7 @@ private:
     QmlJsSettings*                m_settings;
     QmlProjectMonitor*            m_scanMonitor;
     QList<LanguageQmlHandler*>    m_languageHandlers;
-    PaletteContainer*             m_paletteContainer;
+    PaletteLoader*                m_paletteContainer;
     QmlBindingChannelsDispatcher* m_channelDispatcher;
 };
 
@@ -91,7 +91,7 @@ inline QmlProjectMonitor *ProjectQmlExtension::scanMonitor(){
 }
 
 /// \brief Returns the lv::PaletteContainer associated with this object.
-inline PaletteContainer *ProjectQmlExtension::paletteContainer(){
+inline PaletteLoader *ProjectQmlExtension::paletteContainer(){
     return m_paletteContainer;
 }
 

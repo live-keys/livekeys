@@ -12,6 +12,7 @@
 
 namespace lv{
 
+class PaletteContainer;
 class PackageGraphPrivate;
 
 class LV_BASE_EXPORT PackageGraph{
@@ -100,6 +101,8 @@ public:
     Plugin::Ptr loadPlugin(const std::vector<std::string>& importSegment, Plugin::Ptr requestingPlugin = nullptr);
     void addDependency(const Plugin::Ptr& plugin, const std::string& pluginDependency);
     void addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn);
+
+    PaletteContainer* paletteContainer() const;
 
 private:
     bool hasDependency(const Package::Ptr& package, const Package::Ptr& dependency);

@@ -31,7 +31,7 @@ namespace lv{
  */
 EditorGlobalObject::EditorGlobalObject(
         Project *project,
-        PaletteContainer *paletteContainer,
+        PaletteLoader *paletteContainer,
         QObject *parent)
     : QObject(parent)
     , m_project(project)

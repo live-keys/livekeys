@@ -71,6 +71,7 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_defaultPalettes["qml/lcvcore#GrayscaleView"] = "GrayscaleViewPalette";
     m_defaultPalettes["qml/QtQuick#Rectangle"] = "RectangleSizePalette";
     m_defaultPalettes["qml/timeline#Timeline"] = "TimelinePalette";
+    m_defaultPalettes["qml/table#Table"] = "TablePalette";
     m_defaultPalettes["qml/fs#VisualFileSelector"] = "VisualFileSelectorPropertiesPalette";
     m_defaultPalettes["qml/lcvimgproc#Blend"] = "BlendPalette";
     m_defaultPalettes["qml/lcvimgproc#Pad"] = "PadPalette";

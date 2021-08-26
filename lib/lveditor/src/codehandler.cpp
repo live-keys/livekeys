@@ -18,13 +18,13 @@
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
 #include "live/codepalette.h"
-#include "live/palettecontainer.h"
+#include "live/paletteloader.h"
 #include "live/editorglobalobject.h"
 #include "live/project.h"
 #include "live/viewengine.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
-#include "live/palettecontainer.h"
+#include "live/paletteloader.h"
 #include "live/extensions.h"
 
 #include <QQmlContext>

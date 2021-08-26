@@ -154,7 +154,7 @@ public:
 
     QmlError findError(const QString& message) const;
     QmlError findError(QJSValue error) const;
-    static ViewEngine* grab(QObject* object);
+    static ViewEngine* grab(const QObject *object);
 
     ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
     ComponentResult::Ptr createObject(const QString& filePath, QObject* parent, QQmlContext* context = nullptr);

@@ -5,6 +5,7 @@ HEADERS += \
     $$PWD/live/document.h \
     $$PWD/live/documentationloader.h \
     $$PWD/live/hookcontainer.h \
+    $$PWD/live/paletteloader.h \
     $$PWD/live/project.h \
     $$PWD/live/projectentry.h \
     $$PWD/live/projectfile.h \
@@ -15,7 +16,6 @@ HEADERS += \
     $$PWD/live/lveditorglobal.h \
     $$PWD/live/editorglobalobject.h \
     $$PWD/live/editorprivate_plugin.h \
-    $$PWD/live/palettecontainer.h \
     $$PWD/live/codepalette.h \
     $$PWD/live/linecontrol.h \
     $$PWD/live/syntaxhighlighter.h \

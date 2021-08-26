@@ -52,6 +52,8 @@ public:
 private:
     Plugin(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);
 
+    void addPalette(const std::string& type, const std::string& path);
+
     PluginPrivate* m_d;
 };
 

@@ -15,7 +15,6 @@ public:
     explicit LocalDataSource(QObject *parent = nullptr);
     ~LocalDataSource();
 
-    int totalRows() const override;
     QString valueAt(int row, int column) override;
     void setValueAt(int row, int column, const QString& value) override;
 
@@ -29,6 +28,11 @@ public:
 public slots:
     void readFromFile(const QString& path, const QJSValue& options);
     void writeToFile(const QString& path);
+
+    int totalRows() const override;
+    QJSValue rowAt(int index);
+    QJSValue columnInfo() const;
+    void clear();
 
 private:
     Q_DISABLE_COPY(LocalDataSource);

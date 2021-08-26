@@ -23,6 +23,40 @@ int LocalDataSource::totalRows() const{
     return m_data.size();
 }
 
+QJSValue LocalDataSource::rowAt(int index){
+    ViewEngine* ve = ViewEngine::grab(this);
+    if (!ve)
+        return QJSValue();
+    if (index >= m_data.length() )
+        return QJSValue();
+
+    auto& rowData = m_data[index];
+    QJSValue result = ve->engine()->newArray(rowData.length());
+    for ( int i = 0; i < rowData.length(); ++i ){
+        result.setProperty(i, rowData[i]);
+    }
+    return result;
+}
+
+QJSValue LocalDataSource::columnInfo() const{
+    ViewEngine* ve = ViewEngine::grab(this);
+    if (!ve)
+        return QJSValue();
+
+    QJSValue result = ve->engine()->newArray(m_headers.length());
+    for ( int i = 0; i < m_headers.length(); ++i ){
+        result.setProperty(i, m_headers[i]);
+    }
+    return result;
+}
+
+void LocalDataSource::clear(){
+    beginLoadData();
+    m_data.clear();
+    m_headers.clear();
+    endLoadData();
+}
+
 QString LocalDataSource::valueAt(int row, int column){
     auto& rowData = m_data[row];
     return rowData[column];

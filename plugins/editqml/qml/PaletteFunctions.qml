@@ -785,7 +785,7 @@ QtObject{
 
     function openPaletteInObjectContainer(objectContainer, paletteName){
         var ef = objectContainer.editFragment
-        var paletteBoxParent = objectContainer.paletteListContainer.children[0]
+        var paletteBoxParent = objectContainer.paletteGroup()
         var editor = ef.language.code.textEdit().getEditor()
         var ch = ef.language
         if (!ef)
@@ -825,7 +825,7 @@ QtObject{
         var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment)
         var propertyInfo = metaTypeInfo.propertyInfo(name)
         if ( !propertyInfo ){
-            lk.layers.workspace.messages.pushError("Error: Failed to get property info for '" + name +  "", 1)
+            lk.layers.workspace.messages.pushError("Error: Failed to get property info for '" + name +  "' from '" + objectContainer.editFragment.typeName() +  "'", 1)
             return null
         }
 

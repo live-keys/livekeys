@@ -52,10 +52,12 @@ signals:
 
 public slots:
     void addRows(int number = 1);
-    void addColumns(int number = 1);
-    void removeColumn(int idx);
     void removeRow(int idx);
     void assignCell(int row, int col, QString value);
+
+    void addColumns(int number = 1);
+    void assignColumnInfo(int index, QJSValue name);
+    void removeColumn(int idx);
 
     bool select(QJSValue column, QJSValue row);
     bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());

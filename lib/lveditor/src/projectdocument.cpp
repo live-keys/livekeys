@@ -347,12 +347,12 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
         // iterate current block, see if it has any binds, check if binds are before the end of the block
         ProjectDocumentBlockData* bd = static_cast<ProjectDocumentBlockData*>(block.userData());
 
-        if ( bd && bd->m_sections.size() > 0 ){
+        if ( bd && bd->m_sections->size() > 0 ){
             ProjectDocumentBlockData* bddestination = nullptr;
             QTextBlock destinationBlock;
 
-            QLinkedList<ProjectDocumentSection::Ptr>::iterator seit = bd->m_sections.begin();
-            while ( seit != bd->m_sections.end() ){
+            auto seit = bd->m_sections->begin();
+            while ( seit != bd->m_sections->end() ){
                 ProjectDocumentSection::Ptr& itSection = *seit;
 
                 if ( itSection->position() >= blockEnd ){
@@ -369,7 +369,7 @@ void ProjectDocument::updateSectionBlocks(int position, const QString &addedText
                     nuPtr->m_userData = itSection->m_userData;
                     nuPtr->m_textChangedHandler = itSection->m_textChangedHandler;
                     bddestination->addSection(nuPtr);
-                    seit = bd->m_sections.erase(seit);
+                    seit = bd->m_sections->erase(seit);
                     emit formatChanged(destinationBlock.position(), destinationBlock.length());
                     continue;
                 }
@@ -742,13 +742,20 @@ void ProjectDocumentAction::redo(){
 //    parent->m_content.replace(position, charsRemoved.size(), charsAdded);
 }
 
-ProjectDocumentBlockData::ProjectDocumentBlockData() : m_numOfCollapsedLines(0)
-    , m_stateChangeFlag(false) {}
+ProjectDocumentBlockData::ProjectDocumentBlockData()
+    : m_sections(new std::list<ProjectDocumentSection::Ptr>())
+    , m_exceededSections(new std::list<ProjectDocumentSection::Ptr>())
+    , m_numOfCollapsedLines(0)
+    , m_stateChangeFlag(false)
+{
+}
 
 ProjectDocumentBlockData::~ProjectDocumentBlockData(){
-    foreach ( const ProjectDocumentSection::Ptr& section, m_sections ){
+    foreach ( const ProjectDocumentSection::Ptr& section, *m_sections ){
         section->m_parentBlock = nullptr;
     }
+    delete m_sections;
+    delete m_exceededSections;
 }
 
 /**
@@ -829,7 +836,7 @@ void ProjectDocumentSection::invalidate(){
 
 void ProjectDocumentBlockData::addSection(ProjectDocumentSection::Ptr section){
     section->m_parentBlock = this;
-    m_sections.append(section);
+    m_sections->push_back(section);
 }
 
 void ProjectDocumentBlockData::removeSection(ProjectDocumentSection::Ptr section){
@@ -837,9 +844,9 @@ void ProjectDocumentBlockData::removeSection(ProjectDocumentSection::Ptr section
 }
 
 void ProjectDocumentBlockData::removeSection(ProjectDocumentSection *section){
-    for ( auto it = m_sections.begin(); it != m_sections.end(); ++it ){
+    for ( auto it = m_sections->begin(); it != m_sections->end(); ++it ){
         if ( it->data() == section ){
-            m_sections.erase(it);
+            m_sections->erase(it);
             return;
         }
     }

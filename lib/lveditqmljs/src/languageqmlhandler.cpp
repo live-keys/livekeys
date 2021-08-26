@@ -44,6 +44,7 @@
 #include "live/visuallogqt.h"
 #include "live/editorglobalobject.h"
 #include "live/palettecontainer.h"
+#include "live/paletteloader.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/runnablecontainer.h"
 #include "live/shared.h"
@@ -2826,18 +2827,18 @@ CodePalette *LanguageQmlHandler::openBinding(QmlEditFragment *edit, QString pale
         return nullptr;
 
     // check if duplicate
-    PaletteLoader* paletteLoader = d->projectHandler->paletteContainer()->findPaletteByName(paletteName);
+    PaletteContainer::PaletteInfo paletteInfo = d->projectHandler->paletteContainer()->findPaletteByName(paletteName);
     if ( edit->bindingPalette() ){
-        if ( edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) )
+        if ( edit->bindingPalette()->path() == QString::fromStdString(paletteInfo.path().data()) )
             return edit->bindingPalette();
     }
-    CodePalette* cp = edit->palette(PaletteContainer::palettePath(paletteLoader));
+    CodePalette* cp = edit->palette(QString::fromStdString(paletteInfo.path().data()));
     if ( cp ){
         edit->setBindingPalette(cp);
         return cp;
     }
 
-    CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteLoader);
+    CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteInfo);
     qmlEngine(this)->setObjectOwnership(palette, QQmlEngine::CppOwnership);
     palette->setEditFragment(edit);
 
@@ -2933,17 +2934,17 @@ QJSValue LanguageQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
         while ( palettesIt.next() ){
             QString paletteName = palettesIt.value().toString();
 
-            PaletteLoader* paletteLoader = d->projectHandler->paletteContainer()->findPaletteByName(paletteName);
-            if ( !paletteLoader )
+            PaletteContainer::PaletteInfo paletteInfo = d->projectHandler->paletteContainer()->findPaletteByName(paletteName);
+            if ( !paletteInfo.isValid() )
                 return QJSValue();
 
-            if ( edit->bindingPalette() && edit->bindingPalette()->path() == PaletteContainer::palettePath(paletteLoader) ){
+            if ( edit->bindingPalette() && edit->bindingPalette()->path() == QString::fromStdString(paletteInfo.path().data()) ){
                 edit->addPalette(edit->bindingPalette());
                 return m_engine->engine()->newQObject(edit->bindingPalette());
             }
 
-            if ( !PaletteContainer::configuresLayout(paletteLoader) ){
-                CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteLoader);
+            if ( !PaletteLoader::configuresLayout(paletteInfo) ){
+                CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteInfo);
                 m_engine->engine()->setObjectOwnership(palette, QQmlEngine::CppOwnership);
 
                 palette->setEditFragment(edit);
@@ -2957,7 +2958,7 @@ QJSValue LanguageQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
 
                 return m_engine->engine()->newQObject(palette);
             } else {
-                return d->projectHandler->paletteContainer()->paletteContent(paletteLoader);
+                return d->projectHandler->paletteContainer()->paletteContent(paletteInfo);
             }
         }
     }
@@ -2995,8 +2996,8 @@ lv::CodePalette* LanguageQmlHandler::edit(lv::QmlEditFragment *edit){
     if ( m_editFragment && m_editFragment != edit )
         removeEditFragment(m_editFragment);
 
-    PaletteLoader* loader = d->projectHandler->paletteContainer()->findPalette("edit/qml");
-    CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(loader);
+    PaletteContainer::PaletteInfo pi = d->projectHandler->paletteContainer()->findFirstPalette("edit/qml");
+    CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(pi);
 
     edit->addPalette(palette);
 
@@ -3950,7 +3951,7 @@ QJSValue LanguageQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
     Q_D(LanguageQmlHandler);
     QmlScopeSnap scope = d->snapScope();
 
-    QList<PaletteLoader*> result = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
+    std::list<PaletteContainer::PaletteInfo> result = d->projectHandler->paletteContainer()->findPalettes(declaration->type().join());
 
     if ( declaration->type().language() == QmlTypeReference::Qml ){
         QmlInheritanceInfo typePath = scope.getTypePath(declaration->type());
@@ -3958,7 +3959,7 @@ QJSValue LanguageQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
             QmlTypeInfo::Ptr ti = typePath.nodes[i];
             if ( !ti->exportType().isEmpty() ){
                 auto list = d->projectHandler->paletteContainer()->findPalettes(ti->exportType().join());
-                result.append(list);
+                result.insert(result.end(), list.begin(), list.end());
             }
         }
     }
@@ -3973,7 +3974,7 @@ QJSValue LanguageQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
             if ( pi.isValid() && !ti->exportType().isEmpty() ){
                 QString propSearch = ti->exportType().join() + "." + pi.name;
                 auto list = d->projectHandler->paletteContainer()->findPalettes(propSearch);
-                result.append(list);
+                result.insert(result.end(), list.begin(), list.end());
             }
         }
     }
@@ -3981,28 +3982,38 @@ QJSValue LanguageQmlHandler::findPalettesForDeclaration(QmlDeclaration::Ptr decl
 
     if (declaration->isForComponent()){
         auto components = d->projectHandler->paletteContainer()->findPalettes("qml/Component");
-        result.append(components);
+        result.insert(result.end(), components.begin(), components.end());
     } else {
         if ( declaration->isForObject()){
             if (declaration->type().name()[0].isUpper() && declaration->type().language() == QmlTypeReference::Qml){
                 auto object = d->projectHandler->paletteContainer()->findPalettes("qml/Object");
-                result.append(object);
+                result.insert(result.end(), object.begin(), object.end());
             }
         }
 
         if ( declaration->isForList() ){
             auto child = d->projectHandler->paletteContainer()->findPalettes("qml/childlist");
-            result.append(child);
+            result.insert(result.end(), child.begin(), child.end());
         } else {
             auto prop = d->projectHandler->paletteContainer()->findPalettes("qml/property");
-            result.append(prop);
+            result.insert(result.end(), prop.begin(), prop.end());
         }
     }
 
     QJSValue res = m_engine->engine()->newObject();
-    QJSValue data = m_engine->engine()->newArray(result.length());
-    for (int i = 0; i < result.length(); ++i){
-        data.setProperty(i, d->projectHandler->paletteContainer()->paletteData(result[i]));
+    QJSValue data = m_engine->engine()->newArray(static_cast<quint32>(result.size()));
+    quint32 i = 0;
+    for (auto it = result.begin(); it != result.end(); ++it){
+        PaletteContainer::PaletteInfo& pi = *it;
+
+        QJSValue paletteData = m_engine->engine()->newObject();
+        paletteData.setProperty("name", QString::fromStdString(pi.name().data()));
+        paletteData.setProperty("type", QString::fromStdString(pi.type().data()));
+        paletteData.setProperty("path", QString::fromStdString(pi.path().data()));
+        paletteData.setProperty("configuresLayout", PaletteLoader::configuresLayout(pi));
+
+        data.setProperty(i, paletteData);
+        ++i;
     }
     res.setProperty("data", data);
 

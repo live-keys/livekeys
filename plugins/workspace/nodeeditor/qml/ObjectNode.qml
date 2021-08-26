@@ -142,6 +142,8 @@ Qan.NodeItem{
         var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
         nodeMember.__initialize(nodeParent, nodeStyle, ef)
 
+        root.members.push(nodeMember)
+
         if ( ef.objectId() )
             nodeMember.addOutPort()
     }

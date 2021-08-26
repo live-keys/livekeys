@@ -13,5 +13,6 @@ Module {
         prototype: "QAbstractTableModel"
         exports: ["table/Table 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "dataSource"; type: "lv::TableDataSource"; isPointer: true }
     }
 }

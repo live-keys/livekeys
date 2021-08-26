@@ -1,5 +1,6 @@
 import QtQuick 2.3
 import workspace 1.0
+import base 1.0 as Base
 
 QtObject{
     id: root
@@ -371,10 +372,12 @@ QtObject{
         }
     }
 
-    function reset(){
+    function reset(callback){
         __clearAll()
         var split = root.container.createNewSplitter(Qt.Horizontal)
         root.container.initialize([split])
+        if ( callback )
+            Base.Time.delay(0, callback)
     }
 
     function focusPane(paneType){

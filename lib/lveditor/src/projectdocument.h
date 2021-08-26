@@ -160,8 +160,8 @@ public:
     void removeSection(ProjectDocumentSection::Ptr section);
     void removeSection(ProjectDocumentSection* section);
 
-    QLinkedList<ProjectDocumentSection::Ptr> m_sections;
-    QLinkedList<ProjectDocumentSection::Ptr> m_exceededSections;
+    std::list<ProjectDocumentSection::Ptr>* m_sections;
+    std::list<ProjectDocumentSection::Ptr>* m_exceededSections;
     QList<int> bracketPositions;
     QString    blockIdentifier;
 
