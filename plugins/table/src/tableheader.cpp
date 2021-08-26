@@ -42,6 +42,7 @@ bool TableHeader::setData(const QModelIndex &index, const QVariant &, int)
     }
 
     m_data[index.column()] = createColumnData(index.column());
+    emit dataChanged(index, index);
 
     return true;
 }
@@ -132,6 +133,12 @@ int TableHeader::contentWidth() const
     return m_contentWidth;
 }
 
+void TableHeader::assignColumnName(int index, const QString &name){
+    if ( index >= m_data.length() )
+        return;
+    m_data[index].name = name;
+    emit dataChanged(createIndex(0, index), createIndex(0, index));
+}
 
 }
 

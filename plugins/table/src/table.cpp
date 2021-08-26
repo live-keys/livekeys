@@ -107,6 +107,10 @@ void Table::addColumns(int number){
     endInsertColumns();
 }
 
+void Table::assignColumnInfo(int index, QJSValue name){
+    m_headerModel->assignColumnName(index, name.toString());
+}
+
 void Table::removeColumn(int idx)
 {
     if (idx >= columnCount())
