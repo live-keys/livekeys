@@ -18,6 +18,25 @@ CodePalette{
 
     property QtObject theme: lk.layers.workspace.themes.current
 
+    function findObjectById(objectId){
+        for ( var k = 0; k < allObjects.length; ++k ){
+            var objectNode = allObjects[k].item
+            if ( objectNode.editFragment.objectId() === objectId ){
+                return allObjects[k]
+            }
+
+            for ( var l = 0; l < objectNode.members.length; ++l ){
+                var objectNodeMember = objectNode.members[l]
+
+                if(objectNodeMember.editFragment.location === QmlEditFragment.Object ){
+                    if ( objectNodeMember.editFragment.objectId() === objectId )
+                        return objectNodeMember
+                }
+            }
+        }
+        return null
+    }
+
     function addObject(object, cursorCoords){
         var objectName = object.typeName()
         var objectId = object.objectId()
@@ -99,7 +118,8 @@ CodePalette{
                                     inPort: null,
                                     outPort: null,
                                     id: currentConnection.expression.length === 2 ? currentConnection.expression[0] : '',
-                                    property: currentConnection.expression.length === 2 ? currentConnection.expression[1] : currentConnection.expression[0]
+                                    property: currentConnection.expression.length === 2 ? currentConnection.expression[1] : '',
+                                    idOrProperty: currentConnection.expression.length === 1 ? currentConnection.expression[0] : ''
                                 },
                                 isFunction: currentConnection.isFunction ? true : false
                             }
@@ -115,36 +135,51 @@ CodePalette{
 
                 var node = null
                 if ( propertyConnection.right.id ){
-                    node = objectsWithId[propertyConnection.right.id]
-                } else {
-                    node = propertyConnection.left.node
+                    node = palette.findObjectById(propertyConnection.right.id)
+                    vlog.i(node)
+                    if ( node.objectName !== 'objectNode' )
+                        node = null
+                } else if ( propertyConnection.right.idOrProperty ){
+                    node = palette.findObjectById(propertyConnection.right.idOrProperty)
+                    vlog.i(node)
+                    if ( node ){
+                        propertyConnection.right.id = propertyConnection.right.idOrProperty
+                    } else {
+                        node = propertyConnection.left.node
+                        propertyConnection.right.property = propertyConnection.right.idOrProperty
+                    }
                 }
 
                 if (node){
-                    var nodeProperty = node.item.propertyByName(propertyConnection.right.property)
-                    if ( nodeProperty ){
-                        propertyConnection.right.node = node
-                        propertyConnection.right.outPort = nodeProperty.outPort
-                        propertyConnection.right.inPort = nodeProperty.inPort
-                    } else {
-                        if ( propertyConnection.isFunction ){
-                            nodeProperty = node.item.addFunctionProperty(propertyConnection.right.property)
+                    if ( propertyConnection.right.property ){ // dealing with property of a node
+                        var nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                        if ( nodeProperty ){
                             propertyConnection.right.node = node
-                            propertyConnection.right.inPort = nodeProperty.inPort
                             propertyConnection.right.outPort = nodeProperty.outPort
+                            propertyConnection.right.inPort = nodeProperty.inPort
                         } else {
-                            var position = node.item.editFragment.valuePosition() +
-                                           node.item.editFragment.valueLength() - 1
-                            var paletteControls = lk.layers.workspace.extensions.editqml.paletteControls
-                            paletteControls.addPropertyToObjectContainer(node.item, propertyConnection.right.property, false, position)
-
-                            nodeProperty = node.item.propertyByName(propertyConnection.right.property)
-                            if ( nodeProperty ){
+                            if ( propertyConnection.isFunction ){
+                                nodeProperty = node.item.addFunctionProperty(propertyConnection.right.property)
                                 propertyConnection.right.node = node
-                                propertyConnection.right.outPort = nodeProperty.outPort
                                 propertyConnection.right.inPort = nodeProperty.inPort
+                                propertyConnection.right.outPort = nodeProperty.outPort
+                            } else {
+                                var position = node.item.editFragment.valuePosition() +
+                                               node.item.editFragment.valueLength() - 1
+                                var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+                                paletteFunctions.addPropertyToObjectContainer(node.item, propertyConnection.right.property, false, position)
+
+                                nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                                if ( nodeProperty ){
+                                    propertyConnection.right.node = node
+                                    propertyConnection.right.outPort = nodeProperty.outPort
+                                    propertyConnection.right.inPort = nodeProperty.inPort
+                                }
                             }
                         }
+                    } else { // dealing with the node directly
+                        propertyConnection.right.node = node
+                        propertyConnection.right.outPort = node.objectName === 'objectNodeMember' ? node.outPort : node.item.outPort
                     }
                 }
             }
@@ -169,7 +204,8 @@ CodePalette{
 
         function clean(){
             for (var i=0; i< allObjects.length; ++i){
-                if (!allObjects[i].item) return
+                if (!allObjects[i].item)
+                    return
                 var numofProps = allObjects[i].item.propertyContainer.children.length
                 for (var j=0; j < numofProps; ++j){
                     var child = allObjects[i].item.propertyContainer.children[j]
