@@ -19,9 +19,10 @@
 #include "live/codepalette.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
-#include "qmlbindingchannel.h"
 #include "live/languageqmlhandler.h"
 #include "live/viewcontext.h"
+#include "live/visuallogqt.h"
+#include "qmlbindingchannel.h"
 #include "documentqmlchannels.h"
 
 #include <QJSValue>
@@ -483,6 +484,8 @@ void QmlEditFragment::suggestionsForExpression(const QString &expression, CodeCo
  * \brief Reads the code value of this fragment and returns it.
  */
 QString QmlEditFragment::readValueText() const{
+    if ( valuePosition() < 0 )
+        return "";
     QTextCursor tc(m_declaration->document()->textDocument());
     tc.setPosition(valuePosition());
     tc.setPosition(valuePosition() + valueLength(), QTextCursor::KeepAnchor);
@@ -714,6 +717,19 @@ QJSValue QmlEditFragment::paletteList() const{
         result.setProperty(i, engine->engine()->newQObject(m_palettes[i]));
     }
     return result;
+}
+
+void QmlEditFragment::removePalettes(){
+    for ( auto it = begin(); it != end(); ++it ){
+        CodePalette* cp = *it;
+        emit aboutToRemovePalette(cp);
+        if ( bindingPalette() != cp ){
+            cp->deleteLater();
+        }
+    }
+    m_palettes.clear();
+
+    emit paletteListEmpty();
 }
 
 QJSValue QmlEditFragment::getChildFragments() const{

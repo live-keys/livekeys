@@ -810,7 +810,7 @@ QtObject{
         return paletteBox
     }
 
-    function addPropertyToObjectContainer(objectContainer, name, readOnly, position){
+    function addPropertyToObjectContainer(objectContainer, name, readOnly, position, context){
 
         var languageHandler = objectContainer.editFragment.language
 
@@ -849,7 +849,7 @@ QtObject{
             return null
         }
 
-        objectContainer.editFragment.signalChildAdded(ef)
+        objectContainer.editFragment.signalChildAdded(ef, context)
 
         if ( populateValueFromPalette ){
             var paletteList = ef.paletteList()
@@ -865,7 +865,7 @@ QtObject{
         return objectContainer.propertyByName(name)
     }
 
-    function addEventToObjectContainer(objectContainer, name, position){
+    function addEventToObjectContainer(objectContainer, name, position, context){
         // check if event is opened already
         var propContainer = objectContainer.propertyByName(name)
         if ( propContainer ){
@@ -877,14 +877,14 @@ QtObject{
         var ppos = languageHandler.addEventToCode(position, name)
         var ef = languageHandler.openNestedConnection(objectContainer.editFragment, ppos)
         if (ef){
-            objectContainer.editFragment.signalChildAdded(ef)
+            objectContainer.editFragment.signalChildAdded(ef, context)
         }
 
         return objectContainer.propertyByName(name)
     }
 
     //TODO: Add return type (last child)
-    function addObjectToObjectContainer(container, typeOptions, extraProperties, position){
+    function addObjectToObjectContainer(container, typeOptions, extraProperties, position, context){
         var languageHandler = container.editFragment.language
 
         var opos = languageHandler.addObjectToCode(position, typeOptions, extraProperties)
@@ -893,7 +893,7 @@ QtObject{
         if (!ef)
             return null
 
-        container.editFragment.signalChildAdded(ef)
+        container.editFragment.signalChildAdded(ef, context)
         container.sortChildren()
     }
 
@@ -1082,7 +1082,9 @@ QtObject{
                                objectContainer.editFragment.valueLength() - 1
                 var readOnly = prop.hasOwnProperty('readOnly') ? prop.readOnly : false
 
-                var propertyContainer = addPropertyToObjectContainer(objectContainer, prop.name, readOnly, position)
+                var propertyContainer = addPropertyToObjectContainer(
+                    objectContainer, prop.name, readOnly, position, {location: 'PaletteFunctions.ExpandLayout' }
+                )
 
                 if ( prop.isObject ){
                     expandObjectContainerLayout(propertyContainer.childObjectContainer, prop.object)

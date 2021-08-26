@@ -341,6 +341,26 @@ Rectangle{
         if ( edge === selectedEdge )
             selectedEdge = null
     }
+
+    function removeObjectNode(node){
+        --palette.numOfObjects
+        if (node.item.selected)
+            --numOfSelectedNodes
+        if (numOfSelectedNodes === 0)
+            root.activateFocus()
+
+        // clear everything inside node
+
+        var children = node.item.propertyContainer.children
+        for (var i = 0; i < children.length; ++i){
+            children[i].destroyObjectNodeProperty()
+        }
+
+        if (node.item.outPort)
+            graph.removePort(node, node.item.outPort)
+
+        graph.removeNode(node)
+    }
     
     function addObjectNode(x, y, label){
         var node = graph.insertNode()

@@ -67,6 +67,20 @@ Item{
         return {}
     }
 
+    function clean(){
+        if (valueContainer.objectName === "paletteGroup"){
+            var pg = valueContainer
+            for (var xi = 0; xi < pg.children.length; ++xi)
+                if (pg.children[xi].objectName === "paletteContainer")
+                    pg.children[xi].destroy()
+            pg.destroy()
+        }
+        if (valueContainer.objectName === "objectContainer"){
+            valueContainer.clean().destroy()
+        }
+        return propertyContainer
+    }
+
     property string title: "Object"
     objectName: "propertyContainer"
 

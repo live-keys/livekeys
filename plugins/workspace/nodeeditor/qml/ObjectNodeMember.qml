@@ -127,21 +127,18 @@ Item{
         root.isMethod = true
     }
 
-    function destroyObjectNodeProperty(){
+    function clean(){
         root.node.item.removeMemberByName(propertyName)
 
-        var graph = node.graph
+        var graph = root.node.graph
         if (root.inPort) {
-
             if (root.inPort.inEdge)
                 graph.removeEdge(root.inPort.inEdge)
-
             graph.removePort(node, root.inPort)
         }
         if (root.outPort) {
             for (var i=0; i< root.outPort.outEdges.length; ++i)
                 graph.removeEdge(root.outPort.outEdges[i])
-
             graph.removePort(node, root.outPort)
         }
 
@@ -149,6 +146,11 @@ Item{
         for (var idx = 0; idx < children.length; ++idx)
             children[idx].destroy()
 
+        return root
+    }
+
+    function destroyObjectNodeProperty(){
+        root.clean()
         root.destroy()
     }
 

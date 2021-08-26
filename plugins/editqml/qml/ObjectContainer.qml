@@ -169,43 +169,49 @@ Item{
         }
     }
 
-    function expand(){
-        objectContainerFrame.expand()
+    function expand(options){
+        objectContainerFrame.expand(options ? options : undefined)
     }
 
     function collapse(){
         objectContainerFrame.collapse()
     }
 
-    function destroyObjectContainer(oc){
-        for (var pi = 0; pi < oc.paletteListContainer.children.length; ++pi){
-            var child = oc.paletteListContainer.children[pi]
-            if (child.objectName === "paletteGroup"){
-                var pg = child
-                for (var xi = 0; xi < pg.children.length; ++xi)
-                    if (pg.children[xi].objectName === "paletteContainer")
-                        pg.children[xi].destroy()
-                pg.destroy()
-            }
-            if (child.objectName === "propertyContainer"){
-                var pc = child
-                if (pc.valueContainer.objectName === "paletteGroup"){
-                    var pg = pc.valueContainer
-                    for (var xi = 0; xi < pg.children.length; ++xi)
-                        if (pg.children[xi].objectName === "paletteContainer")
-                            pg.children[xi].destroy()
-                    pg.destroy()
-                }
-                if (pc.valueContainer.objectName === "objectContainer"){
-                    oc.destroyObjectContainer(pc.valueContainer)
-                }
+    function __cleanExpandedMembers(){
+        editFragment.removePalettes()
 
-                pc.destroy()
+        var pg = objectContainerFrame.paletteGroup
+        for (var xi = 0; xi < pg.children.length; ++xi)
+            if (pg.children[xi].objectName === "paletteContainer")
+                pg.children[xi].destroy()
+        pg.children = []
+        pg.palettesOpened = []
+
+        for (var pi = 0; pi < paletteListContainer.children.length; ++pi){
+            var child = paletteListContainer.children[pi]
+            var ef = null
+            if (child.objectName === "propertyContainer"){
+                ef = child.editFragment
+                child.clean().destroy()
             }
             if (child.objectName === "objectContainer"){
-                destroyObjectContainer(child)
+                ef = child.editFragment
+                child.clean().destroy()
             }
+            if ( ef )
+                editor.code.language.removeConnection(ef)
         }
+
+    }
+
+    function clean(){
+        __cleanExpandedMembers()
+        objectContainerFrame.paletteGroup.destroy()
+        return root
+    }
+
+    function destroyObjectContainer(oc){
+        oc.clean()
         oc.destroy()
     }
 
@@ -252,9 +258,10 @@ Item{
             root.placeHolder.parent = null
         }
 
-        function expand(){
+        function expand(options){
             if (!compact)
                 return
+
             compact = false
 
             var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
@@ -266,7 +273,10 @@ Item{
                     root.addChildObject(objects[i])
                 }
             }
-            paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
+
+            var expandDefaultPalette = options && options.expandDefaultPalette ? options.expandDefaultPalette : true
+            if ( expandDefaultPalette )
+                paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
 
             var codeHandler = root.editor.code.language
 
@@ -275,7 +285,9 @@ Item{
             for (var i = 0; i < properties.length; ++i){
                 if ( !properties[i].visualParent ){
                     var pc = addProperty(properties[i])
-                    paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
+
+                    if ( expandDefaultPalette )
+                        paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
                 }
             }
 
@@ -294,17 +306,9 @@ Item{
                 compact = true
                 return
             }
-
-            for ( var i = 1; i < container.children.length; ++i ){
-                var edit = container.children[i].editFragment
-                editor.code.language.removeConnection(edit)
-            }
-
-            for (var i=1; i < container.children.length; ++i)
-                container.children[i].destroy()
+            root.__cleanExpandedMembers()
 
             compact = true
-
             propertiesOpened.length = 0
         }
 
@@ -325,7 +329,9 @@ Item{
                 if (editFragment.position() === rootPosition)
                     editFragment.language.rootFragment = null
 
-                if (!p) return
+                if (!p)
+                    return
+
                 if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
                     destroyObjectContainer(root)
                     p.destroy()
@@ -342,9 +348,11 @@ Item{
             target: editFragment
             ignoreUnknownSignals: true
             function onChildAdded(ef, context){
+                var expandPalette = context && context.location === 'PaletteFunctions.ExpandLayout' ? false : true
+
                 if ( ef.location === EditQml.QmlEditFragment.Object ){
                     if (compact)
-                        expand()
+                        expand({expandDefaultPalette: expandPalette})
                     else
                         addChildObject(ef)
 
@@ -352,7 +360,8 @@ Item{
                 } else {
                     var pc = root.addProperty(ef)
                     var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-                    paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
+                    if ( expandPalette )
+                        paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
                 }
             }
         }
