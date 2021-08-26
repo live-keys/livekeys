@@ -23,7 +23,7 @@
 namespace lv{
 
 class Project;
-class PaletteContainer;
+class PaletteLoader;
 
 /// \private
 class LV_EDITOR_EXPORT EditorGlobalObject : public QObject{
@@ -34,22 +34,22 @@ class LV_EDITOR_EXPORT EditorGlobalObject : public QObject{
 public:
     explicit EditorGlobalObject(
         Project* project,
-        PaletteContainer* paletteContainer,
+        PaletteLoader* paletteContainer,
         QObject *parent = 0
     );
 
     Project* project();
-    PaletteContainer* paletteContainer();
+    PaletteLoader* paletteContainer();
 
 signals:
     void projectChanged();
 
 private:
     Project*              m_project;
-    PaletteContainer* m_paletteContainer;
+    PaletteLoader* m_paletteContainer;
 };
 
-inline PaletteContainer *EditorGlobalObject::paletteContainer(){
+inline PaletteLoader *EditorGlobalObject::paletteContainer(){
     return m_paletteContainer;
 }
 

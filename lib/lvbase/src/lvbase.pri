@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/libraryloadpath.h \
     $$PWD/librarytable.h \
     $$PWD/lvbaseglobal.h \
+    $$PWD/palettecontainer.h \
     $$PWD/stacktrace.h \
     $$PWD/commandlineparser.h \
     $$PWD/lockedfileiosession.h \
@@ -35,6 +36,7 @@ SOURCES += \
     $$PWD/mlnode.cpp \
     $$PWD/mlnodetojson.cpp \
     $$PWD/libraryloadpath.cpp \
+    $$PWD/palettecontainer.cpp \
     $$PWD/typename.cpp \
     $$PWD/visuallog.cpp \
     $$PWD/stacktrace.cpp \

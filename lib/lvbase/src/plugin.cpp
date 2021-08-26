@@ -5,6 +5,9 @@
 #include "live/mlnodetojson.h"
 #include "live/exception.h"
 #include "live/package.h"
+#include "live/packagegraph.h"
+#include "live/palettecontainer.h"
+#include "live/visuallog.h"
 #include <list>
 #include <map>
 
@@ -106,6 +109,7 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
 
     Plugin::Ptr pt(new Plugin(path, filePath, m["name"].asString(), package.toStdString()));
 
+
     if ( m.hasKey("palettes") ){
         MLNode::ObjectType pal = m["palettes"].asObject();
         for ( auto it = pal.begin(); it != pal.end(); ++it ){
@@ -113,9 +117,11 @@ Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &f
                 const MLNode::ArrayType& itArray = it->second.asArray();
                 for ( auto itItem = itArray.begin(); itItem != itArray.end(); ++itItem ){
                     pt->m_d->palettes.push_back(std::make_pair(it->first, itItem->asString()));
+                    pt->addPalette(itItem->asString(), it->first);
                 }
             } else {
                 pt->m_d->palettes.push_back(std::make_pair(it->first, it->second.asString()));
+                pt->addPalette(it->second.asString(), it->first);
             }
         }
     }
@@ -196,6 +202,13 @@ void Plugin::assignContext(PackageGraph *graph){
 
     m_d->context = new Plugin::Context;
     m_d->context->packageGraph = graph;
+
+    if ( graph ){
+        for ( auto it = m_d->palettes.begin(); it != m_d->palettes.end(); ++it ){
+            addPalette(it->second, it->first);
+        }
+    }
+
 }
 
 /** Context getter */
@@ -211,6 +224,17 @@ Plugin::Plugin(const std::string &path, const std::string &filePath, const std::
     m_d->name     = name;
     m_d->package  = package;
     m_d->context  = nullptr;
+}
+
+void Plugin::addPalette(const std::string &type, const std::string &path){
+    if ( context() ){
+        QFileInfo finfo(QString::fromStdString(path));
+        Utf8 extension = finfo.suffix().toStdString();
+        Utf8 name = finfo.baseName().toStdString();
+        Utf8 plugin = m_d->name;
+        Utf8 fullPath = m_d->path + "/" + path;
+        context()->packageGraph->paletteContainer()->addPalette(type, fullPath, name, extension, plugin);
+    }
 }
 
 

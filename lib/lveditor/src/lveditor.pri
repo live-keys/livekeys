@@ -21,7 +21,7 @@ HEADERS += \
     $$PWD/linecontrol.h \
     $$PWD/linesurface.h \
     $$PWD/lveditorglobal.h \
-    $$PWD/palettecontainer.h \
+    $$PWD/paletteloader.h \
     $$PWD/project.h \
     $$PWD/projectdocument.h \
     $$PWD/projectdocumentmodel.h \
@@ -64,7 +64,7 @@ SOURCES += \
     $$PWD/keymap.cpp \
     $$PWD/linecontrol.cpp \
     $$PWD/linesurface.cpp \
-    $$PWD/palettecontainer.cpp \
+    $$PWD/paletteloader.cpp \
     $$PWD/project.cpp \
     $$PWD/projectdocument.cpp \
     $$PWD/projectdocumentmodel.cpp \

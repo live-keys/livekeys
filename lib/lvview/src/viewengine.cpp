@@ -533,7 +533,7 @@ QmlError ViewEngine::findError(QJSValue error) const{
     return findError(error.property("message").toString());
 }
 
-ViewEngine *ViewEngine::grab(QObject *object){
+ViewEngine *ViewEngine::grab(const QObject *object){
     QQmlEngine* engine = qmlEngine(object);
     if ( engine )
         return qobject_cast<ViewEngine*>(engine->property("viewEngine").value<QObject*>());
