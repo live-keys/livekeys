@@ -201,6 +201,7 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     readContent();
     connect(d_ptr->textDocument, &QTextDocument::contentsChange,      this, &ProjectDocument::__documentContentsChanged);
     connect(d_ptr->textDocument, &QTextDocument::modificationChanged, this, &ProjectDocument::__documentModificationChanged);
+    connect(this,                &Document::saved,                    this, &ProjectDocument::__documentSaved);
 }
 
 void ProjectDocument::readContent(){
@@ -699,6 +700,10 @@ void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, 
 
 void ProjectDocument::__documentModificationChanged(){
     setIsDirty(d_ptr->textDocument->isModified());
+}
+
+void ProjectDocument::__documentSaved(){
+    d_ptr->textDocument->setModified(false);
 }
 
 void ProjectDocument::syncContent() const{

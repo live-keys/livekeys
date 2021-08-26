@@ -269,6 +269,7 @@ public:
 public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void __documentModificationChanged();
+    void __documentSaved();
 
     virtual void readContent() override;
     virtual int contentLength() override;
