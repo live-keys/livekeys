@@ -94,7 +94,7 @@ void TableRowsInfo::removeColumn(int idx)
 {
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
         auto rowInfo = *it;
-        (*it)->cells.erase((*it)->cells.begin()+idx);
+        rowInfo->cells.erase(rowInfo->cells.begin() + idx);
     }
 }
 

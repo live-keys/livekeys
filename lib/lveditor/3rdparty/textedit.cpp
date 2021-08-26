@@ -4047,7 +4047,7 @@ void TextEdit::setCode(CodeHandler *dh)
     dh->setTextEdit(this);
 }
 
-void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int height, QQuickItem *palette, int start, int end)
+void TextEdit::linePaletteAdded(int lineStart, int lineEnd, int /*height*/, QQuickItem *palette, int start, int end)
 {
     Q_D(TextEdit);
     auto startBlock = d->document->findBlockByNumber(lineStart-1);

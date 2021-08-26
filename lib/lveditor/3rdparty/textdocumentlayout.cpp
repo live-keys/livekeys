@@ -830,7 +830,7 @@ void TextDocumentLayoutPrivate::drawFrame(const QPointF &offset, QPainter *paint
 }
 
 void TextDocumentLayoutPrivate::drawFlow(const QPointF &offset, QPainter *painter, const QAbstractTextDocumentLayout::PaintContext &context,
-                                          QTextFrameIterator it, const QList<QTextFrame *> &floats, QTextBlock *cursorBlockNeedingRepaint) const
+                                          QTextFrameIterator it, const QList<QTextFrame *> &floats, QTextBlock* /*cursorBlockNeedingRepaint*/) const
 {
     Q_Q(const TextDocumentLayout);
     const bool inRootFrame = (!it.atEnd() && it.parentFrame() && it.parentFrame()->parentFrame() == 0);
@@ -2255,7 +2255,7 @@ QRectF TextDocumentLayout::frameBoundingRect(QTextFrame *frame) const
 QRectF TextDocumentLayoutPrivate::frameBoundingRectInternal(QTextFrame *frame) const
 {
     QPointF pos;
-    const int framePos = frame->firstPosition();
+//    const int framePos = frame->firstPosition();
     QTextFrame *f = frame;
     while (f) {
         TextFrameData *fd = data(f);
