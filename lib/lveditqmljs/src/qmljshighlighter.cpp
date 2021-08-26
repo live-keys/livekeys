@@ -225,7 +225,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         ++it;
     }
 
-    blockData->m_exceededSections.clear();
+    blockData->m_exceededSections->clear();
 
     if (!bracketPositions.isEmpty()) {
         blockData->bracketPositions = bracketPositions;
@@ -239,7 +239,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             lv::ProjectDocumentBlockData *prevBlockData =
                     reinterpret_cast<lv::ProjectDocumentBlockData*>(prevBlock.userData());
 
-            foreach (const ProjectDocumentSection::Ptr& section, prevBlockData->m_exceededSections ){
+            foreach (const ProjectDocumentSection::Ptr& section, *prevBlockData->m_exceededSections ){
                 if ( section->isValid() ){
                     highlightSection(section, blockData, exceeded);
                 }
@@ -249,7 +249,7 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
 
 
     if ( blockData ){
-        foreach(const ProjectDocumentSection::Ptr& section, blockData->m_sections ){
+        foreach(const ProjectDocumentSection::Ptr& section, *blockData->m_sections ){
             highlightSection(section, blockData, exceeded);
         }
     }
@@ -463,7 +463,7 @@ void QmlJsHighlighter::highlightSection(const ProjectDocumentSection::Ptr &secti
             setFormat(valueBegin, valueEnd - valueBegin, settings[QmlJsSettings::QmlRuntimeModifiedValue]);
             if ( valueEnd > currentBlock().position() + currentBlock().length() ){
                 exceeded = true;
-                blockData->m_exceededSections.append(section);
+                blockData->m_exceededSections->push_back(section);
             }
         }
         if ( def->totalPalettes() ){
@@ -476,7 +476,7 @@ void QmlJsHighlighter::highlightSection(const ProjectDocumentSection::Ptr &secti
             setFormat(valueBegin, valueEnd - valueBegin, settings[QmlJsSettings::QmlEdit]);
             if ( valueEnd > currentBlock().position() + currentBlock().length() ){
                 exceeded = true;
-                blockData->m_exceededSections.append(section);
+                blockData->m_exceededSections->push_back(section);
             }
         }
     }
