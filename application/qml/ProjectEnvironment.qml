@@ -18,7 +18,7 @@ import QtQuick 2.5
 import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.4
 import QtQuick.Controls.Styles 1.4
-import base 1.0
+import base 1.0 as Base
 import editor 1.0
 import editor.private 1.0
 import fs 1.0 as Fs
@@ -240,51 +240,55 @@ Item{
         function openProject(url, callback){
             root.wizards.checkUnsavedFiles(function(){
                 project.closeProject()
-
                 var path = Fs.UrlInfo.toLocalFile(url)
 
-                project.openProject(url)
+                Base.Time.delay(0, function(){
+                    project.openProject(url)
 
-                if ( !project.active ){
-                    var message = 'Folder doesn\'t have a main project file. Would you like to create one?'
-                    var createFile = function(mbox){
-                        root.wizards.addFile(
-                            project.dir(),
-                            {
-                                'extension': 'qml',
-                                'heading' : 'Add main file in ' + project.dir()
-                            },
-                            function(file){
-                                project.setActive(file.path)
-                                if ( callback )
-                                    callback(path)
-                            }
-                        )
-                        mbox.close()
+                    if ( !project.active ){
+                        var message = 'Folder doesn\'t have a main project file. Would you like to create one?'
+                        var createFile = function(mbox){
+                            root.wizards.addFile(
+                                project.dir(),
+                                {
+                                    'extension': 'qml',
+                                    'heading' : 'Add main file in ' + project.dir()
+                                },
+                                function(file){
+                                    project.setActive(file.path)
+                                    if ( callback )
+                                        callback(path)
+                                }
+                            )
+                            mbox.close()
+                        }
+
+                        lk.layers.window.dialogs.message(message, {
+                            button1Name : 'Yes',
+                            button1Function : createFile,
+                            button3Name : 'No',
+                            button3Function : function(mbox){ mbox.close() },
+                            returnPressed : createFile
+                        })
+
+                    } else {
+                        if ( callback )
+                            callback(path)
                     }
-
-                    lk.layers.window.dialogs.message(message, {
-                        button1Name : 'Yes',
-                        button1Function : createFile,
-                        button3Name : 'No',
-                        button3Function : function(mbox){ mbox.close() },
-                        returnPressed : createFile
-                    })
-
-                } else {
-                    if ( callback )
-                        callback(path)
-                }
-                // lk.openProjectInstance(url)
+                    // lk.openProjectInstance(url)
+                })
             })
         }
 
         function newProject(callback){
             root.wizards.closeProject(function(){
-                project.newProject()
-                if ( callback )
-                    callback()
-                // lk.newProjectInstance()
+                // delay so that previous panes get deleted before new ones are added
+                Base.Time.delay(0, function(){
+                    project.newProject()
+                    if ( callback )
+                        callback()
+                    // lk.newProjectInstance()
+                })
             })
         }
 
@@ -336,10 +340,12 @@ Item{
                         returnPressed : function(mbox){
                             var projectUrl = fileUrl
                             root.wizards.closeProject(function(){
-                                project.openProject(projectUrl)
-                                var path = Fs.UrlInfo.toLocalFile(projectUrl)
-                                if ( callback )
-                                    callback(path)
+                                Base.Time.delay(0, function(){
+                                    project.openProject(projectUrl)
+                                    var path = Fs.UrlInfo.toLocalFile(projectUrl)
+                                    if ( callback )
+                                        callback(path)
+                                })
                             })
                             mbox.close()
                         }
