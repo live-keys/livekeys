@@ -181,20 +181,20 @@ WorkspaceExtension{
                             name : "New Document",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.wizards.openFile(fe.path, ProjectDocument.Edit)
+                                lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
                             }
                         }, {
                             name : "New Runnable",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.wizards.openFile(fe.path, ProjectDocument.Edit)
+                                lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
                                 project.openRunnable(fe.path, [fe.path])
                             }
                         }, {
                             name : "Add File",
                             action : function(){
                                 lk.layers.workspace.wizards.addFile(item.entry().path, {}, function(f){
-                                    lk.layers.workspace.wizards.openFile(f.path, ProjectDocument.Edit)
+                                    lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
                                 })
                             }
                         }, {
@@ -226,7 +226,7 @@ WorkspaceExtension{
                             name : "Add File",
                             action : function(){
                                 lk.layers.workspace.wizards.addFile(item.entry().path, function(f){
-                                    lk.layers.workspace.wizards.openFile(f.path, ProjectDocument.Edit)
+                                    lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
                                 })
                             }
                         }, {

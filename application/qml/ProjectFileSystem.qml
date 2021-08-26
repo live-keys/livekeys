@@ -36,12 +36,12 @@ Pane{
     property Theme currentTheme : lk.layers.workspace.themes.current
 
     function openEntry(entry, monitor){
-        lk.layers.workspace.wizards.openFile(
+        lk.layers.workspace.project.openFile(
             entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
         )
     }
     function editEntry(entry){
-        lk.layers.workspace.wizards.openFile(entry.path, ProjectDocument.Edit)
+        lk.layers.workspace.project.openFile(entry.path, ProjectDocument.Edit)
     }
     function removeEntry(entry, isFile){
         var message = ''

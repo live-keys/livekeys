@@ -94,7 +94,7 @@ Opens a new file at the given `path`. The mode can be `Document.Edit`,
 `Document.Monitor` or `Document.EditIfNotOpen`.
 
 ```js
-lk.layers.workspace.wizards.openFile('/path/to/file', Document.Edit, function(path, document, pane){
+lk.layers.workspace.project.openFile('/path/to/file', Document.Edit, function(path, document, pane){
     console.log('File opened: ' + path, document, pane)
 })
 ```
