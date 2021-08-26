@@ -1553,8 +1553,8 @@ void TextDocumentLayoutPrivate::layoutFlow(QTextFrameIterator it, TextLayoutStru
             if (blockFormat.pageBreakPolicy() & QTextFormat::PageBreak_AlwaysBefore)
                 layoutStruct->newPage();
 
-            const QFixed origY = layoutStruct->y;
-            const QFixed origPageBottom = layoutStruct->pageBottom;
+//            const QFixed origY = layoutStruct->y;
+//            const QFixed origPageBottom = layoutStruct->pageBottom;
             const QFixed origMaximumWidth = layoutStruct->maximumWidth;
             layoutStruct->maximumWidth = 0;
 
