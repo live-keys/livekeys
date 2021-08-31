@@ -208,7 +208,7 @@ Item{
                     'open' : [wizards.openProjectViaDialog, "Open Project"],
                     'new' : [wizards.newProject, "New Project"],
                     'openFile' : [wizards.openFileViaDialog, "Open File"],
-                    'toggleProjectVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
+                    'toggleProjectVisibility' : [toggleVisibility, "Project File View: Toggle Visibility"]
                 })
             }
         }

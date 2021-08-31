@@ -15,6 +15,18 @@ WorkspaceExtension{
         lk.layers.workspace.panes.insertPane(pane, {orientation: Qt.Horizontal} )
     }
 
+    function toggleMainRunViewPane(){
+        var panes = lk.layers.workspace.panes.findPanesByType('viewer')
+        if ( panes.length > 0 ){
+            for ( var i = 0; i < panes.length; ++i ){
+                lk.layers.workspace.removePane(panes[i])
+            }
+        }
+
+        var pane = lk.layers.workspace.panes.createPane('viewer')
+        lk.layers.workspace.panes.insertPane(pane)
+    }
+
     property Component editorPane: Component{
         EditorPane{
             id: editorComponent
@@ -41,15 +53,16 @@ WorkspaceExtension{
         'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
         'addEditor' : [root.addEditorPane, "Add editor pane"],
         'toggleFullScreen': [lk.layers.window.handle.toggleFullScreen, "Toggle Fullscreen"],
-        "node_delete_active": [globals.objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
-        "nodeEditMode" : [globals.objectGraphControls.nodeEditMode, "Switch to node editing mode."]
+        "nodeDeleteActive": [globals.objectGraphControls.removeActiveItem, "Deletes the activated item in the node editor."],
+        "nodeEditMode" : [globals.objectGraphControls.nodeEditMode, "Switch to node editing mode."],
+        "toggleMainRunView" : [root.toggleMainRunViewPane, "MainRunView: Toggle visibility."]
     }
 
     // quick node editing
 
     keyBindings: {
-        "backspace": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
-        "delete": {command: "workspace.node_delete_active", whenPane: "editor", whenItem:"objectGraph" },
+        "backspace": {command: "workspace.nodeDeleteActive", whenPane: "editor", whenItem:"objectGraph" },
+        "delete": {command: "workspace.nodeDeleteActive", whenPane: "editor", whenItem:"objectGraph" },
         "alt+n": {command: "workspace.nodeEditMode" }
     }
 
