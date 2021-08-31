@@ -627,7 +627,7 @@ QtObject{
                 //TOREMOVE
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
-                paletteBoxGroup = objectContainer.paletteGroup
+                paletteBoxGroup = objectContainer.paletteGroup()
                 editorBox = objectContainer.parent
             } else {
                 editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
