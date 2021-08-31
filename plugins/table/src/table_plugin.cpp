@@ -1,9 +1,9 @@
 #include "table_plugin.h"
+#include "tablemodel.h"
+#include "tablemodelheader.h"
+#include "tablemodelrowsinfo.h"
 #include "table.h"
-#include "tableheader.h"
-#include "tablerowsinfo.h"
-#include "tabledatasource.h"
-#include "localdatasource.h"
+#include "localtable.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
@@ -11,10 +11,13 @@
 
 void TablePlugin::registerTypes(const char *uri)
 {
-    qmlRegisterType<lv::Table>(uri, 1, 0, "Table");
-    qmlRegisterUncreatableType<lv::TableHeader>(uri, 1, 0, "TableHeader", "Cannot create TableHeader instance.");
-    qmlRegisterUncreatableType<lv::TableRowsInfo>(uri, 1, 0, "TableRows", "Cannot create TableRows instance.");
+    qmlRegisterType<lv::TableModel>(uri, 1, 0, "TableModel");
+    qmlRegisterType<lv::LocalTable>(uri, 1, 0, "LocalTable");
 
-    qmlRegisterUncreatableType<lv::TableDataSource>(uri, 1, 0, "TableDataSource", "TableDataSource is of abstract type.");
-    qmlRegisterType<lv::LocalDataSource>(uri, 1, 0, "LocalDataSource");
+    qmlRegisterUncreatableType<lv::TableModelHeader>(
+        uri, 1, 0, "TableModelHeader", "Cannot create TableModelHeader instance.");
+    qmlRegisterUncreatableType<lv::TableModelRowsInfo>(
+        uri, 1, 0, "TableModelRowsInfo", "Cannot create TableModelRowsInfo instance.");
+    qmlRegisterUncreatableType<lv::Table>(
+        uri, 1, 0, "Table", "Table is of abstract type.");
 }

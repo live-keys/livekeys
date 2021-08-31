@@ -1,11 +1,11 @@
-#ifndef LVTABLEROWSINFO_H
-#define LVTABLEROWSINFO_H
+#ifndef LVTABLEMODELROWSINFO_H
+#define LVTABLEMODELROWSINFO_H
 
 #include <QAbstractTableModel>
 
 namespace lv {
 
-class TableRowsInfo : public QAbstractTableModel{
+class TableModelRowsInfo : public QAbstractTableModel{
 
     Q_OBJECT
     Q_PROPERTY(int defaultRowHeight READ defaultRowHeight WRITE setDefaultRowHeight NOTIFY defaultRowHeightChanged)
@@ -27,7 +27,7 @@ class TableRowsInfo : public QAbstractTableModel{
     };
 
 public:
-    explicit TableRowsInfo(QObject* parent = nullptr);
+    explicit TableModelRowsInfo(QObject* parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -71,15 +71,15 @@ private:
     int                     m_contentHeight;
 };
 
-inline QHash<int, QByteArray> TableRowsInfo::roleNames() const{
+inline QHash<int, QByteArray> TableModelRowsInfo::roleNames() const{
     return m_roles;
 }
 
-inline int TableRowsInfo::defaultRowHeight() const{
+inline int TableModelRowsInfo::defaultRowHeight() const{
     return m_defaultRowHeight;
 }
 
-inline void TableRowsInfo::setDefaultRowHeight(int defaultRowHeight){
+inline void TableModelRowsInfo::setDefaultRowHeight(int defaultRowHeight){
     if (m_defaultRowHeight == defaultRowHeight)
         return;
 
@@ -89,4 +89,4 @@ inline void TableRowsInfo::setDefaultRowHeight(int defaultRowHeight){
 
 }
 
-#endif // LVTABLEROWSINFO_H
+#endif // LVTABLEMODELROWSINFO_H

@@ -1,9 +1,9 @@
-#include "tableheader.h"
+#include "tablemodelheader.h"
 
 namespace lv {
 
 
-TableHeader::TableHeader(QObject *parent)
+TableModelHeader::TableModelHeader(QObject *parent)
     : QAbstractListModel(parent)
     , m_defaultColumnWidth(100)
     , m_contentWidth(0)
@@ -11,15 +11,15 @@ TableHeader::TableHeader(QObject *parent)
     m_roles[Name] = "name";
 }
 
-int TableHeader::rowCount(const QModelIndex &) const{
+int TableModelHeader::rowCount(const QModelIndex &) const{
     return 1;
 }
 
-int TableHeader::columnCount(const QModelIndex &) const{
+int TableModelHeader::columnCount(const QModelIndex &) const{
     return m_data.size();
 }
 
-QVariant TableHeader::data(const QModelIndex &index, int) const{
+QVariant TableModelHeader::data(const QModelIndex &index, int) const{
     if (index.row() > 0)
         return QVariant();
     if (index.column() >= m_data.size())
@@ -28,7 +28,7 @@ QVariant TableHeader::data(const QModelIndex &index, int) const{
     return m_data[index.column()].name;
 }
 
-bool TableHeader::setData(const QModelIndex &index, const QVariant &, int)
+bool TableModelHeader::setData(const QModelIndex &index, const QVariant &, int)
 {
     if (index.row() > 0)
         return false;
@@ -47,7 +47,7 @@ bool TableHeader::setData(const QModelIndex &index, const QVariant &, int)
     return true;
 }
 
-void TableHeader::addColumn(const QString &name)
+void TableModelHeader::addColumn(const QString &name)
 {
     beginInsertColumns(QModelIndex(), m_data.size(), m_data.size());
     auto modelData = createColumnData(m_data.size());
@@ -58,7 +58,7 @@ void TableHeader::addColumn(const QString &name)
 
 }
 
-void TableHeader::removeColumn(int idx)
+void TableModelHeader::removeColumn(int idx)
 {
     beginRemoveColumns(QModelIndex(), idx, idx);
 
@@ -69,7 +69,7 @@ void TableHeader::removeColumn(int idx)
     endRemoveColumns();
 }
 
-void TableHeader::initalizeData(int size)
+void TableModelHeader::initalizeData(int size)
 {
     if (size < 1)
         return;
@@ -81,7 +81,7 @@ void TableHeader::initalizeData(int size)
     endInsertColumns();
 }
 
-void TableHeader::notifyModelReset(){
+void TableModelHeader::notifyModelReset(){
     beginResetModel();
     m_data.clear();
     endResetModel();
@@ -89,11 +89,11 @@ void TableHeader::notifyModelReset(){
     emit contentWidthChanged();
 }
 
-int TableHeader::size() const{
+int TableModelHeader::size() const{
     return m_data.size();
 }
 
-void TableHeader::updateColumnWidth(int index, int width){
+void TableModelHeader::updateColumnWidth(int index, int width){
     if ( index >= m_data.size() )
         return;
     int delta = width - m_data[index].width;
@@ -103,13 +103,13 @@ void TableHeader::updateColumnWidth(int index, int width){
         emit contentWidthChanged();
 }
 
-int TableHeader::columnWidth(int index){
+int TableModelHeader::columnWidth(int index){
     if ( index >= m_data.size() )
         return m_defaultColumnWidth;
     return m_data[index].width;
 }
 
-TableHeader::ColumnData TableHeader::createColumnData(int idx){
+TableModelHeader::ColumnData TableModelHeader::createColumnData(int idx){
     int rem = idx%26;
     QString name = QString(static_cast<char>(static_cast<int>('A') + rem));
     idx /= 26;
@@ -120,7 +120,7 @@ TableHeader::ColumnData TableHeader::createColumnData(int idx){
         name = QString(static_cast<char>(static_cast<int>('A') + rem - 1)) + name;
     }
 
-    TableHeader::ColumnData data;
+    TableModelHeader::ColumnData data;
     data.name = name;
     data.width = m_defaultColumnWidth;
     m_contentWidth += m_defaultColumnWidth;
@@ -128,12 +128,12 @@ TableHeader::ColumnData TableHeader::createColumnData(int idx){
     return data;
 }
 
-int TableHeader::contentWidth() const
+int TableModelHeader::contentWidth() const
 {
     return m_contentWidth;
 }
 
-void TableHeader::assignColumnName(int index, const QString &name){
+void TableModelHeader::assignColumnName(int index, const QString &name){
     if ( index >= m_data.length() )
         return;
     m_data[index].name = name;

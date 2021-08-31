@@ -15,12 +15,12 @@ Rectangle{
     color: style.cellBorderColor
     objectName: "tableEditor"
 
-    property var table: null
+    property var tableModel: null
 
     property QtObject style: TableEditorStyle{}
 
-    onTableChanged: {
-        if (!table){
+    onTableModelChanged: {
+        if (!tableModel){
             return
         }
         headerTableView.forceLayout()
@@ -29,30 +29,32 @@ Rectangle{
     }
 
     property var getContextMenuOptions: function(item, options){
+        if ( !tableModel )
+            return []
         if ( item.objectName === "tableEditor" ){
             var initial = [{
                 name: "Add column",
                 enabled: true,
                 action: function(){
-                    table.addColumns(1)
+                    tableModel.addColumns(1)
                 }
             },
             {
                 name: "Add row",
                 enabled: true,
                 action: function(){
-                    root.table.addRows(1)
+                    root.tableModel.addRows(1)
                 }
             },
             {
                 name: "Clear table",
                 enabled: true,
                 action: function(){
-                    root.table.clearTable()
+                    root.tableModel.clearTable()
                 }
             }]
 
-            if ( table.dataSource instanceof LocalDataSource ){
+            if ( tableModel && (tableModel.table instanceof LocalTable) ){
                 initial.push({
                      name: "Save...",
                      enabled: true,
@@ -61,7 +63,7 @@ Rectangle{
                              { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
                              function(url){
                                  var path = UrlInfo.toLocalFile(url)
-                                 table.dataSource.writeToFile(path)
+                                 tableModel.table.writeToFile(path)
                              }
                          )
                      }
@@ -73,7 +75,7 @@ Rectangle{
                              { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
                              function(url){
                                  var path = UrlInfo.toLocalFile(url)
-                                 table.dataSource.readFromFile(path)
+                                 tableModel.table.readFromFile(path)
                              }
                          )
                      }
@@ -88,14 +90,14 @@ Rectangle{
                 name: "Remove row",
                 enabled: true,
                 action: function(){
-                    root.table.removeRow(options.row)
+                    root.tableModel.removeRow(options.row)
                 }
             },
             {
                 name: "Remove column",
                 enabled: true,
                 action: function(){
-                    root.table.removeColumn(options.column)
+                    root.tableModel.removeColumn(options.column)
                 }
             }]
         }
@@ -133,7 +135,7 @@ Rectangle{
          radius: 0
          style: root.style.cellInputStyle
          onActiveFocusLost: {
-             root.table.assignCell(editCell.row, editCell.column, input.text)
+             root.tableModel.assignCell(editCell.row, editCell.column, input.text)
              root.disableCellInput()
          }
      }
@@ -208,12 +210,12 @@ Rectangle{
         width: root.style.headerCellWidth
         height: parent.height - root.style.headerCellHeight
         clip: true
-        model: !table || !table.rowInfo ? 0 : table.rowInfo
+        model: !tableModel || !tableModel.rowInfo ? 0 : tableModel.rowInfo
 
         anchors.top: tableOptions.bottom
 
         interactive: false
-        rowHeightProvider: table ? table.rowInfo.rowHeight : null
+        rowHeightProvider: tableModel ? tableModel.rowInfo.rowHeight : null
 
         contentY: contentTableView.contentY
         delegate: Item{
@@ -274,7 +276,7 @@ Rectangle{
                     rowInfoContainer.height = y
 
                     var newHeight = y - rowInfoContainer.y + root.style.headerCellBorderSize
-                    table.rowInfo.updateRowHeight(index, newHeight)
+                    tableModel.rowInfo.updateRowHeight(index, newHeight)
                     rowTableView.forceLayout()
                     contentTableView.forceLayout()
                 }
@@ -288,11 +290,11 @@ Rectangle{
         width: parent.width - root.style.headerCellWidth
         height: root.style.headerCellHeight
         clip: true
-        model: !table || !table.header ? null : table.header
+        model: !tableModel || !tableModel.header ? null : tableModel.header
         anchors.left: tableOptions.right
 
         interactive: false
-        columnWidthProvider: table ? table.header.columnWidth : null
+        columnWidthProvider: tableModel ? tableModel.header.columnWidth : null
 
         contentX: contentTableView.contentX
         delegate: Item{
@@ -358,7 +360,7 @@ Rectangle{
                     headerColumnContainer.width = x
 
                     var newWidth = x - headerColumnContainer.x + root.style.headerCellBorderSize
-                    table.header.updateColumnWidth(index, newWidth)
+                    tableModel.header.updateColumnWidth(index, newWidth)
                     headerTableView.forceLayout()
                     contentTableView.forceLayout()
                 }
@@ -406,19 +408,19 @@ Rectangle{
             id: contentTableView
             anchors.fill: parent
 
-            contentWidth: table ? table.header.contentWidth : 0
-            contentHeight: table ? table.rowInfo.contentHeight : 0
+            contentWidth: tableModel ? tableModel.header.contentWidth : 0
+            contentHeight: tableModel ? tableModel.rowInfo.contentHeight : 0
 
             clip: true
-            model: table
+            model: tableModel
 
             columnSpacing: root.style.cellBorderSize
             columnWidthProvider: function(column){
-                return table.header.columnWidth(column) - 1
+                return tableModel.header.columnWidth(column) - 1
             }
             rowSpacing: root.style.cellBorderSize
             rowHeightProvider: function(row){
-                return table.rowInfo.rowHeight(row) - 1
+                return tableModel.rowInfo.rowHeight(row) - 1
             }
 
             delegate: Rectangle{
@@ -457,12 +459,12 @@ Rectangle{
                                 if ( model.isSelected ){
                                     //TODO
                                 } else {
-                                    table.select(column, row)
+                                    tableModel.select(column, row)
                                 }
 
                             } else {
-                                table.deselect()
-                                table.select(column, row)
+                                tableModel.deselect()
+                                tableModel.select(column, row)
                             }
 
                             root.cellClicked(row, column, tableDelegate)

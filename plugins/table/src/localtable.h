@@ -1,19 +1,19 @@
-#ifndef LVLOCALDATASOURCE_H
-#define LVLOCALDATASOURCE_H
+#ifndef LVLOCALTABLE_H
+#define LVLOCALTABLE_H
 
 #include <QObject>
 #include <QJSValue>
-#include "tabledatasource.h"
+#include "table.h"
 
 namespace lv{
 
-class LocalDataSource : public TableDataSource{
+class LocalTable : public Table{
 
     Q_OBJECT
 
 public:
-    explicit LocalDataSource(QObject *parent = nullptr);
-    ~LocalDataSource();
+    explicit LocalTable(QObject *parent = nullptr);
+    ~LocalTable();
 
     QString valueAt(int row, int column) override;
     void setValueAt(int row, int column, const QString& value) override;
@@ -35,7 +35,7 @@ public slots:
     void clear();
 
 private:
-    Q_DISABLE_COPY(LocalDataSource);
+    Q_DISABLE_COPY(LocalTable);
 
     QList<QString>         m_headers;
     QList<QList<QString> > m_data;
@@ -43,4 +43,4 @@ private:
 
 }// namespace
 
-#endif // LVLOCALDATASOURCE_H
+#endif // LVLOCALTABLE_H

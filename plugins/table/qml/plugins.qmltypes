@@ -15,4 +15,10 @@ Module {
         exportMetaObjectRevisions: [0]
         Property { name: "dataSource"; type: "lv::TableDataSource"; isPointer: true }
     }
+    Component {
+        name: "lv::LocalTable"
+        prototype: "lv::Table"
+        exports: ["table/LocalTable 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
 }

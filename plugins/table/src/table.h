@@ -1,91 +1,40 @@
-#ifndef LVTABLE_H
-#define LVTABLE_H
+#ifndef LVTABLE
+#define LVTABLE
 
-#include <QAbstractTableModel>
-#include <QQmlParserStatus>
-#include <QJSValue>
+#include <QObject>
 
-namespace lv {
+namespace lv{
 
-class TableHeader;
-class TableRowsInfo;
-class TableDataSource;
+class Table : public QObject{
 
-class Table : public QAbstractTableModel, public QQmlParserStatus
-{
     Q_OBJECT
-    Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(lv::TableHeader*   header        READ header         CONSTANT)
-    Q_PROPERTY(lv::TableRowsInfo* rowInfo       READ rowInfo        CONSTANT)
-    Q_PROPERTY(lv::TableDataSource* dataSource  READ dataSource     WRITE setDataSource NOTIFY dataSourceChanged)
-    
-    enum Roles{
-        Value = Qt::UserRole + 1,
-        IsSelected
-    };
+
 public:
-
     explicit Table(QObject *parent = nullptr);
-    ~Table();
+    virtual ~Table();
 
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-    QHash<int, QByteArray> roleNames() const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
-    QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex &index, const QVariant &value, int role = Qt::EditRole) override;
+    virtual int totalRows() const = 0;
+    virtual QString valueAt(int row, int column) = 0;
+    virtual void setValueAt(int row, int column, const QString& value) = 0;
 
-    void classBegin() override {}
-    virtual void componentComplete() override;
+    virtual void addRow() = 0;
+    virtual void addColumn() = 0;
+    virtual void removeColumn(int idx) = 0;
+    virtual void removeRow(int idx) = 0;
+    virtual int totalColumns() const = 0;
+    virtual QList<QString> columnNames() const = 0;
 
-    lv::TableHeader *header() const;
-    lv::TableRowsInfo *rowInfo() const;
-    lv::TableDataSource* dataSource() const;
-
-    void setDataSource(lv::TableDataSource* dataSource);
-
-signals:
-    void complete();
-    void rowAdded();
-    void columnAdded();
-    void dataSourceChanged();
+    void beginLoadData();
+    void endLoadData();
 
 public slots:
-    void addRows(int number = 1);
-    void removeRow(int idx);
-    void assignCell(int row, int col, QString value);
+    void reload();
 
-    void addColumns(int number = 1);
-    void assignColumnInfo(int index, QJSValue name);
-    void removeColumn(int idx);
-
-    bool select(QJSValue column, QJSValue row);
-    bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
-
-    void clearTable();
-    void __dataSourceAboutToLoad();
-    void __dataSourceFinished();
-
-private:
-    void assignDataSource(TableDataSource* ds);
-
-    Q_DISABLE_COPY(Table)
-    QHash<int, QByteArray>            m_roles;
-    bool                              m_isComponentComplete;
-
-    TableHeader*                      m_headerModel;
-    TableRowsInfo*                    m_rowModel;
-    TableDataSource*                  m_dataSource;
+signals:
+    void dataAboutToLoad();
+    void dataLoaded();
 };
 
-inline QHash<int, QByteArray> Table::roleNames() const{
-    return m_roles;
-}
+}// namespace
 
-inline TableDataSource *Table::dataSource() const{
-    return m_dataSource;
-}
-
-} // namespace
-
-#endif // LVTABLE_H
+#endif // LVTABLE

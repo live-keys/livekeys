@@ -5,6 +5,7 @@ import editor 1.0
 import live 1.0
 import base 1.0
 import visual.input 1.0 as Input
+import table 1.0
 
 CodePalette {
     id: root
@@ -12,6 +13,15 @@ CodePalette {
     type: "qml/table#Table"
 
     property var table: null
+    onTableChanged: {
+        if ( tableModel )
+            tableModel.destroy()
+        tableModel = tableModelFactory.createObject()
+        tableModel.table = table
+    }
+
+    property Component tableModelFactory: TableModel{}
+    property TableModel tableModel: null
 
     item: Item {
         id: paletteItem
@@ -20,7 +30,7 @@ CodePalette {
 
         TableEditor {
             anchors.fill: parent
-            table: root.table
+            tableModel: root.tableModel
             style: lk.layers.workspace.themes.current.tableStyle
 
             //TODO: Move to extension
