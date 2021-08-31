@@ -28,7 +28,6 @@
 #include "qmlstreamsink.h"
 #include "qmlworkerpoolobject.h"
 #include "qmlcontainer.h"
-#include "qmlopening.h"
 #include "qmlfollowup.h"
 #include "groupcollector.h"
 #include "qmlstreamfilter.h"
@@ -41,6 +40,8 @@
 #include "qmlcollector.h"
 #include "qmlsplit.h"
 #include "qmlstreamoperator.h"
+#include "qmlvalueflow.h"
+#include "qmleachvalueapply.h"
 
 #include <qqml.h>
 #include <QQmlApplicationEngine>
@@ -80,7 +81,6 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlStreamLog>(       uri, 1, 0, "StreamLog");
     qmlRegisterType<lv::QmlPropertyLog>(     uri, 1, 0, "PropertyLog");
     qmlRegisterType<lv::QmlContainer>(       uri, 1, 0, "Container");
-    qmlRegisterType<lv::QmlOpening>(         uri, 1, 0, "Opening");
     qmlRegisterType<lv::QmlFollowUp>(        uri, 1, 0, "FollowUp");
     qmlRegisterType<lv::QmlArrange>(         uri, 1, 0, "Arrange");
     qmlRegisterType<lv::QmlSplit>(           uri, 1, 0, "Split");
@@ -92,6 +92,8 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlStreamValueAwait>(uri, 1, 0, "StreamValueAwait");
     qmlRegisterType<lv::QmlStreamAct>(       uri, 1, 0, "StreamAct");
     qmlRegisterType<lv::QmlStreamOperator>(  uri, 1, 0, "StreamOperator");
+    qmlRegisterType<lv::QmlValueFlow>(       uri, 1, 0, "ValueFlow");
+    qmlRegisterType<lv::QmlEachValueApply>(  uri, 1, 0, "EachValueApply");
 
     qmlRegisterSingletonType<lv::QmlScript>(           uri, 1, 0, "Script", &scriptProvider);
     qmlRegisterSingletonType<lv::QmlWorkerPoolObject>( uri, 1, 0, "WorkerPool", &workerPoolProvider);
