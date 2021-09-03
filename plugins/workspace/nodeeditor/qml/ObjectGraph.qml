@@ -353,7 +353,7 @@ Rectangle{
 
         var children = node.item.propertyContainer.children
         for (var i = 0; i < children.length; ++i){
-            children[i].destroyObjectNodeProperty()
+            children[i].clean().destroy()
         }
 
         if (node.item.outPort)

@@ -51,8 +51,38 @@ Item{
     property var isAnObject: false
     property bool isMethod: false
 
+    property QtObject childObjectContainer: null
+
     signal updateContentWidth()
     onUpdateContentWidth: paletteContainer.updateContentWidth()
+
+    function __initialize(node, style, editFragment){
+        root.style = style
+        root.propertyName = editFragment.identifier()
+        root.title = root.propertyName
+        root.subtitle = editFragment.typeName()
+        root.node = node
+        root.editFragment = editFragment
+
+        if ( editFragment ) {
+            if ( editFragment.location === QmlEditFragment.Object ){
+                root.isAnObject = true
+                root.title = editFragment.typeName()
+                root.subtitle = editFragment.objectId()
+            }
+            editFragment.incrementRefCount()
+        }
+        root.width = node.item.width - (root.isAnObject ? 30 : 0)
+    }
+
+    function __initializeFunction(node, style, name){
+        root.style = style
+        root.propertyName = name
+        root.title = root.propertyName
+        root.node = node
+        root.width = node.item.width
+        root.isMethod = true
+    }
 
     function addInPort(){
         if ( root.inPort )
@@ -94,39 +124,6 @@ Item{
         port.objectProperty = root
     }
 
-    function __initialize(node, style, editFragment){
-        root.style = style
-        root.propertyName = editFragment.identifier()
-        root.title = root.propertyName
-        root.subtitle = editFragment.typeName()
-        root.node = node
-        root.editFragment = editFragment
-
-        //TODO: Handle functions
-        //        if ( options && options.hasOwnProperty('isMethod') ){
-        //            propertyItem.isMethod = options.isMethod
-        //        }
-
-        if ( editFragment ) {
-            if ( editFragment.location === QmlEditFragment.Object ){
-                root.isAnObject = true
-                root.title = editFragment.typeName()
-                root.subtitle = editFragment.objectId()
-            }
-            editFragment.incrementRefCount()
-        }
-        root.width = node.item.width - (root.isAnObject ? 30 : 0)
-    }
-
-    function __initializeFunction(node, style, name){
-        root.style = style
-        root.propertyName = name
-        root.title = root.propertyName
-        root.node = node
-        root.width = node.item.width
-        root.isMethod = true
-    }
-
     function clean(){
         root.node.item.removeMemberByName(propertyName)
 
@@ -149,11 +146,6 @@ Item{
         return root
     }
 
-    function destroyObjectNodeProperty(){
-        root.clean()
-        root.destroy()
-    }
-
     function paletteByName(name){
         var pg = paletteContainer
         for ( var i = 0; i < pg.children.length; ++i ){
@@ -163,13 +155,39 @@ Item{
         return null
     }
 
+    function userAddPalette(){
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+
+        var palettes = root.editFragment.language.findPalettesForFragment(root.editFragment)
+        palettes.data = paletteFunctions.filterOutPalettes(palettes.data, paletteGroup().palettesOpened, true)
+        if (!palettes.data || palettes.data.length === 0)
+            return null
+
+        var paletteList = paletteFunctions.views.openPaletteList(paletteFunctions.theme.selectableListView, palettes.data, root.node.item,
+        {
+             onCancelled: function(){
+                 root.node.item.objectGraph.activateFocus()
+                 paletteList.destroy()
+             },
+             onSelected: function(index){
+                 var palette = root.editFragment.language.expand(root.editFragment, {
+                     "palettes" : [palettes.data[index].name]
+                 })
+                var paletteBox = paletteFunctions.__factories.createPaletteContainer(palette, root.paletteGroup(), {moveEnabled: false})
+                root.node.item.objectGraph.activateFocus()
+             }
+        })
+
+        paletteList.forceActiveFocus()
+        paletteList.width = root.width
+        paletteList.anchors.topMargin = root.y + 78
+    }
+
     function paletteGroup(){
         return paletteContainer
     }
 
     function expand(){}
-
-    property QtObject childObjectContainer: null
 
     Rectangle {
         id: propertyTitle
@@ -213,8 +231,8 @@ Item{
 
 
         Item{
-            visible:!isAnObject
             id: paletteAddButton
+            visible:!isAnObject
             anchors.right: parent.right
             anchors.rightMargin: 25
             anchors.verticalCenter: parent.verticalCenter
@@ -227,28 +245,13 @@ Item{
             MouseArea{
                 id: paletteAddMouse
                 anchors.fill: parent
-                onClicked: {
-                    var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-                    var coords = root.mapToItem(node.item, 0, 0)
-                    var paletteList = paletteFunctions.views.openPaletteListForNode(
-                        root,
-                        paletteContainer,
-                        node.item
-                    )
-
-                    if (paletteList){
-                        paletteList.anchors.topMargin = coords.y + 30
-                        paletteList.anchors.left = node.item.left
-                        paletteList.anchors.leftMargin = coords.x
-                        paletteList.width = Qt.binding(function(){return root.width})
-                    }
-                }
+                onClicked: root.userAddPalette()
             }
         }
 
         Item{
-            visible: !isAnObject
             id: closeObjectItem
+            visible: !isAnObject
             anchors.right: parent.right
             anchors.rightMargin: 0
             anchors.top: parent.top
@@ -268,14 +271,14 @@ Item{
                     editFragment.language.removeConnection(editFragment)
                     if (editFragment.refCount > 0)
                     {
-                        destroyObjectNodeProperty()
+                        root.clean().destroy()
                     }
                 }
             }
         }
     }
 
-    PaletteGroup {
+    PaletteGroup{
         id: paletteContainer
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
@@ -293,14 +296,11 @@ Item{
             updateContentWidth()
         }
         editFragment: root.editFragment
-
     }
     
     Connections {
         target: editFragment
-        function onAboutToBeRemoved(){
-            destroyObjectNodeProperty()
-        }
+        function onAboutToBeRemoved(){ root.clean().destroy() }
         ignoreUnknownSignals: true
     }
 

@@ -25,10 +25,9 @@ Qan.NodeItem{
     property alias propertyContainer: nodeMemberContainer
     property alias paletteListContainer: paletteContainer
 
-    property var nodeParent: null
-    property var editFragment: null
-    property var removeNode: null
     property string id: ""
+    property var editFragment: null
+    property var nodeParent: null
     property var editor: null
     property var objectGraph: null
 
@@ -162,6 +161,40 @@ Qan.NodeItem{
         return root
     }
 
+    function userAddPalette(){
+        root.selected = false
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+
+        var palettes = root.editFragment.language.findPalettesForFragment(root.editFragment)
+        palettes.data = paletteFunctions.filterOutPalettes(palettes.data, root.paletteGroup().palettesOpened, true)
+        if (!palettes.data || palettes.data.length === 0)
+            return null
+
+        var paletteList = paletteFunctions.views.openPaletteList(paletteFunctions.theme.selectableListView, palettes.data, root,
+        {
+            onCancelled: function(){
+                root.objectGraph.activateFocus()
+                paletteList.destroy()
+            },
+            onSelected: function(index){
+                var palette = root.editFragment.language.expand(root.editFragment, {
+                    "palettes" : [palettes.data[index].name]
+                })
+                var paletteBox = paletteFunctions.__factories.createPaletteContainer(palette, paletteGroup(), {moveEnabled: false})
+                if ( palette.item ){ // send expand signal
+                    root.expand()
+                } else {
+                    paletteFunctions.expandObjectContainerLayout(root, palette, {expandChildren: false})
+                }
+                paletteList.destroy()
+            }
+        })
+
+        paletteList.forceActiveFocus()
+        paletteList.anchors.topMargin = nodeTitle.height
+        paletteList.width = root.width
+    }
+
     function sortChildren(){}
     function expand(){}
 
@@ -275,19 +308,7 @@ Qan.NodeItem{
                 MouseArea{
                     id: paletteAddMouse
                     anchors.fill: parent
-                    onClicked: {
-                        root.selected = false
-                        var paletteList = paletteFunctions.views.openPaletteListForNode(
-                            root,
-                            paletteContainer,
-                            wrapper
-                        )
-
-                        if (paletteList){
-                            paletteList.anchors.topMargin = nodeTitle.height
-                            paletteList.width = Qt.binding(function(){ return wrapper.width })
-                        }
-                    }
+                    onClicked: root.userAddPalette()
                 }
             }
         }

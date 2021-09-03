@@ -130,18 +130,17 @@ CodePalette{
                 }
             }
 
+
             for ( var j = 0; j < propertyConnections.length; ++j ){
                 var propertyConnection = propertyConnections[j]
 
                 var node = null
                 if ( propertyConnection.right.id ){
                     node = palette.findObjectById(propertyConnection.right.id)
-                    vlog.i(node)
-                    if ( node.objectName !== 'objectNode' )
+                    if ( node.item.objectName !== 'objectNode' )
                         node = null
                 } else if ( propertyConnection.right.idOrProperty ){
                     node = palette.findObjectById(propertyConnection.right.idOrProperty)
-                    vlog.i(node)
                     if ( node ){
                         propertyConnection.right.id = propertyConnection.right.idOrProperty
                     } else {
