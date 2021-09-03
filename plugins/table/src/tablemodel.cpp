@@ -6,7 +6,7 @@
 
 namespace lv {
 
-TableModel::TableModel(QObject *parent)
+TableModel::TableModel(Table *parent)
     : QAbstractTableModel(parent)
     , m_isComponentComplete(false)
     , m_headerModel(new TableModelHeader(this))
@@ -16,7 +16,14 @@ TableModel::TableModel(QObject *parent)
     m_roles[Value]      = "value";
     m_roles[IsSelected] = "isSelected";
 
-    assignDataSource(new LocalTable(this));
+
+    __dataSourceAboutToLoad();
+    m_dataSource = parent;
+    if ( m_dataSource ){
+        connect(m_dataSource, &Table::dataAboutToLoad, this, &TableModel::__dataSourceAboutToLoad);
+        connect(m_dataSource, &Table::dataLoaded, this, &TableModel::__dataSourceFinished);
+    }
+    __dataSourceFinished();
 }
 
 TableModel::~TableModel(){
@@ -109,6 +116,7 @@ void TableModel::addColumns(int number){
 
 void TableModel::assignColumnInfo(int index, QJSValue name){
     m_headerModel->assignColumnName(index, name.toString());
+    m_dataSource->assignColumnInfo(index, name.toString());
 }
 
 void TableModel::removeColumn(int idx)
@@ -193,30 +201,6 @@ void TableModel::__dataSourceFinished(){
 }
 
 void TableModel::assignDataSource(Table *ds){
-    if ( m_dataSource == ds )
-        return;
-    //TODO: Reference counting on data source
-    if ( m_dataSource){
-        disconnect(m_dataSource, &Table::dataAboutToLoad, this, &TableModel::__dataSourceAboutToLoad);
-        disconnect(m_dataSource, &Table::dataLoaded, this, &TableModel::__dataSourceFinished);
-    }
-
-    __dataSourceAboutToLoad();
-    m_dataSource = ds;
-    if ( m_dataSource ){
-        connect(m_dataSource, &Table::dataAboutToLoad, this, &TableModel::__dataSourceAboutToLoad);
-        connect(m_dataSource, &Table::dataLoaded, this, &TableModel::__dataSourceFinished);
-    }
-    __dataSourceFinished();
-}
-
-void TableModel::setTable(Table *dataSource)
-{
-    if (m_dataSource == dataSource)
-        return;
-
-    assignDataSource(dataSource);
-    emit tableChanged();
 }
 
 } // namespace

@@ -17,7 +17,7 @@ class TableModel : public QAbstractTableModel, public QQmlParserStatus
     Q_INTERFACES(QQmlParserStatus)
     Q_PROPERTY(lv::TableModelHeader*   header   READ header  CONSTANT)
     Q_PROPERTY(lv::TableModelRowsInfo* rowInfo  READ rowInfo CONSTANT)
-    Q_PROPERTY(lv::Table* table                 READ table   WRITE setTable NOTIFY tableChanged)
+    Q_PROPERTY(lv::Table* table                 READ table   CONSTANT)
     
     enum Roles{
         Value = Qt::UserRole + 1,
@@ -25,7 +25,7 @@ class TableModel : public QAbstractTableModel, public QQmlParserStatus
     };
 public:
 
-    explicit TableModel(QObject *parent = nullptr);
+    explicit TableModel(Table *parent = nullptr);
     ~TableModel();
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -48,7 +48,6 @@ signals:
     void complete();
     void rowAdded();
     void columnAdded();
-    void tableChanged();
 
 public slots:
     void addRows(int number = 1);

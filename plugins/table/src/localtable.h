@@ -24,10 +24,11 @@ public:
     void removeRow(int idx) override;
     int totalColumns() const override;
     QList<QString> columnNames() const override;
+    void assignColumnInfo(int index, const QString& info) override;
 
 public slots:
     void readFromFile(const QString& path, const QJSValue& options);
-    void writeToFile(const QString& path);
+    void writeToFile(const QString& path, const QJSValue& options);
 
     int totalRows() const override;
     QJSValue rowAt(int index);

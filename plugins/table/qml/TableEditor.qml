@@ -63,7 +63,19 @@ Rectangle{
                              { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
                              function(url){
                                  var path = UrlInfo.toLocalFile(url)
-                                 tableModel.table.writeToFile(path)
+                                 tableModel.table.writeToFile(path, {})
+                             }
+                         )
+                     }
+                 }, {
+                     name: "Save With Header...",
+                     enabled: true,
+                     action: function(){
+                         lk.layers.window.dialogs.saveFile(
+                             { filters: [ "Csv Files (*.csv)", "All files (*)" ] },
+                             function(url){
+                                 var path = UrlInfo.toLocalFile(url)
+                                 tableModel.table.writeToFile(path, {header: true})
                              }
                          )
                      }

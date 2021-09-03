@@ -98,6 +98,10 @@ QList<QString> LocalTable::columnNames() const{
     return m_headers;
 }
 
+void LocalTable::assignColumnInfo(int index, const QString &info){
+    m_headers[index] = info;
+}
+
 void LocalTable::readFromFile(const QString &path, const QJSValue &options){
     beginLoadData();
 
@@ -136,7 +140,7 @@ void LocalTable::readFromFile(const QString &path, const QJSValue &options){
     endLoadData();
 }
 
-void LocalTable::writeToFile(const QString &path){
+void LocalTable::writeToFile(const QString &path, const QJSValue& options){
     QFile file(path);
     if ( !file.open(QFile::WriteOnly) ){
         ViewEngine* engine = ViewEngine::grab(this);
@@ -146,6 +150,15 @@ void LocalTable::writeToFile(const QString &path){
     }
 
     QTextStream stream(&file);
+
+    bool useHeader = options.hasOwnProperty("header") && options.property("header").toBool();
+    if ( useHeader && m_headers.length() ){
+        stream << "\"" << m_headers[0] << "\"";
+        for ( int i = 1; i < m_headers.length(); ++i ){
+            stream << ",\"" << m_headers[i] << "\"";
+        }
+        stream << "\n";
+    }
 
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
         const QList<QString>& row = *it;

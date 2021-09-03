@@ -5,9 +5,11 @@
 
 namespace lv{
 
+class TableModel;
 class Table : public QObject{
 
     Q_OBJECT
+    Q_PROPERTY(lv::TableModel* model READ model CONSTANT)
 
 public:
     explicit Table(QObject *parent = nullptr);
@@ -23,9 +25,12 @@ public:
     virtual void removeRow(int idx) = 0;
     virtual int totalColumns() const = 0;
     virtual QList<QString> columnNames() const = 0;
+    virtual void assignColumnInfo(int index, const QString& info) = 0;
 
     void beginLoadData();
     void endLoadData();
+
+    TableModel* model();
 
 public slots:
     void reload();
@@ -33,6 +38,9 @@ public slots:
 signals:
     void dataAboutToLoad();
     void dataLoaded();
+
+private:
+    TableModel* m_model;
 };
 
 }// namespace

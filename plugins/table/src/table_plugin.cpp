@@ -11,13 +11,14 @@
 
 void TablePlugin::registerTypes(const char *uri)
 {
-    qmlRegisterType<lv::TableModel>(uri, 1, 0, "TableModel");
     qmlRegisterType<lv::LocalTable>(uri, 1, 0, "LocalTable");
 
     qmlRegisterUncreatableType<lv::TableModelHeader>(
         uri, 1, 0, "TableModelHeader", "Cannot create TableModelHeader instance.");
     qmlRegisterUncreatableType<lv::TableModelRowsInfo>(
         uri, 1, 0, "TableModelRowsInfo", "Cannot create TableModelRowsInfo instance.");
+    qmlRegisterUncreatableType<lv::TableModel>(
+        uri, 1, 0, "TableModel", "Cannot create TableModel instance. Use 'table.model'.");
     qmlRegisterUncreatableType<lv::Table>(
         uri, 1, 0, "Table", "Table is of abstract type.");
 }

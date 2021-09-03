@@ -13,24 +13,15 @@ CodePalette {
     type: "qml/table#Table"
 
     property var table: null
-    onTableChanged: {
-        if ( tableModel )
-            tableModel.destroy()
-        tableModel = tableModelFactory.createObject()
-        tableModel.table = table
-    }
-
-    property Component tableModelFactory: TableModel{}
-    property TableModel tableModel: null
 
     item: Item {
         id: paletteItem
         width: 600
         height: 300
 
-        TableEditor {
+        TableEditor{
             anchors.fill: parent
-            tableModel: root.tableModel
+            tableModel: root.table ? root.table.model : null
             style: lk.layers.workspace.themes.current.tableStyle
 
             //TODO: Move to extension
@@ -50,6 +41,11 @@ CodePalette {
 
 //                }
 //            }
+        }
+
+        ResizeArea{
+            minimumHeight: 200
+            minimumWidth: 200
         }
     }
 
