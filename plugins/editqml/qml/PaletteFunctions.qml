@@ -559,7 +559,7 @@ QtObject{
                 if ( callback )
                     callback(ef, palette)
             })
-        } else if ( palettes.length === 1 ){
+        } else if ( palettes.data.length === 1 ){
             shapePaletteAtPosition(editor, palettes.data[0].name, position, function(ef, palette){
                 if ( ef.visualParent.expand )
                     ef.visualParent.expand()
