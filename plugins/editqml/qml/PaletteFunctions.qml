@@ -33,7 +33,10 @@ QtObject{
         property Component paletteListView: Component{
             PaletteListView{
                 visible: model ? true : false
-                onFocusChanged : if ( !focus ) model = null
+                onFocusChanged : if ( !focus ){
+                    cancelled()
+                }
+
                 z: 2000
 
                 property var selectedHandler : function(){}
@@ -89,14 +92,30 @@ QtObject{
             return pg
         }
 
+        function createPaletteContainer(palette, paletteBoxParent, options){
+            if ( !palette.item )
+                return null
+
+            var newPaletteBox = __factories.paletteContainer.createObject(paletteBoxParent)
+            palette.item.x = 2
+            palette.item.y = 2
+
+            newPaletteBox.palette = palette
+
+            if ( paletteBoxParent.palettesOpened )
+                paletteBoxParent.palettesOpened.push(palette.name)
+
+            if ( options && options.hasOwnProperty('moveEnabled') ){
+                newPaletteBox.moveEnabledSet = options.moveEnabled
+            }
+
+            return newPaletteBox
+        }
+
         function createObjectContainer(editor, ef, parent){
             var oc = __factories.objectContainer.createObject(parent)
             oc.__initialize(editor, ef)
             return oc
-        }
-
-        function createPaletteContainer(parent){
-            return __factories.paletteContainer.createObject(parent)
         }
 
         function createPaletteListView(parent, style){
@@ -113,27 +132,6 @@ QtObject{
     }
 
     property QtObject __private: QtObject{
-
-        //TOMOVE: into factories
-        function wrapPaletteInContainer(palette, paletteBoxParent, options){
-            if ( !palette.item )
-                return null
-
-            var newPaletteBox = __factories.createPaletteContainer(paletteBoxParent)
-            palette.item.x = 2
-            palette.item.y = 2
-
-            newPaletteBox.palette = palette
-
-            if ( paletteBoxParent.palettesOpened )
-                paletteBoxParent.palettesOpened.push(palette.name)
-
-            if ( options && options.hasOwnProperty('moveEnabled') ){
-                newPaletteBox.moveEnabledSet = options.moveEnabled
-            }
-
-            return newPaletteBox
-        }
 
         function createEditorPaletteBoxForFragment(ef, parent){
             var languageHandler = ef.language
@@ -250,47 +248,6 @@ QtObject{
             return paletteList
         }
 
-        function openPaletteListForNode(container, paletteGroup, parent){
-            var palettes = container.editFragment.language.findPalettesForFragment(container.editFragment)
-            palettes.data = filterOutPalettes(palettes.data, paletteGroup.palettesOpened, true)
-            if (!palettes.data || palettes.data.length === 0) return null
-
-            var paletteList = openPaletteList(theme.selectableListView, palettes.data, parent,
-            {
-                onCancelled: function(){
-                    container.objectGraph.paletteListOpened = false
-                    container.objectGraph.activateFocus()
-                },
-                onSelected: function(index){
-                    var palette = container.editFragment.language.expand(container.editFragment, {
-                        "palettes" : [palettes.data[index].name]
-                    })
-
-                    var objectRoot = container.objectName === "objectNode" ? container : null
-                    var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
-                    if ( objectRoot ){
-                        if ( palette.item ){ // send expand signal
-                            if ( objectRoot.compact )
-                                objectRoot.expand()
-                        } else {
-                            expandObjectContainerLayout(objectRoot, palette, {expandChildren: false})
-                        }
-                    }
-
-                    if (paletteBox){
-                        paletteBox.moveEnabledSet = false
-                    }
-
-                    container.objectGraph.paletteListOpened = false
-                    container.objectGraph.activateFocus()
-                }
-            })
-
-            container.objectGraph.paletteListOpened = true
-
-            return paletteList
-        }
-
         function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
             var palettes = container.editFragment.language.findPalettesForFragment(container.editFragment)
             palettes.data = filterOutPalettes(
@@ -299,7 +256,8 @@ QtObject{
                 mode === PaletteFunctions.PaletteListMode.ObjectContainer
             )
 
-            if (!palettes.data || palettes.data.length === 0) return null
+            if (!palettes.data || palettes.data.length === 0)
+                return null
 
             var pane = container.parent
             if ( container.pane )
@@ -330,7 +288,7 @@ QtObject{
                 var objectRoot = mode === PaletteFunctions.PaletteListMode.ObjectContainer
                                ? container
                                : (container.objectName === "objectNode" ? container : null)
-                var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
+                var paletteBox = __factories.createPaletteContainer(palette, paletteGroup)
                 if ( container ){
                     if ( palette.item ){ // send expand signal
                         if ( container.compact )
@@ -499,7 +457,7 @@ QtObject{
             paletteBoxGroup = ef.visualParent
         }
 
-        var paletteBox = __private.wrapPaletteInContainer(palette, paletteBoxGroup)
+        var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup)
 
         var rect = editor.getCursorRectangle()
         var cursorCoords = editor.cursorWindowCoords()
@@ -528,7 +486,7 @@ QtObject{
         editorBox.border.width = 1
         editorBox.border.color = "#141c25"
 
-        var paletteBox = __private.wrapPaletteInContainer(palette, paletteGroup)
+        var paletteBox = __factories.createPaletteContainer(palette, paletteGroup)
         palette.item.x = 5
         palette.item.y = 7
         if (paletteBox){
@@ -627,7 +585,7 @@ QtObject{
                 //TOREMOVE
                 objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
 
-                paletteBoxGroup = objectContainer.paletteGroup
+                paletteBoxGroup = objectContainer.paletteGroup()
                 editorBox = objectContainer.parent
             } else {
                 editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
@@ -652,7 +610,7 @@ QtObject{
             if (forAnObject && !palette.item ){
                 expandObjectContainerLayout(objectContainer, palette, {expandChildren: false})
             }
-            var paletteBox = __private.wrapPaletteInContainer(palette, paletteBoxGroup, {moveEnabled: false})
+            var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup, {moveEnabled: false})
         }
 
         var frameBoxPosition = ef.position()
@@ -779,7 +737,7 @@ QtObject{
         var palette = editor.code.language.expand(ef, {
             "palettes" : [paletteName]
         })
-        var paletteBox = __private.wrapPaletteInContainer(palette, propertyContainer.paletteGroup(), { moveEnabled: false })
+        var paletteBox = __factories.createPaletteContainer(palette, propertyContainer.paletteGroup(), { moveEnabled: false })
         return paletteBox
     }
 
@@ -798,7 +756,7 @@ QtObject{
             return
 
         var palette = ch.expand(ef, { "palettes" : [paletteName] })
-        var paletteBox = __private.wrapPaletteInContainer(palette, paletteBoxParent, { moveEnabled: false })
+        var paletteBox = __factories.createPaletteContainer(palette, paletteBoxParent, { moveEnabled: false })
 
         if ( palette.item ){ // send expand signal
             if ( objectContainer.compact )
@@ -810,7 +768,7 @@ QtObject{
         return paletteBox
     }
 
-    function addPropertyToObjectContainer(objectContainer, name, readOnly, position){
+    function addPropertyToObjectContainer(objectContainer, name, readOnly, position, context){
 
         var languageHandler = objectContainer.editFragment.language
 
@@ -849,7 +807,7 @@ QtObject{
             return null
         }
 
-        objectContainer.editFragment.signalChildAdded(ef)
+        objectContainer.editFragment.signalChildAdded(ef, context)
 
         if ( populateValueFromPalette ){
             var paletteList = ef.paletteList()
@@ -865,7 +823,7 @@ QtObject{
         return objectContainer.propertyByName(name)
     }
 
-    function addEventToObjectContainer(objectContainer, name, position){
+    function addEventToObjectContainer(objectContainer, name, position, context){
         // check if event is opened already
         var propContainer = objectContainer.propertyByName(name)
         if ( propContainer ){
@@ -877,14 +835,14 @@ QtObject{
         var ppos = languageHandler.addEventToCode(position, name)
         var ef = languageHandler.openNestedConnection(objectContainer.editFragment, ppos)
         if (ef){
-            objectContainer.editFragment.signalChildAdded(ef)
+            objectContainer.editFragment.signalChildAdded(ef, context)
         }
 
         return objectContainer.propertyByName(name)
     }
 
     //TODO: Add return type (last child)
-    function addObjectToObjectContainer(container, typeOptions, extraProperties, position){
+    function addObjectToObjectContainer(container, typeOptions, extraProperties, position, context){
         var languageHandler = container.editFragment.language
 
         var opos = languageHandler.addObjectToCode(position, typeOptions, extraProperties)
@@ -893,7 +851,7 @@ QtObject{
         if (!ef)
             return null
 
-        container.editFragment.signalChildAdded(ef)
+        container.editFragment.signalChildAdded(ef, context)
         container.sortChildren()
     }
 
@@ -1082,7 +1040,9 @@ QtObject{
                                objectContainer.editFragment.valueLength() - 1
                 var readOnly = prop.hasOwnProperty('readOnly') ? prop.readOnly : false
 
-                var propertyContainer = addPropertyToObjectContainer(objectContainer, prop.name, readOnly, position)
+                var propertyContainer = addPropertyToObjectContainer(
+                    objectContainer, prop.name, readOnly, position, {location: 'PaletteFunctions.ExpandLayout' }
+                )
 
                 if ( prop.isObject ){
                     expandObjectContainerLayout(propertyContainer.childObjectContainer, prop.object)

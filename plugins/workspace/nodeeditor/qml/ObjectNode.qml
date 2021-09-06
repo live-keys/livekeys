@@ -25,10 +25,9 @@ Qan.NodeItem{
     property alias propertyContainer: nodeMemberContainer
     property alias paletteListContainer: paletteContainer
 
-    property var nodeParent: null
-    property var editFragment: null
-    property var removeNode: null
     property string id: ""
+    property var editFragment: null
+    property var nodeParent: null
     property var editor: null
     property var objectGraph: null
 
@@ -148,6 +147,54 @@ Qan.NodeItem{
             nodeMember.addOutPort()
     }
 
+    function clean(){
+        for (var xi = 0; xi < paletteContainer.children.length; ++xi){
+            if (paletteContainer.children[xi].objectName === "paletteContainer")
+                paletteContainer.children[xi].destroy()
+        }
+
+        for ( var i = 0; i < root.members.length; ++i ){
+            var member = root.members[i]
+            member.clean().destroy()
+        }
+
+        return root
+    }
+
+    function userAddPalette(){
+        root.selected = false
+        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+
+        var palettes = root.editFragment.language.findPalettesForFragment(root.editFragment)
+        palettes.data = paletteFunctions.filterOutPalettes(palettes.data, root.paletteGroup().palettesOpened, true)
+        if (!palettes.data || palettes.data.length === 0)
+            return null
+
+        var paletteList = paletteFunctions.views.openPaletteList(paletteFunctions.theme.selectableListView, palettes.data, root,
+        {
+            onCancelled: function(){
+                root.objectGraph.activateFocus()
+                paletteList.destroy()
+            },
+            onSelected: function(index){
+                var palette = root.editFragment.language.expand(root.editFragment, {
+                    "palettes" : [palettes.data[index].name]
+                })
+                var paletteBox = paletteFunctions.__factories.createPaletteContainer(palette, paletteGroup(), {moveEnabled: false})
+                if ( palette.item ){ // send expand signal
+                    root.expand()
+                } else {
+                    paletteFunctions.expandObjectContainerLayout(root, palette, {expandChildren: false})
+                }
+                paletteList.destroy()
+            }
+        })
+
+        paletteList.forceActiveFocus()
+        paletteList.anchors.topMargin = nodeTitle.height
+        paletteList.width = root.width
+    }
+
     function sortChildren(){}
     function expand(){}
 
@@ -162,35 +209,6 @@ Qan.NodeItem{
         propertiesOpened = propertiesOpened.filter(function(value, index, arr){
             return value !== name
         })
-    }
-
-    function addPropertyToNodeByName(name){
-        for (var i = 0; i < propertiesOpened.length; ++i){
-            if (propertiesOpened[i] === name){
-                return
-            }
-        }
-
-        var codeHandler = editFragment.language
-
-        var position = editFragment.valuePosition() +
-                       editFragment.valueLength() - 1
-
-        var addContainer = codeHandler.getAddOptions(position)
-        if ( !addContainer )
-            return
-
-        addContainer.activeIndex = 1
-        addContainer.model.setFilter(name)
-        if (addContainer.model.rowCount() !== 1) return
-
-        var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
-
-        for (var i=0; i < propertiesOpened.length; ++i){
-            if (!propertiesOpened[i].toString().localeCompare(name)) return
-        }
-
-        addSubobject(nodeParent, name, ObjectGraph.PortMode.OutPort, null)
     }
 
     onSelectedChanged: {
@@ -290,19 +308,7 @@ Qan.NodeItem{
                 MouseArea{
                     id: paletteAddMouse
                     anchors.fill: parent
-                    onClicked: {
-                        root.selected = false
-                        var paletteList = paletteFunctions.views.openPaletteListForNode(
-                            root,
-                            paletteContainer,
-                            wrapper
-                        )
-
-                        if (paletteList){
-                            paletteList.anchors.topMargin = nodeTitle.height
-                            paletteList.width = Qt.binding(function(){ return wrapper.width })
-                        }
-                    }
+                    onClicked: root.userAddPalette()
                 }
             }
         }
@@ -337,8 +343,7 @@ Qan.NodeItem{
         }
         function onAboutToBeRemoved(){
             paletteContainer.closePalettes()
-            if (removeNode)
-                removeNode(nodeParent)
+            root.objectGraph.removeObjectNode(nodeParent)
         }
     }
 }

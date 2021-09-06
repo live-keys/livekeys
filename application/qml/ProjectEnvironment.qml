@@ -75,7 +75,7 @@ Item{
         visible: false
         onOpen: {
             root.panes.setActiveItem(projectNavigation.parent.textEdit, projectNavigation.parent)
-            root.wizards.openFile(path, ProjectDocument.EditIfNotOpen)
+            root.openFile(path, ProjectDocument.EditIfNotOpen)
         }
         onCloseFile: {
             root.wizards.closeFile(path)
@@ -208,7 +208,7 @@ Item{
                     'open' : [wizards.openProjectViaDialog, "Open Project"],
                     'new' : [wizards.newProject, "New Project"],
                     'openFile' : [wizards.openFileViaDialog, "Open File"],
-                    'toggleProjectVisibility' : [toggleVisibility, "Project: Toggle Visibility"]
+                    'toggleProjectVisibility' : [toggleVisibility, "Project File View: Toggle Visibility"]
                 })
             }
         }
@@ -310,9 +310,9 @@ Item{
                     if ( callback )
                         callback(path)
                 } else if ( project.isFileInProject(url) ){
-                    root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
+                    root.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                 } else if ( !project.canRunFile(localPath) ){
-                    root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
+                    root.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                 } else {
                     var fileUrl = url
                     lk.layers.window.dialogs.message(
@@ -331,7 +331,7 @@ Item{
                         },
                         button2Name : 'Open file',
                         button2Function : function(mbox){
-                            root.wizards.openFile(url, ProjectDocument.EditIfNotOpen, callback)
+                            root.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                         },
                         button3Name : 'Cancel',
                         button3Function : function(mbox){
@@ -374,53 +374,7 @@ Item{
             }
         }
 
-        /// callback will receive: path, document, pane
-        function openFile(path, mode, callback){
-            var pane = lk.layers.workspace.interceptFile(path, mode)
-            if ( pane )
-                return pane
 
-            if ( Fs.Path.hasExtensions(path, 'html')){
-                if ( Fs.Path.hasExtensions(path, 'doc.html')){
-                    var docItem = documentationViewFactory.createObject()
-                    if ( docItem ){
-                        docItem.loadDocumentationHtml(path)
-                        var docPane = mainSplit.findPaneByType('documentation')
-                        if ( !docPane ){
-                            var storeWidth = root.width
-                            docPane = root.panes.createPane('documentation', {}, [400, 400])
-                            root.panes.container.splitPane(0, docPane)
-                        }
-                        docPane.pageTitle = Fs.Path.baseName(path)
-                        docPane.page = docItem
-
-                        if ( callback )
-                            callback(path, null, docPane)
-
-                        return docPane
-                    }
-                }
-            }
-
-            var doc = project.openTextFile(path, mode)
-            if ( !doc )
-                return;
-            var fe = root.panes.focusPane('editor')
-            if ( !fe ){
-                fe = root.panes.createPane('editor', {}, [400, 0])
-                root.panes.container.splitPane(0, fe)
-
-                var containerPanes = root.panes.container.panes
-                if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
-                    containerPanes[0].width = containerPanes[0].width * 2
-                    fe.width = 400
-                }
-            }
-            if ( callback )
-                callback(path, doc, fe)
-            fe.document = doc
-            return fe
-        }
 
         function closeFile(path, callback){
             var doc = project.documentModel.isOpened(path)
@@ -620,6 +574,54 @@ Item{
                 }
             })
         }
+    }
+
+    /// callback will receive: path, document, pane
+    function openFile(path, mode, callback){
+        var pane = lk.layers.workspace.interceptFile(path, mode)
+        if ( pane )
+            return pane
+
+        if ( Fs.Path.hasExtensions(path, 'html')){
+            if ( Fs.Path.hasExtensions(path, 'doc.html')){
+                var docItem = documentationViewFactory.createObject()
+                if ( docItem ){
+                    docItem.loadDocumentationHtml(path)
+                    var docPane = mainSplit.findPaneByType('documentation')
+                    if ( !docPane ){
+                        var storeWidth = root.width
+                        docPane = root.panes.createPane('documentation', {}, [400, 400])
+                        root.panes.container.splitPane(0, docPane)
+                    }
+                    docPane.pageTitle = Fs.Path.baseName(path)
+                    docPane.page = docItem
+
+                    if ( callback )
+                        callback(path, null, docPane)
+
+                    return docPane
+                }
+            }
+        }
+
+        var doc = project.openTextFile(path, mode)
+        if ( !doc )
+            return;
+        var fe = root.panes.focusPane('editor')
+        if ( !fe ){
+            fe = root.panes.createPane('editor', {}, [400, 0])
+            root.panes.container.splitPane(0, fe)
+
+            var containerPanes = root.panes.container.panes
+            if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                containerPanes[0].width = containerPanes[0].width * 2
+                fe.width = 400
+            }
+        }
+        if ( callback )
+            callback(path, doc, fe)
+        fe.document = doc
+        return fe
     }
 
 }

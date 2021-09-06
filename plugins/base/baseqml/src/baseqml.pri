@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/lvbaseqmlglobal.h \
     $$PWD/qmlarrange.h \
     $$PWD/qmlcollector.h \
+    $$PWD/qmleachvalueapply.h \
     $$PWD/qmlexec.h \
     $$PWD/qmlindexselector.h \
     $$PWD/qmlpropertylog.h \
@@ -18,6 +19,7 @@ HEADERS += \
     $$PWD/qmlstreamvalueawait.h \
     $$PWD/qmlthreadinfo.h \
     $$PWD/qmltime.h \
+    $$PWD/qmlvalueflow.h \
     $$PWD/qmlworkerpoolobject.h \
     $$PWD/qmlstreamlog.h \
     $$PWD/groupcollector.h \
@@ -25,7 +27,6 @@ HEADERS += \
     $$PWD/qmlact.h \
     $$PWD/qmlcontainer.h \
     $$PWD/qmlfollowup.h \
-    $$PWD/qmlopening.h \
     $$PWD/qmlworkerinterface.h \
     $$PWD/qmlstreamfilter.h \
     $$PWD/workerthread.h \
@@ -36,6 +37,7 @@ SOURCES += \
     $$PWD/environment.cpp \
     $$PWD/qmlarrange.cpp \
     $$PWD/qmlcollector.cpp \
+    $$PWD/qmleachvalueapply.cpp \
     $$PWD/qmlexec.cpp \
     $$PWD/qmlindexselector.cpp \
     $$PWD/qmlpropertylog.cpp \
@@ -48,6 +50,7 @@ SOURCES += \
     $$PWD/qmlstreamvalueawait.cpp \
     $$PWD/qmlthreadinfo.cpp \
     $$PWD/qmltime.cpp \
+    $$PWD/qmlvalueflow.cpp \
     $$PWD/qmlworkerinterface.cpp \
     $$PWD/qmlworkerpoolobject.cpp \
     $$PWD/qmlstreamlog.cpp \
@@ -56,6 +59,5 @@ SOURCES += \
     $$PWD/qmlact.cpp \
     $$PWD/qmlcontainer.cpp \
     $$PWD/qmlfollowup.cpp \
-    $$PWD/qmlopening.cpp \
     $$PWD/qmlstreamfilter.cpp \
     $$PWD/workerthread.cpp

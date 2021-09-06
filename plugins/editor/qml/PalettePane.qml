@@ -40,8 +40,8 @@ Workspace.Pane{
             anchors.verticalCenter: parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 5
-            onDragStarted: root.panes.__dragStarted(root)
-            onDragFinished: root.panes.__dragFinished(root)
+            onDragStarted: lk.layers.workspace.panes.__dragStarted(root)
+            onDragFinished: lk.layers.workspace.panes.__dragFinished(root)
             display: root.title
         }
 

@@ -10,14 +10,14 @@ TextDocumentData::TextDocumentData()
     // rows.push_back(std::vector<ushort>());
 }
 
-std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTextDocument *document, int position, int removed, int added)
+std::vector<std::pair<uint32_t, uint32_t>> TextDocumentData::contentsChange(QTextDocument *document, int position, int removed, int added)
 {
     // assumption: we will always have blocks containing "position" and "removed" blocks
 
     size_t i = 0;
     size_t total = 0;
 
-    std::pair<unsigned, unsigned> start, old_end, new_end;
+    std::pair<uint32_t, uint32_t> start, old_end, new_end;
 
     if (!rows.empty())
 
@@ -25,10 +25,10 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
         while (i < rows.size())
         {
             auto& row = rows.at(i);
-            if (total <= position && position < total + row.size())
+            if (total <= static_cast<uint32_t>(position) && static_cast<uint32_t>(position) < total + row.size())
             {
-                start.first = i;
-                start.second = position - total;
+                start.first = static_cast<uint32_t>(i);
+                start.second = static_cast<uint32_t>(position) - static_cast<uint32_t>(total);
                 break;
             } else {
                 ++i;
@@ -51,8 +51,8 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
             auto& row = rows.at(i);
             if (total <= (start.second + removed) && (start.second + removed) < total + row.size())
             {
-                old_end.first = i;
-                old_end.second = start.second + removed - total;
+                old_end.first = static_cast<uint32_t>(i);
+                old_end.second = start.second + static_cast<uint32_t>(removed) - static_cast<uint32_t>(total);
                 break;
             } else {
                 ++i;
@@ -66,7 +66,7 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
 
     if (added != 0)
     {
-        QTextBlock first = document->findBlock(position);
+//        QTextBlock first = document->findBlock(position);
         QTextBlock last = document->findBlock(position + added);
 
         if (last == document->end()) last = document->lastBlock();
@@ -80,15 +80,15 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
 
     if (old_end.first != new_end.first)
     {
-        int delta = new_end.first - old_end.first;
+//        int delta = new_end.first - old_end.first;
         if (new_end.first > old_end.first)
         {
-            for (int i = 0; i < new_end.first - old_end.first; ++i)
+            for (uint32_t i = 0; i < new_end.first - old_end.first; ++i)
             {
-                rows.insert(rows.begin() + start.first, std::u16string());
+                rows.insert(rows.begin() + static_cast<size_t>(start.first), std::u16string());
             }
         } else {
-            for (int i = 0; i < old_end.first - new_end.first; ++i)
+            for (uint32_t i = 0; i < old_end.first - new_end.first; ++i)
             {
                 rows.erase(rows.begin() + start.first);
             }
@@ -97,12 +97,13 @@ std::vector<std::pair<unsigned, unsigned>> TextDocumentData::contentsChange(QTex
 
     QTextBlock block = document->findBlockByNumber(start.first);
     int finalBlockNumber = document->lastBlock().blockNumber();
-    for (unsigned i = start.first; i <= new_end.first; ++i)
+    for (uint32_t i = start.first; i <= new_end.first; ++i)
     {
         std::u16string u16s;
         QString text = block.text();
         for (int idx = 0; idx < text.length(); ++idx) u16s.push_back(text[idx].unicode());
-        if (i != finalBlockNumber) u16s.push_back(QChar('\n').unicode());
+        if (i != static_cast<uint32_t>(finalBlockNumber))
+            u16s.push_back(QChar('\n').unicode());
 
         rows[i] = u16s;
         block = block.next();
@@ -124,7 +125,7 @@ void TextDocumentData::clear()
 
 std::u16string &TextDocumentData::rowAt(unsigned i)
 {
-    return rows[i];
+    return rows.at(static_cast<size_t>(i));
 }
 
 

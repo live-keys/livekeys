@@ -15,8 +15,7 @@ Act{
         Cv.Mat.CV32F
     )
 
+    returns: "qml/object"
     run: Img.Geometry.transform
-    onComplete: exec()
-
     args: ["$image", "$kernel"]
 }

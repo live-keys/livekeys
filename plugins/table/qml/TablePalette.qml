@@ -5,6 +5,7 @@ import editor 1.0
 import live 1.0
 import base 1.0
 import visual.input 1.0 as Input
+import table 1.0
 
 CodePalette {
     id: root
@@ -18,9 +19,9 @@ CodePalette {
         width: 600
         height: 300
 
-        TableEditor {
+        TableEditor{
             anchors.fill: parent
-            table: root.table
+            tableModel: root.table ? root.table.model : null
             style: lk.layers.workspace.themes.current.tableStyle
 
             //TODO: Move to extension
@@ -40,6 +41,11 @@ CodePalette {
 
 //                }
 //            }
+        }
+
+        ResizeArea{
+            minimumHeight: 200
+            minimumWidth: 200
         }
     }
 

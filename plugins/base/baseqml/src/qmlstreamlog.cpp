@@ -39,8 +39,8 @@ void QmlStreamLog::onStreamData(QObject *that, const QJSValue &val){
 
 QmlStreamLog::~QmlStreamLog(){
     if ( m_stream ){
-        Shared::unref(m_stream);
         m_stream->unsubscribeObject(this);
+        Shared::unref(m_stream);
     }
 }
 

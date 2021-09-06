@@ -199,7 +199,9 @@ ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *p
     d_ptr->textDocument->setDocumentMargin(0);
     d_ptr->textDocument->setDocumentLayout(new TextDocumentLayout(d_ptr->textDocument));
     readContent();
-    connect(d_ptr->textDocument, &QTextDocument::contentsChange, this, &ProjectDocument::__documentContentsChanged);
+    connect(d_ptr->textDocument, &QTextDocument::contentsChange,      this, &ProjectDocument::__documentContentsChanged);
+    connect(d_ptr->textDocument, &QTextDocument::modificationChanged, this, &ProjectDocument::__documentModificationChanged);
+    connect(this,                &Document::saved,                    this, &ProjectDocument::__documentSaved);
 }
 
 void ProjectDocument::readContent(){
@@ -678,7 +680,6 @@ void ProjectDocument::removeLineAtBlockNumber(int pos){
 void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, int charsAdded){
     d_ptr->contentStringDirty = true;
     emit contentsChange(position, charsRemoved, charsAdded);
-    //m_isDirty = true;
 
     QString addedText = "";
     if ( charsAdded == 1 ){
@@ -695,8 +696,14 @@ void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, 
 
     updateMarkers(position, charsRemoved, addedText.size());
     updateSections(position, charsRemoved, addedText);
+}
 
+void ProjectDocument::__documentModificationChanged(){
     setIsDirty(d_ptr->textDocument->isModified());
+}
+
+void ProjectDocument::__documentSaved(){
+    d_ptr->textDocument->setModified(false);
 }
 
 void ProjectDocument::syncContent() const{

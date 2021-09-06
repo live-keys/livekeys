@@ -16,26 +16,6 @@ QtObject{
         }
     }
 
-    function removeObjectNode(graph, node){
-        --palette.numOfObjects
-        if (node.item.selected)
-            --numOfSelectedNodes
-        if (numOfSelectedNodes === 0)
-            root.activateFocus()
-
-        // clear everything inside node
-
-        var children = node.item.propertyContainer.children
-        for (var i = 0; i < children.length; ++i){
-            children[i].destroyObjectNodeProperty()
-        }
-
-        if (node.item.outPort)
-            graph.removePort(node, node.item.outPort)
-
-        graph.removeNode(node)
-    }
-
     function nodeEditMode(){
         var panes = lk.layers.workspace.panes
         panes.reset(function(){

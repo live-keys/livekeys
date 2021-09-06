@@ -1,4 +1,4 @@
-#include "localdatasource.h"
+#include "localtable.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
 
@@ -10,20 +10,20 @@
 
 namespace lv{
 
-LocalDataSource::LocalDataSource(QObject *parent)
-    : TableDataSource(parent)
+LocalTable::LocalTable(QObject *parent)
+    : Table(parent)
 {
 
 }
 
-LocalDataSource::~LocalDataSource(){
+LocalTable::~LocalTable(){
 }
 
-int LocalDataSource::totalRows() const{
+int LocalTable::totalRows() const{
     return m_data.size();
 }
 
-QJSValue LocalDataSource::rowAt(int index){
+QJSValue LocalTable::rowAt(int index){
     ViewEngine* ve = ViewEngine::grab(this);
     if (!ve)
         return QJSValue();
@@ -38,7 +38,7 @@ QJSValue LocalDataSource::rowAt(int index){
     return result;
 }
 
-QJSValue LocalDataSource::columnInfo() const{
+QJSValue LocalTable::columnInfo() const{
     ViewEngine* ve = ViewEngine::grab(this);
     if (!ve)
         return QJSValue();
@@ -50,23 +50,23 @@ QJSValue LocalDataSource::columnInfo() const{
     return result;
 }
 
-void LocalDataSource::clear(){
+void LocalTable::clear(){
     beginLoadData();
     m_data.clear();
     m_headers.clear();
     endLoadData();
 }
 
-QString LocalDataSource::valueAt(int row, int column){
+QString LocalTable::valueAt(int row, int column){
     auto& rowData = m_data[row];
     return rowData[column];
 }
 
-void LocalDataSource::setValueAt(int row, int column, const QString &value){
+void LocalTable::setValueAt(int row, int column, const QString &value){
     m_data[row][column] = value;
 }
 
-void LocalDataSource::addRow(){
+void LocalTable::addRow(){
     size_t s = m_headers.size();
     QList<QString> row;
     for ( size_t i = 0; i < s; ++i ){
@@ -75,30 +75,34 @@ void LocalDataSource::addRow(){
     m_data.append(row);
 }
 
-void LocalDataSource::addColumn(){
+void LocalTable::addColumn(){
     m_headers.append("");
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
         (*it).append("");
     }
 }
 
-void LocalDataSource::removeColumn(int idx){
+void LocalTable::removeColumn(int idx){
 
 }
 
-void LocalDataSource::removeRow(int idx){
+void LocalTable::removeRow(int idx){
     m_data.erase(m_data.begin() + idx);
 }
 
-int LocalDataSource::totalColumns() const{
+int LocalTable::totalColumns() const{
     return m_headers.size();
 }
 
-QList<QString> LocalDataSource::columnNames() const{
+QList<QString> LocalTable::columnNames() const{
     return m_headers;
 }
 
-void LocalDataSource::readFromFile(const QString &path, const QJSValue &options){
+void LocalTable::assignColumnInfo(int index, const QString &info){
+    m_headers[index] = info;
+}
+
+void LocalTable::readFromFile(const QString &path, const QJSValue &options){
     beginLoadData();
 
     m_data.clear();
@@ -136,7 +140,7 @@ void LocalDataSource::readFromFile(const QString &path, const QJSValue &options)
     endLoadData();
 }
 
-void LocalDataSource::writeToFile(const QString &path){
+void LocalTable::writeToFile(const QString &path, const QJSValue& options){
     QFile file(path);
     if ( !file.open(QFile::WriteOnly) ){
         ViewEngine* engine = ViewEngine::grab(this);
@@ -146,6 +150,15 @@ void LocalDataSource::writeToFile(const QString &path){
     }
 
     QTextStream stream(&file);
+
+    bool useHeader = options.hasOwnProperty("header") && options.property("header").toBool();
+    if ( useHeader && m_headers.length() ){
+        stream << "\"" << m_headers[0] << "\"";
+        for ( int i = 1; i < m_headers.length(); ++i ){
+            stream << ",\"" << m_headers[i] << "\"";
+        }
+        stream << "\n";
+    }
 
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
         const QList<QString>& row = *it;

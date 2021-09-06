@@ -175,6 +175,7 @@ public slots:
 
     int totalPalettes() const;
     QJSValue paletteList() const;
+    void removePalettes();
     lv::CodePalette* bindingPalette();
     void updateBindings();
 

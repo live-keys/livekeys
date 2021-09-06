@@ -130,18 +130,17 @@ CodePalette{
                 }
             }
 
+
             for ( var j = 0; j < propertyConnections.length; ++j ){
                 var propertyConnection = propertyConnections[j]
 
                 var node = null
                 if ( propertyConnection.right.id ){
                     node = palette.findObjectById(propertyConnection.right.id)
-                    vlog.i(node)
-                    if ( node.objectName !== 'objectNode' )
+                    if ( node.item.objectName !== 'objectNode' )
                         node = null
                 } else if ( propertyConnection.right.idOrProperty ){
                     node = palette.findObjectById(propertyConnection.right.idOrProperty)
-                    vlog.i(node)
                     if ( node ){
                         propertyConnection.right.id = propertyConnection.right.idOrProperty
                     } else {
@@ -203,16 +202,12 @@ CodePalette{
         }
 
         function clean(){
-            for (var i=0; i< allObjects.length; ++i){
+            for (var i = 0; i < allObjects.length; ++i){
                 if (!allObjects[i].item)
                     return
-                var numofProps = allObjects[i].item.propertyContainer.children.length
-                for (var j=0; j < numofProps; ++j){
-                    var child = allObjects[i].item.propertyContainer.children[j]
-                    if (child.editFragment)
-                        editFragment.language.removeConnection(child.editFragment)
-                    child.destroy()
-                }
+
+                var nodeItem = allObjects[i].item
+                nodeItem.clean()
                 editFragment.language.removeConnection(allObjects[i].item.editFragment)
             }
 
@@ -240,8 +235,10 @@ CodePalette{
 
         objectGraph.editFragment = editFragment
         nodeItem.init()
-        editFragment.aboutToRemovePalette.connect(function(palette){
-            nodeItem.clean()
+        editFragment.aboutToRemovePalette.connect(function(removedPalette){
+            if ( removedPalette === palette ){
+                nodeItem.clean()
+            }
         })
     }
 }

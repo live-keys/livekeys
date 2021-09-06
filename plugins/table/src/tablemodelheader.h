@@ -1,12 +1,12 @@
-#ifndef TABLEHEADER_H
-#define TABLEHEADER_H
+#ifndef LVTABLEMODELHEADER_H
+#define LVTABLEMODELHEADER_H
 
 #include <QAbstractListModel>
 #include <QObject>
 
 namespace lv {
 
-class TableHeader : public QAbstractListModel{
+class TableModelHeader : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(int defaultColumnWidth READ defaultColumnWidth WRITE setDefaultColumnWidth NOTIFY defaultColumnWidthChanged)
@@ -22,7 +22,7 @@ class TableHeader : public QAbstractListModel{
     };
 
 public:
-    explicit TableHeader(QObject *parent = nullptr);
+    explicit TableModelHeader(QObject *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
@@ -61,15 +61,15 @@ private:
     int                    m_contentWidth;
 };
 
-inline QHash<int, QByteArray> TableHeader::roleNames() const{
+inline QHash<int, QByteArray> TableModelHeader::roleNames() const{
     return m_roles;
 }
 
-inline int TableHeader::defaultColumnWidth() const{
+inline int TableModelHeader::defaultColumnWidth() const{
     return m_defaultColumnWidth;
 }
 
-inline void TableHeader::setDefaultColumnWidth(int defaultColumnSize){
+inline void TableModelHeader::setDefaultColumnWidth(int defaultColumnSize){
     if (m_defaultColumnWidth == defaultColumnSize)
         return;
 
@@ -77,6 +77,6 @@ inline void TableHeader::setDefaultColumnWidth(int defaultColumnSize){
     emit defaultColumnWidthChanged(m_defaultColumnWidth);
 }
 
-#endif // TABLEHEADER_H
+#endif // LVTABLEMODELHEADER_H
 
 } //namespace

@@ -93,7 +93,7 @@ const char *QueryHighlighter::parsingCallback(void *payload, uint32_t, TSPoint p
 void QueryHighlighter::documentChanged(int pos, int removed, int added){
     QTextDocument* doc = static_cast<QTextDocument*>(parent());
 
-    std::vector<std::pair<unsigned, unsigned>> editPoints =
+    std::vector<std::pair<uint32_t, uint32_t>> editPoints =
             m_textDocumentData->contentsChange(doc, pos, removed, added);
 
     uint32_t start = pos*sizeof(ushort)/sizeof(char);
