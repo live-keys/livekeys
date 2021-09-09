@@ -193,15 +193,13 @@ Item{
             if (child.objectName === "propertyContainer"){
                 ef = child.editFragment
                 child.clean().destroy()
-            }
-            if (child.objectName === "objectContainer"){
+            } else if (child.objectName === "objectContainer"){
                 ef = child.editFragment
                 child.clean().destroy()
             }
             if ( ef )
                 editor.code.language.removeConnection(ef)
         }
-
     }
 
     function clean(){

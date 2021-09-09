@@ -1079,14 +1079,14 @@ QtObject{
         }
     }
 
-    function expandLayout(editorPane, layout, callback){
-        var language = editorPane.editor.code.language
+    function expandLayout(editor, layout, callback){
+        var language = editor.code.language
 
         if ( layout.hasOwnProperty('shapeImports' ) ){
-            shapeImports(editorPane)
+            shapeImports(editor)
         }
 
-        shapeRoot(editorPane, function(ef){
+        shapeRoot(editor, function(ef){
             expandObjectContainerLayout(ef.visualParent, layout)
 
             if ( callback )
