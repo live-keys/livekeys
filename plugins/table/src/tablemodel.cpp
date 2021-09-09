@@ -87,6 +87,14 @@ TableModelRowsInfo *TableModel::rowInfo() const
     return m_rowModel;
 }
 
+void TableModel::insertRow(QJSValue){
+    //TODO
+}
+
+void TableModel::updateRow(int /*index*/, QJSValue /*values*/){
+    //TODO
+}
+
 void TableModel::addRows(int number)
 {
     int rowIndex = rowCount();
@@ -137,16 +145,26 @@ void TableModel::removeColumn(int idx)
     endRemoveColumns();
 }
 
-void TableModel::removeRow(int idx)
+void TableModel::removeRow(int index)
 {
-    if (idx >= rowCount())
+    if (index >= rowCount())
         return;
 
-    beginRemoveRows(QModelIndex(), idx, idx);
-    m_dataSource->removeRow(idx);
-    m_rowModel->removeRow(idx);
+    beginRemoveRows(QModelIndex(), index, index);
+    m_dataSource->removeRow(index);
+    m_rowModel->removeRow(index);
 
     endRemoveRows();
+}
+
+int TableModel::totalRows() const{
+    return m_dataSource->totalRows();
+}
+
+QJSValue TableModel::rowAt(int /*index*/){
+    //TODO
+//    return m_dataSource->rowAt(index);
+    return QJSValue();
 }
 
 void TableModel::assignCell(int row, int col, QString value)

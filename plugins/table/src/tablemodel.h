@@ -50,8 +50,15 @@ signals:
     void columnAdded();
 
 public slots:
-    void addRows(int number = 1);
+    void insertRow(QJSValue row);
+    void updateRow(int index, QJSValue values);
     void removeRow(int idx);
+
+    int totalRows() const;
+    QJSValue rowAt(int index);
+
+
+    void addRows(int number = 1);
     void assignCell(int row, int col, QString value);
 
     void addColumns(int number = 1);
