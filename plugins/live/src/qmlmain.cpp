@@ -42,9 +42,6 @@ QmlMain::~QmlMain(){
 void QmlMain::componentComplete(){
     QQuickItem::componentComplete();
 
-    connect(lv::ViewContext::instance().engine(), SIGNAL(aboutToCreateObject(QUrl)), this, SLOT(beforeCompile()));
-    connect(lv::ViewContext::instance().engine(), SIGNAL(objectReady(QObject*,QUrl)), this, SLOT(afterCompile()));
-
     QObject* obj = qmlContext(this)->contextProperty("script").value<QObject*>();
     m_parser = new ScriptCommandLineParser(obj->property("argvTail").toStringList());
 }
