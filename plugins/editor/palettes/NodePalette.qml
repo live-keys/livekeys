@@ -28,7 +28,7 @@ CodePalette{
             for ( var l = 0; l < objectNode.members.length; ++l ){
                 var objectNodeMember = objectNode.members[l]
 
-                if(objectNodeMember.editFragment.location === QmlEditFragment.Object ){
+                if(objectNodeMember.editFragment && objectNodeMember.editFragment.location === QmlEditFragment.Object ){
                     if ( objectNodeMember.editFragment.objectId() === objectId )
                         return objectNodeMember
                 }
