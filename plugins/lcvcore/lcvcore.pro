@@ -96,6 +96,7 @@ DISTFILES += \
     qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
     qml/ImageSegmentFactory.qml \
+    qml/ImageWrite.qml \
     qml/MatViewPane.qml \
     qml/NavigableImageView.qml \
     qml/PaperSurface.qml \
