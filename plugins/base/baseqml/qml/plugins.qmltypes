@@ -502,6 +502,12 @@ Module {
         exportMetaObjectRevisions: [0]
     }
     Component {
+        name: "lv::QmlData"
+        prototype: "lv::Shared"
+        exports: ["base/Data 1.0"]
+        exportMetaObjectRevisions: [0]
+    }
+    Component {
         name: "lv::ViewEngine"
         prototype: "QObject"
         exports: ["base/LiveEngine 1.0"]

@@ -36,6 +36,7 @@
 #include "qmlstreamact.h"
 #include "qmlthreadinfo.h"
 #include "qmltime.h"
+#include "qmldata.h"
 #include "qmlarrange.h"
 #include "qmlcollector.h"
 #include "qmlsplit.h"
@@ -85,6 +86,7 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlArrange>(         uri, 1, 0, "Arrange");
     qmlRegisterType<lv::QmlSplit>(           uri, 1, 0, "Split");
     qmlRegisterType<lv::QmlCollector>(       uri, 1, 0, "Collector");
+    qmlRegisterType<lv::QmlData>(            uri, 1, 0, "Data");
     qmlRegisterType<lv::GroupCollector>(     uri, 1, 0, "GroupCollector");
     qmlRegisterType<lv::QmlStreamFilter>(    uri, 1, 0, "StreamFilter");
     qmlRegisterType<lv::QmlStreamSink>(      uri, 1, 0, "StreamSink");

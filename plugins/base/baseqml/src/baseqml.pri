@@ -6,6 +6,7 @@ HEADERS += \
     $$PWD/lvbaseqmlglobal.h \
     $$PWD/qmlarrange.h \
     $$PWD/qmlcollector.h \
+    $$PWD/qmldata.h \
     $$PWD/qmleachvalueapply.h \
     $$PWD/qmlexec.h \
     $$PWD/qmlindexselector.h \
@@ -37,6 +38,7 @@ SOURCES += \
     $$PWD/environment.cpp \
     $$PWD/qmlarrange.cpp \
     $$PWD/qmlcollector.cpp \
+    $$PWD/qmldata.cpp \
     $$PWD/qmleachvalueapply.cpp \
     $$PWD/qmlexec.cpp \
     $$PWD/qmlindexselector.cpp \
