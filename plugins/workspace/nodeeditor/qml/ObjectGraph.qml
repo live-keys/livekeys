@@ -351,10 +351,7 @@ Rectangle{
 
         // clear everything inside node
 
-        var children = node.item.propertyContainer.children
-        for (var i = 0; i < children.length; ++i){
-            children[i].clean().destroy()
-        }
+        node.item.clean()
 
         if (node.item.outPort)
             graph.removePort(node, node.item.outPort)

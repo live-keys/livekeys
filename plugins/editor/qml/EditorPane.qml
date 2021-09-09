@@ -246,7 +246,7 @@ Workspace.Pane{
                     }
                 } else {
                     if (root.paneState.layout){
-                        paletteFunctions.expandLayout(root, root.paneState.layout)
+                        paletteFunctions.expandLayout(root.editor, root.paneState.layout)
                     } else {
                         // shape all
                         lk.layers.workspace.extensions.editqml.shapeAll(

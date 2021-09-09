@@ -36,17 +36,24 @@ QtObject{
             panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
             fe.document = project.openTextFile(project.active.path)
 
-            var editor = fe
+            var editor = fe.editor
             var codeHandler = editor.code.language
             var rootPosition = codeHandler.findRootPosition()
 
             var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+
+            if (lk.layers.editor.environment.hasLoadingScreen(editor)){
+                lk.layers.editor.environment.removeLoadingScreen(editor)
+                return
+            }
+            lk.layers.editor.environment.addLoadingScreen(editor)
 
             paletteFunctions.shapeImports(editor)
             paletteFunctions.shapeRoot(editor, function(ef){
                 var objectContainer = ef.visualParent
                 var nodePalette = paletteFunctions.openPaletteInObjectContainer(objectContainer, 'NodePalette')
                 nodePalette.child.resize(objectContainer.width - 50, editor.height - 170)
+                lk.layers.editor.environment.removeLoadingScreen(editor)
             })
         })
     }

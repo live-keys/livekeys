@@ -288,11 +288,5 @@ Grid{
         beta : 0.4
         gamma : 0
     }
-
-
 }
 ```
-
-The image below shows the result:
-
-![](../src/images/api_filter.png)

@@ -154,9 +154,9 @@ Qan.NodeItem{
         }
 
         for ( var i = 0; i < root.members.length; ++i ){
-            var member = root.members[i]
-            member.clean().destroy()
+            root.members[i].clean().destroy()
         }
+        root.members = []
 
         return root
     }

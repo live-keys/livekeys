@@ -126,6 +126,7 @@ Item{
 
     function clean(){
         root.node.item.removeMemberByName(propertyName)
+        aboutToRemoveConnection.enabled = false
 
         var graph = root.node.graph
         if (root.inPort) {
@@ -299,8 +300,11 @@ Item{
     }
     
     Connections {
+        id: aboutToRemoveConnection
         target: editFragment
-        function onAboutToBeRemoved(){ root.clean().destroy() }
+        function onAboutToBeRemoved(){
+            root.clean().destroy()
+        }
         ignoreUnknownSignals: true
     }
 

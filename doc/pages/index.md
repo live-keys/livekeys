@@ -1,17 +1,18 @@
 # Index
 
-Welcome to Livekeys documentation. This documentation is for Livekeys version 1.6.0.
+Welcome to Livekeys documentation. This documentation is for Livekeys version 1.9.0.
 
-The documentation is split into 2 main parts. The user documentation,
-which describes using the application out of the box and working with qml, and a developer section that
-handles the c++ api behind Livekeys and how to extend it in order to write your own plugins.
+The documentation is split into 2 sections. The user section contains documentation on how to use the application
+and the functionality available, while the developer section covers information on
+developing new functionality, together with the internal qml and c++ API.
 
 ### User Section
 
 The user documentation has the following subsections:
 
  * [Installation](installation.md) - How to install Livekeys.
- * [Using Livekeys](running.md) Describes projects, how to open and work with samples, and other useful information on the interface. 
+ * [Running Livekeys](running.md) - Running Livekeys for the first time.
+ * [Projects and structure](projects.md) Describes projects and their structure.
  * [Plugins](plugins.md) - Functionality for each plugin. 
 
 ### Developer Section

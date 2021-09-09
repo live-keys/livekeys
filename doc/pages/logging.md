@@ -170,10 +170,6 @@ A tag can additionally be configured by the `vlog(...).configure()` function.
 
 An interesting feature of our log is the ability to log images as well! They have to be in a QMat form (see documentation of QMat), a matrix representation of the image. The usual source is an ImRead (see documentation).   
 
-![example of visual logging](images/visual-log.png)
-
-In the image above, we note the ImRead object, whose output can be displayed. It can be used as a object to be logged (note the `vlog` call), with the result available below, in the log window. 
-
 ### Log window
 
 LiveKeys has a log window which can be opened either by using the `Ctrl+L` shortcut or clicking on the log icon ![log icon](images/logicon.jpg). 

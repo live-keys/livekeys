@@ -13,7 +13,8 @@
         {"Palettes and Bindings" : "palettes-and-bindings.md"},
         {"Logging" : "logging.md"},
         {"Error Handling": "errorhandling.md"},
-        {"Configurations" : "configurations.md"}
+        {"Configurations" : "configurations.md"},
+        {"Projects in detail" : "projects-detail.md"}
     ],
     {"Plugins": "plugins.md"},
     [

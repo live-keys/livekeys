@@ -517,7 +517,7 @@ QtObject{
                 if ( callback )
                     callback(ef, palette)
             })
-        } else if ( palettes.length === 1 ){
+        } else if ( palettes.data.length === 1 ){
             shapePaletteAtPosition(editor, palettes.data[0].name, position, function(ef, palette){
                 if ( ef.visualParent.expand )
                     ef.visualParent.expand()
@@ -1079,14 +1079,14 @@ QtObject{
         }
     }
 
-    function expandLayout(editorPane, layout, callback){
-        var language = editorPane.editor.code.language
+    function expandLayout(editor, layout, callback){
+        var language = editor.code.language
 
         if ( layout.hasOwnProperty('shapeImports' ) ){
-            shapeImports(editorPane)
+            shapeImports(editor)
         }
 
-        shapeRoot(editorPane, function(ef){
+        shapeRoot(editor, function(ef){
             expandObjectContainerLayout(ef.visualParent, layout)
 
             if ( callback )
