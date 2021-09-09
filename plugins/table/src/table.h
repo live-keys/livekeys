@@ -15,7 +15,6 @@ public:
     explicit Table(QObject *parent = nullptr);
     virtual ~Table();
 
-    virtual int totalRows() const = 0;
     virtual QString valueAt(int row, int column) = 0;
     virtual void setValueAt(int row, int column, const QString& value) = 0;
 
@@ -26,6 +25,10 @@ public:
     virtual int totalColumns() const = 0;
     virtual QList<QString> columnNames() const = 0;
     virtual void assignColumnInfo(int index, const QString& info) = 0;
+
+
+    virtual int totalRows() const = 0;
+
 
     void beginLoadData();
     void endLoadData();
