@@ -60,9 +60,9 @@ DISTFILES += \
     palettes/FolderPathPalette.qml \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
-    palettes/DoubleHistoryPlotPalette.qml \
     palettes/IntInputPalette.qml \
     palettes/NodePalette.qml \
+    palettes/NumberHistoryPlotPalette.qml \
     palettes/RectangleSizePalette.json \
     palettes/SizePalette.qml \
     palettes/StringListPalette.qml \

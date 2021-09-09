@@ -64,7 +64,7 @@ CodePalette{
                         fractionalSlider.enabled = false
 
                     } else {
-                        lk.layers.workspace.messages.pushError('Non-numeric input for DoublePalette', 202)
+                        lk.layers.workspace.messages.pushError('Non-numeric input for SliderPalette', 202)
                     }
                 }
             }

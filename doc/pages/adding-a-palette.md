@@ -8,16 +8,16 @@ To add a palette, we have to make sure that LiveKeys is made aware that the pale
     "package" : ".",
     "palettes" : {
         "palettes/EditPalette.qml" : "edit/qml",
-        "palettes/IntPalette.qml": "qml/int",
+        "palettes/IntSliderPalette.qml": "qml/int",
         "palettes/IntHistoryPlotPalette.qml": "qml/int",
-        "palettes/DoublePalette.qml": "qml/double",
-        "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
+        "palettes/SliderPalette.qml": "qml/double",
+        "palettes/NumberHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color"
     }
 }
 ```
 
-We give the path to the palette file relative to the `live.plugin.json` as the key, and the type that the palette supports as the value. For example, both the `DoublePalette` and `DoubleHistoryPlotPalette` can be used to display a variable of the `double` type.
+We give the path to the palette file relative to the `live.plugin.json` as the key, and the type that the palette supports as the value. For example, both the `SliderPalette` and `NumberHistoryPlotPalette` can be used to display a variable of the `double` type.
 
 After registering the palette in such a manner, we create the appropriate Qml file. The palette itself has to be of CodePalette type.
 

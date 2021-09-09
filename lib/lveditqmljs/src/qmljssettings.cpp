@@ -56,8 +56,8 @@ QmlJsSettings::QmlJsSettings(EditorSettings *parent)
     m_formats[QmlJsSettings::QmlRuntimeModifiedValue] = createFormat("#0080a0");
     m_formats[QmlJsSettings::QmlEdit] = createFormat("#fff", "#0b273f");
 
-    m_defaultPalettes["qml/double"] = "DoublePalette";
-    m_defaultPalettes["qml/int"]    = "IntPalette";
+    m_defaultPalettes["qml/double"] = "SliderPalette";
+    m_defaultPalettes["qml/int"]    = "IntSliderPalette";
     m_defaultPalettes["qml/string"] = "TextPalette";
     m_defaultPalettes["qml/color"] = "ColorPalette";
     m_defaultPalettes["qml/base#Exec"] = "ExecPropertiesPalette";

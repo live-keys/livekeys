@@ -8,22 +8,22 @@
         {
             "location": "property",
             "name": "top",
-            "palettes": ["IntPalette"]
+            "palettes": ["IntSliderPalette"]
         },
         {
             "location": "property",
             "name": "right",
-            "palettes": ["IntPalette"]
+            "palettes": ["IntSliderPalette"]
         },
         {
             "location": "property",
             "name": "bottom",
-            "palettes": ["IntPalette"]
+            "palettes": ["IntSliderPalette"]
         },
         {
             "location": "property",
             "name": "left",
-            "palettes": ["IntPalette"]
+            "palettes": ["IntSliderPalette"]
         },
         {
             "location": "property",

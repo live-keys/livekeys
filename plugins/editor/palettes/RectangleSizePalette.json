@@ -4,12 +4,12 @@
         {
             "location": "property",
             "name": "width",
-            "palettes": ["DoublePalette"]
+            "palettes": ["SliderPalette"]
         },
         {
             "location": "property",
             "name": "height",
-            "palettes": ["DoublePalette"]
+            "palettes": ["SliderPalette"]
         }
     ]
 }
