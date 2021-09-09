@@ -156,7 +156,7 @@ QString QmlError::toString(int options) const{
     if ( options & QmlError::PrintLocation ){
         if ( m_error.hasOwnProperty("fileName") ){
             result += "\nat " +
-                    m_error.property("fileName").toString() + ":" +
+                    QString("file://") + m_error.property("fileName").toString() + ":" +
                     m_error.property("lineNumber").toString() + "@" +
                     m_error.property("functionName").toString();
         }
