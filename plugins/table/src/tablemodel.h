@@ -42,7 +42,9 @@ public:
     lv::TableModelRowsInfo *rowInfo() const;
     lv::Table* table() const;
 
-    void setTable(lv::Table* table);
+    void notifyTableRefresh();
+    void notifyTableRefreshEnd();
+
 
 signals:
     void complete();
@@ -50,31 +52,31 @@ signals:
     void columnAdded();
 
 public slots:
-    void addRows(int number = 1);
-    void removeRow(int idx);
-    void assignCell(int row, int col, QString value);
+    void insertRow(const QJSValue& row);
+    void updateRow(int index, const QJSValue& row);
+    void removeRow(int index);
 
-    void addColumns(int number = 1);
-    void assignColumnInfo(int index, QJSValue name);
-    void removeColumn(int idx);
+    int totalRows() const;
+    QJSValue rowAt(int index);
+
+    int totalFields() const;
+    void insertField(int index, const QJSValue& field);
+    void updateField(int index, const QJSValue& info);
+    void removeField(int index);
 
     bool select(QJSValue column, QJSValue row);
     bool deselect(QJSValue column = QJSValue(), QJSValue row = QJSValue());
 
     void clearTable();
-    void __dataSourceAboutToLoad();
-    void __dataSourceFinished();
 
 private:
-    void assignDataSource(Table* ds);
-
     Q_DISABLE_COPY(TableModel)
     QHash<int, QByteArray>            m_roles;
     bool                              m_isComponentComplete;
 
     TableModelHeader*                      m_headerModel;
     TableModelRowsInfo*                    m_rowModel;
-    Table*                  m_dataSource;
+    Table*                  m_table;
 };
 
 inline QHash<int, QByteArray> TableModel::roleNames() const{
@@ -82,7 +84,7 @@ inline QHash<int, QByteArray> TableModel::roleNames() const{
 }
 
 inline Table *TableModel::table() const{
-    return m_dataSource;
+    return m_table;
 }
 
 } // namespace

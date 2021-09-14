@@ -6,6 +6,7 @@
 
 namespace lv {
 
+class TableModel;
 class TableModelHeader : public QAbstractListModel{
 
     Q_OBJECT
@@ -17,23 +18,20 @@ class TableModelHeader : public QAbstractListModel{
 
     class ColumnData{
     public:
-        QString name;
-        int     width;
+        int width;
     };
 
 public:
-    explicit TableModelHeader(QObject *parent = nullptr);
+    explicit TableModelHeader(TableModel *parent = nullptr);
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
-    bool setData(const QModelIndex &index, const QVariant &value = QVariant(), int role = Qt::EditRole) override;
     QHash<int, QByteArray> roleNames() const override;
 
-    void addColumn(const QString& name = "");
-    void removeColumn(int idx);
-    void initalizeData(int size);
+    void notifyColumnAdded(int index);
+    void notifyColumnRemoved(int idx);
     void notifyModelReset();
 
     int defaultColumnWidth() const;
@@ -43,8 +41,6 @@ public:
 
     int contentWidth() const;
 
-    void assignColumnName(int index, const QString& name);
-
 public slots:
     void updateColumnWidth(int index, int width);
     int columnWidth(int index);
@@ -52,8 +48,9 @@ public slots:
 signals:
     void defaultColumnWidthChanged(int defaultColumnWidth);
     void contentWidthChanged();
+
 private:
-    ColumnData createColumnData(int index);
+    ColumnData createColumnData();
 
     QHash<int, QByteArray> m_roles;
     int                    m_defaultColumnWidth;

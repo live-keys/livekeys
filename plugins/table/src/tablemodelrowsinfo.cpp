@@ -32,20 +32,20 @@ QVariant TableModelRowsInfo::data(const QModelIndex &index, int) const{
     return QString::number(index.row()+1);
 }
 
-void TableModelRowsInfo::notifyRowAdded()
+void TableModelRowsInfo::notifyRowAdded(int index)
 {
-    beginInsertRows(QModelIndex(), m_rowCount, m_rowCount);
+    beginInsertRows(QModelIndex(), index, index);
     ++m_rowCount;
     m_contentHeight += m_defaultRowHeight;
     emit contentHeightChanged();
     endInsertRows();
 }
 
-void TableModelRowsInfo::notifyColumnAdded(){
+void TableModelRowsInfo::notifyColumnAdded(int index){
     for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
         TableModelRowsInfo::CellInfo ci;
         ci.isSelected = false;
-        it.value()->cells.append(ci);
+        it.value()->cells.insert(index, ci);
     }
 }
 

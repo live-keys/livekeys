@@ -4,6 +4,8 @@
 #include "tablemodelrowsinfo.h"
 #include "table.h"
 #include "localtable.h"
+#include "tableroweach.h"
+#include "tablegroup.h"
 
 #include <qqml.h>
 #include <QQmlEngine>
@@ -11,7 +13,9 @@
 
 void TablePlugin::registerTypes(const char *uri)
 {
-    qmlRegisterType<lv::LocalTable>(uri, 1, 0, "LocalTable");
+    qmlRegisterType<lv::LocalTable>(  uri, 1, 0, "LocalTable");
+    qmlRegisterType<lv::TableRowEach>(uri, 1, 0, "TableRowEach");
+    qmlRegisterType<lv::TableGroup>(  uri, 1, 0, "TableGroup");
 
     qmlRegisterUncreatableType<lv::TableModelHeader>(
         uri, 1, 0, "TableModelHeader", "Cannot create TableModelHeader instance.");
