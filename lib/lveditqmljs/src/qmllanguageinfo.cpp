@@ -355,7 +355,7 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
 /**
  * \brief Returns the default value to be assigned for a given qml type
  */
-QString QmlTypeInfo::typeDefaultValue(const QString &typeString){
+QString QmlTypeInfo::typeDefaultValueAsText(const QString &typeString){
     if ( typeString == "bool" )
         return "false";
     else if ( typeString == "double" || typeString == "int" || typeString == "qlonglong" || typeString == "enumeration" || typeString == "real" )

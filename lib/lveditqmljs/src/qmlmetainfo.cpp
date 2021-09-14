@@ -53,7 +53,7 @@ QJSValue QmlMetaInfo::listProperties(QObject *obj){
 }
 
 QString QmlMetaInfo::defaultTypeValue(const QString &type){
-    return QmlTypeInfo::typeDefaultValue(type);
+    return QmlTypeInfo::typeDefaultValueAsText(type);
 }
 
 QString QmlMetaInfo::typeName(const QString &typeReference){

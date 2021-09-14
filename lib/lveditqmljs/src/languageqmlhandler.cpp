@@ -1340,7 +1340,7 @@ void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const 
                     if ( propertyConfig.hasOwnProperty("value") ){
                         value = propertyConfig.property("value").toString();
                     } else {
-                        value = QmlTypeInfo::typeDefaultValue(type);
+                        value = QmlTypeInfo::typeDefaultValueAsText(type);
                     }
 
                     props.append(std::make_tuple(type, name, value));
@@ -3330,7 +3330,7 @@ int LanguageQmlHandler::addObjectToCode(int position, const QJSValue &typeOption
                 if ( propertyConfig.hasOwnProperty("value") ){
                     value = propertyConfig.property("value").toString();
                 } else {
-                    value = QmlTypeInfo::typeDefaultValue(type);
+                    value = QmlTypeInfo::typeDefaultValueAsText(type);
                 }
 
                 propertyDeclarations.append("property " + type + " " + name + ": " + value);
@@ -3464,7 +3464,7 @@ void LanguageQmlHandler::createRootObjectInRuntime(const QJSValue &typeOptions, 
                 if ( propertyConfig.hasOwnProperty("value") ){
                     value = propertyConfig.property("value").toString();
                 } else {
-                    value = QmlTypeInfo::typeDefaultValue(type);
+                    value = QmlTypeInfo::typeDefaultValueAsText(type);
                 }
 
                 props.append(std::make_tuple(type, name, value));

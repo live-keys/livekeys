@@ -206,7 +206,7 @@ public:
     static bool isObject(const QString& declarationType);
     static bool isQmlBasicType(const QString& declarationType);
     static QmlTypeReference toQmlPrimitive(const QmlTypeReference &cppPrimitive);
-    static QString typeDefaultValue(const QString& typeString);
+    static QString typeDefaultValueAsText(const QString& typeString);
 
 private:
     QmlTypeInfo();
