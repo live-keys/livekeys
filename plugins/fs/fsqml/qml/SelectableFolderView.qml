@@ -13,10 +13,12 @@ Input.SelectableListView{
     property var selectedIndexes : []
 
     property color iconColor: '#3f444d'
+    property bool isInteractive: true
 
     property string cwd: ''
     onCwdChanged: {
-        var wdlist = [{name: '..', isDir: true, size: 0}].concat(Fs.Dir.listDetail(cwd))
+        var cwdlist = Fs.Dir.listDetail(cwd)
+        var wdlist = isInteractive ? [{name: '..', isDir: true, size: 0}].concat(cwdlist) : cwdlist
         model = wdlist
     }
 
@@ -45,6 +47,9 @@ Input.SelectableListView{
             width : root.width
             height : 25
             color : {
+                if ( !root.isInteractive )
+                    return 'transparent'
+
                 if ( ListView.isCurrentItem )
                     return root.style.selectionBackgroundColor
                 
@@ -78,9 +83,11 @@ Input.SelectableListView{
 
             MouseArea{
                 anchors.fill: parent
-                hoverEnabled: true
+                hoverEnabled: root.isInteractive
                 onEntered: root.currentIndex = index
                 onClicked: {
+                    if ( !root.isInteractive )
+                        return
                     if (mouse.modifiers & Qt.ControlModifier){
                         if ( root.selectedIndexes.indexOf(index) == -1 )
                             root.selectedIndexes.push(index)
@@ -104,7 +111,9 @@ Input.SelectableListView{
                     }
                     root.forceActiveFocus()
                 }
-                onDoubleClicked: root.itemSelected(index)
+                onDoubleClicked:
+                    if ( root.isInteractive )
+                        root.itemSelected(index)
             }
         }
     }

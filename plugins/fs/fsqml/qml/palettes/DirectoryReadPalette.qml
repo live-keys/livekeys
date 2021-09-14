@@ -20,6 +20,7 @@ import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
 import base 1.0
+import fs 1.0 as Fs
 import visual.input 1.0 as Input
 
 CodePalette{
@@ -31,16 +32,15 @@ CodePalette{
 
     item: Item{
         id: directoryReadItem
-        width: 100
-        height: 25
+        width: 200
+        height: 150
 
         property var current : null
 
         Input.TextButton{
             id: textButton
-            anchors.horizontalCenter: parent.horizontalCenter
             anchors.left: parent.left
-            anchors.leftMargin: 10
+            anchors.leftMargin: 1
             height: 28
             width: 80
             style: theme.formButtonStyle
@@ -51,6 +51,22 @@ CodePalette{
                     directoryReadItem.current.start()
                 }
             }
+        }
+
+        Fs.SelectableFolderView{
+            id: selectableFolderView
+            anchors.fill: parent
+            anchors.topMargin: 30
+            isInteractive: false
+            cwd: {
+                if (!parent.current)
+                    return ''
+                if (!Fs.Path.exists(parent.current.path))
+                    return ''
+                return parent.current.path
+            }
+            style: palette.theme.selectableListView
+            iconColor: palette.theme.colorScheme.middlegroundOverlayDominant
         }
 
         state: "NOT_RUNNING"
