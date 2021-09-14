@@ -22,7 +22,8 @@ B.Container{
         }
     }
 
-    B.Opening{
+    B.Act{
+        onComplete: run()
         run: function(){
             if ( B.Script.argvTail.length === 1 ){
                 timer.start()
