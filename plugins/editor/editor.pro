@@ -72,6 +72,7 @@ DISTFILES += \
     qml/ObjectPalettePane.qml \
     qml/PaletteConnection.qml \
     qml/PalettePane.qml \
+    qml/TextReplace.qml \
     qml/live.package.json \
     qml/live.plugin.json \
     qml/PaletteListView.qml \

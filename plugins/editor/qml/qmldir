@@ -10,3 +10,4 @@ PaletteListView   1.0 PaletteListView.qml
 PaletteConnection 1.0 PaletteConnection.qml
 ObjectPalettePane 1.0 ObjectPalettePane.qml
 PalettePane       1.0 PalettePane.qml
+TextReplace       1.0 TextReplace.qml
