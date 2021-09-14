@@ -194,20 +194,20 @@ WorkspaceExtension{
                             name : "New Document",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                                lk.layers.workspace.project.openFile(fe.path, Document.Edit)
                             }
                         }, {
                             name : "New Runnable",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.project.openFile(fe.path, ProjectDocument.Edit)
+                                lk.layers.workspace.project.openFile(fe.path, Document.Edit)
                                 project.openRunnable(fe.path, [fe.path])
                             }
                         }, {
                             name : "Add File",
                             action : function(){
                                 lk.layers.workspace.wizards.addFile(item.entry().path, {}, function(f){
-                                    lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+                                    lk.layers.workspace.project.openFile(f.path, Document.Edit)
                                 })
                             }
                         }, {
