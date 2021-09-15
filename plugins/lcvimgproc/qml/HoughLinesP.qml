@@ -5,9 +5,9 @@ import lcvimgproc 1.0 as Img
 
 Act{
     property Mat input: null
-    property double rho: 0.0
-    property double theta: 0.0
-    property int threshold: 0
+    property double rho: 1
+    property double theta: 1
+    property int threshold: 1
     property double minLineLength: 0.0
     property double maxLineGap: 0.0
 
