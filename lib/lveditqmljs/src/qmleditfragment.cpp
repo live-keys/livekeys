@@ -166,7 +166,7 @@ void QmlEditFragment::checkIfGroup()
 }
 
 QString QmlEditFragment::defaultValue() const{
-    return QmlTypeInfo::typeDefaultValue(m_declaration->type().name());
+    return QmlTypeInfo::typeDefaultValueAsText(m_declaration->type().name());
 }
 
 CodePalette *QmlEditFragment::palette(const QString &type){

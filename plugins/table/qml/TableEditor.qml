@@ -15,7 +15,8 @@ Rectangle{
     color: style.cellBorderColor
     objectName: "tableEditor"
 
-    property var tableModel: null
+    property var table: null
+    property var tableModel: table ? table.model : nullconso
 
     property QtObject style: TableEditorStyle{}
 
@@ -28,6 +29,25 @@ Rectangle{
         contentTableView.forceLayout()
     }
 
+    function createColumnName(n){
+        var ordA = 'A'.charCodeAt(0);
+        var ordZ = 'Z'.charCodeAt(0);
+        var len = ordZ - ordA + 1;
+
+        var s = "";
+        while(n >= 0) {
+            s = String.fromCharCode(n % len + ordA) + s;
+            n = Math.floor(n / len) - 1;
+        }
+        return s;
+    }
+
+    function assignCell(row, column, value){
+        var ob = {}
+        ob[column] = value
+        tableModel.updateRow(row, ob)
+    }
+
     property var getContextMenuOptions: function(item, options){
         if ( !tableModel )
             return []
@@ -36,14 +56,16 @@ Rectangle{
                 name: "Add column",
                 enabled: true,
                 action: function(){
-                    tableModel.addColumns(1)
+                    var fieldNo = tableModel.totalFields()
+                    var fieldName = createColumnName(fieldNo)
+                    tableModel.insertField(-1, {name: fieldName})
                 }
             },
             {
                 name: "Add row",
                 enabled: true,
                 action: function(){
-                    root.tableModel.addRows(1)
+                    root.tableModel.insertRow([])
                 }
             },
             {
@@ -147,11 +169,58 @@ Rectangle{
          radius: 0
          style: root.style.cellInputStyle
          onActiveFocusLost: {
-             root.tableModel.assignCell(editCell.row, editCell.column, input.text)
+             root.assignCell(editCell.row, editCell.column, input.text)
              root.disableCellInput()
+         }
+         onKeyPressed: {
+             if ( event.key === Qt.Key_Enter || event.key === Qt.Key_Return ){
+                 root.assignCell(editCell.row, editCell.column, input.text)
+                 root.disableCellInput()
+                 event.accepted = true
+             } else if ( event.key === Qt.Key_Escape ){
+                 root.disableCellInput()
+                 event.accepted = true
+             }
          }
      }
 
+    Keys.onPressed: {
+        if ( event.key === Qt.Key_Up ){
+            if ( focusCell.row > -1 && focusCell.column > -1 ){
+                if ( focusCell.row > 0 ){
+                    focusCell = { row: focusCell.row - 1, column: focusCell.column }
+                    tableModel.deselect()
+                    tableModel.select(focusCell.column, focusCell.row)
+                }
+            }
+        } else if ( event.key === Qt.Key_Down ){
+            if ( focusCell.row > -1 && focusCell.column > -1 ){
+                if ( focusCell.row < tableModel.totalRows() - 1 ){
+                    focusCell = { row: focusCell.row + 1, column: focusCell.column }
+                    tableModel.deselect()
+                    tableModel.select(focusCell.column, focusCell.row)
+                }
+            }
+        } else if ( event.key === Qt.Key_Left ){
+            if ( focusCell.row > -1 && focusCell.column > -1 ){
+                if ( focusCell.column > 0 ){
+                    focusCell = { row: focusCell.row , column: focusCell.column - 1 }
+                    tableModel.deselect()
+                    tableModel.select(focusCell.column, focusCell.row)
+                }
+            }
+        } else if ( event.key === Qt.Key_Right ){
+            if ( focusCell.row > -1 && focusCell.column > -1 ){
+                if ( focusCell.column < tableModel.totalFields() - 1 ){
+                    focusCell = { row: focusCell.row , column: focusCell.column + 1 }
+                    tableModel.deselect()
+                    tableModel.select(focusCell.column, focusCell.row)
+                }
+            }
+        }
+    }
+
+    property var focusCell: ({ row: -1, column: -1} )
     property var editCell: ({ row: -1, column: -1 })
     signal cellClicked(int row, int column, Item delegate)
     onCellClicked: {
@@ -182,9 +251,9 @@ Rectangle{
     }
 
     function disableCellInput(){
+        root.cellInputBox.parent = null
         editCell.row = -1
         editCell.column = -1
-        root.cellInputBox.parent = null
     }
 
     function __notifyEditOutOfView(delegate){
@@ -471,18 +540,19 @@ Rectangle{
                                 if ( model.isSelected ){
                                     //TODO
                                 } else {
+                                    root.focusCell = { column: column, row: row }
                                     tableModel.select(column, row)
                                 }
 
                             } else {
                                 tableModel.deselect()
                                 tableModel.select(column, row)
+                                root.focusCell = { column: column, row: row }
                             }
 
                             root.cellClicked(row, column, tableDelegate)
                             tableDelegate.forceActiveFocus()
                         }
-
                     }
                 }
 

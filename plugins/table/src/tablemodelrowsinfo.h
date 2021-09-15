@@ -34,8 +34,8 @@ public:
     QHash<int, QByteArray> roleNames() const override;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override;
 
-    void notifyRowAdded();
-    void notifyColumnAdded();
+    void notifyRowAdded(int index);
+    void notifyColumnAdded(int index);
     void notifyModelReset(int newRowCount = 0);
     void initializeData(int num);
 

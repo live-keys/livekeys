@@ -1,9 +1,11 @@
 #include "tablemodelheader.h"
+#include "tablemodel.h"
+#include "tableschema.h"
+#include "table.h"
 
-namespace lv {
+namespace lv{
 
-
-TableModelHeader::TableModelHeader(QObject *parent)
+TableModelHeader::TableModelHeader(TableModel *parent)
     : QAbstractListModel(parent)
     , m_defaultColumnWidth(100)
     , m_contentWidth(0)
@@ -25,40 +27,22 @@ QVariant TableModelHeader::data(const QModelIndex &index, int) const{
     if (index.column() >= m_data.size())
         return QVariant();
 
-    return m_data[index.column()].name;
+    TableModel* tm = static_cast<TableModel*>(parent());
+    if ( !tm->table()->schema() )
+        return QVariant();
+
+    return tm->table()->schema()->fieldAt(index.column())->name();
 }
 
-bool TableModelHeader::setData(const QModelIndex &index, const QVariant &, int)
+void TableModelHeader::notifyColumnAdded(int index)
 {
-    if (index.row() > 0)
-        return false;
-
-    if (index.column() >= m_data.size()){
-        beginInsertColumns(QModelIndex(), m_data.size(), index.column());
-        for (int i = m_data.size(); i <= index.column(); ++i)
-            m_data.push_back(createColumnData(i));
-        endInsertColumns();
-        return true;
-    }
-
-    m_data[index.column()] = createColumnData(index.column());
-    emit dataChanged(index, index);
-
-    return true;
-}
-
-void TableModelHeader::addColumn(const QString &name)
-{
-    beginInsertColumns(QModelIndex(), m_data.size(), m_data.size());
-    auto modelData = createColumnData(m_data.size());
-    if ( !name.isEmpty() )
-        modelData.name = name;
-    m_data.push_back(modelData);
+    beginInsertColumns(QModelIndex(), index, index);
+    auto modelData = createColumnData();
+    m_data.insert(index, modelData);
     endInsertColumns();
-
 }
 
-void TableModelHeader::removeColumn(int idx)
+void TableModelHeader::notifyColumnRemoved(int idx)
 {
     beginRemoveColumns(QModelIndex(), idx, idx);
 
@@ -69,23 +53,20 @@ void TableModelHeader::removeColumn(int idx)
     endRemoveColumns();
 }
 
-void TableModelHeader::initalizeData(int size)
-{
-    if (size < 1)
-        return;
-
-    beginInsertColumns(QModelIndex(), 0, size-1);
-
-    for (int i =0; i < size; ++i)
-        m_data.push_back(createColumnData(i));
-    endInsertColumns();
-}
-
 void TableModelHeader::notifyModelReset(){
     beginResetModel();
     m_data.clear();
+
+    TableModel* tm = static_cast<TableModel*>(parent());
+    if ( tm->table()->schema() ){
+        int totalFields = tm->table()->schema()->totalFields();
+        for ( int i = 0; i < totalFields; ++i ){
+            auto modelData = createColumnData();
+            m_data.append(modelData);
+        }
+    }
     endResetModel();
-    m_contentWidth = 0;
+    m_contentWidth = m_data.size() * m_defaultColumnWidth;
     emit contentWidthChanged();
 }
 
@@ -109,19 +90,8 @@ int TableModelHeader::columnWidth(int index){
     return m_data[index].width;
 }
 
-TableModelHeader::ColumnData TableModelHeader::createColumnData(int idx){
-    int rem = idx%26;
-    QString name = QString(static_cast<char>(static_cast<int>('A') + rem));
-    idx /= 26;
-
-    while (idx){
-        int rem = idx%26;
-        idx = idx/26;
-        name = QString(static_cast<char>(static_cast<int>('A') + rem - 1)) + name;
-    }
-
+TableModelHeader::ColumnData TableModelHeader::createColumnData(){
     TableModelHeader::ColumnData data;
-    data.name = name;
     data.width = m_defaultColumnWidth;
     m_contentWidth += m_defaultColumnWidth;
     emit contentWidthChanged();
@@ -133,12 +103,6 @@ int TableModelHeader::contentWidth() const
     return m_contentWidth;
 }
 
-void TableModelHeader::assignColumnName(int index, const QString &name){
-    if ( index >= m_data.length() )
-        return;
-    m_data[index].name = name;
-    emit dataChanged(createIndex(0, index), createIndex(0, index));
-}
 
 }
 

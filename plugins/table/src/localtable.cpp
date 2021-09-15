@@ -1,26 +1,142 @@
 #include "localtable.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "tableschema.h"
 
 #include "csv.hpp"
 
 #include <QtDebug>
-
 #include <QFile>
+#include <QJSValueIterator>
 
 namespace lv{
 
 LocalTable::LocalTable(QObject *parent)
     : Table(parent)
 {
-
+    setSchema(new TableSchema);
 }
 
 LocalTable::~LocalTable(){
 }
 
+void LocalTable::clear(){
+    m_data.clear();
+    setSchema(new TableSchema);
+}
+
+QString LocalTable::valueAt(int row, int column){
+    auto& rowData = m_data[row];
+    return rowData[column];
+}
+
+void LocalTable::insertRow(const QJSValue &row, Table::InsertCallback cb){
+    if ( !schema() )
+        return;
+
+    int s = schema()->totalFields();
+    QList<QString> rowToAdd;
+    for ( int i = 0; i < s; ++i ){
+        rowToAdd.append("");
+    }
+
+    if ( row.isArray() ){
+        QJSValueIterator it(row);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                bool toIntOk = false;
+                int key = it.name().toInt(&toIntOk);
+                if ( toIntOk ){
+                    rowToAdd[key] = it.value().toString();
+                }
+            }
+        }
+    } else if ( row.isObject() ){
+        QJSValueIterator it(row);
+        while ( it.hasNext() ){
+            it.next();
+            bool toIntOk = false;
+            int key = it.name().toInt(&toIntOk);
+            if ( toIntOk ){
+                rowToAdd[key] = it.value().toString();
+            }
+        }
+    }
+
+    m_data.append(rowToAdd);
+
+    if (cb)
+        cb(m_data.size() - 1);
+}
+
+void LocalTable::updateRow(int index, const QJSValue &row){
+    if ( !schema() )
+        return;
+    if ( index >= totalRows() )
+        return;
+
+    int totalFields = schema()->totalFields();
+
+    if ( row.isArray() ){
+        QJSValueIterator it(row);
+        while ( it.hasNext() ){
+            it.next();
+            if ( it.name() != "length" ){
+                bool toIntOk = false;
+                int key = it.name().toInt(&toIntOk);
+                if ( toIntOk && key < totalFields ){
+                    m_data[index][key] = it.value().toString();
+                }
+            }
+        }
+    } else if ( row.isObject() ){
+        QJSValueIterator it(row);
+        while ( it.hasNext() ){
+            it.next();
+            bool toIntOk = false;
+            int key = it.name().toInt(&toIntOk);
+            if ( toIntOk && key < totalFields ){
+                m_data[index][key] = it.value().toString();
+            }
+        }
+    }
+}
+
+void LocalTable::removeRow(int idx){
+    m_data.erase(m_data.begin() + idx);
+}
+
 int LocalTable::totalRows() const{
     return m_data.size();
+}
+
+void LocalTable::insertField(int index, TableField::Ptr field){
+    if ( !schema() )
+        return;
+
+    int totalFields = schema()->totalFields();
+    schema()->insertField(index, field);
+    if ( index < 0 || index > totalFields ){
+        for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
+            (*it).append("");
+        }
+    } else {
+        for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
+            (*it).insert(index, "");
+        }
+    }
+}
+
+void LocalTable::updateField(int index, const QJSValue &opt){
+
+}
+
+void LocalTable::removeField(int /*index*/){
+    if ( !schema() )
+        return;
+
+    //TODO
 }
 
 QJSValue LocalTable::rowAt(int index){
@@ -38,75 +154,11 @@ QJSValue LocalTable::rowAt(int index){
     return result;
 }
 
-QJSValue LocalTable::columnInfo() const{
-    ViewEngine* ve = ViewEngine::grab(this);
-    if (!ve)
-        return QJSValue();
 
-    QJSValue result = ve->engine()->newArray(m_headers.length());
-    for ( int i = 0; i < m_headers.length(); ++i ){
-        result.setProperty(i, m_headers[i]);
-    }
-    return result;
-}
-
-void LocalTable::clear(){
-    beginLoadData();
-    m_data.clear();
-    m_headers.clear();
-    endLoadData();
-}
-
-QString LocalTable::valueAt(int row, int column){
-    auto& rowData = m_data[row];
-    return rowData[column];
-}
-
-void LocalTable::setValueAt(int row, int column, const QString &value){
-    m_data[row][column] = value;
-}
-
-void LocalTable::addRow(){
-    size_t s = m_headers.size();
-    QList<QString> row;
-    for ( size_t i = 0; i < s; ++i ){
-        row.append("");
-    }
-    m_data.append(row);
-}
-
-void LocalTable::addColumn(){
-    m_headers.append("");
-    for ( auto it = m_data.begin(); it != m_data.end(); ++it ){
-        (*it).append("");
-    }
-}
-
-void LocalTable::removeColumn(int idx){
-
-}
-
-void LocalTable::removeRow(int idx){
-    m_data.erase(m_data.begin() + idx);
-}
-
-int LocalTable::totalColumns() const{
-    return m_headers.size();
-}
-
-QList<QString> LocalTable::columnNames() const{
-    return m_headers;
-}
-
-void LocalTable::assignColumnInfo(int index, const QString &info){
-    m_headers[index] = info;
-}
 
 void LocalTable::readFromFile(const QString &path, const QJSValue &options){
-    beginLoadData();
-
     m_data.clear();
-    m_headers.clear();
+    setSchema(new TableSchema);
 
     csv::CSVFormat format;
     format.no_header();
@@ -120,9 +172,9 @@ void LocalTable::readFromFile(const QString &path, const QJSValue &options){
             for (csv::CSVField& field: row) {
                 if ( useHeader ){
                     QString headerName = QString::fromStdString(field.get<std::string>());
-                    m_headers.append(headerName);
+                    schema()->insertField(-1, TableField::create(headerName));
                 } else {
-                    m_headers.append("");
+                    schema()->insertField(-1, TableField::create(""));
                     dataRow.append(QString::fromStdString(field.get<std::string>()));
                 }
             }
@@ -136,11 +188,12 @@ void LocalTable::readFromFile(const QString &path, const QJSValue &options){
             m_data.append(dataRow);
         }
     }
-
-    endLoadData();
 }
 
 void LocalTable::writeToFile(const QString &path, const QJSValue& options){
+    if ( schema() )
+        return;
+
     QFile file(path);
     if ( !file.open(QFile::WriteOnly) ){
         ViewEngine* engine = ViewEngine::grab(this);
@@ -152,10 +205,10 @@ void LocalTable::writeToFile(const QString &path, const QJSValue& options){
     QTextStream stream(&file);
 
     bool useHeader = options.hasOwnProperty("header") && options.property("header").toBool();
-    if ( useHeader && m_headers.length() ){
-        stream << "\"" << m_headers[0] << "\"";
-        for ( int i = 1; i < m_headers.length(); ++i ){
-            stream << ",\"" << m_headers[i] << "\"";
+    if ( useHeader && schema()->totalFields() ){
+        stream << "\"" << schema()->fieldAt(0)->name() << "\"";
+        for ( int i = 1; i < schema()->totalFields(); ++i ){
+            stream << ",\"" << schema()->fieldAt(i)->name() << "\"";
         }
         stream << "\n";
     }

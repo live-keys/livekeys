@@ -1,8 +1,11 @@
 #include "tablemodel.h"
-#include <QDebug>
 #include "tablemodelheader.h"
 #include "tablemodelrowsinfo.h"
 #include "localtable.h"
+#include "tableschema.h"
+#include "live/viewengine.h"
+#include "live/exception.h"
+#include "live/visuallogqt.h"
 
 namespace lv {
 
@@ -11,19 +14,14 @@ TableModel::TableModel(Table *parent)
     , m_isComponentComplete(false)
     , m_headerModel(new TableModelHeader(this))
     , m_rowModel(new TableModelRowsInfo(this))
-    , m_dataSource(nullptr)
+    , m_table(nullptr)
 {
     m_roles[Value]      = "value";
     m_roles[IsSelected] = "isSelected";
 
+    m_table = parent;
 
-    __dataSourceAboutToLoad();
-    m_dataSource = parent;
-    if ( m_dataSource ){
-        connect(m_dataSource, &Table::dataAboutToLoad, this, &TableModel::__dataSourceAboutToLoad);
-        connect(m_dataSource, &Table::dataLoaded, this, &TableModel::__dataSourceFinished);
-    }
-    __dataSourceFinished();
+    m_headerModel->notifyModelReset();
 }
 
 TableModel::~TableModel(){
@@ -32,26 +30,24 @@ TableModel::~TableModel(){
 }
 
 int TableModel::rowCount(const QModelIndex &) const{
-    return m_dataSource->totalRows();
+    return m_table->totalRows();
 }
 
 int TableModel::columnCount(const QModelIndex &) const{
     return m_headerModel->size();
 }
 
-Qt::ItemFlags TableModel::flags(const QModelIndex &) const
-{
+Qt::ItemFlags TableModel::flags(const QModelIndex &) const{
     return Qt::ItemIsEnabled | Qt::ItemIsEditable;
 }
 
-
 QVariant TableModel::data(const QModelIndex &index, int role) const{
-    if ( index.row() >= m_dataSource->totalRows() || index.column() >= columnCount() ){
+    if ( index.row() >= m_table->totalRows() || index.column() >= columnCount() ){
         return QVariant();
     }
 
     if ( role == TableModel::Value ){
-        return m_dataSource->valueAt(index.row(), index.column());
+        return m_table->valueAt(index.row(), index.column());
     } else if ( role == TableModel::IsSelected){
         return m_rowModel->isSelected(index.column(), index.row());
     }
@@ -60,86 +56,64 @@ QVariant TableModel::data(const QModelIndex &index, int role) const{
 
 bool TableModel::setData(const QModelIndex &index, const QVariant &value, int)
 {
-    if ( index.row() < m_dataSource->totalRows() && index.column() < columnCount() ){
+//    if ( index.row() < m_table->totalRows() && index.column() < columnCount() ){
 
-        m_dataSource->setValueAt(index.row(), index.column(), value.toString());
+//        m_table->setValueAt(index.row(), index.column(), value.toString());
 
-        emit dataChanged(index, index);
+//        emit dataChanged(index, index);
 
-        return true;
-    }
+//        return true;
+//    }
     return false;
 }
 
-void TableModel::componentComplete()
-{
+void TableModel::componentComplete(){
     m_isComponentComplete = true;
     emit complete();
 }
 
-TableModelHeader *TableModel::header() const
-{
+TableModelHeader *TableModel::header() const{
     return m_headerModel;
 }
 
-TableModelRowsInfo *TableModel::rowInfo() const
-{
+TableModelRowsInfo *TableModel::rowInfo() const{
     return m_rowModel;
 }
 
-void TableModel::insertRow(QJSValue){
-    //TODO
+void TableModel::notifyTableRefresh(){
+    beginResetModel();
 }
 
-void TableModel::updateRow(int /*index*/, QJSValue /*values*/){
-    //TODO
+void TableModel::notifyTableRefreshEnd(){
+    m_headerModel->notifyModelReset();
+    m_rowModel->notifyModelReset(m_table->totalRows());
+    endResetModel();
 }
 
-void TableModel::addRows(int number)
-{
-    int rowIndex = rowCount();
-
-    beginInsertRows(QModelIndex(), rowIndex, rowIndex + number - 1);
-
-    for ( int newRows = 0; newRows < number; ++newRows ){
-        m_dataSource->addRow();
-        m_rowModel->notifyRowAdded();
-    }
-
-    endInsertRows();
+void TableModel::insertRow(const QJSValue &row){
+    m_table->insertRow(row, [this](int index){
+        beginInsertRows(QModelIndex(), index, index);
+        m_rowModel->notifyRowAdded(index);
+        endInsertRows();
+    });
 }
 
-void TableModel::addColumns(int number){
-    int colIndex = m_headerModel->size();
-    beginInsertColumns(QModelIndex(), colIndex, colIndex + number - 1);
+void TableModel::updateRow(int index, const QJSValue &row){
+    if ( !m_table->schema() )
+        return;
 
-    for ( int newCols = 0; newCols < number; ++newCols ){
-        m_dataSource->addColumn();
-        m_headerModel->addColumn();
-        m_rowModel->notifyColumnAdded();
-    }
-
-    endInsertColumns();
+    m_table->updateRow(index, row);
+    emit dataChanged(createIndex(index, 0), createIndex(index, m_table->schema()->totalFields()));
 }
 
-void TableModel::assignColumnInfo(int index, QJSValue name){
-    m_headerModel->assignColumnName(index, name.toString());
-    m_dataSource->assignColumnInfo(index, name.toString());
-}
-
-void TableModel::removeColumn(int idx)
+void TableModel::removeField(int idx)
 {
     if (idx >= columnCount())
         return;
 
     beginRemoveColumns(QModelIndex(),idx, idx);
-    m_dataSource->removeColumn(idx);
-//    for (int i = 0; i < m_data.size(); ++i){
-//        if (idx >= m_data[i].size())
-//            continue;
-//        m_data[i].erase(m_data[i].begin() + idx);
-//    }
-    m_headerModel->removeColumn(idx);
+    m_table->removeField(idx);
+    m_headerModel->notifyColumnRemoved(idx);
     m_rowModel->removeColumn(idx);
 
     endRemoveColumns();
@@ -151,25 +125,61 @@ void TableModel::removeRow(int index)
         return;
 
     beginRemoveRows(QModelIndex(), index, index);
-    m_dataSource->removeRow(index);
+    m_table->removeRow(index);
     m_rowModel->removeRow(index);
 
     endRemoveRows();
 }
 
 int TableModel::totalRows() const{
-    return m_dataSource->totalRows();
+    return m_table->totalRows();
 }
 
-QJSValue TableModel::rowAt(int /*index*/){
-    //TODO
-//    return m_dataSource->rowAt(index);
-    return QJSValue();
+QJSValue TableModel::rowAt(int index){
+    return m_table->rowAt(index);
 }
 
-void TableModel::assignCell(int row, int col, QString value)
-{
-    setData(QAbstractItemModel::createIndex(row, col), value);
+int TableModel::totalFields() const{
+    if ( !m_table->schema() )
+        return 0;
+
+    return m_table->schema()->totalFields();
+}
+
+void TableModel::insertField(int index, const QJSValue &field){
+    if ( !m_table->schema() )
+        return;
+
+    if ( index == -1 || index >= columnCount() )
+        index = m_table->schema()->totalFields();
+
+    beginInsertColumns(QModelIndex(), index, index);
+
+    QString fieldName = field.hasOwnProperty("name") ? field.property("name").toString() : "";
+    if ( fieldName.isEmpty() ){
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( !ve )
+            ve = ViewEngine::grab(m_table);
+        if ( !ve ){
+            qWarning("TableModel: Failed to grab view engine. Errors will not report.");
+            return;
+        }
+        Exception e = CREATE_EXCEPTION(lv::Exception, "TableModel: Field name is required when inserting field.", Exception::toCode("~Missing"));
+        ve->throwError(&e, this);
+        return;
+    }
+
+    TableField::Ptr tf = TableField::create(fieldName);
+    m_table->insertField(index, tf);
+    m_headerModel->notifyColumnAdded(index);
+    m_rowModel->notifyColumnAdded(index);
+    endInsertColumns();
+
+}
+
+void TableModel::updateField(int index, const QJSValue &info){
+    //TODO: header->notifyColumnUpdated(...)
+    //TODO: table->updateField(...)
 }
 
 bool TableModel::select(QJSValue column, QJSValue row){
@@ -200,25 +210,6 @@ void TableModel::clearTable()
 //            m_data[i][j] = "";
 //    emit dataChanged(QAbstractItemModel::createIndex(0, 0),
 //                     QAbstractItemModel::createIndex(m_data.size()-1, m_data[m_data.size()-1].size()-1));
-}
-
-void TableModel::__dataSourceAboutToLoad(){
-    beginResetModel();
-}
-
-void TableModel::__dataSourceFinished(){
-    m_rowModel->notifyModelReset(m_dataSource->totalRows());
-    m_headerModel->notifyModelReset();
-
-    auto names = m_dataSource->columnNames();
-
-    for ( int i = 0; i < names.size(); ++i ){
-        m_headerModel->addColumn(names[i]);
-    }
-    endResetModel();
-}
-
-void TableModel::assignDataSource(Table *ds){
 }
 
 } // namespace

@@ -1,10 +1,12 @@
 #include "table.h"
 #include "tablemodel.h"
+#include "tableschema.h"
 
 namespace lv{
 
 Table::Table(QObject *parent)
-    : QObject(parent)
+    : Shared(parent)
+    , m_schema(nullptr)
     , m_model(nullptr)
 {
 }
@@ -13,12 +15,8 @@ Table::~Table(){
     delete m_model;
 }
 
-void Table::beginLoadData(){
-    emit dataAboutToLoad();
-}
-
-void Table::endLoadData(){
-    emit dataLoaded();
+bool Table::isModelSet() const{
+    return m_model ? true : false;
 }
 
 TableModel *Table::model(){
@@ -28,9 +26,14 @@ TableModel *Table::model(){
     return m_model;
 }
 
-void Table::reload(){
-    beginLoadData();
-    endLoadData();
+TableSchema *Table::schema(){
+    return m_schema;
+}
+
+void Table::setSchema(TableSchema *schema){
+    if ( m_schema )
+        delete m_schema;
+    m_schema = schema;
 }
 
 }// namespace

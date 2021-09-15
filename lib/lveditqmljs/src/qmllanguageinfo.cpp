@@ -355,7 +355,7 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
 /**
  * \brief Returns the default value to be assigned for a given qml type
  */
-QString QmlTypeInfo::typeDefaultValue(const QString &typePath){
+QString QmlTypeInfo::typeDefaultValueAsText(const QString &typePath){
     QString typeString = typePath.startsWith("qml/") ? typePath.mid(4) : typePath;
     if ( typeString == "bool" )
         return "false";
