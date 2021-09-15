@@ -204,10 +204,8 @@ void QImageFile::loadImage(){
             *newOutput->internalPtr() = temp;
 
             setOutput(newOutput);
-
             setImplicitWidth(output()->internalPtr()->size().width);
             setImplicitHeight(output()->internalPtr()->size().height);
-            emit outputChanged();
             update();
         }
     }
