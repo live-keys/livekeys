@@ -7,7 +7,7 @@ Act{
     property string newValue: ''
 
     run: function(text, value, newValue){
-        return text.replaceAll(value, newValue)
+        return text.replace(new RegExp(value, 'g'), newValue)
     }
     args: ["$text", "$value", "$newValue"]
 }
