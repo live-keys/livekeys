@@ -28,6 +28,7 @@ void QmlStreamValue::classBegin(){
 }
 
 void QmlStreamValue::componentComplete(){
+    m_isComponentComplete = true;
     if ( m_stream )
         return;
 

@@ -3,10 +3,11 @@
 
 #include <QObject>
 #include <QJSValue>
+#include "live/collectorresetter.h"
 
 namespace lv{
 
-class QmlSplit : public QObject{
+class QmlSplit : public QObject, public CollectorResetter{
 
     Q_OBJECT
     Q_PROPERTY(QJSValue value     READ value     WRITE setValue     NOTIFY valueChanged)
@@ -20,6 +21,8 @@ public:
 
     QObject* collector() const;
     void setCollector(QObject* collector);
+
+    void assignColector(QmlCollector *collector) override;
 
 signals:
     void valueChanged();

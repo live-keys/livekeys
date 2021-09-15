@@ -80,7 +80,7 @@ void QmlStreamOperator::setInput(QmlStream *stream){
 
     if ( m_input ){
         m_input->unsubscribeObject(this);
-        delete m_output;
+        Shared::unref(m_output);
         m_output = nullptr;
     }
 
@@ -88,10 +88,11 @@ void QmlStreamOperator::setInput(QmlStream *stream){
     if ( m_input ){
         m_input->forward(this, &QmlStreamOperator::streamHandler);
         m_output = new QmlStream(this, this);
+        Shared::ref(m_output);
     }
 
     emit inputChanged();
-    emit outChanged();
+    emit outputChanged();
 }
 
 void QmlStreamOperator::setNext(QJSValue next){

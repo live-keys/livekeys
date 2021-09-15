@@ -42,6 +42,9 @@
 #include "qmlsplit.h"
 #include "qmlstreamoperator.h"
 #include "qmlvalueflow.h"
+#include "qmlvalueflowsink.h"
+#include "qmlvalueflowinput.h"
+#include "qmlstreamvalueflow.h"
 #include "qmleachvalueapply.h"
 
 #include <qqml.h>
@@ -95,6 +98,9 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlStreamAct>(       uri, 1, 0, "StreamAct");
     qmlRegisterType<lv::QmlStreamOperator>(  uri, 1, 0, "StreamOperator");
     qmlRegisterType<lv::QmlValueFlow>(       uri, 1, 0, "ValueFlow");
+    qmlRegisterType<lv::QmlValueFlowInput>(  uri, 1, 0, "ValueFlowInput");
+    qmlRegisterType<lv::QmlValueFlowSink>(   uri, 1, 0, "ValueFlowSink");
+    qmlRegisterType<lv::QmlStreamValueFlow>( uri, 1, 0, "StreamValueFlow");
     qmlRegisterType<lv::QmlEachValueApply>(  uri, 1, 0, "EachValueApply");
 
     qmlRegisterSingletonType<lv::QmlScript>(           uri, 1, 0, "Script", &scriptProvider);

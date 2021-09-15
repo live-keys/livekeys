@@ -1,13 +1,17 @@
 #include "qmlcollector.h"
 #include "live/qmlpropertywatcher.h"
 #include "live/shared.h"
+#include "live/collectorresetter.h"
+#include "live/visuallogqt.h"
 
 #include <QQmlProperty>
+#include <QtDebug>
 
 namespace lv{
 
 QmlCollector::QmlCollector(QObject *parent)
     : QObject(parent)
+    , m_engine(nullptr)
     , m_properties(new std::list<QmlPropertyWatcher*>)
     , m_propertiesToCollect(new std::list<QString>)
     , m_result(QJSValue::NullValue)
@@ -27,7 +31,27 @@ void QmlCollector::propertyChange(const QmlPropertyWatcher &watcher){
     collector->collectProperty(watcher.name(), watcher.read());
 }
 
+void QmlCollector::setResetter(QObject *resetter){
+    if (m_resetter == resetter)
+        return;
+
+    CollectorResetter* cr = dynamic_cast<CollectorResetter*>(resetter);
+    if ( cr ){
+        if ( m_resetter ){
+            CollectorResetter* oldcr = dynamic_cast<CollectorResetter*>(resetter);
+            oldcr->assignColector(nullptr);
+        }
+        cr->assignColector(this);
+        m_resetter = resetter;
+        emit resetterChanged();
+    }
+
+}
+
 void QmlCollector::release(){
+    if ( !m_engine )
+        return;
+
     m_result = m_collectingResult;
     m_collectingResult = m_engine->engine()->newObject();
 
@@ -35,6 +59,9 @@ void QmlCollector::release(){
 }
 
 void QmlCollector::reset(){
+    if ( !m_engine )
+        return;
+
     m_collectingResult = m_engine->engine()->newObject();
     m_propertiesToCollect->clear();
 
@@ -46,6 +73,10 @@ void QmlCollector::reset(){
 
 void QmlCollector::componentComplete(){
     m_engine = ViewEngine::grab(this);
+    if ( !m_engine ){
+        vlog("base").w() << "QmlValueFlowInput: Failed to capture engine. Object will not work.";
+        return;
+    }
 
     const QMetaObject* meta = metaObject();
 
@@ -53,7 +84,8 @@ void QmlCollector::componentComplete(){
         QMetaProperty property = meta->property(i);
         QByteArray name = property.name();
         if ( name != "objectName" &&
-             name != "result" )
+             name != "result" &&
+             name != "resetter" )
         {
             QQmlProperty qp(this, name);
             auto pw = new QmlPropertyWatcher(qp);

@@ -21,4 +21,8 @@ void lv::QmlSplit::setValue(QJSValue value){
     emit valueChanged();
 }
 
+void QmlSplit::assignColector(QmlCollector *collector){
+    setCollector(collector);
+}
+
 }// namespace

@@ -11,7 +11,7 @@ class QmlStreamOperator : public QObject, public QmlStreamProvider{
 
     Q_OBJECT
     Q_PROPERTY(lv::QmlStream* input  READ input  WRITE setInput NOTIFY inputChanged)
-    Q_PROPERTY(lv::QmlStream* output READ output NOTIFY outChanged)
+    Q_PROPERTY(lv::QmlStream* output READ output NOTIFY outputChanged)
     Q_PROPERTY(QJSValue next         READ next   WRITE setNext   NOTIFY nextChanged)
 
 public:
@@ -39,7 +39,7 @@ public slots:
 
 signals:
     void inputChanged();
-    void outChanged();
+    void outputChanged();
     void nextChanged();
 
 private:

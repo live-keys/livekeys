@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/base_plugin.h \
+    $$PWD/collectorresetter.h \
     $$PWD/environment.h \
     $$PWD/lvbaseqmlglobal.h \
     $$PWD/qmlarrange.h \
@@ -18,9 +19,12 @@ HEADERS += \
     $$PWD/qmlstreamsink.h \
     $$PWD/qmlstreamvalue.h \
     $$PWD/qmlstreamvalueawait.h \
+    $$PWD/qmlstreamvalueflow.h \
     $$PWD/qmlthreadinfo.h \
     $$PWD/qmltime.h \
     $$PWD/qmlvalueflow.h \
+    $$PWD/qmlvalueflowinput.h \
+    $$PWD/qmlvalueflowsink.h \
     $$PWD/qmlworkerpoolobject.h \
     $$PWD/qmlstreamlog.h \
     $$PWD/groupcollector.h \
@@ -50,9 +54,12 @@ SOURCES += \
     $$PWD/qmlstreamvalue.cpp \
     $$PWD/qmlstreamsink.cpp \
     $$PWD/qmlstreamvalueawait.cpp \
+    $$PWD/qmlstreamvalueflow.cpp \
     $$PWD/qmlthreadinfo.cpp \
     $$PWD/qmltime.cpp \
     $$PWD/qmlvalueflow.cpp \
+    $$PWD/qmlvalueflowinput.cpp \
+    $$PWD/qmlvalueflowsink.cpp \
     $$PWD/qmlworkerinterface.cpp \
     $$PWD/qmlworkerpoolobject.cpp \
     $$PWD/qmlstreamlog.cpp \

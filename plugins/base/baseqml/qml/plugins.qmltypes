@@ -157,6 +157,7 @@ Module {
         prototype: "QObject"
         exports: ["base/Collector 1.0"]
         exportMetaObjectRevisions: [0]
+        Property { name: "resetter"; type: "QObject"; isPointer: true }
         Property { name: "result"; type: "QJSValue"; isReadonly: true }
         Signal { name: "complete" }
         Method { name: "release" }
@@ -391,7 +392,6 @@ Module {
         Property { name: "input"; type: "lv::QmlStream"; isPointer: true }
         Property { name: "output"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
         Property { name: "next"; type: "QJSValue" }
-        Signal { name: "outChanged" }
         Method {
             name: "writeNext"
             Parameter { name: "val"; type: "QJSValue" }
@@ -431,6 +431,19 @@ Module {
         Method { name: "__streamRemoved" }
         Method { name: "__actResultReady" }
         Method { name: "__updateFollowsObject" }
+    }
+    Component {
+        name: "lv::QmlStreamValueFlow"
+        defaultProperty: "childObjects"
+        prototype: "QObject"
+        exports: ["base/StreamValueFlow 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "value"; type: "QJSValue"; isReadonly: true }
+        Property { name: "valueType"; type: "QString" }
+        Property { name: "result"; type: "QJSValue" }
+        Property { name: "input"; type: "lv::QmlStream"; isPointer: true }
+        Property { name: "output"; type: "lv::QmlStream"; isReadonly: true; isPointer: true }
+        Property { name: "childObjects"; type: "QObject"; isList: true; isReadonly: true }
     }
     Component {
         name: "lv::QmlThreadInfo"
@@ -480,6 +493,20 @@ Module {
         Property { name: "value"; type: "QJSValue" }
         Property { name: "result"; type: "QJSValue" }
         Property { name: "childObjects"; type: "QObject"; isList: true; isReadonly: true }
+    }
+    Component {
+        name: "lv::QmlValueFlowInput"
+        prototype: "QObject"
+        exports: ["base/ValueFlowInput 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "value"; type: "QJSValue"; isReadonly: true }
+    }
+    Component {
+        name: "lv::QmlValueFlowSink"
+        prototype: "QObject"
+        exports: ["base/ValueFlowSink 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "value"; type: "QJSValue" }
     }
     Component {
         name: "lv::QmlVariantList"
