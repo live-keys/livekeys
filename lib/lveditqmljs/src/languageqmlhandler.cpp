@@ -2946,6 +2946,8 @@ QJSValue LanguageQmlHandler::expand(QmlEditFragment *edit, const QJSValue &val){
             if ( !PaletteLoader::configuresLayout(paletteInfo) ){
                 CodePalette* palette = d->projectHandler->paletteContainer()->createPalette(paletteInfo);
                 m_engine->engine()->setObjectOwnership(palette, QQmlEngine::CppOwnership);
+                if ( !palette )
+                    return QJSValue();
 
                 palette->setEditFragment(edit);
 
