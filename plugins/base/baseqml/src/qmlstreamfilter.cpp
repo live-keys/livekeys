@@ -66,11 +66,16 @@ void QmlStreamFilter::setPull(QmlStream *pull){
     if (m_pull == pull)
         return;
 
-    if ( m_pull )
+    if ( m_pull ){
         m_pull->unsubscribeObject(this);
+        Shared::unref(m_pull);
+    }
 
     m_pull = pull;
-    m_pull->forward(this, &QmlStreamFilter::streamHandler);
+    if ( m_pull ){
+        m_pull->forward(this, &QmlStreamFilter::streamHandler);
+        Shared::ref(m_pull);
+    }
 
     emit pullChanged();
 }

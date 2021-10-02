@@ -16,6 +16,7 @@ QmlFileStream::QmlFileStream(QObject *parent)
 }
 
 QmlFileStream::~QmlFileStream(){
+    Shared::unref(m_stream);
 }
 
 void QmlFileStream::wait(){

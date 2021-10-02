@@ -16,6 +16,7 @@ class QmlStreamSink : public QObject, public QQmlParserStatus{
 
 public:
     explicit QmlStreamSink(QObject *parent = nullptr);
+    ~QmlStreamSink();
 
     const QJSValue& input() const;
 

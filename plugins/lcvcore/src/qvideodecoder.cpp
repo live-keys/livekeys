@@ -62,7 +62,7 @@ QVideoDecoder::QVideoDecoder(QObject *parent)
 
 QVideoDecoder::~QVideoDecoder(){
     delete m_worker;
-    delete m_stream;
+    lv::Shared::unref(m_stream);
     delete m_properties;
 }
 
@@ -143,11 +143,12 @@ lv::QmlStream* QVideoDecoder::run(const QString &file){
         }
 
         delete m_worker;
-        delete m_stream;
+        lv::Shared::unref(m_stream);
     }
 
     m_worker = new QVideoDecodeThread(file, m_properties, this);
     m_stream = new lv::QmlStream(this);
+    lv::Shared::ref(m_stream);
     connect(m_worker, &QVideoDecodeThread::matReady, this, &QVideoDecoder::__matReady);
 
     if ( m_worker->isCaptureOpened() ){

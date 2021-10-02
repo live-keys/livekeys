@@ -14,8 +14,10 @@ QmlStreamValue::QmlStreamValue(QObject *parent)
 }
 
 QmlStreamValue::~QmlStreamValue(){
-    if ( m_stream )
+    if ( m_stream ){
         m_stream->unsubscribeObject(this);
+        Shared::unref(m_stream);
+    }
 }
 
 void QmlStreamValue::streamHandler(QObject *that, const QJSValue &val){
@@ -59,19 +61,19 @@ void QmlStreamValue::setValueType(const QString &valueType){
     emit valueTypeChanged();
 }
 
-void QmlStreamValue::__streamRemoved(){
-    m_stream = nullptr;
-}
-
 void QmlStreamValue::updateFollowsObject(){
     QmlStreamFilter* filter = qobject_cast<QmlStreamFilter*>(m_follow);
     if ( filter ){
-        if( m_stream )
+        if( m_stream ){
             m_stream->unsubscribeObject(this);
+            Shared::unref(m_stream);
+            m_stream = nullptr;
+        }
 
         if ( filter->pull() ){
             m_stream = filter->pull();
             m_stream->forward(this, &QmlStreamValue::streamHandler);
+            Shared::ref(m_stream);
             emit streamChanged();
         }
     }
@@ -95,12 +97,14 @@ void QmlStreamValue::setStream(QmlStream *stream){
 
     if( m_stream ){
         m_stream->unsubscribeObject(this);
-        disconnect(m_stream, &QObject::destroyed, this, &QmlStreamValue::__streamRemoved);
+        Shared::unref(m_stream);
     }
 
     m_stream = stream;
-    m_stream->forward(this, &QmlStreamValue::streamHandler);
-    connect(m_stream, &QObject::destroyed, this, &QmlStreamValue::__streamRemoved);
+    if ( m_stream ){
+        m_stream->forward(this, &QmlStreamValue::streamHandler);
+        Shared::ref(m_stream);
+    }
 
     emit streamChanged();
 }

@@ -14,8 +14,7 @@ QmlDirectoryRead::QmlDirectoryRead(QObject *parent)
 }
 
 QmlDirectoryRead::~QmlDirectoryRead(){
-    if ( m_stream )
-        Shared::unref(m_stream);
+    Shared::unref(m_stream);
     delete m_dit;
 }
 

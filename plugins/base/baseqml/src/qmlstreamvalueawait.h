@@ -37,7 +37,6 @@ public:
     void setAct(lv::QmlAct* act);
 
 public slots:
-    void __streamRemoved();
     void __actResultReady();
     void __updateFollowsObject();
 

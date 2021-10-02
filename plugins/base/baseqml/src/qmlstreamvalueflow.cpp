@@ -17,6 +17,8 @@ QmlStreamValueFlow::QmlStreamValueFlow(QObject *parent)
 }
 
 QmlStreamValueFlow::~QmlStreamValueFlow(){
+    Shared::unref(m_input);
+    Shared::unref(m_output);
 }
 
 void QmlStreamValueFlow::setValueType(const QString &valueType){
@@ -101,6 +103,8 @@ void QmlStreamValueFlow::setInput(QmlStream *stream){
 
     if ( m_input ){
         m_input->unsubscribeObject(this);
+        Shared::unref(m_input);
+
         Shared::unref(m_output);
         m_output = nullptr;
     }
@@ -108,6 +112,8 @@ void QmlStreamValueFlow::setInput(QmlStream *stream){
     m_input = stream;
     if ( m_input ){
         m_input->forward(this, &QmlStreamValueFlow::streamHandler);
+        Shared::ref(m_input);
+
         m_output = new QmlStream(this, this);
         Shared::ref(m_output);
     }

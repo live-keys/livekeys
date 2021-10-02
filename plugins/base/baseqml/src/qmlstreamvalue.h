@@ -31,9 +31,6 @@ public:
     const QString& valueType() const;
     void setValueType(const QString& valueType);
 
-public slots:
-    void __streamRemoved();
-
 signals:
     void streamChanged();
     void valueChanged();

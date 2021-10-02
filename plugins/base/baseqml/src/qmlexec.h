@@ -6,11 +6,12 @@
 #include <QProcess>
 
 #include "live/qmlstream.h"
+#include "live/qmlstreamprovider.h"
 
 namespace lv{
 
 class QmlWritableStream;
-class QmlExec : public QObject, public QQmlParserStatus{
+class QmlExec : public QObject, public QQmlParserStatus, public QmlStreamProvider{
 
     Q_OBJECT
     Q_ENUMS(ChannelMode)
@@ -48,6 +49,10 @@ public:
     lv::QmlStream* input() const;
 
     static void onInStream(QObject* that, const QJSValue& val);
+
+    // QmlStreamProvider interface
+    void wait() override;
+    void resume() override;
 
 protected:
     void classBegin() override{}

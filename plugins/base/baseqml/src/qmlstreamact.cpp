@@ -12,7 +12,7 @@ QmlStreamAct::QmlStreamAct(QObject *parent)
 }
 
 QmlStreamAct::~QmlStreamAct(){
-    delete m_output;
+    Shared::unref(m_output);
 }
 
 void QmlStreamAct::onStreamValue(const QJSValue &val){
@@ -37,14 +37,17 @@ void QmlStreamAct::setInput(QmlStream *stream){
 
     if ( m_input ){
         m_input->unsubscribeObject(this);
-        delete m_output;
+        Shared::unref(m_output);
         m_output = nullptr;
     }
 
     m_input = stream;
     if ( m_input ){
         m_input->forward(this, &QmlStreamAct::streamHandler);
+        Shared::ref(m_input);
+
         m_output = new QmlStream(this, this);
+        Shared::ref(m_output);
     }
 
     emit inputChanged();

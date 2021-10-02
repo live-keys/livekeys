@@ -15,15 +15,19 @@ QmlExec::QmlExec(QObject *parent)
     : QObject(parent)
     , m_process(new QProcess)
     , m_mode(QmlExec::ReadWrite)
-    , m_out(new QmlStream(this))
+    , m_out(new QmlStream(this, this))
     , m_in(nullptr)
 {
+    Shared::ref(m_out);
     connect(m_process, SIGNAL(finished(int, QProcess::ExitStatus)), this, SLOT(__processFinished(int, QProcess::ExitStatus)));
 }
 
 QmlExec::~QmlExec(){
-    if ( m_in )
+    if ( m_in ){
         m_in->unsubscribeObject(this);
+        Shared::unref(m_in);
+    }
+    Shared::unref(m_out);
 }
 
 void QmlExec::componentComplete(){
@@ -56,18 +60,28 @@ void QmlExec::onInStream(QObject *that, const QJSValue &val){
     ethat->m_process->write(val.toVariant().toByteArray());
 }
 
+void QmlExec::wait(){
+}
+
+void QmlExec::resume(){
+}
+
 void QmlExec::setInput(QmlStream *in){
     if (m_in == in)
         return;
 
-    if ( m_in )
+    if ( m_in ){
         m_in->unsubscribeObject(this);
+        Shared::unref(m_in);
+    }
 
     m_in = in;
     emit inChanged();
 
-    if ( m_in )
+    if ( m_in ){
         m_in->forward(this, &QmlExec::onInStream);
+        Shared::ref(m_in);
+    }
 }
 
 void QmlExec::run(){
