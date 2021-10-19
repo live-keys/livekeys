@@ -845,6 +845,10 @@ int QmlEditFragment::refCount()
     return m_refCount;
 }
 
+QJSValue QmlEditFragment::compileFunctionInContext(const QString &functionSource){
+    return m_language->compileFunctionInContext(functionSource);
+}
+
 void QmlEditFragment::signalChildAdded(QmlEditFragment *ef, const QJSValue &context){
     emit childAdded(ef, context);
 }

@@ -67,11 +67,11 @@ public:
     void setType(QString type);
 
     const QJSValue& writer() const;
+    void setWriter(QJSValue writer);
 
 public slots:
     bool isBindingChange() const;
-
-    void setWriter(QJSValue writer);
+    void assignFunction(const QJSValue& fn);
 
 signals:
     /** Item changed */

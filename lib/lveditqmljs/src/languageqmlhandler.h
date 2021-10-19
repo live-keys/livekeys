@@ -123,6 +123,8 @@ public:
 
     QmlInheritanceInfo inheritanceInfo(const QmlTypeReference &name, int position = -1);
 
+    QJSValue compileFunctionInContext(const QString& functionSource);
+
 signals:
     void importsFragmentChanged();
     void rootFragmentChanged();

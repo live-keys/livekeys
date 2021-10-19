@@ -187,6 +187,8 @@ public slots:
     void decrementRefCount();
     int refCount();
 
+    QJSValue compileFunctionInContext(const QString& functionSource);
+
     void suggestionsForExpression(const QString& expression, lv::CodeCompletionModel* model, bool suggestFunctions);
     void signalChildAdded(lv::QmlEditFragment* ef, const QJSValue& context = QJSValue());
 

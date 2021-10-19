@@ -102,4 +102,13 @@ QString CodePalette::name() const{
     return QFileInfo(m_path).baseName();
 }
 
+void CodePalette::assignFunction(const QJSValue &fn){
+    if ( fn.isCallable() ){
+        m_isChangingValue = true;
+        m_value = QVariant::fromValue(fn);
+        emit valueChanged();
+        m_isChangingValue = false;
+    }
+}
+
 }// namespace

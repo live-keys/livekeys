@@ -2465,6 +2465,10 @@ QList<QObject *> LanguageQmlHandler::openNestedFragments(QmlEditFragment *edit, 
                 if (rp->name().size() == 1 && rp->name()[0] == "id"){
                     continue;
                 }
+                // skip attached properties (i.e. Component.onCompleted )
+                if (rp->name().size() > 1 && rp->name()[0].length() && rp->name()[0][0].isUpper() ){
+                    continue;
+                }
 
                 QmlEditFragment* parentEdit = edit;
 
@@ -3560,6 +3564,23 @@ QmlInheritanceInfo LanguageQmlHandler::inheritanceInfo(const QmlTypeReference &t
     typePath.join(scope.getTypePath(typeName));
 
     return typePath;
+}
+
+QJSValue LanguageQmlHandler::compileFunctionInContext(const QString &functionSource){
+    Q_D(LanguageQmlHandler);
+    QmlScopeSnap scope = d->snapScope();
+
+    QByteArray imports = DocumentQmlInfo::Import::join(scope.document->imports()).toUtf8();
+    QString moduleFile = "FunctionIn" + m_document->file()->name();
+
+    ViewEngine::ComponentResult::Ptr cr = m_engine->compileJsModule(imports, functionSource.toUtf8(), moduleFile);
+    if ( cr->hasError() ){
+        QmlError::join(cr->errors).jsThrow();
+        return QJSValue();
+    }
+
+    QJSValue compiledFn = cr->object->property("exports").value<QJSValue>();
+    return compiledFn;
 }
 
 QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QJSValue &typeOrFragment){
