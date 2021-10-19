@@ -56,6 +56,8 @@ public:
 
     void jsThrow();
 
+    static void warnNoEngineCaptured(QObject* object, QString prefix = "");
+
     static QString toString(const QList<QmlError>& errors, int options = QmlError::PrintMessage | QmlError::PrintLocation);
     static QmlError join(const QList<QmlError>& errors);
 

@@ -251,4 +251,11 @@ void QmlError::jsThrow(){
     }
 }
 
+void QmlError::warnNoEngineCaptured(QObject *object, QString prefix){
+    if ( prefix.isEmpty() && object ){
+        prefix = object->metaObject()->className();
+    }
+    vlog().w() << (prefix.isEmpty() ? "" : prefix + ": ") << "Failed to capture the engine from object \'" << object << "\'.";
+}
+
 }// namespace
