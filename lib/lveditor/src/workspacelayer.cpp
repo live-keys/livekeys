@@ -47,6 +47,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
     , m_project(nullptr)
+    , m_mainWindow(nullptr)
     , m_extensions(nullptr)
     , m_documentation(nullptr)
     , m_tutorials(new StartupModel())
@@ -91,11 +92,12 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     }
 
     WindowLayer* windowLayer = qobject_cast<WindowLayer*>(windowLayerOb);
-    QQuickWindow* window = windowLayer->window();
+    m_mainWindow = windowLayer->window();
 
     m_workspace = new Workspace(m_project, this);
 
-    connect(window, SIGNAL(closing(QQuickCloseEvent*)), this, SLOT(whenMainWindowClose()));
+    connect(m_mainWindow, SIGNAL(closing(QQuickCloseEvent*)), this, SLOT(__mainWindowClosing()));
+    connect(m_mainWindow, &QWindow::activeChanged, this, &WorkspaceLayer::__mainWindowActiveChanged);
 
     setHasView(true);
 }
@@ -332,10 +334,15 @@ void WorkspaceLayer::addWindow(QQuickWindow *window){
     }
 }
 
-void WorkspaceLayer::whenMainWindowClose(){
+void WorkspaceLayer::__mainWindowClosing(){
     delete m_workspace;
     m_workspace = nullptr;
     whenProjectClose();
+}
+
+void WorkspaceLayer::__mainWindowActiveChanged(){
+    if ( m_mainWindow->isActive() ){
+    }
 }
 
 void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspace){

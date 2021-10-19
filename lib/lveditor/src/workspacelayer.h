@@ -69,24 +69,25 @@ public:
 public slots:
     QJSValue interceptMenu(QJSValue pane, QJSValue item);
     QJSValue interceptFile(const QString& path, int mode);
-    void addPane(QQuickItem* pane, QQuickWindow* window, const QVariantList& position);
-    void removePane(QQuickItem* pane);
-
-    void addWindow(QQuickWindow* window);
-    void whenMainWindowClose();
-
-    void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
-    void whenProjectClose();
 
     QString docsPath() const;
-
-    bool wasRecentsFileFound() const;
     QString pluginsPath() const;
 
     void triggerTooltip(QObject* tooltip);
     void cancelTooltip(QObject* tooltip);
 
+    bool wasRecentsFileFound() const;
     void saveRecentsToFile();
+
+    void addPane(QQuickItem* pane, QQuickWindow* window, const QVariantList& position);
+    void removePane(QQuickItem* pane);
+    void addWindow(QQuickWindow* window);
+
+    void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
+    void whenProjectClose();
+
+    void __mainWindowClosing();
+    void __mainWindowActiveChanged();
 
     void __tooltipDestroyed();
     void __tooltipTimeout();
@@ -120,6 +121,7 @@ private:
 
     Project*       m_project;
     ViewEngine*    m_engine;
+    QQuickWindow*  m_mainWindow;
 
     Extensions*    m_extensions;
     Workspace*     m_workspace;

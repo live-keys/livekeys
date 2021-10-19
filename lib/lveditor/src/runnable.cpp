@@ -249,25 +249,25 @@ void Runnable::run(){
     }
 }
 
-void Runnable::_activationContentsChanged(int, int, int){
+void Runnable::__activationContentsChanged(int, int, int){
     m_scheduleTimer->start();
 }
 
-void Runnable::_documentOpened(Document *document){
+void Runnable::__documentOpened(Document *document){
     ProjectDocument* pd = ProjectDocument::castFrom(document);
     if ( !pd )
         return;
 
     if ( m_activations.contains(document->file()->path()) ){
         if ( m_runTrigger == Project::RunOnChange ){
-            connect(pd->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+            connect(pd->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
         } else {
-            connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+            connect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
         }
     }
 }
 
-void Runnable::_documentSaved(){
+void Runnable::__documentSaved(){
     m_scheduleTimer->start();
 }
 
@@ -281,12 +281,12 @@ void Runnable::setRunTrigger(int runTrigger){
             m_project->removeExcludedRunTriggers(m_activations);
             m_scheduleTimer->deleteLater();
             m_scheduleTimer = nullptr;
-            disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            disconnect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
                 ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
-                    disconnect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+                    disconnect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
                 }
             }
 
@@ -294,12 +294,12 @@ void Runnable::setRunTrigger(int runTrigger){
             m_project->removeExcludedRunTriggers(m_activations);
             m_scheduleTimer->deleteLater();
             m_scheduleTimer = nullptr;
-            disconnect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            disconnect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
                 ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
-                    disconnect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+                    disconnect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
                 }
             }
 
@@ -311,13 +311,13 @@ void Runnable::setRunTrigger(int runTrigger){
             m_scheduleTimer->setInterval(1000);
             m_scheduleTimer->setSingleShot(true);
             connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
-            connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            connect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
 
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
                 ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
-                    connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::_activationContentsChanged);
+                    connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
                 }
             }
 
@@ -326,12 +326,12 @@ void Runnable::setRunTrigger(int runTrigger){
             m_scheduleTimer = new QTimer(this);
             m_scheduleTimer->setInterval(1000);
             m_scheduleTimer->setSingleShot(true);
-            connect(m_project, &Project::documentOpened, this, &Runnable::_documentOpened);
+            connect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
             for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
                 const QString& activation = *it;
                 ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
                 if ( document ){
-                    connect(document, &ProjectDocument::saved, this, &Runnable::_documentSaved);
+                    connect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
                 }
             }
         }

@@ -290,7 +290,7 @@ Rectangle{
         frameVisible: false
 
         function ensureVisible(r){
-            if (!editor.internalActiveFocus )
+            if (!root.internalActiveFocus )
                 return;
             if (flickableItem.contentX >= r.x)
                 flickableItem.contentX = r.x;
@@ -501,7 +501,8 @@ Rectangle{
                 qmlSuggestionBox.parent.updatePlacement(
                     rect,
                     Qt.point(paneCoords.x - 7, paneCoords.y - 43),
-                        lk.layers.editor.environment.placement.bottom)
+                    lk.layers.editor.environment.placement.bottom
+                )
 
             } else {
                 qmlSuggestionBox = paletteFunctions.createSuggestionBox(null, textEdit.font)
