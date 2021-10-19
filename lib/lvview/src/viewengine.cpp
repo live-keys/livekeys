@@ -126,12 +126,6 @@ ViewEngine::~ViewEngine(){
     delete m_memory;
 }
 
-/** Locks the engine for use until the passed function finishes */
-void ViewEngine::useEngine(std::function<void(QQmlEngine *)> call){
-    QMutexLocker engineMutexLock(m_engineMutex);
-    call(m_engine);
-}
-
 /** Displays the errors the engine had previously */
 const QList<QQmlError> &ViewEngine::lastErrors() const{
     return m_lastErrors;
@@ -290,6 +284,39 @@ void ViewEngine::registerBaseTypes(const char *uri){
 void ViewEngine::initializeBaseTypes(ViewEngine *engine){
     MetaInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
     ti->addSerialization(&lv::Group::serialize, &lv::Group::deserialize);
+}
+
+QJSValue ViewEngine::typeDefaultValue(const QString &ti, lv::ViewEngine *engine){
+    if ( ti.contains('#') )
+        return QJSValue(QJSValue::NullValue);
+    else if ( ti == "qml/object" )
+        return QJSValue(QJSValue::NullValue);
+    else if ( ti == "qml/bool" )
+        return false;
+    else if ( ti == "qml/double" || ti == "qml/int" || ti == "qml/enumeration" || ti == "qml/real" )
+        return 0;
+    else if ( ti == "qml/string" || ti == "qml/url")
+        return QJSValue("");
+    else if ( ti == "qml/var" )
+        return QJSValue(QJSValue::UndefinedValue);
+
+    if (!engine)
+        return QJSValue(QJSValue::NullValue);
+
+    if ( ti == "qml/color" ){
+        QJSValue createColor = engine->engine()->globalObject().property("Qt").property("rgba");
+        return createColor.call(QJSValueList() << 0 << 0 << 0 << 0);
+    } else if ( ti == "qml/point" ){
+        QJSValue createPoint = engine->engine()->globalObject().property("Qt").property("point");
+        return createPoint.call(QJSValueList() << 0 << 0);
+    } else if ( ti == "qml/size" ){
+        QJSValue createSize = engine->engine()->globalObject().property("Qt").property("size");
+        return createSize.call(QJSValueList() << 0 << 0);
+    } else if ( ti == "qml/rect" ){
+        QJSValue createRect = engine->engine()->globalObject().property("Qt").property("rect");
+        return createRect.call(QJSValueList() << 0 << 0 << 0 << 0);
+    }
+    return QJSValue(QJSValue::UndefinedValue);;
 }
 
 QString ViewEngine::toErrorString(const QQmlError &error){

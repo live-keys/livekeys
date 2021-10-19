@@ -26,20 +26,11 @@ void QmlStreamValueFlow::setValueType(const QString &valueType){
         return;
 
     if ( m_isComponentComplete ){
-        ViewEngine* ve = ViewEngine::grab(this);
-        if ( !ve ){
-            vlog("base").w() << "QmlStreamValueFlow: Failed to capture engine. Errors will not report.";
-            return;
-        }
-
         THROW_QMLERROR(Exception, "QmlStreamValueFlow: Cannot set valueType after component is complete.", Exception::toCode("~Assignment"), this);
         return;
     }
 
-
-    if ( valueType == "qml/object" ){
-        m_value = QJSValue(QJSValue::NullValue);
-    }
+    m_value = ViewEngine::typeDefaultValue(valueType, ViewEngine::grab(this));
 
     m_valueType = valueType;
     emit valueTypeChanged();

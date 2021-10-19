@@ -348,6 +348,8 @@ QmlTypeReference QmlTypeInfo::toQmlPrimitive(const QmlTypeReference &cppPrimitiv
             return QmlTypeReference(QmlTypeReference::Qml, "size");
         else if ( cppPrimitive.name() == "QPoint" || cppPrimitive.name() == "QPointF" )
             return QmlTypeReference(QmlTypeReference::Qml, "point");
+        else if ( cppPrimitive.name() == "QJSValue")
+            return QmlTypeReference(QmlTypeReference::Qml, "var");
     }
     return cppPrimitive;
 }
@@ -468,7 +470,11 @@ QmlFunctionInfo QmlTypeInfoPrivate::fromMetaMethod(
 QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, const LanguageUtils::FakeMetaProperty &prop){
     QmlPropertyInfo qpi(prop.name(), QmlTypeReference(), parent.prefereredType());
     if ( QmlTypeInfo::isObject(prop.typeName()) ){
-        qpi.typeName = QmlTypeReference(QmlTypeReference::Unknown, prop.typeName());
+        if ( prop.typeName() == "QJSValue" ){
+            qpi.typeName = QmlTypeReference(QmlTypeReference::Qml, "var");
+        } else {
+            qpi.typeName = QmlTypeReference(QmlTypeReference::Unknown, prop.typeName());
+        }
     } else {
         auto typeName = prop.typeName();
         if (typeName == "QString"){
@@ -481,6 +487,8 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
             typeName = "font";
         } else if (typeName == "QDateTime"){
             typeName = "date";
+        } else if (typeName == "QJSValue"){
+            typeName = "var";
         } else if (typeName == "QPoint" || typeName == "QPointF"){
             typeName = "point";
         } else if (typeName == "QSize" || typeName == "QSizeF"){

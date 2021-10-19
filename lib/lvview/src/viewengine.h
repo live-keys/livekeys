@@ -103,13 +103,12 @@ public:
     bool isLoading() const;
     void setIsLoading(bool isLoading);
 
-    void useEngine(std::function<void(QQmlEngine*)> call);
+    Memory* memory();
 
     const QList<QQmlError>& lastErrors() const;
 
     QQmlEngine* engine();
     QMutex* engineMutex();
-    Memory*     memory();
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
     void throwError(const lv::QmlError& error);
@@ -135,8 +134,9 @@ public:
     static QString typeAsPropertyMessage(const QString& typeName, const QString& propertyName);
 
     static void registerBaseTypes(const char* uri);
-
     static void initializeBaseTypes(ViewEngine* engine);
+
+    static QJSValue typeDefaultValue(const QString& typeInfo, ViewEngine* engine = nullptr);
 
     static QString toErrorString(const QQmlError& error);
     static QString toErrorString(const QList<QQmlError> &errors);
@@ -151,10 +151,10 @@ public:
     void setPackageGraph(PackageGraph* pg);
 
     static void printTrace(QJSEngine* engine);
+    static ViewEngine* grab(const QObject *object);
 
     QmlError findError(const QString& message) const;
     QmlError findError(QJSValue error) const;
-    static ViewEngine* grab(const QObject *object);
 
     ComponentResult::Ptr createPluginObject(const QString& filePath, QObject* parent);
     ComponentResult::Ptr createObject(const QString& filePath, QObject* parent, QQmlContext* context = nullptr);
@@ -194,7 +194,6 @@ public slots:
     void engineWarnings(const QList<QQmlError>& warnings);
 
     void throwError(const QJSValue& error, QObject* object = nullptr);
-
     QJSValue unwrapError(QJSValue error) const;
 
     /// \private

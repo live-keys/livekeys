@@ -53,9 +53,8 @@ void QmlStreamValue::setValueType(const QString &valueType){
         return;
     }
 
-    if ( valueType == "qml/object" ){
-        m_current = QJSValue(QJSValue::NullValue);
-    }
+
+    m_current = ViewEngine::typeDefaultValue(valueType, ViewEngine::grab(this));
 
     m_valueType = valueType;
     emit valueTypeChanged();

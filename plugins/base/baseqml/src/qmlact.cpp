@@ -322,13 +322,10 @@ void QmlAct::setRun(QJSValue run){
 }
 
 void QmlAct::setReturns(QJSValue returns){
-
     if ( !m_isComponentComplete ){
-        if ( returns.isString() && returns.toString() == "qml/object" ){
-            m_result = QJSValue(QJSValue::NullValue);
+        if ( returns.isString() ){
+            m_result = ViewEngine::typeDefaultValue(returns.toString(), ViewEngine::grab(this));
         }
-//        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set return type after component is complete.", Exception::toCode("~ActConfig"));
-//        ViewContext::instance().engine()->throwError(&e, this);
     }
 
     m_returns = returns;
