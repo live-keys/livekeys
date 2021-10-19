@@ -114,6 +114,8 @@ public:
     void excludeRunTriggers(const QSet<QString>& paths);
     void removeExcludedRunTriggers(const QSet<QString>& paths);
 
+    el::Engine* engine();
+
 public slots:
     void newProject();
     void closeProject();
@@ -145,8 +147,6 @@ public slots:
 
     QObject* runSpace();
     QObject* appRoot();
-
-    el::Engine* engine();
 
 signals:
     /** path changed, means the whole project changed */

@@ -75,8 +75,6 @@ Item{
         onClicked: parent.clicked()
     }
 
-    property bool documentsReloaded : false
-
     Connections{
         target: lk.layers.window
         function onIsActiveChanged(isActive){
@@ -84,11 +82,6 @@ Item{
                 project.navigationModel.requiresReindex()
                 project.fileModel.rescanEntries()
                 project.documentModel.rescanDocuments()
-                if ( documentsReloaded && project.active ){
-                    project.scheduleRun()
-                    documentsReloaded = false
-                }
-
                 if ( root.panes.activePane )
                     root.panes.activePane.forceActiveFocus()
             }

@@ -141,7 +141,6 @@ Item{
                     button1Function : function(mbox){
                         mbox.close()
                         document.readContent()
-                        root.documentsReloaded = true
                     },
                     button2Name : 'Save',
                     button2Function : function(mbox){
