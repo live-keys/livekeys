@@ -7,11 +7,20 @@ import paper 1.0 as Paper
 
 CodePalette{
     id: palette
-    type : "qml/lcvcore#Mat"
+    type : "qml/lcvcore#PaperSurface"
 
     property QtObject theme: lk.layers.workspace.themes.current
-
     property QtObject paperSurface: null
+    property Cv.Mat background: paperSurface ? paperSurface.background : null
+    onBackgroundChanged: {
+        if ( background ){
+            paperEditor.background = backgroundView
+        }
+    }
+
+    property Component backgroundView: Cv.ImageView{
+        image: palette.background
+    }
 
     item: Item{
         width: 600
@@ -20,6 +29,8 @@ CodePalette{
         Paper.PaperEditor{
             id: paperEditor
             anchors.fill: parent
+            paperWidth: paperSurface ? paperSurface.width : 0
+            paperHeight: paperSurface ? paperSurface.height : 0
             Component.onCompleted : {
                 paperEditor.paperCanvas.onPainted.connect(function(){
                     itemCapture.capture()

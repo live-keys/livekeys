@@ -13,6 +13,10 @@ Rectangle{
 
     property alias paperCanvas: paperCanvas
     property color iconColor: lk.layers.workspace.themes.current.colorScheme.foregroundFaded
+    property Component background: null
+
+    property double paperWidth: 600
+    property double paperHeight: 500
 
     Paper.Toolbox{
         id: toolbox
@@ -133,8 +137,36 @@ Rectangle{
                         dropDownBox.currentIndex = options.index
                     }
                 }
-
             }
+
+            intDropDown: Item{
+
+                Input.DropDown{
+                    id: intDropDownBox
+                    anchors.fill: parent
+                    style: lk.layers.workspace.themes.current.dropDownStyle
+                    model: ['0%', '10%', '20%', '30%', '40%', '50%', '60%', '70%', '80%', '90%', '100%']
+                    onActivated: {
+                        var val = parseInt(intDropDownBox.model[index].replace('%', ''))
+                        parent.selectedValue = val
+                        parent.valueChanged(index, val)
+                    }
+                }
+
+                property var selectedValue: 100
+
+                signal valueChanged(int index, var value)
+
+                function setup(options){
+                    if ( options.model )
+                        intDropDownBox.model = options.model
+                    if ( options.hasOwnProperty('index') ){
+                        selectedValue = intDropDownBox.model[options.index]
+                        intDropDownBox.currentIndex = options.index
+                    }
+                }
+            }
+
 
             textInput: Item{
 
@@ -162,8 +194,6 @@ Rectangle{
 
 
             }
-
-
         }
 
         Paper.ToolButton{
@@ -487,7 +517,6 @@ Rectangle{
                     }
                 }
             }
-
         }
 
         Item{
@@ -500,7 +529,6 @@ Rectangle{
     }
 
     Rectangle{
-
         anchors.top: parent.top
         anchors.topMargin: 25
 
@@ -749,6 +777,9 @@ Rectangle{
                 pg.styles.update({ strokeSize: toolbox.toolStyle.strokeSize })
                 paperCanvas.paint()
             })
+            toolbox.toolStyle.onOpacityToBackgroundChanged.connect(function(){
+                paperCanvas.opacity = toolbox.toolStyle.opacityToBackground
+            })
 
             var exports = {}
             var openTypeModule = Paper.JsModule.require(lk.layers.workspace.pluginsPath() + '/paper/papergrapherjs/opentype.js', {
@@ -771,68 +802,88 @@ Rectangle{
         }
     }
 
-    Paper.PaperCanvas{
-        id: paperCanvas
-
+    ScrollView{
+        id: paperCanvasScroll
         anchors.top: parent.top
-        anchors.topMargin: 30
+        anchors.topMargin: 25
 
         anchors.left: parent.left
         anchors.leftMargin: 70
 
         width: parent.width - 270
-        height: parent.height - 30
+        height: parent.height - 25
+        clip: true
 
+        contentWidth: paperCanvas.width
+        contentHeight: paperCanvas.height
 
-        xmldomPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/xmldom.js'
-        domScriptPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/paper-dom.js'
-        paperScriptPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/paper-full.js'
+        Loader{
+            id: paperCanvasBackgroundLoader
+            width: paperCanvas.width
+            height: paperCanvas.height
+            sourceComponent: root.background
+        }
 
-        jsModuleLoader: Paper.JsModule
+        Paper.PaperCanvas{
+            id: paperCanvas
 
-        MouseArea{
-            anchors.fill: parent
-            hoverEnabled: true
+            width: root.paperWidth
+            height: root.paperHeight
 
-            property var path : null
+            xmldomPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/xmldom.js'
+            domScriptPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/paper-dom.js'
+            paperScriptPath: lk.layers.workspace.pluginsPath() + '/paper/paperjs/paper-full.js'
 
-            onPressed: {
-                if ( toolbox.selectedTool ){
-                    //if (typeof os_win !== 'undefined') {
-                        gc()
-                    //}
-                    toolbox.selectedTool.mouseDown(mouse)
+            jsModuleLoader: Paper.JsModule
+
+            MouseArea{
+                anchors.fill: parent
+                hoverEnabled: true
+                preventStealing: true
+
+                property var path : null
+
+                onPressed: {
+                    if ( toolbox.selectedTool ){
+                        //if (typeof os_win !== 'undefined') {
+                            gc()
+                        //}
+                        toolbox.selectedTool.mouseDown(mouse)
+                    }
+                    mouse.accepted = true
                 }
-            }
-            onPositionChanged: {
-                if ( toolbox.selectedTool ){
-                    //if (typeof os_win !== 'undefined') {
-                        gc()
-                    //}
-                    if ( mouse.buttons )
-                        toolbox.selectedTool.mouseDrag(mouse)
-                    else
-                        toolbox.selectedTool.mouseMove(mouse)
+                onPositionChanged: {
+                    if ( toolbox.selectedTool ){
+                        //if (typeof os_win !== 'undefined') {
+                            gc()
+                        //}
+                        if ( mouse.buttons )
+                            toolbox.selectedTool.mouseDrag(mouse)
+                        else
+                            toolbox.selectedTool.mouseMove(mouse)
+                    }
+                    mouse.accepted = true
                 }
-            }
-            onDoubleClicked: {
-                if ( toolbox.selectedTool ){
-                    //if (typeof os_win !== 'undefined') {
-                        gc()
-                    //}
-                    toolbox.selectedTool.mouseDoubleClicked(mouse)
+                onDoubleClicked: {
+                    if ( toolbox.selectedTool ){
+                        //if (typeof os_win !== 'undefined') {
+                            gc()
+                        //}
+                        toolbox.selectedTool.mouseDoubleClicked(mouse)
+                    }
+                    mouse.accepted = true
                 }
-            }
-            onReleased: {
-                if ( toolbox.selectedTool ){
-                    //if (typeof os_win !== 'undefined') {
-                        gc()
-                    //}
-                    toolbox.selectedTool.mouseUp(mouse)
+                onReleased: {
+                    if ( toolbox.selectedTool ){
+                        //if (typeof os_win !== 'undefined') {
+                            gc()
+                        //}
+                        toolbox.selectedTool.mouseUp(mouse)
+                    }
+                    mouse.accepted = true
                 }
             }
         }
     }
-
 
 }

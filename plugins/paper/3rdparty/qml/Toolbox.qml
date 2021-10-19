@@ -20,6 +20,7 @@ Rectangle{
         property double opacity: 1
         property string blendMode : 'normal'
         property double strokeSize: 1
+        property double opacityToBackground: 1
 
         function setup(opt){
             if ( opt.strokeSize ){
@@ -256,6 +257,36 @@ Rectangle{
 //            }
 //        }
 //    }
+
+    Item{
+        anchors.top: layout.bottom
+        anchors.topMargin: 150
+        width: parent.width
+        height: 50
+
+        Loader{
+            sourceComponent: root.style.label
+            anchors.horizontalCenter: parent.horizontalCenter
+            onItemChanged: {
+                item.text = 'Background'
+            }
+        }
+
+        Loader{
+            anchors.top: parent.top
+            anchors.topMargin: 18
+            width: parent.width - 10
+            height: 20
+            anchors.horizontalCenter: parent.horizontalCenter
+            sourceComponent: root.style.intDropDown
+            onItemChanged: {
+                item.setup( { index: 10 })
+                item.onValueChanged.connect(function(index, value){
+                    root.toolStyle.opacityToBackground = value / 100
+                })
+            }
+        }
+    }
 
     Item{
         anchors.top: layout.bottom

@@ -50,6 +50,7 @@ OTHER_FILES += \
     $$PWD/3rdparty/qml/tools/*.js \
     $$PWD/3rdparty/qml/tools/*.qml \
     $$PWD/3rdparty/paperqml/js/*.js \
+    $$PWD/3rdparty/paperqml/qml/*.qml \
     $$PWD/qml/live.package.json \
     $$PWD/qml/live.plugin.json \
     $$PWD/qml/qmldir
