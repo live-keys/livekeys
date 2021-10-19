@@ -76,7 +76,7 @@ Item{
         style: root.style.inputBox
         text: parent.value
 
-        Keys.onReturnPressed: { numberSpinbox.commitValue() }
+        Keys.onReturnPressed: { root.commitValue() }
     }
     
     function __initialize(){

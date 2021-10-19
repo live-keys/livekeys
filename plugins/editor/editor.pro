@@ -58,6 +58,7 @@ DISTFILES += \
     palettes/ConnectionPalette.qml \
     palettes/FilePathPalette.qml \
     palettes/FolderPathPalette.qml \
+    palettes/FunctionPalette.qml \
     palettes/ImportsPalette.qml \
     palettes/IntHistoryPlotPalette.qml \
     palettes/IntInputPalette.qml \
@@ -65,6 +66,7 @@ DISTFILES += \
     palettes/NumberHistoryPlotPalette.qml \
     palettes/RectangleSizePalette.json \
     palettes/SizePalette.qml \
+    palettes/SpinBoxPalette.qml \
     palettes/StringListPalette.qml \
     palettes/TextPalette.qml \
     palettes/TriggerPalette.qml \
