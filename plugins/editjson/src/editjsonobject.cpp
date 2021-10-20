@@ -25,7 +25,7 @@ EditJsonObject::EditJsonObject(QQmlEngine* parent)
         return;
     }
 
-    m_engine = static_cast<ViewEngine*>(lg->property("engine").value<QObject*>());
+    m_engine = ViewEngine::grabFromQmlEngine(parent);
     if ( !m_engine ){
         qWarning("Failed to find engine object.");
         return;

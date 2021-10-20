@@ -152,6 +152,7 @@ public:
 
     static void printTrace(QJSEngine* engine);
     static ViewEngine* grab(const QObject *object);
+    static ViewEngine* grabFromQmlEngine(QQmlEngine* engine);
 
     QmlError findError(const QString& message) const;
     QmlError findError(QJSValue error) const;

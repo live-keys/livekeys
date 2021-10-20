@@ -143,7 +143,8 @@ void CodeHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickIte
  * \brief Implementation of the respective function from QQmlParserStatus
  */
 void CodeHandler::componentComplete(){
-    QQmlContext* ctx = qmlEngine(this)->rootContext();
+    QQmlEngine* qmlengine = qmlEngine(this);
+    QQmlContext* ctx = qmlengine->rootContext();
     EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
     if ( !editor ){
         qWarning("Failed to find editor global object.");
@@ -158,7 +159,7 @@ void CodeHandler::componentComplete(){
         return;
     }
 
-    m_engine     = static_cast<ViewEngine*>(lg->property("engine").value<lv::ViewEngine*>());
+    m_engine = static_cast<ViewEngine*>(qmlengine->property("viewEngine").value<QObject*>());
 
     QObject* workspace = lg->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
 

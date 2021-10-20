@@ -92,6 +92,8 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_errorCounter(0)
     , m_memory(new Memory(this))
 {
+    m_engine->rootContext()->setContextProperty("engine", this);
+
     m_engine->setProperty("viewEngine", QVariant::fromValue(this));
     m_engine->setIncubationController(m_incubationController);
     m_engine->setOutputWarningsToStandardError(true);
@@ -268,13 +270,13 @@ void ViewEngine::registerBaseTypes(const char *uri){
         uri, 1, 0, "Layer", "Layer is of abstract type.");
 
     qmlRegisterUncreatableType<lv::ViewEngine>(
-        uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "lk.engine"));
+        uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "engine"));
     qmlRegisterUncreatableType<lv::Settings>(
         uri, 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "lk.settings"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(
         uri, 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
     qmlRegisterUncreatableType<lv::Memory>(
-        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "lk.engine.mem"));
+        uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "engine.mem"));
     qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
         uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
@@ -562,7 +564,11 @@ QmlError ViewEngine::findError(QJSValue error) const{
 
 ViewEngine *ViewEngine::grab(const QObject *object){
     QQmlEngine* engine = qmlEngine(object);
-    if ( engine )
+    return grabFromQmlEngine(engine);
+}
+
+ViewEngine *ViewEngine::grabFromQmlEngine(QQmlEngine *engine){
+    if (engine)
         return qobject_cast<ViewEngine*>(engine->property("viewEngine").value<QObject*>());
     return nullptr;
 }

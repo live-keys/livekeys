@@ -103,14 +103,15 @@ void ProjectQmlExtension::classBegin(){
  */
 void ProjectQmlExtension::componentComplete(){
     if ( !m_scanMonitor ){
-        QQmlContext* ctx = qmlEngine(this)->rootContext();
+        QQmlEngine* qmlengine = qmlEngine(this);
+        QQmlContext* ctx = qmlengine->rootContext();
         QObject* lg = ctx->contextProperty("lk").value<QObject*>();
         if ( !lg ){
             qWarning("Failed to find live global object.");
             return;
         }
 
-        ViewEngine* engine = static_cast<ViewEngine*>(lg->property("engine").value<QObject*>());
+        ViewEngine* engine = ViewEngine::grabFromQmlEngine(qmlengine);
         if ( !engine ){ qWarning("Failed to find engine object."); return; }
 
         Settings* settings = static_cast<Settings*>(lg->property("settings").value<QObject*>());

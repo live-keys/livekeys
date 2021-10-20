@@ -19,7 +19,7 @@ void ViewContext::initFromEngine(QQmlEngine *engine){
     if ( !livekeys )
         THROW_EXCEPTION(lv::Exception, "Failed to load lk context property.", 1);
 
-    ViewEngine* e = qobject_cast<lv::ViewEngine*>(livekeys->property("engine").value<QObject*>());
+    ViewEngine* e = ViewEngine::grabFromQmlEngine(engine);
     Settings* s = qobject_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
     Memory* m = e->memory();
     if ( !e || !s || !m )

@@ -65,7 +65,6 @@ class Livekeys : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
-    Q_PROPERTY(lv::ViewEngine*     engine         READ engine     CONSTANT)
     Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
     Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
 

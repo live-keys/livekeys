@@ -29,15 +29,18 @@ LanguageLvExtension::~LanguageLvExtension(){
 
 void LanguageLvExtension::componentComplete(){
     if ( !m_scanMonitor ){
-        QQmlContext* ctx = qmlEngine(this)->rootContext();
+        ViewEngine* engine = ViewEngine::grab(this);
+        if ( !engine ){
+            QmlError::warnNoEngineCaptured(this);
+            return;
+        }
+
+        QQmlContext* ctx = engine->engine()->rootContext();
         QObject* lg = ctx->contextProperty("lk").value<QObject*>();
         if ( !lg ){
             qWarning("Failed to find live global object.");
             return;
         }
-
-        ViewEngine* engine = static_cast<ViewEngine*>(lg->property("engine").value<QObject*>());
-        if ( !engine ){ qWarning("Failed to find engine object."); return; }
 
         Settings* settings = static_cast<Settings*>(lg->property("settings").value<QObject*>());
         if ( !settings ){ qWarning("Failed to find settings object."); return; }

@@ -38,7 +38,7 @@ CodePalette{
                 palette.editFragment.write({'__ref': "(" + text + ")"})
             }
         } catch (e){
-            var error = lk.engine.unwrapError(e)
+            var error = engine.unwrapError(e)
             lk.layers.workspace.messages.pushError(error.message, error.code)
         }
     }

@@ -50,7 +50,7 @@ CodePalette{
             builderComponentCode += 'source: "' + resolvePath() + '"'
             builderComponentCode += ' }'
 
-            var comp = lk.engine.createComponent(builderComponentCode, "Builder.qml")
+            var comp = engine.createComponent(builderComponentCode, "Builder.qml")
             palette.value = comp
 
             var imports = editFragment.language.importsModel()

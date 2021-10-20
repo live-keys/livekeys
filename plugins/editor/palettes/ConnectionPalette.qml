@@ -61,7 +61,7 @@ CodePalette{
             commitButton.visible = false
 
         } catch (e){
-            var error = lk.engine.unwrapError(e)
+            var error = engine.unwrapError(e)
             lk.layers.workspace.messages.pushError(error.message, error.code)
         }
     }

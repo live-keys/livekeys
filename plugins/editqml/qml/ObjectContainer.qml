@@ -393,7 +393,7 @@ Item{
                     try{
                         paletteFunctions.eraseObject(root)
                     } catch ( e ){
-                        var eunwrap = lk.engine.unwrapError(e)
+                        var eunwrap = engine.unwrapError(e)
                         lk.layers.workspace.messages.pushError(eunwrap.message, eunwrap.code)
                     }
                 }

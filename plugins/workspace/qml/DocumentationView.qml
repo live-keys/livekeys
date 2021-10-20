@@ -105,12 +105,12 @@ WebEngineView{
                         enterControl = component.createObject(root);
                         if ( !enterControl || typeof enterControl.run !== "function" ){
                             root.loadedHovers = {}
-                            lk.engine.throwError(new Error("Error creating object from component: " + enterPath), root)
+                            engine.throwError(new Error("Error creating object from component: " + enterPath), root)
                             return
                         }
                     } else if (component.status === Component.Error) {
                         root.loadedHovers = {}
-                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                         return
                     }
 
@@ -124,12 +124,12 @@ WebEngineView{
                         leaveControl = component.createObject(root);
                         if ( !leaveControl || typeof leaveControl.run !== "function" ){
                             root.loadedHovers = {}
-                            lk.engine.throwError(new Error("Error creating object from component: " + leavePath), root)
+                            engine.throwError(new Error("Error creating object from component: " + leavePath), root)
                             return
                         }
                     } else if (component.status === Component.Error) {
                         root.loadedHovers = {}
-                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                         return
                     }
 
@@ -145,7 +145,7 @@ WebEngineView{
                     if (component.status === Component.Ready){
                         var initializerControl = component.createObject(root);
                         if ( !initializerControl || typeof initializerControl.run !== "function" ){
-                            lk.engine.throwError(new Error("Error creating object from component: " + currentInitializerPath), root)
+                            engine.throwError(new Error("Error creating object from component: " + currentInitializerPath), root)
                             return
                         }
                         try {
@@ -154,7 +154,7 @@ WebEngineView{
                             root.runJavaScriptCallbackError(e)
                         }
                     } else if (component.status === Component.Error) {
-                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                         return
                     }
                 }
@@ -163,7 +163,7 @@ WebEngineView{
     }
 
     onRunJavaScriptCallbackError: {
-        lk.engine.throwError(e, root)
+        engine.throwError(e, root)
     }
 
     onNewViewRequested: {
@@ -187,7 +187,7 @@ WebEngineView{
 
                         control.destroy()
                     } else if (component.status === Component.Error) {
-                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                     }
                 } else if ( Fs.UrlInfo.host(request.requestedUrl) === "open-project" ){
                     var path = Fs.UrlInfo.path(request.requestedUrl)
@@ -225,7 +225,7 @@ WebEngineView{
 
                         control.destroy()
                     } else if (component.status === Component.Error) {
-                        lk.engine.throwError(new Error("Error loading component: " + component.errorString()), root)
+                        engine.throwError(new Error("Error loading component: " + component.errorString()), root)
                     }
                 }
             }

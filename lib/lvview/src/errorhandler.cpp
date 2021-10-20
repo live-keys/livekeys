@@ -53,14 +53,10 @@ void ErrorHandler::componentComplete(){
             return;
     }
 
-    QObject* livekeys = qmlEngine(this)->rootContext()->contextProperty("lk").value<QObject*>();
-    if ( !livekeys ){
-        qCritical("ErrorHandler: Failed to find engine. ErrorHandling will not work.");
-        return;
-    }
-    m_engine = qobject_cast<ViewEngine*>(livekeys->property("engine").value<QObject*>());
+    m_engine = ViewEngine::grab(this);
     if ( !m_engine ){
-        qCritical("ErrorHandler: Failed to find engine. ErrorHandling will not work.");
+        QmlError::warnNoEngineCaptured(this);
+        return;
     }
 
     m_engine->registerErrorHandler(m_target, this);
