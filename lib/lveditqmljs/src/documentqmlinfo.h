@@ -225,7 +225,8 @@ public:
     lv::QmlTypeInfo::Ptr extractValueObjectWithExport(
             const ValueReference& value,
             const QString& componentName,
-            const QString& libraryPath) const;
+            const QString& libraryPath,
+            bool isSingleton = false) const;
     QStringList extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);

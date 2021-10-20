@@ -388,7 +388,8 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
         QmlLibraryInfo::Ptr lib,
         const QString &filePath,
         const QString &componentName,
-        const QString &fileData)
+        const QString &fileData,
+        bool isSingleton)
 {
     DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(filePath);
     bool parseResult = documentInfo->parse(fileData);
@@ -430,7 +431,8 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
     QmlTypeInfo::Ptr ti = documentInfo->extractValueObjectWithExport(
         documentInfo->rootObject(),
         componentName,
-        lib->uri()
+        lib->uri(),
+        isSingleton
     );
 
     if ( ti ){
@@ -452,7 +454,7 @@ void QmlLanguageScanner::scanQmlDirForExports(const QmlDirParser &dirParser, con
         QString filePath = QDir::cleanPath(lib->path() + QDir::separator() + it->fileName);
         if ( QFile::exists(filePath) ){
             QString fileContent = QString::fromStdString(m_ioSession->readFromFile(filePath.toStdString()));
-            QmlTypeInfo::Ptr fileType = scanObjectFile(lib, filePath, it->typeName, fileContent);
+            QmlTypeInfo::Ptr fileType = scanObjectFile(lib, filePath, it->typeName, fileContent, it->singleton);
             if ( fileType ){
                 lib->addType(fileType);
             }

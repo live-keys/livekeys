@@ -130,16 +130,23 @@ QString lv::QmlFunctionInfo::toString() const{
 // QmlTypeInfo
 // ----------------------------------------------------------------------------
 
-QmlTypeInfo::QmlTypeInfo()
+QmlTypeInfo::QmlTypeInfo(bool isSingleton, bool isCreatable)
+    : m_isSingleton(isSingleton)
+    , m_isCreatable(isCreatable)
+    , m_isComposite(false)
 {
 }
 
-QmlTypeInfo::Ptr QmlTypeInfo::create(){
-    return QmlTypeInfo::Ptr(new QmlTypeInfo);
+QmlTypeInfo::Ptr QmlTypeInfo::create(bool isCreatable){
+    return QmlTypeInfo::Ptr(new QmlTypeInfo(false, isCreatable));
+}
+
+QmlTypeInfo::Ptr QmlTypeInfo::createSingleton(){
+    return QmlTypeInfo::Ptr(new QmlTypeInfo(true, false));
 }
 
 QmlTypeInfo::Ptr QmlTypeInfo::clone(const QmlTypeInfo::ConstPtr &other){
-    QmlTypeInfo::Ptr cl = QmlTypeInfo::Ptr(new QmlTypeInfo);
+    QmlTypeInfo::Ptr cl = QmlTypeInfo::Ptr(new QmlTypeInfo(false, false));
     cl->m_exportType = other->m_exportType;
     cl->m_classType = other->m_classType;
     cl->m_inherits = other->m_inherits;
@@ -173,11 +180,11 @@ const QmlTypeReference &QmlTypeInfo::exportType() const{
     return m_exportType;
 }
 
-const QmlTypeReference &lv::QmlTypeInfo::classType() const{
+const QmlTypeReference &QmlTypeInfo::classType() const{
     return m_classType;
 }
 
-const QmlTypeReference &lv::QmlTypeInfo::inherits() const{
+const QmlTypeReference &QmlTypeInfo::inherits() const{
     return m_inherits;
 }
 

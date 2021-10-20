@@ -378,9 +378,10 @@ lv::QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObject(
 QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
         const DocumentQmlInfo::ValueReference &valueref,
         const QString &componentName,
-        const QString &libraryPath) const
+        const QString &libraryPath,
+        bool isSingleton) const
 {
-    lv::QmlTypeInfo::Ptr vodata = lv::QmlTypeInfo::create();
+    lv::QmlTypeInfo::Ptr vodata = isSingleton ? lv::QmlTypeInfo::createSingleton() : lv::QmlTypeInfo::create(true);
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 

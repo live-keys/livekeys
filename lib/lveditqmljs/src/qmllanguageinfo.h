@@ -159,7 +159,8 @@ public:
     typedef QSharedPointer<const QmlTypeInfo> ConstPtr;
 
 public:
-    static Ptr create();
+    static Ptr create(bool isCreatable = false);
+    static Ptr createSingleton();
     static Ptr clone(const QmlTypeInfo::ConstPtr& other);
 
     ~QmlTypeInfo();
@@ -209,7 +210,7 @@ public:
     static QString typeDefaultValueAsText(const QString& typeString);
 
 private:
-    QmlTypeInfo();
+    QmlTypeInfo(bool isSingleton, bool isCreatable);
     QmlTypeInfo(const QmlTypeInfo&);
     QmlTypeInfo& operator=(const QmlTypeInfo&);
 

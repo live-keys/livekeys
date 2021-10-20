@@ -63,7 +63,8 @@ private:
         QmlLibraryInfo::Ptr lib,
         const QString& filePath,
         const QString& componentName,
-        const QString& fileData);
+        const QString& fileData,
+        bool isSingleton = false);
     void scanQmlDirForExports(const QmlDirParser& dir, const QmlLibraryInfo::Ptr& lib);
     void scanPathForExports(const QString& path, const QmlLibraryInfo::Ptr& lib);
 

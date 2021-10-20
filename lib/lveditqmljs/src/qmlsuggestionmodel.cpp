@@ -1,14 +1,15 @@
 #include "qmlsuggestionmodel.h"
+#include "live/visuallogqt.h"
 #include <QSet>
 #include <languageqmlhandler.h>
 
 namespace lv {
 
-QmlSuggestionModel::QmlSuggestionModel(int addPosition, QObject* parent):
-    QAbstractListModel(parent),
-    m_categoryFilter(0),
-    m_addPosition(addPosition)
-  , m_supportsObjectNesting(false)
+QmlSuggestionModel::QmlSuggestionModel(int addPosition, QObject* parent)
+    : QAbstractListModel(parent)
+    , m_categoryFilter(0)
+    , m_supportsObjectNesting(false)
+    , m_addPosition(addPosition)
 {
     m_roles[Label]          = "label";
     m_roles[ObjectType]     = "objectType";
