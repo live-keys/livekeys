@@ -59,6 +59,11 @@ void TableRowEach::process(){
            qWarning("TableRowEach: Failed to grab view engine. This object will not work.");
            return;
         }
+
+        if ( m_rowExtras.isUndefined() ){
+            m_rowExtras = ve->engine()->evaluate("(function(index){ return parseFloat(this[index]); })");
+        }
+
         int total = m_table->totalRows();
 
         if ( isModelSet() )
@@ -68,6 +73,9 @@ void TableRowEach::process(){
 
         for ( int i = 0; i < total; ++i ){
             QJSValue row = m_table->rowAt(i);
+
+            row.setProperty("nrAt", m_rowExtras);
+
             QJSValue result = m_fn.call(QJSValueList() << row);
             if ( result.isError() ){
                 ve->throwError(result, this);

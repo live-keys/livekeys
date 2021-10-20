@@ -16,7 +16,7 @@ Rectangle{
     objectName: "tableEditor"
 
     property var table: null
-    property var tableModel: table ? table.model : nullconso
+    property var tableModel: table ? table.model : null
 
     property QtObject style: TableEditorStyle{}
 

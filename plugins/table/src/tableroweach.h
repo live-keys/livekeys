@@ -52,7 +52,8 @@ private:
     Q_DISABLE_COPY(TableRowEach);
 
     lv::Table* m_table;
-    QJSValue m_fn;
+    QJSValue   m_fn;
+    QJSValue   m_rowExtras;
     QList<QList<QString> > m_data;
 };
 

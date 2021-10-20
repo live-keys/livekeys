@@ -2,6 +2,7 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "tableschema.h"
+#include "tablemodel.h"
 
 #include "csv.hpp"
 
@@ -157,6 +158,9 @@ QJSValue LocalTable::rowAt(int index){
 
 
 void LocalTable::readFromFile(const QString &path, const QJSValue &options){
+    if ( isModelSet() )
+        model()->notifyTableRefresh();
+
     m_data.clear();
     setSchema(new TableSchema);
 
@@ -188,6 +192,9 @@ void LocalTable::readFromFile(const QString &path, const QJSValue &options){
             m_data.append(dataRow);
         }
     }
+
+    if ( isModelSet() )
+        model()->notifyTableRefreshEnd();
 }
 
 void LocalTable::writeToFile(const QString &path, const QJSValue& options){

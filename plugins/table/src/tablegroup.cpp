@@ -9,6 +9,7 @@ namespace lv{
 TableGroup::TableGroup(QObject *parent)
     : QObject(parent)
     , m_table(nullptr)
+    , m_isComponentComplete(false)
 {
 }
 
@@ -52,14 +53,44 @@ void TableGroup::setTable(Table *table){
 }
 
 void TableGroup::process(){
-    if ( m_fn.isCallable() && m_table ){
-        ViewEngine* ve = ViewEngine::grab(this);
-        if ( !ve ){
-            qWarning("TableGroup: Failed to grab view engine. This object will not work.");
-            return;
+    if ( !m_table || !m_isComponentComplete )
+        return;
+
+    ViewEngine* ve = ViewEngine::grab(this);
+    if ( !ve ){
+        QmlError::warnNoEngineCaptured(this, "TableGroup");
+        return;
+    }
+
+    QJSValue reduceResult;
+    if ( m_reduce.isCallable() ){
+
+        if ( m_rowExtras.isUndefined() ){
+            m_rowExtras = ve->engine()->evaluate("(function(index){ return parseFloat(this[index]); })");
         }
 
-        QJSValue result = m_fn.call(QJSValueList() << ve->engine()->newQObject(m_table->model()));
+        int total = m_table->totalRows();
+        if ( total == 0 )
+            return;
+
+        QJSValue accumulator = m_reduceInit.isUndefined() ? getRow(0) : m_reduceInit;
+        int start = accumulator.isUndefined() ? 1 : 0;
+
+        for ( int i = start; i < total; ++i ){
+            QJSValue row = getRow(i);
+            accumulator = m_reduce.call(QJSValueList() << accumulator << row);
+            if ( accumulator.isError() ){
+                ve->throwError(accumulator, this);
+                return;
+            }
+        }
+
+        reduceResult = accumulator;
+    }
+
+    if ( m_all.isCallable() ){
+
+        QJSValue result = m_all.call(QJSValueList() << ve->engine()->newQObject(m_table->model()) << reduceResult);
         if ( result.isError() ){
             ve->throwError(result, this);
             return;
@@ -67,11 +98,25 @@ void TableGroup::process(){
 
         m_result = result;
         emit resultChanged();
+    } else {
+        m_result = reduceResult;
+        emit resultChanged();
     }
+}
+
+void TableGroup::componentComplete(){
+    m_isComponentComplete = true;
+    process();
 }
 
 void TableGroup::__tableReset(){
     process();
+}
+
+QJSValue TableGroup::getRow(int index) const{
+    QJSValue row = m_table->rowAt(index);
+    row.setProperty("nrAt", m_rowExtras);
+    return row;
 }
 
 }// namespace
