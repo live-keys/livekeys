@@ -235,14 +235,6 @@ Module {
         Method { name: "stop" }
     }
     Component {
-        name: "lv::QmlFollowUp"
-        prototype: "lv::QmlAct"
-        exports: ["base/FollowUp 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "prev"; type: "QJSValue"; isReadonly: true }
-        Method { name: "_whenPrevChanged" }
-    }
-    Component {
         name: "lv::QmlIndexSelector"
         prototype: "QObject"
         exports: ["base/IndexSelector 1.0"]

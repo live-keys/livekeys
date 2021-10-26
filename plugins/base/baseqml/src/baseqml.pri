@@ -31,7 +31,6 @@ HEADERS += \
     $$PWD/groupcollectorentry.h \
     $$PWD/qmlact.h \
     $$PWD/qmlcontainer.h \
-    $$PWD/qmlfollowup.h \
     $$PWD/qmlworkerinterface.h \
     $$PWD/qmlstreamfilter.h \
     $$PWD/workerthread.h \
@@ -67,6 +66,5 @@ SOURCES += \
     $$PWD/groupcollectorentry.cpp \
     $$PWD/qmlact.cpp \
     $$PWD/qmlcontainer.cpp \
-    $$PWD/qmlfollowup.cpp \
     $$PWD/qmlstreamfilter.cpp \
     $$PWD/workerthread.cpp

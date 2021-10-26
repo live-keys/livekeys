@@ -28,7 +28,6 @@
 #include "qmlstreamsink.h"
 #include "qmlworkerpoolobject.h"
 #include "qmlcontainer.h"
-#include "qmlfollowup.h"
 #include "groupcollector.h"
 #include "qmlstreamfilter.h"
 #include "qmlstreamvalue.h"
@@ -85,7 +84,6 @@ void BasePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::QmlStreamLog>(       uri, 1, 0, "StreamLog");
     qmlRegisterType<lv::QmlPropertyLog>(     uri, 1, 0, "PropertyLog");
     qmlRegisterType<lv::QmlContainer>(       uri, 1, 0, "Container");
-    qmlRegisterType<lv::QmlFollowUp>(        uri, 1, 0, "FollowUp");
     qmlRegisterType<lv::QmlArrange>(         uri, 1, 0, "Arrange");
     qmlRegisterType<lv::QmlSplit>(           uri, 1, 0, "Split");
     qmlRegisterType<lv::QmlCollector>(       uri, 1, 0, "Collector");

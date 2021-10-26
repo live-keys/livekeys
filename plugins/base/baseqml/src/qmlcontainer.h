@@ -7,9 +7,6 @@
 
 namespace lv{
 
-//TODO: FollowUp Act
-//TODO: Opening
-
 /// \private
 class QmlContainer : public QObject{
 
