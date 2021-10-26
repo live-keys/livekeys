@@ -24,6 +24,7 @@
         "palettes/ImageSegmentFactoryPalette.qml": "qml/lcvcore#ImageSegmentFactory",
         "palettes/ImageSegmentFactoryPropertiesPalette.json": "qml/lcvcore#ImageSegmentFactory",
         "palettes/GalleryFileSelectorPalette.qml": "qml/lcvcore#GalleryFileSelector",
-        "palettes/GalleryFileSelectorPropertiesPalette.json": "qml/lcvcore#GalleryFileSelector"
+        "palettes/GalleryFileSelectorPropertiesPalette.json": "qml/lcvcore#GalleryFileSelector",
+        "palettes/ImageFileGalleryPalette.qml": "qml/lcvcore#ImageFileGallery"
     }
 }

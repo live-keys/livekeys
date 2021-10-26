@@ -31,3 +31,5 @@ PerspectiveOnBackground    1.0 PerspectiveOnBackground.qml
 GalleryFileSelector        1.0 GalleryFileSelector.qml
 ChannelSelect              1.0 ChannelSelect.qml
 CopyMakeBorder             1.0 CopyMakeBorder.qml
+ImageGalleryView           1.0 ImageGalleryView.qml
+ImageFileGallery           1.0 ImageFileGallery.qml
