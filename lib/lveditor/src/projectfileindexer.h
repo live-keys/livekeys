@@ -14,13 +14,14 @@
 **
 ****************************************************************************/
 
-#ifndef LVPROJECTNAVIGATIONMODEL_H
-#define LVPROJECTNAVIGATIONMODEL_H
+#ifndef LVPROJECTFILEINDEXER_H
+#define LVPROJECTFILEINDEXER_H
 
 #include <QObject>
 #include <QAbstractListModel>
 #include <QHash>
 #include <QFutureWatcher>
+#include <QJSValue>
 
 #include "live/lveditorglobal.h"
 
@@ -28,9 +29,10 @@ namespace lv{
 
 class Project;
 class ProjectDocument;
+class ProjectDocumentModel;
 
 /// \private
-class ProjectNavigationModel : public QAbstractListModel{
+class ProjectFileIndexer : public QAbstractListModel{
 
     Q_OBJECT
     Q_PROPERTY(bool isIndexing READ isIndexing NOTIFY isIndexingChanged)
@@ -52,8 +54,8 @@ public:
     };
 
 public:
-    ProjectNavigationModel(Project* project);
-    ~ProjectNavigationModel();
+    ProjectFileIndexer(Project* project);
+    ~ProjectFileIndexer();
 
     bool isIndexing() const;
     void beginIndexing();
@@ -66,12 +68,13 @@ public:
     const QString& filter() const;
 
 public slots:
+    void filter(const QJSValue& options);
     void setFilter(const QString& filter);
-    void directoryChanged(const QString& path);
     void reindex();
-    void reindexReady();
     void requiresReindex();
 
+    void __reindexReady();
+    void __directoryChanged(const QString& path);
 signals:
     void isIndexingChanged(bool isIndexing);
 
@@ -83,6 +86,7 @@ private:
     QFutureWatcher<QList<Entry> > m_workerWatcher;
 
     Project*               m_project;
+    ProjectDocumentModel*  m_projectDocuments;
     QList<Entry>           m_files;
     QList<Entry>           m_filteredOpenedFiles;
     QList<int>             m_filteredFiles;
@@ -90,28 +94,28 @@ private:
     QString                m_filter;
 };
 
-inline bool ProjectNavigationModel::isIndexing() const{
+inline bool ProjectFileIndexer::isIndexing() const{
     return m_isIndexing;
 }
 
-inline void ProjectNavigationModel::beginIndexing(){
+inline void ProjectFileIndexer::beginIndexing(){
     m_isIndexing = true;
     emit isIndexingChanged(m_isIndexing);
 }
 
-inline void ProjectNavigationModel::endIndexing(){
+inline void ProjectFileIndexer::endIndexing(){
     m_isIndexing = false;
     emit isIndexingChanged(m_isIndexing);
 }
 
-inline QHash<int, QByteArray> ProjectNavigationModel::roleNames() const{
+inline QHash<int, QByteArray> ProjectFileIndexer::roleNames() const{
     return m_roles;
 }
 
-inline const QString &ProjectNavigationModel::filter() const{
+inline const QString &ProjectFileIndexer::filter() const{
     return m_filter;
 }
 
 }// namespace
 
-#endif // LVPROJECTNAVIGATIONMODEL_H
+#endif // LVPROJECTFILEINDEXER_H

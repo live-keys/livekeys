@@ -79,7 +79,6 @@ Item{
         target: lk.layers.window
         function onIsActiveChanged(isActive){
             if ( isActive ){
-                project.navigationModel.requiresReindex()
                 project.fileModel.rescanEntries()
                 project.documentModel.rescanDocuments()
                 if ( root.panes.activePane )

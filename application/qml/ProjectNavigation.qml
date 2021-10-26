@@ -76,7 +76,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                project.navigationModel.setFilter(text)
+                lk.layers.workspace.fileIndexer.filter({ contains: text, documents: project.documentModel })
             }
 
             MouseArea{
@@ -172,7 +172,7 @@ Rectangle{
 
         ListView{
             id: documentView
-            model : navigationInput.text === '' ? project.documentModel : project.navigationModel
+            model : navigationInput.text === '' ? project.documentModel : lk.layers.workspace.fileIndexer
             width: parent.width
             height: parent.height
             clip: true
@@ -282,7 +282,7 @@ Rectangle{
         color: "#001122"
         width: 100
         height: 100
-        visible: project.navigationModel.isIndexing
+        visible: lk.layers.workspace.fileIndexer.isIndexing
         Text{
             anchors.centerIn: parent
             text: 'Indexing...'

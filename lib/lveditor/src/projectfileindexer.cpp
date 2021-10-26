@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "projectnavigationmodel.h"
+#include "projectfileindexer.h"
 #include "live/projectdocumentmodel.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
@@ -25,52 +25,72 @@
 
 namespace lv{
 
-ProjectNavigationModel::ProjectNavigationModel(Project *project)
+ProjectFileIndexer::ProjectFileIndexer(Project *project)
     : QAbstractListModel(project)
     , m_isIndexing(false)
     , m_requiresReindex(true)
     , m_project(project)
+    , m_projectDocuments(nullptr)
 {
-    m_roles[ProjectNavigationModel::Name]   = "name";
-    m_roles[ProjectNavigationModel::Path]   = "path";
-    m_roles[ProjectNavigationModel::IsOpen] = "isOpen";
+    m_roles[ProjectFileIndexer::Name]   = "name";
+    m_roles[ProjectFileIndexer::Path]   = "path";
+    m_roles[ProjectFileIndexer::IsOpen] = "isOpen";
 
-    connect(&m_workerWatcher, SIGNAL(finished()), this, SLOT(reindexReady()));
+    connect(&m_workerWatcher, SIGNAL(finished()), this, SLOT(__reindexReady()));
 }
 
-ProjectNavigationModel::~ProjectNavigationModel(){
+ProjectFileIndexer::~ProjectFileIndexer(){
 }
 
-int ProjectNavigationModel::rowCount(const QModelIndex &) const{
+int ProjectFileIndexer::rowCount(const QModelIndex &) const{
     return m_filteredOpenedFiles.size() + m_filteredFiles.size();
 }
 
-QVariant ProjectNavigationModel::data(const QModelIndex &index, int role) const{
+QVariant ProjectFileIndexer::data(const QModelIndex &index, int role) const{
     int row = index.row();
 
     if ( row < m_filteredOpenedFiles.size() ){
-        if ( role == ProjectNavigationModel::Name ){
+        if ( role == ProjectFileIndexer::Name ){
             return m_filteredOpenedFiles[row].name;
-        } else if ( role == ProjectNavigationModel::Path ){
+        } else if ( role == ProjectFileIndexer::Path ){
             return m_filteredOpenedFiles[row].path;
-        } else if ( role == ProjectNavigationModel::IsOpen ){
+        } else if ( role == ProjectFileIndexer::IsOpen ){
             return true;
         }
     } else {
         row = row - m_filteredOpenedFiles.size();
         int fileIndex = m_filteredFiles[row];
-        if ( role == ProjectNavigationModel::Name ){
+        if ( role == ProjectFileIndexer::Name ){
             return m_files[fileIndex].name;
-        } else if ( role == ProjectNavigationModel::Path ){
+        } else if ( role == ProjectFileIndexer::Path ){
             return m_files[fileIndex].path;
-        } else if ( role == ProjectNavigationModel::IsOpen ){
+        } else if ( role == ProjectFileIndexer::IsOpen ){
             return false;
         }
     }
     return QVariant();
 }
 
-void ProjectNavigationModel::reindex(){
+void ProjectFileIndexer::filter(const QJSValue &options){
+    m_projectDocuments = qobject_cast<ProjectDocumentModel*>(options.property("documents").toQObject());
+
+    QString f = options.hasOwnProperty("contains") ? options.property("contains").toString() : "";
+
+    if ( m_filter != f ){
+        m_filter = f;
+        if ( !m_isIndexing ){
+            if ( m_requiresReindex ){
+                reindex();
+            } else {
+                beginResetModel();
+                updateFilters();
+                endResetModel();
+            }
+        }
+    }
+}
+
+void ProjectFileIndexer::reindex(){
     if ( m_requiresReindex && m_project->rootPath() != "" ){
         beginResetModel();
         m_filteredFiles.clear();
@@ -79,10 +99,10 @@ void ProjectNavigationModel::reindex(){
 
         beginIndexing();
         m_requiresReindex = false;
-        QFuture<QList<ProjectNavigationModel::Entry> > future = QtConcurrent::run(
+        QFuture<QList<ProjectFileIndexer::Entry> > future = QtConcurrent::run(
             [](QString path){
 
-                QList<ProjectNavigationModel::Entry> entries;
+                QList<ProjectFileIndexer::Entry> entries;
 
                 QDirIterator dit(path, QDirIterator::Subdirectories);
                 while( dit.hasNext() ){
@@ -91,7 +111,7 @@ void ProjectNavigationModel::reindex(){
                     if ( info.fileName() == "." || info.fileName() == ".." || info.isDir() )
                         continue;
 
-                    entries.append(ProjectNavigationModel::Entry(info.fileName(), info.filePath()));
+                    entries.append(ProjectFileIndexer::Entry(info.fileName(), info.filePath()));
                 }
 
                 return entries;
@@ -101,7 +121,7 @@ void ProjectNavigationModel::reindex(){
     }
 }
 
-void ProjectNavigationModel::reindexReady(){
+void ProjectFileIndexer::__reindexReady(){
     beginResetModel();
     m_files = m_workerWatcher.result();
     updateFilters();
@@ -110,35 +130,42 @@ void ProjectNavigationModel::reindexReady(){
     endIndexing();
 }
 
-void ProjectNavigationModel::requiresReindex(){
+void ProjectFileIndexer::requiresReindex(){
     m_requiresReindex = true;
 }
 
-void ProjectNavigationModel::updateFilters(){
+void ProjectFileIndexer::updateFilters(){
     m_filteredOpenedFiles.clear();
-    ProjectDocumentModel* dm = m_project->documentModel();
-    for( QHash<QString, Document*>::const_iterator it = dm->openedFiles().begin();
-         it != dm->openedFiles().end();
-         ++it )
-    {
-        ProjectFile* file = it.value()->file();
-        if ( m_filter.size() <= file->name().size() )
-            if ( file->name().contains(m_filter, Qt::CaseInsensitive) )
-                m_filteredOpenedFiles.append(ProjectNavigationModel::Entry(
-                    file->name(), file->path()
-                ));
+    ProjectDocumentModel* dm = m_projectDocuments;
+    if ( dm ){
+        for( auto it = dm->openedFiles().begin(); it != dm->openedFiles().end(); ++it ){
+            ProjectFile* file = it.value()->file();
+            if ( m_filter.size() <= file->name().size() ){
+                if ( file->name().contains(m_filter, Qt::CaseInsensitive) ){
+                    m_filteredOpenedFiles.append(ProjectFileIndexer::Entry(
+                        file->name(), file->path()
+                    ));
+                }
+            }
+        }
     }
 
     m_filteredFiles.clear();
     for ( int i = 0; i < m_files.size(); ++i ){
-        if ( m_filter.size() <= m_files[i].name.size() )
-            if ( m_files[i].name.contains(m_filter, Qt::CaseInsensitive) &&
-                 !m_project->isOpened(m_files[i].path))
-                m_filteredFiles.append(i);
+        if ( m_filter.size() <= m_files[i].name.size() ){
+            if ( m_files[i].name.contains(m_filter, Qt::CaseInsensitive) ){
+                if ( dm ){
+                    if ( !m_project->isOpened(m_files[i].path ))
+                        m_filteredFiles.append(i);
+                } else {
+                    m_filteredFiles.append(i);
+                }
+            }
+        }
     }
 }
 
-void ProjectNavigationModel::setFilter(const QString &filter){
+void ProjectFileIndexer::setFilter(const QString &filter){
     if ( m_filter != filter ){
         m_filter = filter;
         if ( !m_isIndexing ){
@@ -154,7 +181,7 @@ void ProjectNavigationModel::setFilter(const QString &filter){
     }
 }
 
-void ProjectNavigationModel::directoryChanged(const QString &){
+void ProjectFileIndexer::__directoryChanged(const QString &){
     requiresReindex();
 }
 

@@ -20,7 +20,7 @@
 #include "live/projectdocument.h"
 #include "live/projectdocumentmodel.h"
 #include "live/viewengine.h"
-#include "projectnavigationmodel.h"
+#include "projectfileindexer.h"
 #include "projectfilemodel.h"
 #include "runnablecontainer.h"
 #include "runnable.h"
@@ -48,7 +48,6 @@ namespace lv{
 Project::Project(el::Engine *engine, QObject *parent)
     : QObject(parent)
     , m_fileModel(new ProjectFileModel(this))
-    , m_navigationModel(new ProjectNavigationModel(this))
     , m_documentModel(new ProjectDocumentModel(this))
     , m_runnables(new RunnableContainer(this))
     , m_lockedFileIO(LockedFileIOSession::createInstance())
@@ -71,7 +70,6 @@ Project::Project(el::Engine *engine, QObject *parent)
 Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
-    delete m_navigationModel;
     delete m_scheduleRunTimer;
 }
 
