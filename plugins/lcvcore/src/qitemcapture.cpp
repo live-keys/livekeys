@@ -58,7 +58,8 @@ void QItemCapture::componentComplete(){
 void QItemCapture::capture(){
     if ( !m_captureSource ){
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "No capture source provided.", lv::Exception::toCode("~source"));
-        lv::ViewContext::instance().engine()->throwError(&e, this);
+        lv::ViewEngine* ve = lv::ViewEngine::grab(this);
+        lv::QmlError(ve, e, this).jsThrow();
         return;
     }
     if ( m_scheduleCapture )

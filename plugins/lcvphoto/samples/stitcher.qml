@@ -21,8 +21,8 @@ Column{
                 function(e){ return Cv.MatIO.read(e); }
             )
             
-            Cv.MatView{
-                mat : modelData
+            Cv.ImageView{
+                image: modelData
             }
         }
     }

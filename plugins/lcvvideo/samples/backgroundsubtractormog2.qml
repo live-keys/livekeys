@@ -18,7 +18,7 @@ ScrollView{
             Component.onCompleted : staticLoad(parent.videoPath)
         }
         
-        MatView {
+        ImageView {
             id: background
         }
         
@@ -29,7 +29,7 @@ ScrollView{
             learningRate : 0.005
             detectShadows : false
             onOutputChanged : {
-               background.mat = this.backgroundModel
+               background.image = this.backgroundModel
             }
             Component.onCompleted : staticLoad("mog2")
         }

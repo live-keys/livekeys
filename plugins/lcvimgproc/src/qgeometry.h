@@ -4,6 +4,7 @@
 #include <QObject>
 #include "opencv2/imgproc.hpp"
 #include "qmat.h"
+#include "live/viewengine.h"
 
 class QGeometry : public QObject{
 
@@ -58,6 +59,9 @@ public slots:
 
     QVariantList applyPerspectiveTransform(QVariantList points, QMat* warp);
     void warpTriangles(QMat* src, QMat* dst, QVariantList triangles1, QVariantList triangles2);
+
+private:
+    lv::ViewEngine* engine();
 };
 
 #endif // QGEOMETRY_H

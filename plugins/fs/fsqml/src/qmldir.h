@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include <QJSValue>
+#include "live/viewengine.h"
 
 namespace lv {
 
@@ -10,6 +11,7 @@ namespace lv {
 class QmlDir : public QObject{
 
     Q_OBJECT
+
 public:
     explicit QmlDir(QObject *parent = nullptr);
 
@@ -21,6 +23,9 @@ public slots:
     bool mkPath(QJSValue path);
     bool remove(QJSValue path);
     bool rename(QJSValue old, QJSValue nu);
+
+private:
+    ViewEngine* engine();
 };
 
 }

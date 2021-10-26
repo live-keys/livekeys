@@ -21,8 +21,8 @@ Item{
             )
             property var times:  [1.6, 6, 30]
             
-            Cv.MatView{
-                mat : modelData
+            Cv.ImageView{
+                image : modelData
             }
         }
     }         

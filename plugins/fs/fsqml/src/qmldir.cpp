@@ -40,14 +40,16 @@ QJSValue QmlDir::listDetail(QJSValue path, QJSValue){
 
     QFileInfoList finfos = QDir(path.toString()).entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name | QDir::DirsFirst);
 
-    QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
+    ViewEngine* ve = engine();
+    if ( !ve )
+        return result;
 
-    result = engine->newArray(finfos.size());
+    result = ve->engine()->newArray(finfos.size());
 
     for ( int i = 0; i < finfos.size(); ++i ){
         QFileInfo& finfo = finfos[i];
 
-        QJSValue rinfo = engine->newObject();
+        QJSValue rinfo = ve->engine()->newObject();
         rinfo.setProperty("name", finfo.fileName());
         rinfo.setProperty("isDir",  finfo.isDir());
         rinfo.setProperty("size", static_cast<uint>(finfo.size()));
@@ -66,9 +68,13 @@ QJSValue QmlDir::detail(QJSValue path){
         return QJSValue();
     }
 
-    QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
+    QJSValue result;
 
-    QJSValue result = engine->newObject();
+    ViewEngine* ve = engine();
+    if ( !ve )
+        return result;
+
+    result = ve->engine()->newObject();
 
     result.setProperty("name", finfo.fileName());
     result.setProperty("path", finfo.filePath());
@@ -100,6 +106,13 @@ bool QmlDir::rename(QJSValue old, QJSValue nu)
 {
     if (!old.isString() || !nu.isString()) return false;
     return QDir(".").rename(old.toString(), nu.toString());
+}
+
+ViewEngine *QmlDir::engine(){
+    lv::ViewEngine* ve = lv::ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
+    if ( !ve )
+        lv::QmlError::warnNoEngineCaptured(this, "Dir");
+    return ve;
 }
 
 }

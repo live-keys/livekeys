@@ -6,7 +6,7 @@
 
 QImageView::QImageView(QQuickItem *parent)
     : QQuickItem(parent)
-    , m_mat(QMat::nullMat())
+    , m_mat(nullptr)
     , m_linearFilter(true)
 {
     setFlag(ItemHasContents, true);
@@ -31,20 +31,19 @@ QSGNode *QImageView::updatePaintNode(QSGNode *node, QQuickItem::UpdatePaintNodeD
 }
 
 void QImageView::setImage(QMat *arg){
-    if ( arg == nullptr )
-        return;
-
-    cv::Mat* matData = arg->internalPtr();
-    if ( static_cast<int>(implicitWidth()) != matData->cols || static_cast<int>(implicitHeight()) != matData->rows ){
-        setImplicitWidth(matData->cols);
-        setImplicitHeight(matData->rows);
-    }
-
     if ( m_mat )
         lv::Shared::unref(m_mat);
 
     m_mat = arg;
-    lv::Shared::ref(arg);
+
+    if ( arg != nullptr ){
+        lv::Shared::ref(arg);
+        cv::Mat* matData = arg->internalPtr();
+        if ( static_cast<int>(implicitWidth()) != matData->cols || static_cast<int>(implicitHeight()) != matData->rows ){
+            setImplicitWidth(matData->cols);
+            setImplicitHeight(matData->rows);
+        }
+    }
 
     emit imageChanged();
     update();
