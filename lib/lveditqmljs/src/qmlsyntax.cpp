@@ -41,26 +41,26 @@ QJSValue QmlSyntax::parsePathDeclaration(const QString &content){
     QQmlEngine* e = m_engine->engine();
     QJSValue result = e->newObject();
 
-    QmlJS::Scanner scanner;
-    QList<QmlJS::Token> tokens = scanner(content);
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(content);
     if ( tokens.size() == 0 ){
         result.setProperty("path", "");
         return result;
     }
 
-    if ( tokens[0].kind == QmlJS::Token::String ){
+    if ( tokens[0].kind == QQmlJS::Token::String ){
         result.setProperty("path", content.mid(tokens[0].begin() + 1, tokens[0].length - 2));
         result.setProperty("from", "");
         return result;
     }
 
     if ( tokens.size() > 5 ){
-        if ( tokens[0].kind == QmlJS::Token::Identifier &&
-             tokens[1].kind == QmlJS::Token::Dot &&
-             tokens[2].kind == QmlJS::Token::Identifier &&
-             tokens[3].kind == QmlJS::Token::LeftParenthesis &&
-             tokens[4].kind == QmlJS::Token::String &&
-             tokens[5].kind == QmlJS::Token::RightParenthesis )
+        if ( tokens[0].kind == QQmlJS::Token::Identifier &&
+             tokens[1].kind == QQmlJS::Token::Dot &&
+             tokens[2].kind == QQmlJS::Token::Identifier &&
+             tokens[3].kind == QQmlJS::Token::LeftParenthesis &&
+             tokens[4].kind == QQmlJS::Token::String &&
+             tokens[5].kind == QQmlJS::Token::RightParenthesis )
         {
             if ( content.mid(tokens[0].begin(), tokens[0].length ) == "project" &&
                  content.mid(tokens[2].begin(), tokens[2].length ) == "path" )

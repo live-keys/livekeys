@@ -43,7 +43,7 @@
 #include <QCoreApplication>
 #include <utils/qtcassert.h>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 namespace Internal {
 /*!

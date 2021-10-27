@@ -30,7 +30,7 @@
 
 #include "qmljsviewercontext.h"
 
-namespace QmlJS {
+namespace QQmlJS {
 /*!
     \class QmlJS::ViewerContext
     \brief The ViewerContext class encapsulate selector and paths for a given viewer.
@@ -45,8 +45,8 @@ ViewerContext::ViewerContext()
 { }
 
 ViewerContext::ViewerContext(QStringList selectors, QStringList paths,
-                                    QmlJS::Dialect language,
-                                    QmlJS::ViewerContext::Flags flags)
+                                    QQmlJS::Dialect language,
+                                    QQmlJS::ViewerContext::Flags flags)
     : selectors(selectors), paths(paths), language(language),
       flags(flags)
 { }

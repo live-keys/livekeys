@@ -42,7 +42,7 @@
 
 static Q_LOGGING_CATEGORY(importsLog, "qtc.qmljs.imports")
 
-namespace QmlJS {
+namespace QQmlJS {
 
 ImportKind::Enum toImportKind(ImportType::Enum type)
 {

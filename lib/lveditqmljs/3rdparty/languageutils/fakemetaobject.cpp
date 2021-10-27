@@ -52,6 +52,11 @@ void FakeMetaEnum::setName(const QString &name)
 void FakeMetaEnum::addKey(const QString &key, int value)
 { m_keys.append(key); m_values.append(value); }
 
+void FakeMetaEnum::addKey(const QString &key){
+    m_keys.append(key);
+    m_values.append(m_values.length());
+}
+
 QString FakeMetaEnum::key(int index) const
 { return m_keys.at(index); }
 

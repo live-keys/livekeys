@@ -22,7 +22,7 @@
 #include <QList>
 #include <QSharedPointer>
 
-namespace QmlJS{ namespace AST {
+namespace QQmlJS{ namespace AST {
     class Node;
 }}
 
@@ -54,7 +54,7 @@ public:
         virtual ~RangeItem(){}
 
         virtual RangeType rangeType() const = 0;
-        virtual QmlJS::AST::Node* getAst() = 0;
+        virtual QQmlJS::AST::Node* getAst() = 0;
         virtual RangeItem* getParent() = 0;
         virtual void appendObject(RangeObject* child) = 0;
         virtual void appendProperty(RangeProperty*){}
@@ -68,7 +68,7 @@ public:
 
         void appendObject(RangeObject* object){ child = object; }
         RangeType rangeType() const{ return RangeItem::Property; }
-        QmlJS::AST::Node* getAst(){ return ast; }
+        QQmlJS::AST::Node* getAst(){ return ast; }
         RangeItem* getParent(){ return parent; }
         QStringList name() const;
         QStringList object() const;
@@ -76,7 +76,7 @@ public:
         bool hasType() const;
 
     public:
-        QmlJS::AST::Node* ast;
+        QQmlJS::AST::Node* ast;
 
         RangeItem*   parent;
         RangeObject* child;
@@ -99,11 +99,11 @@ public:
         RangeType rangeType() const{ return RangeItem::Object; }
         void appendObject(RangeObject *child) { children.append(child); }
         void appendProperty(RangeProperty *property){ properties.append(property); }
-        QmlJS::AST::Node* getAst(){ return ast; }
+        QQmlJS::AST::Node* getAst(){ return ast; }
         RangeItem* getParent(){ return parent; }
 
     public:
-        QmlJS::AST::Node* ast;
+        QQmlJS::AST::Node* ast;
 
         RangeItem* parent;
         QList<RangeObject*>   children;
@@ -123,7 +123,7 @@ public:
 
     QString toString() const;
 
-    void visit(QmlJS::AST::Node* astroot);
+    void visit(QQmlJS::AST::Node* astroot);
 
     QList<RangeProperty*> propertiesBetween(int start, int end, RangeObject* root = nullptr);
     QList<RangeObject*>   objectsBetween(int start, int end, RangeObject* root = nullptr);
@@ -135,7 +135,7 @@ private:
 
     QString toStringRecursive(RangeObject* object, int indent = 0) const;
     QString toStringRecursive(RangeProperty* property, int indent = 0) const;
-    DocumentQmlValueObjects::RangeObject* appendRange(QmlJS::AST::Node* ast, int begin, int end);
+    DocumentQmlValueObjects::RangeObject* appendRange(QQmlJS::AST::Node* ast, int begin, int end);
 
     RangeObject* m_root;
 };

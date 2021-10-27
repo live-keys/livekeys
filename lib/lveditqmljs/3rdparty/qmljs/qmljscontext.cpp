@@ -34,8 +34,8 @@
 #include "parser/qqmljsengine_p.h"
 #include "qmljsvalueowner.h"
 
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 
 /*!
     \class QmlJS::Context
@@ -57,7 +57,7 @@ using namespace QmlJS::AST;
     QmlJSEditorDocument::semanticInfo()::context.
 */
 
-ContextPtr Context::create(const QmlJS::Snapshot &snapshot, ValueOwner *valueOwner,
+ContextPtr Context::create(const QQmlJS::Snapshot &snapshot, ValueOwner *valueOwner,
                            const ImportsPerDocument &imports, const ViewerContext &vContext)
 {
     QSharedPointer<Context> result(new Context(snapshot, valueOwner, imports, vContext));
@@ -65,7 +65,7 @@ ContextPtr Context::create(const QmlJS::Snapshot &snapshot, ValueOwner *valueOwn
     return result;
 }
 
-Context::Context(const QmlJS::Snapshot &snapshot, ValueOwner *valueOwner,
+Context::Context(const QQmlJS::Snapshot &snapshot, ValueOwner *valueOwner,
                  const ImportsPerDocument &imports, const ViewerContext &vContext)
     : _snapshot(snapshot),
       _valueOwner(valueOwner),
@@ -89,7 +89,7 @@ ValueOwner *Context::valueOwner() const
     return _valueOwner.data();
 }
 
-QmlJS::Snapshot Context::snapshot() const
+QQmlJS::Snapshot Context::snapshot() const
 {
     return _snapshot;
 }
@@ -99,14 +99,14 @@ ViewerContext Context::viewerContext() const
     return _vContext;
 }
 
-const Imports *Context::imports(const QmlJS::Document *doc) const
+const Imports *Context::imports(const QQmlJS::Document *doc) const
 {
     if (!doc)
         return 0;
     return _imports.value(doc).data();
 }
 
-const ObjectValue *Context::lookupType(const QmlJS::Document *doc, UiQualifiedId *qmlTypeName,
+const ObjectValue *Context::lookupType(const QQmlJS::Document *doc, UiQualifiedId *qmlTypeName,
                                        UiQualifiedId *qmlTypeNameEnd) const
 {
     const Imports *importsObj = imports(doc);
@@ -128,7 +128,7 @@ const ObjectValue *Context::lookupType(const QmlJS::Document *doc, UiQualifiedId
     return objectValue;
 }
 
-const ObjectValue *Context::lookupType(const QmlJS::Document *doc, const QStringList &qmlTypeName) const
+const ObjectValue *Context::lookupType(const QQmlJS::Document *doc, const QStringList &qmlTypeName) const
 {
     const Imports *importsObj = imports(doc);
     if (!importsObj)

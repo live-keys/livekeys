@@ -36,7 +36,7 @@
 
 #include <QString>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 QString DescribeValueVisitor::describe(const Value *value, int depth, ContextPtr context)
 {
@@ -373,11 +373,11 @@ void DescribeValueVisitor::visit(const Reference *value)
         }
     } else if (const ASTVariableReference *v = value->asAstVariableReference()) {
         basicDump("ASTVariableReference", v, printDetail);
-        const AST::VariableDeclaration *var = v->ast();
+        const AST::PatternElement *var = v->ast();
         if (printDetail && var) {
             dumpNewline();
             dump("variable:");
-            dump(var->name.toString());
+            dump(var->bindingIdentifier.toString());
         }
     } else if (const QmlPrototypeReference *v = value->asQmlPrototypeReference()) {
         basicDump("QmlPrototypeReference", v, printDetail);

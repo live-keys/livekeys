@@ -38,7 +38,7 @@
 
 #include <QString>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class QMLJS_EXPORT Dialect {
 public:

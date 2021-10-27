@@ -58,7 +58,7 @@ public:
     static int getBlockEnd(QTextBlock& bl, int position);
 
 private:
-    int findColonInTokenSet(const QList<QmlJS::Token>& tokens);
+    int findColonInTokenSet(const QList<QQmlJS::Token>& tokens);
 
     int m_position;
     int m_length;
@@ -67,7 +67,7 @@ private:
     int m_valuePosition;
     int m_valueEnd;
 
-    QmlJS::Scanner m_scanner;
+    QQmlJS::Scanner m_scanner;
 
     ProjectDocument* m_document;
 };

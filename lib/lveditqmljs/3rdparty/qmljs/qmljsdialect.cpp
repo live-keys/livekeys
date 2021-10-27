@@ -33,7 +33,7 @@
 
 #include <QDebug>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 
 bool Dialect::isQmlLikeLanguage() const

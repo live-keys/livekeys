@@ -35,10 +35,11 @@
 #include "qmljsconstants.h"
 #include "parser/qqmljsastfwd_p.h"
 #include "parser/qqmljsengine_p.h"
+#include "parser/qqmljsdiagnosticmessage_p.h"
 
 QT_FORWARD_DECLARE_CLASS(QColor)
 
-namespace QmlJS {
+namespace QQmlJS {
 
 QMLJS_EXPORT QColor toQColor(const QString &qmlColorString);
 QMLJS_EXPORT QString toString(AST::UiQualifiedId *qualifiedId,
@@ -74,9 +75,13 @@ AST::SourceLocation locationFromRange(const T *node)
 template <class T>
 DiagnosticMessage errorMessage(const T *node, const QString &message)
 {
-    return DiagnosticMessage(DiagnosticMessage::Error,
-                             locationFromRange(node),
-                             message);
+    AST::SourceLocation l = locationFromRange(node);
+    DiagnosticMessage dm;
+    dm.type = QtCriticalMsg;
+    dm.line = l.startLine;
+    dm.column = l.startColumn;
+    dm.message = message;
+    return dm;
 }
 
 } // namespace QmlJS

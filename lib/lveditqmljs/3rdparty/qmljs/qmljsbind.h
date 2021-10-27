@@ -37,9 +37,9 @@
 #include <QHash>
 #include <QCoreApplication>
 
-namespace QmlJS {
+namespace QQmlJS {
 
-class DiagnosticMessage;
+struct DiagnosticMessage;
 class Document;
 
 class QMLJS_EXPORT Bind: protected AST::Visitor
@@ -84,10 +84,12 @@ protected:
     // QML/JS
     bool visit(AST::FunctionDeclaration *ast) override;
     bool visit(AST::FunctionExpression *ast) override;
-    bool visit(AST::VariableDeclaration *ast) override;
+    bool visit(AST::PatternElement *ast) override;
 
     ObjectValue *switchObjectValue(ObjectValue *newObjectValue);
     ObjectValue *bindObject(AST::UiQualifiedId *qualifiedTypeNameId, AST::UiObjectInitializer *initializer);
+
+    void throwRecursionDepthError() override;
 
 private:
     Document *_doc;

@@ -21,14 +21,14 @@ namespace lv{
 DocumentQmlRanges::DocumentQmlRanges(){
 }
 
-QList<DocumentQmlRanges::Range> DocumentQmlRanges::operator()(QmlJS::Document::Ptr doc){
+QList<DocumentQmlRanges::Range> DocumentQmlRanges::operator()(QQmlJS::Document::Ptr doc){
     m_ranges.clear();
     if (doc && doc->ast() != 0)
         doc->ast()->accept(this);
     return m_ranges;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::UiObjectBinding *ast){
+bool DocumentQmlRanges::visit(QQmlJS::AST::UiObjectBinding *ast){
     if (ast->initializer && ast->initializer->lbraceToken.length)
         m_ranges.append(createRange(
             ast, ast->initializer->firstSourceLocation(), ast->initializer->lastSourceLocation()
@@ -36,59 +36,63 @@ bool DocumentQmlRanges::visit(QmlJS::AST::UiObjectBinding *ast){
     return true;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::UiObjectDefinition *ast){
+bool DocumentQmlRanges::visit(QQmlJS::AST::UiObjectDefinition *ast){
     if (ast->initializer && ast->initializer->lbraceToken.length)
         m_ranges.append(createRange(ast, ast->initializer));
     return true;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::FunctionExpression *ast){
+bool DocumentQmlRanges::visit(QQmlJS::AST::FunctionExpression *ast){
     m_ranges.append(createRange(ast));
     return true;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::FunctionDeclaration *ast){
+bool DocumentQmlRanges::visit(QQmlJS::AST::FunctionDeclaration *ast){
     m_ranges.append(createRange(ast));
     return true;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::BinaryExpression *ast){
-    auto field = QmlJS::AST::cast<QmlJS::AST::FieldMemberExpression *>(ast->left);
-    auto funcExpr = QmlJS::AST::cast<QmlJS::AST::FunctionExpression *>(ast->right);
+bool DocumentQmlRanges::visit(QQmlJS::AST::BinaryExpression *ast){
+    auto field = QQmlJS::AST::cast<QQmlJS::AST::FieldMemberExpression *>(ast->left);
+    auto funcExpr = QQmlJS::AST::cast<QQmlJS::AST::FunctionExpression *>(ast->right);
 
     if (field && funcExpr && funcExpr->body && (ast->op == QSOperator::Assign))
         m_ranges.append(createRange(ast, ast->firstSourceLocation(), ast->lastSourceLocation()));
     return true;
 }
 
-bool DocumentQmlRanges::visit(QmlJS::AST::UiScriptBinding *ast){
-    if (QmlJS::AST::Block *block = QmlJS::AST::cast<QmlJS::AST::Block *>(ast->statement))
+bool DocumentQmlRanges::visit(QQmlJS::AST::UiScriptBinding *ast){
+    if (QQmlJS::AST::Block *block = QQmlJS::AST::cast<QQmlJS::AST::Block *>(ast->statement))
         m_ranges.append(createRange(ast, block));
     return true;
 }
 
+void DocumentQmlRanges::throwRecursionDepthError(){
+    qWarning("DocumentQmlRanges: Recursion depth reached");
+}
+
 DocumentQmlRanges::Range DocumentQmlRanges::createRange(
-        QmlJS::AST::UiObjectMember *member,
-        QmlJS::AST::UiObjectInitializer *ast)
+        QQmlJS::AST::UiObjectMember *member,
+        QQmlJS::AST::UiObjectInitializer *ast)
 {
     return createRange(member, member->firstSourceLocation(), ast->rbraceToken);
 }
 
-DocumentQmlRanges::Range DocumentQmlRanges::createRange(QmlJS::AST::FunctionExpression *ast){
+DocumentQmlRanges::Range DocumentQmlRanges::createRange(QQmlJS::AST::FunctionExpression *ast){
     return createRange(ast, ast->lbraceToken, ast->rbraceToken);
 }
 
 DocumentQmlRanges::Range DocumentQmlRanges::createRange(
-        QmlJS::AST::UiScriptBinding *ast,
-        QmlJS::AST::Block *block)
+        QQmlJS::AST::UiScriptBinding *ast,
+        QQmlJS::AST::Block *block)
 {
     return createRange(ast, block->lbraceToken, block->rbraceToken);
 }
 
 DocumentQmlRanges::Range DocumentQmlRanges::createRange(
-        QmlJS::AST::Node *ast,
-        QmlJS::AST::SourceLocation start,
-        QmlJS::AST::SourceLocation end)
+        QQmlJS::AST::Node *ast,
+        QQmlJS::AST::SourceLocation start,
+        QQmlJS::AST::SourceLocation end)
 {
     Range range;
 

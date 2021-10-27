@@ -32,7 +32,7 @@
 
 #include <algorithm>
 
-using namespace QmlJS;
+using namespace QQmlJS;
 
 namespace {
 static const QString js_keywords[] = {

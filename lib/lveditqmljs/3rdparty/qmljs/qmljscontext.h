@@ -38,7 +38,7 @@
 
 #include <QSharedPointer>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class Document;
 class Snapshot;

@@ -44,7 +44,7 @@ class QIODevice;
 class QBuffer;
 QT_END_NAMESPACE
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class ModuleApiInfo;
 namespace AST {

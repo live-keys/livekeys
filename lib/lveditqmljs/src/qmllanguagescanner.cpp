@@ -323,10 +323,10 @@ QList<QmlTypeInfo::Ptr> QmlLanguageScanner::scanTypeInfoStream(
     QList<QmlTypeInfo::Ptr> result;
 
     QHash<QString, LanguageUtils::FakeMetaObject::ConstPtr> newObjects;
-    QList<QmlJS::ModuleApiInfo> moduleApis;
+    QList<QQmlJS::ModuleApiInfo> moduleApis;
     QStringList dependencies;
 
-    QmlJS::TypeDescriptionReader reader(typeInfoPath, stream);
+    QQmlJS::TypeDescriptionReader reader(typeInfoPath, stream);
     if ( !reader(&newObjects, &moduleApis, &dependencies) ){
         if ( m_messageListener ){
             m_messageListener(VisualLog::MessageInfo::Error, "TypeInfo parse error: " + reader.errorMessage());
@@ -450,7 +450,6 @@ void QmlLanguageScanner::scanQmlDirForExports(const QmlDirParser &dirParser, con
     for ( auto it = components.begin(); it != components.end(); ++it ){
         if ( it.key() == "classname" )
             continue;
-
         QString filePath = QDir::cleanPath(lib->path() + QDir::separator() + it->fileName);
         if ( QFile::exists(filePath) ){
             QString fileContent = QString::fromStdString(m_ioSession->readFromFile(filePath.toStdString()));

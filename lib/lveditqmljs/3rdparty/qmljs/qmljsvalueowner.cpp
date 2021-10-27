@@ -32,7 +32,7 @@
 
 #include "qmljscontext.h"
 
-using namespace QmlJS;
+using namespace QQmlJS;
 
 /*!
     \class QmlJS::ValueOwner
@@ -45,7 +45,7 @@ using namespace QmlJS;
     A ValueOwner also provides access to various default values.
 */
 
-namespace QmlJS {
+namespace QQmlJS {
 namespace Internal {
 
 class QtObjectPrototypeReference : public Reference

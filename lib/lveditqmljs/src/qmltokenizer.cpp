@@ -20,33 +20,33 @@ QmlTokenizer::QmlTokenizer(QObject *parent)
 
     if ( m_engine ){
         m_tokenKind = m_engine->engine()->newObject();
-        m_tokenKind.setProperty("endOfFile",        QmlJS::Token::EndOfFile);
-        m_tokenKind.setProperty("keyword",          QmlJS::Token::Keyword);
-        m_tokenKind.setProperty("identifier",       QmlJS::Token::Identifier);
-        m_tokenKind.setProperty("string",           QmlJS::Token::String);
-        m_tokenKind.setProperty("comment",          QmlJS::Token::Comment);
-        m_tokenKind.setProperty("number",           QmlJS::Token::Number);
-        m_tokenKind.setProperty("leftParenthesis",  QmlJS::Token::LeftParenthesis);
-        m_tokenKind.setProperty("rightParenthesis", QmlJS::Token::RightParenthesis);
-        m_tokenKind.setProperty("leftBrace",        QmlJS::Token::LeftBrace);
-        m_tokenKind.setProperty("rightBrace",       QmlJS::Token::RightBrace);
-        m_tokenKind.setProperty("leftBracket",      QmlJS::Token::LeftBracket);
-        m_tokenKind.setProperty("rightBracket",     QmlJS::Token::RightBracket);
+        m_tokenKind.setProperty("endOfFile",        QQmlJS::Token::EndOfFile);
+        m_tokenKind.setProperty("keyword",          QQmlJS::Token::Keyword);
+        m_tokenKind.setProperty("identifier",       QQmlJS::Token::Identifier);
+        m_tokenKind.setProperty("string",           QQmlJS::Token::String);
+        m_tokenKind.setProperty("comment",          QQmlJS::Token::Comment);
+        m_tokenKind.setProperty("number",           QQmlJS::Token::Number);
+        m_tokenKind.setProperty("leftParenthesis",  QQmlJS::Token::LeftParenthesis);
+        m_tokenKind.setProperty("rightParenthesis", QQmlJS::Token::RightParenthesis);
+        m_tokenKind.setProperty("leftBrace",        QQmlJS::Token::LeftBrace);
+        m_tokenKind.setProperty("rightBrace",       QQmlJS::Token::RightBrace);
+        m_tokenKind.setProperty("leftBracket",      QQmlJS::Token::LeftBracket);
+        m_tokenKind.setProperty("rightBracket",     QQmlJS::Token::RightBracket);
 
-        m_tokenKind.setProperty("semicolon", QmlJS::Token::Semicolon);
-        m_tokenKind.setProperty("colon",     QmlJS::Token::Colon);
-        m_tokenKind.setProperty("comma",     QmlJS::Token::Comma);
-        m_tokenKind.setProperty("dot",       QmlJS::Token::Dot);
-        m_tokenKind.setProperty("delimiter", QmlJS::Token::Delimiter);
-        m_tokenKind.setProperty("regExp",    QmlJS::Token::RegExp);
+        m_tokenKind.setProperty("semicolon", QQmlJS::Token::Semicolon);
+        m_tokenKind.setProperty("colon",     QQmlJS::Token::Colon);
+        m_tokenKind.setProperty("comma",     QQmlJS::Token::Comma);
+        m_tokenKind.setProperty("dot",       QQmlJS::Token::Dot);
+        m_tokenKind.setProperty("delimiter", QQmlJS::Token::Delimiter);
+        m_tokenKind.setProperty("regExp",    QQmlJS::Token::RegExp);
 
         m_tokenState = m_engine->engine()->newObject();
-        m_tokenState.setProperty("normal", QmlJS::Scanner::Normal);
-        m_tokenState.setProperty("multiLineComment", QmlJS::Scanner::MultiLineComment);
-        m_tokenState.setProperty("multiLineStringDQuote", QmlJS::Scanner::MultiLineStringDQuote);
-        m_tokenState.setProperty("multiLineStringSQuote", QmlJS::Scanner::MultiLineStringSQuote);
-        m_tokenState.setProperty("multiLineMask", QmlJS::Scanner::MultiLineMask);
-        m_tokenState.setProperty("regexpMayFollow", QmlJS::Scanner::RegexpMayFollow);
+        m_tokenState.setProperty("normal", QQmlJS::Scanner::Normal);
+        m_tokenState.setProperty("multiLineComment", QQmlJS::Scanner::MultiLineComment);
+        m_tokenState.setProperty("multiLineStringDQuote", QQmlJS::Scanner::MultiLineStringDQuote);
+        m_tokenState.setProperty("multiLineStringSQuote", QQmlJS::Scanner::MultiLineStringSQuote);
+        m_tokenState.setProperty("multiLineMask", QQmlJS::Scanner::MultiLineMask);
+        m_tokenState.setProperty("regexpMayFollow", QQmlJS::Scanner::RegexpMayFollow);
     }
 }
 
@@ -59,16 +59,16 @@ QJSValue QmlTokenizer::scan(const QString &text){
         return QJSValue();
 
 
-    QmlJS::Scanner scanner;
-    QList<QmlJS::Token> tokens = scanner(text);
-    QList<QmlJS::Token>::iterator it = tokens.begin();
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(text);
+    QList<QQmlJS::Token>::iterator it = tokens.begin();
 
     QJSValue result = m_engine->engine()->newArray(static_cast<quint32>(tokens.size()));
 
     quint32 index = 0;
 
     while ( it != tokens.end() ){
-        QmlJS::Token& tk = *it;
+        QQmlJS::Token& tk = *it;
 
         QJSValue tokenObject = m_engine->engine()->newObject();
         tokenObject.setProperty("position", tk.offset);

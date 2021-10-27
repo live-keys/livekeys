@@ -49,9 +49,10 @@ constexpr static inline double qt_qnan() noexcept{
     return std::numeric_limits<double>::quiet_NaN();
 }
 
-QT_QML_BEGIN_NAMESPACE
 
-namespace QmlJS {
+QT_BEGIN_NAMESPACE
+
+namespace QQmlJS {
 
 static inline int toDigit(char c)
 {
@@ -117,13 +118,6 @@ double integerFromString(const char *buf, int size, int radix)
     return result;
 }
 
-double integerFromString(const QString &str, int radix)
-{
-    QByteArray ba = QStringRef(&str).trimmed().toLatin1();
-    return integerFromString(ba.constData(), ba.size(), radix);
-}
-
-
 Engine::Engine()
     : _lexer(nullptr), _directives(nullptr)
 { }
@@ -135,9 +129,9 @@ void Engine::setCode(const QString &code)
 { _code = code; }
 
 void Engine::addComment(int pos, int len, int line, int col)
-{ if (len > 0) _comments.append(QmlJS::AST::SourceLocation(pos, len, line, col)); }
+{ if (len > 0) _comments.append(QQmlJS::AST::SourceLocation(pos, len, line, col)); }
 
-QList<QmlJS::AST::SourceLocation> Engine::comments() const
+QList<QQmlJS::AST::SourceLocation> Engine::comments() const
 { return _comments; }
 
 Lexer *Engine::lexer() const
@@ -165,6 +159,6 @@ QStringRef Engine::newStringRef(const QString &text)
 QStringRef Engine::newStringRef(const QChar *chars, int size)
 { return newStringRef(QString(chars, size)); }
 
-} // end of namespace QQmlJS
+} // end of namespace QmlJS
 
-QT_QML_END_NAMESPACE
+QT_END_NAMESPACE

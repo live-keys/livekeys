@@ -43,8 +43,8 @@
 
 #include <algorithm>
 
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 
 /*!
     \class QmlJS::Document
@@ -182,7 +182,7 @@ AST::Node *Document::ast() const
     return _ast;
 }
 
-const QmlJS::Engine *Document::engine() const
+const QQmlJS::Engine *Document::engine() const
 {
     return _engine;
 }
@@ -234,6 +234,20 @@ QString Document::componentName() const
 namespace {
 class CollectDirectives : public Directives
 {
+
+    void addLocation(int line, int column) {
+        const SourceLocation loc = SourceLocation(
+                    0,  // placeholder
+                    0,  // placeholder
+                    static_cast<quint32>(line),
+                    static_cast<quint32>(column));
+        _locations += loc;
+    }
+
+    QList<SourceLocation> _locations;
+
+
+
     QString documentPath;
 public:
     CollectDirectives(const QString &documentPath)
@@ -253,6 +267,8 @@ public:
     {
         imports += ImportInfo::moduleImport(uri, LanguageUtils::ComponentVersion(version), module);
     }
+
+    virtual QList<SourceLocation> locations() { return _locations; }
 
     bool isLibrary;
     QList<ImportInfo> imports;
@@ -281,9 +297,14 @@ bool Document::parse_helper(int startToken)
     case QQmlJSGrammar::T_FEED_UI_PROGRAM:
         _parsedCorrectly = parser.parse();
         break;
-    case QQmlJSGrammar::T_FEED_JS_PROGRAM:
+    case QQmlJSGrammar::T_FEED_JS_SCRIPT:
+    case QQmlJSGrammar::T_FEED_JS_MODULE: {
         _parsedCorrectly = parser.parseProgram();
-        break;
+        const QList<SourceLocation> locations = collectDirectives.locations();
+        for (const auto &d : locations) {
+           _jsdirectives << d;
+        }
+    }
     case QQmlJSGrammar::T_FEED_JS_EXPRESSION:
         _parsedCorrectly = parser.parseExpression();
         break;
@@ -314,7 +335,7 @@ bool Document::parseQml()
 
 bool Document::parseJavaScript()
 {
-    return parse_helper(QQmlJSGrammar::T_FEED_JS_PROGRAM);
+    return parse_helper(QQmlJSGrammar::T_FEED_JS_SCRIPT);
 }
 
 bool Document::parseExpression()
@@ -543,12 +564,12 @@ void Snapshot::remove(const QString &fileName)
     }
 }
 
-const QmlJS::ImportDependencies *Snapshot::importDependencies() const
+const QQmlJS::ImportDependencies *Snapshot::importDependencies() const
 {
     return &_dependencies;
 }
 
-QmlJS::ImportDependencies *Snapshot::importDependencies()
+QQmlJS::ImportDependencies *Snapshot::importDependencies()
 {
     return &_dependencies;
 }

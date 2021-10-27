@@ -35,7 +35,7 @@
 
 #include <QLoggingCategory>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 namespace ImportType {
 enum Enum {
