@@ -10,7 +10,7 @@ import QtQuick.Controls.Styles 1.2
 
 CodePalette{
     id: palette
-    type : "qml/lcvcore#ImageFileGallery"
+    type : "qml/lcvcore#ImageGalleryView"
 
     property QtObject theme: lk.layers.workspace.themes.current
 
@@ -21,11 +21,12 @@ CodePalette{
         width: 450
         height: 200
 
-        property QtObject imageFileGallery: null
+        property QtObject imageGalleryView: null
 
         Cv.ImageGalleryView{
             anchors.fill: parent
-            files: root.imageFileGallery ? root.imageFileGallery.run(root.imageFileGallery.path, root.imageFileGallery.extensions) : []
+            files: root.imageGalleryView ? root.imageGalleryView.files : []
+            images: root.imageGalleryView ? root.imageGalleryView.images : null
         }
 
         ResizeArea{
@@ -35,7 +36,7 @@ CodePalette{
     }
 
     onInit: {
-        palette.item.imageFileGallery = value
+        palette.item.imageGalleryView = value
     }
 
 }

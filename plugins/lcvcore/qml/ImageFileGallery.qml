@@ -15,7 +15,7 @@ Act{
             return Fs.Dir.listDetail(path)
                 .filter(f => !f.isDir)
                 .map(f => path + '/' + f.name)
-                .filter(f => ext.includes(Fs.Path.suffix(f)))
+                .filter(f => ext.includes(Fs.Path.suffix(f).toLowerCase()))
         }
     }
 }

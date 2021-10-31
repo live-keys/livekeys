@@ -66,6 +66,7 @@ DISTFILES += \
     palettes/GrayscaleViewPalette.json \
     palettes/ImageFileGalleryPalette.qml \
     palettes/ImageFilePalette.json \
+    palettes/ImageGalleryViewPalette.qml \
     palettes/ImageReadPalette.json \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \

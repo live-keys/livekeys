@@ -59,7 +59,7 @@ GridView{
                             : scale < hScale ? hScale : scale
 
                 if ( scale < 1 )
-                    return Img.Geometry.scale(input, scale, scale, Img.Geometry.INTER_LINEAR)
+                    return Img.Geometry.scale(input, scale, scale, Img.Geometry.INTER_AREA )
 
                 return input
             }
@@ -97,7 +97,7 @@ GridView{
             height: parent.height - (gridView.labelVisible ? 20 : 1)
             clip: true
             sourceComponent: {
-                return gridView.imageExtensions.includes(parent.extension)
+                return gridView.imageExtensions.includes(parent.extension.toLowerCase())
                     ? gridView.__imageDelegate
                     : gridView.__fileDelegate
             }

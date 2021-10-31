@@ -16,7 +16,7 @@ class LV_EDITQMLJS_EXPORT QmlWatcher : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_PROPERTY(QObject* singleton READ target WRITE setSingleton NOTIFY targetChanged)
-    Q_PROPERTY(QObject* target READ target WRITE setTarget NOTIFY targetChanged)
+    Q_PROPERTY(QObject* target    READ target WRITE setTarget NOTIFY targetChanged)
     Q_INTERFACES(QQmlParserStatus)
 
 public:

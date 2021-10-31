@@ -137,7 +137,7 @@ CodePalette{
                 var node = null
                 if ( propertyConnection.right.id ){
                     node = palette.findObjectById(propertyConnection.right.id)
-                    if ( node.item.objectName !== 'objectNode' )
+                    if ( node && node.item.objectName !== 'objectNode' )
                         node = null
                 } else if ( propertyConnection.right.idOrProperty ){
                     node = palette.findObjectById(propertyConnection.right.idOrProperty)
