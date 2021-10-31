@@ -3603,6 +3603,7 @@ QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QJSValue &typeOrFragment){
  */
 void LanguageQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo){
     Q_D(LanguageQmlHandler);
+
     if ( !documentInfo->isParsedCorrectly() && documentInfo->imports().isEmpty() ){
         documentInfo->transferImports(d->documentInfo()->imports());
     }

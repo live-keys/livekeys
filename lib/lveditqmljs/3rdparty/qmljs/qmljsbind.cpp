@@ -193,8 +193,9 @@ bool Bind::visit(UiImport *ast)
 {
     ComponentVersion version;
     if (ast->versionToken.isValid()) {
-        const QString versionString = _doc->source().mid(ast->versionToken.offset, ast->versionToken.length);
-        version = ComponentVersion(versionString);
+//        const QString versionString = _doc->source().mid(ast->versionToken.offset, ast->versionToken.length);
+//        version = ComponentVersion(versionString);
+        version = ComponentVersion(ast->version->majorVersion, ast->version->minorVersion);
         if (!version.isValid()) {
             _diagnosticMessages->append(
                         errorMessage(ast->versionToken, tr("expected two numbers separated by a dot")));
