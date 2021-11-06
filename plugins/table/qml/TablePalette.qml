@@ -16,8 +16,8 @@ CodePalette {
 
     item: Item {
         id: paletteItem
-        width: 600
-        height: 300
+        width: 450
+        height: 250
 
         TableEditor{
             anchors.fill: parent
