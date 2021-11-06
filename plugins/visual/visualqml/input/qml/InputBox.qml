@@ -29,8 +29,7 @@ Rectangle {
 
     property real margins: 6
 
-    property QtObject defaultStyle : InputBoxStyle{}
-    property QtObject style: defaultStyle
+    property QtObject style: InputBoxStyle{}
 
     property alias text : textInput.text
     property alias font: textInput.font
