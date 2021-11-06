@@ -192,8 +192,8 @@ WebEngineView{
                 } else if ( Fs.UrlInfo.host(request.requestedUrl) === "open-project" ){
                     var path = Fs.UrlInfo.path(request.requestedUrl)
                     path = Fs.Path.join(lk.layers.workspace.pluginsPath(), path)
-
-                    lk.layers.workspace.wizards.openProject(path)
+                    var url = Fs.UrlInfo.urlFromLocalFile(path)
+                    lk.layers.workspace.wizards.openProject(url)
                 }
             }
         }

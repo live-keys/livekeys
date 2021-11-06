@@ -20,6 +20,7 @@
 #include "live/projectdocument.h"
 #include "live/projectdocumentmodel.h"
 #include "live/viewengine.h"
+#include "live/exception.h"
 #include "projectnavigationmodel.h"
 #include "projectfilemodel.h"
 #include "runnablecontainer.h"
@@ -86,7 +87,7 @@ void Project::newProject(){
     m_fileModel->createProject();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
         ProjectDocument* document = createTextDocument(
-            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), false
+            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)), "qml", false
         );
 
         document->addEditingState(ProjectDocument::Read);
@@ -112,10 +113,18 @@ void Project::newProject(){
  *
  * It can be either a single file or an entire folder, as mentioned before
  */
-void Project::openProject(const QString &path){
+void Project::openProject(const QUrl &url){
+    if ( !url.isLocalFile() ){
+        Exception e = CREATE_EXCEPTION(Exception, "Failed to open url: " + url.toString().toStdString(), Exception::toCode("~Url"));
+        QmlError(viewEngine(), e, this).jsThrow();
+        return;
+    }
+
+    QString path = url.toLocalFile();
     QFileInfo pathInfo(path);
     if ( !pathInfo.exists() ){
-        qCritical("Path does not exist: %s", qPrintable(path));
+        Exception e = CREATE_EXCEPTION(Exception, "Path does not exist: " + path.toStdString(), Exception::toCode("~Path"));
+        QmlError(viewEngine(), e, this).jsThrow();
         return;
     }
     closeProject();
@@ -125,9 +134,9 @@ void Project::openProject(const QString &path){
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
         ProjectDocument* document = createTextDocument(
             qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
+            "qml",
             false
         );
-
         m_documentModel->openDocument(document->file()->path(), document);
 
         Runnable* r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name());
@@ -153,9 +162,34 @@ void Project::openProject(const QString &path){
     scheduleRun();
 }
 
-/** Opens project given by QUrl */
-void Project::openProject(const QUrl &url){
-    openProject(url.toLocalFile());
+/**
+ * \brief Opens a file using the given options
+ * \p Options can be { type: 'binary', mode: editIfNotOpen, format: 'jpg' }
+ */
+Document* Project::openFile(const QUrl &url, const QJSValue &opt){
+    if ( !url.isLocalFile() ){
+        Exception e = CREATE_EXCEPTION(Exception, "Failed to open url: " + url.toString().toStdString(), Exception::toCode("~Url"));
+        QmlError(viewEngine(), e, this).jsThrow();
+        return nullptr;
+    }
+    if ( !opt.isObject() && !opt.isNull() ){
+        Exception e = CREATE_EXCEPTION(Exception, "Invalid opt argument provided: " + opt.toString().toStdString(), Exception::toCode("~Url"));
+        QmlError(viewEngine(), e, this).jsThrow();
+        return nullptr;
+    }
+
+    QString path = url.toLocalFile();
+    QString type = opt.hasOwnProperty("type") ? opt.property("type").toString() : "binary";
+    int mode = opt.hasOwnProperty("mode") ? opt.property("mode").toInt() : Document::EditIfNotOpen;
+    QString format = opt.hasOwnProperty("format") ? opt.property("format").toString() : "";
+
+    try {
+        return openFile(path, type, mode, format);
+    }  catch (lv::Exception& e) {
+        QmlError(viewEngine(), e, this).jsThrow();
+    }
+
+    return nullptr;
 }
 
 /**
@@ -195,116 +229,6 @@ void Project::closeProject(){
 }
 
 /**
- * \brief QUrl variant of the other openFile function
- *
- * \sa Project::openFile(const QString &path, int mode)
- */
-ProjectDocument *Project::openTextFile(const QUrl &path, int mode){
-    return openTextFile(path.toLocalFile(), mode);
-}
-
-/**
- * \brief Opens the file given by the \p path, in the given mode
- *
- * If the document is not opened, we use the third openFile function to do so.
- * If it is, we update its monitoring state.
- *
- * \sa Project::openFile(ProjectFile *file, int mode)
- */
-ProjectDocument *Project::openTextFile(const QString &path, int mode){
-    Document* document = isOpened(path);
-
-    ProjectDocument* projectDocument = ProjectDocument::castFrom(document);
-    if ( document && !projectDocument ){
-        closeFile(document->file()->path());
-    }
-
-    if (!projectDocument){
-        return openTextFile(m_fileModel->openFile(path), mode);
-    } else if ( projectDocument->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumentMonitoring(projectDocument, false);
-    } else if ( !projectDocument->isMonitored() && mode == ProjectDocument::Monitor ){
-        projectDocument->readContent();
-        m_documentModel->updateDocumentMonitoring(projectDocument, true);
-    }
-
-    return projectDocument;
-}
-
-/**
- * \brief Opens the given file in the given mode, this time using the internal ProjectFile object
- *
- * All open documents are immediately added to the document model
- */
-ProjectDocument *Project::openTextFile(ProjectFile *file, int mode){
-    if (!file)
-        return nullptr;
-
-    Document* document = isOpened(file->path());
-
-    ProjectDocument* projectDocument = ProjectDocument::castFrom(document);
-    if ( document && !projectDocument ){
-        closeFile(document->file()->path());
-    }
-
-    if (!projectDocument){
-        projectDocument = createTextDocument(file, (mode == ProjectDocument::Monitor));
-        m_documentModel->openDocument(file->path(), projectDocument);
-    } else if ( projectDocument->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumentMonitoring(projectDocument, false);
-    } else if ( !projectDocument->isMonitored() && mode == ProjectDocument::Monitor ){
-        projectDocument->readContent();
-        m_documentModel->updateDocumentMonitoring(projectDocument, true);
-    }
-
-    return projectDocument;
-}
-
-Document *Project::openFile(const QString &path, int mode){
-
-    Document* document = isOpened(path);
-
-    if ( document && !ProjectDocument::castFrom(document) ){
-        closeFile(document->file()->path());
-        document = nullptr;
-    }
-
-    if (!document){
-        return openFile(m_fileModel->openFile(path), mode);
-    } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumentMonitoring(document, false);
-    } else if ( !document->isMonitored() && mode == ProjectDocument::Monitor ){
-        document->readContent();
-        m_documentModel->updateDocumentMonitoring(document, true);
-    }
-
-    return document;
-}
-
-Document *Project::openFile(ProjectFile *file, int mode){
-    if (!file)
-        return nullptr;
-
-    Document* document = isOpened(file->path());
-    if ( ProjectDocument::castFrom(document) ){
-        closeFile(document->file()->path());
-        document = nullptr;
-    }
-
-    if (!document){
-        document = createDocument(file, (mode == ProjectDocument::Monitor));
-        m_documentModel->openDocument(file->path(), document);
-    } else if ( document->isMonitored() && mode == ProjectDocument::Edit ){
-        m_documentModel->updateDocumentMonitoring(document, false);
-    } else if ( !document->isMonitored() && mode == ProjectDocument::Monitor ){
-        document->readContent();
-        m_documentModel->updateDocumentMonitoring(document, true);
-    }
-
-    return document;
-}
-
-/**
  * \brief Shows if the project is of folder type
  */
 bool Project::isDirProject() const{
@@ -312,18 +236,16 @@ bool Project::isDirProject() const{
 }
 
 /**
- * \brief QUrl variant of this function
- *
- * \sa Project::isFileInProject(const QString &path)
+ * \brief Shows if the file given by the \p path is inside this folder-based project
  */
-bool Project::isFileInProject(const QUrl &path) const{
-    return isFileInProject(path.toLocalFile());
-}
+bool Project::isFileInProject(const QUrl &url){
+    if ( !url.isLocalFile() ){
+        Exception e = CREATE_EXCEPTION(Exception, "Failed to open url: " + url.toString().toStdString(), Exception::toCode("~Url"));
+        QmlError(viewEngine(), e, this).jsThrow();
+        return false;
+    }
 
-/**
- * \brief Shows if the file given by the QString path is inside this folder-based project
- */
-bool Project::isFileInProject(const QString &path) const{
+    QString path = url.toLocalFile();
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile() )
         return path == m_path;
     else
@@ -463,6 +385,64 @@ void Project::removeExcludedRunTriggers(const QSet<QString> &paths){
 }
 
 /**
+ * \brief Opens the file given by the \p path, in the given mode
+ *
+ * If the document is not opened, we use the third openFile function to do so.
+ * If it is, we update its monitoring state.
+ *
+ * \sa Project::openFile(ProjectFile *file, int mode)
+ */
+Document* Project::openFile(const QString &path, const QString &type, int mode, const QString &format){
+    Document* document = isOpened(path);
+
+    if ( type == "binary" ){
+        if ( document ){
+            if ( ProjectDocument::castFrom(document) ){
+                closeFile(document->file()->path());
+                document = nullptr;
+            }
+        }
+        if ( !document ){
+            ProjectFile* file = m_fileModel->openFile(path);
+            if (!file)
+                return nullptr;
+            document = createDocument(file, format, (mode == ProjectDocument::Monitor));
+            m_documentModel->openDocument(file->path(), document);
+        }
+    } else if ( type == "text" ){
+        if ( document ){
+            if ( !ProjectDocument::castFrom(document) ){
+                closeFile(document->file()->path());
+                document = nullptr;
+            }
+        }
+        if ( !document ){
+            ProjectFile* file = m_fileModel->openFile(path);
+            if (!file)
+                return nullptr;
+            document = createTextDocument(file, format, (mode == ProjectDocument::Monitor));
+            m_documentModel->openDocument(file->path(), document);
+        }
+    } else {
+        THROW_EXCEPTION(Exception, "Failed to create document of type: " + type.toStdString(), Exception::toCode("~Document"));
+    }
+
+    if ( !document ){
+        THROW_EXCEPTION(Exception, "Failed to create document at: " + path.toStdString(), Exception::toCode("~Document"));
+        return nullptr;
+    }
+
+    if ( document->isMonitored() && mode == ProjectDocument::Edit ){
+        m_documentModel->updateDocumentMonitoring(document, false);
+    } else if ( !document->isMonitored() && mode == ProjectDocument::Monitor ){
+        document->readContent();
+        m_documentModel->updateDocumentMonitoring(document, true);
+    }
+
+    return document;
+}
+
+/**
  * \brief Closes the file given the path
  */
 void Project::closeFile(const QString &path){
@@ -478,8 +458,8 @@ void Project::setActive(Runnable* runnable){
     }
 }
 
-ProjectDocument *Project::createTextDocument(ProjectFile *file, bool isMonitored){
-    ProjectDocument* document = new ProjectDocument(file, isMonitored, this);
+ProjectDocument *Project::createTextDocument(ProjectFile *file, const QString& format, bool isMonitored){
+    ProjectDocument* document = new ProjectDocument(file, format, isMonitored, this);
 
     connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
 
@@ -507,8 +487,8 @@ ProjectDocument *Project::createTextDocument(ProjectFile *file, bool isMonitored
     return document;
 }
 
-Document *Project::createDocument(ProjectFile *file, bool isMonitored){
-    Document* document = new Document(file, isMonitored, this);
+Document *Project::createDocument(ProjectFile *file, const QString &formatType, bool isMonitored){
+    Document* document = new Document(file, formatType, isMonitored, this);
     emit documentOpened(document);
     return document;
 }

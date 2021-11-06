@@ -17,9 +17,7 @@
 #include "live/codehandler.h"
 #include "live/projectdocument.h"
 #include "live/projectfile.h"
-#include "live/codepalette.h"
 #include "live/paletteloader.h"
-#include "live/editorglobalobject.h"
 #include "live/project.h"
 #include "live/viewengine.h"
 #include "live/visuallog.h"
@@ -67,7 +65,6 @@ CodeHandler::CodeHandler(QObject *parent)
     , m_language(nullptr)
     , m_projectDocument(nullptr)
     , m_indentSize(0)
-    , m_project(nullptr)
     , m_engine(nullptr)
     , m_textEdit(nullptr)
 {
@@ -145,23 +142,16 @@ void CodeHandler::lineBoxAdded(int lineStart, int lineEnd, int height, QQuickIte
 void CodeHandler::componentComplete(){
     QQmlEngine* qmlengine = qmlEngine(this);
     QQmlContext* ctx = qmlengine->rootContext();
-    EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(ctx->contextProperty("editor").value<QObject*>());
-    if ( !editor ){
-        qWarning("Failed to find editor global object.");
-        return;
-    }
 
-    m_project = editor->project();
-
-    QObject* lg = ctx->contextProperty("lk").value<QObject*>();
-    if ( !lg ){
+    QObject* lk = ctx->contextProperty("lk").value<QObject*>();
+    if ( !lk ){
         qWarning("Failed to find live global object.");
         return;
     }
 
     m_engine = static_cast<ViewEngine*>(qmlengine->property("viewEngine").value<QObject*>());
 
-    QObject* workspace = lg->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+    QObject* workspace = lk->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
 
     if (workspace){
         m_extensions = static_cast<Extensions*>(workspace->property("extensions").value<QQmlPropertyMap*>()->parent());
@@ -170,7 +160,7 @@ void CodeHandler::componentComplete(){
 }
 
 void CodeHandler::findCodeHandler(){
-    if ( m_project && m_engine && m_projectDocument ){
+    if ( m_engine && m_projectDocument ){
         vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->file()->path();
 
         QString fileExtension = QFileInfo(m_projectDocument->file()->path()).suffix();

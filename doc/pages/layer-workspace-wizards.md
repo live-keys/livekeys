@@ -3,10 +3,10 @@
 Wizards are predefined user interactions that go through different checks when
 working with the project.
 
-For example, a file in the project can be closed using the workspace project object:
+For example, a file in the project can be closed using the workspace environment object:
 
 ```js
-lk.layers.workspace.project.closeFile('/path/to/file')
+lk.layers.workspace.environment.closeFile('/path/to/file')
 ```
 
 This will however, close the file without saving, and without checking with the user first.
@@ -94,7 +94,7 @@ Opens a new file at the given `path`. The mode can be `Document.Edit`,
 `Document.Monitor` or `Document.EditIfNotOpen`.
 
 ```js
-lk.layers.workspace.project.openFile('/path/to/file', Document.Edit, function(path, document, pane){
+lk.layers.workspace.environment.openFile('/path/to/file', Document.Edit, function(path, document, pane){
     console.log('File opened: ' + path, document, pane)
 })
 ```

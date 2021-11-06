@@ -28,7 +28,6 @@
 #include "live/projectdocument.h"
 #include "live/editorsettings.h"
 #include "live/paletteloader.h"
-#include "live/editorglobalobject.h"
 #include "live/applicationcontext.h"
 #include "live/keymap.h"
 #include "live/viewengine.h"
@@ -36,6 +35,7 @@
 #include "linesurface.h"
 #include "editorlayer.h"
 #include "workspacelayer.h"
+#include "fileformattypes.h"
 #include "themecontainer.h"
 #include "documentation.h"
 
@@ -80,6 +80,8 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LiveCommands", "LiveCommands is available through the \'lk.layers.workspace.commands\' property.");
     qmlRegisterUncreatableType<lv::KeyMap>(
         uri, 1, 0, "KeyMap", "KeyMap is available through the \'lk.layers.workspace.keymap.\' property.");
+    qmlRegisterUncreatableType<lv::FileFormatTypes>(
+        uri, 1, 0, "FileFormatTypes", "FileFormatTypes is available through the \'lk.layers.workspace.fileFormats.\' property.");
     qmlRegisterUncreatableType<lv::ThemeContainer>(
         uri, 1, 0, "ThemeContainer", "ThemeContainer is available through the \'lk.layers.workspace.themes.\' property.");
     qmlRegisterUncreatableType<lv::StartupModel>(
@@ -94,13 +96,4 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *, const char *){
 void EditorPrivatePlugin::initializeEngine(lv::ViewEngine *engine, lv::Settings *settings, const char *){
     lv::EditorSettings* editorSettings = new lv::EditorSettings(settings->path() + "/editor.json");
     settings->addConfigFile("editor", editorSettings);
-
-    QObject* prob = engine->engine()->rootContext()->contextProperty("project").value<QObject*>();
-    lv::Project* pr = qobject_cast<lv::Project*>(prob);
-
-    lv::PaletteLoader* lpc = lv::PaletteLoader::create(engine);
-
-    lv::EditorGlobalObject* editor = new lv::EditorGlobalObject(pr, lpc);
-
-    engine->engine()->rootContext()->setContextProperty("editor", editor);
 }

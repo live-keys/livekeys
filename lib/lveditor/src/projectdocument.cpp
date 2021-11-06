@@ -184,10 +184,11 @@ void ProjectDocument::resetEditingState(){
 /**
   Default constructor
 */
-ProjectDocument::ProjectDocument(ProjectFile *file, bool isMonitored, Project *parent)
+ProjectDocument::ProjectDocument(ProjectFile *file, const QString& format, bool isMonitored, Project *parent)
     : Document(file, parent)
     , d_ptr(new ProjectDocumentPrivate)
 {
+    setFormatType(format);
     d_ptr->textDocument = new QTextDocument(this);
     d_ptr->iteratingSections = false;
     d_ptr->lastChange = d_ptr->changes.end();

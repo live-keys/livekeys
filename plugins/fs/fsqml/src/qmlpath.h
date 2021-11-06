@@ -62,6 +62,8 @@ public slots:
     QString toLocalFile(const QUrl& url);
     QUrl urlFromLocalFile(const QString& path);
 
+    QJSValue fileTypeFilters(const QString& path);
+
     static QString removeSlashes(QString s);
 };
 

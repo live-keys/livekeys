@@ -116,28 +116,27 @@ public:
 
     el::Engine* engine();
 
+    Document *openFile(
+        const QString& path,
+        const QString& type,
+        int mode,
+        const QString& format = ""
+    );
+
 public slots:
     void newProject();
     void closeProject();
-    lv::ProjectDocument* openTextFile(const QUrl& rootPath, int mode = lv::Document::EditIfNotOpen);
-    lv::ProjectDocument* openTextFile(const QString& rootPath, int mode = lv::Document::EditIfNotOpen);
-    lv::ProjectDocument* openTextFile(lv::ProjectFile* file, int mode = lv::Document::EditIfNotOpen);
+    void openProject(const QUrl& path);
 
-    lv::Document* openFile(const QString& path, int mode = lv::Document::EditIfNotOpen);
-    lv::Document* openFile(lv::ProjectFile* file, int mode = lv::Document::EditIfNotOpen);
-
+    lv::Document *openFile(const QUrl& url, const QJSValue& options);
+    bool isFileInProject(const QUrl& url);
+    void closeFile(const QString& rootPath);
     void setActive(const QString& rootPath);
+
     lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
 
     bool isDirProject() const;
-    bool isFileInProject(const QUrl& rootPath) const;
-    bool isFileInProject(const QString& rootPath) const;
     bool canRunFile(const QString& path) const;
-
-    void openProject(const QString& rootPath);
-    void openProject(const QUrl& url);
-
-    void closeFile(const QString& rootPath);
 
     QString dir() const;
     QString path(const QString& relative) const;
@@ -172,8 +171,8 @@ private:
     ViewEngine* viewEngine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, Document *document);
     void setActive(Runnable* runnable);
-    ProjectDocument* createTextDocument(ProjectFile* file, bool isMonitored);
-    Document* createDocument(ProjectFile* file, bool isMonitored);
+    ProjectDocument* createTextDocument(ProjectFile* file, const QString &format, bool isMonitored);
+    Document* createDocument(ProjectFile* file, const QString& formatType, bool isMonitored);
     void documentSaved(Document *documnet);
 
 private:

@@ -117,7 +117,7 @@ Item{
                         }
                     }
                     if ( !fe.document ){
-                        fe.document = project.openTextFile(project.active.path)
+                        fe.document = project.openFile(Fs.UrlInfo.urlFromLocalFile(project.active.path), {type: 'text'})
                     }
                 }
             }
@@ -373,45 +373,141 @@ Item{
             }
         }
 
+        function saveDocument(document, callback){
+            if ( !document )
+                return
+            if ( document.file.exists() ){
+                document.save()
+                if (callback)
+                    callback(Fs.UrlInfo.urlFromLocalFile(document.file.path))
+            } else {
+                saveDocumentAs(document, callback)
+            }
+        }
 
+        function saveDocumentAs(document, callback){
+            if ( !document )
+                return
+            lk.layers.window.dialogs.saveFile(
+                { filters: Fs.UrlInfo.urlFromLocalFile(document.file.path) },
+                function(url){
+                    if ( !document.saveAs(url) ){
+                        lk.layers.window.dialogs.message(
+                            'Failed to save file to: ' + url,
+                            {
+                                button3Name : 'Ok',
+                                button3Function : function(mbox){
+                                    mbox.close()
+                                }
+                            }
+                        )
+                        return
+                    }
 
-        function closeFile(path, callback){
-            var doc = project.documentModel.isOpened(path)
-            if ( doc ){
-                if ( doc.isDirty ){
-                    lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
-                    {
-                        button1Name : 'Yes',
-                        button1Function : function(mbox){
-                            doc.save()
-                            project.closeFile(path)
-                            if (callback)
-                                callback()
-                            mbox.close()
-                        },
-                        button2Name : 'No',
-                        button2Function : function(mbox){
-                            project.closeFile(path)
-                            if (callback)
-                                callback()
-                            mbox.close()
-                        },
-                        button3Name : 'Cancel',
-                        button3Function : function(mbox){
-                            mbox.close()
-                        },
-                        returnPressed : function(mbox){
-                            doc.save()
-                            project.closeFile(path)
-                            if (callback)
-                                callback()
-                            mbox.close()
-                        }
-                    })
-                } else {
-                    project.closeFile(path)
-                    if (callback) callback()
+                    if ( !project.isDirProject() ){
+                        project.openProject(url)
+                        var path = Fs.UrlInfo.toLocalFile(url)
+                        if (callback)
+                            callback(path)
+                    } else if ( project.isFileInProject(url) ){
+                        lk.layers.workspace.environment.openFile(url, ProjectDocument.Edit)
+                        var path = Fs.UrlInfo.toLocalFile(url)
+                        if (callback)
+                            callback(path)
+                    } else {
+                        var fileUrl = url
+                        lk.layers.window.dialogs.message(
+                            'File is outside project scope. Would you like to open it as a new project?',
+                        {
+                            button1Name : 'Open as project',
+                            button1Function : function(mbox){
+                                var projectUrl = fileUrl
+                                projectView.closeProject(
+                                    function(){
+                                        project.openProject(projectUrl)
+                                        var path = Fs.UrlInfo.toLocalFile(projectUrl)
+                                        if (callback)
+                                            callback(path)
+                                    }
+                                )
+                                mbox.close()
+                            },
+                            button3Name : 'Cancel',
+                            button3Function : function(mbox){
+                                mbox.close()
+                                if (callback)
+                                    callback(url)
+                            },
+                            returnPressed : function(mbox){
+                                var projectUrl = fileUrl
+                                projectView.closeProject(
+                                    function(){
+                                        project.openProject(url)
+                                        var path = Fs.UrlInfo.toLocalFile(url)
+                                        if (callback)
+                                            callback(path)
+                                    }
+                                )
+                                mbox.close()
+                            }
+                        })
+                    }
                 }
+            )
+        }
+
+        function closeDocument(document, callback){
+            if ( !document )
+                return
+            if ( document.isDirty ){
+                var saveFunction = function(mbox, callback){
+                    if ( document.file.exists() ){
+                        document.save()
+                        root.fileSystem.closeDocument(document, callbacK)
+                    } else {
+                        lk.layers.window.dialogs.saveFile(
+                            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                            function(url){
+                                if ( !document.saveAs(url) ){
+                                    lk.layers.window.dialogs.message(
+                                        'Failed to save file to: ' + url,
+                                        {
+                                            button3Name : 'Ok',
+                                            button3Function : function(){
+                                                lk.layers.window.dialogs.messageClose()
+                                            }
+                                        }
+                                    )
+                                    return;
+                                }
+                                root.fileSystem.closeDocument(document, callback)
+                            }
+                        )
+                    }
+                    mbox.close()
+                }
+
+
+                lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
+                {
+                    button1Name : 'Yes',
+                    button1Function : function(mbox){
+                        saveFunction(mbox, callback)
+                    },
+                    button2Name : 'No',
+                    button2Function : function(mbox){
+                        root.fileSystem.closeDocument(path, callback)
+                    },
+                    button3Name : 'Cancel',
+                    button3Function : function(mbox){
+                        mbox.close()
+                    },
+                    returnPressed : function(mbox){
+                        saveFunction(mbox, callback)
+                    },
+                })
+            } else {
+                root.fileSystem.closeDocument(document, callbacK)
             }
         }
 
@@ -575,52 +671,85 @@ Item{
         }
     }
 
-    /// callback will receive: path, document, pane
-    function openFile(path, mode, callback){
-        var pane = lk.layers.workspace.interceptFile(path, mode)
-        if ( pane )
-            return pane
+    property QtObject fileSystem: QtObject{
 
-        if ( Fs.Path.hasExtensions(path, 'html')){
-            if ( Fs.Path.hasExtensions(path, 'doc.html')){
-                var docItem = documentationViewFactory.createObject()
-                if ( docItem ){
-                    docItem.loadDocumentationHtml(path)
-                    var docPane = mainSplit.findPaneByType('documentation')
-                    if ( !docPane ){
-                        var storeWidth = root.width
-                        docPane = root.panes.createPane('documentation', {}, [400, 400])
-                        root.panes.container.splitPane(0, docPane)
+        function openFile(path, mode, callback){
+            var format = lk.layers.workspace.fileFormats.find(path)
+            var pane = lk.layers.workspace.interceptFile(path, format, mode)
+            if ( pane )
+                return pane
+
+            if ( Fs.Path.hasExtensions(path, 'html')){
+                if ( Fs.Path.hasExtensions(path, 'doc.html')){
+                    var docItem = documentationViewFactory.createObject()
+                    if ( docItem ){
+                        docItem.loadDocumentationHtml(path)
+                        var docPane = mainSplit.findPaneByType('documentation')
+                        if ( !docPane ){
+                            var storeWidth = root.width
+                            docPane = root.panes.createPane('documentation', {}, [400, 400])
+                            root.panes.container.splitPane(0, docPane)
+                        }
+                        docPane.pageTitle = Fs.Path.baseName(path)
+                        docPane.page = docItem
+
+                        if ( callback )
+                            callback(path, null, docPane)
+
+                        return docPane
                     }
-                    docPane.pageTitle = Fs.Path.baseName(path)
-                    docPane.page = docItem
-
-                    if ( callback )
-                        callback(path, null, docPane)
-
-                    return docPane
                 }
             }
+
+            var doc = project.openFile(path, {type: 'text', format: format, mode: mode})
+            if ( !doc )
+                return;
+            var fe = root.panes.focusPane('editor')
+            if ( !fe ){
+                fe = root.panes.createPane('editor', {}, [400, 0])
+                root.panes.container.splitPane(0, fe)
+
+                var containerPanes = root.panes.container.panes
+                if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                    containerPanes[0].width = containerPanes[0].width * 2
+                    fe.width = 400
+                }
+            }
+            if ( callback )
+                callback(path, doc, fe)
+            fe.document = doc
+            return fe
         }
 
-        var doc = project.openTextFile(path, mode)
-        if ( !doc )
-            return;
-        var fe = root.panes.focusPane('editor')
-        if ( !fe ){
-            fe = root.panes.createPane('editor', {}, [400, 0])
-            root.panes.container.splitPane(0, fe)
-
-            var containerPanes = root.panes.container.panes
-            if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
-                containerPanes[0].width = containerPanes[0].width * 2
-                fe.width = 400
+        function closeDocument(document, callback){
+            if ( !project.isDirProject() && document.file.path === project.active.path ){
+                lk.layers.window.dialogs.message(
+                    'Closing this file will also close this project. Would you like to close the project?',
+                {
+                    button1Name : 'Yes',
+                    button1Function : function(mbox){
+                        project.closeProject()
+                        mbox.close()
+                        if ( callback )
+                            callback()
+                    },
+                    button3Name : 'No',
+                    button3Function : function(mbox){
+                        mbox.close()
+                    },
+                    returnPressed : function(mbox){
+                        project.closeProject()
+                        mbox.close()
+                        if ( callback )
+                            callback()
+                    }
+                })
+            } else {
+                project.closeFile(document.file.path)
+                if ( callback )
+                    callback()
             }
         }
-        if ( callback )
-            callback(path, doc, fe)
-        fe.document = doc
-        return fe
     }
 
 }

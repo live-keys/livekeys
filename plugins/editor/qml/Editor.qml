@@ -3,44 +3,40 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
+import editor.style 1.0
 import base 1.0
 import live 1.0
 import visual.input 1.0 as Input
 
 Rectangle{
     id: root
+    objectName: "editorType"
 
     property alias textEdit: textEdit
     property alias code: textEdit.code
-
-    property QtObject addRootButton: addRootButton
-
-    property var document: null
-    onDocumentChanged: code.setDocument(document)
-
-    property int fragmentStart: 0
-    property int fragmentEnd: -1
-
-    property color lineSurfaceColor: "black"
-    color: "#03090d"
-
-    objectName: "editorType"
-
-    property var isActive: lk.layers.workspace.panes.activePane === root.parent
 
     property alias internalActiveFocus : textEdit.activeFocus
     property alias internalFocus: textEdit.focus
     property alias lineSurfaceVisible: lineSurfaceBackground.visible
     property double lineSurfaceWidth: lineSurfaceBackground.visible ? lineSurface.width : 0
 
-    property var qmlSuggestionBox: null
+    property int fragmentStart: 0
+    property int fragmentEnd: -1
 
-    function mapGlobalPosition(){
-        if ( parent && parent.paneType === 'editor' ){
-            return parent.mapGlobalPosition()
-        } else {
-            return mapToGlobal(0, 0)
-        }
+    property var document: null
+    onDocumentChanged: code.setDocument(document)
+
+    property QtObject style: EditorStyle{}
+
+    color: root.style.backgroundColor
+
+    signal keyPress(var event)
+    signal rightClicked(var mouse)
+
+    property var __qmlSuggestionBox: null
+
+    property var getGlobalPosition: function(){
+        return root.mapToGlobal(0, 0)
     }
 
     function forceFocus(){
@@ -52,132 +48,9 @@ Rectangle{
         return Qt.point(r.x, r.y - flick.flickableItem.contentY);
     }
 
-    function save(){
-        if ( !root.document )
-            return;
-        if ( root.document.file.exists() ){
-            root.document.save()
-        } else {
-            saveAs()
-        }
-    }
-
     function makePositionVisible(y){
         if (y < 0 || y > root.height - 30)
             flick.flickableItem.contentY = Math.min(flick.flickableItem.contentY + y, Math.max(0,flick.flickableItem.contentHeight - root.height))
-    }
-
-    function saveAs(){
-        lk.layers.window.dialogs.saveFile(
-            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
-            function(url){
-                var editordoc = root.document
-                if ( !editordoc.saveAs(url) ){
-                    lk.layers.window.dialogs.message(
-                        'Failed to save file to: ' + url,
-                        {
-                            button3Name : 'Ok',
-                            button3Function : function(mbox){
-                                mbox.close()
-                            }
-                        }
-                    )
-                    return
-                }
-
-                if ( !project.isDirProject() ){
-                    project.openProject(url)
-                } else if ( project.isFileInProject(url) ){
-                    lk.layers.workspace.project.openFile(url, ProjectDocument.Edit)
-                } else {
-                    var fileUrl = url
-                    lk.layers.window.dialogs.message(
-                        'File is outside project scope. Would you like to open it as a new project?',
-                    {
-                        button1Name : 'Open as project',
-                        button1Function : function(mbox){
-                            var projectUrl = fileUrl
-                            projectView.closeProject(
-                                function(){
-                                    project.openProject(projectUrl);
-                                }
-                            )
-                            mbox.close()
-                        },
-                        button3Name : 'Cancel',
-                        button3Function : function(mbox){
-                            mbox.close()
-                        },
-                        returnPressed : function(mbox){
-                            var projectUrl = fileUrl
-                            projectView.closeProject(
-                                function(){
-                                    project.openProject(projectUrl)
-                                }
-                            )
-                            mbox.close()
-                        }
-                    })
-                }
-            }
-        )
-    }
-
-    function toggleComment(){
-        code.language.toggleComment(textEdit.selectionStart, textEdit.selectionEnd - textEdit.selectionStart)
-    }
-
-    function closeDocument(){
-        if ( !root.document )
-            return;
-        if ( root.document.isDirty ){
-            var saveFunction = function(mbox){
-                if ( root.document.file.exists() ){
-                    root.document.save()
-                    root.closeDocumentAction()
-                } else {
-                    lk.layers.window.dialogs.saveFile(
-                        { filters: [ "Qml files (*.qml)", "All files (*)" ] },
-                        function(url){
-                            if ( !root.document.saveAs(url) ){
-                                lk.layers.window.dialogs.message(
-                                    'Failed to save file to: ' + url,
-                                    {
-                                        button3Name : 'Ok',
-                                        button3Function : function(){ lk.layers.window.dialogs.messageClose(); }
-                                    }
-                                )
-                                return;
-                            }
-                            root.closeDocumentAction()
-                        }
-                    )
-                }
-                mbox.close()
-            }
-
-            lk.layers.window.dialogs.message('File contains unsaved changes. Would you like to save them before closing?',
-            {
-                button1Name : 'Yes',
-                button1Function : function(mbox){
-                    saveFunction(mbox)
-                },
-                button2Name : 'No',
-                button2Function : function(mbox){
-                    mbox.close()
-                    root.closeDocumentAction()
-                    root.document = project.documentModel.lastOpened()
-                },
-                button3Name : 'Cancel',
-                button3Function : function(mbox){
-                    mbox.close()
-                },
-                returnPressed : function(mbox){
-                    saveFunction(mbox)
-                },
-            })
-        } else
-            root.closeDocumentAction()
     }
 
     function getCursorFragment(){
@@ -185,31 +58,6 @@ Rectangle{
             return code.contextBlockRange(textEdit.cursorPosition)
         }
         return null
-    }
-
-    function closeDocumentAction(){
-        if ( !project.isDirProject() && document.file.path === project.active.path ){
-            lk.layers.window.dialogs.message(
-                'Closing this file will also close this project. Would you like to close the project?',
-            {
-                button1Name : 'Yes',
-                button1Function : function(mbox){
-                    project.closeProject()
-                    mbox.close()
-                },
-                button3Name : 'No',
-                button3Function : function(mbox){
-                    mbox.close()
-                },
-                returnPressed : function(mbox){
-                    project.closeProject()
-                    mbox.close()
-                }
-            })
-        } else {
-            project.closeFile(document.file.path)
-            root.document = project.documentModel.lastOpened()
-        }
     }
 
     function getCursorRectangle(){
@@ -220,7 +68,6 @@ Rectangle{
         if (code.has(DocumentHandler.LanguageCodeCompletion))
             code.language.suggestCompletion(textEdit.cursorPosition)
     }
-
 
     FontMetrics{
         id: editorMetrics
@@ -233,7 +80,7 @@ Rectangle{
         anchors.left: parent.left
         anchors.bottom: parent.bottom
         width: visible ? lineSurface.width + 5 : 0
-        color: root.lineSurfaceColor
+        color: root.style.lineSurfaceBackgroundColor
         clip: true
         visible: true
 
@@ -246,7 +93,7 @@ Rectangle{
 
             LineSurface{
                 id: lineSurface
-                color: "#3e464d"
+                color: root.style.lineSurfaceTextColor
                 viewport: Qt.rect(0,flick.flickableItem.contentY,0,flick.height)
                 Component.onCompleted: {
                     setComponents(textEdit);
@@ -269,7 +116,7 @@ Rectangle{
                 implicitWidth: 10
                 implicitHeight: 10
                 Rectangle {
-                    color: "#1f2227"
+                    color: root.style.scrollbarHandleColor
                     anchors.fill: parent
                 }
             }
@@ -312,7 +159,6 @@ Rectangle{
             NewTextEdit {
                 id : textEdit
 
-
                 anchors.left: parent.left
                 anchors.leftMargin: 2
                 viewport: Qt.rect(flick.flickableItem.contentX,flick.flickableItem.contentY,flick.width,flick.height)
@@ -343,14 +189,16 @@ Rectangle{
 
                 focus : true
 
-                color : "#fff"
-                font.family: "Source Code Pro, Ubuntu Mono, Courier New, Courier"
-                font.pixelSize: lk.settings.file('editor').fontSize
-                font.weight: Font.Normal
+                color : root.style.textStyle.color
+                font.italic: root.style.textStyle.font.italic
+                font.family: root.style.textStyle.font.family
+                font.pixelSize: root.style.textStyle.font.pixelSize
+                font.weight: root.style.textStyle.font.weight
 
+                selectionColor: root.style.selectionBackgroundColor
+                selectedTextColor: root.style.selectionColor
                 selectByMouse: true
                 mouseSelectionMode: NewTextEdit.SelectCharacters
-                selectionColor: "#3d4856"
 
                 textFormat: NewTextEdit.PlainText
 
@@ -360,12 +208,12 @@ Rectangle{
                 width: Math.max(paintedWidth, flick.width)
 
                 readOnly: root.document === null || root.document.isMonitored || (code && code.language && code.language.importsFragment && code.language.rootFragment)
-                cursorVisible: !readOnly && isActive
+                cursorVisible: !readOnly && activeFocus
 
                 Keys.onPressed: {
                     if ( event.key === Qt.Key_PageUp ){
                         if ( code.completionModel.isEnabled ){
-                            qmlSuggestionBox.highlightPrevPage()
+                            __qmlSuggestionBox.highlightPrevPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
                             var prevLineStartPos = textEdit.text.lastIndexOf('\n', cursorPosition - 1)
@@ -401,7 +249,7 @@ Rectangle{
                         event.accepted = true
                     } else if ( event.key === Qt.Key_PageDown ){
                         if ( code.completionModel.isEnabled ){
-                            qmlSuggestionBox.highlightNextPage()
+                            __qmlSuggestionBox.highlightNextPage()
                         } else {
                             var lines = flick.height / cursorRectangle.height
                             var nextLineStartPos = textEdit.text.indexOf('\n', cursorPosition)
@@ -414,24 +262,19 @@ Rectangle{
                     } else if ( event.key === Qt.Key_Down ){
                         if ( code.completionModel.isEnabled ){
                             event.accepted = true
-                            qmlSuggestionBox.highlightNext()
+                            __qmlSuggestionBox.highlightNext()
                         }
                     } else if ( event.key === Qt.Key_Up ){
                         if ( code.completionModel.isEnabled ){
                             event.accepted = true
-                            qmlSuggestionBox.highlightPrev()
+                            __qmlSuggestionBox.highlightPrev()
                         }
                     } else if ( event.key === Qt.Key_Escape ){
                         if ( code.completionModel.isEnabled ){
                             code.completionModel.disable()
                         }
                     } else {
-                        var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
-                        if ( command !== '' ){
-                            lk.layers.workspace.commands.execute(command)
-                            event.accepted = true
-                            return
-                        }
+                        root.keyPress(event)
                     }
                 }
 
@@ -441,7 +284,7 @@ Rectangle{
                         code.insertCompletion(
                             code.completionModel.completionPosition,
                             cursorPosition,
-                            qmlSuggestionBox.getCompletion()
+                            __qmlSuggestionBox.getCompletion()
                         )
                         event.accepted = true
                     }
@@ -451,23 +294,12 @@ Rectangle{
                     NumberAnimation { duration: 40 }
                 }
 
-                Connections{
-                    target: project.documentModel
-                    function onAboutToClose(document){
-                        if ( document === root.document ){
-                            root.document = null
-                        }
-                    }
-                }
-
                 MouseArea{
                     anchors.fill: parent
                     cursorShape: Qt.IBeamCursor
                     acceptedButtons: Qt.RightButton
                     onClicked: {
-                        if ( lk.layers.workspace ){
-                            lk.layers.workspace.panes.openContextMenu(root, root.parent)
-                        }
+                        root.rightClicked(mouse)
                     }
                 }
             }
@@ -476,15 +308,23 @@ Rectangle{
     }
 
     Connections{
+        target: project.documentModel
+        function onAboutToClose(document){
+            if ( document === root.document ){
+                root.document = null
+            }
+        }
+    }
+
+    Connections{
         target: code.completionModel
         function onIsEnabledChanged(){
             if ( !code.completionModel.isEnabled || code.completionModel.suggestionCount() === 0 ){
-                qmlSuggestionBox.visible = false
+                __qmlSuggestionBox.visible = false
                 return
             }
 
-            var activePane = editor.parent
-            var paneCoords = activePane.mapGlobalPosition()
+            var paneCoords = root.getGlobalPosition()
             var r = textEdit.cursorRectangle
 
             var rect = {
@@ -496,20 +336,20 @@ Rectangle{
                 height: r.height
             }
 
-            if (qmlSuggestionBox){
-                qmlSuggestionBox.visible = true
-                qmlSuggestionBox.parent.updatePlacement(
+            if (__qmlSuggestionBox){
+                __qmlSuggestionBox.visible = true
+                __qmlSuggestionBox.parent.updatePlacement(
                     rect,
                     Qt.point(paneCoords.x - 7, paneCoords.y - 43),
                     lk.layers.editor.environment.placement.bottom
                 )
 
             } else {
-                qmlSuggestionBox = paletteFunctions.createSuggestionBox(null, textEdit.font)
-                qmlSuggestionBox.model = code.completionModel
+                __qmlSuggestionBox = lk.layers.editor.environment.createSuggestionBox(null, textEdit.font)
+                __qmlSuggestionBox.model = code.completionModel
 
                 var editorBox = lk.layers.editor.environment.createEditorBox(
-                    qmlSuggestionBox,
+                    __qmlSuggestionBox,
                     rect,
                     Qt.point(paneCoords.x, paneCoords.y),
                     lk.layers.editor.environment.placement.bottom
@@ -517,17 +357,15 @@ Rectangle{
 
                 editorBox.color = 'transparent'
             }
-
         }
-
     }
 
     Component.onDestruction: {
-        if (!qmlSuggestionBox)
+        if (!__qmlSuggestionBox)
             return
-        var par = qmlSuggestionBox.parent
-        qmlSuggestionBox.destroy()
-        qmlSuggestionBox = null
+        var par = __qmlSuggestionBox.parent
+        __qmlSuggestionBox.destroy()
+        __qmlSuggestionBox = null
         par.destroy()
     }
 }

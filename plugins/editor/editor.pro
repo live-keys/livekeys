@@ -81,4 +81,5 @@ DISTFILES += \
     palettes/EditPalette.qml \
     qml/PaneMenuButton.qml \
     qml/loaddocs.qml \
-    qml/loadqtdocs.qml
+    qml/loadqtdocs.qml \
+    qml/style/EditorStyle.qml

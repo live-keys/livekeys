@@ -8,11 +8,11 @@ HEADERS += \
     $$PWD/codepalette.h \
     $$PWD/commands.h \
     $$PWD/commandsmodel.h \
+    $$PWD/fileformattypes.h \
     $$PWD/hookcontainer.h \
     $$PWD/document.h \
     $$PWD/documentation.h \
     $$PWD/documentationloader.h \
-    $$PWD/editorglobalobject.h \
     $$PWD/editorlayer.h \
     $$PWD/editorprivate_plugin.h \
     $$PWD/editorsettings.h \
@@ -52,11 +52,11 @@ SOURCES += \
     $$PWD/codepalette.cpp \
     $$PWD/commands.cpp \
     $$PWD/commandsmodel.cpp \
+    $$PWD/fileformattypes.cpp \
     $$PWD/hookcontainer.cpp \
     $$PWD/document.cpp \
     $$PWD/documentation.cpp \
     $$PWD/documentationloader.cpp \
-    $$PWD/editorglobalobject.cpp \
     $$PWD/editorlayer.cpp \
     $$PWD/editorprivate_plugin.cpp \
     $$PWD/editorsettings.cpp \

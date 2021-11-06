@@ -90,11 +90,6 @@ inline QmlProjectMonitor *ProjectQmlExtension::scanMonitor(){
     return m_scanMonitor;
 }
 
-/// \brief Returns the lv::PaletteContainer associated with this object.
-inline PaletteLoader *ProjectQmlExtension::paletteContainer(){
-    return m_paletteContainer;
-}
-
 /// \brief Returns the global lv::Project
 inline Project *ProjectQmlExtension::project(){
     return m_project;

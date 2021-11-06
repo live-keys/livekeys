@@ -7,6 +7,8 @@
 
 namespace lv{
 
+class PaletteLoader;
+
 class LV_EDITOR_EXPORT EditorLayer : public Layer{
 
     Q_OBJECT
@@ -19,15 +21,22 @@ public:
     QObject* environment() const;
     void setEnvironment(QObject* environment);
 
+    PaletteLoader* paletteLoader();
+
 signals:
     void environmentChanged();
 
 private:
-    QObject* m_environment;
+    PaletteLoader* m_paletteLoader;
+    QObject*       m_environment;
 };
 
 inline QObject *EditorLayer::environment() const{
     return m_environment;
+}
+
+inline PaletteLoader *EditorLayer::paletteLoader(){
+    return m_paletteLoader;
 }
 
 }// namespace

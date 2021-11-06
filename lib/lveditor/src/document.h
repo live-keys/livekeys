@@ -16,6 +16,7 @@ class LV_EDITOR_EXPORT Document : public QObject{
     Q_OBJECT
     Q_PROPERTY(lv::ProjectFile* file  READ file        NOTIFY fileChanged)
     Q_PROPERTY(QByteArray content     READ content     NOTIFY contentChanged)
+    Q_PROPERTY(QString formatType     READ formatType  NOTIFY formatTypeChanged)
     Q_PROPERTY(bool isMonitored       READ isMonitored NOTIFY isMonitoredChanged)
     Q_PROPERTY(bool isDirty           READ isDirty     WRITE  setIsDirty     NOTIFY isDirtyChanged)
     Q_ENUMS(OpenMode)
@@ -45,7 +46,7 @@ public:
     };
 
 public:
-    explicit Document(ProjectFile* file, bool isMonitored, Project *parent);
+    explicit Document(ProjectFile* file, const QString& formatType, bool isMonitored, Project *parent);
     virtual ~Document();
 
     virtual QByteArray content();
@@ -63,6 +64,8 @@ public:
 
     Project* parentAsProject();
 
+    const QString& formatType() const;
+
 signals:
     /** shows dirty state changed */
     void isDirtyChanged();
@@ -70,6 +73,8 @@ signals:
     void isMonitoredChanged();
     /** triggered when the file changed */
     void fileChanged();
+    /** triggered when the formatType changed */
+    void formatTypeChanged();
     /** triggered when the document was saved */
     void saved();
     /** shows if the document content changed */
@@ -84,6 +89,7 @@ public slots:
     bool saveAs(const QUrl& url);
 
 protected:
+    void setFormatType(const QString& formatType);
     Document(ProjectFile* file, Project* parent);
 
 private:
@@ -92,6 +98,7 @@ private:
 
     QByteArray   m_content;
     ProjectFile* m_file;
+    QString      m_formatType;
     QDateTime    m_lastModified;
     bool         m_isMonitored;
     bool         m_isDirty;
@@ -152,6 +159,10 @@ inline const QDateTime &Document::lastModified() const{
  */
 inline void Document::setLastModified(const QDateTime &lastModified){
     m_lastModified = lastModified;
+}
+
+inline const QString &Document::formatType() const{
+    return m_formatType;
 }
 
 }// namespace

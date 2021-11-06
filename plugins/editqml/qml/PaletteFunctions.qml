@@ -74,14 +74,6 @@ QtObject{
             }
         }
 
-        property Component suggestionBox: Component {
-            SuggestionBox {
-                Behavior on opacity {
-                    NumberAnimation { duration: 150 }
-                }
-            }
-        }
-
         function createAddQmlBox(parent){
             return __factories.addQmlBox.createObject(parent)
         }
@@ -415,7 +407,7 @@ QtObject{
                 palettes.data,
                 {
                     aroundRect: editor.getCursorRectangle(),
-                    panePosition: editor.mapGlobalPosition(),
+                    panePosition: editor.getGlobalPosition(),
                     relativePlacement: lk.layers.editor.environment.placement.bottom
                 },
                 {
@@ -533,7 +525,7 @@ QtObject{
                 palettes.data,
                 {
                     aroundRect: editor.getCursorRectangle(),
-                    panePosition: editor.mapGlobalPosition(),
+                    panePosition: editor.getGlobalPosition(),
                     relativePlacement: lk.layers.editor.environment.placement.bottom
                 },
                 {
@@ -695,7 +687,7 @@ QtObject{
                 palettes.data,
                 {
                     aroundRect: editor.getCursorRectangle(),
-                    panePosition: editor.mapGlobalPosition(),
+                    panePosition: editor.getGlobalPosition(),
                     relativePlacement: lk.layers.editor.environment.placement.bottom
                 },
                 {
@@ -1162,12 +1154,6 @@ QtObject{
         return result
     }
 
-    function createSuggestionBox(parent, font){
-        var sb = __factories.suggestionBox.createObject(parent)
-        sb.__initialize(font)
-        return sb
-    }
-
     function filterOutPalettes(palettes, names, includeLayouts){
         if ((!names || names.length === 0) && includeLayouts)
             return palettes
@@ -1190,7 +1176,7 @@ QtObject{
             return
 
         var rect = editor.getCursorRectangle()
-        var paneCoords = editor.mapGlobalPosition()
+        var paneCoords = editor.getGlobalPosition()
 
         if ( !categories )
             categories = ['objects', 'properties', 'events']

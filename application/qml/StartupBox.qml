@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import workspace 1.0 as Workspace
+import fs 1.0 as Fs
 
 Rectangle{
     width: 1040
@@ -260,7 +261,7 @@ Rectangle{
                             anchors.fill: parent
                             hoverEnabled: true
                             onClicked: {
-                                lk.layers.workspace.wizards.openProject(model.path)
+                                lk.layers.workspace.wizards.openProject(Fs.UrlInfo.urlFromLocalFile(model.path))
                             }
                         }
 
@@ -377,7 +378,7 @@ Rectangle{
                             hoverEnabled: true
                             onClicked: {
                                 if (model.isGroupTitle) return
-                                project.openProject(model.path)
+                                lk.layers.workspace.wizards.openProject(Fs.UrlInfo.urlFromLocalFile(model.path))
                             }
                         }
 
@@ -482,7 +483,7 @@ Rectangle{
                             onClicked: {
                                 if (model.isGroupTitle)
                                     return
-                                project.openProject(model.path)
+                                lk.layers.workspace.wizards.openProject(Fs.UrlInfo.urlFromLocalFile(model.path))
                             }
                         }
 
@@ -557,7 +558,8 @@ Rectangle{
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
-                        project.openProject(lk.layers.workspace.pluginsPath() + "/squareone/tutorials/workspace")
+                        var path = lk.layers.workspace.pluginsPath() + "/squareone/tutorials/workspace"
+                        lk.layers.workspace.wizards.openProject(Fs.UrlInfo.urlFromLocalFile(path))
                     }
                 }
 

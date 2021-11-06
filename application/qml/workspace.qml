@@ -40,7 +40,7 @@ Item{
         paneDropArea: paneDropArea
     }
 
-    property QtObject projectEnvironment : ProjectEnvironment{
+    property QtObject environment : WorkspaceEnvironment{
         panes: root.panes
         runSpace: root.runSpace
     }
@@ -162,7 +162,7 @@ Item{
         }
 
         onOpenSettings: {
-            var fe = lk.layers.workspace.project.openFile(
+            var fe = lk.layers.workspace.environment.openFile(
                 lk.settings.file('editor').path, ProjectDocument.Edit
             )
             lk.settings.file('editor').documentOpened(fe.document)
@@ -229,7 +229,7 @@ Item{
     function toggleNavigation(){
         var ap = root.panes.activePane
         if ( ap.objectName === 'editor' ){
-            var navMenu = root.projectEnvironment.navigation
+            var navMenu = root.environment.navigation
             navMenu.parent = ap
             navMenu.visible = !navMenu.visible
         }

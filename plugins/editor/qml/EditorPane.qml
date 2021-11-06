@@ -26,7 +26,17 @@ import visual.input 1.0 as Input
 
 Workspace.Pane{
     id : root
+    objectName: "editor"
 
+    color : lk.layers.workspace.themes.current.paneBackground
+    clip : true
+    height: parent ? parent.height : 0
+    width: 400
+
+    property alias editor: editor
+    property alias document: editor.document
+    property alias code: editor.code
+    property alias textEdit: editor.textEdit
     property alias internalActiveFocus : editor.internalActiveFocus
     property alias internalFocus: editor.internalFocus
     onInternalActiveFocusChanged: {
@@ -35,20 +45,16 @@ Workspace.Pane{
         }
     }
 
-    property alias editor: editor
-    property alias document: editor.document
     property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
-
-    property var document: null
-    onDocumentChanged: {
-        paneState = { document : document }
-    }
-
-    property alias code: editor.code
-    property alias textEdit: editor.textEdit
     property var panes: null
 
     property bool codeOnly: !(code.language && code.language.editContainer.editCount !== 0)
+
+    property Theme currentTheme : lk.layers.workspace.themes.current
+    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
+    property color lineSurfaceColor: currentTheme ? currentTheme.panebackgroundOverlay : 'black'
+    property color lineInfoColor:  currentTheme ? currentTheme.paneTopbackgroundOverlay : 'black'
+    property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
 
     paneType: 'editor'
     paneState : { return {} }
@@ -57,7 +63,8 @@ Workspace.Pane{
             if (typeof s.document === 'string' || s.document instanceof String){
                 if ( s.document.startsWith('%project%') ){
                     var documentPath = s.document.replace('%project%', project.dir())
-                    var d = project.openTextFile(documentPath)
+                    var format = lk.layers.workspace.fileFormats.find(documentPath)
+                    var d = project.openFile(documentPath, {type: 'text', format: format})
                     if ( d )
                         document = d
                 } else {
@@ -77,8 +84,8 @@ Workspace.Pane{
     paneHelp : function(){
         if ( code && code.has(DocumentHandler.LanguageHelp) ){
             var helpPath = ''
-            if ( code.completionModel.isEnabled && editor.qmlSuggestionBox){
-                helpPath = editor.qmlSuggestionBox.getDocumentation()
+            if ( code.completionModel.isEnabled && editor.__qmlSuggestionBox){
+                helpPath = editor.__qmlSuggestionBox.getDocumentation()
             } else {
                 helpPath = code.language.help(textEdit.cursorPosition)
             }
@@ -110,45 +117,6 @@ Workspace.Pane{
     paneFocusItem : textEdit
     paneClone: function(){
         return root.panes.createPane('editor', paneState, [root.width, root.height])
-    }
-
-    property Theme currentTheme : lk.layers.workspace.themes.current
-
-    property color topColor: currentTheme ? currentTheme.paneTopBackground : 'black'
-    property color lineSurfaceColor: currentTheme ? currentTheme.panebackgroundOverlay : 'black'
-    property color lineInfoColor:  currentTheme ? currentTheme.paneTopbackgroundOverlay : 'black'
-    property color optionsColor: currentTheme ? currentTheme.paneTopBackground : 'black'
-
-    color : lk.layers.workspace.themes.current.paneBackground
-    clip : true
-    height: parent ? parent.height : 0
-    width: 400
-
-    objectName: "editor"
-
-    function closeDocument(){ editor.closeDocument() }
-    function save(){ editor.save()}
-    function saveAs(){ editor.saveAs() }
-    function closeDocumentAction(){ editor.closeDocumentAction() }
-    function assistCompletion(){ editor.assistCompletion() }
-    function getCursorRectangle(){ return editor.getCursorRectangle() }
-    function cursorWindowCoords(){ return editor.cursorWindowCoords(root) }
-
-    function hasActiveEditor(){
-        return root.panes.activePane.objectName === 'editor'
-    }
-
-    function toggleSize(){
-        if ( root.width < parent.width / 2)
-            root.width = parent.width - parent.width / 4
-        else if ( root.width === parent.width / 2 )
-            root.width = parent.width / 4
-        else
-            root.width = parent.width / 2
-    }
-
-    function toggleComment(){
-        editor.toggleComment()
     }
 
     Rectangle{
@@ -479,12 +447,28 @@ Workspace.Pane{
         id: editor
         anchors.fill: parent
         anchors.topMargin: 30
-        color: root.color
-        lineSurfaceColor: root.lineSurfaceColor
+        style: root.currentTheme.editorStyle
         lineSurfaceVisible: !(code && code.language && code.language.importsFragment && code.language.rootFragment)
+        getGlobalPosition: function(){ return root.mapGlobalPosition() }
+
+        onKeyPress: {
+            var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
+            if ( command !== '' ){
+                lk.layers.workspace.commands.execute(command)
+                event.accepted = true
+                return
+            }
+        }
+
+        onRightClicked: {
+            if ( lk.layers.workspace ){
+                lk.layers.workspace.panes.openContextMenu(editor, root)
+            }
+        }
 
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = code.has(DocumentHandler.LanguageLayout)
+            paneState = { document : document }
         }
     }
 

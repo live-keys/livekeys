@@ -13,7 +13,8 @@ class LV_EDITOR_EXPORT WorkspaceExtension : public QObject{
     Q_PROPERTY(QObject* globals           READ globals           WRITE setGlobals           NOTIFY globalsChanged)
     Q_PROPERTY(QJSValue interceptFile     READ interceptFile     WRITE setInterceptFile     NOTIFY interceptFileChanged)
     Q_PROPERTY(QJSValue interceptLanguage READ interceptLanguage WRITE setInterceptLanguage NOTIFY interceptLanguageChanged)
-    Q_PROPERTY(QJSValue menuInterceptors  READ menuInterceptors  WRITE setMenuInterceptors     NOTIFY menuInterceptorsChanged)
+    Q_PROPERTY(QJSValue menuInterceptors  READ menuInterceptors  WRITE setMenuInterceptors  NOTIFY menuInterceptorsChanged)
+    Q_PROPERTY(QJSValue fileFormats       READ fileFormats       WRITE setFileFormats       NOTIFY fileFormatsChanged)
     Q_PROPERTY(QJSValue panes             READ panes             WRITE setPanes             NOTIFY panesChanged)
     Q_PROPERTY(QJSValue commands          READ commands          WRITE setCommands          NOTIFY commandsChanged)
     Q_PROPERTY(QJSValue keyBindings       READ keyBindings       WRITE setKeyBindings       NOTIFY keyBindingsChanged)
@@ -41,6 +42,8 @@ public:
     QJSValue panes() const{ return m_panes; }
     /** Returns the themes */
     QJSValue themes() const{ return m_themes; }
+    /** Returns the file formats */
+    QJSValue fileFormats() const{ return m_fileFormats; }
 
     void setGlobals(QObject* globals);
     void setInterceptLanguage(QJSValue interceptLanguage);
@@ -51,6 +54,7 @@ public:
     void setInterceptFile(QJSValue interceptFile);
     void setPanes(QJSValue panes);
     void setThemes(QJSValue themes);
+    void setFileFormats(QJSValue fileFormats);
 
     void setIdentifiers(const std::string& name, const std::string& path);
     /** Name getter */
@@ -86,6 +90,8 @@ signals:
     void panesChanged();
     /** Signals that the themes property has changed */
     void themesChanged();
+    /** Signals that the fileFormats property has changed */
+    void fileFormatsChanged();
 
 private:
     std::string m_name;
@@ -100,6 +106,7 @@ private:
     QJSValue m_interceptFile;
     QJSValue m_panes;
     QJSValue m_themes;
+    QJSValue m_fileFormats;
 };
 
 /** Globals setter */
@@ -160,6 +167,12 @@ inline void WorkspaceExtension::setPanes(QJSValue panes){
 inline void WorkspaceExtension::setThemes(QJSValue themes){
     m_themes = themes;
     emit themesChanged();
+}
+
+/** Sets the fileFormats */
+inline void WorkspaceExtension::setFileFormats(QJSValue fileFormats){
+    m_fileFormats = fileFormats;
+    emit fileFormatsChanged();
 }
 
 }// namespace

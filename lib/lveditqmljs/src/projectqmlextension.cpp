@@ -21,7 +21,7 @@
 #include "live/viewengine.h"
 #include "live/languageqmlhandler.h"
 #include "live/editorsettings.h"
-#include "live/editorglobalobject.h"
+#include "live/editorlayer.h"
 
 #include "qmlbuilder.h"
 #include "qmlwatcher.h"
@@ -39,6 +39,7 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QQmlPropertyMap>
 
 namespace lv{
 
@@ -97,6 +98,22 @@ ProjectQmlExtension::~ProjectQmlExtension(){
 void ProjectQmlExtension::classBegin(){
 }
 
+/// \brief Returns the lv::PaletteContainer associated with this object.
+PaletteLoader *ProjectQmlExtension::paletteContainer(){
+    if( !m_paletteContainer ){
+        QObject* lk = m_engine->engine()->rootContext()->contextProperty("lk").value<QObject*>();
+        if ( !lk ){
+            return nullptr;
+        }
+        QObject* editorLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("editor").value<QObject*>();
+        EditorLayer* editorLayer = static_cast<EditorLayer*>(editorLayerOb);
+        if ( !editorLayer ){
+            return nullptr;
+        }
+        m_paletteContainer = editorLayer->paletteLoader();
+    }
+    return m_paletteContainer;
+}
 
 /**
  * @brief Override of QQmlParserStatus::componentComplete
@@ -105,8 +122,8 @@ void ProjectQmlExtension::componentComplete(){
     if ( !m_scanMonitor ){
         QQmlEngine* qmlengine = qmlEngine(this);
         QQmlContext* ctx = qmlengine->rootContext();
-        QObject* lg = ctx->contextProperty("lk").value<QObject*>();
-        if ( !lg ){
+        QObject* lk = ctx->contextProperty("lk").value<QObject*>();
+        if ( !lk ){
             qWarning("Failed to find live global object.");
             return;
         }
@@ -114,7 +131,7 @@ void ProjectQmlExtension::componentComplete(){
         ViewEngine* engine = ViewEngine::grabFromQmlEngine(qmlengine);
         if ( !engine ){ qWarning("Failed to find engine object."); return; }
 
-        Settings* settings = static_cast<Settings*>(lg->property("settings").value<QObject*>());
+        Settings* settings = static_cast<Settings*>(lk->property("settings").value<QObject*>());
         if ( !settings ){ qWarning("Failed to find settings object."); return; }
 
         Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
@@ -123,7 +140,16 @@ void ProjectQmlExtension::componentComplete(){
         Workspace* workspace = Workspace::getFromContext(ctx);
         if ( !workspace ){ qWarning("Failed to find workspace object."); return; }
 
-        setParams(settings, project, engine, workspace);
+        m_project = project;
+        m_engine = engine;
+
+        m_scanMonitor = new QmlProjectMonitor(this, m_project, m_engine, workspace);
+
+        lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
+        m_settings = new QmlJsSettings(editorSettings);
+        editorSettings->syncWithFile();
+
+        m_channelDispatcher = new QmlBindingChannelsDispatcher(m_project, this);
     }
 }
 
@@ -177,23 +203,7 @@ void ProjectQmlExtension::registerTypes(const char *uri){
  * \brief Assign initialization params for this object
  */
 void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine, Workspace *workspace){
-    m_project = project;
-    m_engine = engine;
 
-    m_scanMonitor = new QmlProjectMonitor(this, m_project, m_engine, workspace);
-
-    lv::EditorSettings* editorSettings = qobject_cast<lv::EditorSettings*>(settings->file("editor"));
-    m_settings = new QmlJsSettings(editorSettings);
-    editorSettings->syncWithFile();
-
-    EditorGlobalObject* editor = static_cast<EditorGlobalObject*>(engine->engine()->rootContext()->contextProperty("editor").value<QObject*>());
-    if ( !editor ){
-        qWarning("Failed to find editor global object.");
-        return;
-    }
-
-    m_paletteContainer = editor->paletteContainer();
-    m_channelDispatcher = new QmlBindingChannelsDispatcher(m_project, this);
 }
 
 bool ProjectQmlExtension::pluginTypesEnabled(){

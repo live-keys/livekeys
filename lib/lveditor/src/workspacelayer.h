@@ -20,6 +20,7 @@ class QQuickCloseEvent;
 
 namespace lv{
 
+class FileFormatTypes;
 class Project;
 class Workspace;
 class ProjectWorkspace;
@@ -28,7 +29,7 @@ class ProjectWorkspace;
 class WorkspaceLayer : public Layer{
 
     Q_OBJECT
-    Q_PROPERTY(QObject* project                     READ project       NOTIFY projectChanged)
+    Q_PROPERTY(QObject* environment                 READ environment   NOTIFY environmentChanged)
     Q_PROPERTY(QObject* wizards                     READ wizards       NOTIFY wizardsChanged)
     Q_PROPERTY(QObject* panes                       READ panes         NOTIFY panesChanged)
     Q_PROPERTY(QObject* startup                     READ startup       NOTIFY startupChanged)
@@ -36,6 +37,7 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(lv::Commands* commands               READ commands      CONSTANT)
     Q_PROPERTY(lv::KeyMap* keymap                   READ keymap        CONSTANT)
     Q_PROPERTY(lv::ThemeContainer* themes           READ themes        CONSTANT)
+    Q_PROPERTY(lv::FileFormatTypes* fileFormats     READ fileFormats   CONSTANT)
     Q_PROPERTY(lv::Documentation* documentation     READ documentation CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* extensions          READ extensions    CONSTANT)
     Q_PROPERTY(lv::StartupModel* recents            READ recents       CONSTANT)
@@ -50,7 +52,7 @@ public:
     QObject* nextViewParent() override;
     QObject * viewRoot() override;
 
-    QObject* project() const;
+    QObject* environment() const;
     QObject* wizards() const;
     QObject* panes() const;
     QObject* startup() const;
@@ -58,6 +60,7 @@ public:
 
     lv::Commands* commands() const;
     lv::KeyMap* keymap() const;
+    lv::FileFormatTypes* fileFormats() const;
     QQmlPropertyMap* extensions() const;
     lv::ThemeContainer* themes() const;
     lv::Documentation* documentation() const;
@@ -68,7 +71,7 @@ public:
 
 public slots:
     QJSValue interceptMenu(QJSValue pane, QJSValue item);
-    QJSValue interceptFile(const QString& path, int mode);
+    QJSValue interceptFile(const QString& path, const QString& format, int mode);
 
     QString docsPath() const;
     QString pluginsPath() const;
@@ -93,7 +96,7 @@ public slots:
     void __tooltipTimeout();
 
 signals:
-    void projectChanged();
+    void environmentChanged();
     void wizardsChanged();
     void panesChanged();
     void startupChanged();
@@ -108,16 +111,17 @@ private:
 
     QObject* m_nextViewParent;
 
-    QObject* m_projectEnvironment;
+    QObject* m_environment;
     QObject* m_wizards;
     QObject* m_panes;
     QObject* m_startup;
     QObject* m_viewRoot;
 
-    lv::WorkspaceMessageStack* m_messageStack;
+    WorkspaceMessageStack* m_messageStack;
     Commands* m_commands;
     KeyMap*   m_keymap;
     ThemeContainer* m_themes;
+    FileFormatTypes* m_fileFormats;
 
     Project*       m_project;
     ViewEngine*    m_engine;
@@ -134,8 +138,8 @@ private:
     QObject*       m_tooltip;
 };
 
-inline QObject *WorkspaceLayer::project() const{
-    return m_projectEnvironment;
+inline QObject *WorkspaceLayer::environment() const{
+    return m_environment;
 }
 
 inline QObject *WorkspaceLayer::wizards() const{
@@ -156,6 +160,10 @@ inline Commands *WorkspaceLayer::commands() const{
 
 inline KeyMap *WorkspaceLayer::keymap() const{
     return m_keymap;
+}
+
+inline FileFormatTypes *WorkspaceLayer::fileFormats() const{
+    return m_fileFormats;
 }
 
 inline QQmlPropertyMap *WorkspaceLayer::extensions() const{

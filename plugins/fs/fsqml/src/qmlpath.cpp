@@ -1,6 +1,10 @@
 #include "qmlpath.h"
+#include "live/viewengine.h"
+#include "live/qmlerror.h"
+
 #include <QFileInfo>
 #include <QJSValueIterator>
+#include <QQmlEngine>
 #include <QDebug>
 #include <QFile>
 
@@ -338,6 +342,30 @@ QString QmlPath::toLocalFile(const QUrl &url){
 
 QUrl QmlPath::urlFromLocalFile(const QString &path){
     return QUrl::fromLocalFile(path);
+}
+
+QJSValue QmlPath::fileTypeFilters(const QString &path){
+    QQmlEngine* engine = qobject_cast<QQmlEngine*>(QObject::parent());
+    ViewEngine* ve = ViewEngine::grabFromQmlEngine(engine);
+    if ( !ve ){
+        QmlError::warnNoEngineCaptured(this, "Path.fileTypeFilters");
+        return QJSValue();
+    }
+
+    QString suffix = QFileInfo(path).suffix();
+
+    if ( suffix.isEmpty() ){
+        QJSValue result = engine->newArray(1);
+        result.setProperty(0, "All files (*)");
+        return result;
+    }
+
+    QString suffixFilter = suffix.at(0).toUpper() + suffix.mid(1) + " files (*." + suffix + ")";
+
+    QJSValue result = engine->newArray(2);
+    result.setProperty(0, suffixFilter);
+    result.setProperty(1, "All files (*)");
+    return result;
 }
 
 QString QmlPath::removeSlashes(QString s)

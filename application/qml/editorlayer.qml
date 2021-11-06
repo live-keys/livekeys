@@ -12,20 +12,67 @@ EditorLayer{
     id: root
     objectName: "editor"
 
-    Component.onCompleted: {
-        lk.layers.workspace.commands.add(root, {
-            'saveFile' : [ function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.save() }, "Save File"],
-            'saveFileAs' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.saveAs() }, "Save File As"],
-            'closeFile' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.closeDocument() }, "Close File"],
-            'assistCompletion' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.assistCompletion() }, "Assist Completion"],
-            'toggleSize' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.toggleSize() }, "Toggle Size"],
-            'toggleComment' : [function(){ if ( hasActiveEditor() ) lk.layers.workspace.panes.activePane.toggleComment() }, "Toggle Comment"]
-        })
-    }
-
     function hasActiveEditor(){
         return lk.layers.workspace.panes.activePane.objectName === 'editor'
     }
+
+    property var commandFunctions : ({
+        saveFile : function(){
+            if ( hasActiveEditor() ){
+                var document = lk.layers.workspace.panes.activePane.editor.document
+                lk.layers.workspace.wizards.saveDocument(document)
+            }
+        },
+        saveFileAs: function(){
+            if ( hasActiveEditor() ){
+                var document = lk.layers.workspace.panes.activePane.editor.document
+                lk.layers.workspace.wizards.saveDocumentAs(document)
+            }
+        },
+         closeFile: function(){
+             if ( hasActiveEditor() ){
+                 var document = lk.layers.workspace.panes.activePane.editor.document
+                 lk.layers.workspace.wizards.closeDocument(document)
+             }
+         },
+        assistCompletion: function(){
+            if ( hasActiveEditor() ){
+                var editor = lk.layers.workspace.panes.activePane.editor
+                editor.assistCompletion()
+            }
+        },
+        toggleSize: function(){
+            if ( hasActiveEditor() ){
+                var editorPane = lk.layers.workspace.panes.activePane
+                if ( editorPane.width < editorPane.parent.width / 2)
+                    editorPane.width = editorPane.parent.width - editorPane.parent.width / 4
+                else if ( editorPane.width === editorPane.parent.width / 2 )
+                    editorPane.width = editorPane.parent.width / 4
+                else
+                    editorPane.width = editorPane.parent.width / 2
+            }
+        },
+        toggleComment: function(){
+            if ( hasActiveEditor() ){
+                var editor = lk.layers.workspace.panes.activePane.editor
+                if ( editor.code.language ){
+                    editor.code.language.toggleComment(editor.textEdit.selectionStart, editor.textEdit.selectionEnd - editor.textEdit.selectionStart)
+                }
+            }
+        }
+    })
+
+    Component.onCompleted: {
+        lk.layers.workspace.commands.add(root, {
+            'saveFile' : [ root.commandFunctions.saveFile, "Save File"],
+            'saveFileAs' : [ root.commandFunctions.saveFileAs, "Save File As"],
+            'closeFile' : [ root.commandFunctions.closeFile, "Close File"],
+            'assistCompletion' : [ root.commandFunctions.assistCompletion, "Assist Completion"],
+            'toggleSize' : [ root.commandFunctions.toggleSize, "Toggle Size"],
+            'toggleComment' : [ root.commandFunctions.toggleComment, "Toggle Comment"]
+        })
+    }
+
 
     environment: QtObject{
 
@@ -39,15 +86,20 @@ EditorLayer{
         property Item content : null
 
         function createEmptyEditorBox(parent){
-            return editorBoxFactory.createObject(parent ? parent : lk.layers.workspace.panes.container)
+            return __editorBox.createObject(parent ? parent : lk.layers.workspace.panes.container)
         }
 
         function createEditorBox(child, aroundRect, panePosition, relativePlacement){
-            var eb = editorBoxFactory.createObject(lk.layers.workspace.panes.container)
+            var eb = __editorBox.createObject(lk.layers.workspace.panes.container)
             eb.setChild(child, aroundRect, panePosition, relativePlacement)
             return eb;
         }
 
+        function createSuggestionBox(parent, font){
+            var sb = __suggestionBox.createObject(parent)
+            sb.__initialize(font)
+            return sb
+        }
 
         function addLoadingScreen(editor){
             var anim = __loadingScreen.createObject(editor)
@@ -109,8 +161,15 @@ EditorLayer{
             }
         }
 
+        property Component __suggestionBox : Component {
+            SuggestionBox{
+                Behavior on opacity {
+                    NumberAnimation { duration: 150 }
+                }
+            }
+        }
 
-        property Component editorBoxFactory: Component{
+        property Component __editorBox: Component{
 
             Rectangle{
                 id: editorBoxComponent

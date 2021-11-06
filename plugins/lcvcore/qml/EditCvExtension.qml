@@ -12,9 +12,19 @@ WorkspaceExtension{
     objectName : "editcv"
     commands: { return {} }
 
-    interceptFile: function(path, mode){
+    fileFormats: [
+        { extension: 'jpg', type: 'jpg' },
+        { extension: 'jpeg', type: 'jpg' },
+        { extension: 'bmp', type: 'bmp' },
+        { extension: 'tiff', type: 'tiff' },
+        { extension: 'avi', type: 'avi' },
+        { extension: 'mp4', type: 'mp4' },
+        { extension: 'mpeg', type: 'mpeg' }
+    ]
+
+    interceptFile: function(path, format, mode){
         if ( Fs.Path.hasExtensions(path, 'jpg')){
-            var document = project.openFile(path, mode)
+            var document = project.openFile(path, {type: 'binary', mode: Document.Edit, format: 'jpg' })
             if ( !document )
                 return
 
@@ -80,7 +90,7 @@ WorkspaceExtension{
                                         'heading' : 'Add adjustments file in ' + project.dir()
                                     },
                                     function(file){
-                                        var pd = project.openTextFile(file, Document.Edit)
+                                        var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                         pd.insert(
                                             0,
                                             pd.contentLength(),
@@ -138,8 +148,7 @@ WorkspaceExtension{
                             } else {
                                 var path = segment.filters
 
-                                var pd = project.openTextFile(path, Document.Edit)
-
+                                var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(path), { type: 'text', format: 'qml', mode: Document.Edit})
                                 var pane = lk.layers.workspace.panes.createPane('editor', {}, [400, 0])
 
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')
@@ -183,7 +192,7 @@ WorkspaceExtension{
                                         'heading' : 'Add adjustments file in ' + project.dir()
                                     },
                                     function(file){
-                                        var pd = project.openTextFile(file, Document.Edit)
+                                        var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                         pd.insert(
                                             0,
                                             pd.contentLength(),
@@ -263,8 +272,7 @@ WorkspaceExtension{
                             } else {
                                 var path = segment.filters
 
-                                var pd = project.openTextFile(path, Document.Edit)
-
+                                var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                 var pane = lk.layers.workspace.panes.createPane('editor', {}, [400, 0])
 
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')

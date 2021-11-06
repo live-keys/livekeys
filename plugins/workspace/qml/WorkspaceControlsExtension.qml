@@ -49,6 +49,14 @@ WorkspaceExtension{
         }
     }
 
+    fileFormats: [
+        { extension: 'qml', type: 'qml' },
+        { extension: 'js', type: 'js' },
+        { extension: 'json', type: 'json' },
+        { extension: 'csv', type: 'csv' },
+        { extension: 'txt', type: 'txt' }
+    ]
+
     commands: {
         'minimize' : [lk.layers.window.handle.minimize, "Minimize"],
         'addEditor' : [root.addEditorPane, "Add editor pane"],
@@ -194,20 +202,20 @@ WorkspaceExtension{
                             name : "New Document",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.project.openFile(fe.path, Document.Edit)
+                                lk.layers.workspace.environment.openFile(fe.path, Document.Edit)
                             }
                         }, {
                             name : "New Runnable",
                             action : function(){
                                 var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.project.openFile(fe.path, Document.Edit)
+                                lk.layers.workspace.environment.openFile(fe.path, Document.Edit)
                                 project.openRunnable(fe.path, [fe.path])
                             }
                         }, {
                             name : "Add File",
                             action : function(){
                                 lk.layers.workspace.wizards.addFile(item.entry().path, {}, function(f){
-                                    lk.layers.workspace.project.openFile(f.path, Document.Edit)
+                                    lk.layers.workspace.environment.openFile(f.path, Document.Edit)
                                 })
                             }
                         }, {
@@ -239,7 +247,7 @@ WorkspaceExtension{
                             name : "Add File",
                             action : function(){
                                 lk.layers.workspace.wizards.addFile(item.entry().path, function(f){
-                                    lk.layers.workspace.project.openFile(f.path, ProjectDocument.Edit)
+                                    lk.layers.workspace.environment.openFile(f.path, ProjectDocument.Edit)
                                 })
                             }
                         }, {

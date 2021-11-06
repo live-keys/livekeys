@@ -179,10 +179,10 @@ void Livekeys::loadProject(){
         QString projPath = QString::fromStdString(m_arguments->script());
         if ( m_arguments->globalFlag() && !QFileInfo(projPath).isAbsolute() ){
             m_project->openProject(
-                QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + projPath + ".qml"
+                QUrl::fromLocalFile(QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + projPath + ".qml")
             );
         } else {
-            m_project->openProject(projPath);
+            m_project->openProject(QUrl::fromLocalFile(projPath));
         }
     }
     if ( !m_arguments->monitoredFiles().isEmpty() ){
@@ -190,12 +190,15 @@ void Livekeys::loadProject(){
             if ( !mfile.isEmpty() ){
                 QFileInfo mfileInfo(mfile);
                 if ( mfileInfo.isRelative() ){
-                    m_project->openTextFile(
+                    m_project->openFile(
                         QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
-                        ProjectDocument::Monitor
+                        "text",
+                        ProjectDocument::Monitor,
+                        "" //TODO: Find format in workspace layer
                     );
                 } else {
-                    m_project->openTextFile(mfile, ProjectDocument::Monitor);
+                    //TODO: Find format in workspace layer
+                    m_project->openFile(mfile, "text", ProjectDocument::Monitor, "");
                 }
             }
         }

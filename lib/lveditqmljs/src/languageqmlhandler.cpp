@@ -42,7 +42,6 @@
 #include "live/projectqmlextension.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
-#include "live/editorglobalobject.h"
 #include "live/palettecontainer.h"
 #include "live/paletteloader.h"
 #include "live/qmlpropertywatcher.h"

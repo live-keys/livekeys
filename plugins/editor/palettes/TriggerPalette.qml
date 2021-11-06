@@ -148,7 +148,7 @@ CodePalette{
                         qmlSuggestionBox.parent.updatePlacement(rect, Qt.point(paneCoords.x + 113, paneCoords.y - 75), lk.layers.editor.environment.placement.bottom)
                         return
                     }
-                    qmlSuggestionBox = paletteFunctions.createSuggestionBox(null, palette.inputFont)
+                    qmlSuggestionBox = lk.layers.editor.environment.createSuggestionBox(null, palette.inputFont)
                     qmlSuggestionBox.width = Qt.binding(function(){ return input.width })
                     qmlSuggestionBox.height = 200
                     qmlSuggestionBox.x = 0

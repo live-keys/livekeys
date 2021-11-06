@@ -34,7 +34,7 @@ QtObject{
             }
 
             panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
-            fe.document = project.openTextFile(project.active.path)
+            fe.document = project.openFile(project.active.path, {type: 'text', format: 'qml'})
 
             var editor = fe.editor
             var codeHandler = editor.code.language

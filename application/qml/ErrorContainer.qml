@@ -60,7 +60,7 @@ Rectangle{
         visible : text === "" ? false : true
 
         onLinkActivated: {
-            lk.layers.workspace.project.openFile(
+            lk.layers.workspace.environment.openFile(
                 link.substring(0, link.lastIndexOf(':')), ProjectDocument.EditIfNotOpen
             )
         }

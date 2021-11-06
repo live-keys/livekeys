@@ -2,6 +2,7 @@ import QtQuick 2.3
 import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.2
 import editor 1.0
+import editor.style 1.0
 import workspace 1.0
 import workspace.icons 1.0
 import workspace.nodeeditor 1.0
@@ -136,6 +137,28 @@ Theme{
             corner: Rectangle{color: 'transparent'}
         }
 
+    }
+
+    // Editor
+
+    property QtObject editorStyle: EditorStyle{
+        backgroundColor: root.paneBackground
+        lineSurfaceBackgroundColor: root.panebackgroundOverlay
+
+        selectionColor: root.colorScheme.foreground
+        selectionBackgroundColor: '#3d4856'
+
+        scrollbarHandleColor: '#1f2227'
+        textStyle: Input.TextStyle{
+            color: root.colorScheme.foreground
+            font : Qt.font({
+                family: 'Source Code Pro, Courier New, Courier',
+                weight: Font.Normal,
+                italic: false,
+                pixelSize: lk.settings.file('editor').fontSize
+            })
+        }
+        lineSurfaceTextColor: "#3e464d"
     }
 
     // Labels

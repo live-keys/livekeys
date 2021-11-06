@@ -17,6 +17,7 @@
 #include "live/mlnodetojson.h"
 #include "live/applicationcontext.h"
 
+#include "fileformattypes.h"
 #include "workspace.h"
 #include "projectworkspace.h"
 #include "documentation.h"
@@ -37,7 +38,7 @@ namespace lv{
 
 WorkspaceLayer::WorkspaceLayer(QObject *parent)
     : Layer(parent)
-    , m_projectEnvironment(nullptr)
+    , m_environment(nullptr)
     , m_wizards(nullptr)
     , m_panes(nullptr)
     , m_startup(nullptr)
@@ -46,6 +47,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_commands(nullptr)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
+    , m_fileFormats(new FileFormatTypes(this))
     , m_project(nullptr)
     , m_mainWindow(nullptr)
     , m_extensions(nullptr)
@@ -124,6 +126,8 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
             m_commands->add(le, le->commands());
         if ( le->keyBindings().isObject() )
             m_keymap->store(le->keyBindings());
+        if ( le->fileFormats().isArray() )
+            m_fileFormats->add(le->fileFormats());
 
         QJSValue themesArray = le->themes();
 
@@ -168,8 +172,8 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
             Exception, ViewEngine::toErrorString(engine->lastErrors()).toStdString(), Exception::toCode("~Component")
         );
 
-    m_projectEnvironment = m_viewRoot->property("projectEnvironment").value<QObject*>();
-    m_wizards            = m_projectEnvironment->property("wizards").value<QObject*>();
+    m_environment        = m_viewRoot->property("environment").value<QObject*>();
+    m_wizards            = m_environment->property("wizards").value<QObject*>();
     m_panes              = m_viewRoot->property("panes").value<QObject*>();
     m_startup            = m_viewRoot->property("startup").value<QObject*>();
     m_nextViewParent     = m_viewRoot->property("runSpace").value<QObject*>();
@@ -289,9 +293,9 @@ QJSValue WorkspaceLayer::interceptMenu(QJSValue pane, QJSValue item){
     return concat;
 }
 
-QJSValue WorkspaceLayer::interceptFile(const QString &path, int mode){
+QJSValue WorkspaceLayer::interceptFile(const QString &path, const QString &format, int mode){
     QJSValueList interceptorArgs;
-    interceptorArgs << path << mode;
+    interceptorArgs << path << format << mode;
 
     for ( auto it = m_extensions->begin(); it != m_extensions->end(); ++it ){
         WorkspaceExtension* le = it.value();
@@ -359,7 +363,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
             QString path = QString::fromStdString((*it).asString());
             QFileInfo pathInfo(path);
             if ( pathInfo.exists() ){
-                ProjectDocument* doc = m_project->openTextFile(path);
+                ProjectDocument* doc = ProjectDocument::castFrom(m_project->openFile(path, "text", Document::EditIfNotOpen));
                 openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
             } else {
                 removedDocuments.push_back(path.toStdString());

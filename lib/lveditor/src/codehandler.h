@@ -139,7 +139,6 @@ private:
     ProjectDocument*      m_projectDocument;
     int                   m_indentSize;
     QString               m_indentContent;
-    Project*              m_project;
     Extensions*           m_extensions;
     ViewEngine*           m_engine;
     TextEdit*             m_textEdit;

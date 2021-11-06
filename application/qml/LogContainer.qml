@@ -72,7 +72,7 @@ Workspace.Pane{
         var file = location.substr(0, location.lastIndexOf(':'))
         if ( file.startsWith('memory') )
             file = 'file' + file.substr(6)
-        var fe = lk.layers.workspace.project.openFile(file)
+        var fe = lk.layers.workspace.environment.openFile(file)
         if ( fe ){
             fe.editor.forceFocus()
             fe.editor.textEdit.cursorPosition = fe.editor.document.offsetAtLine(line)

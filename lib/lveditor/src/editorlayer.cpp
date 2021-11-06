@@ -2,6 +2,7 @@
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/keymap.h"
+#include "live/paletteloader.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>
@@ -16,6 +17,8 @@ EditorLayer::EditorLayer(QObject *parent)
     QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
     QObject* livekeys = engine->rootContext()->contextProperty("lk").value<QObject*>();
     QObject* workspace = livekeys->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+
+    m_paletteLoader = PaletteLoader::create(lv::ViewContext::instance().engine());
 
     if ( !workspace ){
         Exception e = CREATE_EXCEPTION(lv::Exception, "Editor layer requires workspace layer.", Exception::toCode("~layer"));

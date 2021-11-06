@@ -8,9 +8,10 @@
 
 namespace lv{
 
-Document::Document(ProjectFile *file, bool isMonitored, Project *parent)
+Document::Document(ProjectFile *file, const QString &formatType, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_file(file)
+    , m_formatType(formatType)
     , m_isMonitored(isMonitored)
     , m_isDirty(false)
 {
@@ -108,6 +109,14 @@ bool Document::saveAs(const QString& path){
  */
 bool Document::saveAs(const QUrl& url){
     return saveAs(url.toLocalFile());
+}
+
+void Document::setFormatType(const QString &formatType){
+    if ( m_formatType == formatType )
+        return;
+
+    m_formatType = formatType;
+    emit formatTypeChanged();
 }
 
 

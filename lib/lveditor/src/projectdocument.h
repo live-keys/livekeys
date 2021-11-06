@@ -220,7 +220,7 @@ public:
     };
 
 public:
-    explicit ProjectDocument(ProjectFile* file, bool isMonitored, Project *parent);
+    explicit ProjectDocument(ProjectFile* file, const QString& format, bool isMonitored, Project *parent);
     ~ProjectDocument() override;
 
     QTextDocument* textDocument();
