@@ -24,6 +24,7 @@
 
 namespace lv{
 
+class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 
@@ -65,19 +66,25 @@ public:
     ProjectEntry* findPathInEntry(ProjectEntry* entry, const QString& path);
     ProjectEntry* root();
 
+    void removeEntry(lv::ProjectEntry* entry);
+    void renameEntry(lv::ProjectEntry* item, const QString& newName);
+    void moveEntry(lv::ProjectEntry* item, lv::ProjectEntry* parent);
+
 public slots:
     void entryRemoved(const QModelIndex& item);
     void entryRemoved(ProjectEntry* entry);
     void entryRemoved(const QModelIndex &item, lv::ProjectEntry* entry);
     void entryAdded(lv::ProjectEntry* item, lv::ProjectEntry* parent);
 
-    void moveEntry(lv::ProjectEntry* item, lv::ProjectEntry* parent);
-    void renameEntry(lv::ProjectEntry* item, const QString& newName);
-    lv::ProjectFile* addFile(lv::ProjectEntry* parentEntry, const QString& name);
-    lv::ProjectFile* addTemporaryFile();
-    lv::ProjectEntry* addDirectory(lv::ProjectEntry* parentEntry, const QString& name);
     lv::ProjectEntry* findPath(const QString& path);
-    bool removeEntry(lv::ProjectEntry* entry);
+
+    lv::ProjectFile* addTemporaryFile();
+
+    QString addFile(const QString& path, const QString& name, const QString& content = "");
+    QString addDirectory(const QString& path, const QString& name);
+    void removePath(const QString& path);
+    void renamePath(const QString& path, const QString& name);
+    void movePath(const QString& path, const QString& toParent);
 
     void expandEntry(lv::ProjectEntry* entry) const;
     void rescanEntries(lv::ProjectEntry* entry = 0);
@@ -90,9 +97,9 @@ public slots:
 
 signals:
     void projectNodeChanged(QModelIndex index);
-    void error(const QString& message);
 
 private:
+    ViewEngine* viewEngine();
     ProjectFile* openExternalFile(const QString& file);
     ProjectEntry *itemOrRoot(const QModelIndex &index) const;
 

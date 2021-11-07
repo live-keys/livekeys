@@ -130,37 +130,44 @@ void Project::openProject(const QUrl &url){
     }
     closeProject();
     QString absolutePath = QFileInfo(path).absoluteFilePath();
-    m_fileModel->openProject(absolutePath);
 
-    if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-        ProjectDocument* document = createTextDocument(
-            qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
-            "qml",
-            false
-        );
-        m_documentModel->openDocument(document->file()->path(), document);
+    try{
+        m_fileModel->openProject(absolutePath);
+        if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
+            ProjectDocument* document = createTextDocument(
+                qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
+                "qml",
+                false
+            );
+            m_documentModel->openDocument(document->file()->path(), document);
 
-        Runnable* r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name());
-        r->setRunSpace(m_runspace);
-        m_runnables->addRunnable(r);
-        m_active = r;
+            Runnable* r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name());
+            r->setRunSpace(m_runspace);
+            m_runnables->addRunnable(r);
+            m_active = r;
 
-        m_path   = absolutePath;
-        emit pathChanged(absolutePath);
-        emit activeChanged(m_active);
-    } else if ( m_fileModel->root()->childCount() > 0 ){
-        m_path = absolutePath;
-        emit pathChanged(absolutePath);
+            m_path   = absolutePath;
+            emit pathChanged(absolutePath);
+            emit activeChanged(m_active);
+        } else if ( m_fileModel->root()->childCount() > 0 ){
+            m_path = absolutePath;
+            emit pathChanged(absolutePath);
 
-        if ( !m_active ){
-            ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
-            if( bestFocus ){
-                setActive(bestFocus->path());
+            if ( !m_active ){
+                ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
+                if( bestFocus ){
+                    setActive(bestFocus->path());
+                }
             }
         }
+
+        scheduleRun();
+
+    } catch ( lv::Exception& e ){
+        QmlError(viewEngine(), e, this).jsThrow();
     }
 
-    scheduleRun();
+
 }
 
 Document *Project::isOpened(const QUrl &url){

@@ -156,16 +156,6 @@ Item{
         }
     }
 
-    Connections{
-        target: project.fileModel
-        function onError(message){
-            lk.layers.window.dialogs.message(message,{
-                button2Name : 'Ok',
-                button2Function : function(mbox){ mbox.close(); }
-            })
-        }
-    }
-
     function toggleVisibility(){
         var pfs = root.panes.focusPane('projectFileSystem')
 
@@ -579,6 +569,117 @@ Item{
             lk.layers.window.dialogs.overlayBox(root.addEntryOverlay)
         }
 
+        function removePath(path, callback){
+            var message = ''
+            if ( !Fs.Path.exists(path) )
+                return
+            if ( Fs.Path.isDir(path) ){
+                var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+                if ( documentList.length === 0 ){
+                    message =
+                        "Are you sure you want to remove directory\'" + entry.path + "\' " +
+                        "and all its contents?"
+                } else {
+                    var unsavedFiles = '';
+                    for ( var i = 0; i < documentList.length; ++i ){
+                        unsavedFiles += documentList[i] + "\n";
+                    }
+
+                    message = "The following files have unsaved changes:\n";
+                    message += unsavedFiles
+                    message +=
+                        "Are you sure you want to remove directory \'" + entry.path +
+                        "\' and all its contents?\n"
+                }
+            } else {
+                var doc = project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
+                if  ( doc && doc.isDirty ){
+                    message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
+                } else {
+                    message = "Are you sure you want to remove file \'" + entry.path + "\'?"
+                }
+            }
+
+            lk.layers.window.dialogs.message(message, {
+                button1Name : 'Yes',
+                button1Function : function(mbox){
+                    root.fileSystem.removePath(path)
+                    mbox.close()
+                    if ( callback )
+                        callback()
+                },
+                button3Name : 'No',
+                button3Function : function(mbox){
+                    mbox.close()
+                },
+                returnPressed : function(mbox){
+                    root.fileSystem.removePath(path)
+                    mbox.close()
+                    if ( callback )
+                        callback()
+                }
+            })
+        }
+
+        function movePath(path, newParent, callback){
+            var message = ''
+            if ( !Fs.Path.exists(path) )
+                return
+
+            if ( !Fs.Path.isDir(path) ){
+                var doc = project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
+                if  ( doc && doc.isDirty ){
+                    message = lang([
+                        "Are you sure you want to move unsaved file '%0'?\n" +
+                        "All your changes will be lost."
+                    ]).format(entry.path)
+                } else {
+                    root.fileSystem.movePath(path, newParent)
+                    if ( callback )
+                        callback()
+                    return;
+                }
+            } else {
+                var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+                if ( documentList.length === 0 ){
+                    root.fileSystem.movePath(path, newParent)
+                    if ( callback )
+                        callbac()
+                    return;
+                } else {
+                    var unsavedFiles = '';
+                    for ( var i = 0; i < documentList.length; ++i ){
+                        unsavedFiles += documentList[i] + "\n";
+                    }
+                    message = lang([
+                        "The following files have unsaved changes:\n %0",
+                        "Are you sure you want to move directory \'%1\'",
+                        "and all its contents? Unsaved changes will be lost."
+                    ]).format(unsavedFiles, entry.path)
+                }
+            }
+
+            lk.layers.window.dialogs.message(message, {
+                button1Name : 'Yes',
+                button1Function : function(mbox){
+                    root.fileSystem.movePath(path, newParent)
+                    mbox.close()
+                    if ( callback )
+                        callback()
+                },
+                button3Name : 'No',
+                button3Function : function(mbox){
+                    mbox.close()
+                },
+                returnPressed : function(mbox){
+                    root.fileSystem.movePath(path, newParent)
+                    mbox.close()
+                    if ( callback )
+                        callback()
+                }
+            })
+        }
+
         function checkUnsavedFiles(callback){
             var documentList = project.documentModel.listUnsavedDocuments()
             callback = callback ? callback : function(){}
@@ -719,6 +820,18 @@ Item{
                 callback(path, doc, fe)
             fe.document = doc
             return fe
+        }
+
+        function removePath(path){
+            project.fileModel.removePath(path)
+        }
+
+        function renamePath(path, name){
+            project.fileModel.renamePath(path, name)
+        }
+
+        function movePath(path, newParent){
+            project.fileModel.movePath(path, newParent)
         }
 
         function closeDocument(document, callback){

@@ -19,6 +19,7 @@
 #include "live/runnable.h"
 #include "live/projectentry.h"
 #include "live/projectfile.h"
+#include "live/qmlerror.h"
 #include "live/project.h"
 
 #include "live/visuallogqt.h"
@@ -195,7 +196,7 @@ void ProjectFileModel::openProject(const QString &path){
     QFileInfo pathInfo(path);
     if ( !pathInfo.exists() ){
         endResetModel();
-        emit error("Project path does not exist: " + path);
+        THROW_EXCEPTION(lv::Exception, Utf8("Project path does not exist: %").format(path), lv::Exception::toCode("~Path"));
         return;
     }
 
@@ -263,18 +264,18 @@ void ProjectFileModel::moveEntry(ProjectEntry *item, ProjectEntry *newParent){
                 entryAdded(item, newParent);
                 item->updatePaths();
             } else {
-                emit error("Failed to move file: \"" + item->path() + "\" to \"" + newPath + "\"");
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to move file \'%\' to \'%\'").format(item->path(), newPath), Exception::toCode("~Move"));
             }
         } else {
             if ( !item->parentEntry() ){
-                emit error("Failed to move directory: \"" + item->path() + "\" to \"" + newPath + "\"");
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to move directory \'%\' to \'%\'").format(item->path(), newPath), Exception::toCode("~Move"));
             }
             if ( QDir(item->parentEntry()->path()).rename(item->path(), newPath ) ){
                 entryRemoved(item);
                 entryAdded(item, newParent);
                 item->updatePaths();
             } else {
-                emit error("Failed to move directory: \"" + item->path() + "\" to \"" + newPath + "\"");
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to move directory \'%\' to \'%\'").format(item->path(), newPath), Exception::toCode("~Move"));
             }
         }
     }
@@ -289,14 +290,14 @@ void ProjectFileModel::renameEntry(ProjectEntry *item, const QString &newName){
         QString newPath = parentEntry->path() + "/" + newName;
 
         if ( QFileInfo(newPath).exists() ){
-            emit error("Failed to rename entry. There is already a path with that name: " + newPath);
+            THROW_EXCEPTION(lv::Exception, Utf8("Failed to rename path. There is already a path with that name: %").format(newPath), lv::Exception::toCode("~Rename"));
             return;
         }
 
         if ( item->isFile() ){
             QFile f(item->path());
             if ( !f.rename(newPath) ){
-                emit error("Failed to rename file to: " + newName);
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to rename file to: %").format(newPath), lv::Exception::toCode("~Rename"));
                 return;
             } else {
                 item->setName(newName);
@@ -308,7 +309,7 @@ void ProjectFileModel::renameEntry(ProjectEntry *item, const QString &newName){
             if ( parentEntry ){
                 QDir d(parentEntry->path());
                 if ( !d.rename(item->name(), newPath) ){
-                    emit error("Failed to rename directory to:" + newName);
+                    THROW_EXCEPTION(lv::Exception, Utf8("Failed to rename file to: %").format(newName), lv::Exception::toCode("~Rename"));
                     return;
                 } else {
                     item->setName(newName);
@@ -320,27 +321,6 @@ void ProjectFileModel::renameEntry(ProjectEntry *item, const QString &newName){
             }
         }
     }
-}
-
-ProjectFile *ProjectFileModel::addFile(ProjectEntry *parentEntry, const QString &name){
-    QString filePath = QDir::cleanPath(parentEntry->path() + "/" + name);
-    QFile file(filePath);
-    if ( file.exists() ){
-        emit error("Failed to create file: " + filePath + "\nFile exists.");
-        return 0;
-    }
-
-    if ( !file.open(QIODevice::WriteOnly) ){
-        emit error("Failed to create file: " + parentEntry->path() + "/" + name);
-        return 0;
-    }
-    if ( file.fileName().endsWith(".qml") )
-        file.write("import QtQuick 2.3\n\nItem{\n}");
-    file.close();
-
-    ProjectFile* fileEntry = new ProjectFile(parentEntry->path(), name, 0);
-    entryAdded(fileEntry, parentEntry);
-    return fileEntry;
 }
 
 ProjectFile *ProjectFileModel::addTemporaryFile(){
@@ -364,24 +344,131 @@ ProjectFile *ProjectFileModel::addTemporaryFile(){
     return fileEntry;
 }
 
-ProjectEntry* ProjectFileModel::addDirectory(ProjectEntry *parentEntry, const QString &name){
-    QString dirPath = QDir::cleanPath(parentEntry->path() + "/" + name);
-    QDir d(parentEntry->path());
-    if ( d.exists(name) ){
-        emit error("Failed to create directory: " + dirPath + "\nDirectory exists.");
-        return 0;
-    }
-    if ( !d.mkdir(name) ){
-        emit error("Failed to create directory: " + dirPath + "");
-        return 0;
+QString ProjectFileModel::addFile(const QString &path, const QString &name, const QString& content){
+    if ( !QDir(path).exists() ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to create file '%'. Directory doesn't exist: %").format(name, path), lv::Exception::toCode("~Path")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return QString();
     }
 
-    ProjectEntry* entry = new ProjectEntry(parentEntry->path(), name);
-    entryAdded(entry, parentEntry);
-    return entry;
+    QString filePath = QDir::cleanPath(path + "/" + name);
+    QFile file(filePath);
+    if ( file.exists() ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to create file '%'. File already exists.").format(filePath), lv::Exception::toCode("~File")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return QString();
+    }
+    if ( !file.open(QIODevice::WriteOnly) ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to create file '%'. Path cannot be open.").format(filePath), lv::Exception::toCode("~File")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return QString();
+    }
+
+    if ( !content.isEmpty() )
+        file.write(content.toUtf8());
+    file.close();
+
+    ProjectEntry* parentEntry = findPath(path);
+    if ( parentEntry ){
+        ProjectFile* fileEntry = new ProjectFile(parentEntry->path(), name, 0);
+        entryAdded(fileEntry, parentEntry);
+        return filePath;
+    }
+    return filePath;
 }
 
-bool ProjectFileModel::removeEntry(ProjectEntry *entry){
+QString ProjectFileModel::addDirectory(const QString &path, const QString &name){
+    QString dirPath = QDir::cleanPath(path + "/" + name);
+    QDir d(path);
+    if ( d.exists(name) ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to create directory: %. Directory already exists.").format(dirPath), lv::Exception::toCode("~Directory")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return QString();
+    }
+    if ( !d.mkdir(name) ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to create directory: %.").format(dirPath), lv::Exception::toCode("~Directory")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return QString();
+    }
+
+    ProjectEntry* parentEntry = findPath(path);
+    if ( parentEntry ){
+        ProjectEntry* entry = new ProjectEntry(path, name);
+        entryAdded(entry, parentEntry);
+    }
+    return dirPath;
+}
+
+void ProjectFileModel::removePath(const QString &path){
+    ProjectEntry* entry = findPath(path);
+    if ( !entry ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to remove path: %. Path does not exist.").format(path), lv::Exception::toCode("~Path")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return;
+    }
+
+    try{
+        removeEntry(entry);
+    } catch ( lv::Exception& e ){
+        QmlError(viewEngine(), e, this).jsThrow();
+    }
+}
+
+void ProjectFileModel::renamePath(const QString &path, const QString &name){
+    ProjectEntry* entry = findPath(path);
+    if ( !entry ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to rename path: %. Path does not exist.").format(path), lv::Exception::toCode("~Path")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return;
+    }
+
+    try{
+        renameEntry(entry, name);
+    } catch ( lv::Exception& e ){
+        QmlError(viewEngine(), e, this).jsThrow();
+    }
+}
+
+void ProjectFileModel::movePath(const QString &path, const QString &toParent){
+    ProjectEntry* entry = findPath(path);
+    if ( !entry ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to move path: %. Path does not exist.").format(path), lv::Exception::toCode("~Path")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return;
+    }
+    ProjectEntry* parentEntry = findPath(toParent);
+    if ( !parentEntry ){
+        lv::Exception e = CREATE_EXCEPTION(
+            lv::Exception, Utf8("Failed to move path: % to %. Destination does not exist.").format(path, toParent), lv::Exception::toCode("~Path")
+        );
+        QmlError(viewEngine(), e, this).jsThrow();
+        return;
+    }
+
+    try{
+        moveEntry(entry, parentEntry);
+    } catch ( lv::Exception& e ){
+        QmlError(viewEngine(), e, this).jsThrow();
+    }
+}
+
+void ProjectFileModel::removeEntry(ProjectEntry *entry){
     Project* p = qobject_cast<Project*>(QObject::parent());
     if ( entry->isFile() ){
         if ( QFile(entry->path()).remove() ){
@@ -410,10 +497,8 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
                 }
             }
             entryRemoved(entry);
-            return true;
         } else {
-            emit error("Failed to remove file: " + entry->path());
-            return false;
+            THROW_EXCEPTION(lv::Exception, Utf8("Failed to remove file: %").format(entry->path()), lv::Exception::toCode("~RemovePath"));
         }
     } else {
         if ( QDir(entry->path()).removeRecursively() ){
@@ -446,13 +531,10 @@ bool ProjectFileModel::removeEntry(ProjectEntry *entry){
             }
 
             entryRemoved(entry);
-            return true;
         } else {
-            emit error("Failed to remove directory: "  + entry->path());
-            return false;
+            THROW_EXCEPTION(lv::Exception, Utf8("Failed to remove file: %").format(entry->path()), lv::Exception::toCode("~RemovePath"));
         }
     }
-    return false;
 }
 
 void ProjectFileModel::expandEntry(ProjectEntry *entry) const{
@@ -558,6 +640,11 @@ QString ProjectFileModel::printableName(const QString &name){
     if ( name.startsWith("T:") )
         return (name.mid(3) == "0" ? "untitled" : ("untitled" + name.mid(3)));
     return name;
+}
+
+ViewEngine *ProjectFileModel::viewEngine(){
+    Project* project = qobject_cast<Project*>(QObject::parent());
+    return project->viewEngine();
 }
 
 ProjectFile *ProjectFileModel::openExternalFile(const QString &path){

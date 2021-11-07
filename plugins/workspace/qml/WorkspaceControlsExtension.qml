@@ -184,7 +184,7 @@ WorkspaceExtension{
                         }, {
                             name : "Delete",
                             action : function(){
-                                pane.removeEntry(item.entry(), false)
+                                lk.layers.workspace.wizards.removePath(item.entry().path)
                             }
                         }
                     ]
@@ -241,7 +241,7 @@ WorkspaceExtension{
                         {
                             name : "Delete",
                             action : function(){
-                                pane.removeEntry(item.entry(), true)
+                                lk.layers.workspace.wizards.removePath(item.entry().path)
                             }
                         }, {
                             name : "Add File",

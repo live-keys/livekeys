@@ -35,110 +35,7 @@ Pane{
 
     property Theme currentTheme : lk.layers.workspace.themes.current
 
-    function openEntry(entry, monitor){
-        lk.layers.workspace.environment.openFile(
-            entry.path, monitor ? ProjectDocument.Monitor : ProjectDocument.EditIfNotOpen
-        )
-    }
-    function editEntry(entry){
-        lk.layers.workspace.environment.openFile(entry.path, ProjectDocument.Edit)
-    }
-    function removeEntry(entry, isFile){
-        var message = ''
-        if ( entry.isFile ){
-            if ( !entry.isDirty ){
-                message = "Are you sure you want to remove file \'" + entry.path + "\'?"
-            } else
-                message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
-        } else {
-            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-            if ( documentList.length === 0 ){
-                message =
-                    "Are you sure you want to remove directory\'" + entry.path + "\' " +
-                    "and all its contents?"
-            } else {
-                var unsavedFiles = '';
-                for ( var i = 0; i < documentList.length; ++i ){
-                    unsavedFiles += documentList[i] + "\n";
-                }
-
-                message = "The following files have unsaved changes:\n";
-                message += unsavedFiles
-                message +=
-                    "Are you sure you want to remove directory \'" + entry.path +
-                    "\' and all its contents?\n"
-            }
-        }
-
-        lk.layers.window.dialogs.message(message, {
-            button1Name : 'Yes',
-            button1Function : function(mbox){
-                project.fileModel.removeEntry(entry)
-                mbox.close()
-            },
-            button3Name : 'No',
-            button3Function : function(mbox){
-                mbox.close()
-            },
-            returnPressed : function(mbox){
-                project.fileModel.removeEntry(entry)
-                mbox.close()
-            }
-        })
-    }
-    function moveEntry(entry, newParent){
-        var message = ''
-        if ( entry.isFile ){
-            if ( !entry.isDirty ){
-                project.fileModel.moveEntry(entry, newParent)
-                return;
-            }
-            message =
-                "Are you sure you want to move unsaved file \'" + entry.path + "\'?\n" +
-                "All your changes will be lost."
-        } else {
-            var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
-            if ( documentList.length === 0 ){
-                project.fileModel.moveEntry(entry, newParent)
-                return;
-            } else {
-                var unsavedFiles = '';
-                for ( var i = 0; i < documentList.length; ++i ){
-                    unsavedFiles += documentList[i] + "\n";
-                }
-
-                message = "The following files have unsaved changes:\n";
-                message += unsavedFiles
-                message +=
-                    "Are you sure you want to move directory \'" + entry.path +
-                    "\' and all its contents? Unsaved changes will be lost.\n"
-            }
-        }
-
-        lk.layers.window.dialogs.message(message, {
-            button1Name : 'Yes',
-            button1Function : function(mbox){
-                project.fileModel.moveEntry(entry, newParent)
-                mbox.close()
-            },
-            button3Name : 'No',
-            button3Function : function(mbox){
-                mbox.close()
-            },
-            returnPressed : function(mbox){
-                project.fileModel.moveEntry(entry, newParent)
-                mbox.close()
-            }
-        })
-    }
-
-    function renameEntry(entry, newName){
-        project.fileModel.renameEntry(entry, newName)
-    }
-
-    property QtObject delegateOperations: QtObject{
-
-    }
+    property QtObject delegateOperations: QtObject{}
 
     Rectangle{
         id: paneTop
@@ -293,10 +190,14 @@ Pane{
                 project.openRunnable(styleData.value.path, [styleData.value.path])
             }
             function openFile(){
-                root.editEntry(styleData.value)
+                lk.layers.workspace.environment.openFile(
+                    styleData.value.path, ProjectDocument.Edit
+                )
             }
             function monitorFile(){
-                root.openEntry(styleData.value, true)
+                lk.layers.workspace.environment.openFile(
+                    styleData.value.path, ProjectDocument.Monitor
+                )
             }
 
             function openExternally(){
@@ -366,7 +267,7 @@ Pane{
                     readOnly: !entryDelegate.editMode
                     selectionColor: "#3d4856"
                     Keys.onReturnPressed: {
-                        root.renameEntry(styleData.value, text)
+                        lk.layers.workspace.fileSystem.renamePath(styleData.value.path, text)
                         entryDelegate.editMode = false
                     }
                     Keys.onEscapePressed: {
@@ -419,7 +320,7 @@ Pane{
                     }
                     onDoubleClicked: {
                         if ( styleData.value.isFile )
-                            root.openEntry(styleData.value, false)
+                            lk.layers.workspace.environment.openFile(styleData.value.path, ProjectDocument.EditIfNotOpen)
                         else {
                             var modelIndex = project.fileModel.itemIndex(styleData.value)
                             if (view.isExpanded(modelIndex))
@@ -465,7 +366,7 @@ Pane{
             }
             onDropped: {
                 if ( view.dropEntry !== null ){
-                    root.moveEntry(view.dragEntry, view.dropEntry)
+                    lk.layers.workspace.wizards.movePath(view.dragEntry.path, view.dropEntry.path)
                     view.dragEntry = null
                     view.dropEntry = null
                 }
