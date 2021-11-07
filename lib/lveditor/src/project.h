@@ -128,6 +128,7 @@ public slots:
     void closeProject();
     void openProject(const QUrl& path);
 
+    lv::Document* isOpened(const QUrl& url);
     lv::Document *openFile(const QUrl& url, const QJSValue& options);
     bool isFileInProject(const QUrl& url);
     void closeFile(const QString& rootPath);

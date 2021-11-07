@@ -21,6 +21,7 @@
 #include "live/projectdocumentmodel.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
+#include "live/visuallogqt.h"
 #include "projectnavigationmodel.h"
 #include "projectfilemodel.h"
 #include "runnablecontainer.h"
@@ -160,6 +161,16 @@ void Project::openProject(const QUrl &url){
     }
 
     scheduleRun();
+}
+
+Document *Project::isOpened(const QUrl &url){
+    if ( !url.isLocalFile() ){
+        Exception e = CREATE_EXCEPTION(
+            Exception, Utf8("Failed to open url: %").format(url), Exception::toCode("~Url"));
+        QmlError(viewEngine(), e, this).jsThrow();
+        return nullptr;
+    }
+    return isOpened(url.toLocalFile());
 }
 
 /**
