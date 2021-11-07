@@ -1,5 +1,6 @@
 #include "utf8.h"
 #include "utf8proc.h"
+#include "live/exception.h"
 
 #include <locale>
 #include <functional>
@@ -283,6 +284,10 @@ Utf8 Utf8::trim() const{
 Utf8::Utf8(std::string *strPtr)
     : m_data(strPtr)
 {
+}
+
+void Utf8::throwFormatError(const std::string &message) const{
+    THROW_EXCEPTION(lv::Exception, message, lv::Exception::toCode("Format"));
 }
 
 }// namespace

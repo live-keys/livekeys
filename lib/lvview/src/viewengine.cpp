@@ -25,7 +25,7 @@
 #include "live/settings.h"
 #include "live/memory.h"
 #include "live/visuallogmodel.h"
-#include "live/visuallogqmlobject.h"
+#include "live/qmlvisuallog.h"
 #include "live/qmlerror.h"
 
 #include "group.h"
@@ -80,6 +80,38 @@
 
 namespace lv{
 
+namespace{
+
+const char* linkErrorProgram =
+    "(function(engine){"
+        "return function(error, object){\n"
+            "error.message = engine.markErrorObject(error, object);"
+            "return error;"
+        "}"
+    "})";
+
+const char* languageProgram =
+    "(function(qmlLanguage){\n"
+        "function Language(qmlLanguage, str){\n"
+            "//qmlLanguage.lookupTranslation(str.constructor === Array ? str.join('') : str)\n"
+            "this._str = str.constructor === Array ?  str.join('') : str\n"
+         "}\n"
+         "Language.prototype.format = function(){\n"
+             "var args = arguments\n"
+             "return this._str.replace(/%((%)|\\d+)/g, function (m) {\n"
+                 "var key = m.substring(1)\n"
+                 "if ( key === '%' ) return key\n"
+                 "var index = parseInt(key)\n"
+                 "return args[index]\n"
+             "});\n"
+         "}\n"
+         "Language.translate = function(str){\n"
+             "return new Language(qmlLanguage, str)\n"
+         "}\n"
+         "return Language.translate\n"
+    "})\n";
+
+}
 
 /** Default constructor */
 ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
@@ -90,9 +122,11 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     , m_incubationController(new IncubationController)
     , m_packageGraph(nullptr)
     , m_errorCounter(0)
+    , m_logger(new QmlVisualLog(this))
     , m_memory(new Memory(this))
 {
     m_engine->rootContext()->setContextProperty("engine", this);
+    m_engine->globalObject().setProperty("vlog", m_engine->newQObject(m_logger));
 
     m_engine->setProperty("viewEngine", QVariant::fromValue(this));
     m_engine->setIncubationController(m_incubationController);
@@ -100,16 +134,13 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
     connect(m_engine, SIGNAL(warnings(QList<QQmlError>)), this, SLOT(engineWarnings(QList<QQmlError>)));
     m_errorType = m_engine->evaluate("Error");
 
-    QJSValue markErrorConstructor = m_engine->evaluate(
-        "(function(engine){"
-            "return function(error, object){\n"
-                "error.message = engine.markErrorObject(error, object);"
-                "return error;"
-            "}"
-        "})"
-    );
+    QJSValue markErrorConstructor = m_engine->evaluate(linkErrorProgram);
     QJSValue markErrorFn = markErrorConstructor.call(QJSValueList() << engine->newQObject(this));
     m_engine->globalObject().setProperty("linkError", markErrorFn);
+
+    QJSValue languageConstructor = m_engine->evaluate(languageProgram);
+    QJSValue languageFn = languageConstructor.call(QJSValueList() << QJSValue(QJSValue::NullValue));
+    m_engine->globalObject().setProperty("lang", languageFn);
 
 //    connect(m_engine, &QQmlEngine::quit, QCoreApplication::instance(),
 //                      &QCoreApplication::quit, Qt::QueuedConnection);
@@ -277,7 +308,7 @@ void ViewEngine::registerBaseTypes(const char *uri){
         uri, 1, 0, "VisualLogModel",  ViewEngine::typeAsPropertyMessage("VisualLogModel", "lk.log"));
     qmlRegisterUncreatableType<lv::Memory>(
         uri, 1, 0, "Memory",          ViewEngine::typeAsPropertyMessage("Memory", "engine.mem"));
-    qmlRegisterUncreatableType<lv::VisualLogQmlObject>(
+    qmlRegisterUncreatableType<lv::QmlVisualLog>(
         uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
         uri, 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");

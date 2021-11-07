@@ -8,12 +8,12 @@ HEADERS += \
     $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
     $$PWD/qmlstreamprovider.h \
+    $$PWD/qmlvisuallog.h \
     $$PWD/qmlwritablestream.h \
     $$PWD/settings.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
     $$PWD/visuallogmodel.h \
-    $$PWD/visuallogqmlobject.h \
     $$PWD/visuallognetworksender.h \
     $$PWD/visuallogqt.h \
     $$PWD/mlnodetoqml.h \
@@ -47,13 +47,13 @@ SOURCES += \
     $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
     $$PWD/qmlstreamprovider.cpp \
+    $$PWD/qmlvisuallog.cpp \
     $$PWD/qmlwritablestream.cpp \
     $$PWD/settings.cpp \
     $$PWD/qmlclipboard.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogmodel.cpp \
-    $$PWD/visuallogqmlobject.cpp \
     $$PWD/visuallognetworksender.cpp \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \

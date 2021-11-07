@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "live/exception.h"
+#include "live/utf8.h"
 #include <sstream>
 
 namespace lv{

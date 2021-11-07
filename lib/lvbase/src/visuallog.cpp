@@ -16,6 +16,7 @@
 
 #include "visuallog.h"
 #include "live/mlnodetojson.h"
+#include "live/utf8.h"
 #include <unordered_map>
 #include <QFile>
 #include <QDateTime>
@@ -853,4 +854,10 @@ const QDateTime &lv::VisualLog::MessageInfo::stamp() const{
     return *m_stamp;
 }
 
+std::ostream& operator << (std::ostream &stream, const Utf8& val ){
+    stream << val.data();
+    return stream;
+}
+
 }// namespace
+

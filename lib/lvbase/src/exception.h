@@ -25,8 +25,9 @@
 #include <exception>
 #include <string>
 
-#include "live/stacktrace.h"
 #include "live/lvbaseglobal.h"
+#include "live/stacktrace.h"
+#include "live/utf8.h"
 
 namespace lv{
 
@@ -68,6 +69,22 @@ public:
         const std::string& functionName = "",
         StackTrace::Ptr stackTrace = StackTrace::Ptr(nullptr)
     );
+    template<typename T> static T create(
+        const char* message,
+        Code code,
+        const std::string& file = "",
+        int line = 0,
+        const std::string& functionName = "",
+        StackTrace::Ptr stackTrace = StackTrace::Ptr(nullptr)
+    );
+    template<typename T> static T create(
+        const Utf8& message,
+        Code code,
+        const std::string& file = "",
+        int line = 0,
+        const std::string& functionName = "",
+        StackTrace::Ptr stackTrace = StackTrace::Ptr(nullptr)
+    );
 
 private:
     void assignSourceLocation(const std::string& file, int line, const std::string& functionName);
@@ -91,6 +108,40 @@ template<typename T> T Exception::create(
 
     return e;
 }
+
+/** Create exception of given type */
+template<typename T> T Exception::create(
+        const char* message,
+        Code code,
+        const std::string &file,
+        int line,
+        const std::string &functionName,
+        StackTrace::Ptr stackTrace)
+{
+    T e(std::string(message), code);
+    e.assignSourceLocation(file, line, functionName);
+    e.assignStackTrace(stackTrace);
+
+    return e;
+}
+
+/** Create exception of given type */
+template<typename T> T Exception::create(
+        const Utf8& message,
+        Code code,
+        const std::string &file,
+        int line,
+        const std::string &functionName,
+        StackTrace::Ptr stackTrace)
+{
+    T e(message.data(), code);
+    e.assignSourceLocation(file, line, functionName);
+    e.assignStackTrace(stackTrace);
+    return e;
+}
+
+
+
 
 } // namespace
 

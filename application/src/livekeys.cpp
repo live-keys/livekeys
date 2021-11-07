@@ -18,12 +18,10 @@
 #include "livekeysarguments.h"
 #include "live/memory.h"
 
-#include "live/keymap.h"
 #include "live/visuallog.h"
 #include "live/visuallogqt.h"
 #include "live/visuallogmodel.h"
 #include "live/visuallognetworksender.h"
-#include "live/visuallogqmlobject.h"
 #include "live/viewengine.h"
 #include "live/errorhandler.h"
 #include "live/settings.h"
@@ -33,7 +31,6 @@
 #include "live/packagegraph.h"
 
 #include "live/project.h"
-#include "live/codehandler.h"
 #include "live/editorprivate_plugin.h"
 
 #include "qmlengineinterceptor.h"
@@ -70,7 +67,6 @@ Livekeys::Livekeys(QObject *parent)
     , m_project(new Project(m_engine, m_viewEngine))
     , m_settings(nullptr)
     , m_log(nullptr)
-    , m_vlog(new VisualLogQmlObject) // js ownership
     , m_packageGraph(nullptr)
 
     , m_layers(new QQmlPropertyMap)
@@ -338,9 +334,6 @@ void Livekeys::loadInternalPlugins(){
 
     m_viewEngine->engine()->rootContext()->setContextProperty("project", m_project);
     m_viewEngine->engine()->rootContext()->setContextProperty("lk",  this);
-
-    QJSValue vlogjs  = m_viewEngine->engine()->newQObject(m_vlog);
-    m_viewEngine->engine()->globalObject().setProperty("vlog", vlogjs);
 
     EditorPrivatePlugin ep;
     ep.registerTypes("editor.private");

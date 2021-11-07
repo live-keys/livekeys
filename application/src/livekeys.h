@@ -49,10 +49,7 @@ class Memory;
 class Commands;
 class KeyMap;
 class VisualLogModel;
-class VisualLogQmlObject;
 class Project;
-class CodeHandler;
-class LanguageQmlHandler;
 class PackageGraph;
 class Layer;
 
@@ -141,7 +138,6 @@ private:
     lv::Project*           m_project;
     lv::Settings*          m_settings;
     lv::VisualLogModel*    m_log;
-    lv::VisualLogQmlObject*m_vlog;
     lv::PackageGraph*      m_packageGraph;
 
     QQmlPropertyMap*       m_layers;

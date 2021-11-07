@@ -25,13 +25,13 @@ namespace lv{
 
 class VisualLog;
 
-class LV_VIEW_EXPORT VisualLogQmlObject : public QObject{
+class LV_VIEW_EXPORT QmlVisualLog : public QObject{
 
     Q_OBJECT
 
 public:
-    VisualLogQmlObject(QObject* parent = nullptr);
-    ~VisualLogQmlObject();
+    QmlVisualLog(QObject* parent = nullptr);
+    ~QmlVisualLog();
 
     static void logValue(VisualLog& vl, const QJSValue& message);
 

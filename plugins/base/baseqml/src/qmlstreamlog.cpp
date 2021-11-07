@@ -34,7 +34,7 @@ void QmlStreamLog::onStreamData(QObject *that, const QJSValue &val){
     VisualLog vl(VisualLog::MessageInfo::Info);
     if ( !t->prefix().isEmpty() )
         vl << t->prefix();
-    VisualLogQmlObject::logValue(vl, val);
+    QmlVisualLog::logValue(vl, val);
 }
 
 QmlStreamLog::~QmlStreamLog(){

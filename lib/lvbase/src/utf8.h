@@ -7,6 +7,7 @@
 #endif
 
 #include <string>
+#include <sstream>
 #include <memory>
 #include <vector>
 
@@ -78,6 +79,9 @@ public:
 
     std::vector<Utf8> split(const char* sep);
 
+    template<typename ...Args>
+    Utf8 format(Args... args) const;
+
     size_t size() const;
     size_t length() const;
 
@@ -96,8 +100,55 @@ public:
 private:
     Utf8(std::string* strPtr);
 
+    void formatImpl(std::string::const_iterator sit, std::stringstream&) const;
+
+    template<typename T, typename... Args>
+    void formatImpl(std::string::const_iterator sit, std::stringstream&, const T& value, Args... args) const;
+    void throwFormatError(const std::string& message) const;
+
     std::shared_ptr<std::string> m_data;
 };
+
+template<typename ...Args>
+Utf8 Utf8::format(Args... args) const{
+    std::stringstream result;
+    formatImpl(m_data->cbegin(), result, args...);
+    return Utf8(result.str());
+}
+
+inline void Utf8::formatImpl(std::string::const_iterator sit, std::stringstream &stream) const{
+    while (sit != m_data->cend() ) {
+        char ch = *sit;
+        if (ch == '%') {
+            if (*(sit + 1) == '%') {
+                ++sit;
+            } else {
+                throwFormatError("Missing arguments in Utf8.format");
+            }
+        }
+        stream << ch;
+        ++sit;
+    }
+}
+
+template<typename T, typename... Args>
+void Utf8::formatImpl(std::string::const_iterator sit, std::stringstream &stream, const T &value, Args... args) const{
+    while (sit != m_data->cend() ) {
+        char ch = *sit;
+        if (*sit == '%') {
+            if (*(sit + 1) == '%') {
+                ++sit;
+            } else {
+                stream << value;
+                formatImpl(sit + 1, stream, args...);
+                return;
+            }
+        }
+        stream << ch;
+        ++sit;
+    }
+    throwFormatError("Extra arguments provided to Utf8.format.");
+}
 
 inline Utf8 Utf8::operator+(const Utf8 &other) const{
     return Utf8(*m_data + *other.m_data);

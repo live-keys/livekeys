@@ -14,7 +14,7 @@
 **
 ****************************************************************************/
 
-#include "visuallogqmlobject.h"
+#include "qmlvisuallog.h"
 #include "live/visuallog.h"
 #include "mlnodetoqml.h"
 #include "live/viewcontext.h"
@@ -83,17 +83,17 @@ void logJsValue(VisualLog& vl, const QJSValue& message){
 void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
     if ( message.isUndefined() ){
         VisualLog vl(level);
-        VisualLogQmlObject::logValue(vl, messageOrCategory);
+        QmlVisualLog::logValue(vl, messageOrCategory);
     } else {
         VisualLog vl(messageOrCategory.toString().toStdString(), level);
-        VisualLogQmlObject::logValue(vl, message);
+        QmlVisualLog::logValue(vl, message);
     }
 }
 
 }// namespace
 
 
-void VisualLogQmlObject::logValue(VisualLog& vl, const QJSValue& message){
+void QmlVisualLog::logValue(VisualLog& vl, const QJSValue& message){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
         MetaInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
@@ -110,47 +110,47 @@ void VisualLogQmlObject::logValue(VisualLog& vl, const QJSValue& message){
 }
 
 /** Default constructor */
-VisualLogQmlObject::VisualLogQmlObject(QObject *parent)
+QmlVisualLog::QmlVisualLog(QObject *parent)
     : QObject(parent)
 {
 }
 
 /** Default destructor */
-VisualLogQmlObject::~VisualLogQmlObject(){
+QmlVisualLog::~QmlVisualLog(){
 }
 
 /** Fatal messages */
-void VisualLogQmlObject::f(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::f(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Fatal, messageOrCategory, message);
 }
 
 /** Error messages */
-void VisualLogQmlObject::e(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::e(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Error, messageOrCategory, message);
 }
 
 /** Warning messages */
-void VisualLogQmlObject::w(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::w(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Warning, messageOrCategory, message);
 }
 
 /** Info messages */
-void VisualLogQmlObject::i(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::i(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Info, messageOrCategory, message);
 }
 
 /** Debug messages */
-void VisualLogQmlObject::d(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::d(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Debug, messageOrCategory, message);
 }
 
 /** Verbose messages */
-void VisualLogQmlObject::v(const QJSValue &messageOrCategory, const QJSValue &message){
+void QmlVisualLog::v(const QJSValue &messageOrCategory, const QJSValue &message){
     logHelper(VisualLog::MessageInfo::Verbose, messageOrCategory, message);
 }
 
 /** Configures global vlog object from a given QJSValue object */
-void VisualLogQmlObject::configure(const QString &name, const QJSValue &options){
+void QmlVisualLog::configure(const QString &name, const QJSValue &options){
     MLNode mlopt;
     ml::fromQml(options, mlopt);
     vlog().configure(name.toStdString(), mlopt);

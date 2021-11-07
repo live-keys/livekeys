@@ -21,6 +21,7 @@
 
 #include <QString>
 #include <QTextStream>
+#include <QUrl>
 
 #include <ostream>
 
@@ -58,6 +59,15 @@ inline std::ostream& operator << (std::ostream &stream, const QByteArray& val ){
 inline std::ostream& operator << (std::ostream &stream, const QStringRef& val ){
     QByteArray utf8 = val.toUtf8();
     stream << utf8.data();
+    return stream;
+}
+
+/**
+ * Stream output operator for QUrl
+ * \ingroup lvview
+ */
+inline std::ostream& operator << (std::ostream &stream, const QUrl& val ){
+    stream << val.toString();
     return stream;
 }
 

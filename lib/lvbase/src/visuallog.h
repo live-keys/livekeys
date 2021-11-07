@@ -29,6 +29,8 @@ class QVariant;
 
 namespace lv{
 
+class Utf8;
+
 class LV_BASE_EXPORT VisualLog{
 
 public:
@@ -446,6 +448,10 @@ inline std::ostream& operator << (std::ostream &stream, bool val ){
     stream << (val ? "true" : "false");
     return stream;
 }
+
+
+/** \brief Stream output operator for bool */
+std::ostream& operator << (std::ostream &stream, const Utf8& val );
 
 }// namespace
 

@@ -42,6 +42,7 @@ class ErrorHandler;
 class PackageGraph;
 class ComponentDeclaration;
 class IncubationController;
+class QmlVisualLog;
 
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
@@ -220,6 +221,8 @@ private:
 
     QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
     QHash<QString, const QMetaObject*>       m_typeNames;
+
+    QmlVisualLog* m_logger;
 
     lv::Memory* m_memory;
     bool        m_isLoading;

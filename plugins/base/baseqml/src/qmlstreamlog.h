@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "live/qmlstream.h"
-#include "live/visuallogqmlobject.h"
+#include "live/qmlvisuallog.h"
 
 namespace lv{
 
