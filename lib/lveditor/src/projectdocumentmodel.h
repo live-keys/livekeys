@@ -51,7 +51,7 @@ public:
     void relocateDocument(const QString& path, const QString& newPath, Document* document);
     void closeDocuments();
 
-    const QHash<QString, Document*> openedFiles() const;
+    const QHash<QString, Document *> &openedFiles() const;
 
     void updateDocumentMonitoring(Document* document, bool monitor);
 
@@ -89,7 +89,7 @@ private:
 };
 
 /** Returns the hashmap containing the open documents */
-inline const QHash<QString, Document *> ProjectDocumentModel::openedFiles() const{
+inline const QHash<QString, Document *>& ProjectDocumentModel::openedFiles() const{
     return m_openedFiles;
 }
 
