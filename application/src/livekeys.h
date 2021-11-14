@@ -25,6 +25,8 @@
 #include <functional>
 
 #include "live/package.h"
+#include "live/lockedfileiosession.h"
+#include "live/programholder.h"
 
 // Versioning
 // ----------
@@ -46,10 +48,7 @@ class LivekeysArguments;
 class ViewEngine;
 class Settings;
 class Memory;
-class Commands;
-class KeyMap;
 class VisualLogModel;
-class Project;
 class PackageGraph;
 class Layer;
 
@@ -58,12 +57,12 @@ namespace el{ class Engine; }
 // class Livekeys
 // --------------
 
-class Livekeys : public QObject{
+class Livekeys : public QObject, public ProgramHolder{
 
     Q_OBJECT
-    Q_PROPERTY(lv::Settings*       settings       READ settings   CONSTANT)
-    Q_PROPERTY(lv::VisualLogModel* log            READ log        CONSTANT)
-    Q_PROPERTY(QQmlPropertyMap*    layers         READ layers     CONSTANT)
+    Q_PROPERTY(lv::Settings*       settings  READ settings   CONSTANT)
+    Q_PROPERTY(lv::VisualLogModel* log       READ log        CONSTANT)
+    Q_PROPERTY(QQmlPropertyMap*    layers    READ layers     CONSTANT)
 
 public:
     typedef QSharedPointer<Livekeys>       Ptr;
@@ -90,6 +89,10 @@ public:
     void loadLayers(const QStringList& layers, std::function<void(Layer*)> onReady = nullptr);
     int exec(const QGuiApplication& app);
 
+    void setMain(Program* program) override;
+    Program* main() override;
+    QString scriptPath() const;
+
     void loadInternals();
     void loadInternalPlugins();
     void loadInternalPackages();
@@ -100,7 +103,6 @@ public:
 
     Settings*   settings();
     ViewEngine* engine();
-    Project*    project();
     VisualLogModel* log();
     QQmlPropertyMap* layers();
 
@@ -109,7 +111,6 @@ public:
 public slots:
     QObject* layerPlaceholder() const;
     void engineError(QJSValue error);
-    void projectChanged(const QString& path);
     void newProjectInstance();
     void openProjectInstance(const QUrl& path);
 
@@ -122,10 +123,12 @@ private:
     Livekeys(const Livekeys&);
     Livekeys& operator = (const Livekeys&);
 
-    void loadDefaultLayers();
+    void loadConfiguredLayers();
     int execElements(const QGuiApplication& app);
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
+
+    LockedFileIOSession::Ptr m_lockedFileIO;
 
     ViewEngine*        m_viewEngine;
     LivekeysArguments* m_arguments;
@@ -135,7 +138,7 @@ private:
 
     lv::el::Engine*        m_engine;
 
-    lv::Project*           m_project;
+    lv::Program*           m_main;
     lv::Settings*          m_settings;
     lv::VisualLogModel*    m_log;
     lv::PackageGraph*      m_packageGraph;
@@ -179,10 +182,6 @@ inline Settings *Livekeys::settings(){
 
 inline ViewEngine *Livekeys::engine(){
     return m_viewEngine;
-}
-
-inline Project *Livekeys::project(){
-    return m_project;
 }
 
 inline VisualLogModel *Livekeys::log(){

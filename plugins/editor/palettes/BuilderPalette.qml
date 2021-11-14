@@ -37,7 +37,7 @@ CodePalette{
 
     function resolvePath(){
         if ( pathInput.path.startsWith('%project%') ){
-            return project.path(pathInput.path.substr(10))
+            return lk.layers.workspace.project.path(pathInput.path.substr(10))
         }
         return pathInput.path
     }

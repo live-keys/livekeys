@@ -23,7 +23,8 @@ public:
     };
 
 public:
-    explicit QmlUsageGraphScanner(Project* project, const QmlScopeSnap &qss, QObject *parent = nullptr);
+    explicit QmlUsageGraphScanner(ViewEngine* engine, Project* project, const QmlScopeSnap &qss, QObject *parent = nullptr);
+    ~QmlUsageGraphScanner();
 
     void run() override;
 
@@ -40,6 +41,8 @@ signals:
 public slots:
 
 private:
+    Q_DISABLE_COPY(QmlUsageGraphScanner);
+
     QList<QmlUsageGraphScanner::BindingEntry> extractRanges(
         DocumentQmlValueObjects::RangeObject* obj,
         QmlBindingPath::Ptr bp,
@@ -56,16 +59,17 @@ private:
     bool checkEntry(const QmlUsageGraphScanner::BindingEntry& entry);
 
     bool                   m_stopRequest;
+    ViewEngine*            m_viewEngine;
     Project*               m_project;
     QmlScopeSnap           m_scopeSnap;
     QMap<QString, QString> m_runnables;
     QString                m_searchComponent;
     QString                m_searchComponentFile;
-    QLinkedList<QmlBindingPath::Ptr> m_scannedResults;
+    std::list<QmlBindingPath::Ptr>* m_scannedResults;
 };
 
 inline bool QmlUsageGraphScanner::hasResult() const{
-    return !m_scannedResults.isEmpty();
+    return !m_scannedResults->empty();
 }
 
 inline void QmlUsageGraphScanner::requestStop(){

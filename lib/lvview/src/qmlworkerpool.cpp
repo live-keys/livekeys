@@ -59,7 +59,7 @@ QJSValue QmlWorkerPool::WorkerData::compileJsModule(
 
 ViewEngine *QmlWorkerPool::WorkerData::engine(){
     if ( !m_engine ){
-        m_engine = new ViewEngine(new QQmlEngine);
+        m_engine = new ViewEngine(new QQmlEngine, ViewContext::instance().engine()->fileIO());
         m_engine->engine()->installExtensions(QJSEngine::ConsoleExtension);
         QStringList engineImportPaths = m_engine->engine()->importPathList();
 

@@ -22,11 +22,8 @@ QmlPluginInfoExtractor::QmlPluginInfoExtractor(QObject *parent)
 {
     ViewEngine* viewEngine = lv::ViewContext::instance().engine();
     m_engine = viewEngine->engine();
-    QObject* project = m_engine->rootContext()->contextProperty("project").value<QObject*>();
 
-    Project* proj = static_cast<Project*>(project);
-
-    m_languageScanner = new QmlLanguageScanner(proj->lockedFileIO(), m_engine->importPathList());
+    m_languageScanner = new QmlLanguageScanner(viewEngine->fileIO(), m_engine->importPathList());
     m_languageScanner->enableFork(false);
     m_languageScanner->onMessage([this](int level, const QString& data){
         emit message(level, data);

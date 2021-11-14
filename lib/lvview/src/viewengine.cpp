@@ -34,6 +34,8 @@
 #include "qmlstream.h"
 #include "qmlwritablestream.h"
 #include "qmlclipboard.h"
+#include "qmlprojectinfo.h"
+#include "viewengineinterceptor_p.h"
 
 #include "private/qqmlcontext_p.h"
 
@@ -110,21 +112,39 @@ const char* languageProgram =
          "}\n"
          "return Language.translate\n"
     "})\n";
-
 }
 
+class ViewEnginePrivate{
+public:
+    ViewEnginePrivate()
+        : interceptor(nullptr)
+        , networkInterceptor(nullptr)
+        , urlInterceptor(nullptr)
+    {}
+
+    ViewEngineInterceptor *interceptor;
+    QmlEngineInterceptor::Factory* networkInterceptor;
+    QmlEngineInterceptor::UrlInterceptor* urlInterceptor;
+};
+
 /** Default constructor */
-ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
+ViewEngine::ViewEngine(QQmlEngine *engine, LockedFileIOSession::Ptr fileIO, QObject *parent)
     : QObject(parent)
+    , d_ptr(new ViewEnginePrivate)
     , m_engine(engine)
     , m_engineMutex(new QMutex)
     , m_incubator(new QQmlIncubator(QQmlIncubator::Asynchronous))
     , m_incubationController(new IncubationController)
     , m_packageGraph(nullptr)
+    , m_fileIO(fileIO)
     , m_errorCounter(0)
     , m_logger(new QmlVisualLog(this))
     , m_memory(new Memory(this))
 {
+    Q_D(ViewEngine);
+    d->urlInterceptor = new QmlEngineInterceptor::UrlInterceptor(this);
+    m_engine->setUrlInterceptor(d->urlInterceptor);
+
     m_engine->rootContext()->setContextProperty("engine", this);
     m_engine->globalObject().setProperty("vlog", m_engine->newQObject(m_logger));
 
@@ -153,10 +173,16 @@ ViewEngine::ViewEngine(QQmlEngine *engine, QObject *parent)
 
 /** Default destructor */
 ViewEngine::~ViewEngine(){
+    Q_D(ViewEngine);
+    m_engine->setUrlInterceptor(nullptr);
+    m_engine->setNetworkAccessManagerFactory(nullptr);
     m_engine->setProperty("viewEngine", QVariant());
     delete m_engineMutex;
     m_engine->deleteLater();
     delete m_memory;
+    delete d->interceptor;
+    delete d->urlInterceptor;
+    delete d->networkInterceptor;
 }
 
 /** Displays the errors the engine had previously */
@@ -225,6 +251,20 @@ void ViewEngine::registerErrorHandler(QObject *object, ErrorHandler *handler){
 /** Removes the handler for the given object */
 void ViewEngine::removeErrorHandler(QObject *object){
     m_errorHandlers.remove(object);
+}
+
+void ViewEngine::setInterceptor(ViewEngineInterceptor *interceptor){
+    Q_D(ViewEngine);
+    if ( d->interceptor == interceptor )
+        return;
+
+    delete d->networkInterceptor;
+    delete d->interceptor;
+
+    d->interceptor = interceptor;
+    d->urlInterceptor->setInterceptor(interceptor);
+    d->networkInterceptor = new QmlEngineInterceptor::Factory(interceptor);
+    m_engine->setNetworkAccessManagerFactory(d->networkInterceptor);
 }
 
 /** Returns the type info for a given meta-object*/
@@ -302,6 +342,8 @@ void ViewEngine::registerBaseTypes(const char *uri){
 
     qmlRegisterUncreatableType<lv::ViewEngine>(
         uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "engine"));
+    qmlRegisterUncreatableType<lv::QmlProjectInfo>(
+        uri, 1, 0, "ProjectInfo",     ViewEngine::typeAsPropertyMessage("ProjectInfo", "project"));
     qmlRegisterUncreatableType<lv::Settings>(
         uri, 1, 0, "LiveSettings",    ViewEngine::typeAsPropertyMessage("LiveSettings", "lk.settings"));
     qmlRegisterUncreatableType<lv::VisualLogModel>(

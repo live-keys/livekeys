@@ -24,7 +24,7 @@ WorkspaceExtension{
 
     interceptFile: function(path, format, mode){
         if ( Fs.Path.hasExtensions(path, 'jpg')){
-            var document = project.openFile(path, {type: 'binary', mode: Document.Edit, format: 'jpg' })
+            var document = lk.layers.workspace.project.openFile(path, {type: 'binary', mode: Document.Edit, format: 'jpg' })
             if ( !document )
                 return
 
@@ -84,13 +84,13 @@ WorkspaceExtension{
 
                             if ( segment.filters === '' ){
                                 lk.layers.workspace.wizards.addFile(
-                                    project.dir(),
+                                    lk.layers.workspace.project.dir(),
                                     {
                                         'extension': 'qml',
-                                        'heading' : 'Add adjustments file in ' + project.dir()
+                                        'heading' : 'Add adjustments file in ' + lk.layers.workspace.project.dir()
                                     },
                                     function(file){
-                                        var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
+                                        var pd = lk.layers.workspace.project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                         pd.insert(
                                             0,
                                             pd.contentLength(),
@@ -148,7 +148,7 @@ WorkspaceExtension{
                             } else {
                                 var path = segment.filters
 
-                                var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(path), { type: 'text', format: 'qml', mode: Document.Edit})
+                                var pd = lk.layers.workspace.project.openFile(Fs.UrlInfo.urlFromLocalFile(path), { type: 'text', format: 'qml', mode: Document.Edit})
                                 var pane = lk.layers.workspace.panes.createPane('editor', {}, [400, 0])
 
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')
@@ -178,7 +178,7 @@ WorkspaceExtension{
                     },{
                         name : "Create Filter using Nodes",
                         action : function(){
-                            if ( !project.isDirProject() ){
+                            if ( !lk.layers.workspace.project.isDirProject() ){
                                 lk.layers.workspace.messages.pushError(
                                     "Cannot adjust for non-directory project. Open the project as a directory to adjust.", 3000
                                 )
@@ -186,13 +186,13 @@ WorkspaceExtension{
 
                             if ( segment.filters === '' ){
                                 lk.layers.workspace.wizards.addFile(
-                                    project.dir(),
+                                    lk.layers.workspace.project.dir(),
                                     {
                                         'extension': 'qml',
-                                        'heading' : 'Add adjustments file in ' + project.dir()
+                                        'heading' : 'Add adjustments file in ' + lk.layers.workspace.project.dir()
                                     },
                                     function(file){
-                                        var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
+                                        var pd = lk.layers.workspace.project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                         pd.insert(
                                             0,
                                             pd.contentLength(),
@@ -272,7 +272,7 @@ WorkspaceExtension{
                             } else {
                                 var path = segment.filters
 
-                                var pd = project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
+                                var pd = lk.layers.workspace.project.openFile(Fs.UrlInfo.urlFromLocalFile(file), { type: 'text', format: 'qml', mode: Document.Edit})
                                 var pane = lk.layers.workspace.panes.createPane('editor', {}, [400, 0])
 
                                 var panes = lk.layers.workspace.panes.findPanesByType('editor')

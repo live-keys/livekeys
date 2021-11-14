@@ -66,15 +66,7 @@ static QObject* timeProvider(QQmlEngine* engine, QJSEngine*){
 }
 
 static QObject* scriptProvider(QQmlEngine *engine, QJSEngine *){
-    QObject* projectOb = engine->rootContext()->contextProperty("project").value<QObject*>();
-    if ( !projectOb )
-        THROW_EXCEPTION(lv::Exception, "Failed to load project context property.", 1);
-
-    lv::Project* project = static_cast<lv::Project*>(projectOb);
-    lv::QmlScript* script = new lv::QmlScript(engine, lv::ApplicationContext::instance().scriptArguments());
-    QObject::connect(project, &lv::Project::activeChanged, script, &lv::QmlScript::scriptChanged);
-
-    return script;
+    return new lv::QmlScript(engine, lv::ApplicationContext::instance().scriptArguments());;
 }
 
 void BasePlugin::registerTypes(const char *uri){

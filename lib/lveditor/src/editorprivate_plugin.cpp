@@ -93,7 +93,7 @@ void EditorPrivatePlugin::initializeEngine(QQmlEngine *, const char *){
 
 }
 
-void EditorPrivatePlugin::initializeEngine(lv::ViewEngine *engine, lv::Settings *settings, const char *){
+void EditorPrivatePlugin::initializeEngine(lv::ViewEngine *, lv::Settings *settings, const char *){
     lv::EditorSettings* editorSettings = new lv::EditorSettings(settings->path() + "/editor.json");
     settings->addConfigFile("editor", editorSettings);
 }

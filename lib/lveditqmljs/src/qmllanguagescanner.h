@@ -75,9 +75,9 @@ private:
     QMutex                           m_plannedQueueMutex;
     QLinkedList<QmlLibraryInfo::Ptr> m_plannedQueue;
 
-    std::function<void(QmlLibraryInfo::Ptr, int)>    m_updateListener;
-    std::function<void()>                            m_queueFinished;
-    std::function<void(int, const QString& message)> m_messageListener;
+    std::function<void(QmlLibraryInfo::Ptr, int)> m_updateListener;
+    std::function<void()>                         m_queueFinished;
+    std::function<void(int, const QString&)>      m_messageListener;
 
     QHash<QString, QmlLibraryInfo::Ptr> m_libraries;
     QStringList                         m_defaultImportPaths;

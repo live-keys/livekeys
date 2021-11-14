@@ -7,6 +7,8 @@ HEADERS += \
     $$PWD/live/lvbaseglobal.h \
     $$PWD/live/lvglobal.h \
     $$PWD/live/palettecontainer.h \
+    $$PWD/live/program.h \
+    $$PWD/live/programholder.h \
     $$PWD/live/stacktrace.h \
     $$PWD/live/commandlineparser.h \
     $$PWD/live/lockedfileiosession.h \

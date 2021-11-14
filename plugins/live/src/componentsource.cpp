@@ -56,7 +56,7 @@ void ComponentSource::extractSource(){
     }
 
     DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(thisPath);
-    QString code = QString::fromStdString(m_project->lockedFileIO()->readFromFile(thisPath.toStdString()));
+    QString code = QString::fromStdString(lv::ViewContext::instance().engine()->fileIO()->readFromFile(thisPath.toStdString()));
     dqi->parse(code);
     dqi->createRanges();
 

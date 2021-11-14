@@ -75,7 +75,6 @@ Workspace::~Workspace(){
     delete m_currentProjectWorkspace;
     saveRecentsIfChanged();
     delete m_recentsModel;
-
 }
 
 void Workspace::whenProjectPathChange(const QString &path){

@@ -488,7 +488,7 @@ void LineControl::applyOffsetToSectionsAfterIndex(unsigned sectionIndex, int off
         while (!q.empty())
         {
             LineSection* lsp = q.front(); q.pop();
-            for (int x = 0; x < lsp->children.size(); ++x)
+            for (size_t x = 0; x < lsp->children.size(); ++x)
                 q.push(&lsp->children[x]);
 
             if (offsetVisible) lsp->displayLineNumber += offset;
@@ -542,7 +542,7 @@ void LineControl::codeRemovalHandler(int pos, int removed)
                 while (true)
                 {
                     // finding which nested sections contain the left and right borders of the removed text
-                    for (int i = 0; i < parent->children.size(); ++i)
+                    for (size_t i = 0; i < parent->children.size(); ++i)
                     {
                         if (pos >= parent->children[i].startPosition && pos < parent->children[i].endPosition)
                             leftIndex = i;
@@ -741,7 +741,7 @@ void LineControl::codeAddingHandler(int pos, int added)
     while (!q.empty())
     {
         LineSection* lsp = q.front(); q.pop();
-        for (int x = 0; x < lsp->children.size(); ++x)
+        for (size_t x = 0; x < lsp->children.size(); ++x)
             q.push(&lsp->children[x]);
 
         // If the section contains the text addition point, we shift the round bound only
@@ -779,7 +779,7 @@ bool LineControl::handleOffsetsWithinASection(int sectionIndex, int delta)
     while (!q.empty())
     {
         LineSection* lsp = q.front(); q.pop();
-        for (int x = 0; x < lsp->children.size(); ++x)
+        for (size_t x = 0; x < lsp->children.size(); ++x)
             q.push(&lsp->children[x]);
 
         if (lsp->lineNumber <= m_firstDirtyLine && m_firstDirtyLine < lsp->lineNumber + lsp->lineSpan)

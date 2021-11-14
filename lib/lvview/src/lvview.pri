@@ -7,10 +7,14 @@ HEADERS += \
     $$PWD/metainfo.h \
     $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
+    $$PWD/qmlprogram.h \
+    $$PWD/qmlprojectinfo.h \
     $$PWD/qmlstreamprovider.h \
     $$PWD/qmlvisuallog.h \
     $$PWD/qmlwritablestream.h \
     $$PWD/settings.h \
+    $$PWD/viewengineinterceptor.h \
+    $$PWD/viewengineinterceptor_p.h \
     $$PWD/visuallogbasemodel.h \
     $$PWD/visuallogfilter.h \
     $$PWD/visuallogmodel.h \
@@ -46,11 +50,14 @@ SOURCES += \
     $$PWD/metainfo.cpp \
     $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
+    $$PWD/qmlprogram.cpp \
+    $$PWD/qmlprojectinfo.cpp \
     $$PWD/qmlstreamprovider.cpp \
     $$PWD/qmlvisuallog.cpp \
     $$PWD/qmlwritablestream.cpp \
     $$PWD/settings.cpp \
     $$PWD/qmlclipboard.cpp \
+    $$PWD/viewengineinterceptor.cpp \
     $$PWD/visuallogbasemodel.cpp \
     $$PWD/visuallogfilter.cpp \
     $$PWD/visuallogmodel.cpp \

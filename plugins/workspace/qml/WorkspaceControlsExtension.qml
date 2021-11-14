@@ -188,7 +188,7 @@ WorkspaceExtension{
                             }
                         }
                     ]
-                } else if ( item.path() === project.rootPath ){
+                } else if ( item.path() === lk.layers.workspace.project.rootPath ){
                     return [
                         {
                             name : "Show in Explorer",
@@ -199,17 +199,17 @@ WorkspaceExtension{
                                 lk.layers.workspace.commands.execute('window.workspace.project.close')
                             }
                         }, {
-                            name : "New Document",
+                            name : "New Qml Document",
                             action : function(){
-                                var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.environment.openFile(fe.path, Document.Edit)
+                                var newDocument = lk.layers.workspace.project.createDocument({fileSystem: true, type: 'text', format: 'qml'})
+                                lk.layers.workspace.environment.fileSystem.openDocumentInEditor(newDocument)
                             }
                         }, {
                             name : "New Runnable",
                             action : function(){
-                                var fe = project.fileModel.addTemporaryFile()
-                                lk.layers.workspace.environment.openFile(fe.path, Document.Edit)
-                                project.openRunnable(fe.path, [fe.path])
+                                var newDocument = lk.layers.workspace.project.createDocument({fileSystem: true, type: 'text', format: 'qml'})
+                                lk.layers.workspace.environment.fileSystem.openDocumentInEditor(newDocument)
+                                lk.layers.workspace.project.openRunnable(newDocument.path, [newDocument.path])
                             }
                         }, {
                             name : "Add File",

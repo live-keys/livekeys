@@ -22,12 +22,19 @@
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/visuallogqt.h"
+#include "live/programholder.h"
+#include "live/program.h"
+#include "live/qmlprogram.h"
+#include "workspacelayer.h"
+#include "fileformattypes.h"
 #include "projectnavigationmodel.h"
 #include "projectfilemodel.h"
+#include "projectengineinterceptor.h"
 #include "runnablecontainer.h"
 #include "runnable.h"
 
 #include <QFileInfo>
+#include <QDir>
 #include <QUrl>
 #include <QQuickItem>
 #include <QDebug>
@@ -47,24 +54,38 @@ namespace lv{
 /**
  * \brief Default constructor
  */
-Project::Project(el::Engine *engine, QObject *parent)
+Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
     : QObject(parent)
+    , m_workspaceLayer(workspaceLayer)
     , m_fileModel(new ProjectFileModel(this))
     , m_navigationModel(new ProjectNavigationModel(this))
     , m_documentModel(new ProjectDocumentModel(this))
     , m_runnables(new RunnableContainer(this))
-    , m_lockedFileIO(LockedFileIOSession::createInstance())
+    , m_programHolder(nullptr)
     , m_active(nullptr)
     , m_runspace(nullptr)
     , m_scheduleRunTimer(new QTimer())
     , m_runTrigger(Project::RunOnChange)
-    , m_engine(engine)
+    , m_engine(nullptr)
 {
+    ViewEngine* ve = viewEngine();
+    QObject* lkobject = ve->engine()->rootContext()->contextProperty("lk").value<QObject*>();
+    m_programHolder = dynamic_cast<ProgramHolder*>(lkobject);
+
+    ProjectEngineInterceptor* interceptor = new ProjectEngineInterceptor(ve, this);
+    ve->setInterceptor(interceptor);
+
     m_scheduleRunTimer->setInterval(1000);
     m_scheduleRunTimer->setSingleShot(true);
     connect(m_scheduleRunTimer, &QTimer::timeout, this, &Project::run);
-
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, &Project::closeProject);
+
+    if ( m_programHolder && m_programHolder->main() ){
+        QmlProgram* qmlProgram = static_cast<QmlProgram*>(m_programHolder->main());
+        if ( qmlProgram ){
+            openProject(QUrl::fromLocalFile(QString::fromStdString(qmlProgram->rootPath().data())));
+        }
+    }
 }
 
 /**
@@ -96,17 +117,59 @@ void Project::newProject(){
         document->removeEditingState(ProjectDocument::Read);
         m_documentModel->openDocument("T:0", document);
 
-        m_active = new Runnable(viewEngine(), m_engine, "T:0", m_runnables, "untitled");
+        QmlProgram* qmlProgram = QmlProgram::create(viewEngine(), "", "T:0");
+        m_active = new Runnable(qmlProgram, m_runnables);
         m_active->setRunSpace(m_runspace);
         m_runnables->addRunnable(m_active);
+
+        m_programHolder->setMain(qmlProgram);
+
         setActive(m_active);
 
-        m_path   = "";
+        m_path = "";
         emit pathChanged("");
         emit activeChanged(m_active);
 
         scheduleRun();
     }
+}
+
+
+void Project::openProject(const QUrl &url, Program *main){
+    if ( !url.isLocalFile() )
+        THROW_EXCEPTION(Exception, Utf8("Failed to open url: %").format(url), Exception::toCode("~Url"));
+    QString path = localPath(url);
+    QFileInfo pathInfo(path);
+    if ( !pathInfo.exists() ){
+        THROW_EXCEPTION(Exception, Utf8("Path does not exist: %").format(path), Exception::toCode("~Path"));
+    }
+    closeProject();
+    QString absolutePath = QFileInfo(path).absoluteFilePath();
+
+    m_fileModel->openProject(absolutePath);
+
+    QmlProgram* qmlProgram = static_cast<QmlProgram*>(main);
+    if ( qmlProgram && !qmlProgram->mainPath().isEmpty() ){
+        Runnable* r = new Runnable(qmlProgram, m_runnables);
+        r->setRunSpace(m_runspace);
+        m_runnables->addRunnable(r);
+        m_active = r;
+    }
+
+    m_path   = absolutePath;
+    emit pathChanged(absolutePath);
+    emit activeChanged(m_active);
+}
+
+QString Project::findFileFormat(const QString &path){
+    return m_workspaceLayer->fileFormats()->find(path);
+}
+
+QString Project::localPath(const QUrl &url){
+    QString result = url.toLocalFile();
+    if ( result.startsWith("/T:") )
+        return result.mid(1);
+    return result;
 }
 
 /**
@@ -115,59 +178,16 @@ void Project::newProject(){
  * It can be either a single file or an entire folder, as mentioned before
  */
 void Project::openProject(const QUrl &url){
-    if ( !url.isLocalFile() ){
-        Exception e = CREATE_EXCEPTION(Exception, "Failed to open url: " + url.toString().toStdString(), Exception::toCode("~Url"));
-        QmlError(viewEngine(), e, this).jsThrow();
-        return;
-    }
-
-    QString path = url.toLocalFile();
-    QFileInfo pathInfo(path);
-    if ( !pathInfo.exists() ){
-        Exception e = CREATE_EXCEPTION(Exception, "Path does not exist: " + path.toStdString(), Exception::toCode("~Path"));
-        QmlError(viewEngine(), e, this).jsThrow();
-        return;
-    }
-    closeProject();
-    QString absolutePath = QFileInfo(path).absoluteFilePath();
-
+    QmlProgram* qmlMain = nullptr;
     try{
-        m_fileModel->openProject(absolutePath);
-        if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile()){
-            ProjectDocument* document = createTextDocument(
-                qobject_cast<ProjectFile*>(m_fileModel->root()->child(0)),
-                "qml",
-                false
-            );
-            m_documentModel->openDocument(document->file()->path(), document);
-
-            Runnable* r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name());
-            r->setRunSpace(m_runspace);
-            m_runnables->addRunnable(r);
-            m_active = r;
-
-            m_path   = absolutePath;
-            emit pathChanged(absolutePath);
-            emit activeChanged(m_active);
-        } else if ( m_fileModel->root()->childCount() > 0 ){
-            m_path = absolutePath;
-            emit pathChanged(absolutePath);
-
-            if ( !m_active ){
-                ProjectFile* bestFocus = lookupBestFocus(m_fileModel->root()->child(0));
-                if( bestFocus ){
-                    setActive(bestFocus->path());
-                }
-            }
-        }
-
-        scheduleRun();
-
+        qmlMain = QmlProgram::create(viewEngine(), url.toLocalFile().toStdString());
+        openProject(url, qmlMain);
+        m_programHolder->setMain(qmlMain);
     } catch ( lv::Exception& e ){
+        delete qmlMain;
         QmlError(viewEngine(), e, this).jsThrow();
+        return;
     }
-
-
 }
 
 Document *Project::isOpened(const QUrl &url){
@@ -177,7 +197,7 @@ Document *Project::isOpened(const QUrl &url){
         QmlError(viewEngine(), e, this).jsThrow();
         return nullptr;
     }
-    return isOpened(url.toLocalFile());
+    return isOpened(localPath(url));
 }
 
 /**
@@ -196,10 +216,12 @@ Document* Project::openFile(const QUrl &url, const QJSValue &opt){
         return nullptr;
     }
 
-    QString path = url.toLocalFile();
+    QString path = localPath(url);
     QString type = opt.hasOwnProperty("type") ? opt.property("type").toString() : "binary";
     int mode = opt.hasOwnProperty("mode") ? opt.property("mode").toInt() : Document::EditIfNotOpen;
-    QString format = opt.hasOwnProperty("format") ? opt.property("format").toString() : "";
+    QString format = opt.hasOwnProperty("format")
+            ? opt.property("format").toString()
+            : findFileFormat(path);
 
     try {
         return openFile(path, type, mode, format);
@@ -207,6 +229,32 @@ Document* Project::openFile(const QUrl &url, const QJSValue &opt){
         QmlError(viewEngine(), e, this).jsThrow();
     }
 
+    return nullptr;
+}
+
+Document *Project::createDocument(const QJSValue &opt){
+    bool fileSystem = opt.hasOwnProperty("fileSystem") ? opt.property("fileSystem").toBool() : false;
+    QString type = opt.hasOwnProperty("type") ? opt.property("type").toString() : "binary";
+    QString format = opt.hasOwnProperty("format") ? opt.property("format").toString() : "";
+
+    if ( fileSystem ){
+        ProjectFile* fe = m_fileModel->addTemporaryFile();
+        return openFile(fe->path(), type, lv::Document::Edit, format);
+    } else {
+        if ( type == "binary" ){
+            Document* document = new Document(nullptr, format, false, nullptr);
+            QQmlEngine::setObjectOwnership(document, QQmlEngine::JavaScriptOwnership);
+            return document;
+        } else if ( type == "text" ){
+            ProjectDocument* document = new ProjectDocument(nullptr, format, false, nullptr);
+            QQmlEngine::setObjectOwnership(document, QQmlEngine::JavaScriptOwnership);
+            return document;
+        } else {
+            Exception e = CREATE_EXCEPTION(Exception, Utf8("Failed to create document of type: %").format(type), Exception::toCode("~Type"));
+            QmlError(viewEngine(), e, this).jsThrow();
+            return nullptr;
+        }
+    }
     return nullptr;
 }
 
@@ -224,10 +272,17 @@ QString Project::dir() const{
 
 ProjectFile *Project::relocateDocument(const QString &path, const QString& newPath, Document *document){
     m_documentModel->relocateDocument(path, newPath, document);
+    document->setPath(newPath);
+
     QString absoluteNewPath = QFileInfo(newPath).absoluteFilePath();
     if (absoluteNewPath.indexOf(m_path) == 0 )
         m_fileModel->rescanEntries();
-    return m_fileModel->openFile(newPath);
+
+    ProjectFile* file = m_fileModel->openFile(newPath);
+    if ( file ){
+        file->setDocument(document);
+    }
+    return file;
 }
 
 /**
@@ -263,7 +318,7 @@ bool Project::isFileInProject(const QUrl &url){
         return false;
     }
 
-    QString path = url.toLocalFile();
+    QString path = localPath(url);
     if ( m_fileModel->root()->childCount() > 0 && m_fileModel->root()->child(0)->isFile() )
         return path == m_path;
     else
@@ -285,30 +340,23 @@ bool Project::canRunFile(const QString &path) const{
 void Project::setActive(const QString &path){
     Runnable* r = openRunnable(path);
     if (r){
-        r->setRunSpace(m_runspace);
         setActive(r);
     }
 }
 
 Runnable *Project::openRunnable(const QString &path, const QStringList &activations){
     Runnable* r = m_runnables->runnableAt(path);
-    if ( !r ){
-        ProjectDocument* document = ProjectDocument::castFrom(isOpened(path));
-
+    if (!r){
         QSet<QString> activ;
         for ( auto it = activations.begin(); it != activations.end(); ++it )
             activ.insert(*it);
-
-        if ( document ){
-            r = new Runnable(viewEngine(), m_engine, document->file()->path(), m_runnables, document->file()->name(), activ);
-        } else {
-            QFileInfo pathInfo(path);
-            r = new Runnable(viewEngine(), m_engine, path, m_runnables, pathInfo.fileName(), activ);
+        QmlProgram* qmlProgram = QmlProgram::create(viewEngine(), m_path.toStdString(), path.toStdString());
+        if ( qmlProgram && !qmlProgram->mainPath().isEmpty() ){
+            vlog() << qmlProgram->mainPath();
+            r = new Runnable(qmlProgram, m_runnables, activ);
+            m_runnables->addRunnable(r);
         }
-
-        m_runnables->addRunnable(r);
     }
-
 
     return r;
 }
@@ -402,6 +450,25 @@ void Project::removeExcludedRunTriggers(const QSet<QString> &paths){
     }
 }
 
+void Project::monitorFiles(const QStringList &files){
+    for( const QString& mfile: files ){
+        if ( !mfile.isEmpty() ){
+            QFileInfo mfileInfo(mfile);
+            if ( mfileInfo.isRelative() ){
+                QString filePath = QDir::cleanPath(rootPath() + QDir::separator() + mfile);
+                openFile(
+                    filePath,
+                    "text",
+                    ProjectDocument::Monitor,
+                    findFileFormat(filePath)
+                );
+            } else {
+                openFile(mfile, "text", ProjectDocument::Monitor, findFileFormat(mfile));
+            }
+        }
+    }
+}
+
 /**
  * \brief Opens the file given by the \p path, in the given mode
  *
@@ -412,11 +479,10 @@ void Project::removeExcludedRunTriggers(const QSet<QString> &paths){
  */
 Document* Project::openFile(const QString &path, const QString &type, int mode, const QString &format){
     Document* document = isOpened(path);
-
     if ( type == "binary" ){
         if ( document ){
             if ( ProjectDocument::castFrom(document) ){
-                closeFile(document->file()->path());
+                closeFile(document->path());
                 document = nullptr;
             }
         }
@@ -430,7 +496,7 @@ Document* Project::openFile(const QString &path, const QString &type, int mode, 
     } else if ( type == "text" ){
         if ( document ){
             if ( !ProjectDocument::castFrom(document) ){
-                closeFile(document->file()->path());
+                closeFile(document->path());
                 document = nullptr;
             }
         }
@@ -442,11 +508,11 @@ Document* Project::openFile(const QString &path, const QString &type, int mode, 
             m_documentModel->openDocument(file->path(), document);
         }
     } else {
-        THROW_EXCEPTION(Exception, "Failed to create document of type: " + type.toStdString(), Exception::toCode("~Document"));
+        THROW_EXCEPTION(Exception, Utf8("Failed to create document of type: %").format(type), Exception::toCode("~Document"));
     }
 
     if ( !document ){
-        THROW_EXCEPTION(Exception, "Failed to create document at: " + path.toStdString(), Exception::toCode("~Document"));
+        THROW_EXCEPTION(Exception, Utf8("Failed to create document at: %").format(path), Exception::toCode("~Document"));
         return nullptr;
     }
 
@@ -469,19 +535,27 @@ void Project::closeFile(const QString &path){
 
 void Project::setActive(Runnable* runnable){
     if ( m_active != runnable ){
+        if ( m_active ){
+            m_active->setRunSpace(nullptr);
+        }
         m_active = runnable;
         emit activeChanged(runnable);
+        if ( m_active ){
+            m_active->setRunSpace(m_runspace);
+            m_programHolder->setMain(m_active->program());
+        }
 
         scheduleRun();
     }
 }
 
 ProjectDocument *Project::createTextDocument(ProjectFile *file, const QString& format, bool isMonitored){
-    ProjectDocument* document = new ProjectDocument(file, format, isMonitored, this);
+    ProjectDocument* document = new ProjectDocument(file->path(), format, isMonitored, this);
+    file->setDocument(document);
 
     connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
 
-        if ( m_excludedRunTriggers.contains(document->file()->path()) )
+        if ( m_excludedRunTriggers.contains(document->path()) )
             return;
 
         if ( document->editingStateIs(ProjectDocument::Read) && document->isMonitored() ){
@@ -506,7 +580,8 @@ ProjectDocument *Project::createTextDocument(ProjectFile *file, const QString& f
 }
 
 Document *Project::createDocument(ProjectFile *file, const QString &formatType, bool isMonitored){
-    Document* document = new Document(file, formatType, isMonitored, this);
+    Document* document = new Document(file->path(), formatType, isMonitored, this);
+    file->setDocument(document);
     emit documentOpened(document);
     return document;
 }
@@ -515,7 +590,7 @@ void Project::documentSaved(Document *document){
     if ( m_runTrigger == Project::RunOnSave ){
         scheduleRun();
     }
-    emit fileChanged(document->file()->path());
+    emit fileChanged(document->path());
 }
 
 /**

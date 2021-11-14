@@ -22,6 +22,7 @@ import base 1.0
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0
+import fs 1.0 as Fs
 
 Pane{
     id: root
@@ -113,7 +114,7 @@ Pane{
 
     TreeView {
         id: view
-        model: project.fileModel
+        model: lk.layers.workspace.project.fileModel
         anchors.topMargin: 40
         anchors.leftMargin: 10
         anchors.fill: parent
@@ -184,10 +185,10 @@ Pane{
                 entryData.activeFocus = false
             }
             function setActive(){
-                project.setActive(styleData.value.path)
+                lk.layers.workspace.project.setActive(styleData.value.path)
             }
             function addRunnable(){
-                project.openRunnable(styleData.value.path, [styleData.value.path])
+                lk.layers.workspace.project.openRunnable(styleData.value.path, [styleData.value.path])
             }
             function openFile(){
                 lk.layers.workspace.environment.openFile(
@@ -220,7 +221,7 @@ Pane{
                     anchors.verticalCenter: parent.verticalCenter
                     source: {
                         if ( styleData.value && styleData.value.isFile ){
-                            if (project.active && styleData.value.path === project.active.path)
+                            if (lk.layers.workspace.project.active && styleData.value.path === lk.layers.workspace.project.active.path)
                                 return "qrc:/images/project-file-active.png"
                             else {
                                 if ( styleData.value.document ){
@@ -244,7 +245,7 @@ Pane{
                     color: type === 1 ? "#c6d3de" : view && styleData.value === view.dropEntry ? "#ff0000" : styleData.textColor
                     text: {
                         styleData.value
-                            ? project.fileModel.printableName(styleData.value.name)
+                            ? lk.layers.workspace.project.fileModel.printableName(styleData.value.name)
                             : ''
                     }
                     font.family: 'Open Sans, Arial, sans-serif'
@@ -253,7 +254,7 @@ Pane{
                         if (styleData.value){
                             if ( styleData.value.document ){
                                 var ap = root.panes.activePane
-                                if ( ap && ap.objectName === 'editor' && ap.document && ap.document.file === styleData.value ){
+                                if ( ap && ap.objectName === 'editor' && ap.document && ap.document.path === styleData.value.path ){
                                     return 1;
                                 }
                                 return 2
@@ -296,7 +297,7 @@ Pane{
                                 lk.layers.workspace.panes.activateItem(entryDelegate, root)
                                 lk.layers.workspace.panes.openContextMenu(entryDelegate, root)
 //                                fileContextMenu.popup()
-                            } else if ( styleData.value.path === project.rootPath ){
+                            } else if ( styleData.value.path === lk.layers.workspace.project.rootPath ){
                                 view.setContextDelegate(entryDelegate)
                                 lk.layers.workspace.panes.activateItem(entryDelegate, root)
                                 lk.layers.workspace.panes.openContextMenu(entryDelegate, root)
@@ -320,9 +321,11 @@ Pane{
                     }
                     onDoubleClicked: {
                         if ( styleData.value.isFile )
-                            lk.layers.workspace.environment.openFile(styleData.value.path, ProjectDocument.EditIfNotOpen)
+                            lk.layers.workspace.environment.fileSystem.openFile(
+                                Fs.UrlInfo.urlFromLocalFile(styleData.value.path), ProjectDocument.EditIfNotOpen
+                            )
                         else {
-                            var modelIndex = project.fileModel.itemIndex(styleData.value)
+                            var modelIndex = lk.layers.workspace.project.fileModel.itemIndex(styleData.value)
                             if (view.isExpanded(modelIndex))
                                 view.collapse(modelIndex)
                             else
@@ -360,7 +363,7 @@ Pane{
             onPositionChanged: {
                 view.dropEntry = null
                 var index = view.indexAt(view.flickableItem.contentX + drag.x, view.flickableItem.contentY + drag.y)
-                var item = project.fileModel.itemAt(index)
+                var item = lk.layers.workspace.project.fileModel.itemAt(index)
                 if ( item && item !== view.dragEntry && !item.isFile )
                     view.dropEntry = item
             }
@@ -373,7 +376,7 @@ Pane{
             }
         }
         Connections{
-            target: project.fileModel
+            target: lk.layers.workspace.project.fileModel
             function onProjectNodeChanged(index){
                 view.expand(index)
             }

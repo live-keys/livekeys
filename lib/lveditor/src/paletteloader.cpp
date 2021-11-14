@@ -128,7 +128,9 @@ QJSValue PaletteComponent::getContent(QQmlEngine *engine){
     if ( !pr )
         return QJSValue();
 
-    std::string content = pr->lockedFileIO()->readFromFile(m_path.toStdString());
+    ViewEngine* viewEngine = ViewEngine::grabFromQmlEngine(engine);
+
+    std::string content = viewEngine->fileIO()->readFromFile(m_path.toStdString());
 
     try {
         MLNode result;

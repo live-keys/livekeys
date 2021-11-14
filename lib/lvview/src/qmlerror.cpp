@@ -21,7 +21,7 @@ QmlError::QmlError(const Exception &e, QObject *engineObject)
 {
     m_engine = ViewEngine::grab(engineObject);
     if ( !m_engine ){
-        vlog().w() << "QmlError: Failed to initialize engine from object in QmlError. This object will not throw.";
+        vlog("main").w() << "QmlError: Failed to initialize engine from object in QmlError. This object will not throw.";
     } else {
         initializeFromException(e, engineObject);
     }

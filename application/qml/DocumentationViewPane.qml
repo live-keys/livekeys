@@ -22,7 +22,7 @@ Pane{
                 path = s.document
 
                 if (Fs.Path.isRelative(path) )
-                    path = project.path(path)
+                    path = lk.layers.workspace.project.path(path)
             } else { // if url
                 path = s.document.toString()
             }

@@ -14,7 +14,7 @@ class ProjectFile;
 class LV_EDITOR_EXPORT Document : public QObject{
 
     Q_OBJECT
-    Q_PROPERTY(lv::ProjectFile* file  READ file        NOTIFY fileChanged)
+    Q_PROPERTY(QString path           READ path        NOTIFY pathChanged)
     Q_PROPERTY(QByteArray content     READ content     NOTIFY contentChanged)
     Q_PROPERTY(QString formatType     READ formatType  NOTIFY formatTypeChanged)
     Q_PROPERTY(bool isMonitored       READ isMonitored NOTIFY isMonitoredChanged)
@@ -22,6 +22,9 @@ class LV_EDITOR_EXPORT Document : public QObject{
     Q_ENUMS(OpenMode)
 
 public:
+    friend class Project;
+    friend class ProjectDocumentModel;
+
     class LV_EDITOR_EXPORT Location{
     public:
         Location(int line = -1, int column = 0) : m_line(line), m_column(column){}
@@ -46,7 +49,7 @@ public:
     };
 
 public:
-    explicit Document(ProjectFile* file, const QString& formatType, bool isMonitored, Project *parent);
+    explicit Document(const QString &filePath, const QString& formatType, bool isMonitored, Project *parent);
     virtual ~Document();
 
     virtual QByteArray content();
@@ -57,14 +60,15 @@ public:
     /** Shows if the document is monitored */
     bool isMonitored() const;
 
-    ProjectFile* file() const;
-
     const QDateTime& lastModified() const;
     void setLastModified(const QDateTime& lastModified);
 
     Project* parentAsProject();
 
     const QString& formatType() const;
+
+    const QString& path() const;
+    QString pathHash() const;
 
 signals:
     /** shows dirty state changed */
@@ -79,6 +83,10 @@ signals:
     void saved();
     /** shows if the document content changed */
     void contentChanged();
+    /** triggered when path changed */
+    void pathChanged();
+    /** triggered before the document would close */
+    void aboutToClose();
 
 public slots:
     virtual void setContent(const QByteArray& content);
@@ -88,20 +96,26 @@ public slots:
     bool saveAs(const QString& path);
     bool saveAs(const QUrl& url);
 
+    QString fileName() const;
+    bool isOnDisk() const;
+
 protected:
     void setFormatType(const QString& formatType);
-    Document(ProjectFile* file, Project* parent);
+    Document(const QString &filePath, Project* parent);
 
 private:
+    void beforeClose();
+    void setPath(const QString& path);
 
     Q_DISABLE_COPY(Document)
 
     QByteArray   m_content;
-    ProjectFile* m_file;
     QString      m_formatType;
     QDateTime    m_lastModified;
     bool         m_isMonitored;
     bool         m_isDirty;
+    QString      m_fileName;
+    QString      m_path;
 };
 
 inline QByteArray Document::content(){
@@ -115,13 +129,6 @@ inline void Document::setContent(const QByteArray &content){
 
 inline bool Document::isMonitored() const{
     return m_isMonitored;
-}
-
-/**
- * \brief File getter
- */
-inline ProjectFile *Document::file() const{
-    return m_file;
 }
 
 inline void Document::setIsDirty(bool isDirty){
@@ -163,6 +170,13 @@ inline void Document::setLastModified(const QDateTime &lastModified){
 
 inline const QString &Document::formatType() const{
     return m_formatType;
+}
+
+/**
+ * \brief Returns the document path
+ */
+inline const QString &Document::path() const{
+    return m_path;
 }
 
 }// namespace

@@ -75,8 +75,8 @@ int main(int argc, char *argv[]){
             printf("Uncaught exception when initializing: %s\n", e.message().c_str());
             return e.code();
         } else {
-            vlog() << "Uncaught exception: " << e.message().c_str();
-            vlog() << *e.stackTrace();
+            vlog("main").e() << "Uncaught exception: " << e.message().c_str();
+            vlog("main").e() << *e.stackTrace();
             return e.code();
         }
     }

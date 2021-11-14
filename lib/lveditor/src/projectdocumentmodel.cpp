@@ -62,9 +62,9 @@ QVariant ProjectDocumentModel::data(const QModelIndex &index, int role) const{
     QHash<QString, Document*>::const_iterator it = m_openedFiles.constBegin() + index.row();
 
     if ( role == ProjectDocumentModel::Name ){
-        return it.value()->file()->name();
+        return it.value()->fileName();
     } else if ( role == ProjectDocumentModel::Path ){
-        return it.value()->file()->path();
+        return it.value()->path();
     } else if ( role == ProjectDocumentModel::IsOpen ){
         return true;
     }
@@ -109,6 +109,7 @@ void ProjectDocumentModel::closeDocuments(){
     }
 
     for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
+        it.value()->beforeClose();
         emit aboutToClose(it.value());
         delete it.value();
     }
@@ -119,10 +120,10 @@ void ProjectDocumentModel::closeDocuments(){
 void ProjectDocumentModel::updateDocumentMonitoring(Document *document, bool monitor){
     if ( document->isMonitored() != monitor ){
         if ( monitor ){
-            fileWatcher()->addPath(document->file()->path());
+            fileWatcher()->addPath(document->path());
             document->setIsMonitored(true);
         } else {
-            fileWatcher()->removePath(document->file()->path());
+            fileWatcher()->removePath(document->path());
             document->setIsMonitored(false);
         }
     }
@@ -141,7 +142,8 @@ void ProjectDocumentModel::closeDocumentsInPath(const QString &path){
         if ( it.key().startsWith(path) ){
             Document* doc = it.value();
             it = m_openedFiles.erase(it);
-            emit aboutToClose(it.value());
+            doc->beforeClose();
+            emit aboutToClose(doc);
             delete doc;
         } else {
             ++it;
@@ -158,6 +160,7 @@ void ProjectDocumentModel::closeDocument(const QString &path){
     if ( m_openedFiles.contains(path) ){
         beginResetModel();
         Document* document = m_openedFiles.take(path);
+        document->beforeClose();
         emit aboutToClose(document);
         delete document;
         endResetModel();
@@ -202,7 +205,7 @@ Document *ProjectDocumentModel::lastOpened(){
 Document *ProjectDocumentModel::documentByPathHash(const QString &hash){
     for( auto it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         Document* d = *it;
-        if ( d->file()->hashPath() == hash )
+        if ( d->pathHash() == hash )
             return d;
     }
     return nullptr;
@@ -217,7 +220,7 @@ QStringList ProjectDocumentModel::listUnsavedDocuments(){
     QStringList base;
     for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.value()->isDirty() )
-            base.append(it.value()->file()->path());
+            base.append(it.value()->path());
     }
     return base;
 }
@@ -232,7 +235,7 @@ QStringList ProjectDocumentModel::listUnsavedDocumentsInPath(const QString &path
     for( QHash<QString, Document*>::iterator it = m_openedFiles.begin(); it != m_openedFiles.end(); ++it ){
         if ( it.key().startsWith(path) ){
             if ( it.value()->isDirty() )
-                base.append(it.value()->file()->path());
+                base.append(it.value()->path());
         }
     }
     return base;

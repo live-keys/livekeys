@@ -62,13 +62,13 @@ Workspace.Pane{
         if ( s.document ){
             if (typeof s.document === 'string' || s.document instanceof String){
                 if ( s.document.startsWith('%project%') ){
-                    var documentPath = s.document.replace('%project%', project.dir())
+                    var documentPath = s.document.replace('%project%', lk.layers.workspace.project.dir())
                     var format = lk.layers.workspace.fileFormats.find(documentPath)
-                    var d = project.openFile(documentPath, {type: 'text', format: format})
+                    var d = lk.layers.workspace.project.openFile(documentPath, {type: 'text', format: format})
                     if ( d )
                         document = d
                 } else {
-                    var d = project.documentModel.documentByPathHash(s.document)
+                    var d = lk.layers.workspace.project.documentModel.documentByPathHash(s.document)
                     document = d
                 }
             } else {
@@ -145,8 +145,8 @@ Workspace.Pane{
             color: "#808691"
             text: {
                 if ( root.document ){
-                    var filename = root.document.file.name
-                    if ( !root.document.file.exists() ){
+                    var filename = root.document.fileName()
+                    if ( !root.document.isOnDisk() ){
                         var findex = filename.substring(2)
                         filename = 'untitled' + (findex === '0' ? '' : findex)
                     }
@@ -354,9 +354,9 @@ Workspace.Pane{
                     return
                 }
 
-                var editorFile = editor.document.file.path
+                var editorFile = editor.document.path
                 var layoutFile = editorFile + 'a'
-                editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+                editorFile = Fs.Path.relativePath(lk.layers.workspace.project.dir(), editorFile)
 
                 var layoutObj = {
                     file: editorFile,
@@ -387,10 +387,10 @@ Workspace.Pane{
                         return
                     }
 
-                    var editorFile = editor.document.file.path
-                    var relativeLayoutFile = Fs.Path.relativePath(project.dir(), layoutFile)
+                    var editorFile = editor.document.path
+                    var relativeLayoutFile = Fs.Path.relativePath(lk.layers.workspace.project.dir(), layoutFile)
                     if ( relativeLayoutFile !== layoutFile ){ // layout file is in project path
-                        editorFile = Fs.Path.relativePath(project.dir(), editorFile)
+                        editorFile = Fs.Path.relativePath(lk.layers.workspace.project.dir(), editorFile)
                     }
 
                     var layoutObj = {
@@ -426,11 +426,11 @@ Workspace.Pane{
 
                     var editorFile = layoutObj.file
                     if ( Fs.Path.isRelative(editorFile ) )
-                        editorFile = project.path(editorFile)
+                        editorFile = lk.layers.workspace.project.path(editorFile)
 
                     var layout = layoutObj.layout
 
-                    if ( editorFile !== editor.document.file.path ){
+                    if ( editorFile !== editor.document.path ){
                         lk.layers.workspace.messages.pushWarning("Layout file is not compatible with the file in the editor.", 100)
                         return
                     }

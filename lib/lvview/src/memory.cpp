@@ -37,7 +37,7 @@ void Memory::recycleSize(Shared *o, int size) const{
 
 void Memory::logDeletion(QObject *object){
     connect(object, &QObject::destroyed, [object](){
-        vlog() << "ViewEngine: Object Destroyed:" << object;
+        vlog("main") << "ViewEngine: Object Destroyed:" << object;
     });
 }
 

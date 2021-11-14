@@ -1,17 +1,22 @@
-#include "qmlengineinterceptor.h"
-#include <QNetworkRequest>
-#include <QQmlEngine>
-#include <QTimer>
+#include "viewengineinterceptor.h"
+#include "viewengineinterceptor_p.h"
 
 namespace lv{
 
-Project* QmlEngineInterceptor::m_project = nullptr;
+ViewEngineInterceptor::ViewEngineInterceptor(){
+}
 
-QmlEngineInterceptor::UrlInterceptor::UrlInterceptor(ViewEngine* engine, PackageGraph* packageGraph, Project* project)
-    : m_project(project)
-    , m_engine(engine)
-    , m_packageGraph(packageGraph)
+ViewEngineInterceptor::~ViewEngineInterceptor(){
+}
+
+QmlEngineInterceptor::UrlInterceptor::UrlInterceptor(ViewEngine* engine)
+    : m_engine(engine)
+    , m_interceptor(nullptr)
 {
+}
+
+void QmlEngineInterceptor::UrlInterceptor::setInterceptor(ViewEngineInterceptor *interceptor){
+    m_interceptor = interceptor;
 }
 
 QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstractUrlInterceptor::DataType dataType){
@@ -51,7 +56,7 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
 
                 try{
                     if ( Plugin::existsIn(localPath.toStdString() ) ){
-                        Plugin::Ptr plugin = m_packageGraph->loadPlugin(partsConverted);
+                        Plugin::Ptr plugin = m_engine->packageGraph()->loadPlugin(partsConverted);
                         if ( plugin != nullptr ){
                             return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
                         }
@@ -62,18 +67,16 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
             m_engine->throwError(&e, nullptr);
         }
     }
-    else if (dataType == QQmlAbstractUrlInterceptor::QmlFile && path.isLocalFile()){
-        if (m_project->isOpened(path.toLocalFile())){
-            QUrl memoryPath(path);
-            memoryPath.setScheme("memory");
-            return memoryPath;
-        }
-    }
-    return path;
+    return m_interceptor ? m_interceptor->interceptUrl(path, dataType) : path;
+}
+
+QmlEngineInterceptor::Factory::Factory(ViewEngineInterceptor *interceptor)
+    : m_interceptor(interceptor)
+{
 }
 
 QNetworkAccessManager *QmlEngineInterceptor::Factory::create(QObject *parent){
-    return new QmlEngineInterceptor(parent);
+    return new QmlEngineInterceptor(m_interceptor, parent);
 }
 
 QNetworkReply *QmlEngineInterceptor::createRequest(
@@ -81,26 +84,16 @@ QNetworkReply *QmlEngineInterceptor::createRequest(
         const QNetworkRequest &request,
         QIODevice *outgoingData)
 {
-    if (request.url().scheme() == "memory")
-    {
+    ViewEngineInterceptor::ContentResult cr = m_interceptor->interceptContent(request.url());
+    if ( cr.isValid() ){
         MemoryNetworkReply* mnr = new MemoryNetworkReply();
-        QUrl url = request.url();
-        url.setScheme("file");
-        QString content = m_project->openFile(url.toLocalFile(), "binary", Document::EditIfNotOpen)->content();
-        mnr->setContent(content);
+        mnr->setContent(cr.content());
         return mnr;
     }
     return QNetworkAccessManager::createRequest(op, request, outgoingData);
 }
 
-void QmlEngineInterceptor::interceptEngine(ViewEngine *engine, PackageGraph* packageGraph, Project* project){
-    m_project = project;
-    engine->engine()->setNetworkAccessManagerFactory(new QmlEngineInterceptor::Factory);
-    engine->engine()->setUrlInterceptor(new QmlEngineInterceptor::UrlInterceptor(engine, packageGraph, project));
-}
-
-void MemoryNetworkReply::setContent(const QString &content)
-{
+void MemoryNetworkReply::setContent(const QString &content){
     m_content = content.toUtf8();
     m_offset = 0;
     open(ReadOnly | Unbuffered);
@@ -109,13 +102,11 @@ void MemoryNetworkReply::setContent(const QString &content)
 
 void MemoryNetworkReply::abort(){}
 
-qint64 MemoryNetworkReply::bytesAvailable() const
-{
+qint64 MemoryNetworkReply::bytesAvailable() const{
     return m_content.size() - m_offset + QIODevice::bytesAvailable();
 }
 
-bool MemoryNetworkReply::isSequential() const
-{
+bool MemoryNetworkReply::isSequential() const{
     return true;
 }
 
@@ -130,6 +121,7 @@ qint64 MemoryNetworkReply::readData(char *data, qint64 maxSize)
 
     return number;
 }
+
 
 
 

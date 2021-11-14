@@ -59,7 +59,7 @@ void ProjectWorkspace::State::projectActiveChange(Runnable *runnable){
 }
 
 void ProjectWorkspace::State::documentOpen(Document *document){
-    std::string path = document->file()->path().toStdString();
+    std::string path = document->path().toStdString();
 
     if ( currentWorkspaceLayout.hasKey("documents") && currentWorkspaceLayout["documents"].type() == MLNode::Array ){
 
@@ -78,7 +78,7 @@ void ProjectWorkspace::State::documentOpen(Document *document){
 }
 
 void ProjectWorkspace::State::documentRemoved(Document *document){
-    std::string path = document->file()->path().toStdString();
+    std::string path = document->path().toStdString();
     documentRemoved(path);
 }
 
@@ -351,7 +351,7 @@ void ProjectWorkspace::State::setPaneState(MLNode &pane, const QVariant &state){
     if ( ps.hasOwnProperty("document") ){
         ProjectDocument* doc = static_cast<ProjectDocument*>(ps.property("document").toQObject());
         if ( doc )
-            ps.setProperty("document", doc->file()->hashPath());
+            ps.setProperty("document", doc->pathHash());
     }
 
     MLNode paneStateNode;

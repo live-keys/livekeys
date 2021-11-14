@@ -134,7 +134,9 @@ void ProjectQmlExtension::componentComplete(){
         Settings* settings = static_cast<Settings*>(lk->property("settings").value<QObject*>());
         if ( !settings ){ qWarning("Failed to find settings object."); return; }
 
-        Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
+
+        QObject* workspaceLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+        Project* project = workspaceLayerOb ? qobject_cast<lv::Project*>(workspaceLayerOb->property("project").value<QObject*>()) : nullptr;
         if ( !project ){ qWarning("Failed to find project object."); return; }
 
         Workspace* workspace = Workspace::getFromContext(ctx);

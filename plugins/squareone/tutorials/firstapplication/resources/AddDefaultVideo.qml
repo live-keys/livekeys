@@ -34,7 +34,7 @@ WorkspaceControl{
                                 for ( var pi = 0; pi < palettes.length; ++pi ){
                                     var palette = palettes[pi]
                                     if ( palette.name === 'PathPalette' ){
-                                        palette.value = project.path('../../../../samples/_videos/amherst-11_2754_3754.avi')
+                                        palette.value = lk.layers.workspace.project.path('../../../../samples/_videos/amherst-11_2754_3754.avi')
                                     }
                                 }
                             }

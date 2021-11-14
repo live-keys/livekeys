@@ -93,7 +93,7 @@ public:
 
     void syncParse(ProjectDocument* document){
         if ( !m_documentParseSync ){
-            m_documentInfo = DocumentQmlInfo::create(document->file()->path());
+            m_documentInfo = DocumentQmlInfo::create(document->path());
             m_documentInfo->parse(document->contentString());
             m_documentParseSync = true;
         }
@@ -561,7 +561,7 @@ void LanguageQmlHandler::setDocument(ProjectDocument *document){
 
     if ( d->projectHandler->scanMonitor()->hasProjectScope() && document != nullptr ){
         d->documentQueuedForScanning();
-        d->projectHandler->scanMonitor()->queueDocumentScan(document->file()->path(), document->contentString(), this);
+        d->projectHandler->scanMonitor()->queueDocumentScan(document->path(), document->contentString(), this);
     }
 }
 
@@ -618,7 +618,7 @@ void LanguageQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
 void LanguageQmlHandler::__updateScope(){
     Q_D(LanguageQmlHandler);
     if ( !d->isDocumentBeingScanned() && d->projectHandler->scanMonitor()->hasProjectScope() && m_document ){
-        d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+        d->projectHandler->scanMonitor()->queueDocumentScan(m_document->path(), m_document->contentString(), this);
         d->documentQueuedForScanning();
     }
 }
@@ -1305,7 +1305,7 @@ void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const 
     QmlBindingChannel::Ptr bc = edit->channel();
 
     if ( bc->canModify() ){
-        QString creationPath = m_document->file()->path();
+        QString creationPath = m_document->path();
         creationPath.replace(".qml", "_a.qml");
 
         QQmlContext* creationCtx = nullptr;
@@ -2178,7 +2178,7 @@ bool LanguageQmlHandler::findFunctionBindingForExpression(QmlEditFragment *edit,
 
 QmlUsageGraphScanner *LanguageQmlHandler::createScanner(){
     Q_D(LanguageQmlHandler);
-    return new QmlUsageGraphScanner(d->projectHandler->project(), d->snapScope());
+    return new QmlUsageGraphScanner(m_engine, d->projectHandler->project(), d->snapScope());
 }
 
 QList<int> LanguageQmlHandler::languageFeatures() const{
@@ -3477,7 +3477,7 @@ void LanguageQmlHandler::createRootObjectInRuntime(const QJSValue &typeOptions, 
         }
     }
 
-    QString creationPath = m_document->file()->path();
+    QString creationPath = m_document->path();
     creationPath.replace(".qml", "_a.qml");
     QObject* result = QmlEditFragment::createObject(
         d->documentInfo(), type, creationPath, nullptr, r->viewContext(), props
@@ -3570,7 +3570,7 @@ QJSValue LanguageQmlHandler::compileFunctionInContext(const QString &functionSou
     QmlScopeSnap scope = d->snapScope();
 
     QByteArray imports = DocumentQmlInfo::Import::join(scope.document->imports()).toUtf8();
-    QString moduleFile = "FunctionIn" + m_document->file()->name();
+    QString moduleFile = "FunctionIn" + m_document->fileName();
 
     ViewEngine::ComponentResult::Ptr cr = m_engine->compileJsModule(imports, functionSource.toUtf8(), moduleFile);
     if ( cr->hasError() ){
@@ -3654,7 +3654,7 @@ void LanguageQmlHandler::onDocumentParsed(QJSValue callback){
         m_documentParseListeners.append(callback);
         if ( !d->isDocumentBeingScanned() ){
             d->documentQueuedForScanning();
-            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->file()->path(), m_document->contentString(), this);
+            d->projectHandler->scanMonitor()->queueDocumentScan(m_document->path(), m_document->contentString(), this);
         }
     }
 }
@@ -3707,7 +3707,7 @@ void LanguageQmlHandler::suggestionsForStringImport(
     if ( m_document ){
         QStringList enteredPathSegments = enteredPath.split('/');
         filter = enteredPathSegments.size() > 0 ? enteredPathSegments.last() : "";
-        QString path = m_document->file()->path();
+        QString path = m_document->path();
         QString dirPath = QFileInfo(path).path();
         suggestionsForRecursiveImport(0, dirPath, enteredPathSegments, suggestions);
     }

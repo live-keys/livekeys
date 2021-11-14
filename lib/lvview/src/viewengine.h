@@ -28,6 +28,7 @@
 #include "live/metainfo.h"
 #include "live/mlnode.h"
 #include "live/qmlerror.h"
+#include "live/lockedfileiosession.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -43,6 +44,7 @@ class PackageGraph;
 class ComponentDeclaration;
 class IncubationController;
 class QmlVisualLog;
+class ViewEngineInterceptor;
 
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
@@ -65,10 +67,11 @@ public:
     virtual ~InputException(){}
 };
 
-
+class ViewEnginePrivate;
 class LV_VIEW_EXPORT ViewEngine : public QObject{
 
     Q_OBJECT
+    Q_DISABLE_COPY(ViewEngine)
     Q_PROPERTY(bool isLoading   READ isLoading NOTIFY isLoadingChanged)
     Q_PROPERTY(lv::Memory* mem  READ memory    CONSTANT)
 
@@ -97,7 +100,7 @@ public:
     };
 
 public:
-    explicit ViewEngine(QQmlEngine* engine, QObject *parent = nullptr);
+    explicit ViewEngine(QQmlEngine* engine, LockedFileIOSession::Ptr fileIO, QObject *parent = nullptr);
     ~ViewEngine();
 
     /** Shows if the engine is loading */
@@ -110,6 +113,7 @@ public:
 
     QQmlEngine* engine();
     QMutex* engineMutex();
+    const LockedFileIOSession::Ptr& fileIO() const;
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
     void throwError(const lv::QmlError& error);
@@ -118,6 +122,8 @@ public:
     bool hasErrorHandler(QObject* object);
     void registerErrorHandler(QObject* object, ErrorHandler* handler);
     void removeErrorHandler(QObject* object);
+
+    void setInterceptor(ViewEngineInterceptor* interceptor);
 
     template<typename T> MetaInfo::Ptr registerQmlTypeInfo(
         const std::function<void(const T&, MLNode&)>& serializeFunction,
@@ -148,7 +154,7 @@ public:
     QJSValue toJSErrors(const QList<QQmlError>& errors) const;
     QJSValue toJSError(const QQmlError& error) const;
 
-    const PackageGraph* packageGraph() const;
+    PackageGraph* packageGraph() const;
     void setPackageGraph(PackageGraph* pg);
 
     static void printTrace(QJSEngine* engine);
@@ -207,12 +213,17 @@ private:
     void storeError(const QmlError& error);
     bool propagateError(const QmlError &error);
 
+    Q_DECLARE_PRIVATE(ViewEngine)
+    QScopedPointer<ViewEnginePrivate> d_ptr;
+
     QQmlEngine*           m_engine;
     QMutex*               m_engineMutex;
     QQmlIncubator*        m_incubator;
     IncubationController* m_incubationController;
     QJSValue              m_errorType;
     PackageGraph*         m_packageGraph;
+
+    LockedFileIOSession::Ptr m_fileIO;
 
     QList<QQmlError>              m_lastErrors;
     int                           m_errorCounter;
@@ -270,13 +281,18 @@ inline QMutex *ViewEngine::engineMutex(){
     return m_engineMutex;
 }
 
+/** FileIO getter */
+inline const LockedFileIOSession::Ptr &ViewEngine::fileIO() const{
+    return m_fileIO;
+}
+
 /** Retrieves the memory object */
 inline Memory *ViewEngine::memory(){
     return m_memory;
 }
 
 /** Returns the package graph of the engine */
-inline const PackageGraph *ViewEngine::packageGraph() const{
+inline PackageGraph *ViewEngine::packageGraph() const{
     return m_packageGraph;
 }
 

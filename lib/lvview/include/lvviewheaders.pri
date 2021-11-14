@@ -7,10 +7,12 @@ HEADERS += \
     $$PWD/live/metainfo.h \
     $$PWD/live/qmlbuild.h \
     $$PWD/live/qmlerror.h \
+    $$PWD/live/qmlprogram.h \
     $$PWD/live/qmlstreamprovider.h \
     $$PWD/live/qmlvisuallog.h \
     $$PWD/live/qmlwritablestream.h \
     $$PWD/live/settings.h \
+    $$PWD/live/viewengineinterceptor.h \
     $$PWD/live/visuallogbasemodel.h \
     $$PWD/live/visuallogfilter.h \
     $$PWD/live/visuallogmodel.h \

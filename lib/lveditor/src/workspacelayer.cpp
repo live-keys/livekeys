@@ -43,6 +43,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_panes(nullptr)
     , m_startup(nullptr)
     , m_viewRoot(nullptr)
+    , m_runSpace(nullptr)
     , m_messageStack(new lv::WorkspaceMessageStack(this))
     , m_commands(nullptr)
     , m_keymap(nullptr)
@@ -58,6 +59,10 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_tooltip(nullptr)
 {
     m_engine = ViewContext::instance().engine();
+    m_project = new Project(this, m_engine);
+
+//    m_engine->engine()->rootContext()->setContextProperty("project", m_project);
+
     m_commands = new Commands(m_engine, this);
 
     m_tooltipTimer->setInterval(500);
@@ -74,9 +79,6 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     settings->addConfigFile("extensions", m_extensions);
 
     QQmlEngine* engine = m_engine->engine();
-    QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
-    m_project = qobject_cast<lv::Project*>(probject);
-
     m_documentation = new Documentation(m_engine->packageGraph(), this);
 
     QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
@@ -202,6 +204,18 @@ void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
     }
 
     m_startup->property("show").value<QJSValue>().call();
+
+    m_project->setRunSpace(m_nextViewParent);
+    if ( m_project->active() ){
+        m_workspace->whenProjectPathChange(m_project->dir());
+        QObject* viewRootPrivate = m_environment->property("__private").value<QObject*>();
+        QJSValue refreshFunction = viewRootPrivate->property("refreshActive").value<QJSValue>();
+        if ( refreshFunction.isCallable() ){
+            refreshFunction.call();
+        } else {
+            THROW_EXCEPTION(Exception, Utf8("Refresh function not callable: %").format(refreshFunction.toString()), Exception::toCode("~Function"));
+        }
+    }
 
     emit viewReady(this, m_nextViewParent);
 }
@@ -355,7 +369,6 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
     const MLNode& layout = workspace->currentLayout();
 
     QMap<QByteArray, ProjectDocument*> openDocuments;
-
     std::vector<std::string> removedDocuments;
 
     if ( layout.hasKey("documents") && layout["documents"].type() == MLNode::Array ){
@@ -363,7 +376,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
             QString path = QString::fromStdString((*it).asString());
             QFileInfo pathInfo(path);
             if ( pathInfo.exists() ){
-                ProjectDocument* doc = ProjectDocument::castFrom(m_project->openFile(path, "text", Document::EditIfNotOpen));
+                ProjectDocument* doc = ProjectDocument::castFrom(m_project->openFile(path, "text", Document::EditIfNotOpen, fileFormats()->find(path)));
                 openDocuments[Project::hashPath(path.toUtf8()).toHex()] = doc;
             } else {
                 removedDocuments.push_back(path.toStdString());
@@ -372,7 +385,6 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
     }
 
     if ( layout.hasKey("panes") && layout["panes"].size() > 0 ){
-
         QQmlEngine* engine = lv::ViewContext::instance().engine()->engine();
 
         QJSValue jsPanes;
@@ -383,6 +395,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
 
         QJSValue initialPanes = initializePanesFn.callWithInstance(engine->newQObject(m_panes), QJSValueList() << jsWindows << jsPanes);
         if ( initialPanes.isError() ){
+            m_messageStack->pushError(initialPanes.toString(), 0);
             lv::ViewContext::instance().engine()->throwError(initialPanes, this);
             return;
         }
@@ -394,7 +407,7 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
         QByteArray activeKey = QByteArray::fromStdString(layout["active"].asString());
         auto it = openDocuments.find(activeKey);
         if ( it != openDocuments.end() ){
-            m_project->setActive(it.value()->file()->path());
+            m_project->setActive(it.value()->path());
         }
     }
 

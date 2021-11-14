@@ -68,7 +68,7 @@ void EngineTest::engineExceptionTest(){
 
     bool isException = false;
 
-    QObject::connect(&engine, &ViewEngine::applicationError, [&isException, this](QJSValue error){
+    QObject::connect(&engine, &ViewEngine::applicationError, [&isException](QJSValue error){
         QCOMPARE(error.property("type").toString(), QString("Exception"));
         QCOMPARE(error.property("message").toString(), QString("JSTest"));
         QCOMPARE(error.property("code").toInt(), 1);
@@ -88,7 +88,7 @@ void EngineTest::engineObjectExceptionTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isException = false;
-    QObject::connect(&engine, &ViewEngine::applicationError, [&isException, this](QJSValue error){
+    QObject::connect(&engine, &ViewEngine::applicationError, [&isException](QJSValue error){
         QCOMPARE(error.property("type").toString(), QString("Exception"));
         QCOMPARE(error.property("message").toString(), QString("JSTest"));
         QCOMPARE(error.property("code").toInt(), 1);
@@ -119,7 +119,7 @@ void EngineTest::engineInternalWarningTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
-    QObject::connect(&engine, &ViewEngine::applicationWarning, [&isWarning, this](QJSValue error){
+    QObject::connect(&engine, &ViewEngine::applicationWarning, [&isWarning](QJSValue error){
         QCOMPARE(error.property("message").toString(), QString("JSTest"));
         QCOMPARE(error.property("fileName").toString(), QString("enginetest.cpp"));
         QCOMPARE(error.property("lineNumber").toInt(), 100);
@@ -148,10 +148,10 @@ void EngineTest::engineErrorHandlerTest(){
 
     bool isWarning = false;
     bool isError   = false;
-    QObject::connect(engine, &ViewEngine::applicationWarning, [&isWarning, this](QJSValue){
+    QObject::connect(engine, &ViewEngine::applicationWarning, [&isWarning](QJSValue){
         isWarning = true;
     });
-    QObject::connect(engine, &ViewEngine::applicationError, [&isError, this](QJSValue){
+    QObject::connect(engine, &ViewEngine::applicationError, [&isError](QJSValue){
         isError = true;
     });
 
@@ -197,10 +197,10 @@ void EngineTest::engineErrorHandlerSkipTest(){
 
     bool isWarning = false;
     bool isError   = false;
-    QObject::connect(engine, &ViewEngine::applicationWarning, [&isWarning, this](QJSValue){
+    QObject::connect(engine, &ViewEngine::applicationWarning, [&isWarning](QJSValue){
         isWarning = true;
     });
-    QObject::connect(engine, &ViewEngine::applicationError, [&isError, this](QJSValue){
+    QObject::connect(engine, &ViewEngine::applicationError, [&isError](QJSValue){
         isError = true;
     });
 
@@ -240,7 +240,7 @@ void EngineTest::jsThrownErrorTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isError = false;
-    QObject::connect(&engine, &ViewEngine::applicationError, [&isError, this](QJSValue error){
+    QObject::connect(&engine, &ViewEngine::applicationError, [&isError](QJSValue error){
         QVERIFY(error.property("message").toString().endsWith("JSTest"));
         QVERIFY(error.property("fileName").toString().endsWith("enginetest.qml"));
         QCOMPARE(error.property("lineNumber").toInt(), 3);

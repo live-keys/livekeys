@@ -82,6 +82,8 @@ public:
     template<typename ...Args>
     Utf8 format(Args... args) const;
 
+    bool isEmpty() const;
+
     size_t size() const;
     size_t length() const;
 
@@ -208,6 +210,10 @@ inline bool Utf8::operator>(const char *str) const{
 
 inline bool Utf8::operator>=(const Utf8 &other) const{
     return compare(other) >= 0;
+}
+
+inline bool Utf8::isEmpty() const{
+    return size() == 0;
 }
 
 inline bool Utf8::operator>=(const char *str) const{

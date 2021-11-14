@@ -32,7 +32,7 @@ CodePalette{
                 if (!parent.galleryFileSelector)
                     return ''
                 if (!Fs.Path.exists(parent.galleryFileSelector.workingDirectory))
-                    return project.dir()
+                    return lk.layers.workspace.project.dir()
                 else
                     return parent.galleryFileSelector.workingDirectory
             }

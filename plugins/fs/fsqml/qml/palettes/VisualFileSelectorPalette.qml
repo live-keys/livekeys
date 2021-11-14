@@ -26,7 +26,7 @@ CodePalette{
                 if (!parent.visualFileSelector)
                     return ''
                 if (!Fs.Path.exists(parent.visualFileSelector.workingDirectory))
-                    return project.dir()
+                    return lk.layers.workspace.project.dir()
                 return parent.visualFileSelector.workingDirectory
             }
             style: palette.theme.selectableListView

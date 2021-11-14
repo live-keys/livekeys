@@ -15,6 +15,7 @@
 ****************************************************************************/
 
 #include "live/projectfile.h"
+#include "live/document.h"
 #include <QFileInfo>
 
 /**
@@ -49,8 +50,35 @@ void ProjectFile::setDocument(Document *document){
     if ( document == m_document )
         return;
 
+    if ( m_document ){
+        disconnect(m_document, &Document::pathChanged, this, &ProjectFile::__documentPathChanged);
+        disconnect(m_document, &Document::aboutToClose, this, &ProjectFile::__documentAboutToClose);
+    }
+
     m_document = document;
+
+    if ( m_document ){
+        connect(m_document, &Document::pathChanged, this, &ProjectFile::__documentPathChanged);
+        connect(m_document, &Document::aboutToClose, this, &ProjectFile::__documentAboutToClose);
+    }
+
     emit documentChanged();
+}
+
+void ProjectFile::__documentAboutToClose(){
+    if ( parent() == nullptr )
+        deleteLater();
+    else {
+        setDocument(nullptr);
+    }
+}
+
+void ProjectFile::__documentPathChanged(){
+    if ( parent() == nullptr )
+        deleteLater();
+    else {
+        setDocument(nullptr);
+    }
 }
 
 }// namespace

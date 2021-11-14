@@ -1,10 +1,10 @@
-#ifndef LVQMLENGINEINTERCEPTOR_H
-#define LVQMLENGINEINTERCEPTOR_H
+#ifndef LVVIEWENGINEINTERCEPTOR_P_H
+#define LVVIEWENGINEINTERCEPTOR_P_H
 
 #include "live/lvviewglobal.h"
 #include "live/packagegraph.h"
 #include "live/viewengine.h"
-#include "live/project.h"
+#include "live/viewengineinterceptor.h"
 
 #include <QQmlEngine>
 #include <QNetworkAccessManager>
@@ -14,8 +14,8 @@
 
 namespace lv{
 
-class MemoryNetworkReply : public QNetworkReply
-{
+class MemoryNetworkReply : public QNetworkReply{
+
     Q_OBJECT
 
 public:
@@ -42,32 +42,39 @@ class QmlEngineInterceptor : public QNetworkAccessManager{
 public:
     class UrlInterceptor : public QQmlAbstractUrlInterceptor{
     public:
-        UrlInterceptor(ViewEngine* engine, PackageGraph* PackageGraph, Project* project);
+        UrlInterceptor(ViewEngine* engine);
+
+        void setInterceptor(ViewEngineInterceptor* interceptor);
 
         QUrl intercept(const QUrl &path, DataType type);
 
     private:
-        Project*      m_project;
-        ViewEngine*   m_engine;
-        PackageGraph* m_packageGraph;
+        ViewEngine*            m_engine;
+        ViewEngineInterceptor* m_interceptor;
     };
 
     class Factory : public QQmlNetworkAccessManagerFactory{
     public:
+        Factory(ViewEngineInterceptor* interceptor);
+
         virtual QNetworkAccessManager *create(QObject *parent);
+
+    private:
+        ViewEngineInterceptor* m_interceptor;
     };
 
 public:
-    explicit QmlEngineInterceptor(QObject* parent = Q_NULLPTR) : QNetworkAccessManager(parent){}
-
-    static void interceptEngine(ViewEngine* engine, PackageGraph* packageGraph, Project* project);
+    explicit QmlEngineInterceptor(ViewEngineInterceptor* interceptor, QObject* parent = Q_NULLPTR)
+        : QNetworkAccessManager(parent), m_interceptor(interceptor)
+    {}
 
 protected:
     virtual QNetworkReply* createRequest(Operation op, const QNetworkRequest &request, QIODevice *outgoingData);
+
 private:
-    static Project* m_project;
+    ViewEngineInterceptor* m_interceptor;
 };
 
 }// namespace
 
-#endif // LVQMLENGINEINTERCEPTOR_H
+#endif // LVVIEWENGINEINTERCEPTOR_P_H

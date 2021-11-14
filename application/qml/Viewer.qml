@@ -66,10 +66,10 @@ Workspace.Pane{
                     elide: Text.ElideRight
                     width: 110
                     text : {
-                        if (!project.active)
+                        if (!lk.layers.workspace.project.active)
                             return "";
 
-                        return project.active.name
+                        return lk.layers.workspace.project.active.name
                     }
                 }
             }
@@ -120,7 +120,7 @@ Workspace.Pane{
                 hoverEnabled: true
                 onPressed: compileButtonShape.state = "Pressed"
                 onReleased: compileButtonShape.state = "Released"
-                onClicked: { project.run() }
+                onClicked: { lk.layers.workspace.project.run() }
             }
             Workspace.Tooltip{
                 mouseOver: compileButton.containsMouse
@@ -160,9 +160,9 @@ Workspace.Pane{
                     Image{
                         id : modeImage
                         anchors.centerIn: parent
-                        source: project.runTrigger === Project.RunOnChange
+                        source: lk.layers.workspace.project.runTrigger === Project.RunOnChange
                             ? modeContainer.liveImage.source
-                            : project.runTrigger === Project.RunOnSave
+                            : lk.layers.workspace.project.runTrigger === Project.RunOnSave
                                 ? modeContainer.onSaveImage.source
                                 : modeContainer.disabledImage.source
                     }
@@ -228,7 +228,7 @@ Workspace.Pane{
     }
 
     Connections{
-        target: project.active
+        target: lk.layers.workspace.project.active
         function onObjectReady(){ error.text = '' }
         function onRunError(errors){
             var errorMessage = error.wrapMessage(errors)
@@ -253,17 +253,17 @@ Workspace.Pane{
         id: runnablesMenu
         anchors.top: header.bottom
         onRunnableSelected: {
-            if ( project.active )
-                project.active.setRunSpace(null)
+            if ( lk.layers.workspace.project.active )
+                lk.layers.workspace.project.active.setRunSpace(null)
 
-            project.setActive(path)
+            lk.layers.workspace.project.setActive(path)
         }
         x: 130
     }
 
     ModeContainer {
         id: modeContainer
-        onRunTriggerSelected: project.runTrigger = trigger
+        onRunTriggerSelected: lk.layers.workspace.project.runTrigger = trigger
         anchors.top: header.bottom
         x: 200
     }

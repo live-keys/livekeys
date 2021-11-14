@@ -121,11 +121,10 @@ void ProjectNavigationModel::updateFilters(){
          it != dm->openedFiles().end();
          ++it )
     {
-        ProjectFile* file = it.value()->file();
-        if ( m_filter.size() <= file->name().size() )
-            if ( file->name().contains(m_filter, Qt::CaseInsensitive) )
+        if ( m_filter.size() <= it.value()->fileName().size() )
+            if ( it.value()->fileName().contains(m_filter, Qt::CaseInsensitive) )
                 m_filteredOpenedFiles.append(ProjectNavigationModel::Entry(
-                    file->name(), file->path()
+                    it.value()->fileName(), it.value()->path()
                 ));
     }
 

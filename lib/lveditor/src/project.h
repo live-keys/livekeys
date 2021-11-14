@@ -18,7 +18,6 @@
 #define LVPROJECT_H
 
 #include "live/lveditorglobal.h"
-#include "live/lockedfileiosession.h"
 #include "live/projectdocument.h"
 #include "live/document.h"
 
@@ -39,6 +38,10 @@ class ProjectFileModel;
 class ProjectNavigationModel;
 class ProjectDocumentModel;
 class RunnableContainer;
+class ProjectEngineInterceptor;
+class Program;
+class ProgramHolder;
+class WorkspaceLayer;
 
 class LV_EDITOR_EXPORT Project : public QObject{
 
@@ -56,6 +59,7 @@ class LV_EDITOR_EXPORT Project : public QObject{
     friend class Document;
     friend class ProjectDocument;
     friend class ProjectDocumentModel;
+    friend class Runnable;
 
 public:
     enum RunTrigger{
@@ -65,32 +69,15 @@ public:
     };
 
 public:
-    Project(el::Engine* engine, QObject* parent = nullptr);
+    Project(WorkspaceLayer* workspaceLayer, QObject* parent = nullptr);
     ~Project();
 
     ProjectFile* lookupBestFocus(ProjectEntry* entry);
     Document* isOpened(const QString& rootPath);
 
-    /**
-     * \brief Getter of the file model
-     *
-     * The file model represents all of the opened files in the current project
-     */
     lv::ProjectFileModel* fileModel();
-
-    /**
-     * \brief Getter of the navigation model
-     *
-     * Used to search through the project for different files
-     */
     lv::ProjectNavigationModel* navigationModel();
-    /**
-     * \brief Getter of the document model
-     *
-     * Shows all the opened files
-     */
     lv::ProjectDocumentModel* documentModel();
-
     lv::RunnableContainer* runnables() const;
 
     lv::Runnable* active() const;
@@ -102,8 +89,6 @@ public:
      */
     const QString& rootPath() const;
 
-    LockedFileIOSession::Ptr lockedFileIO();
-
     lv::Project::RunTrigger runTrigger() const;
     void setRunTrigger(lv::Project::RunTrigger runTrigger);
 
@@ -113,6 +98,8 @@ public:
 
     void excludeRunTriggers(const QSet<QString>& paths);
     void removeExcludedRunTriggers(const QSet<QString>& paths);
+
+    void monitorFiles(const QStringList& files);
 
     el::Engine* engine();
 
@@ -129,10 +116,11 @@ public slots:
     void openProject(const QUrl& path);
 
     lv::Document* isOpened(const QUrl& url);
-    lv::Document *openFile(const QUrl& url, const QJSValue& options);
+    lv::Document* openFile(const QUrl& url, const QJSValue& options);
     bool isFileInProject(const QUrl& url);
     void closeFile(const QString& rootPath);
     void setActive(const QString& rootPath);
+    lv::Document* createDocument(const QJSValue& options);
 
     lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
 
@@ -169,6 +157,9 @@ signals:
     void aboutToClose();
 
 private:
+    void openProject(const QUrl& url, Program* main);
+    QString findFileFormat(const QString& path);
+    QString localPath(const QUrl& url);
     ViewEngine* viewEngine();
     ProjectFile* relocateDocument(const QString& rootPath, const QString &newPath, Document *document);
     void setActive(Runnable* runnable);
@@ -177,12 +168,12 @@ private:
     void documentSaved(Document *documnet);
 
 private:
-    ProjectFileModel*       m_fileModel;
-    ProjectNavigationModel* m_navigationModel;
-    ProjectDocumentModel*   m_documentModel;
-    RunnableContainer*      m_runnables;
-
-    LockedFileIOSession::Ptr m_lockedFileIO;
+    WorkspaceLayer*           m_workspaceLayer;
+    ProjectFileModel*         m_fileModel;
+    ProjectNavigationModel*   m_navigationModel;
+    ProjectDocumentModel*     m_documentModel;
+    RunnableContainer*        m_runnables;
+    ProgramHolder*            m_programHolder;
 
     Runnable*        m_active;
     QString          m_path;
@@ -195,13 +186,28 @@ private:
 };
 
 
+/**
+ * \brief Getter of the file model
+ *
+ * The file model represents all of the opened files in the current project
+ */
 inline ProjectFileModel* Project::fileModel(){
     return m_fileModel;
 }
 
+/**
+ * \brief Getter of the navigation model
+ *
+ * Used to search through the project for different files
+ */
 inline ProjectNavigationModel *Project::navigationModel(){
     return m_navigationModel;
 }
+/**
+ * \brief Getter of the document model
+ *
+ * Shows all the opened files
+ */
 
 inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;
@@ -220,16 +226,6 @@ inline Runnable* Project::active() const{
 
 inline const QString &Project::rootPath() const{
     return m_path;
-}
-
-/**
- * @brief Getter of the locked file session
- *
- * Implemention of the standard read-write model where there can be multiple readers, but a single writer,
- * and the write mode is locked for access.
- */
-inline LockedFileIOSession::Ptr Project::lockedFileIO(){
-    return m_lockedFileIO;
 }
 
 /**

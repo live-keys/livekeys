@@ -20,6 +20,7 @@
 #include "live/codehandler.h"
 #include "live/project.h"
 #include "live/visuallog.h"
+#include "live/viewengine.h"
 #include "textdocumentlayout.h"
 
 #include <QFile>
@@ -184,8 +185,8 @@ void ProjectDocument::resetEditingState(){
 /**
   Default constructor
 */
-ProjectDocument::ProjectDocument(ProjectFile *file, const QString& format, bool isMonitored, Project *parent)
-    : Document(file, parent)
+ProjectDocument::ProjectDocument(const QString& filePath, const QString& format, bool isMonitored, Project *parent)
+    : Document(filePath, parent)
     , d_ptr(new ProjectDocumentPrivate)
 {
     setFormatType(format);
@@ -206,14 +207,14 @@ ProjectDocument::ProjectDocument(ProjectFile *file, const QString& format, bool 
 }
 
 void ProjectDocument::readContent(){
-    if ( file()->exists() ){
+    if ( isOnDisk() ){
         addEditingState(ProjectDocument::Read);
         d_ptr->textDocument->setPlainText(
-            QString::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(file()->path().toStdString()))
+            QString::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(path().toStdString()))
         );
         removeEditingState(ProjectDocument::Read);
         d_ptr->textDocument->setModified(false);
-        setLastModified(QFileInfo(file()->path()).lastModified());
+        setLastModified(QFileInfo(path()).lastModified());
         d_ptr->changes.clear();
         d_ptr->lastChange = d_ptr->changes.end();
         d_ptr->isSynced = true;
@@ -528,7 +529,7 @@ void ProjectDocument::removeSection(ProjectDocumentSection::Ptr section){
  */
 bool ProjectDocument::isActive() const{
     Project* prj = qobject_cast<Project*>(parent());
-    if ( prj && prj->active() && prj->active()->path() == file()->path() )
+    if ( prj && prj->active() && prj->active()->path() == path() )
         return true;
     return false;
 }

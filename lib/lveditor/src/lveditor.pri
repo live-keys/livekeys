@@ -25,6 +25,7 @@ HEADERS += \
     $$PWD/project.h \
     $$PWD/projectdocument.h \
     $$PWD/projectdocumentmodel.h \
+    $$PWD/projectengineinterceptor.h \
     $$PWD/projectentry.h \
     $$PWD/projectfile.h \
     $$PWD/projectfilemodel.h \
@@ -68,6 +69,7 @@ SOURCES += \
     $$PWD/project.cpp \
     $$PWD/projectdocument.cpp \
     $$PWD/projectdocumentmodel.cpp \
+    $$PWD/projectengineinterceptor.cpp \
     $$PWD/projectentry.cpp \
     $$PWD/projectfile.cpp \
     $$PWD/projectfilemodel.cpp \

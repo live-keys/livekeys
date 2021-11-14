@@ -365,7 +365,7 @@ Pane{
                 root.currentRunnable.setRunSpace(null)
             }
 
-            var r = project.openRunnable(path)
+            var r = lk.layers.workspace.project.openRunnable(path)
             if (r){
                 if ( !r.runSpace() )
                     r.setRunSpace(viewer)

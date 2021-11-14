@@ -12,6 +12,8 @@ namespace lv{
 class ViewEngine;
 class RunnableContainer;
 class QmlBuild;
+class Program;
+class QmlProgram;
 
 namespace el{
     class Engine;
@@ -42,6 +44,12 @@ public:
         const QSet<QString>& activations = QSet<QString>());
 
     Runnable(
+        Program* program,
+        RunnableContainer* parent,
+        const QSet<QString>& activations = QSet<QString>()
+    );
+
+    Runnable(
         ViewEngine* engine,
         QQmlComponent* component,
         RunnableContainer* parent,
@@ -54,6 +62,8 @@ public:
 
     QObject* viewRoot();
     QQmlContext* viewContext();
+    Program* program() const;
+
     el::Element* elementRoot();
 
     const QSet<QString>& activations() const;
@@ -69,9 +79,9 @@ public:
     void swapViewRoot(QObject* object);
 
 public slots:
-    void engineObjectAcquired(const QUrl& file, QObject* ref);
-    void engineObjectReady(QObject* object, const QUrl& file, QObject* ref, QQmlContext* context);
-    void engineObjectCreationError(QJSValue errors, const QUrl&, QObject* reference, QQmlContext* context);
+    void __objectAcquired();
+    void __objectReady(QObject* object, QQmlContext* context);
+    void __objectCreationError(QJSValue errors, QQmlContext* context);
 
     void run();
 
@@ -92,6 +102,7 @@ signals:
     void objectReady(QObject* object);
 
 private:
+    void initialize();
     void runLv();
 
     QObject *createObject(const QByteArray& code, const QUrl& file, QQmlContext* context);
@@ -99,6 +110,7 @@ private:
 
     QString               m_name;
     QString               m_path;
+    QmlProgram*           m_program;
     QQmlComponent*        m_component;
     QObject*              m_runSpace;
     ViewEngine*           m_viewEngine;

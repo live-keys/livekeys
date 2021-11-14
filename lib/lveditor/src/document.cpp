@@ -1,5 +1,6 @@
 #include "document.h"
 #include "live/project.h"
+#include "live/viewengine.h"
 #include "live/visuallog.h"
 #include "live/projectfile.h"
 #include "live/lockedfileiosession.h"
@@ -8,42 +9,54 @@
 
 namespace lv{
 
-Document::Document(ProjectFile *file, const QString &formatType, bool isMonitored, Project *parent)
+Document::Document(const QString& filePath, const QString &formatType, bool isMonitored, Project *parent)
     : QObject(parent)
-    , m_file(file)
     , m_formatType(formatType)
     , m_isMonitored(isMonitored)
     , m_isDirty(false)
 {
+    setPath(filePath);
     readContent();
-    m_file->setDocument(this);
 }
 
 
-Document::Document(ProjectFile *file, Project *parent)
+Document::Document(const QString& filePath, Project *parent)
     : QObject(parent)
-    , m_file(file)
     , m_isMonitored(false)
     , m_isDirty(false)
 {
-    m_file->setDocument(this);
+    setPath(filePath);
 }
 
-Document::~Document(){
-    if ( m_file->parent() == nullptr )
-        m_file->deleteLater();
-    else {
-        m_file->setDocument(nullptr);
+void Document::beforeClose(){
+    emit aboutToClose();
+}
+
+void Document::setPath(const QString &path){
+    if ( m_path != path ){
+        m_path = path;
+        if ( !m_path.isEmpty() ){
+            if ( m_path.contains(':') ){
+                m_fileName = m_path;
+            } else {
+                QFileInfo finfo(m_path);
+                m_fileName = finfo.fileName();
+            }
+        }
+        emit pathChanged();
     }
+}
+
+Document::~Document(){    
 }
 
 /**
  * \brief Open the document in a read states
  */
 void Document::readContent(){
-    if ( m_file->exists() ){
-        m_content = QByteArray::fromStdString(parentAsProject()->lockedFileIO()->readFromFile(m_file->path().toStdString()));
-        m_lastModified = QFileInfo(m_file->path()).lastModified();
+    if ( isOnDisk() ){
+        m_content = QByteArray::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(m_path.toStdString()));
+        m_lastModified = QFileInfo(m_path).lastModified();
         emit contentChanged();
     }
 }
@@ -59,10 +72,10 @@ int Document::contentLength(){
  * \brief Save modified document to its respective file
  */
 bool Document::save(){
-    if ( file()->exists() ){
+    if ( isOnDisk() ){
         QByteArray data = content();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(
-                 file()->path().toStdString(), data.constData(), static_cast<size_t>(data.length() )) )
+        if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
+                 path().toStdString(), data.constData(), static_cast<size_t>(data.length() )) )
         {
             setIsDirty(false);
             setLastModified(QDateTime::currentDateTime());
@@ -79,19 +92,15 @@ bool Document::save(){
 /**
  * \brief Save document content in a different file
  */
-bool Document::saveAs(const QString& path){
-    if ( m_file->path() == path ){
+bool Document::saveAs(const QString& savePath){
+    if ( path() == savePath ){
         save();
-    } else if ( path != "" ){
+    } else if ( savePath != "" ){
         QByteArray data = content();
-        if ( parentAsProject()->lockedFileIO()->writeToFile(
-                 path.toStdString(), data, static_cast<size_t>(data.size())) ){
-            ProjectFile* file = parentAsProject()->relocateDocument(m_file->path(), path, this);
-            if ( file ){
-                m_file->setDocument(nullptr);
-                m_file = file;
-                emit fileChanged();
-            }
+        if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
+                 savePath.toStdString(), data, static_cast<size_t>(data.size())) )
+        {
+            parentAsProject()->relocateDocument(path(), savePath, this);
             setIsDirty(false);
             emit saved();
             m_lastModified = QDateTime::currentDateTime();
@@ -125,6 +134,24 @@ void Document::setFormatType(const QString &formatType){
  */
 Project *Document::parentAsProject(){
     return qobject_cast<Project*>(parent());
+}
+
+QString Document::fileName() const{
+    return m_fileName;
+}
+
+bool Document::isOnDisk() const{
+    if ( m_fileName.isEmpty() )
+        return false;
+    if ( m_fileName.contains(':') )
+        return false;
+    return true;
+}
+
+QString Document::pathHash() const{
+    if ( isOnDisk() )
+        return QString::fromUtf8(Project::hashPath(path().toUtf8()).toHex());
+    return "";
 }
 
 }// namespace

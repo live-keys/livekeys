@@ -85,7 +85,7 @@ void QmlProjectMonitor::newProject(const QString &){
             this, &QmlProjectMonitor::newDocumentScan);
     }
 
-    m_projectScope = ProjectQmlScope::create(m_project->lockedFileIO(), m_engine->engine());
+    m_projectScope = ProjectQmlScope::create(m_engine->fileIO(), m_engine->engine());
     connect(
         this, &QmlProjectMonitor::requestDocumentScan,
         m_projectScope->languageScanner(), &QmlLanguageScanner::scanDocument);

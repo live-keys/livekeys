@@ -308,7 +308,7 @@ Rectangle{
     }
 
     Connections{
-        target: project.documentModel
+        target: lk.layers.workspace.project.documentModel
         function onAboutToClose(document){
             if ( document === root.document ){
                 root.document = null

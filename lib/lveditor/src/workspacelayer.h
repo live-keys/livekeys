@@ -33,6 +33,7 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(QObject* wizards                     READ wizards       NOTIFY wizardsChanged)
     Q_PROPERTY(QObject* panes                       READ panes         NOTIFY panesChanged)
     Q_PROPERTY(QObject* startup                     READ startup       NOTIFY startupChanged)
+    Q_PROPERTY(lv::Project* project                 READ project       CONSTANT)
     Q_PROPERTY(lv::WorkspaceMessageStack* messages  READ messages      CONSTANT)
     Q_PROPERTY(lv::Commands* commands               READ commands      CONSTANT)
     Q_PROPERTY(lv::KeyMap* keymap                   READ keymap        CONSTANT)
@@ -58,6 +59,7 @@ public:
     QObject* startup() const;
     lv::WorkspaceMessageStack* messages() const;
 
+    lv::Project* project() const;
     lv::Commands* commands() const;
     lv::KeyMap* keymap() const;
     lv::FileFormatTypes* fileFormats() const;
@@ -116,6 +118,7 @@ private:
     QObject* m_panes;
     QObject* m_startup;
     QObject* m_viewRoot;
+    QObject* m_runSpace;
 
     WorkspaceMessageStack* m_messageStack;
     Commands* m_commands;
@@ -152,6 +155,10 @@ inline QObject *WorkspaceLayer::panes() const{
 
 inline QObject *WorkspaceLayer::startup() const{
     return m_startup;
+}
+
+inline Project *WorkspaceLayer::project() const{
+    return m_project;
 }
 
 inline Commands *WorkspaceLayer::commands() const{

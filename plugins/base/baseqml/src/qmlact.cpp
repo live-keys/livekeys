@@ -143,7 +143,6 @@ void QmlAct::setResult(const QJSValue &result){
 
 void QmlAct::extractSource(ViewEngine* ve){
     if ( !m_source ){
-
         ComponentDeclaration cd = ve->rootDeclaration(this);
         if ( cd.id().isEmpty() ){
             THROW_EXCEPTION(Exception, "Act: Act requires id to be used in workers.", Exception::toCode("~Id"));
@@ -154,19 +153,10 @@ void QmlAct::extractSource(ViewEngine* ve){
 
         m_source = new QmlAct::RunSource(cd);
 
-        Project* project = qobject_cast<lv::Project*>(
-            lv::ViewContext::instance().engine()->engine()->rootContext()->contextProperty("project").value<QObject*>()
-        );
-        if ( !project ){
-            delete m_source;
-            m_source = nullptr;
-            THROW_EXCEPTION(Exception, "Failed to load 'project' property from context.", Exception::toCode("~Id"));
-        }
-
         QString path = m_source->declarationLocation.url().toLocalFile();
 
         DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(path);
-        QString code = QString::fromStdString(project->lockedFileIO()->readFromFile(path.toStdString()));
+        QString code = QString::fromStdString(ve->fileIO()->readFromFile(path.toStdString()));
         dqi->parse(code);
         dqi->createRanges();
 

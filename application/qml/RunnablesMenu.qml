@@ -64,7 +64,7 @@ Rectangle{
 
             text: ""
             onTextChanged: {
-                project.runnables.setFilter(text)
+                lk.layers.workspace.project.runnables.setFilter(text)
             }
 
             MouseArea{
@@ -143,7 +143,7 @@ Rectangle{
 
         ListView{
             id: runnablesView
-            model : project.runnables
+            model : lk.layers.workspace.project.runnables
             width: parent.width
             height: parent.height
             clip: true

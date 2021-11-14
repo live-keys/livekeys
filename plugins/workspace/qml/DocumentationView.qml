@@ -149,7 +149,7 @@ WebEngineView{
                             return
                         }
                         try {
-                            initializerControl.run(lk.layers.workspace, project)
+                            initializerControl.run(lk.layers.workspace, lk.layers.workspace.project)
                         } catch (e){
                             root.runJavaScriptCallbackError(e)
                         }
@@ -182,7 +182,7 @@ WebEngineView{
                         var control = component.createObject(root);
 
                         if (typeof control.run === "function") {
-                            control.run(lk.layers.workspace, project)
+                            control.run(lk.layers.workspace, lk.layers.workspace.project)
                         }
 
                         control.destroy()
@@ -220,7 +220,7 @@ WebEngineView{
                         var control = component.createObject(root);
 
                         if (typeof control.run === "function") {
-                            control.run(lk.layers.workspace, project)
+                            control.run(lk.layers.workspace, lk.layers.workspace.project)
                         }
 
                         control.destroy()

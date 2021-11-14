@@ -79,9 +79,9 @@ Item{
         target: lk.layers.window
         function onIsActiveChanged(isActive){
             if ( isActive ){
-                project.navigationModel.requiresReindex()
-                project.fileModel.rescanEntries()
-                project.documentModel.rescanDocuments()
+                lk.layers.workspace.project.navigationModel.requiresReindex()
+                lk.layers.workspace.project.fileModel.rescanEntries()
+                lk.layers.workspace.project.documentModel.rescanDocuments()
                 if ( root.panes.activePane )
                     root.panes.activePane.forceActiveFocus()
             }
@@ -105,7 +105,7 @@ Item{
                     'setLiveCodingMode': [root.panes.__factories.viewer.modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
                     'setOnSaveCodingMode': [root.panes.__factories.viewer.modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
                     'setDisabledCodingMode': [root.panes.__factories.viewer.modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
-                    'runProject': [project.run, "Run Project"],
+                    'runProject': [lk.layers.workspace.project.run, "Run Project"],
                     'addRunView' : [root.addRunView, "Add Run View"],
                     "help" : [root.help, "Help"]
                 })

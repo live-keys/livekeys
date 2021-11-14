@@ -23,19 +23,16 @@
 #include "live/visuallogmodel.h"
 #include "live/visuallognetworksender.h"
 #include "live/viewengine.h"
-#include "live/errorhandler.h"
 #include "live/settings.h"
 #include "live/applicationcontext.h"
 #include "live/viewcontext.h"
-#include "live/workspaceextension.h"
+#include "live/windowlayer.h"
 #include "live/packagegraph.h"
 
-#include "live/project.h"
+#include "live/program.h"
+#include "live/qmlprogram.h"
 #include "live/editorprivate_plugin.h"
 
-#include "qmlengineinterceptor.h"
-
-#include "live/windowlayer.h"
 
 #include <QUrl>
 #include <QDir>
@@ -56,7 +53,8 @@ namespace lv{
 
 Livekeys::Livekeys(QObject *parent)
     : QObject(parent)
-    , m_viewEngine(new ViewEngine(new QQmlApplicationEngine))
+    , m_lockedFileIO(LockedFileIOSession::createInstance())
+    , m_viewEngine(new ViewEngine(new QQmlApplicationEngine, m_lockedFileIO))
     , m_arguments(new LivekeysArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
 #ifdef BUILD_ELEMENTS
@@ -64,7 +62,7 @@ Livekeys::Livekeys(QObject *parent)
 #else
     , m_engine(nullptr)
 #endif
-    , m_project(new Project(m_engine, m_viewEngine))
+    , m_main(nullptr)
     , m_settings(nullptr)
     , m_log(nullptr)
     , m_packageGraph(nullptr)
@@ -74,12 +72,10 @@ Livekeys::Livekeys(QObject *parent)
     , m_layerPlaceholder(nullptr)
 {
     Memory::setSize(5242880);
-
     solveImportPaths();
-    m_log = new VisualLogModel(m_viewEngine->engine());
-
-    connect(m_project, SIGNAL(pathChanged(QString)), SLOT(projectChanged(QString)));
     connect(m_viewEngine, &ViewEngine::applicationError, this, &Livekeys::engineError);
+
+    m_log = new VisualLogModel(m_viewEngine->engine());
 
     VisualLog::setViewTransport(m_log);
 }
@@ -104,6 +100,8 @@ Livekeys::~Livekeys(){
     delete m_engine;
     el::Engine::dispose();
 #endif
+
+    delete m_main;
 }
 
 Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *parent){
@@ -114,6 +112,12 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
 
     Livekeys::Ptr livekeys = Livekeys::Ptr(new Livekeys(parent));
     livekeys->m_arguments->initialize(argc, argv);
+
+    QString mainPath = livekeys->scriptPath();
+    if ( !mainPath.isEmpty() ){
+        QmlProgram* qmlMain = QmlProgram::create(livekeys->m_viewEngine, mainPath.toStdString());
+        livekeys->m_main = qmlMain;
+    }
 
     qInstallMessageHandler(&visualLogMessageHandler);
 
@@ -169,36 +173,14 @@ void Livekeys::solveImportPaths(){
 }
 
 void Livekeys::loadProject(){
-    m_project->setRunSpace(layerPlaceholder());
+    QmlProgram* qmlMain = static_cast<QmlProgram*>(m_main);
+    setMain(qmlMain);
+    if ( qmlMain ){
+        qmlMain->setRunSpace(layerPlaceholder());
+        qmlMain->run();
+    }
 
-    if ( m_arguments->script() != "" ){
-        QString projPath = QString::fromStdString(m_arguments->script());
-        if ( m_arguments->globalFlag() && !QFileInfo(projPath).isAbsolute() ){
-            m_project->openProject(
-                QUrl::fromLocalFile(QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + projPath + ".qml")
-            );
-        } else {
-            m_project->openProject(QUrl::fromLocalFile(projPath));
-        }
-    }
-    if ( !m_arguments->monitoredFiles().isEmpty() ){
-        foreach( QString mfile, m_arguments->monitoredFiles() ){
-            if ( !mfile.isEmpty() ){
-                QFileInfo mfileInfo(mfile);
-                if ( mfileInfo.isRelative() ){
-                    m_project->openFile(
-                        QDir::cleanPath(m_project->rootPath() + QDir::separator() + mfile),
-                        "text",
-                        ProjectDocument::Monitor,
-                        "" //TODO: Find format in workspace layer
-                    );
-                } else {
-                    //TODO: Find format in workspace layer
-                    m_project->openFile(mfile, "text", ProjectDocument::Monitor, "");
-                }
-            }
-        }
-    }
+//    m_project->monitorFiles(m_arguments->monitoredFiles());
 }
 
 void Livekeys::addLayer(const QString &name, const QString &layer){
@@ -243,8 +225,12 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
     if ( layer->hasView() ){
         connect(layer, &Layer::viewReady, [this, onReady](Layer* l, QObject* view){
             vlog("main").v() << "Layer view ready: " << l->name();
-            if ( view )
-                m_layerPlaceholder = view;
+
+            if ( view ){
+                QObject* nextViewParent = l->nextViewParent();
+                if ( nextViewParent )
+                    m_layerPlaceholder = nextViewParent;
+            }
 
             emit layerReady(l);
 
@@ -283,9 +269,50 @@ int Livekeys::exec(const QGuiApplication& app){
 #ifdef BUILD_ELEMENTS
     return execElements(app);
 #else
-    loadDefaultLayers();
+    loadConfiguredLayers();
     return app.exec();
 #endif
+}
+
+void Livekeys::setMain(Program *program){
+    if ( program == m_main )
+        return;
+
+    m_main = program;
+    m_viewEngine->engine()->setImportPathList(m_engineImportPaths);
+    m_packageGraph->clearPackages();
+
+    if ( m_main ){
+        QString path = QString::fromStdString(m_main->rootPath().data());
+        if ( !path.isEmpty() && QFileInfo(path + "/packages").isDir() )
+            m_viewEngine->engine()->addImportPath(path + "/packages");
+
+        m_packageGraph->setPackageImportPaths(packageImportPaths());
+        std::string packagePath = path.toStdString();
+        if ( Package::existsIn(packagePath) ){
+            std::list<Package::Reference> missing;
+            m_packageGraph->loadPackageWithDependencies(Package::createFromPath(packagePath), missing);
+            if ( missing.size() > 0 ){
+                emit missingPackages();
+            }
+        }
+    }
+}
+
+Program *Livekeys::main(){
+    return m_main;
+}
+
+QString Livekeys::scriptPath() const{
+    if ( m_arguments->script() != "" ){
+        QString projPath = QString::fromStdString(m_arguments->script());
+        if ( m_arguments->globalFlag() && !QFileInfo(projPath).isAbsolute() ){
+            return QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + projPath + ".qml";
+        } else {
+            return projPath;
+        }
+    }
+    return QString();
 }
 
 #ifdef BUILD_ELEMENTS
@@ -300,12 +327,12 @@ int Livekeys::execElements(const QGuiApplication &app){
 }
 #else
 int Livekeys::execElements(const QGuiApplication &){
-    vlog().e() << "Support for elements is disabled.";
+    vlog("main").e() << "Support for elements is disabled.";
     return 0;
 }
 #endif
 
-void Livekeys::loadDefaultLayers(){
+void Livekeys::loadConfiguredLayers(){
     QStringList layersToLoad = {"window", "workspace", "editor"}; // defaults
     if ( !m_arguments->layers().isEmpty() ){
         layersToLoad = m_arguments->layers();
@@ -325,14 +352,12 @@ void Livekeys::loadInternals(){
     loadInternalPackages();
     loadInternalPlugins();
     addDefaultLayers();
-    QmlEngineInterceptor::interceptEngine(engine(), m_packageGraph, m_project);
 }
 
 void Livekeys::loadInternalPlugins(){
 //    qmlRegisterUncreatableType<lv::Livekeys>(
 //        "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
 
-    m_viewEngine->engine()->rootContext()->setContextProperty("project", m_project);
     m_viewEngine->engine()->rootContext()->setContextProperty("lk",  this);
 
     EditorPrivatePlugin ep;
@@ -391,8 +416,8 @@ std::vector<std::string> Livekeys::packageImportPaths() const{
     std::vector<std::string> paths;
     paths.push_back(ApplicationContext::instance().pluginPath());
 
-    if ( !m_project->rootPath().isEmpty() ){
-        paths.push_back(m_project->dir().toStdString() + "/packages");
+    if ( m_main && !m_main->rootPath().isEmpty() ){
+        paths.push_back((m_main->rootPath() + "/packages").data());
     }
     return paths;
 }
@@ -488,44 +513,16 @@ const MLNode &Livekeys::startupConfiguration(){
 }
 
 QObject *Livekeys::layerPlaceholder() const{
-    if ( !m_layerPlaceholder ){
-        QList<QObject*> rootObjects = static_cast<QQmlApplicationEngine*>(m_viewEngine->engine())->rootObjects();
-        for ( auto it = rootObjects.begin(); it != rootObjects.end(); ++it ){
-            if ( (*it)->objectName() == "window" ){
-                QObject* controls = (*it)->property("controls").value<QObject*>();
-                QObject* workspace = controls->property("workspace").value<QObject*>();
-                QObject* prj = workspace->property("project").value<QObject*>();
-                m_layerPlaceholder = prj->property("runSpace").value<QObject*>();
-            }
-        }
-    }
     return m_layerPlaceholder;
 }
 
 void Livekeys::engineError(QJSValue error){
     QmlError e(m_viewEngine, error);
 
-    vlog().e() <<  "Uncaught error: " + e.toString(
+    vlog("main").e() <<  "Uncaught error: " + e.toString(
         QmlError::PrintMessage | QmlError::PrintLocation | QmlError::PrintStackTrace
     );
-    vlog().d() << e.toString(QmlError::PrintCStackTrace);
-}
-
-void Livekeys::projectChanged(const QString &path){
-    m_viewEngine->engine()->setImportPathList(m_engineImportPaths);
-    if ( !path.isEmpty() && QFileInfo(path + "/packages").isDir() )
-        m_viewEngine->engine()->addImportPath(path + "/packages");
-
-    m_packageGraph->clearPackages();
-    m_packageGraph->setPackageImportPaths(packageImportPaths());
-    std::string packagePath = path.toStdString();
-    if ( Package::existsIn(packagePath) ){
-        std::list<Package::Reference> missing;
-        m_packageGraph->loadPackageWithDependencies(Package::createFromPath(packagePath), missing);
-        if ( missing.size() > 0 ){
-            emit missingPackages();
-        }
-    }
+    vlog("main").d() << e.toString(QmlError::PrintCStackTrace);
 }
 
 void Livekeys::newProjectInstance(){

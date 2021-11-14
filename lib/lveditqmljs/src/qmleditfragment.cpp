@@ -264,7 +264,7 @@ void QmlEditFragment::writeProperties(const QJSValue &properties)
     int valueLength   = declaration()->valueLength();
     QString source    = declaration()->document()->content().mid(valuePosition, valueLength);
 
-    lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(declaration()->document()->file()->path());
+    lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create(declaration()->document()->path());
     if ( !docinfo->parse(source) )
         return;
 

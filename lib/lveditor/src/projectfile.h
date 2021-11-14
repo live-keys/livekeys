@@ -43,6 +43,9 @@ public:
 public slots:
     bool exists() const;
 
+    void __documentAboutToClose();
+    void __documentPathChanged();
+
 signals:
     /** Signals that the document associated with the file has changed */
     void documentChanged();

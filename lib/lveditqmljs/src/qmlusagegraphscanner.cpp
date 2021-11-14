@@ -3,15 +3,18 @@
 #include "live/project.h"
 #include "live/projectdocument.h"
 #include "live/runnablecontainer.h"
+#include "live/viewengine.h"
 #include "live/visuallogqt.h"
 
 namespace lv{
 
-QmlUsageGraphScanner::QmlUsageGraphScanner(Project *project, const QmlScopeSnap& qss, QObject *parent)
+QmlUsageGraphScanner::QmlUsageGraphScanner(ViewEngine* engine, Project *project, const QmlScopeSnap& qss, QObject *parent)
     : QThread(parent)
     , m_stopRequest(false)
+    , m_viewEngine(engine)
     , m_project(project)
     , m_scopeSnap(qss)
+    , m_scannedResults(new std::list<QmlBindingPath::Ptr>)
 {
     RunnableContainer* rc = project->runnables();
 
@@ -30,6 +33,10 @@ QmlUsageGraphScanner::QmlUsageGraphScanner(Project *project, const QmlScopeSnap&
             }
         }
     }
+}
+
+QmlUsageGraphScanner::~QmlUsageGraphScanner(){
+    delete m_scannedResults;
 }
 
 void QmlUsageGraphScanner::followGraph(
@@ -108,15 +115,15 @@ void QmlUsageGraphScanner::pushGraphResult(QList<QmlUsageGraphScanner::BindingEn
 
     if ( result ){
         vlog("editqmljs-usagegraph").v() << "Result: Runnable \'" << segments.last().componentName << "\' binding path: " << result->toString();
-        m_scannedResults.append(result);
+        m_scannedResults->push_back(result);
         emit bindingPathAdded();
     }
 
 }
 
 QPair<Runnable *, QmlBindingPath::Ptr> QmlUsageGraphScanner::popResult(){
-    QmlBindingPath::Ptr rbp = m_scannedResults.front();
-    m_scannedResults.pop_front();
+    QmlBindingPath::Ptr rbp = m_scannedResults->front();
+    m_scannedResults->pop_front();
 
     RunnableContainer* rc = m_project->runnables();
     return QPair<Runnable*, QmlBindingPath::Ptr>(rc->runnableAt(rbp->rootFile()), rbp);
@@ -129,7 +136,7 @@ bool QmlUsageGraphScanner::checkEntry(const QmlUsageGraphScanner::BindingEntry &
 
     QString content = m_runnables.contains(file)
             ? m_runnables[file]
-            : QString::fromStdString(m_project->lockedFileIO()->readFromFile(file.toStdString()));
+            : QString::fromStdString(m_viewEngine->fileIO()->readFromFile(file.toStdString()));
 
     ProjectQmlScope::Ptr projectScope = m_scopeSnap.project;
 
@@ -206,7 +213,7 @@ void QmlUsageGraphScanner::run(){
             if ( ti->document().isValid() ){
                 QString filePath = ti->document().path;
 
-                std::string content = m_project->lockedFileIO()->readFromFile(filePath.toStdString());
+                std::string content = m_viewEngine->fileIO()->readFromFile(filePath.toStdString());
                 QString qcontent = QString::fromStdString(content);
 
                 DocumentQmlInfo::Ptr documentInfo = DocumentQmlInfo::create(filePath);

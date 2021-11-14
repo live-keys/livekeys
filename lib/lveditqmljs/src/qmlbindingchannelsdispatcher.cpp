@@ -44,7 +44,7 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
 
     for ( auto it = m_channeledDocuments.begin(); it != m_channeledDocuments.end(); ++it ){
         DocumentQmlChannels* documentChannels = *it;
-        QString filePath = documentChannels->document()->file()->path();
+        QString filePath = documentChannels->document()->path();
 
         documentChannels->removeIndirectChannels();
         if ( filePath == run->path() ){
@@ -91,7 +91,7 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
 void QmlBindingChannelsDispatcher::__hookEntryAdded(Runnable *runnable, const QString &file, const QString &id, QObject *object){
     for ( auto it = m_channeledDocuments.begin(); it != m_channeledDocuments.end(); ++it ){
         DocumentQmlChannels* documentChannels = *it;
-        QString filePath = documentChannels->document()->file()->path();
+        QString filePath = documentChannels->document()->path();
         if ( filePath == file ){
             if ( qobject_cast<QmlWatcher*>(object) ){
 
@@ -129,7 +129,7 @@ void QmlBindingChannelsDispatcher::removeDocumentChannels(DocumentQmlChannels *d
 void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, DocumentQmlChannels *documentChannels){
     m_channeledDocuments.insert(documentChannels);
 
-    Runnable* r = m_project->runnables()->runnableAt(codeHandler->document()->file()->path());
+    Runnable* r = m_project->runnables()->runnableAt(codeHandler->document()->path());
     if (r && r->type() != Runnable::LvFile ){
         QmlBindingPath::Ptr bp = QmlBindingPath::create();
         bp->appendFile(r->path());
@@ -139,8 +139,8 @@ void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, D
     }
 
 
-    QString fileName = codeHandler->document()->file()->name();
-    QString filePath = codeHandler->document()->file()->path();
+    QString fileName = codeHandler->document()->fileName();
+    QString filePath = codeHandler->document()->path();
     if ( fileName.length() && fileName.front().isUpper() ){ // if component
         RunnableContainer* rc = m_project->runnables();
         int totalRunnables = rc->rowCount();

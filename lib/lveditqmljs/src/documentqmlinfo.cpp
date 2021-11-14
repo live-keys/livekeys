@@ -782,14 +782,14 @@ DocumentQmlInfo::TraversalResult DocumentQmlInfo::findDeclarationPath(
         declaration->setValueLength(root->end - root->begin);
 
         QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
-        componentNode->name = document->file()->name();
+        componentNode->name = document->fileName();
         n = componentNode;
         range = root;
     } else {
         TraversalNodeResult result = findDeclarationPathImpl(root, declaration);
         if ( result.bindingNode ){
             QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
-            componentNode->name = document->file()->name();
+            componentNode->name = document->fileName();
             componentNode->child = result.bindingNode;
             result.bindingNode->parent = componentNode;
             n = componentNode;
@@ -803,7 +803,7 @@ DocumentQmlInfo::TraversalResult DocumentQmlInfo::findDeclarationPath(
     QmlBindingPath::Ptr path = QmlBindingPath::create();
 
     QmlBindingPath::FileNode* fnode = new QmlBindingPath::FileNode;
-    fnode->filePath = document->file()->path();
+    fnode->filePath = document->fileName();
 
     n->parent = fnode;
     fnode->child = n;

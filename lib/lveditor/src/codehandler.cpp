@@ -161,9 +161,9 @@ void CodeHandler::componentComplete(){
 
 void CodeHandler::findCodeHandler(){
     if ( m_engine && m_projectDocument ){
-        vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->file()->path();
+        vlog("editor-documenthandler").v() << "Looking up language handler for: " << m_projectDocument->path();
 
-        QString fileExtension = QFileInfo(m_projectDocument->file()->path()).suffix();
+        QString fileExtension = QFileInfo(m_projectDocument->path()).suffix();
 
         QJSValueList interceptorArgs;
         interceptorArgs << m_engine->engine()->newQObject(m_projectDocument);

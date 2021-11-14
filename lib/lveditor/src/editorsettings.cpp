@@ -142,7 +142,7 @@ void EditorSettings::documentOpened(lv::ProjectDocument *document){
 void EditorSettings::documentChanged(){
     ProjectDocument* document = qobject_cast<ProjectDocument*>(sender());
     if ( document ){
-        if ( !document->isDirty() && document->file()->path() == m_path ){
+        if ( !document->isDirty() && document->path() == m_path ){
             init(document->content());
         }
     }

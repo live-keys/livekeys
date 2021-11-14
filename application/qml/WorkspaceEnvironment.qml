@@ -56,12 +56,12 @@ Item{
 
         onAccepted: {
             if ( isFile ){
-                var f = project.fileModel.addFile(entry, name)
+                var f = lk.layers.workspace.project.fileModel.addFile(entry, name)
                 if ( callbackFunction ){
                     callbackFunction(f)
                 }
             } else {
-                var e = project.fileModel.addDirectory(entry, name)
+                var e = lk.layers.workspace.project.fileModel.addDirectory(entry, name)
                 if ( callbackFunction ){
                     callbackFunction(e)
                 }
@@ -86,39 +86,50 @@ Item{
         }
     }
 
+    property QtObject __private : QtObject{
+
+        property var refreshActive : function(){
+            var fe = root.panes.focusPane('editor')
+            if ( !fe ){
+                fe = root.panes.createPane('editor', {}, [400, 0])
+
+                var containerUsed = root.panes.container
+                if ( containerUsed.orientation === Qt.Vertical ){
+                    for ( var i = 0; i < containerUsed.panes.length; ++i ){
+                        if ( containerUsed.panes[i].paneType === 'splitview' &&
+                             containerUsed.panes[i].orientation === Qt.Horizontal )
+                        {
+                            containerUsed = containerUsed.panes[i]
+                            break
+                        }
+                    }
+                }
+
+                root.panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
+
+                var containerPanes = containerUsed.panes
+                if ( (containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width) || containerUsed.width === 0 ){
+                    containerUsed.resizePane(containerPanes[0], containerPanes[0].width * 2)
+                    containerUsed.resizePane(fe, 400)
+                }
+            }
+            if ( !fe.document ){
+                var path = lk.layers.workspace.project.active.path
+                var format = lk.layers.workspace.fileFormats.find(path)
+                fe.document = lk.layers.workspace.project.openFile(
+                    Fs.UrlInfo.urlFromLocalFile(path), {type: 'text', format: format}
+                )
+            }
+        }
+    }
+
 
     Connections{
-        target: project
+        target: lk.layers.workspace.project
         function onActiveChanged(){
-            if (project.active){
+            if (lk.layers.workspace.project.active){
                 if ( pathChange ){
-                    var fe = root.panes.focusPane('editor')
-                    if ( !fe ){
-                        fe = root.panes.createPane('editor', {}, [400, 0])
-
-                        var containerUsed = root.panes.container
-                        if ( containerUsed.orientation === Qt.Vertical ){
-                            for ( var i = 0; i < containerUsed.panes.length; ++i ){
-                                if ( containerUsed.panes[i].paneType === 'splitview' &&
-                                     containerUsed.panes[i].orientation === Qt.Horizontal )
-                                {
-                                    containerUsed = containerUsed.panes[i]
-                                    break
-                                }
-                            }
-                        }
-
-                        root.panes.splitPaneHorizontallyWith(containerUsed, 0, fe)
-
-                        var containerPanes = containerUsed.panes
-                        if ( (containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width) || containerUsed.width === 0 ){
-                            containerUsed.resizePane(containerPanes[0], containerPanes[0].width * 2)
-                            containerUsed.resizePane(fe, 400)
-                        }
-                    }
-                    if ( !fe.document ){
-                        fe.document = project.openFile(Fs.UrlInfo.urlFromLocalFile(project.active.path), {type: 'text'})
-                    }
+                    root.__private.refreshActive()
                 }
             }
             pathChange = false
@@ -132,10 +143,10 @@ Item{
     }
 
     Connections{
-        target: project.documentModel
+        target: lk.layers.workspace.project.documentModel
         function onDocumentChangedOutside(document){
             lk.layers.window.dialogs.message(
-                'File \'' + document.file.path + '\' changed outside Livekeys. Would you like to reload it?',
+                'File \'' + document.path + '\' changed outside Livekeys. Would you like to reload it?',
                 {
                     button1Name : 'Yes',
                     button1Function : function(mbox){
@@ -217,8 +228,8 @@ Item{
         function openProjectFileViaDialog(callback){
             root.wizards.checkUnsavedFiles(function(){
                 lk.layers.window.dialogs.openFile({}, function(url){
-                    project.closeProject()
-                    project.openProject(url)
+                    lk.layers.workspace.project.closeProject()
+                    lk.layers.workspace.project.openProject(url)
                     var path = Fs.UrlInfo.toLocalFile(url)
                     if ( callback )
                         callback(path)
@@ -228,23 +239,23 @@ Item{
 
         function openProject(url, callback){
             root.wizards.checkUnsavedFiles(function(){
-                project.closeProject()
+                lk.layers.workspace.project.closeProject()
                 var path = Fs.UrlInfo.toLocalFile(url)
 
                 Base.Time.delay(0, function(){
-                    project.openProject(url)
+                    lk.layers.workspace.project.openProject(url)
 
-                    if ( !project.active ){
+                    if ( !lk.layers.workspace.project.active ){
                         var message = 'Folder doesn\'t have a main project file. Would you like to create one?'
                         var createFile = function(mbox){
                             root.wizards.addFile(
-                                project.dir(),
+                                lk.layers.workspace.project.dir(),
                                 {
                                     'extension': 'qml',
-                                    'heading' : 'Add main file in ' + project.dir()
+                                    'heading' : 'Add main file in ' + lk.layers.workspace.project.dir()
                                 },
                                 function(file){
-                                    project.setActive(file.path)
+                                    lk.layers.workspace.project.setActive(file.path)
                                     if ( callback )
                                         callback(path)
                                 }
@@ -273,7 +284,7 @@ Item{
             root.wizards.closeProject(function(){
                 // delay so that previous panes get deleted before new ones are added
                 Base.Time.delay(0, function(){
-                    project.newProject()
+                    lk.layers.workspace.project.newProject()
                     if ( callback )
                         callback()
                     // lk.newProjectInstance()
@@ -283,7 +294,7 @@ Item{
 
         function closeProject(callback){
             root.wizards.checkUnsavedFiles(function(){
-                project.closeProject()
+                lk.layers.workspace.project.closeProject()
                 if ( callback )
                     callback()
             })
@@ -293,14 +304,14 @@ Item{
         function openFileViaDialog(callback){
             var openCallback = function(url){
                 var localPath = Fs.UrlInfo.toLocalFile(url)
-                if ( project.rootPath === '' ){
-                    project.openProject(url)
+                if ( lk.layers.workspace.project.rootPath === '' ){
+                    lk.layers.workspace.project.openProject(url)
                     var path = Fs.UrlInfo.toLocalFile(url)
                     if ( callback )
                         callback(path)
-                } else if ( project.isFileInProject(url) ){
+                } else if ( lk.layers.workspace.project.isFileInProject(url) ){
                     root.openFile(url, ProjectDocument.EditIfNotOpen, callback)
-                } else if ( !project.canRunFile(localPath) ){
+                } else if ( !lk.layers.workspace.project.canRunFile(localPath) ){
                     root.openFile(url, ProjectDocument.EditIfNotOpen, callback)
                 } else {
                     var fileUrl = url
@@ -311,7 +322,7 @@ Item{
                         button1Function : function(mbox){
                             var projectUrl = fileUrl
                             root.wizards.closeProject(function(){
-                                project.openProject(projectUrl)
+                                lk.layers.workspace.project.openProject(projectUrl)
                                 var path = Fs.UrlInfo.toLocalFile(projectUrl)
                                 if ( callback )
                                     callback(path)
@@ -330,7 +341,7 @@ Item{
                             var projectUrl = fileUrl
                             root.wizards.closeProject(function(){
                                 Base.Time.delay(0, function(){
-                                    project.openProject(projectUrl)
+                                    lk.layers.workspace.project.openProject(projectUrl)
                                     var path = Fs.UrlInfo.toLocalFile(projectUrl)
                                     if ( callback )
                                         callback(path)
@@ -342,13 +353,13 @@ Item{
                 }
             }
 
-            if ( !project.isDirProject() ){
+            if ( !lk.layers.workspace.project.isDirProject() ){
                 root.wizards.checkUnsavedFiles(function(){
                     lk.layers.window.dialogs.openFile(
                         { filters: ["Qml files (*.qml)", "All files (*)"] },
                         function(url){
-                            project.closeProject()
-                            project.openProject(url)
+                            lk.layers.workspace.project.closeProject()
+                            lk.layers.workspace.project.openProject(url)
                             var path = Fs.UrlInfo.toLocalFile(url)
                             if ( callback )
                                 callback(path)
@@ -366,10 +377,10 @@ Item{
         function saveDocument(document, callback){
             if ( !document )
                 return
-            if ( document.file.exists() ){
+            if ( document.isOnDisk() ){
                 document.save()
                 if (callback)
-                    callback(Fs.UrlInfo.urlFromLocalFile(document.file.path))
+                    callback(Fs.UrlInfo.urlFromLocalFile(document.path))
             } else {
                 saveDocumentAs(document, callback)
             }
@@ -379,7 +390,7 @@ Item{
             if ( !document )
                 return
             lk.layers.window.dialogs.saveFile(
-                { filters: Fs.UrlInfo.urlFromLocalFile(document.file.path) },
+                { filters: Fs.UrlInfo.urlFromLocalFile(document.path) },
                 function(url){
                     if ( !document.saveAs(url) ){
                         lk.layers.window.dialogs.message(
@@ -394,13 +405,13 @@ Item{
                         return
                     }
 
-                    if ( !project.isDirProject() ){
-                        project.openProject(url)
+                    if ( !lk.layers.workspace.project.isDirProject() ){
+                        lk.layers.workspace.project.openProject(url)
                         var path = Fs.UrlInfo.toLocalFile(url)
                         if (callback)
                             callback(path)
-                    } else if ( project.isFileInProject(url) ){
-                        lk.layers.workspace.environment.openFile(url, ProjectDocument.Edit)
+                    } else if ( lk.layers.workspace.project.isFileInProject(url) ){
+                        lk.layers.workspace.environment.fileSystem.openFile(url, ProjectDocument.Edit)
                         var path = Fs.UrlInfo.toLocalFile(url)
                         if (callback)
                             callback(path)
@@ -414,7 +425,7 @@ Item{
                                 var projectUrl = fileUrl
                                 projectView.closeProject(
                                     function(){
-                                        project.openProject(projectUrl)
+                                        lk.layers.workspace.project.openProject(projectUrl)
                                         var path = Fs.UrlInfo.toLocalFile(projectUrl)
                                         if (callback)
                                             callback(path)
@@ -432,7 +443,7 @@ Item{
                                 var projectUrl = fileUrl
                                 projectView.closeProject(
                                     function(){
-                                        project.openProject(url)
+                                        lk.layers.workspace.project.openProject(url)
                                         var path = Fs.UrlInfo.toLocalFile(url)
                                         if (callback)
                                             callback(path)
@@ -451,7 +462,7 @@ Item{
                 return
             if ( document.isDirty ){
                 var saveFunction = function(mbox, callback){
-                    if ( document.file.exists() ){
+                    if ( document.isOnDisk() ){
                         document.save()
                         root.fileSystem.closeDocument(document, callbacK)
                     } else {
@@ -503,7 +514,7 @@ Item{
 
         function addFile(path, opt, callback){
 
-            var entry = project.fileModel.findPath(path)
+            var entry = lk.layers.workspace.project.fileModel.findPath(path)
             if ( !entry ){
                 //TODO: Enable if directory is outside the project
                 lk.layers.workspace.messages.pushError("Path not found in project: " + path, 100)
@@ -537,7 +548,7 @@ Item{
         }
 
         function addDirectory(path, opt, callback){
-            var entry = project.fileModel.findPath(path)
+            var entry = lk.layers.workspace.project.fileModel.findPath(path)
             if ( !entry ){
                 //TODO: Enable if directory is outside the project
                 lk.layers.workspace.messages.pushError("Path not found in project: " + path, 100)
@@ -574,7 +585,7 @@ Item{
             if ( !Fs.Path.exists(path) )
                 return
             if ( Fs.Path.isDir(path) ){
-                var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+                var documentList = lk.layers.workspace.project.documentModel.listUnsavedDocumentsInPath(entry.path)
                 if ( documentList.length === 0 ){
                     message =
                         "Are you sure you want to remove directory\'" + entry.path + "\' " +
@@ -592,7 +603,7 @@ Item{
                         "\' and all its contents?\n"
                 }
             } else {
-                var doc = project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
+                var doc = lk.layers.workspace.project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
                 if  ( doc && doc.isDirty ){
                     message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
                 } else {
@@ -627,7 +638,7 @@ Item{
                 return
 
             if ( !Fs.Path.isDir(path) ){
-                var doc = project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
+                var doc = lk.layers.workspace.project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
                 if  ( doc && doc.isDirty ){
                     message = lang([
                         "Are you sure you want to move unsaved file '%0'?\n" +
@@ -640,7 +651,7 @@ Item{
                     return;
                 }
             } else {
-                var documentList = project.documentModel.listUnsavedDocumentsInPath(entry.path)
+                var documentList = lk.layers.workspace.project.documentModel.listUnsavedDocumentsInPath(entry.path)
                 if ( documentList.length === 0 ){
                     root.fileSystem.movePath(path, newParent)
                     if ( callback )
@@ -681,13 +692,13 @@ Item{
         }
 
         function checkUnsavedFiles(callback){
-            var documentList = project.documentModel.listUnsavedDocuments()
+            var documentList = lk.layers.workspace.project.documentModel.listUnsavedDocuments()
             callback = callback ? callback : function(){}
             var message = ''
             if ( documentList.length === 0 ){
                 callback()
                 return;
-            } else if ( !project.isDirProject() ){
+            } else if ( !lk.layers.workspace.project.isDirProject() ){
                 message = "Your project file has unsaved changes. Would you like to save them before closing it?";
             } else {
                 var unsavedFiles = '';
@@ -704,9 +715,9 @@ Item{
                 button1Function : function(box){
                     box.close()
 
-                    if ( !project.isDirProject() && documentList.length === 1 && documentList[0] === ':/0'){
+                    if ( !lk.layers.workspace.project.isDirProject() && documentList.length === 1 && documentList[0] === ':/0'){
                         var closeCallback = callback;
-                        var untitledDocument = project.documentModel.isOpened(documentList[0])
+                        var untitledDocument = lk.layers.workspace.project.documentModel.isOpened(documentList[0])
 
                         lk.layers.window.dialogs.saveFile(
                             { filters: [ "Qml files (*.qml)", "All files (*)" ] },
@@ -721,15 +732,15 @@ Item{
                                     )
                                     return;
                                 }
-                                project.closeProject()
+                                lk.layers.workspace.project.closeProject()
                                 closeCallback()
                             }
                         )
-                    } else if ( !project.documentModel.saveDocuments() ){
-                        var unsavedList = project.documentModel.listUnsavedDocuments()
+                    } else if ( !lk.layers.workspace.project.documentModel.saveDocuments() ){
+                        var unsavedList = lk.layers.workspace.project.documentModel.listUnsavedDocuments()
                         unsavedFiles = '';
                         for ( var i = 0; i < unsavedList.length; ++i ){
-                            unsavedFiles += project.fileModel.printableName(unsavedList[i]) + "\n";
+                            unsavedFiles += lk.layers.workspace.project.fileModel.printableName(unsavedList[i]) + "\n";
                         }
 
                         message = 'Failed to save the following files:\n'
@@ -802,7 +813,7 @@ Item{
                 }
             }
 
-            var doc = project.openFile(path, {type: 'text', format: format, mode: mode})
+            var doc = lk.layers.workspace.project.openFile(path, {type: 'text', format: format, mode: mode})
             if ( !doc )
                 return;
             var fe = root.panes.focusPane('editor')
@@ -816,32 +827,49 @@ Item{
                     fe.width = 400
                 }
             }
+            fe.document = doc
             if ( callback )
                 callback(path, doc, fe)
-            fe.document = doc
             return fe
         }
 
+        function openDocumentInEditor(doc, callback){
+            var fe = root.panes.focusPane('editor')
+            if ( !fe ){
+                fe = root.panes.createPane('editor', {}, [400, 0])
+                root.panes.container.splitPane(0, fe)
+
+                var containerPanes = root.panes.container.panes
+                if ( containerPanes.length > 2 && containerPanes[2].width > 500 + containerPanes[0].width){
+                    containerPanes[0].width = containerPanes[0].width * 2
+                    fe.width = 400
+                }
+            }
+            fe.document = doc
+            if ( callback )
+                callback(path, doc, fe)
+        }
+
         function removePath(path){
-            project.fileModel.removePath(path)
+            lk.layers.workspace.project.fileModel.removePath(path)
         }
 
         function renamePath(path, name){
-            project.fileModel.renamePath(path, name)
+            lk.layers.workspace.project.fileModel.renamePath(path, name)
         }
 
         function movePath(path, newParent){
-            project.fileModel.movePath(path, newParent)
+            lk.layers.workspace.project.fileModel.movePath(path, newParent)
         }
 
         function closeDocument(document, callback){
-            if ( !project.isDirProject() && document.file.path === project.active.path ){
+            if ( !lk.layers.workspace.project.isDirProject() && document.path === lk.layers.workspace.project.active.path ){
                 lk.layers.window.dialogs.message(
                     'Closing this file will also close this project. Would you like to close the project?',
                 {
                     button1Name : 'Yes',
                     button1Function : function(mbox){
-                        project.closeProject()
+                        lk.layers.workspace.project.closeProject()
                         mbox.close()
                         if ( callback )
                             callback()
@@ -851,14 +879,14 @@ Item{
                         mbox.close()
                     },
                     returnPressed : function(mbox){
-                        project.closeProject()
+                        lk.layers.workspace.project.closeProject()
                         mbox.close()
                         if ( callback )
                             callback()
                     }
                 })
             } else {
-                project.closeFile(document.file.path)
+                lk.layers.workspace.project.closeFile(document.path)
                 if ( callback )
                     callback()
             }

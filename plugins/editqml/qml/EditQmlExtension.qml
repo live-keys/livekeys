@@ -38,24 +38,15 @@ WorkspaceExtension{
     }
     interceptLanguage : function(document, handler, ext){
         var extLower = ext.toLowerCase()
-
-        if ( extLower === 'js' || extLower === 'qml'  ||
-            (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ) )
-        {
+        if ( document.formatType === 'js' || document.formatType === 'qml' )
             return globals.createHandler(document, handler)
-        }
         return null
     }
 
     objectName : "editqml"
 
     function canBeQml(document){
-        if ( endsWith(document.file.path, '.qml') ||
-            (document.file.name.length > 2 && document.file.name.substring(0, 2) === "T:" ))
-        {
-            return true
-        }
-        return false
+        return document.formatType === 'qml'
     }
 
     function endsWith(str, suffix){

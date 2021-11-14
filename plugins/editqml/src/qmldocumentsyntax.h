@@ -54,7 +54,7 @@ inline void QmlDocumentSyntax::setDocument(ProjectDocument *document){
     m_documentInfoDirty = true;
     m_document = document;
     m_documentObjects = nullptr;
-    m_documentInfo = DocumentQmlInfo::create(document->file()->path());
+    m_documentInfo = DocumentQmlInfo::create(document->path());
     emit documentChanged();
 }
 
