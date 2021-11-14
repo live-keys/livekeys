@@ -186,8 +186,8 @@ namespace{
 /// \private
 class DocumentQmlInfoPrivate{
 public:
-    QmlJS::Document::MutablePtr     internalDoc;
-    QmlJS::Bind*                    internalDocBind;
+    QQmlJS::Document::MutablePtr     internalDoc;
+    QQmlJS::Bind*                    internalDocBind;
     DocumentQmlInfo::ImportList     imports;
     DocumentQmlRanges               ranges;
     QList<DocumentQmlInfo::Message> messages;
@@ -291,11 +291,11 @@ DocumentQmlInfo::DocumentQmlInfo(const QString &fileName)
 
     DocumentQmlInfo::Dialect dialect = extensionToDialect(suffix);
     if ( dialect == DocumentQmlInfo::Javascript )
-        d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::JavaScript);
+        d->internalDoc = QQmlJS::Document::create(fileName, QQmlJS::Dialect::JavaScript);
     else if ( dialect == DocumentQmlInfo::Qml || fileName == "" ){
-        d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::Qml);
+        d->internalDoc = QQmlJS::Document::create(fileName, QQmlJS::Dialect::Qml);
     } else
-        d->internalDoc = QmlJS::Document::create(fileName, QmlJS::Dialect::NoLanguage);
+        d->internalDoc = QQmlJS::Document::create(fileName, QQmlJS::Dialect::NoLanguage);
 }
 
 /**
@@ -359,7 +359,7 @@ lv::QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObject(
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+    if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
 
         ValueMemberExtractor extractor(vodata);
         vob->processMembers(&extractor);
@@ -385,7 +385,7 @@ QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
     if ( isValueNull(valueref) || valueref.parent != this )
         return vodata;
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+    if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
 
         ValueMemberExtractor extractor(vodata);
         vob->processMembers(&extractor);
@@ -406,7 +406,7 @@ QStringList DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReferen
         return QStringList();
 
     QStringList result;
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+    if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->typeName() ){
             result << vob->typeName()->name.toString();
 
@@ -430,7 +430,7 @@ void DocumentQmlInfo::extractTypeNameRange(const DocumentQmlInfo::ValueReference
         return;
     }
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+    if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->typeName() ){
             begin = static_cast<int>(vob->typeName()->firstSourceLocation().begin());
             end = static_cast<int>(vob->typeName()->lastSourceLocation().end());
@@ -450,7 +450,7 @@ void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valuer
         return;
     }
 
-    if ( const QmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
+    if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->initializer() ){
             begin = static_cast<int>(vob->initializer()->firstSourceLocation().begin());
             end = static_cast<int>(vob->initializer()->lastSourceLocation().end());
@@ -476,7 +476,7 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(int posit
     if ( range.ast == nullptr )
         return DocumentQmlInfo::ValueReference();
 
-    QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
+    QQmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
     return DocumentQmlInfo::ValueReference(value, this);
 }
 
@@ -508,7 +508,7 @@ const DocumentQmlInfo::ValueReference DocumentQmlInfo::valueAtPosition(
     begin = range.begin;
     end   = range.end;
 
-    QmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
+    QQmlJS::ObjectValue* value = d->internalDocBind->findQmlObject(range.ast);
     return DocumentQmlInfo::ValueReference(value, this);
 }
 
@@ -580,16 +580,16 @@ bool DocumentQmlInfo::parse(const QString &source){
     bool parseResult = d->internalDoc->parse();
     d->internalDocBind = d->internalDoc->bind();
 
-    foreach( const QmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
+    foreach( const QQmlJS::DiagnosticMessage& message, d->internalDoc->diagnosticMessages() ){
         DocumentQmlInfo::Message::Severity severity = DocumentQmlInfo::Message::Hint;
-        switch( message.kind ){
-        case QmlJS::DiagnosticMessage::Error: severity = DocumentQmlInfo::Message::Error; break;
-        case QmlJS::DiagnosticMessage::Warning: severity = DocumentQmlInfo::Message::Warning; break;
-        }
+        if ( message.isError() )
+            severity = DocumentQmlInfo::Message::Error;
+        else if ( message.isWarning() )
+            severity = DocumentQmlInfo::Message::Warning;
 
         d->messages.append(
             DocumentQmlInfo::Message(
-                severity, static_cast<int>(message.loc.offset), static_cast<int>(message.loc.startLine), message.message
+                severity, static_cast<int>(message.column), static_cast<int>(message.line), message.message
             )
         );
     }
@@ -607,25 +607,25 @@ const QList<lv::DocumentQmlInfo::Message> &DocumentQmlInfo::diagnostics() const{
 /**
  * \brief Return a pointer to the internal QmlJS::Bind object
  */
-QmlJS::Bind *DocumentQmlInfo::internalBind(){
+QQmlJS::Bind *DocumentQmlInfo::internalBind(){
     Q_D(DocumentQmlInfo);
     return d->internalDocBind;
 }
 
 QList<DocumentQmlInfo::Import> DocumentQmlInfo::extractImports(){
     QList<DocumentQmlInfo::Import> imports;
-    QList<QmlJS::ImportInfo> importInfos = internalBind()->imports();
+    QList<QQmlJS::ImportInfo> importInfos = internalBind()->imports();
 
-    for ( QList<QmlJS::ImportInfo>::iterator it = importInfos.begin(); it != importInfos.end(); ++it ){
-        QmlJS::ImportKey impKey(*it);
+    for ( QList<QQmlJS::ImportInfo>::iterator it = importInfos.begin(); it != importInfos.end(); ++it ){
+        QQmlJS::ImportKey impKey(*it);
         Import::Type importType;
         switch(impKey.type){
-        case QmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
-        case QmlJS::ImportType::Library:           importType = Import::Library; break;
-        case QmlJS::ImportType::Directory:         importType = Import::Directory; break;
-        case QmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
-        case QmlJS::ImportType::File:              importType = Import::File; break;
-        case QmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
+        case QQmlJS::ImportType::Invalid:           importType = Import::Invalid; break;
+        case QQmlJS::ImportType::Library:           importType = Import::Library; break;
+        case QQmlJS::ImportType::Directory:         importType = Import::Directory; break;
+        case QQmlJS::ImportType::ImplicitDirectory: importType = Import::ImplicitDirectory; break;
+        case QQmlJS::ImportType::File:              importType = Import::File; break;
+        case QQmlJS::ImportType::UnknownFile:       importType = Import::UnknownFile; break;
         default:                                   importType = Import::Invalid;
         }
 

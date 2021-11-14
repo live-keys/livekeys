@@ -37,7 +37,7 @@
 #include <QString>
 #include <QSet>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class QMLJS_EXPORT DescribeValueVisitor : public ValueVisitor
 {

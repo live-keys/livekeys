@@ -21,7 +21,14 @@ QMat *ColorSpace::cvtColor(QMat *input, int code, int dstCn)
         return new QMat(rMat);
 
     } catch (cv::Exception& e){
-        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "ColorSpace: ").jsThrow();
+        lv::CvExtras::toLocalError(e, engine(), this, "ColorSpace: ").jsThrow();
         return nullptr;
     }
+}
+
+lv::ViewEngine *ColorSpace::engine(){
+    lv::ViewEngine* ve = lv::ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
+    if ( !ve )
+        lv::QmlError::warnNoEngineCaptured(this, "ColorSpace");
+    return ve;
 }

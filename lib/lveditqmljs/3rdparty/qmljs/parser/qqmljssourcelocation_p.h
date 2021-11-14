@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2018 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtQml module of the Qt Toolkit.
@@ -37,8 +37,12 @@
 **
 ****************************************************************************/
 
-#ifndef QQMLJSENGINE_P_H
-#define QQMLJSENGINE_P_H
+#ifndef QQMLJSSOURCELOCATION_P_H
+#define QQMLJSSOURCELOCATION_P_H
+
+#include "qqmljsglobal_p.h"
+
+#include <QtCore/qglobal.h>
 
 //
 //  W A R N I N G
@@ -51,84 +55,33 @@
 // We mean it.
 //
 
-#include "qqmljsglobal_p.h"
-#include "qqmljssourcelocation_p.h"
-
-#include "qqmljsmemorypool_p.h"
-
-#include <QtCore/qstring.h>
-#include <QtCore/qset.h>
-
 QT_BEGIN_NAMESPACE
 
-namespace QQmlJS {
+namespace QQmlJS { namespace AST {
 
-class Lexer;
-class MemoryPool;
-
-class QML_PARSER_EXPORT Directives {
-public:
-    virtual ~Directives() {}
-
-    virtual void pragmaLibrary()
-    {
-    }
-
-    virtual void importFile(const QString &jsfile, const QString &module, int line, int column)
-    {
-        Q_UNUSED(jsfile);
-        Q_UNUSED(module);
-        Q_UNUSED(line);
-        Q_UNUSED(column);
-    }
-
-    virtual void importModule(const QString &uri, const QString &version, const QString &module, int line, int column)
-    {
-        Q_UNUSED(uri);
-        Q_UNUSED(version);
-        Q_UNUSED(module);
-        Q_UNUSED(line);
-        Q_UNUSED(column);
-    }
-};
-
-class QML_PARSER_EXPORT Engine
+class SourceLocation
 {
-    Lexer *_lexer;
-    Directives *_directives;
-    MemoryPool _pool;
-    QList<AST::SourceLocation> _comments;
-    QString _extraCode;
-    QString _code;
-
 public:
-    Engine();
-    ~Engine();
+    explicit SourceLocation(quint32 offset = 0, quint32 length = 0, quint32 line = 0, quint32 column = 0)
+        : offset(offset), length(length),
+          startLine(line), startColumn(column)
+    { }
 
-    void setCode(const QString &code);
-    const QString &code() const { return _code; }
+    bool isValid() const { return length != 0; }
 
-    void addComment(int pos, int len, int line, int col);
-    QList<AST::SourceLocation> comments() const;
+    quint32 begin() const { return offset; }
+    quint32 end() const { return offset + length; }
 
-    Lexer *lexer() const;
-    void setLexer(Lexer *lexer);
-
-    Directives *directives() const;
-    void setDirectives(Directives *directives);
-
-    MemoryPool *pool();
-
-    inline QStringRef midRef(int position, int size) { return _code.midRef(position, size); }
-
-    QStringRef newStringRef(const QString &s);
-    QStringRef newStringRef(const QChar *chars, int size);
+// attributes
+    // ### encode
+    quint32 offset;
+    quint32 length;
+    quint32 startLine;
+    quint32 startColumn;
 };
 
-double integerFromString(const char *buf, int size, int radix);
-
-} // end of namespace QQmlJS
+} } // namespace AST
 
 QT_END_NAMESPACE
 
-#endif // QQMLJSENGINE_P_H
+#endif

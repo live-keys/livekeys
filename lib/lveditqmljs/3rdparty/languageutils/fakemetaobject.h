@@ -61,6 +61,7 @@ public:
     void setName(const QString &name);
 
     void addKey(const QString &key, int value);
+    void addKey(const QString& key);
     QString key(int index) const;
     int keyCount() const;
     QStringList keys() const;

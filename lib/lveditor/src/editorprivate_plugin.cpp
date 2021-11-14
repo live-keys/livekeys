@@ -20,7 +20,7 @@
 #include "live/codehandler.h"
 #include "projectfilemodel.h"
 #include "live/projectdocumentmodel.h"
-#include "projectnavigationmodel.h"
+#include "projectfileindexer.h"
 #include "runnablecontainer.h"
 #include "live/project.h"
 #include "live/projectentry.h"
@@ -56,8 +56,8 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
         uri, 1, 0, "ProjectFileModel", "Cannot create a ProjectFileModel instance.");
     qmlRegisterUncreatableType<lv::ProjectDocumentModel>(
         uri, 1, 0, "ProjectDocumentModel", "Cannot create a ProjectDocumentModel instance.");
-    qmlRegisterUncreatableType<lv::ProjectNavigationModel>(
-        uri, 1, 0, "ProjectNavigationModel", "Cannot create a ProjectNavigationModel instance.");
+    qmlRegisterUncreatableType<lv::ProjectFileIndexer>(
+        uri, 1, 0, "ProjectFileIndexer", "Cannot create a ProjectFileIndexer instance.");
     qmlRegisterUncreatableType<lv::Runnable>(
         uri, 1, 0, "Runnable", "Cannot create Runnable instance. Use subproject instead.");
     qmlRegisterUncreatableType<lv::RunnableContainer>(

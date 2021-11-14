@@ -30,18 +30,18 @@ QmlJsHighlighter::QmlJsHighlighter(QmlJsSettings* settings, CodeHandler*, QTextD
 // Anything else is discarded
 QmlJsHighlighter::LookAheadType QmlJsHighlighter::lookAhead(
         const QString& text,
-        const QList<QmlJS::Token> &tokens,
-        QList<QmlJS::Token>::ConstIterator it,
+        const QList<QQmlJS::Token> &tokens,
+        QList<QQmlJS::Token>::ConstIterator it,
         int state)
 {
     bool identifierExpected = false;
     while ( it != tokens.end() ){
-        const QmlJS::Token& tk = *it;
-        if ( tk.is(QmlJS::Token::Colon) ){
+        const QQmlJS::Token& tk = *it;
+        if ( tk.is(QQmlJS::Token::Colon) ){
             return QmlJsHighlighter::Property;
-        } else if ( tk.is(QmlJS::Token::LeftBrace) ){
+        } else if ( tk.is(QQmlJS::Token::LeftBrace) ){
             return QmlJsHighlighter::Type;
-        } else if ( tk.is(QmlJS::Token::Identifier ) ){
+        } else if ( tk.is(QQmlJS::Token::Identifier ) ){
             if ( !identifierExpected ){
                 if ( tk.length == 2 && text.mid(tk.begin(), tk.length) == "on" )
                      return QmlJsHighlighter::Type;
@@ -49,9 +49,9 @@ QmlJsHighlighter::LookAheadType QmlJsHighlighter::lookAhead(
                 return QmlJsHighlighter::Unknown;
             }
             identifierExpected = false;
-        } else if ( tk.is(QmlJS::Token::Dot) ){
+        } else if ( tk.is(QQmlJS::Token::Dot) ){
             identifierExpected = true;
-        } else if ( tk.isNot(QmlJS::Token::Comment) ){
+        } else if ( tk.isNot(QQmlJS::Token::Comment) ){
             return QmlJsHighlighter::Unknown;
         }
         ++it;
@@ -59,18 +59,18 @@ QmlJsHighlighter::LookAheadType QmlJsHighlighter::lookAhead(
 
     QTextBlock bl = currentBlock().next();
     while ( bl.isValid() ){
-        QmlJS::Scanner scn;
-        QList<QmlJS::Token> tks = scn(bl.text(), state);
+        QQmlJS::Scanner scn;
+        QList<QQmlJS::Token> tks = scn(bl.text(), state);
         state = scn.state();
         it = tks.begin();
 
         while ( it != tks.end() ){
-            const QmlJS::Token& tk = *it;
-            if ( tk.is(QmlJS::Token::Colon) ){
+            const QQmlJS::Token& tk = *it;
+            if ( tk.is(QQmlJS::Token::Colon) ){
                 return QmlJsHighlighter::Property;
-            } else if ( tk.is(QmlJS::Token::LeftBrace) ){
+            } else if ( tk.is(QQmlJS::Token::LeftBrace) ){
                 return QmlJsHighlighter::Type;
-            } else if ( tk.is(QmlJS::Token::Identifier ) ){
+            } else if ( tk.is(QQmlJS::Token::Identifier ) ){
                 if ( !identifierExpected ){
                     if ( tk.length == 2 && text.mid(tk.begin(), tk.length) == "on" )
                          return QmlJsHighlighter::Type;
@@ -78,9 +78,9 @@ QmlJsHighlighter::LookAheadType QmlJsHighlighter::lookAhead(
                     return QmlJsHighlighter::Unknown;
                 }
                 identifierExpected = false;
-            } else if ( tk.is(QmlJS::Token::Dot) ){
+            } else if ( tk.is(QQmlJS::Token::Dot) ){
                 identifierExpected = true;
-            } else if ( tk.isNot(QmlJS::Token::Comment) ){
+            } else if ( tk.isNot(QQmlJS::Token::Comment) ){
                 return QmlJsHighlighter::Unknown;
             }
             ++it;
@@ -103,15 +103,15 @@ void QmlJsHighlighter::collapse(const QTextBlock &tb, int &numLines, QString &re
     if (blockState < 0) {
         prevSectionExceeded = false;
         bracketLevel        = 0;
-        state               = QmlJS::Scanner::Normal;
+        state               = QQmlJS::Scanner::Normal;
     }
 
-    QmlJS::Scanner scanner;
-    QList<QmlJS::Token> tokens = scanner(tb.text(), state);
-    QList<QmlJS::Token>::iterator it = tokens.begin();
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(tb.text(), state);
+    QList<QQmlJS::Token>::iterator it = tokens.begin();
     while ( it != tokens.end() ){
-        QmlJS::Token& tk = *it;
-        if ( tk.kind == QmlJS::Token::LeftBrace ){
+        QQmlJS::Token& tk = *it;
+        if ( tk.kind == QQmlJS::Token::LeftBrace ){
             QTextBlock bScan = tb;
             if ( DocumentQmlValueScanner::getBlockEnd(bScan, tb.position() + tk.end()) == 0 )
             {
@@ -140,13 +140,13 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
     if (blockState < 0) {
         prevSectionExceeded = false;
         bracketLevel        = 0;
-        state               = QmlJS::Scanner::Normal;
+        state               = QQmlJS::Scanner::Normal;
     }
 
     QmlJsSettings& settings = *m_settings;
 
-    QmlJS::Scanner scanner;
-    QList<QmlJS::Token> tokens = scanner(text, state);
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(text, state);
     state = scanner.state();
 
     lv::ProjectDocumentBlockData *blockData =
@@ -160,21 +160,21 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
         blockData->resetCollapseParams();
     }
 
-    QList<QmlJS::Token>::iterator it = tokens.begin();
+    QList<QQmlJS::Token>::iterator it = tokens.begin();
     while ( it != tokens.end() ){
-        QmlJS::Token& tk = *it;
+        QQmlJS::Token& tk = *it;
         switch(tk.kind){
-        case QmlJS::Token::Keyword:
+        case QQmlJS::Token::Keyword:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Keyword]);
             break;
-        case QmlJS::Token::Identifier:{
+        case QQmlJS::Token::Identifier:{
             QString tktext = text.mid(tk.begin(), tk.length);
             if ( m_knownIds.contains(tktext) ){
                 setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Identifier]);
             } else if ( tktext == "true" || tktext == "false" ){
                 setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Keyword]);
             } else {
-                QList<QmlJS::Token>::iterator lait = it;
+                QList<QQmlJS::Token>::iterator lait = it;
                 QmlJsHighlighter::LookAheadType la = lookAhead(text, tokens, ++lait, state);
                 if ( la == QmlJsHighlighter::Property )
                     setFormat(tk.begin(), tk.length, settings[QmlJsSettings::QmlProperty]);
@@ -183,40 +183,40 @@ void QmlJsHighlighter::highlightBlock(const QString &text){
             }
             break;
         }
-        case QmlJS::Token::String:
+        case QQmlJS::Token::String:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::String]);
             break;
-        case QmlJS::Token::Comment:
+        case QQmlJS::Token::Comment:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Comment]);
             break;
-        case QmlJS::Token::Number:
+        case QQmlJS::Token::Number:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Number]);
             break;
-        case QmlJS::Token::LeftParenthesis:
-        case QmlJS::Token::RightParenthesis:
+        case QQmlJS::Token::LeftParenthesis:
+        case QQmlJS::Token::RightParenthesis:
             break;
-        case QmlJS::Token::LeftBrace:
+        case QQmlJS::Token::LeftBrace:
             blockData->setCollapse(&QmlJsHighlighter::collapse);
             blockData->setStateChangeFlag(true);
             blockData->setCollapsible(true);
             document()->markContentsDirty(currentBlock().position(), currentBlock().length());
             break;
-        case QmlJS::Token::RightBrace:
+        case QQmlJS::Token::RightBrace:
             if (blockData->isCollapsible())
                 blockData->setCollapsible(false);
             break;
-        case QmlJS::Token::LeftBracket:
-        case QmlJS::Token::RightBracket:
-        case QmlJS::Token::EndOfFile:
+        case QQmlJS::Token::LeftBracket:
+        case QQmlJS::Token::RightBracket:
+        case QQmlJS::Token::EndOfFile:
             break;
-        case QmlJS::Token::Semicolon:
-        case QmlJS::Token::Colon:
-        case QmlJS::Token::Comma:
-        case QmlJS::Token::Dot:
-        case QmlJS::Token::Delimiter:
+        case QQmlJS::Token::Semicolon:
+        case QQmlJS::Token::Colon:
+        case QQmlJS::Token::Comma:
+        case QQmlJS::Token::Dot:
+        case QQmlJS::Token::Delimiter:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::Operator]);
             break;
-        case QmlJS::Token::RegExp:
+        case QQmlJS::Token::RegExp:
             setFormat(tk.begin(), tk.length, settings[QmlJsSettings::String]);
             break;
         }
@@ -264,7 +264,7 @@ QList<SyntaxHighlighter::TextFormatRange> QmlJsHighlighter::highlight(int lastUs
 
     bool prevSectionExceeded    = false;
     int bracketLevel            = 0;
-    int state                   = QmlJS::Scanner::Normal;
+    int state                   = QQmlJS::Scanner::Normal;
 
     if (blockState >= 0) {
         prevSectionExceeded     = (blockState >> 4) & 1;
@@ -280,14 +280,14 @@ QList<SyntaxHighlighter::TextFormatRange> QmlJsHighlighter::highlight(int lastUs
 
     for (QString block: blocks)
     {
-        QmlJS::Scanner scanner;
-        QList<QmlJS::Token> tokens = scanner(block, state);
+        QQmlJS::Scanner scanner;
+        QList<QQmlJS::Token> tokens = scanner(block, state);
         state = scanner.state();
 
         int formatType = -1;
         int collapsibleType = -1;
 
-        QList<QmlJS::Token>::iterator it = tokens.begin();
+        QList<QQmlJS::Token>::iterator it = tokens.begin();
 
         // empty block handling
         if (tokens.empty())
@@ -303,7 +303,7 @@ QList<SyntaxHighlighter::TextFormatRange> QmlJsHighlighter::highlight(int lastUs
         //    blockState = (state & 15) | (exceeded << 4) | (bracketLevel << 5);
 
         while ( it != tokens.end() ){
-            QmlJS::Token& tk = *it;
+            QQmlJS::Token& tk = *it;
             TextFormatRange r;
             formatType = -1;
             collapsibleType = -1;
@@ -312,17 +312,17 @@ QList<SyntaxHighlighter::TextFormatRange> QmlJsHighlighter::highlight(int lastUs
 
             switch(tk.kind){
 
-            case QmlJS::Token::Keyword:
+            case QQmlJS::Token::Keyword:
                 formatType = QmlJsSettings::Keyword;
                 break;
-            case QmlJS::Token::Identifier:{
+            case QQmlJS::Token::Identifier:{
                 QString tktext = text.mid(internalPosition + tk.begin(), tk.length);
                 if ( m_knownIds.contains(tktext) ){
                     formatType = QmlJsSettings::Identifier;
                 } else if ( tktext == "true" || tktext == "false" ){
                     formatType = QmlJsSettings::Keyword;
                 } else {
-                    QList<QmlJS::Token>::iterator lait = it;
+                    QList<QQmlJS::Token>::iterator lait = it;
                     QmlJsHighlighter::LookAheadType la = lookAhead(text, tokens, ++lait, state);
                     if ( la == QmlJsHighlighter::Property ) {
                         formatType = QmlJsSettings::QmlProperty;
@@ -333,36 +333,36 @@ QList<SyntaxHighlighter::TextFormatRange> QmlJsHighlighter::highlight(int lastUs
                 }
                 break;
             }
-            case QmlJS::Token::String:
+            case QQmlJS::Token::String:
                 formatType = QmlJsSettings::String;
                 break;
-            case QmlJS::Token::Comment:
+            case QQmlJS::Token::Comment:
                 formatType = QmlJsSettings::Comment;
                 break;
-            case QmlJS::Token::Number:
+            case QQmlJS::Token::Number:
                 formatType = QmlJsSettings::Number;
                 break;
-            case QmlJS::Token::LeftParenthesis:
-            case QmlJS::Token::RightParenthesis:
+            case QQmlJS::Token::LeftParenthesis:
+            case QQmlJS::Token::RightParenthesis:
                 break;
-            case QmlJS::Token::LeftBrace:
+            case QQmlJS::Token::LeftBrace:
                 collapsibleType = 1;
                 break;
-            case QmlJS::Token::RightBrace:
+            case QQmlJS::Token::RightBrace:
                 collapsibleType = 0;
                 break;
-            case QmlJS::Token::LeftBracket:
-            case QmlJS::Token::RightBracket:
-            case QmlJS::Token::EndOfFile:
+            case QQmlJS::Token::LeftBracket:
+            case QQmlJS::Token::RightBracket:
+            case QQmlJS::Token::EndOfFile:
                 break;
-            case QmlJS::Token::Semicolon:
-            case QmlJS::Token::Colon:
-            case QmlJS::Token::Comma:
-            case QmlJS::Token::Dot:
-            case QmlJS::Token::Delimiter:
+            case QQmlJS::Token::Semicolon:
+            case QQmlJS::Token::Colon:
+            case QQmlJS::Token::Comma:
+            case QQmlJS::Token::Dot:
+            case QQmlJS::Token::Delimiter:
                 formatType = QmlJsSettings::Operator;
                 break;
-            case QmlJS::Token::RegExp:
+            case QQmlJS::Token::RegExp:
                 formatType = QmlJsSettings::String;
                 break;
             }

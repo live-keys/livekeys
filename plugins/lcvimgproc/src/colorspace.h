@@ -4,6 +4,7 @@
 #include <QObject>
 #include "qmat.h"
 #include "opencv2/imgproc.hpp"
+#include "live/viewengine.h"
 
 class ColorSpace: public QObject
 {
@@ -238,8 +239,12 @@ public:
         CV_COLORCVT_MAX  = 127
     };
     ColorSpace(QObject* parent = nullptr);
+
 public slots:
     QMat* cvtColor(QMat* input, int code, int dstCn);
+
+private:
+    lv::ViewEngine* engine();
 };
 
 #endif // COLORSPACE_H

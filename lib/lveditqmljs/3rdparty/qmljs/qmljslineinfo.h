@@ -36,7 +36,7 @@
 #include <QRegExp>
 #include <QTextBlock>
 
-namespace QmlJS {
+namespace QQmlJS {
 class Token;
 
 class QMLJS_EXPORT LineInfo

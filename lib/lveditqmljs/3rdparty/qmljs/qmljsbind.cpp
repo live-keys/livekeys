@@ -34,8 +34,8 @@
 #include "qmljsdocument.h"
 
 using namespace LanguageUtils;
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 
 /*!
     \class QmlJS::Bind
@@ -164,6 +164,13 @@ ObjectValue *Bind::bindObject(UiQualifiedId *qualifiedTypeNameId, UiObjectInitia
     return switchObjectValue(parentObjectValue);
 }
 
+void Bind::throwRecursionDepthError(){
+    DiagnosticMessage dm;
+    dm.type = QtCriticalMsg;
+    dm.message = tr("Hit maximal recursion depth in AST visit");
+    _diagnosticMessages->append(dm);
+}
+
 void Bind::accept(Node *node)
 {
     Node::accept(node, this);
@@ -186,8 +193,9 @@ bool Bind::visit(UiImport *ast)
 {
     ComponentVersion version;
     if (ast->versionToken.isValid()) {
-        const QString versionString = _doc->source().mid(ast->versionToken.offset, ast->versionToken.length);
-        version = ComponentVersion(versionString);
+//        const QString versionString = _doc->source().mid(ast->versionToken.offset, ast->versionToken.length);
+//        version = ComponentVersion(versionString);
+        version = ComponentVersion(ast->version->majorVersion, ast->version->minorVersion);
         if (!version.isValid()) {
             _diagnosticMessages->append(
                         errorMessage(ast->versionToken, tr("expected two numbers separated by a dot")));
@@ -301,14 +309,14 @@ bool Bind::visit(UiArrayBinding *)
     return true;
 }
 
-bool Bind::visit(VariableDeclaration *ast)
+bool Bind::visit(PatternElement *ast)
 {
-    if (ast->name.isEmpty())
+    if (ast->bindingIdentifier.isEmpty() || !ast->isVariableDeclaration())
         return false;
 
     ASTVariableReference *ref = new ASTVariableReference(ast, _doc, &_valueOwner);
     if (_currentObjectValue)
-        _currentObjectValue->setMember(ast->name.toString(), ref);
+        _currentObjectValue->setMember(ast->bindingIdentifier.toString(), ref);
     return true;
 }
 
@@ -332,8 +340,8 @@ bool Bind::visit(FunctionExpression *ast)
 
     // 1. Function formal arguments
     for (FormalParameterList *it = ast->formals; it; it = it->next) {
-        if (!it->name.isEmpty())
-            functionScope->setMember(it->name.toString(), _valueOwner.unknownValue());
+        if (!it->element->bindingIdentifier.isEmpty())
+            functionScope->setMember(it->element->bindingIdentifier.toString(), _valueOwner.unknownValue());
     }
 
     // 2. Functions defined inside the function body

@@ -41,22 +41,28 @@
 
 #include "qqmljsastvisitor_p.h"
 
-QT_QML_BEGIN_NAMESPACE
+QT_BEGIN_NAMESPACE
 
-namespace QmlJS { namespace AST {
+namespace QQmlJS { namespace AST {
 
-void Node::accept(Visitor *visitor)
+FunctionExpression *asAnonymousFunctionDefinition(Node *n)
 {
-    if (visitor->preVisit(this)) {
-        accept0(visitor);
-    }
-    visitor->postVisit(this);
+    if (!n)
+        return nullptr;
+    FunctionExpression *f = n->asFunctionDefinition();
+    if (!f || !f->name.isNull())
+        return nullptr;
+    return f;
 }
 
-void Node::accept(Node *node, Visitor *visitor)
+ClassExpression *asAnonymousClassDefinition(Node *n)
 {
-    if (node)
-        node->accept(visitor);
+    if (!n)
+        return nullptr;
+    ClassExpression *c = n->asClassDefinition();
+    if (!c || !c->name.isNull())
+        return nullptr;
+    return c;
 }
 
 ExpressionNode *Node::expressionCast()
@@ -79,9 +85,65 @@ UiObjectMember *Node::uiObjectMemberCast()
     return nullptr;
 }
 
+LeftHandSideExpression *Node::leftHandSideExpressionCast()
+{
+    return nullptr;
+}
+
+Pattern *Node::patternCast()
+{
+    return nullptr;
+}
+
+FunctionExpression *Node::asFunctionDefinition()
+{
+    return nullptr;
+}
+
+ClassExpression *Node::asClassDefinition()
+{
+    return nullptr;
+}
+
 ExpressionNode *ExpressionNode::expressionCast()
 {
     return this;
+}
+
+FormalParameterList *ExpressionNode::reparseAsFormalParameterList(MemoryPool *pool)
+{
+    AST::ExpressionNode *expr = this;
+    AST::FormalParameterList *f = nullptr;
+    if (AST::Expression *commaExpr = AST::cast<AST::Expression *>(expr)) {
+        f = commaExpr->left->reparseAsFormalParameterList(pool);
+        if (!f)
+            return nullptr;
+
+        expr = commaExpr->right;
+    }
+
+    AST::ExpressionNode *rhs = nullptr;
+    if (AST::BinaryExpression *assign = AST::cast<AST::BinaryExpression *>(expr)) {
+            if (assign->op != QSOperator::Assign)
+                return nullptr;
+        expr = assign->left;
+        rhs = assign->right;
+    }
+    AST::PatternElement *binding = nullptr;
+    if (AST::IdentifierExpression *idExpr = AST::cast<AST::IdentifierExpression *>(expr)) {
+        binding = new (pool) AST::PatternElement(idExpr->name, /*type annotation*/nullptr, rhs);
+        binding->identifierToken = idExpr->identifierToken;
+    } else if (AST::Pattern *p = expr->patternCast()) {
+        SourceLocation loc;
+        QString s;
+        if (!p->convertLiteralToAssignmentPattern(pool, &loc, &s))
+            return nullptr;
+        binding = new (pool) AST::PatternElement(p, rhs);
+        binding->identifierToken = p->firstSourceLocation();
+    }
+    if (!binding)
+        return nullptr;
+    return new (pool) AST::FormalParameterList(f, binding);
 }
 
 BinaryExpression *BinaryExpression::binaryExpressionCast()
@@ -105,6 +167,16 @@ void NestedExpression::accept0(Visitor *visitor)
         accept(expression, visitor);
     }
     visitor->endVisit(this);
+}
+
+FunctionExpression *NestedExpression::asFunctionDefinition()
+{
+    return expression->asFunctionDefinition();
+}
+
+ClassExpression *NestedExpression::asClassDefinition()
+{
+    return expression->asClassDefinition();
 }
 
 void ThisExpression::accept0(Visitor *visitor)
@@ -147,12 +219,30 @@ void FalseLiteral::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
+void SuperLiteral::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+    }
+
+    visitor->endVisit(this);
+}
+
+
 void StringLiteral::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
     }
 
     visitor->endVisit(this);
+}
+
+void TemplateLiteral::accept0(Visitor *visitor)
+{
+    bool accepted = true;
+    for (TemplateLiteral *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        visitor->endVisit(it);
+    }
 }
 
 void NumericLiteral::accept0(Visitor *visitor)
@@ -171,17 +261,27 @@ void RegExpLiteral::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-void ArrayLiteral::accept0(Visitor *visitor)
+void ArrayPattern::accept0(Visitor *visitor)
 {
-    if (visitor->visit(this)) {
+    if (visitor->visit(this))
         accept(elements, visitor);
-        accept(elision, visitor);
-    }
 
     visitor->endVisit(this);
 }
 
-void ObjectLiteral::accept0(Visitor *visitor)
+bool ArrayPattern::isValidArrayLiteral(SourceLocation *errorLocation) const {
+    for (PatternElementList *it = elements; it != nullptr; it = it->next) {
+        PatternElement *e = it->element;
+        if (e && e->bindingTarget != nullptr) {
+            if (errorLocation)
+                *errorLocation = e->firstSourceLocation();
+            return false;
+        }
+    }
+    return true;
+}
+
+void ObjectPattern::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
         accept(properties, visitor);
@@ -190,54 +290,176 @@ void ObjectLiteral::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-void ElementList::accept0(Visitor *visitor)
+/*
+  This is the grammar for AssignmentPattern that we need to convert the literal to:
+
+    AssignmentPattern:
+        ObjectAssignmentPattern
+        ArrayAssignmentPattern
+    ArrayAssignmentPattern:
+        [ ElisionOpt AssignmentRestElementOpt ]
+        [ AssignmentElementList ]
+        [ AssignmentElementList , ElisionOpt AssignmentRestElementOpt ]
+    AssignmentElementList:
+        AssignmentElisionElement
+        AssignmentElementList , AssignmentElisionElement
+    AssignmentElisionElement:
+        ElisionOpt AssignmentElement
+    AssignmentRestElement:
+        ... DestructuringAssignmentTarget
+
+    ObjectAssignmentPattern:
+        {}
+        { AssignmentPropertyList }
+        { AssignmentPropertyList, }
+    AssignmentPropertyList:
+        AssignmentProperty
+        AssignmentPropertyList , AssignmentProperty
+    AssignmentProperty:
+        IdentifierReference InitializerOpt_In
+    PropertyName:
+        AssignmentElement
+
+    AssignmentElement:
+        DestructuringAssignmentTarget InitializerOpt_In
+    DestructuringAssignmentTarget:
+        LeftHandSideExpression
+
+  It was originally parsed with the following grammar:
+
+ArrayLiteral:
+    [ ElisionOpt ]
+    [ ElementList ]
+    [ ElementList , ElisionOpt ]
+ElementList:
+    ElisionOpt AssignmentExpression_In
+    ElisionOpt SpreadElement
+    ElementList , ElisionOpt AssignmentExpression_In
+    ElementList , Elisionopt SpreadElement
+SpreadElement:
+    ... AssignmentExpression_In
+ObjectLiteral:
+    {}
+    { PropertyDefinitionList }
+    { PropertyDefinitionList , }
+PropertyDefinitionList:
+    PropertyDefinition
+    PropertyDefinitionList , PropertyDefinition
+PropertyDefinition:
+    IdentifierReference
+    CoverInitializedName
+    PropertyName : AssignmentExpression_In
+    MethodDefinition
+PropertyName:
+    LiteralPropertyName
+    ComputedPropertyName
+
+*/
+bool ArrayPattern::convertLiteralToAssignmentPattern(MemoryPool *pool, SourceLocation *errorLocation, QString *errorMessage)
 {
-    if (visitor->visit(this)) {
-        for (ElementList *it = this; it; it = it->next) {
-            accept(it->elision, visitor);
-            accept(it->expression, visitor);
+    if (parseMode == Binding)
+        return true;
+    for (auto *it = elements; it; it = it->next) {
+        if (!it->element)
+            continue;
+        if (it->element->type == PatternElement::SpreadElement && it->next) {
+            *errorLocation = it->element->firstSourceLocation();
+            *errorMessage = QString::fromLatin1("'...' can only appear as last element in a destructuring list.");
+            return false;
+        }
+        if (!it->element->convertLiteralToAssignmentPattern(pool, errorLocation, errorMessage))
+            return false;
+    }
+    parseMode = Binding;
+    return true;
+}
+
+bool ObjectPattern::convertLiteralToAssignmentPattern(MemoryPool *pool, SourceLocation *errorLocation, QString *errorMessage)
+{
+    if (parseMode == Binding)
+        return true;
+    for (auto *it = properties; it; it = it->next) {
+        if (!it->property->convertLiteralToAssignmentPattern(pool, errorLocation, errorMessage))
+            return false;
+    }
+    parseMode = Binding;
+    return true;
+}
+
+bool PatternElement::convertLiteralToAssignmentPattern(MemoryPool *pool, SourceLocation *errorLocation, QString *errorMessage)
+{
+    Q_ASSERT(type == Literal || type == SpreadElement);
+    Q_ASSERT(bindingIdentifier.isNull());
+    Q_ASSERT(bindingTarget == nullptr);
+    Q_ASSERT(bindingTarget == nullptr);
+    Q_ASSERT(initializer);
+    ExpressionNode *init = initializer;
+
+    initializer = nullptr;
+    LeftHandSideExpression *lhs = init->leftHandSideExpressionCast();
+    if (type == SpreadElement) {
+        if (!lhs) {
+            *errorLocation = init->firstSourceLocation();
+            *errorMessage = QString::fromLatin1("Invalid lhs expression after '...' in destructuring expression.");
+            return false;
+        }
+    } else {
+        type = PatternElement::Binding;
+
+        if (BinaryExpression *b = init->binaryExpressionCast()) {
+            if (b->op != QSOperator::Assign) {
+                *errorLocation = b->operatorToken;
+                *errorMessage = QString::fromLatin1("Invalid assignment operation in destructuring expression");
+                return false;
+            }
+            lhs = b->left->leftHandSideExpressionCast();
+            initializer = b->right;
+            Q_ASSERT(lhs);
+        } else {
+            lhs = init->leftHandSideExpressionCast();
+        }
+        if (!lhs) {
+            *errorLocation = init->firstSourceLocation();
+            *errorMessage = QString::fromLatin1("Destructuring target is not a left hand side expression.");
+            return false;
         }
     }
 
-    visitor->endVisit(this);
+    if (auto *i = cast<IdentifierExpression *>(lhs)) {
+        bindingIdentifier = i->name;
+        identifierToken = i->identifierToken;
+        return true;
+    }
+
+    bindingTarget = lhs;
+    if (auto *p = lhs->patternCast()) {
+        if (!p->convertLiteralToAssignmentPattern(pool, errorLocation, errorMessage))
+            return false;
+    }
+    return true;
 }
+
+bool PatternProperty::convertLiteralToAssignmentPattern(MemoryPool *pool, SourceLocation *errorLocation, QString *errorMessage)
+{
+    Q_ASSERT(type != SpreadElement);
+    if (type == Binding)
+        return true;
+    if (type == Getter || type == Setter) {
+        *errorLocation = firstSourceLocation();
+        *errorMessage = QString::fromLatin1("Invalid getter/setter in destructuring expression.");
+        return false;
+    }
+    if (type == Method)
+        type = Literal;
+    Q_ASSERT(type == Literal);
+    return PatternElement::convertLiteralToAssignmentPattern(pool, errorLocation, errorMessage);
+}
+
 
 void Elision::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
         // ###
-    }
-
-    visitor->endVisit(this);
-}
-
-void PropertyNameAndValue::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-        accept(name, visitor);
-        accept(value, visitor);
-    }
-
-    visitor->endVisit(this);
-}
-
-void PropertyGetterSetter::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-        accept(name, visitor);
-        accept(formals, visitor);
-        accept(functionBody, visitor);
-    }
-
-    visitor->endVisit(this);
-}
-
-void PropertyAssignmentList::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-        for (PropertyAssignmentList *it = this; it; it = it->next) {
-            accept(it->assignment, visitor);
-        }
     }
 
     visitor->endVisit(this);
@@ -265,6 +487,28 @@ void NumericLiteralPropertyName::accept0(Visitor *visitor)
     }
 
     visitor->endVisit(this);
+}
+
+namespace {
+struct LocaleWithoutZeroPadding : public QLocale
+{
+    LocaleWithoutZeroPadding()
+        : QLocale(QLocale::C)
+    {
+        setNumberOptions(QLocale::OmitLeadingZeroInExponent | QLocale::OmitGroupSeparator);
+    }
+};
+}
+
+QString NumericLiteralPropertyName::asString()const
+{
+    // Can't use QString::number here anymore as it does zero padding by default now.
+
+    // In C++11 this initialization is thread-safe (6.7 [stmt.dcl] p4)
+    static LocaleWithoutZeroPadding locale;
+    // Because of https://gcc.gnu.org/bugzilla/show_bug.cgi?id=83562 we can't use thread_local
+    // for the locale variable and therefore rely on toString(double) to be thread-safe.
+    return locale.toString(id, 'g', 16);
 }
 
 void ArrayMemberExpression::accept0(Visitor *visitor)
@@ -496,15 +740,6 @@ void VariableDeclarationList::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-void VariableDeclaration::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-        accept(expression, visitor);
-    }
-
-    visitor->endVisit(this);
-}
-
 void EmptyStatement::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
@@ -557,17 +792,6 @@ void ForStatement::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
         accept(initialiser, visitor);
-        accept(condition, visitor);
-        accept(expression, visitor);
-        accept(statement, visitor);
-    }
-
-    visitor->endVisit(this);
-}
-
-void LocalForStatement::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
         accept(declarations, visitor);
         accept(condition, visitor);
         accept(expression, visitor);
@@ -580,18 +804,7 @@ void LocalForStatement::accept0(Visitor *visitor)
 void ForEachStatement::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        accept(initialiser, visitor);
-        accept(expression, visitor);
-        accept(statement, visitor);
-    }
-
-    visitor->endVisit(this);
-}
-
-void LocalForEachStatement::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-        accept(declaration, visitor);
+        accept(lhs, visitor);
         accept(expression, visitor);
         accept(statement, visitor);
     }
@@ -623,6 +836,16 @@ void ReturnStatement::accept0(Visitor *visitor)
 
     visitor->endVisit(this);
 }
+
+void YieldExpression::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(expression, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
 
 void WithStatement::accept0(Visitor *visitor)
 {
@@ -717,6 +940,7 @@ void TryStatement::accept0(Visitor *visitor)
 void Catch::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
+        accept(patternElement, visitor);
         accept(statement, visitor);
     }
 
@@ -736,6 +960,7 @@ void FunctionDeclaration::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
         accept(formals, visitor);
+        accept(typeAnnotation, visitor);
         accept(body, visitor);
     }
 
@@ -746,63 +971,189 @@ void FunctionExpression::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
         accept(formals, visitor);
+        accept(typeAnnotation, visitor);
         accept(body, visitor);
     }
 
     visitor->endVisit(this);
 }
 
-void FormalParameterList::accept0(Visitor *visitor)
+FunctionExpression *FunctionExpression::asFunctionDefinition()
 {
-    if (visitor->visit(this)) {
-        // ###
-    }
-
-    visitor->endVisit(this);
+    return this;
 }
 
-void FunctionBody::accept0(Visitor *visitor)
+BoundNames FormalParameterList::formals() const
 {
-    if (visitor->visit(this)) {
-        accept(elements, visitor);
+    BoundNames formals;
+    int i = 0;
+    for (const FormalParameterList *it = this; it; it = it->next) {
+        if (it->element) {
+            QString name = it->element->bindingIdentifier.toString();
+            int duplicateIndex = formals.indexOf(name);
+            if (duplicateIndex >= 0) {
+                // change the name of the earlier argument to enforce the lookup semantics from the spec
+                formals[duplicateIndex].id += QLatin1String("#") + QString::number(i);
+            }
+            formals += {name, it->element->typeAnnotation};
+        }
+        ++i;
     }
+    return formals;
+}
 
-    visitor->endVisit(this);
+BoundNames FormalParameterList::boundNames() const
+{
+    BoundNames names;
+    for (const FormalParameterList *it = this; it; it = it->next) {
+        if (it->element)
+            it->element->boundNames(&names);
+    }
+    return names;
+}
+
+void FormalParameterList::accept0(Visitor *visitor)
+{
+    bool accepted = true;
+    for (FormalParameterList *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        if (accepted)
+            accept(it->element, visitor);
+        visitor->endVisit(it);
+    }
+}
+
+FormalParameterList *FormalParameterList::finish(QQmlJS::MemoryPool *pool)
+{
+    FormalParameterList *front = next;
+    next = nullptr;
+
+    int i = 0;
+    for (const FormalParameterList *it = this; it; it = it->next) {
+        if (it->element && it->element->bindingIdentifier.isEmpty())
+            it->element->bindingIdentifier = pool->newString(QLatin1String("arg#") + QString::number(i));
+        ++i;
+    }
+    return front;
 }
 
 void Program::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        accept(elements, visitor);
+        accept(statements, visitor);
     }
 
     visitor->endVisit(this);
 }
 
-void SourceElements::accept0(Visitor *visitor)
+void ImportSpecifier::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        for (SourceElements *it = this; it; it = it->next) {
-            accept(it->element, visitor);
+
+    }
+    visitor->endVisit(this);
+}
+
+void ImportsList::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        for (ImportsList *it = this; it; it = it->next) {
+            accept(it->importSpecifier, visitor);
         }
     }
 
     visitor->endVisit(this);
 }
 
-void FunctionSourceElement::accept0(Visitor *visitor)
+void NamedImports::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        accept(declaration, visitor);
+        accept(importsList, visitor);
     }
 
     visitor->endVisit(this);
 }
 
-void StatementSourceElement::accept0(Visitor *visitor)
+void FromClause::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        accept(statement, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void NameSpaceImport::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+    }
+
+    visitor->endVisit(this);
+}
+
+void ImportClause::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(nameSpaceImport, visitor);
+        accept(namedImports, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ImportDeclaration::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(importClause, visitor);
+        accept(fromClause, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ExportSpecifier::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+
+    }
+
+    visitor->endVisit(this);
+}
+
+void ExportsList::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        for (ExportsList *it = this; it; it = it->next) {
+            accept(it->exportSpecifier, visitor);
+        }
+    }
+
+    visitor->endVisit(this);
+}
+
+void ExportClause::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(exportsList, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ExportDeclaration::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(fromClause, visitor);
+        accept(exportClause, visitor);
+        accept(variableStatementOrDeclaration, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ESModule::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(body, visitor);
     }
 
     visitor->endVisit(this);
@@ -921,6 +1272,35 @@ void UiQualifiedId::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
+void Type::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(typeId, visitor);
+        accept(typeArguments, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void TypeArgumentList::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        for (TypeArgumentList *it = this; it; it = it->next)
+            accept(it->typeId, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void TypeAnnotation::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(type, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
 void UiImport::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
@@ -930,18 +1310,9 @@ void UiImport::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-void UiQualifiedPragmaId::accept0(Visitor *visitor)
-{
-    if (visitor->visit(this)) {
-    }
-
-    visitor->endVisit(this);
-}
-
 void UiPragma::accept0(Visitor *visitor)
 {
     if (visitor->visit(this)) {
-        accept(pragmaType, visitor);
     }
 
     visitor->endVisit(this);
@@ -949,12 +1320,14 @@ void UiPragma::accept0(Visitor *visitor)
 
 void UiHeaderItemList::accept0(Visitor *visitor)
 {
-    if (visitor->visit(this)) {
-        accept(headerItem, visitor);
-        accept(next, visitor);
-    }
+    bool accepted = true;
+    for (UiHeaderItemList *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        if (accepted)
+            accept(it->headerItem, visitor);
 
-    visitor->endVisit(this);
+        visitor->endVisit(it);
+    }
 }
 
 
@@ -984,8 +1357,190 @@ void UiEnumMemberList::accept0(Visitor *visitor)
     visitor->endVisit(this);
 }
 
-} } // namespace QQmlJS::AST
+void TaggedTemplate::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(base, visitor);
+        accept(templateLiteral, visitor);
+    }
 
-QT_QML_END_NAMESPACE
+    visitor->endVisit(this);
+}
+
+void PatternElement::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(bindingTarget, visitor);
+        accept(typeAnnotation, visitor);
+        accept(initializer, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void PatternElement::boundNames(BoundNames *names)
+{
+    if (bindingTarget) {
+        if (PatternElementList *e = elementList())
+            e->boundNames(names);
+        else if (PatternPropertyList *p = propertyList())
+            p->boundNames(names);
+    } else {
+        names->append({bindingIdentifier.toString(), typeAnnotation});
+    }
+}
+
+void PatternElementList::accept0(Visitor *visitor)
+{
+    bool accepted = true;
+    for (PatternElementList *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        if (accepted) {
+            accept(it->elision, visitor);
+            accept(it->element, visitor);
+        }
+        visitor->endVisit(it);
+    }
+}
+
+void PatternElementList::boundNames(BoundNames *names)
+{
+    for (PatternElementList *it = this; it; it = it->next) {
+        if (it->element)
+            it->element->boundNames(names);
+    }
+}
+
+void PatternProperty::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(name, visitor);
+        accept(bindingTarget, visitor);
+        accept(typeAnnotation, visitor);
+        accept(initializer, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void PatternProperty::boundNames(BoundNames *names)
+{
+    PatternElement::boundNames(names);
+}
+
+void PatternPropertyList::accept0(Visitor *visitor)
+{
+    bool accepted = true;
+    for (PatternPropertyList *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        if (accepted)
+            accept(it->property, visitor);
+        visitor->endVisit(it);
+    }
+}
+
+void PatternPropertyList::boundNames(BoundNames *names)
+{
+    for (PatternPropertyList *it = this; it; it = it->next)
+        it->property->boundNames(names);
+}
+
+void ComputedPropertyName::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(expression, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ClassExpression::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(heritage, visitor);
+        accept(elements, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+ClassExpression *ClassExpression::asClassDefinition()
+{
+    return this;
+}
+
+void ClassDeclaration::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+        accept(heritage, visitor);
+        accept(elements, visitor);
+    }
+
+    visitor->endVisit(this);
+}
+
+void ClassElementList::accept0(Visitor *visitor)
+{
+    bool accepted = true;
+    for (ClassElementList *it = this; it && accepted; it = it->next) {
+        accepted = visitor->visit(it);
+        if (accepted)
+            accept(it->property, visitor);
+
+        visitor->endVisit(it);
+    }
+}
+
+ClassElementList *ClassElementList::finish()
+{
+    ClassElementList *front = next;
+    next = nullptr;
+    return front;
+}
+
+Pattern *Pattern::patternCast()
+{
+    return this;
+}
+
+LeftHandSideExpression *LeftHandSideExpression::leftHandSideExpressionCast()
+{
+    return this;
+}
+
+void UiVersionSpecifier::accept0(Visitor *visitor)
+{
+    if (visitor->visit(this)) {
+    }
+    visitor->endVisit(this);
+}
+
+QString Type::toString() const
+{
+    QString result;
+    toString(&result);
+    return result;
+}
+
+void Type::toString(QString *out) const
+{
+    for (QQmlJS::AST::UiQualifiedId *it = typeId; it; it = it->next) {
+        out->append(it->name);
+
+        if (it->next)
+            out->append(QLatin1Char('.'));
+    }
+
+    if (typeArguments) {
+        out->append(QLatin1Char('<'));
+        if (auto subType = static_cast<TypeArgumentList*>(typeArguments)->typeId)
+            subType->toString(out);
+        out->append(QLatin1Char('>'));
+    };
+}
+
+} } // namespace QmlJS::AST
+
+QT_END_NAMESPACE
 
 

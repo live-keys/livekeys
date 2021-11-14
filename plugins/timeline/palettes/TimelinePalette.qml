@@ -246,7 +246,7 @@ CodePalette{
         }
 
         ResizeArea{
-            minimumHeight: 200
+            minimumHeight: 80
             minimumWidth: 400
         }
 

@@ -69,7 +69,7 @@
 #include <qmljs/qmljslineinfo.h>
 #include <qmljs/qmljsscanner.h>
 
-using namespace QmlJS;
+using namespace QQmlJS;
 
 /*
     The indenter avoids getting stuck in almost infinite loops by

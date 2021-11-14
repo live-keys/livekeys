@@ -1,6 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2016 The Qt Company Ltd.
+** Copyright (C) 2019 The Qt Company Ltd.
 ** Contact: https://www.qt.io/licensing/
 **
 ** This file is part of the QtQml module of the Qt Toolkit.
@@ -37,8 +37,8 @@
 **
 ****************************************************************************/
 
-#ifndef QQMLJSENGINE_P_H
-#define QQMLJSENGINE_P_H
+#ifndef QQMLJSDIAGNOSTICMESSAGE_P_H
+#define QQMLJSDIAGNOSTICMESSAGE_P_H
 
 //
 //  W A R N I N G
@@ -51,84 +51,42 @@
 // We mean it.
 //
 
-#include "qqmljsglobal_p.h"
-#include "qqmljssourcelocation_p.h"
-
-#include "qqmljsmemorypool_p.h"
-
+#include <QtCore/qlogging.h>
 #include <QtCore/qstring.h>
-#include <QtCore/qset.h>
+
+// Include the API version here, to avoid complications when querying it for the
+// QQmlSourceLocation -> line/column change.
+#include "qqmlapiversion_p.h"
 
 QT_BEGIN_NAMESPACE
 
 namespace QQmlJS {
-
-class Lexer;
-class MemoryPool;
-
-class QML_PARSER_EXPORT Directives {
-public:
-    virtual ~Directives() {}
-
-    virtual void pragmaLibrary()
-    {
-    }
-
-    virtual void importFile(const QString &jsfile, const QString &module, int line, int column)
-    {
-        Q_UNUSED(jsfile);
-        Q_UNUSED(module);
-        Q_UNUSED(line);
-        Q_UNUSED(column);
-    }
-
-    virtual void importModule(const QString &uri, const QString &version, const QString &module, int line, int column)
-    {
-        Q_UNUSED(uri);
-        Q_UNUSED(version);
-        Q_UNUSED(module);
-        Q_UNUSED(line);
-        Q_UNUSED(column);
-    }
-};
-
-class QML_PARSER_EXPORT Engine
+struct DiagnosticMessage
 {
-    Lexer *_lexer;
-    Directives *_directives;
-    MemoryPool _pool;
-    QList<AST::SourceLocation> _comments;
-    QString _extraCode;
-    QString _code;
+    QString message;
+    QtMsgType type = QtCriticalMsg;
+    quint32 line = 0;
+    quint32 column = 0;
 
-public:
-    Engine();
-    ~Engine();
+    bool isError() const
+    {
+        return type == QtCriticalMsg;
+    }
 
-    void setCode(const QString &code);
-    const QString &code() const { return _code; }
+    bool isWarning() const
+    {
+        return type == QtWarningMsg;
+    }
 
-    void addComment(int pos, int len, int line, int col);
-    QList<AST::SourceLocation> comments() const;
-
-    Lexer *lexer() const;
-    void setLexer(Lexer *lexer);
-
-    Directives *directives() const;
-    void setDirectives(Directives *directives);
-
-    MemoryPool *pool();
-
-    inline QStringRef midRef(int position, int size) { return _code.midRef(position, size); }
-
-    QStringRef newStringRef(const QString &s);
-    QStringRef newStringRef(const QChar *chars, int size);
+    bool isValid() const
+    {
+        return !message.isEmpty();
+    }
 };
+} // namespace QmlJS
 
-double integerFromString(const char *buf, int size, int radix);
-
-} // end of namespace QQmlJS
+Q_DECLARE_TYPEINFO(QQmlJS::DiagnosticMessage, Q_MOVABLE_TYPE);
 
 QT_END_NAMESPACE
 
-#endif // QQMLJSENGINE_P_H
+#endif // QQMLJSDIAGNOSTICMESSAGE_P_H

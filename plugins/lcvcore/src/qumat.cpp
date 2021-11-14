@@ -129,19 +129,6 @@ QUMat::~QUMat(){
     lv::Memory::free(this, m_internal);
 }
 
-QUMat* QUMat::m_nullMat = nullptr;
-
-/**
- *\brief Returns a null matrix
- */
-QUMat*QUMat::nullMat(){
-    if ( !m_nullMat ){
-        m_nullMat = new QUMat(lv::ViewContext::instance().engine());
-        Shared::ownCpp(m_nullMat);
-    }
-    return m_nullMat;
-}
-
 cv::UMat *QUMat::memoryAlloc(int width, int height, int type, int channels){
     return new cv::UMat(height, width, CV_MAKETYPE(type, channels));
 }

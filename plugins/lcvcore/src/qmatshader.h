@@ -104,7 +104,7 @@ inline QList<QByteArray> QMatShader::attributes() const{
 }
 
 inline void QMatShader::updateState(const QMatState *state, const QMatState *){
-    if ( state->mat != 0 ){
+    if ( state->mat != nullptr ){
         m_glFunctions.initializeOpenGLFunctions();
         m_glFunctions.glActiveTexture(GL_TEXTURE_2D);
         if ( !state->textureSync ){

@@ -144,8 +144,8 @@ bool QImageFile::event(QEvent *ev){
 
     auto ftask = static_cast<LoadImageTask*>(tr->task());
     if ( ftask->error() ){
-        lv::QmlError qe(lv::ViewContext::instance().engine(), *ftask->error(), this);
-        qe.jsThrow();
+        lv::ViewEngine* ve = lv::ViewEngine::grab(this);
+        lv::QmlError(ve, *ftask->error(), this).jsThrow();
         delete ftask;
         return true;
     }

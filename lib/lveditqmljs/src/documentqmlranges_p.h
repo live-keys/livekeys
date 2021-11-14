@@ -24,7 +24,7 @@
 namespace lv{
 
 /// \private
-class DocumentQmlRanges: protected QmlJS::AST::Visitor{
+class DocumentQmlRanges: protected QQmlJS::AST::Visitor{
 
 public:
     /// \private
@@ -33,7 +33,7 @@ public:
         Range(): ast(0) {}
 
     public: // attributes
-        QmlJS::AST::Node *ast;
+        QQmlJS::AST::Node *ast;
         int begin;
         int end;
     };
@@ -41,29 +41,31 @@ public:
 public:
     DocumentQmlRanges();
 
-    QList<Range> operator()(QmlJS::AST::Node* ast);
-    QList<Range> operator()(QmlJS::Document::Ptr doc);
+    QList<Range> operator()(QQmlJS::AST::Node* ast);
+    QList<Range> operator()(QQmlJS::Document::Ptr doc);
 
     Range findClosestRange(int position) const;
     QList<Range> findRangePath(int position) const;
 
 protected:
-    using QmlJS::AST::Visitor::visit;
+    using QQmlJS::AST::Visitor::visit;
 
-    virtual bool visit(QmlJS::AST::UiObjectBinding *ast);
-    virtual bool visit(QmlJS::AST::UiObjectDefinition *ast);
+    virtual bool visit(QQmlJS::AST::UiObjectBinding *ast) override;
+    virtual bool visit(QQmlJS::AST::UiObjectDefinition *ast) override;
 
-    virtual bool visit(QmlJS::AST::FunctionExpression *ast);
-    virtual bool visit(QmlJS::AST::FunctionDeclaration *ast);
+    virtual bool visit(QQmlJS::AST::FunctionExpression *ast) override;
+    virtual bool visit(QQmlJS::AST::FunctionDeclaration *ast) override;
 
-    virtual bool visit(QmlJS::AST::BinaryExpression *ast);
+    virtual bool visit(QQmlJS::AST::BinaryExpression *ast) override;
 
-    virtual bool visit(QmlJS::AST::UiScriptBinding *ast);
+    virtual bool visit(QQmlJS::AST::UiScriptBinding *ast) override;
 
-    Range createRange(QmlJS::AST::UiObjectMember *member, QmlJS::AST::UiObjectInitializer *ast);
-    Range createRange(QmlJS::AST::FunctionExpression *ast);
-    Range createRange(QmlJS::AST::UiScriptBinding *ast, QmlJS::AST::Block *block);
-    Range createRange(QmlJS::AST::Node *ast, QmlJS::AST::SourceLocation start, QmlJS::AST::SourceLocation end);
+    void throwRecursionDepthError() override;
+
+    Range createRange(QQmlJS::AST::UiObjectMember *member, QQmlJS::AST::UiObjectInitializer *ast);
+    Range createRange(QQmlJS::AST::FunctionExpression *ast);
+    Range createRange(QQmlJS::AST::UiScriptBinding *ast, QQmlJS::AST::Block *block);
+    Range createRange(QQmlJS::AST::Node *ast, QQmlJS::AST::SourceLocation start, QQmlJS::AST::SourceLocation end);
 
 private:
     QList<Range> m_ranges;

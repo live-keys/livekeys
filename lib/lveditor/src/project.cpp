@@ -27,7 +27,7 @@
 #include "live/qmlprogram.h"
 #include "workspacelayer.h"
 #include "fileformattypes.h"
-#include "projectnavigationmodel.h"
+#include "projectfileindexer.h"
 #include "projectfilemodel.h"
 #include "projectengineinterceptor.h"
 #include "runnablecontainer.h"
@@ -58,7 +58,6 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
     : QObject(parent)
     , m_workspaceLayer(workspaceLayer)
     , m_fileModel(new ProjectFileModel(this))
-    , m_navigationModel(new ProjectNavigationModel(this))
     , m_documentModel(new ProjectDocumentModel(this))
     , m_runnables(new RunnableContainer(this))
     , m_programHolder(nullptr)
@@ -94,7 +93,6 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
 Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
-    delete m_navigationModel;
     delete m_scheduleRunTimer;
 }
 

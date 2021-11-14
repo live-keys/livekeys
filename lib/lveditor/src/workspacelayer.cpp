@@ -57,6 +57,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_samples(new StartupModel())
     , m_tooltipTimer(new QTimer)
     , m_tooltip(nullptr)
+    , m_fileIndexer(nullptr)
 {
     m_engine = ViewContext::instance().engine();
     m_project = new Project(this, m_engine);
@@ -79,6 +80,8 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     settings->addConfigFile("extensions", m_extensions);
 
     QQmlEngine* engine = m_engine->engine();
+    m_fileIndexer = new ProjectFileIndexer(m_project);
+
     m_documentation = new Documentation(m_engine->packageGraph(), this);
 
     QObject* lk = engine->rootContext()->contextProperty("lk").value<QObject*>();
@@ -360,6 +363,7 @@ void WorkspaceLayer::__mainWindowClosing(){
 
 void WorkspaceLayer::__mainWindowActiveChanged(){
     if ( m_mainWindow->isActive() ){
+        m_fileIndexer->requiresReindex();
     }
 }
 

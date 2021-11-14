@@ -42,8 +42,8 @@
 
 #include <QDir>
 
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 using namespace LanguageUtils;
 
 TypeDescriptionReader::TypeDescriptionReader(const QString &fileName, const QString &data)
@@ -194,15 +194,15 @@ void TypeDescriptionReader::readDependencies(UiScriptBinding *ast)
         addError(ast->statement->firstSourceLocation(), tr("Expected dependency definitions"));
         return;
     }
-    ArrayLiteral *exp = AST::cast<ArrayLiteral *>(stmt->expression);
+    ArrayPattern *exp = AST::cast<ArrayPattern *>(stmt->expression);
     if (!exp) {
         addError(stmt->expression->firstSourceLocation(), tr("Expected dependency definitions"));
         return;
     }
-    for (ElementList *l = exp->elements; l; l = l->next) {
-        StringLiteral *str = AST::cast<StringLiteral *>(l->expression);
+    for (PatternElementList *l = exp->elements; l; l = l->next) {
+        StringLiteral *str = AST::cast<StringLiteral *>(l->element->initializer);
         if (!exp) {
-            addWarning(l->expression->firstSourceLocation(),
+            addWarning(l->element->firstSourceLocation(),
                        tr("Cannot read dependency: skipping."));
         }
         *_dependencies << str->value.toString();
@@ -266,7 +266,7 @@ void TypeDescriptionReader::readComponent(UiObjectDefinition *ast)
     }
 
     // ### add implicit export into the package of c++ types
-    fmo->addExport(fmo->className(), QmlJS::CppQmlTypes::cppPackage, ComponentVersion());
+    fmo->addExport(fmo->className(), QQmlJS::CppQmlTypes::cppPackage, ComponentVersion());
     fmo->updateFingerprint();
     _objects->insert(fmo->className(), fmo);
 }
@@ -571,14 +571,14 @@ void TypeDescriptionReader::readExports(UiScriptBinding *ast, FakeMetaObject::Pt
         return;
     }
 
-    ArrayLiteral *arrayLit = AST::cast<ArrayLiteral *>(expStmt->expression);
+    ArrayPattern  *arrayLit = AST::cast<ArrayPattern  *>(expStmt->expression);
     if (!arrayLit) {
         addError(expStmt->firstSourceLocation(), tr("Expected array of strings after colon."));
         return;
     }
 
-    for (ElementList *it = arrayLit->elements; it; it = it->next) {
-        StringLiteral *stringLit = AST::cast<StringLiteral *>(it->expression);
+    for (PatternElementList *it = arrayLit->elements; it; it = it->next) {
+        StringLiteral *stringLit = AST::cast<StringLiteral *>(it->element->initializer);
         if (!stringLit) {
             addError(arrayLit->firstSourceLocation(), tr("Expected array literal with only string literal members."));
             return;
@@ -617,7 +617,7 @@ void TypeDescriptionReader::readMetaObjectRevisions(UiScriptBinding *ast, FakeMe
         return;
     }
 
-    ArrayLiteral *arrayLit = AST::cast<ArrayLiteral *>(expStmt->expression);
+    ArrayPattern  *arrayLit = AST::cast<ArrayPattern *>(expStmt->expression);
     if (!arrayLit) {
         addError(expStmt->firstSourceLocation(), tr("Expected array of numbers after colon."));
         return;
@@ -625,8 +625,8 @@ void TypeDescriptionReader::readMetaObjectRevisions(UiScriptBinding *ast, FakeMe
 
     int exportIndex = 0;
     const int exportCount = fmo->exports().size();
-    for (ElementList *it = arrayLit->elements; it; it = it->next, ++exportIndex) {
-        NumericLiteral *numberLit = cast<NumericLiteral *>(it->expression);
+    for (PatternElementList  *it = arrayLit->elements; it; it = it->next, ++exportIndex) {
+        NumericLiteral *numberLit = cast<NumericLiteral *>(it->element->initializer);
         if (!numberLit) {
             addError(arrayLit->firstSourceLocation(), tr("Expected array literal with only number literal members."));
             return;
@@ -661,33 +661,28 @@ void TypeDescriptionReader::readEnumValues(AST::UiScriptBinding *ast, LanguageUt
         return;
     }
 
-    ObjectLiteral *objectLit = AST::cast<ObjectLiteral *>(expStmt->expression);
-    if (!objectLit) {
-        addError(expStmt->firstSourceLocation(), tr("Expected object literal after colon."));
-        return;
-    }
-
-    for (PropertyAssignmentList *it = objectLit->properties; it; it = it->next) {
-        PropertyNameAndValue *assignement = AST::cast<PropertyNameAndValue *>(it->assignment);
-        if (assignement) {
-            StringLiteralPropertyName *propName = AST::cast<StringLiteralPropertyName *>(assignement->name);
-            NumericLiteral *value = AST::cast<NumericLiteral *>(assignement->value);
-            UnaryMinusExpression *minus = AST::cast<UnaryMinusExpression *>(assignement->value);
-            if (minus)
-                value = AST::cast<NumericLiteral *>(minus->expression);
-            if (!propName || !value) {
-                addError(objectLit->firstSourceLocation(), tr("Expected object literal to contain only 'string: number' elements."));
-                continue;
+    if (auto *objectLit = AST::cast<ObjectPattern *>(expStmt->expression)) {
+        for (PatternPropertyList *it = objectLit->properties; it; it = it->next) {
+            if (PatternProperty *assignement = it->property) {
+                if (auto *name = AST::cast<StringLiteralPropertyName *>(assignement->name)) {
+                    fme->addKey(name->id.toString());
+                    continue;
+                }
             }
-
-            double v = value->value;
-            if (minus)
-                v = -v;
-            fme->addKey(propName->id.toString(), v);
-            continue;
+            addError(it->firstSourceLocation(), tr("Expected strings as enum keys."));
         }
-        PropertyGetterSetter *getterSetter = AST::cast<PropertyGetterSetter *>(it->assignment);
-        if (getterSetter)
-            addError(objectLit->firstSourceLocation(), tr("Enum should not contain getter and setters, but only 'string: number' elements."));
+    } else if (auto *arrayLit = AST::cast<ArrayPattern *>(expStmt->expression)) {
+        for (PatternElementList *it = arrayLit->elements; it; it = it->next) {
+            if (PatternElement *element = it->element) {
+                if (auto *name = AST::cast<StringLiteral *>(element->initializer)) {
+                    fme->addKey(name->value.toString());
+                    continue;
+                }
+            }
+            addError(it->firstSourceLocation(), tr("Expected strings as enum keys."));
+        }
+    } else {
+        addError(ast->statement->firstSourceLocation(),
+                 tr("Expected either array or object literal as enum definition."));
     }
 }

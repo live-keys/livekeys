@@ -139,7 +139,7 @@ QMat *QMatOp::create(const QSize &size, int type, int channels){
     }
 
     lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    lv::QmlError(engine(), e, this).jsThrow();
     return nullptr;
 }
 
@@ -174,7 +174,7 @@ QMat *QMatOp::createFromArray(const QVariantList &a, int t){
     if ( resultCode > 0 ){
         delete m;
         lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Values must me stored in a 2D array.", lv::Exception::toCode("qmlarray"));
-        lv::ViewContext::instance().engine()->throwError(&e);
+        lv::QmlError(engine(), e, this).jsThrow();
         return nullptr;
     }
 
@@ -187,7 +187,7 @@ QWritableMat *QMatOp::createWritable(const QSize &size, int type, int channels){
     }
 
     lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    lv::QmlError(engine(), e, this).jsThrow();;
     return nullptr;
 }
 
@@ -200,7 +200,7 @@ QWritableMat *QMatOp::createWritableFill(const QSize &size, int type, int channe
     }
 
     lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Invalid size specified.", lv::Exception::toCode("qmlsize"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    lv::QmlError(engine(), e, this).jsThrow();;
     return nullptr;
 }
 
@@ -368,7 +368,7 @@ QMatrix4x4 QMatOp::to4x4Matrix(QMat *m){
     }
 
     lv::Exception e = CREATE_EXCEPTION(lv::Exception, "MatOp: Matrix not of 4x4 and single channel type.", lv::Exception::toCode("array"));
-    lv::ViewContext::instance().engine()->throwError(&e);
+    lv::QmlError(engine(), e, this).jsThrow();;
     return QMatrix4x4();
 }
 
@@ -481,7 +481,7 @@ QMat *QMatOp::selectChannel(QMat *input, int channel)
         return new QMat(rMat);
 
     } catch (cv::Exception& e){
-        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        lv::CvExtras::toLocalError(e, engine(), this, "MatOp: ").jsThrow();
         return nullptr;
     }
 }
@@ -507,7 +507,7 @@ QMat *QMatOp::copyMakeBorder(QMat *input, int top, int bottom, int left, int rig
         return new QMat(rMat);
 
     } catch (cv::Exception& e){
-        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "MatOp: ").jsThrow();
+        lv::CvExtras::toLocalError(e, engine(), this, "MatOp: ").jsThrow();
         return nullptr;
     }
 }
@@ -522,7 +522,10 @@ QMat *QMatOp::convertTo8U(QMat *input)
 }
 
 lv::ViewEngine *QMatOp::engine(){
-    return lv::ViewContext::instance().engine();
+    lv::ViewEngine* ve = lv::ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
+    if ( !ve )
+        lv::QmlError::warnNoEngineCaptured(this, "MatOp");
+    return ve;
 }
 
 

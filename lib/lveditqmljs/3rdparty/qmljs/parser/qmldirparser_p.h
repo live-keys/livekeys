@@ -1,30 +1,39 @@
 /****************************************************************************
 **
-** Copyright (C) 2015 The Qt Company Ltd.
-** Contact: http://www.qt.io/licensing
+** Copyright (C) 2016 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
 **
-** This file is part of Qt Creator.
+** This file is part of the QtQml module of the Qt Toolkit.
 **
+** $QT_BEGIN_LICENSE:LGPL$
 ** Commercial License Usage
 ** Licensees holding valid commercial Qt licenses may use this file in
 ** accordance with the commercial license agreement provided with the
 ** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company.  For licensing terms and
-** conditions see http://www.qt.io/terms-conditions.  For further information
-** use the contact form at http://www.qt.io/contact-us.
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
 **
 ** GNU Lesser General Public License Usage
 ** Alternatively, this file may be used under the terms of the GNU Lesser
-** General Public License version 2.1 or version 3 as published by the Free
-** Software Foundation and appearing in the file LICENSE.LGPLv21 and
-** LICENSE.LGPLv3 included in the packaging of this file.  Please review the
-** following information to ensure the GNU Lesser General Public License
-** requirements will be met: https://www.gnu.org/licenses/lgpl.html and
-** http://www.gnu.org/licenses/old-licenses/lgpl-2.1.html.
+** General Public License version 3 as published by the Free Software
+** Foundation and appearing in the file LICENSE.LGPL3 included in the
+** packaging of this file. Please review the following information to
+** ensure the GNU Lesser General Public License version 3 requirements
+** will be met: https://www.gnu.org/licenses/lgpl-3.0.html.
 **
-** In addition, as a special exception, The Qt Company gives you certain additional
-** rights.  These rights are described in The Qt Company LGPL Exception
-** version 1.1, included in the file LGPL_EXCEPTION.txt in this package.
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 2.0 or (at your option) the GNU General
+** Public license version 3 or any later version approved by the KDE Free
+** Qt Foundation. The licenses are as published by the Free Software
+** Foundation and appearing in the file LICENSE.GPL2 and LICENSE.GPL3
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-2.0.html and
+** https://www.gnu.org/licenses/gpl-3.0.html.
+**
+** $QT_END_LICENSE$
 **
 ****************************************************************************/
 
@@ -45,36 +54,43 @@
 #include <QtCore/QUrl>
 #include <QtCore/QHash>
 #include <QtCore/QDebug>
-
 #include "qqmljsengine_p.h"
+#include "qqmljsdiagnosticmessage_p.h"
 
 QT_BEGIN_NAMESPACE
 
-class QmlError;
-class QmlEngine;
-class QML_PARSER_EXPORT QmlDirParser
+class QQmlEngine;
+class QmlDirParser
 {
-    Q_DISABLE_COPY(QmlDirParser)
-
 public:
-    QmlDirParser();
-    ~QmlDirParser();
-
+    void clear();
     bool parse(const QString &source);
 
     bool hasError() const;
-    void setError(const QmlError &);
-    QList<QmlError> errors(const QString &uri) const;
+    void setError(const QQmlJS::DiagnosticMessage &);
+    QList<QQmlJS::DiagnosticMessage> errors(const QString &uri) const;
 
     QString typeNamespace() const;
     void setTypeNamespace(const QString &s);
+
+    static void checkNonRelative(const char *item, const QString &typeName, const QString &fileName)
+    {
+        if (fileName.startsWith(QLatin1Char('/'))) {
+            qWarning() << item << typeName
+                       << "is specified with non-relative URL" << fileName << "in a qmldir file."
+                       << "URLs in qmldir files should be relative to the qmldir file's directory.";
+        }
+    }
 
     struct Plugin
     {
         Plugin() {}
 
         Plugin(const QString &name, const QString &path)
-            : name(name), path(path) {}
+            : name(name), path(path)
+        {
+            checkNonRelative("Plugin", name, path);
+        }
 
         QString name;
         QString path;
@@ -82,41 +98,46 @@ public:
 
     struct Component
     {
-        Component()
-            : majorVersion(0), minorVersion(0), internal(false), singleton(false) {}
+        Component() {}
 
         Component(const QString &typeName, const QString &fileName, int majorVersion, int minorVersion)
             : typeName(typeName), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion),
-            internal(false), singleton(false) {}
+            internal(false), singleton(false)
+        {
+            checkNonRelative("Component", typeName, fileName);
+        }
 
         QString typeName;
         QString fileName;
-        int majorVersion;
-        int minorVersion;
-        bool internal;
-        bool singleton;
+        int majorVersion = 0;
+        int minorVersion = 0;
+        bool internal = false;
+        bool singleton = false;
     };
 
     struct Script
     {
-        Script()
-            : majorVersion(0), minorVersion(0) {}
+        Script() {}
 
         Script(const QString &nameSpace, const QString &fileName, int majorVersion, int minorVersion)
-            : nameSpace(nameSpace), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion) {}
+            : nameSpace(nameSpace), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion)
+        {
+            checkNonRelative("Script", nameSpace, fileName);
+        }
 
         QString nameSpace;
         QString fileName;
-        int majorVersion;
-        int minorVersion;
+        int majorVersion = 0;
+        int minorVersion = 0;
     };
 
     QHash<QString,Component> components() const;
     QHash<QString,Component> dependencies() const;
+    QStringList imports() const;
     QList<Script> scripts() const;
     QList<Plugin> plugins() const;
+    bool designerSupported() const;
 
-#ifdef QT_CREATOR
     struct TypeInfo
     {
         TypeInfo() {}
@@ -127,27 +148,29 @@ public:
     };
 
     QList<TypeInfo> typeInfos() const;
-#endif
+
+    QString className() const;
 
 private:
     bool maybeAddComponent(const QString &typeName, const QString &fileName, const QString &version, QHash<QString,Component> &hash, int lineNumber = -1, bool multi = true);
     void reportError(quint16 line, quint16 column, const QString &message);
 
 private:
-    QList<QmlJS::DiagnosticMessage> _errors;
+    QList<QQmlJS::DiagnosticMessage> _errors;
     QString _typeNamespace;
     QHash<QString,Component> _components; // multi hash
     QHash<QString,Component> _dependencies;
+    QStringList _imports;
     QList<Script> _scripts;
     QList<Plugin> _plugins;
-#ifdef QT_CREATOR
+    bool _designerSupported = false;
     QList<TypeInfo> _typeInfos;
-#endif
+    QString _className;
 };
 
-typedef QHash<QString,QmlDirParser::Component> QmlDirComponents;
-typedef QList<QmlDirParser::Script> QmlDirScripts;
-typedef QList<QmlDirParser::Plugin> QmlDirPlugins;
+typedef QHash<QString,QmlDirParser::Component> QQmlDirComponents;
+typedef QList<QmlDirParser::Script> QQmlDirScripts;
+typedef QList<QmlDirParser::Plugin> QQmlDirPlugins;
 
 QDebug &operator<< (QDebug &, const QmlDirParser::Component &);
 QDebug &operator<< (QDebug &, const QmlDirParser::Script &);

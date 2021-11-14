@@ -64,7 +64,9 @@ DISTFILES += \
     palettes/GalleryFileSelectorPalette.qml \
     palettes/GalleryFileSelectorPropertiesPalette.json \
     palettes/GrayscaleViewPalette.json \
+    palettes/ImageFileGalleryPalette.qml \
     palettes/ImageFilePalette.json \
+    palettes/ImageGalleryViewPalette.qml \
     palettes/ImageReadPalette.json \
     palettes/BlankImagePalette.json \
     palettes/DrawSurfacePalette.json \
@@ -93,6 +95,8 @@ DISTFILES += \
     qml/GalleryFileSelector.qml \
     qml/GradientTool.qml \
     qml/GrayscaleView.qml \
+    qml/ImageFileGallery.qml \
+    qml/ImageGalleryView.qml \
     qml/ImageRead.qml \
     qml/ImageSegmentCreator.qml \
     qml/ImageSegmentFactory.qml \

@@ -27,10 +27,10 @@
 namespace lv{
 
 /// \private
-class IdExtractor : public QmlJS::MemberProcessor{
+class IdExtractor : public QQmlJS::MemberProcessor{
 
 public:
-    bool processProperty(const QString &name, const QmlJS::Value *, const QmlJS::PropertyInfo &) override{
+    bool processProperty(const QString &name, const QQmlJS::Value *, const QQmlJS::PropertyInfo &) override{
         m_ids << name;
         return true;
     }
@@ -42,7 +42,7 @@ private:
 };
 
 /// \private
-class IdValueExtractor : public QmlJS::MemberProcessor{
+class IdValueExtractor : public QQmlJS::MemberProcessor{
 
 public:
     IdValueExtractor(const QString& name)
@@ -51,7 +51,7 @@ public:
     {
     }
 
-    bool processProperty(const QString &name, const QmlJS::Value *value, const QmlJS::PropertyInfo &) override{
+    bool processProperty(const QString &name, const QQmlJS::Value *value, const QQmlJS::PropertyInfo &) override{
         if ( name == m_name ){
             m_value = value;
             return false;
@@ -59,32 +59,32 @@ public:
         return true;
     }
 
-    const QmlJS::Value* value(){ return m_value; }
+    const QQmlJS::Value* value(){ return m_value; }
 
 private:
     QString m_name;
-    const QmlJS::Value* m_value;
+    const QQmlJS::Value* m_value;
 };
 
 /// \private
-class ValueMemberExtractor : public QmlJS::MemberProcessor{
+class ValueMemberExtractor : public QQmlJS::MemberProcessor{
 public:
     ValueMemberExtractor(QmlTypeInfo::Ptr object) : m_parent(nullptr), m_object(object)
     {}
 
-    bool processProperty(const QString &name, const QmlJS::Value *value, const QmlJS::PropertyInfo&) override{
+    bool processProperty(const QString &name, const QQmlJS::Value *value, const QQmlJS::PropertyInfo&) override{
         QString type = "object";
         if ( name == "parent" ){
             m_parent = value;
             return true;
-        } else if ( const QmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
+        } else if ( const QQmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
             if ( vr->ast()->memberType->next ){
                 type = (vr->ast() != nullptr) ? (vr->ast()->memberType->name.toString() + "." + vr->ast()->memberType->next->name.toString()) : QString("object");
             } else {
                 type = (vr->ast() != nullptr) ? vr->ast()->memberType->name.toString() : QString("object");
             }
 
-        } else if ( const QmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
+        } else if ( const QQmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){
             type = "function";
             QmlFunctionInfo mf;
             mf.name = name;
@@ -100,13 +100,13 @@ public:
         m_object->appendProperty(QmlPropertyInfo(name, typeReference));
         return true;
     }
-    bool processEnumerator(const QString &, const QmlJS::Value *) override
+    bool processEnumerator(const QString &, const QQmlJS::Value *) override
     {
         return false;
     }
-    bool processSignal(const QString &name, const QmlJS::Value *value) override
+    bool processSignal(const QString &name, const QQmlJS::Value *value) override
     {
-        if ( const QmlJS::ASTSignal* vs = value->asAstSignal() ){
+        if ( const QQmlJS::ASTSignal* vs = value->asAstSignal() ){
             QmlFunctionInfo mf;
             mf.name = name;
             mf.functionType = QmlFunctionInfo::Signal;
@@ -117,7 +117,7 @@ public:
         }
         return true;
     }
-    bool processSlot(const QString &name, const QmlJS::Value *) override
+    bool processSlot(const QString &name, const QQmlJS::Value *) override
     {
         QmlFunctionInfo mf;
         mf.name = name;
@@ -125,7 +125,7 @@ public:
         m_object->appendFunction(mf);
         return true;
     }
-    bool processGeneratedSlot(const QString &name, const QmlJS::Value *) override
+    bool processGeneratedSlot(const QString &name, const QQmlJS::Value *) override
     {
         QmlFunctionInfo mf;
         mf.name = name;
@@ -134,10 +134,10 @@ public:
         return true;
     }
 
-    const QmlJS::Value* parent(){ return m_parent; }
+    const QQmlJS::Value* parent(){ return m_parent; }
 
 private:
-    const QmlJS::Value*  m_parent;
+    const QQmlJS::Value*  m_parent;
     QmlTypeInfo::Ptr     m_object;
 };
 

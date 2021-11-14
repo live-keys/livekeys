@@ -36,7 +36,7 @@
 
 #include <QDebug>
 
-using namespace QmlJS;
+using namespace QQmlJS;
 
 /*
     Saves and restores the state of the global linizer. This enables
@@ -371,12 +371,12 @@ bool CompletionContextFinder::isAfterOnInLhsOfBinding() const
     return isInLhsOfBinding() && m_behaviorBinding;
 }
 
-bool QmlJS::CompletionContextFinder::isInStringLiteral() const
+bool QQmlJS::CompletionContextFinder::isInStringLiteral() const
 {
     return m_inStringLiteral;
 }
 
-bool QmlJS::CompletionContextFinder::isInImport() const
+bool QQmlJS::CompletionContextFinder::isInImport() const
 {
     return m_inImport;
 }

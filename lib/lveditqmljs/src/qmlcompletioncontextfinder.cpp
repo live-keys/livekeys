@@ -29,8 +29,8 @@
 // ExpressionUnderCursor
 // ---------------------
 
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 
 namespace {
 
@@ -152,7 +152,7 @@ QmlCompletionContextFinder::~QmlCompletionContextFinder(){
 
 /// \brief Finds the completion context
 QmlCompletionContext::ConstPtr QmlCompletionContextFinder::getContext(const QTextCursor &cursor){
-    QmlJS::CompletionContextFinder finder(cursor);
+    QQmlJS::CompletionContextFinder finder(cursor);
 
     QStringList path;
     int context = 0;

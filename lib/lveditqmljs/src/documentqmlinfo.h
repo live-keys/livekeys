@@ -32,7 +32,7 @@
 class QTextDocument;
 class QTextCursor;
 
-namespace QmlJS{
+namespace QQmlJS{
     class Value;
     class Bind;
     namespace AST{ class Node; }
@@ -135,25 +135,25 @@ public:
     class ValueReference{
     public:
         /// \brief ValueReference constructor
-        ValueReference(const QmlJS::Value* val, const DocumentQmlInfo* p)
+        ValueReference(const QQmlJS::Value* val, const DocumentQmlInfo* p)
             : value(val)
             , parent(p)
         {}
         /// \brief ValueReference destructor
         ValueReference() : value(nullptr), parent(nullptr){}
 
-        const QmlJS::Value* value;
+        const QQmlJS::Value* value;
         const DocumentQmlInfo* parent;
     };
 
     class ASTReference{
     public:
         /// \brief ASTReference constructor
-        ASTReference(QmlJS::AST::Node* n) : node(n){}
+        ASTReference(QQmlJS::AST::Node* n) : node(n){}
         /// \brief ASTReference destructor
         ASTReference() : node(nullptr){}
 
-        QmlJS::AST::Node* node;
+        QQmlJS::AST::Node* node;
     };
 
     class Message{
@@ -244,7 +244,7 @@ public:
     bool parse(const QString& source);
     const QList<DocumentQmlInfo::Message>& diagnostics() const;
 
-    QmlJS::Bind* internalBind();
+    QQmlJS::Bind* internalBind();
 
     QString path() const;
     QString componentName() const;

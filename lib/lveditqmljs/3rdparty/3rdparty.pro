@@ -79,7 +79,10 @@ HEADERS += \
     $$PWD/qmljs/parser/qqmljskeywords_p.h \
     $$PWD/qmljs/parser/qqmljslexer_p.h \
     $$PWD/qmljs/parser/qqmljsmemorypool_p.h \
-    $$PWD/qmljs/parser/qqmljsparser_p.h
+    $$PWD/qmljs/parser/qqmljsparser_p.h \
+    $$PWD/qmljs/parser/qqmljsdiagnosticmessage_p.h \
+    $$PWD/qmljs/parser/qqmljssourcelocation_p.h \
+    $$PWD/qmljs/parser/qqmlapiversion_p.h
 
 SOURCES += \
     $$PWD/qmljs/parser/qmldirparser.cpp \

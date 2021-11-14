@@ -17,25 +17,31 @@ QGeometry::QGeometry(QObject *parent)
 QMat *QGeometry::resize(QMat *input, QSize size, int interpolation){
     if ( !input || size.width() == 0)
         return nullptr;
-    QMat* m = new QMat;
-    cv::resize(input->internal(), m->internal(), cv::Size(size.width(), size.height()), 0, 0, interpolation);
-    return m;
+
+    try {
+        std::unique_ptr<QMat> m(new QMat);
+        cv::resize(input->internal(), m->internal(), cv::Size(size.width(), size.height()), 0, 0, interpolation);
+        return m.release();
+    } catch (cv::Exception& e) {
+        lv::CvExtras::toLocalError(e, engine(), this, "Geometry: ").jsThrow();
+    }
+
+    return nullptr;
 }
 
 QMat *QGeometry::scale(QMat *input, double fx, double fy, int interpolation){
-    if ( !input )
-        return nullptr;
-    if ( fx <= 0 || fy <= 0 )
+    if ( !input || fx <= 0 || fy <= 0 )
         return nullptr;
 
-    QMat* m = new QMat;
     try {
+        std::unique_ptr<QMat> m(new QMat);
         cv::resize(input->internal(), m->internal(), cv::Size(), fx, fy, interpolation);
+        return m.release();
     } catch (cv::Exception& e) {
-        qWarning("%s", e.what());
+        lv::CvExtras::toLocalError(e, engine(), this, "Geometry: ").jsThrow();
     }
 
-    return m;
+    return nullptr;
 }
 
 QMat *QGeometry::resizeBy(QMat *input, QJSValue ob, int interpolation){
@@ -59,52 +65,53 @@ QMat *QGeometry::resizeBy(QMat *input, QJSValue ob, int interpolation){
 QMat *QGeometry::rotate(QMat *m, double degrees){
     if ( !m )
         return nullptr;
-
-    QMat* r = new QMat;
     cv::Point2f ptCp(
         static_cast<float>(m->internal().cols * 0.5),
         static_cast<float>(m->internal().rows * 0.5));
 
-    cv::Mat M = cv::getRotationMatrix2D(ptCp, degrees, 1.0);
-    cv::warpAffine(m->internal(), r->internal(), M, m->internal().size(), cv::INTER_CUBIC);
+    try {
+        std::unique_ptr<QMat> r(new QMat);
+        cv::Mat M = cv::getRotationMatrix2D(ptCp, degrees, 1.0);
+        cv::warpAffine(m->internal(), r->internal(), M, m->internal().size(), cv::INTER_CUBIC);
+        return r.release();
+    } catch (cv::Exception& e) {
+        lv::CvExtras::toLocalError(e, engine(), this, "Geometry: ").jsThrow();
+    }
 
-    return r;
+    return nullptr;
 }
 
 QMat *QGeometry::transform(QMat *input, QMat *m){
     if ( !input || !m )
         return nullptr;
 
-    QMat* r = new QMat;
     try {
+        std::unique_ptr<QMat> r(new QMat);
         cv::transform(input->internal(), *r->internalPtr(), m->internal());
+        return r.release();
     } catch (cv::Exception& e) {
-        THROW_QMLERROR(lv::Exception, e.what(), static_cast<lv::Exception::Code>(e.code), this);
-        delete r;
-        return nullptr;
+        lv::CvExtras::toLocalError(e, engine(), this, "Geometry: ").jsThrow();
     }
 
-    return r;
+    return nullptr;
 }
 
 QMat *QGeometry::pad(QMat *input, QColor color, int top, int right, int bottom, int left){
     if ( !input )
         return nullptr;
 
-    QMat* r = new QMat(input->internal().cols + left + right, input->internal().rows + top + bottom, QMat::CV8U, 4);
-
     try {
+        std::unique_ptr<QMat> r(new QMat(input->internal().cols + left + right, input->internal().rows + top + bottom, QMat::CV8U, 4));
         cv::Mat* surface = r->internalPtr();
         cv::Mat surfaceSelect = (*surface)(cv::Rect(left, top, input->internal().cols, input->internal().rows));
         surface->setTo(cv::Scalar(color.blue(), color.green(), color.red(), color.alpha()));
         lv::CvExtras::copyTo4Channels(input->internal(), surfaceSelect);
+        return r.release();
     } catch (cv::Exception& e){
         lv::CvExtras::toLocalError(e, lv::ViewEngine::grab(this), this, "Geometry: ").jsThrow();
-        delete r;
-        return nullptr;
     }
 
-    return r;
+    return nullptr;
 }
 
 QMat *QGeometry::getPerspectiveTransform(QJSValue src, QJSValue dst)
@@ -120,31 +127,42 @@ QMat *QGeometry::getPerspectiveTransform(QJSValue src, QJSValue dst)
  */
 QMat *QGeometry::getPerspectiveTransform(QVariantList src, QVariantList dst)
 {
-    if (src.length() != 4 && dst.length() != 4) return nullptr;
+    if (src.length() != 4 && dst.length() != 4)
+        return nullptr;
+
     std::vector<cv::Point2f> srcPts;
     std::vector<cv::Point2f> dstPts;
     for (int i = 0; i < 4; ++i)
     {
-        if (src.at(i).userType() != QVariant::PointF) return nullptr;
+        if (src.at(i).userType() != QVariant::PointF)
+            return nullptr;
         srcPts.push_back(cv::Point2f(src.at(i).toPoint().x(), src.at(i).toPoint().y()));
-        if (dst.at(i).userType() != QVariant::PointF) return nullptr;
+        if (dst.at(i).userType() != QVariant::PointF)
+            return nullptr;
         dstPts.push_back(cv::Point2f(dst.at(i).toPoint().x(), dst.at(i).toPoint().y()));
     }
 
     return getPerspectiveTransform(srcPts, dstPts);
 }
 
-QMat *QGeometry::getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst)
-{
-    return new QMat(new cv::Mat(cv::getPerspectiveTransform(src, dst)), this);
+QMat *QGeometry::getPerspectiveTransform(std::vector<cv::Point2f> src, std::vector<cv::Point2f> dst){
+    try {
+        cv::Mat r = cv::getPerspectiveTransform(src, dst);
+        return new QMat(new cv::Mat(r));
+    } catch (cv::Exception& e) {
+        lv::CvExtras::toLocalError(e, lv::ViewEngine::grab(this), this, "Geometry: ").jsThrow();
+    }
+    return nullptr;
 }
 
 QMat *QGeometry::perspectiveProjection(QMat *input, QMat *background, QJSValue points)
 {
-    if (!background) return nullptr;
-    if (!input) return background;
+    if (!background || !input)
+        return nullptr;
+
     QVariantList dst = points.toVariant().toList();
-    if (dst.empty() || dst.length() != 4) return background;
+    if (dst.empty() || dst.length() != 4)
+        return background;
 
     try {
         // repack original points
@@ -186,10 +204,11 @@ QMat *QGeometry::perspectiveProjection(QMat *input, QMat *background, QJSValue p
         QMat* result = t.blend(transformed, background, mask);
         delete transformed;
         delete mask;
+
         return result;
 
     } catch (cv::Exception& e){
-        lv::CvExtras::toLocalError(e, lv::ViewContext::instance().engine(), this, "Geometry: ").jsThrow();
+        lv::CvExtras::toLocalError(e, engine(), this, "Geometry: ").jsThrow();
     }
     return nullptr;
 }
@@ -307,5 +326,11 @@ void QGeometry::warpTriangles(QMat *src, QMat *dst, QVariantList triangles1, QVa
 
     img1.convertTo(img1, CV_8UC3);
     img2.convertTo(img2, CV_8UC3);
+}
 
+lv::ViewEngine *QGeometry::engine(){
+    lv::ViewEngine* ve = lv::ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
+    if ( !ve )
+        lv::QmlError::warnNoEngineCaptured(this, "Geometry");
+    return ve;
 }

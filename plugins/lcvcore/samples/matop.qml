@@ -5,20 +5,20 @@ Grid{
     
     spacing: 2
     
-    Cv.MatView{
-         mat: {
+    Cv.ImageView{
+         image: {
              var m = Cv.MatOp.create(Qt.size(100, 100), Cv.Mat.CV8U, 3)
              Cv.MatOp.fill(m, "#003333")
              return m
          }
     }
     
-    Cv.MatView{
-         mat: Cv.MatOp.createFill(Qt.size(100, 100), Cv.Mat.CV8U, 3, "#660000")
+    Cv.ImageView{
+         image: Cv.MatOp.createFill(Qt.size(100, 100), Cv.Mat.CV8U, 3, "#660000")
     }
     
-    Cv.MatView{
-         mat: Cv.MatOp.createFromArray([
+    Cv.ImageView{
+         image: Cv.MatOp.createFromArray([
              [0,   100, 0],
              [150, 0,   250],
              [0,   200, 0]

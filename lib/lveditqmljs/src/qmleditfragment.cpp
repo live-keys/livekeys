@@ -494,26 +494,26 @@ QString QmlEditFragment::readValueText() const{
 
 QJSValue QmlEditFragment::readValueConnection() const{
     QString content = readValueText();
-    QmlJS::Scanner scanner;
-    QList<QmlJS::Token> tokens = scanner(content);
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(content);
 
     QStringList expression;
     QStringList functionArgs;
     bool isFunction = false;
 
     for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
-        QmlJS::Token token = *it;
-        if ( token.kind == QmlJS::Token::Identifier ){
+        QQmlJS::Token token = *it;
+        if ( token.kind == QQmlJS::Token::Identifier ){
             if  ( isFunction ){
                 functionArgs.append(content.mid(token.begin(), token.length));
             } else {
                 expression.append(content.mid(token.begin(), token.length));
             }
-        } else if ( token.kind == QmlJS::Token::LeftParenthesis ){
+        } else if ( token.kind == QQmlJS::Token::LeftParenthesis ){
             if ( isFunction )
                 return QJSValue();
             isFunction = true;
-        } else if ( token.kind == QmlJS::Token::Dot || token.kind == QmlJS::Token::Comma || token.kind == QmlJS::Token::RightParenthesis ){
+        } else if ( token.kind == QQmlJS::Token::Dot || token.kind == QQmlJS::Token::Comma || token.kind == QQmlJS::Token::RightParenthesis ){
         } else {
             return QJSValue();
         }

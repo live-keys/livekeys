@@ -56,8 +56,6 @@ public:
     QUMat(int width, int height, QUMat::Type type, int channels, QObject* parent = nullptr);
     virtual ~QUMat();
 
-    static QUMat* nullMat();
-
     QUMat* clone() const;
     static QUMat* reloc(QUMat* m);
 
@@ -85,8 +83,6 @@ private:
     static void memoryFree(cv::UMat* m);
 
     cv::UMat*  m_internal;
-
-    static QUMat* m_nullMat;
 };
 
 inline cv::UMat *QUMat::internalPtr(){

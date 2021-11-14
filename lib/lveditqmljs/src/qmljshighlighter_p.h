@@ -48,8 +48,8 @@ public:
 
     LookAheadType lookAhead(
         const QString& text,
-        const QList<QmlJS::Token>& tokens,
-        QList<QmlJS::Token>::ConstIterator it,
+        const QList<QQmlJS::Token>& tokens,
+        QList<QQmlJS::Token>::ConstIterator it,
         int state);
 
     static void collapse(const QTextBlock& tb, int& numLines, QString& replacement);

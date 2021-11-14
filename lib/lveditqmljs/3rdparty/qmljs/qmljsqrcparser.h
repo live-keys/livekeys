@@ -39,7 +39,7 @@
 
 QT_FORWARD_DECLARE_CLASS(QLocale)
 
-namespace QmlJS {
+namespace QQmlJS {
 
 namespace Internal {
 class QrcParserPrivate;

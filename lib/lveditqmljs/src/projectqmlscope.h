@@ -31,7 +31,7 @@
 #include "live/lockedfileiosession.h"
 
 class QQmlEngine;
-namespace QmlJS{ class LibraryInfo; }
+namespace QQmlJS{ class LibraryInfo; }
 
 namespace lv{
 

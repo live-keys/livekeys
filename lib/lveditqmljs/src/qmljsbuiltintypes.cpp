@@ -23,7 +23,7 @@ QmlJsBuiltinTypes::QmlJsBuiltinTypes(){
 }
 
 QString QmlJsBuiltinTypes::nameFromCpp(const QString &type){
-    QmlJS::ValueOwner* valueowner = new QmlJS::ValueOwner(QmlJS::ValueOwner::sharedValueOwner());
+    QQmlJS::ValueOwner* valueowner = new QQmlJS::ValueOwner(QQmlJS::ValueOwner::sharedValueOwner());
 
     if (type == QLatin1String("QByteArray")
             || type == QLatin1String("QString")) {

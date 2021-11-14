@@ -26,26 +26,28 @@ namespace lv{
 // -----------------------------------------------------------------------------
 
 /// \private
-class DocumentQmlValueObjectsVisitor : protected QmlJS::AST::Visitor{
+class DocumentQmlValueObjectsVisitor : protected QQmlJS::AST::Visitor{
 
 public:
     DocumentQmlValueObjectsVisitor(DocumentQmlValueObjects *parent);
     ~DocumentQmlValueObjectsVisitor();
 
-    void operator()(QmlJS::AST::Node* astroot);
+    void operator()(QQmlJS::AST::Node* astroot);
 
 protected:
-    using QmlJS::AST::Visitor::visit;
+    using QQmlJS::AST::Visitor::visit;
 
-    virtual bool visit(QmlJS::AST::UiObjectDefinition* ast);
-    virtual bool visit(QmlJS::AST::UiScriptBinding *ast);
-    virtual bool visit(QmlJS::AST::UiObjectBinding* ast);
-    virtual bool visit(QmlJS::AST::UiPublicMember* ast);
+    virtual bool visit(QQmlJS::AST::UiObjectDefinition* ast) override;
+    virtual bool visit(QQmlJS::AST::UiScriptBinding *ast) override;
+    virtual bool visit(QQmlJS::AST::UiObjectBinding* ast) override;
+    virtual bool visit(QQmlJS::AST::UiPublicMember* ast) override;
 
-    virtual void endVisit(QmlJS::AST::UiObjectDefinition* ast);
-    virtual void endVisit(QmlJS::AST::UiScriptBinding *ast);
-    virtual void endVisit(QmlJS::AST::UiObjectBinding* ast);
-    virtual void endVisit(QmlJS::AST::UiPublicMember* ast);
+    virtual void endVisit(QQmlJS::AST::UiObjectDefinition* ast) override;
+    virtual void endVisit(QQmlJS::AST::UiScriptBinding *ast) override;
+    virtual void endVisit(QQmlJS::AST::UiObjectBinding* ast) override;
+    virtual void endVisit(QQmlJS::AST::UiPublicMember* ast) override;
+
+    void throwRecursionDepthError() override;
 
 private:
     DocumentQmlValueObjects*            m_parent;
@@ -60,7 +62,7 @@ DocumentQmlValueObjectsVisitor::DocumentQmlValueObjectsVisitor(DocumentQmlValueO
 DocumentQmlValueObjectsVisitor::~DocumentQmlValueObjectsVisitor(){
 }
 
-void DocumentQmlValueObjectsVisitor::operator()(QmlJS::AST::Node* astroot){
+void DocumentQmlValueObjectsVisitor::operator()(QQmlJS::AST::Node* astroot){
     delete m_parent->m_root;
     m_parent->m_root = nullptr;
     m_lastAppend = nullptr;
@@ -68,7 +70,7 @@ void DocumentQmlValueObjectsVisitor::operator()(QmlJS::AST::Node* astroot){
         astroot->accept(this);
 }
 
-bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectDefinition *ast){
+bool DocumentQmlValueObjectsVisitor::visit(QQmlJS::AST::UiObjectDefinition *ast){
     if (ast->initializer && ast->initializer->lbraceToken.length){
         DocumentQmlValueObjects::RangeObject* obj = new DocumentQmlValueObjects::RangeObject;
         obj->ast   = ast;
@@ -87,7 +89,7 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectDefinition *ast){
     return true;
 }
 
-bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiScriptBinding *ast){
+bool DocumentQmlValueObjectsVisitor::visit(QQmlJS::AST::UiScriptBinding *ast){
     DocumentQmlValueObjects::RangeProperty* property = new DocumentQmlValueObjects::RangeProperty;
     property->ast         = ast;
     property->parent      = m_lastAppend;
@@ -98,16 +100,16 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiScriptBinding *ast){
     property->end        = static_cast<int>(ast->lastSourceLocation().end());
     m_lastAppend->appendProperty(property);
 
-    if ( QmlJS::AST::cast<QmlJS::AST::Block *>(ast->statement)){
+    if ( QQmlJS::AST::cast<QQmlJS::AST::Block *>(ast->statement)){
         m_lastAppend = property;
     }
 
     return true;
 }
 
-bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
+bool DocumentQmlValueObjectsVisitor::visit(QQmlJS::AST::UiObjectBinding *ast){
     DocumentQmlValueObjects::RangeProperty* property = nullptr;
-    if ( m_lastAppend && m_lastAppend->getAst()->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
+    if ( m_lastAppend && m_lastAppend->getAst()->kind == QQmlJS::AST::Node::Kind_UiPublicMember ){
         property = static_cast<DocumentQmlValueObjects::RangeProperty*>(m_lastAppend);
     } else {
         property = new DocumentQmlValueObjects::RangeProperty;
@@ -135,7 +137,7 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiObjectBinding *ast){
     return true;
 }
 
-bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiPublicMember *ast){
+bool DocumentQmlValueObjectsVisitor::visit(QQmlJS::AST::UiPublicMember *ast){
     DocumentQmlValueObjects::RangeProperty* property = new DocumentQmlValueObjects::RangeProperty;
     property->ast         = ast;
     property->parent      = m_lastAppend;
@@ -151,27 +153,31 @@ bool DocumentQmlValueObjectsVisitor::visit(QmlJS::AST::UiPublicMember *ast){
     return true;
 }
 
-void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiObjectDefinition *ast){
+void DocumentQmlValueObjectsVisitor::endVisit(QQmlJS::AST::UiObjectDefinition *ast){
     if ( m_lastAppend->getAst() == ast )
         m_lastAppend = m_lastAppend->getParent();
 }
 
-void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiScriptBinding *ast){
+void DocumentQmlValueObjectsVisitor::endVisit(QQmlJS::AST::UiScriptBinding *ast){
     if ( m_lastAppend->getAst() == ast ){
         m_lastAppend = m_lastAppend->getParent();
     }
 }
 
-void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiObjectBinding *ast){
+void DocumentQmlValueObjectsVisitor::endVisit(QQmlJS::AST::UiObjectBinding *ast){
     if ( m_lastAppend->getAst() == ast ){
         m_lastAppend = m_lastAppend->getParent()->getParent();
     }
 }
 
-void DocumentQmlValueObjectsVisitor::endVisit(QmlJS::AST::UiPublicMember *ast){
+void DocumentQmlValueObjectsVisitor::endVisit(QQmlJS::AST::UiPublicMember *ast){
     if ( m_lastAppend->getAst() == ast ){
         m_lastAppend = m_lastAppend->getParent();
     }
+}
+
+void DocumentQmlValueObjectsVisitor::throwRecursionDepthError(){
+    qWarning("DocumentQmlValueObjectsVisitor: Recursion depth reached");
 }
 
 // Class QDocumentQmlValueObjects::RangeItem
@@ -402,7 +408,7 @@ QString DocumentQmlValueObjects::toString() const{
 /**
  * \brief Visitor method implementation
  */
-void DocumentQmlValueObjects::visit(QmlJS::AST::Node *astroot){
+void DocumentQmlValueObjects::visit(QQmlJS::AST::Node *astroot){
     DocumentQmlValueObjectsVisitor visitor(this);
     visitor(astroot);
 }
@@ -558,20 +564,20 @@ QString DocumentQmlValueObjects::toStringRecursive(
 QStringList DocumentQmlValueObjects::RangeProperty::name() const{
     QStringList base;
 
-    if ( ast->kind == QmlJS::AST::Node::Kind_UiScriptBinding ){
-        QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiScriptBinding*>(ast)->qualifiedId;
+    if ( ast->kind == QQmlJS::AST::Node::Kind_UiScriptBinding ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiScriptBinding*>(ast)->qualifiedId;
         while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
         }
-    } else if ( ast->kind == QmlJS::AST::Node::Kind_UiObjectBinding ){
-        QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiObjectBinding*>(ast)->qualifiedId;
+    } else if ( ast->kind == QQmlJS::AST::Node::Kind_UiObjectBinding ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(ast)->qualifiedId;
         while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
         }
-    } else if ( ast->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
-        base.append(static_cast<QmlJS::AST::UiPublicMember*>(ast)->name.toString());
+    } else if ( ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember ){
+        base.append(static_cast<QQmlJS::AST::UiPublicMember*>(ast)->name.toString());
     }
 
 
@@ -587,14 +593,14 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
     if ( !parent )
         return base;
 
-    if ( parent->getAst()->kind == QmlJS::AST::Node::Kind_UiObjectBinding ){
-        QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedTypeNameId;
+    if ( parent->getAst()->kind == QQmlJS::AST::Node::Kind_UiObjectBinding ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedTypeNameId;
         while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
         }
-    } else if ( parent->getAst()->kind == QmlJS::AST::Node::Kind_UiObjectDefinition ){
-        QmlJS::AST::UiQualifiedId* qi = static_cast<QmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedId;
+    } else if ( parent->getAst()->kind == QQmlJS::AST::Node::Kind_UiObjectDefinition ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedId;
         while ( qi != nullptr ){
             base.append(qi->name.toString());
             qi = qi->next;
@@ -608,8 +614,8 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
  * \brief Returns the type of this property
  */
 QString DocumentQmlValueObjects::RangeProperty::type() const{
-    if ( ast->kind == QmlJS::AST::Node::Kind_UiPublicMember ){
-        return static_cast<QmlJS::AST::UiPublicMember*>(ast)->memberType->name.toString();
+    if ( ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember ){
+        return static_cast<QQmlJS::AST::UiPublicMember*>(ast)->memberType->name.toString();
     }
     return "";
 }
@@ -620,7 +626,7 @@ QString DocumentQmlValueObjects::RangeProperty::type() const{
  * \returns True on success, false otherwise
  */
 bool DocumentQmlValueObjects::RangeProperty::hasType() const{
-    return ast->kind == QmlJS::AST::Node::Kind_UiPublicMember;
+    return ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember;
 }
 
 }// namespace

@@ -15,6 +15,7 @@
 #include "extensions.h"
 #include "documentation.h"
 #include "startupmodel.h"
+#include "projectfileindexer.h"
 
 class QQuickCloseEvent;
 
@@ -40,6 +41,7 @@ class WorkspaceLayer : public Layer{
     Q_PROPERTY(lv::ThemeContainer* themes           READ themes        CONSTANT)
     Q_PROPERTY(lv::FileFormatTypes* fileFormats     READ fileFormats   CONSTANT)
     Q_PROPERTY(lv::Documentation* documentation     READ documentation CONSTANT)
+    Q_PROPERTY(lv::ProjectFileIndexer* fileIndexer  READ fileIndexer   CONSTANT)
     Q_PROPERTY(QQmlPropertyMap* extensions          READ extensions    CONSTANT)
     Q_PROPERTY(lv::StartupModel* recents            READ recents       CONSTANT)
     Q_PROPERTY(lv::StartupModel* tutorials          READ tutorials     CONSTANT)
@@ -70,6 +72,8 @@ public:
     lv::StartupModel* recents() const;
     lv::StartupModel* tutorials() const;
     lv::StartupModel* samples() const;
+
+    ProjectFileIndexer* fileIndexer() const;
 
 public slots:
     QJSValue interceptMenu(QJSValue pane, QJSValue item);
@@ -139,6 +143,8 @@ private:
 
     QTimer*        m_tooltipTimer;
     QObject*       m_tooltip;
+
+    lv::ProjectFileIndexer* m_fileIndexer;
 };
 
 inline QObject *WorkspaceLayer::environment() const{
@@ -189,6 +195,10 @@ inline Documentation *WorkspaceLayer::documentation() const{
 
 inline Workspace *WorkspaceLayer::workspace() const{
     return m_workspace;
+}
+
+inline ProjectFileIndexer *WorkspaceLayer::fileIndexer() const{
+    return m_fileIndexer;
 }
 
 }// namespace

@@ -36,7 +36,7 @@
 
 #include <QStringList>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class QMLJS_EXPORT ViewerContext
 {

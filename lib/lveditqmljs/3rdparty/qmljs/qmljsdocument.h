@@ -43,10 +43,10 @@
 #include "qmljsconstants.h"
 #include "qmljsimportdependencies.h"
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class Bind;
-class DiagnosticMessage;
+struct DiagnosticMessage;
 class Engine;
 class Snapshot;
 class ImportDependencies;
@@ -78,7 +78,7 @@ public:
     AST::ExpressionNode *expression() const;
     AST::Node *ast() const;
 
-    const QmlJS::Engine *engine() const;
+    const QQmlJS::Engine *engine() const;
 
     QList<DiagnosticMessage> diagnosticMessages() const;
 
@@ -106,14 +106,15 @@ private:
     bool parse_helper(int kind);
 
 private:
-    QmlJS::Engine *_engine;
+    QQmlJS::Engine *_engine;
     AST::Node *_ast;
     Bind *_bind;
-    QList<QmlJS::DiagnosticMessage> _diagnosticMessages;
+    QList<QQmlJS::DiagnosticMessage> _diagnosticMessages;
     QString _fileName;
     QString _path;
     QString _componentName;
     QString _source;
+    QList<AST::SourceLocation> _jsdirectives;
     QWeakPointer<Document> _ptr;
     QByteArray _fingerprint;
     int _editorRevision;

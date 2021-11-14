@@ -80,7 +80,8 @@ void QmlFileReader::resync(){
         QFile fileInput(m_file);
         if ( !fileInput.open(QIODevice::ReadOnly ) ){
             lv::Exception e = CREATE_EXCEPTION(lv::Exception, "Cannot open file: " + m_file.toStdString(), 0);
-            lv::ViewContext::instance().engine()->throwError(&e);
+            ViewEngine* ve = ViewEngine::grab(this);
+            QmlError(ve, e, this).jsThrow();
             return;
         }
         m_data = fileInput.readAll();

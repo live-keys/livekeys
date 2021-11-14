@@ -44,8 +44,8 @@
 #include <QStringList>
 
 using namespace LanguageUtils;
-using namespace QmlJS;
-using namespace QmlJS::AST;
+using namespace QQmlJS;
+using namespace QQmlJS::AST;
 
 /*!
     \class QmlJS::Value
@@ -131,7 +131,7 @@ public:
 
 } // end of anonymous namespace
 
-namespace QmlJS {
+namespace QQmlJS {
 
 MetaFunction::MetaFunction(const FakeMetaMethod &method, ValueOwner *valueOwner)
     : FunctionValue(valueOwner), m_method(method)
@@ -241,8 +241,8 @@ CppComponentValue::CppComponentValue(FakeMetaObject::ConstPtr metaObject, const 
 
 CppComponentValue::~CppComponentValue()
 {
-    delete m_metaSignatures.load();
-    delete m_signalScopes.load();
+    delete m_metaSignatures.loadRelaxed();
+    delete m_signalScopes.loadRelaxed();
 }
 
 static QString generatedSlotName(const QString &base)
@@ -280,7 +280,7 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
     QSet<QString> explicitSignals;
 
     // make MetaFunction instances lazily when first needed
-    QList<const Value *> *signatures = m_metaSignatures.load();
+    QList<const Value *> *signatures = m_metaSignatures.loadRelaxed();
     if (!signatures) {
         signatures = new QList<const Value *>;
         signatures->reserve(m_metaObject->methodCount());
@@ -288,7 +288,7 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
             signatures->append(new MetaFunction(m_metaObject->method(index), valueOwner()));
         if (!m_metaSignatures.testAndSetOrdered(0, signatures)) {
             delete signatures;
-            signatures = m_metaSignatures.load();
+            signatures = m_metaSignatures.loadRelaxed();
         }
     }
 
@@ -516,7 +516,7 @@ const QmlEnumValue *CppComponentValue::getEnumValue(const QString &typeName, con
 
 const ObjectValue *CppComponentValue::signalScope(const QString &signalName) const
 {
-    QHash<QString, const ObjectValue *> *scopes = m_signalScopes.load();
+    QHash<QString, const ObjectValue *> *scopes = m_signalScopes.loadRelaxed();
     if (!scopes) {
         scopes = new QHash<QString, const ObjectValue *>;
         // usually not all methods are signals
@@ -542,7 +542,7 @@ const ObjectValue *CppComponentValue::signalScope(const QString &signalName) con
         }
         if (!m_signalScopes.testAndSetOrdered(0, scopes)) {
             delete scopes;
-            scopes = m_signalScopes.load();
+            scopes = m_signalScopes.loadRelaxed();
         }
     }
 
@@ -1927,7 +1927,7 @@ const Document *ASTObjectValue::document() const
     return m_doc;
 }
 
-ASTVariableReference::ASTVariableReference(VariableDeclaration *ast, const Document *doc, ValueOwner *valueOwner)
+ASTVariableReference::ASTVariableReference(PatternElement *ast, const Document *doc, ValueOwner *valueOwner)
     : Reference(valueOwner)
     , m_ast(ast)
     , m_doc(doc)
@@ -1943,7 +1943,7 @@ const ASTVariableReference *ASTVariableReference::asAstVariableReference() const
     return this;
 }
 
-const VariableDeclaration *ASTVariableReference::ast() const
+const PatternElement *ASTVariableReference::ast() const
 {
     return m_ast;
 }
@@ -1977,17 +1977,17 @@ class UsesArgumentsArray : protected Visitor
     bool m_usesArgumentsArray;
 
 public:
-    bool operator()(FunctionBody *ast)
+    bool operator()(StatementList *ast)
     {
-        if (!ast || !ast->elements)
+        if (!ast)
             return false;
         m_usesArgumentsArray = false;
-        Node::accept(ast->elements, this);
+        Node::accept(ast, this);
         return m_usesArgumentsArray;
     }
 
 protected:
-    bool visit(ArrayMemberExpression *ast)
+    bool visit(ArrayMemberExpression *ast) override
     {
         if (IdentifierExpression *idExp = cast<IdentifierExpression *>(ast->base)) {
             if (idExp->name == QLatin1String("arguments"))
@@ -1997,7 +1997,12 @@ protected:
     }
 
     // don't go into nested functions
-    bool visit(FunctionBody *) { return false; }
+    bool visit(Program *) override { return false; }
+    bool visit(StatementList *) override { return false; }
+
+    void throwRecursionDepthError() override {
+        qWarning("Warning: Hit maximum recursion error visiting AST in UsesArgumentsArray");
+    }
 };
 } // anonymous namespace
 
@@ -2009,7 +2014,7 @@ ASTFunctionValue::ASTFunctionValue(FunctionExpression *ast, const Document *doc,
     setPrototype(valueOwner->functionPrototype());
 
     for (FormalParameterList *it = ast->formals; it; it = it->next)
-        m_argumentNames.append(it->name.toString());
+        m_argumentNames.append(it->element->bindingIdentifier.toString());
 
     m_isVariadic = UsesArgumentsArray()(ast->body);
 }

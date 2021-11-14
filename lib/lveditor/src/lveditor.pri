@@ -28,8 +28,8 @@ HEADERS += \
     $$PWD/projectengineinterceptor.h \
     $$PWD/projectentry.h \
     $$PWD/projectfile.h \
+    $$PWD/projectfileindexer.h \
     $$PWD/projectfilemodel.h \
-    $$PWD/projectnavigationmodel.h \
     $$PWD/projectworkspace.h \
     $$PWD/runnable.h \
     $$PWD/runnablecontainer.h \
@@ -72,8 +72,8 @@ SOURCES += \
     $$PWD/projectengineinterceptor.cpp \
     $$PWD/projectentry.cpp \
     $$PWD/projectfile.cpp \
+    $$PWD/projectfileindexer.cpp \
     $$PWD/projectfilemodel.cpp \
-    $$PWD/projectnavigationmodel.cpp \
     $$PWD/projectworkspace.cpp \
     $$PWD/runnable.cpp \
     $$PWD/runnablecontainer.cpp \

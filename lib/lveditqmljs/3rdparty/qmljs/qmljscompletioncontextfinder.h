@@ -37,7 +37,7 @@
 #include <QStringList>
 #include <QTextCursor>
 
-namespace QmlJS {
+namespace QQmlJS {
 
 class QMLJS_EXPORT CompletionContextFinder : public LineInfo{
 

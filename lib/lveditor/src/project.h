@@ -35,7 +35,7 @@ class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 class ProjectFileModel;
-class ProjectNavigationModel;
+class ProjectFileIndexer;
 class ProjectDocumentModel;
 class RunnableContainer;
 class ProjectEngineInterceptor;
@@ -48,7 +48,6 @@ class LV_EDITOR_EXPORT Project : public QObject{
     Q_OBJECT
     Q_PROPERTY(lv::Runnable* active                        READ active          NOTIFY activeChanged)
     Q_PROPERTY(lv::ProjectFileModel* fileModel             READ fileModel       CONSTANT)
-    Q_PROPERTY(lv::ProjectNavigationModel* navigationModel READ navigationModel CONSTANT)
     Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   CONSTANT)
     Q_PROPERTY(lv::RunnableContainer* runnables            READ runnables       CONSTANT)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
@@ -76,7 +75,6 @@ public:
     Document* isOpened(const QString& rootPath);
 
     lv::ProjectFileModel* fileModel();
-    lv::ProjectNavigationModel* navigationModel();
     lv::ProjectDocumentModel* documentModel();
     lv::RunnableContainer* runnables() const;
 
@@ -170,7 +168,6 @@ private:
 private:
     WorkspaceLayer*           m_workspaceLayer;
     ProjectFileModel*         m_fileModel;
-    ProjectNavigationModel*   m_navigationModel;
     ProjectDocumentModel*     m_documentModel;
     RunnableContainer*        m_runnables;
     ProgramHolder*            m_programHolder;
@@ -194,20 +191,6 @@ private:
 inline ProjectFileModel* Project::fileModel(){
     return m_fileModel;
 }
-
-/**
- * \brief Getter of the navigation model
- *
- * Used to search through the project for different files
- */
-inline ProjectNavigationModel *Project::navigationModel(){
-    return m_navigationModel;
-}
-/**
- * \brief Getter of the document model
- *
- * Shows all the opened files
- */
 
 inline ProjectDocumentModel *Project::documentModel(){
     return m_documentModel;

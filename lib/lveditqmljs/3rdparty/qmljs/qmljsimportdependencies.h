@@ -50,7 +50,7 @@ QT_BEGIN_NAMESPACE
 class QCryptographicHash;
 QT_END_NAMESPACE
 
-namespace QmlJS {
+namespace QQmlJS {
 class ImportInfo;
 class ViewerContext;
 namespace Internal { class ImportDependenciesPrivate; }
