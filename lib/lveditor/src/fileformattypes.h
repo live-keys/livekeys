@@ -30,6 +30,7 @@ public:
 
 public slots:
     QString find(const QString& path);
+    QString fileFilterFromFormat(const QString& format);
 
 private:
     QList<Entry> m_entries;

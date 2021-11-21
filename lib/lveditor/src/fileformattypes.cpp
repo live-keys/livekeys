@@ -54,6 +54,28 @@ QString FileFormatTypes::find(const QString &path){
     return "";
 }
 
+QString FileFormatTypes::fileFilterFromFormat(const QString &format){
+    if ( format.isEmpty() )
+        return "";
+
+    for ( FileFormatTypes::Entry& e : m_entries ){
+        if ( e.type == format ){
+            if ( !e.matchExtension.isEmpty() ){
+                return
+                    e.matchExtension.at(0).toUpper() + e.matchExtension.mid(1) +
+                    " files (*." + e.matchExtension + ")";
+            } else if ( !e.matchWildCard.isEmpty() ){
+                return
+                    format.at(0).toUpper() + format.mid(1) +
+                    " files (" + e.matchWildCard + ")";
+            } else {
+                return "";
+            }
+        }
+    }
+    return "";
+}
+
 bool FileFormatTypes::Entry::isMatch(const QString &file){
     if ( !matchName.isEmpty() ){
         if ( matchName != file )

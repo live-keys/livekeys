@@ -220,7 +220,7 @@ Item{
             root.wizards.checkUnsavedFiles(function(){
                 lk.layers.window.dialogs.openDir({}, function(url){
                     root.wizards.openProject(url, callback)
-                    // lk.openProjectInstance(url)
+                    // lk.layers.workspace.openProjectInstance(url)
                 })
             })
         }
@@ -275,7 +275,7 @@ Item{
                         if ( callback )
                             callback(path)
                     }
-                    // lk.openProjectInstance(url)
+                    // lk.layers.workspace.openProjectInstance(url)
                 })
             })
         }
@@ -287,7 +287,7 @@ Item{
                     lk.layers.workspace.project.newProject()
                     if ( callback )
                         callback()
-                    // lk.newProjectInstance()
+                    // lk.layers.workspace.newProjectInstance()
                 })
             })
         }
@@ -301,7 +301,7 @@ Item{
         }
 
 
-        function openFileViaDialog(callback){
+        function openFileViaDialog(opt, callback){
             var openCallback = function(url){
                 var localPath = Fs.UrlInfo.toLocalFile(url)
                 if ( lk.layers.workspace.project.rootPath === '' ){
@@ -356,7 +356,7 @@ Item{
             if ( !lk.layers.workspace.project.isDirProject() ){
                 root.wizards.checkUnsavedFiles(function(){
                     lk.layers.window.dialogs.openFile(
-                        { filters: ["Qml files (*.qml)", "All files (*)"] },
+                        { filters: opt && opt.filters ? opt.filters : ["Qml files (*.qml)", "All files (*)"] },
                         function(url){
                             lk.layers.workspace.project.closeProject()
                             lk.layers.workspace.project.openProject(url)
@@ -368,7 +368,7 @@ Item{
                 })
             } else {
                 lk.layers.window.dialogs.openFile(
-                    { filters: ["Qml files (*.qml)", "All files (*)"] },
+                    { filters: opt && opt.filters ? opt.filters : ["All files (*)"] },
                     openCallback
                 )
             }
@@ -457,6 +457,8 @@ Item{
             )
         }
 
+        // workspace.formatToFileFilters
+
         function closeDocument(document, callback){
             if ( !document )
                 return
@@ -466,8 +468,13 @@ Item{
                         document.save()
                         root.fileSystem.closeDocument(document, callbacK)
                     } else {
+                        var fileFilter = document.formatType
+                                ? lk.layers.workspace.fileFormats.fileFilterFromFormat(document.formatType)
+                                : ''
+                        var filters = fileFilter.length === '' ? ["All files (*)"] :  [fileFilter,"All files (*)"]
+
                         lk.layers.window.dialogs.saveFile(
-                            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                            { filters: filters },
                             function(url){
                                 if ( !document.saveAs(url) ){
                                     lk.layers.window.dialogs.message(
@@ -719,8 +726,14 @@ Item{
                         var closeCallback = callback;
                         var untitledDocument = lk.layers.workspace.project.documentModel.isOpened(documentList[0])
 
+                        var fileFilter = untitledDocument.formatType
+                                ? lk.layers.workspace.fileFormats.fileFilterFromFormat(untitledDocument.formatType)
+                                : ''
+                        var filters = fileFilter.length === '' ? ["All files (*)"] :  [fileFilter,"All files (*)"]
+
+
                         lk.layers.window.dialogs.saveFile(
-                            { filters: [ "Qml files (*.qml)", "All files (*)" ] },
+                            { filters: filters },
                             function(url){
                                 if ( !untitledDocument.saveAs(url) ){
                                     lk.layers.window.dialogs.message(
