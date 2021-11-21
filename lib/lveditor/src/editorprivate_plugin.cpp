@@ -47,8 +47,6 @@
 void EditorPrivatePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::TextEdit>(      uri, 1, 0, "NewTextEdit");
     qmlRegisterType<lv::LineSurface>(   uri, 1, 0, "LineSurface");
-    qmlRegisterType<lv::EditorLayer>(   uri, 1, 0, "EditorLayer");
-    qmlRegisterType<lv::WorkspaceLayer>(uri, 1, 0, "WorkspaceLayer");
 
     qmlRegisterUncreatableType<lv::Project>(
         uri, 1, 0, "Project", "Cannot create Project instance.");
@@ -91,9 +89,4 @@ void EditorPrivatePlugin::registerTypes(const char *uri){
 
 void EditorPrivatePlugin::initializeEngine(QQmlEngine *, const char *){
 
-}
-
-void EditorPrivatePlugin::initializeEngine(lv::ViewEngine *, lv::Settings *settings, const char *){
-    lv::EditorSettings* editorSettings = new lv::EditorSettings(settings->path() + "/editor.json");
-    settings->addConfigFile("editor", editorSettings);
 }

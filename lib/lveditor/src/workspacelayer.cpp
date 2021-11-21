@@ -11,6 +11,7 @@
 #include "live/theme.h"
 #include "live/windowlayer.h"
 #include "live/applicationcontext.h"
+#include "live/editorsettings.h"
 
 #include "live/mlnode.h"
 #include "live/mlnodetoqml.h"
@@ -22,6 +23,7 @@
 #include "projectworkspace.h"
 #include "documentation.h"
 #include "startupmodel.h"
+#include "editorprivate_plugin.h"
 
 #include <QQuickItem>
 #include <QQmlEngine>
@@ -29,6 +31,8 @@
 #include <QQmlPropertyMap>
 #include <QJSValueIterator>
 #include <QJSValue>
+#include <QProcess>
+#include <QProcessEnvironment>
 #include <QFileInfo>
 #include <QFile>
 #include <QUrl>
@@ -59,6 +63,9 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_tooltip(nullptr)
     , m_fileIndexer(nullptr)
 {
+    EditorPrivatePlugin ep;
+    ep.registerTypes("editor.private");
+
     m_engine = ViewContext::instance().engine();
     m_project = new Project(this, m_engine);
 
@@ -71,6 +78,8 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     connect(m_tooltipTimer, &QTimer::timeout, this, &WorkspaceLayer::__tooltipTimeout);
 
     Settings* settings = ViewContext::instance().settings();
+    lv::EditorSettings* editorSettings = new lv::EditorSettings(settings->path() + "/editor.json");
+    settings->addConfigFile("editor", editorSettings);
 
     m_keymap = new KeyMap(settings->path(), this);
     settings->addConfigFile("keymap", m_keymap);
@@ -115,6 +124,19 @@ WorkspaceLayer::~WorkspaceLayer(){
     delete m_tutorials;
     delete m_samples;
     delete m_tooltipTimer;
+}
+
+void WorkspaceLayer::initialize(const MLNode &config){
+    const MLNode::ObjectType& o = config.asObject();
+    for ( auto it = o.begin(); it != o.end(); ++it ){
+        if ( it->first == "monitor" ){
+            QString monitorFiles = QString::fromStdString(it->second.asString());
+            QStringList monitorFileList = monitorFiles.split(',');
+            m_project->monitorFiles(monitorFileList);
+        } else {
+            THROW_EXCEPTION(lv::Exception, Utf8("Uknown workspace layer key in --layer-config: %").format(it->first), lv::Exception::toCode("~Key") );
+        }
+    }
 }
 
 void WorkspaceLayer::loadView(ViewEngine *engine, QObject *parent){
@@ -428,6 +450,37 @@ void WorkspaceLayer::whenProjectClose(){
         m_engine->throwError(res, this);
         return;
     }
+}
+
+void WorkspaceLayer::newProjectInstance(){
+    QProcess* fork = new QProcess();
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    fork->setProcessEnvironment(env);
+
+    QString program = "./livekeys";
+
+    QStringList arguments;
+
+    fork->startDetached(program, arguments);
+    fork->waitForStarted();
+    QCoreApplication::exit(0);
+}
+
+void WorkspaceLayer::openProjectInstance(const QUrl &path){
+    QProcess* fork = new QProcess();
+
+    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
+    fork->setProcessEnvironment(env);
+
+    QString program = "./livekeys";
+
+    QStringList arguments;
+    arguments.append(path.toLocalFile());
+
+    fork->startDetached(program, arguments);
+    fork->waitForStarted();
+    QCoreApplication::exit(0);
 }
 
 QString WorkspaceLayer::docsPath() const{

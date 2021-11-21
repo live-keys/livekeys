@@ -121,7 +121,7 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
 
     qInstallMessageHandler(&visualLogMessageHandler);
 
-    MLNode logconfig = livekeys->m_arguments->getLogConfiguration();
+    MLNode logconfig = livekeys->m_arguments->logConfiguration();
     for( auto it = logconfig.begin(); it != logconfig.end(); ++it ){
         if ( it.value().hasKey("toNetwork") ){
             QString toNetwork = QString::fromStdString(it.value()["toNetwork"].asString());
@@ -210,10 +210,11 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
         THROW_EXCEPTION(Exception, "Null layer returned at: " + name.toStdString(), Exception::toCode("~Layer"));
 
     Layer* layer = static_cast<Layer*>(layerObj);
-    layer->setName(name);
-
     if ( !layer )
         THROW_EXCEPTION(Exception, "Object is not of layer type at: " + name.toStdString(), Exception::toCode("~Layer"));
+
+    layer->setName(name);
+    layer->initialize(m_arguments->layerConfigurationFor(name.toStdString()));
 
     if ( m_lastLayer)
         layer->setParent(m_lastLayer);
@@ -359,10 +360,6 @@ void Livekeys::loadInternalPlugins(){
 //        "base", 1, 0, "LiveKeys",        ViewEngine::typeAsPropertyMessage("LiveKeys", "lk"));
 
     m_viewEngine->engine()->rootContext()->setContextProperty("lk",  this);
-
-    EditorPrivatePlugin ep;
-    ep.registerTypes("editor.private");
-    ep.initializeEngine(m_viewEngine, m_settings, "editor.private");
 }
 
 void Livekeys::loadInternalPackages(){
@@ -523,47 +520,6 @@ void Livekeys::engineError(QJSValue error){
         QmlError::PrintMessage | QmlError::PrintLocation | QmlError::PrintStackTrace
     );
     vlog("main").d() << e.toString(QmlError::PrintCStackTrace);
-}
-
-void Livekeys::newProjectInstance(){
-    QProcess* fork = new QProcess();
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    fork->setProcessEnvironment(env);
-
-    QString program = "./livekeys";
-
-    QStringList arguments;
-
-    std::vector<std::string> args = m_arguments->arguments();
-    for ( const std::string& arg : args ){
-        arguments.append(QString::fromStdString(arg));
-    }
-
-    fork->startDetached(program, arguments);
-    fork->waitForStarted();
-    QCoreApplication::exit(0);
-}
-
-void Livekeys::openProjectInstance(const QUrl &path){
-    QProcess* fork = new QProcess();
-
-    QProcessEnvironment env = QProcessEnvironment::systemEnvironment();
-    fork->setProcessEnvironment(env);
-
-    QString program = "./livekeys";
-
-    QStringList arguments;
-
-    std::vector<std::string> args = m_arguments->arguments();
-    for ( const std::string& arg : args ){
-        arguments.append(QString::fromStdString(arg));
-    }
-    arguments.append(path.toLocalFile());
-
-    fork->startDetached(program, arguments);
-    fork->waitForStarted();
-    QCoreApplication::exit(0);
 }
 
 }// namespace

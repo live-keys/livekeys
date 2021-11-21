@@ -17,6 +17,7 @@
 #include "livekeysarguments.h"
 #include "live/commandlineparser.h"
 #include "live/mlnodetojson.h"
+#include "live/visuallogqt.h"
 #include <QFile>
 
 namespace lv{
@@ -36,9 +37,6 @@ bool LivekeysArguments::helpFlag() const{
 }
 
 void LivekeysArguments::initialize(int argc, const char* const argv[]){
-    CommandLineParser::Option* monitorOption  = m_parser->addOption({"-m", "--monitor"},
-        "Opens the list of paths in monitor mode.", "list");
-
     CommandLineParser::Option* logToConsoleOption = m_parser->addFlag({"-c", "--log-toconsole"},
         "Output log data to the console.");
     CommandLineParser::Option* logLevelOption = m_parser->addOption({"--log-level"},
@@ -66,6 +64,9 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
 
     CommandLineParser::Option* layers = m_parser->addOption({"-l", "--layers"},
         "Layers to load when running (i.e. -l window,workspace). Defaults are window,workspace and editor.", "string");
+    CommandLineParser::Option* layerConfigOption = m_parser->addOption({"--layer-config"},
+        "Custom configuration for layers. Each layer property is configured via a dot notation. "
+        "(i.e. workspace.monitor=monitor.qml;)", "string");
 
     CommandLineParser::Option* layersRun = m_parser->addFlag({"--run"},
         "Run project in console mode. This is equivalent to --layers base");
@@ -172,14 +173,53 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
         }
     }
 
-    QString monitoredList = QString::fromStdString(m_parser->value(monitorOption));
-    if ( !monitoredList.isEmpty() ){
-        m_monitoredFiles = monitoredList.split(";");
-    }
+    if ( m_parser->isSet(layerConfigOption) ){
+        // i.e: workspace.monitor=monitor.qml;editor.highlighter=disabled
+        m_layerConfiguration = MLNode(MLNode::Type::Object);
 
+        // separate assignments, and check for optional configuration name
+        QStringList cf = QString::fromStdString(m_parser->value(layerConfigOption)).split(";");
+        for( auto it = cf.begin(); it != cf.end(); ++it ){
+            QString& cfs = *it;
+            if ( cfs.isEmpty() )
+                continue;
+            int apos = cfs.indexOf('=');
+            if ( apos == -1 )
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to parse layer configuration segment: %").format(cfs), Exception::toCode("Init"));
+            int tpos = cfs.indexOf('.');
+            if ( tpos == -1 || tpos > apos ){
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to parse layer configuration segment: %").format(cfs), Exception::toCode("Init"));
+            }
+
+            QString configurationName  = cfs.mid(0, tpos);
+            QString configurationKey   = cfs.mid(tpos + 1, apos - tpos - 1);
+            QString configurationValue = cfs.mid(apos + 1);
+
+            if ( configurationName.isEmpty() || configurationKey.isEmpty() || configurationValue.isEmpty() )
+                THROW_EXCEPTION(lv::Exception, Utf8("Failed to parse configuration segment: %").format(cfs), Exception::toCode("Init"));
+
+            MLNode::StringType cfgname = configurationName.toStdString();
+            MLNode::StringType cfgkey  = configurationKey.toStdString();
+            // setup configuration for layer if it hasn't been set yet
+            if ( !m_layerConfiguration.hasKey(cfgname) )
+                m_layerConfiguration[cfgname] = MLNode(MLNode::Type::Object);
+            m_layerConfiguration[cfgname][cfgkey] = configurationValue.toStdString();
+        }
+    }
 }
 
-const MLNode &LivekeysArguments::getLogConfiguration(){
+const MLNode &LivekeysArguments::layerConfiguration() const{
+    return m_layerConfiguration;
+}
+
+MLNode LivekeysArguments::layerConfigurationFor(const std::string &layerName) const{
+    if ( m_layerConfiguration.hasKey(layerName) ){
+        return m_layerConfiguration[layerName];
+    }
+    return MLNode();
+}
+
+const MLNode &LivekeysArguments::logConfiguration() const{
     return m_logConfiguration;
 }
 

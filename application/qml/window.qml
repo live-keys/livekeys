@@ -19,9 +19,6 @@ import QtQuick.Dialogs 1.2
 import QtQuick.Controls 1.2
 import QtQuick.Window 2.0
 import base 1.0 as B
-import editor 1.0
-import editor.private 1.0
-import live 1.0
 
 ApplicationWindow{
     id : root
@@ -33,7 +30,7 @@ ApplicationWindow{
     minimumHeight: 400
     color : "#000509"
     objectName: "window"
-    title: qsTr("Livekeys")
+    title: "Livekeys"
 
     property int prevVisibility: 2
 

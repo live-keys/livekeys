@@ -51,6 +51,7 @@ public:
     explicit WorkspaceLayer(QObject *parent = nullptr);
     ~WorkspaceLayer() override;
 
+    void initialize(const MLNode& config) override;
     void loadView(ViewEngine *engine, QObject *parent) override;
     QObject* nextViewParent() override;
     QObject * viewRoot() override;
@@ -94,6 +95,9 @@ public slots:
 
     void whenProjectOpen(const QString& path, ProjectWorkspace* workspace);
     void whenProjectClose();
+
+    void newProjectInstance();
+    void openProjectInstance(const QUrl& path);
 
     void __mainWindowClosing();
     void __mainWindowActiveChanged();

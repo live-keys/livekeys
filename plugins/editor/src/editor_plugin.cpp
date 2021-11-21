@@ -20,6 +20,7 @@
 #include "live/visuallog.h"
 #include "live/settings.h"
 #include "live/workspaceextension.h"
+#include "live/workspace.h"
 #include "live/codehandler.h"
 #include "live/theme.h"
 #include "live/documentationloader.h"
@@ -34,14 +35,15 @@
 
 void EditorPlugin::registerTypes(const char *uri){
     // @uri editor
-    qmlRegisterType<lv::CodeHandler>(uri, 1, 0, "DocumentHandler");
-    qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
-    qmlRegisterType<lv::CodePalette>(uri, 1, 0, "CodePalette");
-    qmlRegisterType<lv::WorkspaceExtension>(uri, 1, 0, "WorkspaceExtension");
-    qmlRegisterType<lv::Theme>(uri, 1, 0, "Theme");
-    qmlRegisterType<lv::DocumentationLoader>(uri, 1, 0, "DocumentationLoader");
+    lv::Workspace::registerTypes(uri);
 
-    qmlRegisterType<lv::TextSearch>(     uri, 1, 0, "TextSearch");
+    qmlRegisterType<lv::CodeHandler>(        uri, 1, 0, "DocumentHandler");
+    qmlRegisterType<lv::CodeCompletionModel>(uri, 1, 0, "CodeCompletionModel");
+    qmlRegisterType<lv::CodePalette>(        uri, 1, 0, "CodePalette");
+    qmlRegisterType<lv::WorkspaceExtension>( uri, 1, 0, "WorkspaceExtension");
+    qmlRegisterType<lv::Theme>(              uri, 1, 0, "Theme");
+    qmlRegisterType<lv::DocumentationLoader>(uri, 1, 0, "DocumentationLoader");
+    qmlRegisterType<lv::TextSearch>(         uri, 1, 0, "TextSearch");
 }
 
 void EditorPlugin::initializeEngine(QQmlEngine *, const char *){

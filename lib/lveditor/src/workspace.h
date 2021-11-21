@@ -65,6 +65,8 @@ public:
 
     void saveRecents();
 
+    static void registerTypes(const char* uri);
+
 signals:
     void projectOpen(const QString& path);
     void projectInitialized(const QString& path, ProjectWorkspace* workspace);

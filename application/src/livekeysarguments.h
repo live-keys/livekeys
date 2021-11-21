@@ -38,7 +38,6 @@ public:
     std::string helpString() const;
 
     const QStringList& layers() const;
-    const QStringList& monitoredFiles() const;
 
     CommandLineParser* parser();
 
@@ -48,22 +47,19 @@ public:
 
     void initialize(int argc, const char* const argv[]);
 
-    const MLNode& getLogConfiguration();
+    const MLNode& layerConfiguration() const;
+    MLNode layerConfigurationFor(const std::string& layerName) const;
+    const MLNode& logConfiguration() const;
 
 private:
     CommandLineParser* m_parser;
 
     MLNode m_logConfiguration;
+    MLNode m_layerConfiguration;
 
     bool        m_globalScript;
-
-    QStringList m_monitoredFiles;
     QStringList m_layers;
 };
-
-inline const QStringList &LivekeysArguments::monitoredFiles() const{
-    return m_monitoredFiles;
-}
 
 inline CommandLineParser *LivekeysArguments::parser(){
     return m_parser;

@@ -2,6 +2,7 @@
 #include "workspacelayer.h"
 #include "projectworkspace.h"
 #include "projectdocumentmodel.h"
+#include "editorlayer.h"
 
 #include <QDir>
 #include <QQuickItem>
@@ -181,6 +182,11 @@ void Workspace::saveRecents(){
         recentsFile.write(result.c_str());
         recentsFile.close();
     }
+}
+
+void Workspace::registerTypes(const char *uri){
+    qmlRegisterType<lv::EditorLayer>(   uri, 1, 0, "EditorLayer");
+    qmlRegisterType<lv::WorkspaceLayer>(uri, 1, 0, "WorkspaceLayer");
 }
 
 }// namespace

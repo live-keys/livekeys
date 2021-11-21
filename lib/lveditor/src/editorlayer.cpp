@@ -3,6 +3,8 @@
 #include "live/viewengine.h"
 #include "live/keymap.h"
 #include "live/paletteloader.h"
+#include "live/settings.h"
+#include "editorsettings.h"
 
 #include <QQmlEngine>
 #include <QQmlContext>

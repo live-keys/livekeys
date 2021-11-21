@@ -111,8 +111,6 @@ public:
 public slots:
     QObject* layerPlaceholder() const;
     void engineError(QJSValue error);
-    void newProjectInstance();
-    void openProjectInstance(const QUrl& path);
 
 signals:
     void layerReady(lv::Layer* layer);

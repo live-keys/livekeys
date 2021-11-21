@@ -3,6 +3,7 @@
 
 #include <QObject>
 #include "lvviewglobal.h"
+#include "live/mlnode.h"
 
 namespace lv{
 
@@ -23,6 +24,7 @@ public:
     const QString& name() const;
     void setName(const QString &name);
 
+    virtual void initialize(const MLNode&){}
     virtual void loadView(ViewEngine *, QObject*){}
     virtual QObject* nextViewParent(){ return nullptr; }
     virtual QObject* viewRoot(){return nullptr;}
