@@ -1,7 +1,7 @@
 // Note that when dealing with ids, components are only aware of their own context,
 // any child or parent component context will not be available
 
-module.exports["ParserTest6"] = class ParserTest6 extends Container{
+export class ParserTest06 extends Container{
 
     constructor(){
         super()

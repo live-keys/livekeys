@@ -1,7 +1,7 @@
-var TodoListItem = imports.get('TodoListItem')
-var Ul = imports.get('Ul')
+import {TodoListItem} from '__UNRESOLVED__'
+import {Ul} from '__UNRESOLVED__'
 
-module.exports["TodoList"] = class TodoList extends Ul{
+export class TodoList extends Ul{
 
     constructor(){
         super()

@@ -26,7 +26,7 @@ v8::Local<v8::Object> Imports::object(){
 }
 
 void Imports::require(const std::string &importKey){
-    ElementsPlugin::Ptr ep = m_engine->require(importKey, m_moduleFile->plugin()->plugin());
+    ElementsModule::Ptr ep = m_engine->require(importKey, m_moduleFile->plugin()->plugin());
     for ( auto it = ep->fileExports().begin(); it != ep->fileExports().end(); ++it ){
         m_exports[it->first] = it->second;
     }
@@ -51,7 +51,7 @@ v8::Local<v8::Object> Imports::requireAs(const std::string &importKey){
 v8::Local<v8::Value> Imports::get(const std::string &key){
     ModuleFile* mf = nullptr;
 
-    ElementsPlugin::Ptr currentPlugin = m_moduleFile->plugin();
+    ElementsModule::Ptr currentPlugin = m_moduleFile->plugin();
     auto currentPluginExportSearch = currentPlugin->fileExports().find(key);
     if ( currentPluginExportSearch != currentPlugin->fileExports().end() ){
         mf = currentPluginExportSearch->second;

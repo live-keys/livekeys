@@ -6,15 +6,21 @@
 #include "container.h"
 #include "live/exception.h"
 #include "live/visuallog.h"
+#include "live/plugincontext.h"
 #include "visuallogjsobject.h"
 #include "errorhandler.h"
 #include "imports_p.h"
 #include "tuple.h"
+#include "component.h"
+#include "modulefile.h"
+
+#include "v8nowarnings.h"
 
 #include <sstream>
 #include <iomanip>
+#include <unordered_map>
+
 #include <QFileInfo>
-#include "v8nowarnings.h"
 #include <QDateTime>
 
 namespace lv{ namespace el{
@@ -90,7 +96,13 @@ public:
 
     PackageGraph* packageGraph;
     Engine::FileInterceptor* fileInterceptor;
-    std::map<std::string, ElementsPlugin::Ptr> loadedPlugins;
+
+    std::map<std::string, ElementsModule::Ptr> loadedModules;
+    std::map<std::string, ElementsModule::Ptr> loadedModulesByPath;
+
+    std::map<std::string, JsModule::Ptr>             pathToModule;
+    std::unordered_multimap<uint32_t, JsModule::Ptr> hashToModule;
+
 
 public: // helpers
     bool isElementConstructor(
@@ -99,9 +111,188 @@ public: // helpers
         const v8::Local<v8::Function> &elementFnc
     );
 
+    JsModule::Ptr getFromModule(const v8::Local<v8::Module>& mod);
+
+    static v8::MaybeLocal<v8::Promise> resolveModuleDynamically(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::ScriptOrModule> referrer,
+        v8::Local<v8::String> specifier
+    );
+    static v8::MaybeLocal<v8::Module> resolveModule(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::String> specifier,
+        v8::Local<v8::Module> referrer
+    );
+    static void resolveModuleMeta(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::Module> module,
+        v8::Local<v8::Object> meta
+    );
+
     static void messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data);
 
 };
+
+JsModule::Ptr EnginePrivate::getFromModule(const v8::Local<v8::Module> &mod){
+    auto range = hashToModule.equal_range(mod->GetIdentityHash());
+    for (auto it = range.first; it != range.second; ++it) {
+        if (it->second->localModule() == mod)
+            return it->second;
+    }
+    return nullptr;
+}
+
+v8::MaybeLocal<v8::Promise> EnginePrivate::resolveModuleDynamically(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::ScriptOrModule> referrer,
+        v8::Local<v8::String> specifier)
+{
+    v8::Local<v8::Promise::Resolver> resolver =
+        v8::Promise::Resolver::New(context).ToLocalChecked();
+    v8::MaybeLocal<v8::Promise> promise(resolver->GetPromise());
+
+    auto engine = reinterpret_cast<Engine*>(context->GetIsolate()->GetData(0));
+
+    v8::String::Utf8Value name(engine->isolate(), specifier);
+
+    std::string path = *name;
+    if ( path.length() >= 2 && path[0] == '.' && path[1] == '/' ){
+        path = path.substr(2);
+
+        auto val = referrer->GetResourceName();
+        v8::String::Utf8Value name(engine->isolate(), val);
+        std::string referrerPath = *name;
+
+        for ( auto it = engine->m_d->hashToModule.begin(); it != engine->m_d->hashToModule.end(); ++it ){
+            if ( it->second->filePath() == referrerPath ){
+                QFileInfo finfo(QString::fromStdString(it->second->filePath()));
+                std::string fileParent = finfo.path().toStdString();
+                path = fileParent + "/" + path;
+                break;
+            }
+        }
+    } else {
+        auto packagePaths = engine->packageImportPaths();
+        for ( auto it = packagePaths.begin(); it != packagePaths.end(); ++it ){
+            QFileInfo finfo(QString::fromStdString(*it + "/" + path));
+            if ( finfo.exists() ){
+                path = *it + "/" + path;
+            }
+        }
+    }
+
+    try {
+        JsModule::Ptr module = engine->loadJsModule(path);
+        module->evaluate(context);
+        auto localModule = module->localModule();
+        engine->m_d->hashToModule.insert(std::make_pair(localModule->GetIdentityHash(), module));
+
+        v8::Local<v8::Value> moduleNamespace = module->localModuleNamespace();
+        auto result = resolver->Resolve(context, moduleNamespace);
+        if ( result.IsNothing() )
+            return v8::MaybeLocal<v8::Promise>();
+
+        return promise;
+
+    } catch (lv::Exception& e) {
+        engine->throwError(&e, nullptr);
+    }
+
+    return v8::MaybeLocal<v8::Promise>();
+}
+
+v8::MaybeLocal<v8::Module> EnginePrivate::resolveModule(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::String> specifier,
+        v8::Local<v8::Module> referrer)
+{
+    auto engine = reinterpret_cast<Engine*>(context->GetIsolate()->GetData(0));
+    v8::String::Utf8Value name(engine->isolate(), specifier);
+
+    std::string path = *name;
+
+    QFileInfo finfo(QString::fromStdString(path));
+    if ( finfo.isRelative() ){
+        if ( path.length() >= 2 && path[0] == '.' && path[1] == '/' ){
+            path = path.substr(2);
+
+            JsModule::Ptr module = engine->m_d->getFromModule(referrer);
+            if ( module ){
+                QFileInfo finfo(QString::fromStdString(module->filePath()));
+                QString fullPath = finfo.path() + "/" + QString::fromStdString(path);
+                path = QFileInfo(fullPath).absoluteFilePath().toStdString();
+            }
+        } else if ( path.length() >= 2 && path[0] == '.' && path[1] == '.' ){
+            JsModule::Ptr module = engine->m_d->getFromModule(referrer);
+            if ( module ){
+                QFileInfo finfo(QString::fromStdString(module->filePath()));
+                QString fullPath = finfo.path() + "/" + QString::fromStdString(path);
+                path = QFileInfo(fullPath).absoluteFilePath().toStdString();
+            }
+
+        } else {
+            auto packagePaths = engine->packageImportPaths();
+            for ( auto it = packagePaths.begin(); it != packagePaths.end(); ++it ){
+                QFileInfo finfo(QString::fromStdString(*it + "/" + path));
+                if ( finfo.exists() ){
+                    path = *it + "/" + path;
+                }
+            }
+        }
+    }
+
+    try {
+        JsModule::Ptr module = engine->loadJsModule(path);
+        auto localModule = module->localModule();
+
+        engine->m_d->hashToModule.insert(std::make_pair(localModule->GetIdentityHash(), module));
+
+        return localModule;
+    } catch (lv::Exception& e) {
+        engine->throwError(&e, nullptr);
+    }
+    return v8::MaybeLocal<v8::Module>();
+}
+
+void EnginePrivate::resolveModuleMeta(
+        v8::Local<v8::Context> context,
+        v8::Local<v8::Module> referrer,
+        v8::Local<v8::Object> meta)
+{
+    auto engine = reinterpret_cast<Engine*>(context->GetIsolate()->GetData(0));
+    JsModule::Ptr module = engine->m_d->getFromModule(referrer);
+
+    if ( module->m_moduleFile ){
+
+        v8::Maybe<bool> result = meta->Set(
+            context,
+            v8::String::NewFromUtf8(context->GetIsolate(), "url").ToLocalChecked(),
+            v8::String::NewFromUtf8(context->GetIsolate(), module->m_moduleFile->filePath().c_str()).ToLocalChecked()
+        );
+        if ( result.IsNothing() ){
+            //TODO: engine warning
+        }
+
+        std::string moduleUri = module->m_moduleFile->plugin()->plugin()->context()->importId;
+        v8::Maybe<bool> moduleResult = meta->Set(
+            context,
+            v8::String::NewFromUtf8(context->GetIsolate(), "module").ToLocalChecked(),
+            v8::String::NewFromUtf8(context->GetIsolate(), moduleUri.c_str()).ToLocalChecked()
+        );
+        if ( moduleResult.IsNothing() ){
+            //TODO: engine warning
+        }
+    } else {
+        v8::Maybe<bool> result = meta->Set(
+            context,
+            v8::String::NewFromUtf8(context->GetIsolate(), "url").ToLocalChecked(),
+            v8::String::NewFromUtf8(context->GetIsolate(), module->filePath().c_str()).ToLocalChecked()
+        );
+        if ( result.IsNothing() ){
+            //TODO: engine warning
+        }
+    }
+}
 
 void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8::Value> data){
     v8::Local<v8::External> engineData = v8::Local<v8::External>::Cast(data);
@@ -170,8 +361,12 @@ Engine::FileInterceptor::FileInterceptor(LockedFileIOSession::Ptr fileInput)
 Engine::FileInterceptor::~FileInterceptor(){
 }
 
-std::string Engine::FileInterceptor::readFile(const std::string &path){
+std::string Engine::FileInterceptor::readFile(const std::string &path) const{
     return m_fileInput->readFromFile(path);
+}
+
+bool Engine::FileInterceptor::writeToFile(const std::string &path, const std::string &data) const{
+    return m_fileInput->writeToFile(path, data);
 }
 
 const LockedFileIOSession::Ptr &Engine::FileInterceptor::fileInput() const{
@@ -206,6 +401,9 @@ Engine::Engine(PackageGraph *pg)
 
     v8::Local<v8::External> listenerData = v8::External::New(isolate(), this);
     m_d->isolate->AddMessageListener(&EnginePrivate::messageListener, listenerData);
+
+    m_d->isolate->SetHostImportModuleDynamicallyCallback(&EnginePrivate::resolveModuleDynamically);
+    m_d->isolate->SetHostInitializeImportMetaObjectCallback(&EnginePrivate::resolveModuleMeta);
 
     m_d->packageGraph    = (pg == nullptr) ? new PackageGraph : pg;
     m_d->fileInterceptor = new Engine::FileInterceptor;
@@ -294,6 +492,131 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
     return sc;
 }
 
+
+JsModule::Ptr Engine::loadAsJsModule(ModuleFile *file){
+    return loadJsModule(file->filePath());
+}
+
+JsModule::Ptr Engine::loadJsModule(const std::string &path){
+    auto foundIt = m_d->pathToModule.find(path);
+    if (foundIt != m_d->pathToModule.end() ){
+        if ( foundIt->second && foundIt->second->status() == JsModule::Ready ){
+            return foundIt->second;
+        } else {
+            THROW_EXCEPTION(
+                lv::Exception,
+                "Attempting to load a module while the module is being loaded. This might be due to a dependency cycle.",
+                lv::Exception::toCode("JsCycle")
+            );
+        }
+    }
+
+    v8::HandleScope handle(isolate());
+    v8::Local<v8::Context> context = m_d->context->asLocal();
+    v8::Context::Scope context_scope(context);
+
+    std::ifstream file(path, std::ifstream::in | std::ifstream::binary);
+    if ( !file.is_open() )
+        THROW_EXCEPTION(Exception, "Failed to open file: " + path, Exception::toCode("~ScriptFile"));
+
+    file.seekg(0, std::ios::end);
+    size_t size = static_cast<size_t>(file.tellg());
+    std::string code(size, ' ');
+    file.seekg(0);
+    file.read(&code[0], size);
+
+    v8::Local<v8::String> vcode =
+        v8::String::NewFromUtf8(isolate(), code.c_str()).ToLocalChecked();
+
+    v8::ScriptOrigin origin(
+        v8::String::NewFromUtf8(isolate(), path.c_str()).ToLocalChecked(),
+        v8::Integer::New(isolate(), 0),
+        v8::Integer::New(isolate(), 0), v8::False(isolate()),
+        v8::Local<v8::Integer>(), v8::Local<v8::Value>(),
+        v8::False(isolate()), v8::False(isolate()),
+        v8::True(isolate())
+    );
+
+    v8::ScriptCompiler::Source source(vcode, origin);
+    v8::MaybeLocal<v8::Module> maybeModule = v8::ScriptCompiler::CompileModule(isolate(), &source);
+
+    v8::Local<v8::Module> mod;
+    if (!maybeModule.ToLocal(&mod)) {
+        THROW_EXCEPTION(lv::Exception, "Failed to load module:" + path, Exception::toCode("~Module"));
+    }
+
+    JsModule::Ptr jsModule = JsModule::create(this, path, mod);
+    m_d->hashToModule.insert(std::make_pair(mod->GetIdentityHash(), jsModule));
+    m_d->pathToModule.insert(std::make_pair(jsModule->filePath(), jsModule));
+
+    std::string pluginPath = QFileInfo(QString::fromStdString(path)).path().toStdString();
+
+    auto it = m_d->loadedModulesByPath.find(pluginPath);
+    if ( it != m_d->loadedModulesByPath.end() ){
+        auto mf = it->second->findModuleFileByName(jsModule->name() + ".lv");
+        if ( mf ){
+            jsModule->m_moduleFile = mf;
+            mf->setJsModule(jsModule);
+        }
+    }
+
+
+    v8::TryCatch tc(m_d->isolate);
+
+    v8::Maybe<bool> result = mod->InstantiateModule(context, &EnginePrivate::resolveModule);
+
+    if ( tc.HasCaught() ){
+        CatchData cd(this, &tc);
+        handleError(cd.message(), cd.stack(), cd.fileName(), cd.lineNumber());
+    }
+
+    if (result.IsNothing()) {
+        THROW_EXCEPTION(lv::Exception, "Can't instantiate module: " + path, lv::Exception::toCode("~Module"));
+    }
+
+    return jsModule;
+}
+
+Element *Engine::runFile(const std::string &path){
+    ElementsModule::Ptr module = compile(path);
+    ModuleFile* mf = module->moduleFileBypath(path);
+
+    JsModule::Ptr jsMf = loadJsModule(mf->jsFilePath());
+    jsMf->evaluate();
+
+    ScopedValue sv = jsMf->moduleNamespace();
+    Object::Accessor oa(sv);
+
+    ScopedValue rootValue = oa.get(this, mf->name());
+    if ( !rootValue.isElement() ){
+        THROW_EXCEPTION(lv::Exception, "File needs to have a single default root item: " + path, lv::Exception::toCode("~Root"));
+    }
+    Element* root = rootValue.toElement(this);
+
+    return root;
+}
+
+ElementsModule::Ptr Engine::compile(const std::string &path){
+    QFileInfo finfo(QString::fromStdString(path));
+    std::string pluginPath = finfo.path().toStdString();
+    std::string fileName = finfo.fileName().toStdString();
+
+    Plugin::Ptr plugin(nullptr);
+    if ( Plugin::existsIn(pluginPath) ){
+        plugin = Plugin::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(plugin->package());
+        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
+    } else {
+        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
+    }
+
+    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
+    ElementsModule::addModuleFile(epl, fileName);
+    epl->compile();
+
+    return epl;
+}
+
 Script::Ptr Engine::compileModuleFile(const std::string &path){
     if ( moduleFileType() == Engine::JsOnly ){
         return compileJsModuleFile(path + ".js");
@@ -317,12 +640,14 @@ Script::Ptr Engine::compileModuleFile(const std::string &path){
         QString text = file.readAll();
         return compileModuleSource(resPath, text.toStdString());
     } else if (m_d->moduleFileType == Engine::Lv){
+
         QFileInfo fileInfo(QString((path).c_str()));
         if (!fileInfo.exists()) return nullptr;
         QFile file(QString(path.c_str()));
         file.open(QFile::Text | QFile::ReadOnly);
         QString text = file.readAll();
         return compileModuleSource(path, text.toStdString());
+
     } else if (m_d->moduleFileType == Engine::LvOrJs){
         QFileInfo fi1(path.c_str());
         QFileInfo fi2((path+".js").c_str());
@@ -390,8 +715,8 @@ Object Engine::loadJsFile(const std::string &path){
         plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
     }
 
-    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
-    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, baseName);
+    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
+    ModuleFile* mf = ElementsModule::addModuleFile(epl, baseName);
 
     Script::Ptr sc = compileJsModuleFile(path);
     Object m = sc->loadAsModule(mf);
@@ -416,8 +741,8 @@ Object Engine::loadFile(const std::string &path){
         plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
     }
 
-    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
-    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
+    ModuleFile* mf = ElementsModule::addModuleFile(epl, fileName);
 
     Script::Ptr sc = compileModuleFile(path);
     Object m = sc->loadAsModule(mf);
@@ -442,8 +767,8 @@ Object Engine::loadFile(const std::string &path, const std::string &content){
         plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
     }
 
-    ElementsPlugin::Ptr epl = ElementsPlugin::create(plugin, this);
-    ModuleFile* mf = ElementsPlugin::addModuleFile(epl, fileName);
+    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
+    ModuleFile* mf = ElementsModule::addModuleFile(epl, fileName);
 
     Script::Ptr sc = compileModuleSource(path, content);
     Object m = sc->loadAsModule(mf);
@@ -726,7 +1051,7 @@ void Engine::clearPendingException(){
     m_d->pendingExceptionNesting = -1;
 }
 
-const std::vector<std::string> Engine::packageImportPaths() const{
+const std::vector<std::string>& Engine::packageImportPaths() const{
     return m_d->packageGraph->packageImportPaths();
 }
 
@@ -894,14 +1219,20 @@ Object Engine::require(ModuleLibrary *module, const Object& o){
     return exportsObject;
 }
 
-ElementsPlugin::Ptr Engine::require(const std::string &importKey, Plugin::Ptr requestingPlugin){
-    auto foundEp = m_d->loadedPlugins.find(importKey);
-    if ( foundEp == m_d->loadedPlugins.end() ){
+ElementsModule::Ptr Engine::require(const std::string &importKey, Plugin::Ptr requestingPlugin){
+    auto foundEp = m_d->loadedModules.find(importKey);
+    if ( foundEp == m_d->loadedModules.end() ){
         Plugin::Ptr plugin = m_d->packageGraph->loadPlugin(importKey, requestingPlugin);
-        return ElementsPlugin::create(plugin, this);
+        if ( plugin ){
+            auto ep = ElementsModule::create(plugin, this);
+            m_d->loadedModules[importKey] = ep;
+            m_d->loadedModulesByPath[ep->plugin()->path()] = ep;
+            return ep;
+        }
     } else {
         return foundEp->second;
     }
+    return nullptr;
 }
 
 void Engine::scope(const std::function<void()> &f){
@@ -1004,3 +1335,4 @@ Engine::CatchData::CatchData(Engine *engine, v8::TryCatch *tc)
 }
 
 }} // namespace lv, el
+

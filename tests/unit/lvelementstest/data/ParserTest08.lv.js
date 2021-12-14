@@ -1,13 +1,11 @@
-imports.require('typing')
+import {A} from '__UNRESOLVED__'
+import {Article} from '__UNRESOLVED__'
+import {B} from '__UNRESOLVED__'
+import {H1} from '__UNRESOLVED__'
+import {P} from '__UNRESOLVED__'
+import {T} from '__UNRESOLVED__'
 
-var A = imports.get('A')
-var Article = imports.get('Article')
-var B = imports.get('B')
-var H1 = imports.get('H1')
-var P = imports.get('P')
-var T = imports.get('T')
-
-module.exports["ParserTest8"] = (function(parent){
+export let ParserTest08 = (function(parent){
     this.setParent(parent)
 
     Element.assignDefaultProperty(this, [

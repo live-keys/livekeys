@@ -36,7 +36,6 @@
 #include "mlnodetojstest.h"
 #include "lvcompiletest.h"
 #include "jstupletest.h"
-#include "jsimportstest.h"
 #include "lvimportstest.h"
 #include "lvparsetest.h"
 #include "metaobjecttypeinfotest.h"

@@ -129,7 +129,7 @@ Object Script::loadAsModuleImpl(ModuleFile *mf, const v8::Local<v8::Context> &co
 
     v8::Local<v8::Value> args[4];
     args[0] = module.data();
-    args[1] = mf->imports()->object();
+    args[1] = mf->importsObject()->object();
     args[2] = name;
     args[3] = filePath;
 

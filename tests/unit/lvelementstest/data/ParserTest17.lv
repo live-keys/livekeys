@@ -2,9 +2,9 @@ component TodoListItem{
     key: index
     item: item
     on remove: (index) => {
-        todoList.remove(index)
+        this.todoList.remove(index)
     }
     on markDone: (index) => {
-        todoList.markTodoDone(index) 
+        this.todoList.markTodoDone(index)
     }
 }

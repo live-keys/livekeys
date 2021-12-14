@@ -1,9 +1,7 @@
-var A = imports.requireAs("xmodule")
+import {not1} from '__UNRESOLVED__'
+import {not2} from '__UNRESOLVED__'
 
-var not1 = imports.get("not1") // not1 is a local function and should be accessed by this
-var not2 = imports.get("not2") // not2 is a local property and should be accessed by this
-
-module.exports["B"] = class B extends Element{
+export class B extends Element{
     constructor(){
         super()
         this.__initialize()

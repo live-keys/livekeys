@@ -179,7 +179,7 @@ void PackageGraph::addDependency(const Package::Ptr &package, const Package::Ptr
                 }
             }
 
-            THROW_EXCEPTION(lv::Exception, "Package dependency cycle found: "  + ss.str(), 4);
+            THROW_EXCEPTION(lv::Exception, "Package dependency cycle found: "  + ss.str(), lv::Exception::toCode("Cycle"));
         }
     }
 
@@ -622,6 +622,7 @@ Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegme
 
         auto pluginIt = foundPackage->context()->plugins.find(importId);
         if ( pluginIt != foundPackage->context()->plugins.end() ){
+            addDependency(requestingPlugin, pluginIt->second);
             return pluginIt->second;
         }
 
@@ -697,7 +698,7 @@ void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& d
                     }
                 }
 
-                THROW_EXCEPTION(lv::Exception, "Plugin dependency cycle found: "  + ss.str(), 4);
+                THROW_EXCEPTION(lv::Exception, "Plugin dependency cycle found: "  + ss.str(), Exception::toCode("Cycle"));
             }
         }
 

@@ -1,5 +1,3 @@
-import test
-
 instance default TestCase{
 
     Scenario{

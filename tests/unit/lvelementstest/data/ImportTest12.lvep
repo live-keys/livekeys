@@ -1,0 +1,68 @@
+// This file holds object that require import meta data
+
+////// plugin1/live.plugin.json
+
+{
+    "name" : "plugin1",
+    "package": "..",
+    "modules": ["A"]
+}
+
+////// plugin1/A.lv
+
+component default < Element{
+    string url: {
+        return import.meta.url
+    }
+    string module: {
+        return import.meta.module
+    }
+}
+
+////// plugin1/subplugin/live.plugin.json
+
+{
+    "name" : "subplugin",
+    "package": "../..",
+    "modules": ["B"]
+}
+
+////// plugin1/subplugin/B.lv
+
+component default < Element{
+    string url: {
+        return import.meta.url
+    }
+    string module: {
+        return import.meta.module
+    }
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["main"]
+}
+
+
+////// main.lv
+
+import .plugin1
+import .plugin1.subplugin
+
+instance default Element{
+    string aUrl: (new A()).url
+    string aModule: (new A()).module
+    string bUrl: (new B()).url
+    string bModule: (new B()).module
+}
+

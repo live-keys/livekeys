@@ -1,0 +1,62 @@
+////// plugin1/subplugin1/live.plugin.json
+
+{
+    "name" : "subplugin1",
+    "package": "../..",
+    "modules": ["A", "B"]
+}
+
+////// plugin1/subplugin1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// plugin1/subplugin1/B.lv
+
+component default < Element{
+    fn toString(){
+        return "class[B]"
+    }
+}
+
+////// plugin1/subplugin2/live.plugin.json
+
+{
+    "name" : "subplugin2",
+    "package": "../..",
+    "modules": ["C"]
+}
+
+////// plugin1/subplugin2/C.lv
+
+import .plugin1.subplugin1
+
+component default < B{}
+
+////// live.plugin.json
+
+{
+    "name" : "test-package",
+    "package": ".",
+    "modules": ["main"]
+}
+
+////// live.package.json
+
+{
+    "name" : "test-package",
+    "version" : "1.0.0"
+}
+
+////// main.lv
+
+import .plugin1.subplugin2
+
+instance default Element{
+    string c : {
+        return (new C()).toString()
+    }
+}

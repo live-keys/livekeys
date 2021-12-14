@@ -1,0 +1,67 @@
+// This file holds a dependency cycle between plugins within a package
+// plugin1 <- plugin2 <- plugin3 <- plugin1
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package" : "."
+}
+
+////// main.lv
+
+import .plugina
+
+instance default A{
+}
+
+
+////// plugina/live.plugin.json
+
+{
+    "name" : "plugina",
+    "package": "..",
+    "modules": ["A"]
+}
+
+////// plugina/A.lv
+
+import .pluginb
+
+component default < B {}
+
+////// pluginb/live.plugin.json
+
+{
+    "name" : "pluginb",
+    "package": "..",
+    "modules": ["B"]
+}
+
+////// pluginb/B.lv
+
+import .pluginc
+
+component default < C {}
+
+////// pluginc/live.plugin.json
+
+{
+    "name" : "pluginc",
+    "package": "..",
+    "modules": ["C"]
+}
+
+////// pluginc/C.lv
+
+import .plugina
+
+component C < A {}
+

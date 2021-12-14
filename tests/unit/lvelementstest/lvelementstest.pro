@@ -26,7 +26,6 @@ HEADERS += \
     $$PWD/mlnodetojstest.h \
     $$PWD/testpack.h \
     $$PWD/jstupletest.h \
-    $$PWD/jsimportstest.h \
     $$PWD/jsinheritancetest.h \
     $$PWD/lvparsetest.h \
     $$PWD/metaobjecttypeinfotest.h \
@@ -51,7 +50,6 @@ SOURCES += \
     $$PWD/mlnodetojstest.cpp \
     $$PWD/testpack.cpp \
     $$PWD/jstupletest.cpp \
-    $$PWD/jsimportstest.cpp \
     $$PWD/jsinheritancetest.cpp \
     $$PWD/lvparsetest.cpp \
     $$PWD/metaobjecttypeinfotest.cpp \
@@ -81,24 +79,29 @@ export(testdatacopy.commands)
 QMAKE_EXTRA_TARGETS += first testdatacopy
 
 DISTFILES += \
-    data/ImportTest01.lv \
-    data/ImportTest02.lv \
-    data/ImportTest03.lv \
-    data/ImportTest04.lv \
-    data/ImportTest05.lv \
-    data/ImportTest10.lv \
-    data/ImportTest07.lv \
-    data/ImportTest08.lv \
-    data/ImportTest09.lv \
-    data/ImportTest06.lv \
-    data/ImportTest11.lv \
-    data/ParserTest1.lv \
+    data/ImportTest01.lvep \
+    data/ImportTest02.lvep \
+    data/ImportTest03.lvep \
+    data/ImportTest04.lvep \
+    data/ImportTest05.lvep \
+    data/ImportTest06.lvep \
+    data/ImportTest07.lvep \
+    data/ImportTest08.lvep \
+    data/ImportTest09.lvep \
+    data/ImportTest10.lvep \
+    data/ImportTest11.lvep \
+    data/ImportTest12.lvep \
+    data/ParserTest011.lv \
     data/ParserTest1.lv.js \
     data/ParserTest11.lv \
     data/ParserTest14.lv \
     data/ParserTest14.lv.js \
     data/ParserTest2.lv \
     data/ParserTest2.lv.js \
+    data/ParserTest27.lv \
+    data/ParserTest27.lv.js \
+    data/ParserTest28.lv \
+    data/ParserTest28.lv.js \
     data/ParserTest3.lv \
     data/ParserTest3.lv.js \
     data/ParserTest4.lv \

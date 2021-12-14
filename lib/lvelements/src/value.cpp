@@ -14,10 +14,10 @@ namespace lv{ namespace el{
 // LocalValue implementation
 // ----------------------------------------------------------------------
 
-class LocalValuePrivate{
+class ScopedValuePrivate{
 
 public:
-    LocalValuePrivate(const v8::Local<v8::Value>& d) : data(d){}
+    ScopedValuePrivate(const v8::Local<v8::Value>& d) : data(d){}
 
 public:
     v8::Local<v8::Value> data;
@@ -25,35 +25,35 @@ public:
 
 
 ScopedValue::ScopedValue(Engine *engine)
-    : m_d(new LocalValuePrivate(v8::Undefined(engine->isolate())))
+    : m_d(new ScopedValuePrivate(v8::Undefined(engine->isolate())))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, bool val)
-    : m_d(new LocalValuePrivate(v8::Boolean::New(engine->isolate(), val)))
+    : m_d(new ScopedValuePrivate(v8::Boolean::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Value::Int32 val)
-    : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
+    : m_d(new ScopedValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Value::Int64 val)
-    : m_d(new LocalValuePrivate(v8::Integer::New(engine->isolate(), val)))
+    : m_d(new ScopedValuePrivate(v8::Integer::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Value::Number val)
-    : m_d(new LocalValuePrivate(v8::Number::New(engine->isolate(), val)))
+    : m_d(new ScopedValuePrivate(v8::Number::New(engine->isolate(), val)))
     , m_ref(new int)
 {
     ++(*m_ref);
@@ -64,33 +64,33 @@ ScopedValue::ScopedValue(Engine *engine, const std::string &val)
     , m_ref(new int)
 {
     v8::Local<v8::Value> s = v8::String::NewFromUtf8(engine->isolate(), val.c_str()).ToLocalChecked();
-    m_d = new LocalValuePrivate(s);
+    m_d = new ScopedValuePrivate(s);
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Callable val)
-    : m_d(new LocalValuePrivate(val.data()))
+    : m_d(new ScopedValuePrivate(val.data()))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Object val)
-    : m_d(new LocalValuePrivate(val.data()))
+    : m_d(new ScopedValuePrivate(val.data()))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
-    : m_d(new LocalValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
+    : m_d(new ScopedValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
 ScopedValue::ScopedValue(Engine *engine, Element* val)
-    : m_d(new LocalValuePrivate(ElementPrivate::localObject(val)))
+    : m_d(new ScopedValuePrivate(ElementPrivate::localObject(val)))
     , m_ref(new int)
 {
     ++(*m_ref);
@@ -103,25 +103,25 @@ ScopedValue::ScopedValue(Engine *engine, const Value &value)
     ++(*m_ref);
     switch ( value.type() ){
     case Value::Stored::Boolean:
-        m_d = new LocalValuePrivate(v8::Boolean::New(engine->isolate(), value.asBool()));
+        m_d = new ScopedValuePrivate(v8::Boolean::New(engine->isolate(), value.asBool()));
         break;
     case Value::Stored::Integer:
-        m_d = new LocalValuePrivate(v8::Integer::New(engine->isolate(), value.asInt64()));
+        m_d = new ScopedValuePrivate(v8::Integer::New(engine->isolate(), value.asInt64()));
         break;
     case Value::Stored::Double:
-        m_d = new LocalValuePrivate(v8::Number::New(engine->isolate(), value.asNumber()));
+        m_d = new ScopedValuePrivate(v8::Number::New(engine->isolate(), value.asNumber()));
         break;
     case Value::Stored::Object:
-        m_d = new LocalValuePrivate(value.asObject().data());
+        m_d = new ScopedValuePrivate(value.asObject().data());
         break;
     case Value::Stored::Callable:
-        m_d = new LocalValuePrivate(value.asCallable().data());
+        m_d = new ScopedValuePrivate(value.asCallable().data());
         break;
     case Value::Stored::Element:
         if ( value.isNull() )
-            m_d = new LocalValuePrivate(v8::Undefined(engine->isolate()));
+            m_d = new ScopedValuePrivate(v8::Undefined(engine->isolate()));
         else
-            m_d = new LocalValuePrivate(ElementPrivate::localObject(value.asElement()));
+            m_d = new ScopedValuePrivate(ElementPrivate::localObject(value.asElement()));
         break;
     default:
         THROW_EXCEPTION(lv::Exception, "Invalid Value type", Exception::toCode("~LocalValue"));
@@ -285,7 +285,7 @@ bool ScopedValue::isElement() const{
 }
 
 ScopedValue::ScopedValue(const v8::Local<v8::Value> &data)
-    : m_d(new LocalValuePrivate(data))
+    : m_d(new ScopedValuePrivate(data))
     , m_ref(new int)
 {
     ++(*m_ref);

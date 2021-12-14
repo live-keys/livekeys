@@ -1,6 +1,6 @@
-var namespace = imports.get('namespace')
+import {namespace} from '__UNRESOLVED__'
 
-module.exports["ParserTest10"] = class ParserTest10 extends namespace.Comp {
+export class ParserTest10 extends namespace.Comp {
 
     constructor(){
         super()

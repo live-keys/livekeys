@@ -1,0 +1,45 @@
+// This holds an import from the same path
+
+////// live.plugin.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["A", "B", "main"]
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// B.lv
+
+component default < Element{
+    fn toString(){
+        return "class[B]"
+    }
+}
+
+////// main.lv
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+}
+
+

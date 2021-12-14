@@ -1,11 +1,8 @@
-imports.require('test')
-imports.require('language')
+import {LanguageScanner} from '__UNRESOLVED__'
+import {Scenario} from '__UNRESOLVED__'
+import {TestCase} from '__UNRESOLVED__'
 
-var LanguageScanner = imports.get('LanguageScanner')
-var Scenario = imports.get('Scenario')
-var TestCase = imports.get('TestCase')
-
-module.exports["ParserTest14"] = (function(parent){
+export let ParserTest14 = (function(parent){
     this.setParent(parent)
     Element.addProperty(this, 'ls', { type: 'LanguageScanner', notify: 'lsChanged' })
     this.ls = (function(parent){

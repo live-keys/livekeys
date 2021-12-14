@@ -284,31 +284,41 @@ std::string LanguageParser::toJs(const std::string &contents, const std::string 
 }
 
 std::string LanguageParser::toJs(const std::string& contents, AST *ast, const std::string filename) const{
+    std::string result;
+
+    if ( !ast )
+        return result;
+
+    ProgramNode* root = toJsNodes(ast, filename);
+    root->collectImportTypes(contents);
+
+    result = toJs(contents, root);
+
+    delete root;
+
+    return result;
+}
+
+ProgramNode *LanguageParser::toJsNodes(AST *ast, const std::string filename) const{
     if ( !ast )
         return nullptr;
 
-    std::string result;
-
-    BaseNode* root = nullptr;
-    try {
-        root = el::BaseNode::visit(ast);
-    } catch (SyntaxException exc){
-        if (m_engine)
-            m_engine->throwError(&exc, nullptr);
-        return "";
-    }
-
-    if (!filename.empty())
-    {
-        ProgramNode* pn = dynamic_cast<ProgramNode*>(root);
+    BaseNode* root = el::BaseNode::visit(ast);
+    ProgramNode* pn = dynamic_cast<ProgramNode*>(root);
+    if (!filename.empty()){
         pn->setFilename(filename);
     }
 
+    return pn;
+}
+
+std::string LanguageParser::toJs(const std::string &contents, BaseNode *node) const{
+    std::string result;
     el::JSSection* section = new el::JSSection;
     section->from = 0;
     section->to   = static_cast<int>(contents.size());
 
-    root->convertToJs(contents, section->m_children);
+    node->convertToJs(contents, section->m_children);
 
     std::vector<std::string> flatten;
     section->flatten(contents, flatten);
@@ -318,7 +328,6 @@ std::string LanguageParser::toJs(const std::string& contents, AST *ast, const st
     }
 
     delete section;
-    delete root;
 
     return result;
 }

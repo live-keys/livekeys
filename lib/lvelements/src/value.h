@@ -24,6 +24,7 @@ class Value;
 class Boolean;
 class Context;
 class Script;
+class Module;
 class TryCatch;
 template<class T> class Local;
 template<class T> class MaybeLocal;
@@ -119,7 +120,7 @@ inline Value::Stored::Type Value::type() const{
 }
 
 
-class LocalValuePrivate;
+class ScopedValuePrivate;
 
 /**
  * @brief Stores a reference to a script value.
@@ -183,7 +184,7 @@ public:
     }
 
 private:
-    LocalValuePrivate* m_d;
+    ScopedValuePrivate* m_d;
     int*               m_ref;
 };
 

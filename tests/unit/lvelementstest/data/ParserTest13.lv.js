@@ -1,9 +1,7 @@
-imports.require('test')
+import {Scenario} from '__UNRESOLVED__'
+import {TestCase} from '__UNRESOLVED__'
 
-var Scenario = imports.get('Scenario')
-var TestCase = imports.get('TestCase')
-
-module.exports["ParserTest13"] = (function(parent){
+export let ParserTest13 = (function(parent){
     this.setParent(parent)
     Element.assignDefaultProperty(this, [
         (function(parent){

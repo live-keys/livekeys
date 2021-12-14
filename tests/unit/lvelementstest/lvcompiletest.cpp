@@ -23,11 +23,17 @@ void LvCompileTest::initTestCase(){
 void LvCompileTest::test1Lv(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
-        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv";
-        Script::Ptr sc = engine->compileModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test1");
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv";
+        ElementsModule::Ptr epl = engine->compile(scriptsPath);
+        ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
+
+        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        jsMf->evaluate();
+
+        ScopedValue sv = jsMf->moduleNamespace();
+        Object::Accessor oa(sv);
+
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -73,8 +79,8 @@ void LvCompileTest::test2Lv(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv";
         Script::Ptr sc = engine->compileModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test2");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test2");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -114,8 +120,8 @@ void LvCompileTest::test3Lv(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv";
         Script::Ptr sc = engine->compileModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test3");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test3");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -159,8 +165,8 @@ void LvCompileTest::test4Lv(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv";
         Script::Ptr sc = engine->compileModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test4");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test4");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -206,8 +212,8 @@ void LvCompileTest::test1Js(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv.js";
         Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test1");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test1");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -253,8 +259,8 @@ void LvCompileTest::test2Js(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv.js";
         Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test2");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test2");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -294,8 +300,8 @@ void LvCompileTest::test3Js(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv.js";
         Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test3");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test3");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);
@@ -339,8 +345,8 @@ void LvCompileTest::test4Js(){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv.js";
         Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
 
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsPlugin::addModuleFile(epl, "Test4");
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
+        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test4");
 
         Object m = sc->loadAsModule(mf);
         Object::Accessor lm(m);

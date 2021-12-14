@@ -103,7 +103,7 @@ void JsErrorHandlingTest::testExceptionFromFunction(){
     Engine* engine = new Engine;
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
 
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();
@@ -136,7 +136,7 @@ void JsErrorHandlingTest::testExceptionFromMethod(){
     Engine* engine = new Engine;
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();
         epl->addModuleLibrary(m);
@@ -171,7 +171,7 @@ void JsErrorHandlingTest::testExceptionFromProperty()
     Engine* engine = new Engine;
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();
         epl->addModuleLibrary(m);
@@ -205,7 +205,7 @@ void JsErrorHandlingTest::testExceptionPropagation(){
     Engine* engine = new Engine;
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();
         epl->addModuleLibrary(m);
@@ -244,7 +244,7 @@ void JsErrorHandlingTest::testExceptionPropagationFromJs(){
 
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
 
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();
@@ -285,7 +285,7 @@ void JsErrorHandlingTest::testExceptionRethrowPropagation()
 
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
 
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<JsErrorHandlingStub>();

@@ -43,6 +43,8 @@ private slots:
     void idObjectInJsScope();
     void nestedObjectsInJsScope();
     void sameIdInBothScopes();
+    void namespaceImportTest();
+    void multiNamespaceImportTest();
 
 private:
     void parseTestTemplate(std::string name);

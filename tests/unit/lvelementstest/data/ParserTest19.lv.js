@@ -1,10 +1,10 @@
-var Button = imports.get('Button')
-var Div = imports.get('Div')
-var Li = imports.get('Li')
-var Span = imports.get('Span')
-var T = imports.get('T')
+import {Button} from '__UNRESOLVED__'
+import {Div} from '__UNRESOLVED__'
+import {Li} from '__UNRESOLVED__'
+import {Span} from '__UNRESOLVED__'
+import {T} from '__UNRESOLVED__'
 
-module.exports["TodoListItem"] = class TodoListItem extends Li{
+export class TodoListItem extends Li{
 
     constructor(){
         super()
@@ -26,9 +26,9 @@ module.exports["TodoListItem"] = class TodoListItem extends Li{
                 this.setParent(parent)
                 Element.assignPropertyExpression(this,
                     'classes',
-                    function(){ return item.done ? "done" : "undone"}.bind(this),
+                    function(){ return todoListItem.item.done ? "done" : "undone"}.bind(this),
                     [
-                        [ item, 'doneChanged' ]
+                        [ todoListItem.item, 'doneChanged' ]
                     ]
                 )
                 Element.assignDefaultProperty(this, [
@@ -43,9 +43,9 @@ module.exports["TodoListItem"] = class TodoListItem extends Li{
                         this.setParent(parent)
                         Element.assignPropertyExpression(this,
                             'text',
-                            function(){ return item.value}.bind(this),
+                            function(){ return todoListItem.item.value}.bind(this),
                             [
-                                [ item, 'valueChanged' ]
+                                [ todoListItem.item, 'valueChanged' ]
                             ]
                         )
                         return this

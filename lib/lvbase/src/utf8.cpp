@@ -77,6 +77,18 @@ size_t Utf8::findLast(const Utf8 &str, size_t offset) const{
     return m_data->rfind(str.data(), offset);
 }
 
+Utf8 Utf8::replaceAll(const Utf8 &from, const Utf8 &to) const{
+    std::string result = data();
+    size_t start_pos = 0;
+
+    while( (start_pos = result.find(from.data(), start_pos)) != std::string::npos) {
+        result.replace(start_pos, from.length(), to.data());
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+
+    return Utf8(result);
+}
+
 Utf8 Utf8::substr(size_t start, size_t length) const{
     return Utf8(m_data->substr(start, length));
 }
@@ -212,6 +224,31 @@ Utf8 Utf8::toUpper() const{
 
     delete[] upperCharDst;
     return Utf8(upperStr);
+}
+
+std::vector<Utf8> Utf8::split(const char *sep){
+    std::vector<Utf8> tokens;
+    std::size_t start = 0, end = 0;
+    while ((end = m_data->find(sep, start)) != std::string::npos) {
+        tokens.push_back(Utf8(m_data->substr(start, end - start)));
+        start = end + 1;
+    }
+    tokens.push_back(Utf8(m_data->substr(start)));
+    return tokens;
+}
+
+Utf8 Utf8::join(const std::vector<Utf8> &parts, const Utf8 &delim){
+    Utf8 result;
+    for( const auto &s : parts ){
+        if(!result.isEmpty())
+            *result.m_data += delim.data();
+        *result.m_data += s.data();
+    }
+    return result;
+}
+
+bool Utf8::isEmpty() const{
+    return m_data->empty();
 }
 
 size_t Utf8::size() const{

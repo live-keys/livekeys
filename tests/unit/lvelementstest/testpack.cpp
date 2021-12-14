@@ -8,9 +8,15 @@
 #include "live/exception.h"
 #include "live/visuallog.h"
 
-TestPack::TestPack(std::string path)
+TestPack::TestPack(std::string path, bool clearOnDestruct)
+    : m_clearOnDestruction(clearOnDestruct)
 {
     m_path = path;
+}
+
+TestPack::~TestPack(){
+    if ( m_clearOnDestruction )
+        clear();
 }
 
 void TestPack::unpack(std::string filePath)
@@ -88,5 +94,3 @@ std::string TestPack::listLocation(){
 
     return result;
 }
-
-

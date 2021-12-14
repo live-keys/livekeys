@@ -36,6 +36,8 @@ public:
     size_t findLast(const std::string& str, size_t offset = std::string::npos) const;
     size_t findLast(const Utf8& str, size_t offset = std::string::npos) const;
 
+    Utf8 replaceAll(const Utf8& from, const Utf8& to) const;
+
     Utf8 substr(size_t start, size_t length) const;
 
     char operator[](size_t index) const;
@@ -77,6 +79,9 @@ public:
     Utf8 toUpper() const;
 
     std::vector<Utf8> split(const char* sep);
+    static Utf8 join(const std::vector<Utf8>& parts, const Utf8& delim = ",");
+
+    bool isEmpty() const;
 
     size_t size() const;
     size_t length() const;

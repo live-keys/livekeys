@@ -2,6 +2,8 @@
 isEmpty(V8CONFIG_PRO){
 V8CONFIG_PRO = 1
 
+# Minimum v8 version: 9
+
 win32{
     # Windows Configuration
 

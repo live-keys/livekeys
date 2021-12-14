@@ -1,4 +1,4 @@
-module.exports["FunctionComponent"] = class FunctionComponent extends Element{
+export class FunctionComponent extends Element{
     constructor(){
         super()
         this.__initialize()
@@ -26,7 +26,7 @@ module.exports["FunctionComponent"] = class FunctionComponent extends Element{
     }
 }
 
-module.exports["FunctionCreatesComponent"] = class FunctionCreatesComponent extends Element{
+export class FunctionCreatesComponent extends Element{
     constructor(){
         super()
         this.__initialize()
