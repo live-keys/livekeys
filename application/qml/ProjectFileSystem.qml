@@ -185,7 +185,7 @@ Pane{
                 entryData.activeFocus = false
             }
             function setActive(){
-                lk.layers.workspace.project.setActive(styleData.value.path)
+                lk.layers.workspace.wizards.switchActive(Fs.UrlInfo.urlFromLocalFile(styleData.value.path))
             }
             function addRunnable(){
                 lk.layers.workspace.project.openRunnable(styleData.value.path, [styleData.value.path])

@@ -515,8 +515,17 @@ Item{
                     },
                 })
             } else {
-                root.fileSystem.closeDocument(document, callbacK)
+                root.fileSystem.closeDocument(document, callback)
             }
+        }
+
+        function switchActive(url){
+            var path = Fs.UrlInfo.toLocalFile(url)
+            if ( lk.layers.workspace.project.active && lk.layers.workspace.project.active.path === path )
+                return
+
+            lk.layers.workspace.project.setActive(path)
+            root.fileSystem.updateProjectFile()
         }
 
         function addFile(path, opt, callback){
@@ -595,7 +604,7 @@ Item{
                 var documentList = lk.layers.workspace.project.documentModel.listUnsavedDocumentsInPath(entry.path)
                 if ( documentList.length === 0 ){
                     message =
-                        "Are you sure you want to remove directory\'" + entry.path + "\' " +
+                        "Are you sure you want to remove directory\'" + path + "\' " +
                         "and all its contents?"
                 } else {
                     var unsavedFiles = '';
@@ -606,15 +615,15 @@ Item{
                     message = "The following files have unsaved changes:\n";
                     message += unsavedFiles
                     message +=
-                        "Are you sure you want to remove directory \'" + entry.path +
+                        "Are you sure you want to remove directory \'" + path +
                         "\' and all its contents?\n"
                 }
             } else {
                 var doc = lk.layers.workspace.project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
                 if  ( doc && doc.isDirty ){
-                    message = "Are you sure you want to remove unsaved file \'" + entry.path + "\'?"
+                    message = "Are you sure you want to remove unsaved file \'" + path + "\'?"
                 } else {
-                    message = "Are you sure you want to remove file \'" + entry.path + "\'?"
+                    message = "Are you sure you want to remove file \'" + path + "\'?"
                 }
             }
 
@@ -648,7 +657,7 @@ Item{
                 var doc = lk.layers.workspace.project.isOpened(Fs.UrlInfo.urlFromLocalFile(path))
                 if  ( doc && doc.isDirty ){
                     message = lang([
-                        "Are you sure you want to move unsaved file '%0'?\n" +
+                        "Are you sure you want to move unsaved file '%0'?\n",
                         "All your changes will be lost."
                     ]).format(entry.path)
                 } else {
@@ -861,6 +870,33 @@ Item{
             fe.document = doc
             if ( callback )
                 callback(path, doc, fe)
+        }
+
+        function hasProjectFile(){
+            return Fs.Path.exists(lk.layers.workspace.project.path('live.project.json'))
+        }
+
+        function updateProjectFile(){
+            var activePath = lk.layers.workspace.project.active.path
+            var projectPath = lk.layers.workspace.project.dir()
+            var relativeActivePath = activePath.replace(projectPath + '/', '')
+
+            if ( hasProjectFile() ){
+                var projectFileUrl = Fs.UrlInfo.urlFromLocalFile(lk.layers.workspace.project.path('live.project.json'))
+                var doc = lk.layers.workspace.project.openFile(projectFileUrl, { type: 'binary', fileSystem: true })
+                var docContent = doc.content.toString()
+
+                var contentObject = JSON.parse(docContent)
+                contentObject.active = relativeActivePath
+                doc.setContent(JSON.stringify(contentObject))
+                doc.save()
+                lk.layers.workspace.project.closeFile(lk.layers.workspace.project.path('live.project.json'))
+            } else {
+                var doc = lk.layers.workspace.project.createDocument({ type: 'binary', fileSystem: true })
+                doc.setContent(JSON.stringify({active: relativeActivePath}))
+                doc.saveAs(lk.layers.workspace.project.path('live.project.json'))
+                lk.layers.workspace.project.closeFile(lk.layers.workspace.project.path('live.project.json'))
+            }
         }
 
         function removePath(path){

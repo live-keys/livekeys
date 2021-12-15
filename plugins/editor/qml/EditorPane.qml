@@ -249,7 +249,7 @@ Workspace.Pane{
             }
             MouseArea{
                 anchors.fill: parent
-                onClicked: root.closeDocument()
+                onClicked: lk.layers.workspace.wizards.closeDocument(editor.document)
             }
         }
 
