@@ -82,7 +82,7 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
     if ( m_programHolder && m_programHolder->main() ){
         QmlProgram* qmlProgram = static_cast<QmlProgram*>(m_programHolder->main());
         if ( qmlProgram ){
-            openProject(QUrl::fromLocalFile(QString::fromStdString(qmlProgram->rootPath().data())));
+            openProject(QUrl::fromLocalFile(QString::fromStdString(qmlProgram->rootPath().data())), qmlProgram);
         }
     }
 }

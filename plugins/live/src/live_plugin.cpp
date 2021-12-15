@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "live_plugin.h"
-#include "qmlmain.h"
 #include "staticloader.h"
 #include "live/staticcontainer.h"
 #include "licensesettings.h"
@@ -66,7 +65,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::VisualLogFilter>(     uri, 1, 0, "VisualLogFilter");
     qmlRegisterType<lv::LogListener>(         uri, 1, 0, "LogListener");
     qmlRegisterType<lv::ValueHistory>(        uri, 1, 0, "ValueHistory");
-    qmlRegisterType<lv::QmlMain>(             uri, 1, 0, "Main");
     qmlRegisterType<lv::StringBasedLoader>(   uri, 1, 0, "StringBasedLoader");
     qmlRegisterType<lv::Worker>(              uri, 1, 0, "Worker");
     qmlRegisterType<lv::QmlFork>(             uri, 1, 0, "Fork");

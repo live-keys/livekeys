@@ -53,9 +53,7 @@ private:
     void setPaneState(MLNode& pane, const QVariant& state);
 };
 
-void ProjectWorkspace::State::projectActiveChange(Runnable *runnable){
-    if ( runnable )
-        currentWorkspaceLayout["active"] = Project::hashPath(runnable->path().toUtf8()).toHex().toStdString();
+void ProjectWorkspace::State::projectActiveChange(Runnable*){
 }
 
 void ProjectWorkspace::State::documentOpen(Document *document){

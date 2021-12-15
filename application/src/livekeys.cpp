@@ -116,6 +116,12 @@ Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *par
     QString mainPath = livekeys->scriptPath();
     if ( !mainPath.isEmpty() ){
         QmlProgram* qmlMain = QmlProgram::create(livekeys->m_viewEngine, mainPath.toStdString());
+        auto scriptArguments = livekeys->m_arguments->scriptArguments();
+        QStringList arguments;
+        for ( const std::string& arg: scriptArguments ){
+            arguments.push_back(QString::fromStdString(arg));
+        }
+        qmlMain->setArguments(arguments);
         livekeys->m_main = qmlMain;
     }
 

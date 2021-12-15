@@ -14,14 +14,14 @@
 **
 ****************************************************************************/
 
-#include "scriptcommandlineparser_p.h"
+#include "qmlscriptargumentsparser.h"
 #include "live/exception.h"
 
 namespace{
 
     /// \private
     std::exception makeException(const QString& str){
-        return CREATE_EXCEPTION(lv::Exception, str.toStdString().c_str(), lv::Exception::toCode("scriptcommandlineparser"));
+        return CREATE_EXCEPTION(lv::Exception, str.toStdString().c_str(), lv::Exception::toCode("QmlScriptArgumentsParser"));
     }
 
 }// namespace
@@ -29,7 +29,7 @@ namespace{
 namespace lv{
 
 /// \private
-class ScriptCommandLineParser::Option{
+class QmlScriptArgumentsParser::Option{
 
 public:
     QStringList shortNames;
@@ -44,27 +44,27 @@ public:
     Option() : isFlag(false), isSet(false){}
 };
 
-ScriptCommandLineParser::ScriptCommandLineParser(const QStringList &argvTail)
+QmlScriptArgumentsParser::QmlScriptArgumentsParser(const QStringList &argvTail)
     : m_argvTail(argvTail)
 {
     m_helpOption    = addFlag(QStringList() << "-h" << "--help",    "Displays this information and exits.");
     m_versionOption = addFlag(QStringList() << "-v" << "--version", "Displays version information and exits.");
 }
 
-ScriptCommandLineParser::~ScriptCommandLineParser(){
-    for ( QList<ScriptCommandLineParser::Option*>::iterator it = m_options.begin(); it != m_options.end(); ++it ){
+QmlScriptArgumentsParser::~QmlScriptArgumentsParser(){
+    for ( QList<QmlScriptArgumentsParser::Option*>::iterator it = m_options.begin(); it != m_options.end(); ++it ){
         delete *it;
     }
     m_options.clear();
 }
 
-QString ScriptCommandLineParser::helpString() const{
+QString QmlScriptArgumentsParser::helpString() const{
     QString base("\nUsage:\n\n   livekeys [...] script.qml [options] [args ...]\n\nScript options:\n\n");
-    for ( QList<ScriptCommandLineParser::Option*>::const_iterator it = m_options.begin(); it != m_options.end(); ++it ){
-        for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
+    for ( QList<QmlScriptArgumentsParser::Option*>::const_iterator it = m_options.begin(); it != m_options.end(); ++it ){
+        for ( auto nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
             base += QString("  ") + "-" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
-        for ( QStringList::const_iterator nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
+        for ( auto nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
             base += QString("  ") + "--" + *nameIt + ((*it)->type != "" ? " <" + (*it)->type + ">" : "");
         }
         base += "\n";
@@ -73,7 +73,7 @@ QString ScriptCommandLineParser::helpString() const{
     return base;
 }
 
-QStringList ScriptCommandLineParser::optionNames(ScriptCommandLineParser::Option *option) const{
+QStringList QmlScriptArgumentsParser::optionNames(QmlScriptArgumentsParser::Option *option) const{
     QStringList base;
     for ( QStringList::const_iterator nameIt = option->shortNames.begin(); nameIt != option->shortNames.end(); ++nameIt ){
         base << *nameIt;
@@ -85,10 +85,10 @@ QStringList ScriptCommandLineParser::optionNames(ScriptCommandLineParser::Option
 }
 
 
-void ScriptCommandLineParser::assignName(const QString &name, ScriptCommandLineParser::Option *option, const QList<Option *> &check){
+void QmlScriptArgumentsParser::assignName(const QString &name, QmlScriptArgumentsParser::Option *option, const QList<Option *> &check){
     if ( name.startsWith("--") ){
         if ( name.length() != 2 ){
-            ScriptCommandLineParser::Option* sameNameOpt = findOptionByLongName(name.mid(2), check);
+            QmlScriptArgumentsParser::Option* sameNameOpt = findOptionByLongName(name.mid(2), check);
             if ( sameNameOpt != 0 )
                 throw makeException("Option with the same name exists: " + name);
             option->longNames.append(name.mid(2));
@@ -98,7 +98,7 @@ void ScriptCommandLineParser::assignName(const QString &name, ScriptCommandLineP
             delete option;
             throw makeException("Long option name given for short option: " + name);
         }
-        ScriptCommandLineParser::Option* sameNameOpt = findOptionByShortName(name.mid(1), check);
+        QmlScriptArgumentsParser::Option* sameNameOpt = findOptionByShortName(name.mid(1), check);
         if ( sameNameOpt != 0 )
             throw makeException("Option with the same name exists: " + name);
         option->shortNames.append(name.mid(1));
@@ -106,8 +106,8 @@ void ScriptCommandLineParser::assignName(const QString &name, ScriptCommandLineP
         throw makeException("Failed to parse option name: " + name);
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::findOptionByLongName(const QString &name, const QList<Option *> &check){
-    for ( QList<ScriptCommandLineParser::Option*>::const_iterator it = check.begin(); it != check.end(); ++it ){
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::findOptionByLongName(const QString &name, const QList<Option *> &check){
+    for ( QList<QmlScriptArgumentsParser::Option*>::const_iterator it = check.begin(); it != check.end(); ++it ){
         for ( QStringList::const_iterator nameIt = (*it)->longNames.begin(); nameIt != (*it)->longNames.end(); ++nameIt ){
             if ( *nameIt == name )
                 return *it;
@@ -116,8 +116,8 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::findOptionByLongName(c
     return 0;
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::findOptionByShortName(const QString &name, const QList<Option *> &check){
-    for ( QList<ScriptCommandLineParser::Option*>::const_iterator it = check.begin(); it != check.end(); ++it ){
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::findOptionByShortName(const QString &name, const QList<Option *> &check){
+    for ( QList<QmlScriptArgumentsParser::Option*>::const_iterator it = check.begin(); it != check.end(); ++it ){
         for ( QStringList::const_iterator nameIt = (*it)->shortNames.begin(); nameIt != (*it)->shortNames.end(); ++nameIt ){
             if ( *nameIt == name )
                 return *it;
@@ -127,8 +127,8 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::findOptionByShortName(
 }
 
 
-void ScriptCommandLineParser::resetScriptOptions(){
-    for ( QList<ScriptCommandLineParser::Option*>::iterator it = m_options.begin(); it != m_options.end(); ++it ){
+void QmlScriptArgumentsParser::resetScriptOptions(){
+    for ( QList<QmlScriptArgumentsParser::Option*>::iterator it = m_options.begin(); it != m_options.end(); ++it ){
         delete *it;
     }
     m_options.clear();
@@ -138,11 +138,11 @@ void ScriptCommandLineParser::resetScriptOptions(){
     m_versionOption = addFlag(QStringList() << "-v" << "--version", "Displays version information and exits.");
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::addFlag(const QStringList &names, const QString &description){
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::addFlag(const QStringList &names, const QString &description){
     if ( names.isEmpty() )
         throw makeException("Setting up option requires at least one name.");
 
-    ScriptCommandLineParser::Option* option = new ScriptCommandLineParser::Option;
+    QmlScriptArgumentsParser::Option* option = new QmlScriptArgumentsParser::Option;
     for ( QStringList::const_iterator it = names.begin(); it != names.end(); ++it )
         assignName(*it, option, m_options);
     option->isFlag      = true;
@@ -151,8 +151,8 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::addFlag(const QStringL
     return option;
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::addFlag(const QString &name, const QString &description){
-    ScriptCommandLineParser::Option* option = new ScriptCommandLineParser::Option;
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::addFlag(const QString &name, const QString &description){
+    QmlScriptArgumentsParser::Option* option = new QmlScriptArgumentsParser::Option;
     assignName(name, option, m_options);
     option->isFlag      = true;
     option->description = description;
@@ -160,11 +160,11 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::addFlag(const QString 
     return option;
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::addOption(const QStringList &names, const QString &description, const QString &type){
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::addOption(const QStringList &names, const QString &description, const QString &type){
     if ( names.isEmpty() )
         throw makeException("Setting up option requires at least one name.");
 
-    ScriptCommandLineParser::Option* option = new ScriptCommandLineParser::Option;
+    QmlScriptArgumentsParser::Option* option = new QmlScriptArgumentsParser::Option;
     for ( QStringList::const_iterator it = names.begin(); it != names.end(); ++it )
         assignName(*it, option, m_options);
     option->isFlag      = false;
@@ -174,8 +174,8 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::addOption(const QStrin
     return option;
 }
 
-ScriptCommandLineParser::Option *ScriptCommandLineParser::addOption(const QString &name, const QString &description, const QString &type){
-    ScriptCommandLineParser::Option* option = new ScriptCommandLineParser::Option;
+QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::addOption(const QString &name, const QString &description, const QString &type){
+    QmlScriptArgumentsParser::Option* option = new QmlScriptArgumentsParser::Option;
     assignName(name, option, m_options);
     option->isFlag      = false;
     option->description = description;
@@ -184,13 +184,13 @@ ScriptCommandLineParser::Option *ScriptCommandLineParser::addOption(const QStrin
     return option;
 }
 
-void ScriptCommandLineParser::parseArguments(){
+void QmlScriptArgumentsParser::parseArguments(){
     if ( m_argvTail.length() > 0 ){
         int i = 0;
         while ( i < m_argvTail.length() ){
             if ( m_argvTail[i][0] == '-' ){
                 if ( m_argvTail[i][1] == '-' ){
-                    ScriptCommandLineParser::Option* option = findOptionByLongName(m_argvTail[i].mid(2), m_options);
+                    QmlScriptArgumentsParser::Option* option = findOptionByLongName(m_argvTail[i].mid(2), m_options);
                     if ( !option )
                         throw makeException(QString("Option not found: ") + m_argvTail[i]);
 
@@ -202,7 +202,7 @@ void ScriptCommandLineParser::parseArguments(){
                         option->value = m_argvTail[i];
                     }
                 } else {
-                    ScriptCommandLineParser::Option* option = findOptionByShortName(m_argvTail[i].mid(1), m_options);
+                    QmlScriptArgumentsParser::Option* option = findOptionByShortName(m_argvTail[i].mid(1), m_options);
                     if ( !option )
                         throw makeException(QString("Option not found: ") + m_argvTail[i]);
 
@@ -228,7 +228,7 @@ void ScriptCommandLineParser::parseArguments(){
     }
 }
 
-ScriptCommandLineParser::Option* ScriptCommandLineParser::findOptionByName(const QString &name){
+QmlScriptArgumentsParser::Option* QmlScriptArgumentsParser::findOptionByName(const QString &name){
     if ( name.startsWith("--") )
         return findOptionByLongName(name.mid(2), m_options);
     else if ( name.startsWith("-") )
@@ -236,15 +236,15 @@ ScriptCommandLineParser::Option* ScriptCommandLineParser::findOptionByName(const
     return 0;
 }
 
-bool ScriptCommandLineParser::isSet(ScriptCommandLineParser::Option *option) const{
+bool QmlScriptArgumentsParser::isSet(QmlScriptArgumentsParser::Option *option) const{
     return option->isSet;
 }
 
-const QString &ScriptCommandLineParser::value(ScriptCommandLineParser::Option *option) const{
+const QString &QmlScriptArgumentsParser::value(QmlScriptArgumentsParser::Option *option) const{
     return option->value;
 }
 
-void ScriptCommandLineParser::assertIsSet(ScriptCommandLineParser::Option *option) const{
+void QmlScriptArgumentsParser::assertIsSet(QmlScriptArgumentsParser::Option *option) const{
     if ( !isSet(option) ){
         QString key = option->longNames.length() > 0 ? "--" + option->longNames.first() : "-" + option->shortNames.first();
         throw makeException("Required option has not been set: " + key);

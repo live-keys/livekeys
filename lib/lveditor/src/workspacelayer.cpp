@@ -127,14 +127,16 @@ WorkspaceLayer::~WorkspaceLayer(){
 }
 
 void WorkspaceLayer::initialize(const MLNode &config){
-    const MLNode::ObjectType& o = config.asObject();
-    for ( auto it = o.begin(); it != o.end(); ++it ){
-        if ( it->first == "monitor" ){
-            QString monitorFiles = QString::fromStdString(it->second.asString());
-            QStringList monitorFileList = monitorFiles.split(',');
-            m_project->monitorFiles(monitorFileList);
-        } else {
-            THROW_EXCEPTION(lv::Exception, Utf8("Uknown workspace layer key in --layer-config: %").format(it->first), lv::Exception::toCode("~Key") );
+    if ( config.type() == MLNode::Type::Object ){
+        const MLNode::ObjectType& o = config.asObject();
+        for ( auto it = o.begin(); it != o.end(); ++it ){
+            if ( it->first == "monitor" ){
+                QString monitorFiles = QString::fromStdString(it->second.asString());
+                QStringList monitorFileList = monitorFiles.split(',');
+                m_project->monitorFiles(monitorFileList);
+            } else {
+                THROW_EXCEPTION(lv::Exception, Utf8("Uknown workspace layer key in --layer-config: %").format(it->first), lv::Exception::toCode("~Key") );
+            }
         }
     }
 }
@@ -427,14 +429,6 @@ void WorkspaceLayer::whenProjectOpen(const QString &, ProjectWorkspace *workspac
         }
 
         initializePanesAndWindows(workspace, initialPanes);
-    }
-
-    if ( layout.hasKey("active") && !openDocuments.isEmpty() ){
-        QByteArray activeKey = QByteArray::fromStdString(layout["active"].asString());
-        auto it = openDocuments.find(activeKey);
-        if ( it != openDocuments.end() ){
-            m_project->setActive(it.value()->path());
-        }
     }
 
     // notify removed documents

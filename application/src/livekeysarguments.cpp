@@ -213,7 +213,7 @@ const MLNode &LivekeysArguments::layerConfiguration() const{
 }
 
 MLNode LivekeysArguments::layerConfigurationFor(const std::string &layerName) const{
-    if ( m_layerConfiguration.hasKey(layerName) ){
+    if ( m_layerConfiguration.type() == MLNode::Object && m_layerConfiguration.hasKey(layerName) ){
         return m_layerConfiguration[layerName];
     }
     return MLNode();

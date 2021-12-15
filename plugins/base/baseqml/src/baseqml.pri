@@ -9,6 +9,8 @@ HEADERS += \
     $$PWD/qmlcollector.h \
     $$PWD/qmldata.h \
     $$PWD/qmleachvalueapply.h \
+    $$PWD/qmlmain.h \
+    $$PWD/qmlscriptargumentsparser.h \
     $$PWD/qmlexec.h \
     $$PWD/qmlindexselector.h \
     $$PWD/qmlpropertylog.h \
@@ -43,6 +45,8 @@ SOURCES += \
     $$PWD/qmlcollector.cpp \
     $$PWD/qmldata.cpp \
     $$PWD/qmleachvalueapply.cpp \
+    $$PWD/qmlmain.cpp \
+    $$PWD/qmlscriptargumentsparser.cpp \
     $$PWD/qmlexec.cpp \
     $$PWD/qmlindexselector.cpp \
     $$PWD/qmlpropertylog.cpp \

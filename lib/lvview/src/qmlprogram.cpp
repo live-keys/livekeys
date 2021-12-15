@@ -16,7 +16,11 @@ QmlProgram::QmlProgram(ViewEngine *engine, const Utf8 &file, const Utf8 &project
     , m_viewEngine(engine)
     , m_rootPath(projectPath)
     , m_path(file)
-    , m_projectInfo(new QmlProjectInfo(QString::fromStdString(projectPath.data()), QUrl::fromLocalFile(QString::fromStdString(file.data())), this))
+    , m_projectInfo(new QmlProjectInfo(
+        QString::fromStdString(projectPath.data()),
+        QUrl::fromLocalFile(QString::fromStdString(file.data())),
+        engine,
+        this))
     , m_runSpace(nullptr)
     , m_isLoading(false)
     , m_readerInstance(nullptr)
@@ -32,6 +36,11 @@ QmlProgram::~QmlProgram(){
 
 void QmlProgram::setRunSpace(QObject *runSpace){
     m_runSpace = runSpace;
+}
+
+void QmlProgram::setArguments(const QStringList &arguments){
+    m_arguments = arguments;
+    m_projectInfo->setArguments(QStringList() << QString::fromStdString(m_path.data()) << arguments);
 }
 
 void QmlProgram::setFileReader(std::function<QByteArray (QUrl, QObject *)> reader, QObject *instance){
@@ -102,6 +111,10 @@ void QmlProgram::run(QQmlContext *ctx, bool runAsync){
 
 void QmlProgram::clearCache(){
     m_viewEngine->engine()->clearComponentCache();
+}
+
+void QmlProgram::onExit(const std::function<void (int)> &exitHandler){
+    m_projectInfo->onExit(exitHandler);
 }
 
 QmlProgram *QmlProgram::create(ViewEngine *engine, const Utf8 &p){

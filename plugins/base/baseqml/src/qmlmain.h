@@ -19,71 +19,64 @@
 
 #include <QQuickItem>
 #include <QJSValue>
-#include "live/lvliveglobal.h"
 
 namespace lv{
 
-class ScriptCommandLineParser;
+class QmlScriptArgumentsParser;
+class ViewEngine;
 
 ///\private
 class QmlMain : public QQuickItem{
 
     Q_OBJECT
-    Q_PROPERTY(QJSValue options READ options WRITE setOptions NOTIFY optionsChanged)
+    Q_PROPERTY(QJSValue args    READ args    CONSTANT)
     Q_PROPERTY(QString version  READ version WRITE setVersion NOTIFY versionChanged)
+    Q_PROPERTY(QJSValue run     READ run     WRITE setRun     NOTIFY runChanged)
 
 public:
     explicit QmlMain(QQuickItem* parent = 0);
     ~QmlMain();
 
-    const QJSValue& options() const;
     const QString& version() const;
-
-    void setOptions(const QJSValue& options);
     void setVersion(const QString& version);
 
+    const QJSValue& run() const;
+    void setRun(const QJSValue& arg);
+
+    const QJSValue& args() const;
+
 protected:
-    void componentComplete() Q_DECL_OVERRIDE;
+    void classBegin() override;
+    void componentComplete() override;
 
 public slots:
-    void beforeCompile();
-    void afterCompile();
-
-    const QStringList& arguments() const;
-    QString option(const QString& key) const;
-    bool isOptionSet(const QString& key) const;
+    QJSValue parse(const QJSValue& options);
+    QString parserHelpString() const;
+    void exit(int code);
 
 signals:
-    void optionsChanged();
+    void runChanged();
     void versionChanged();
-    void run();
 
 private:
-    QJSValue m_options;
-    QString  m_version;
+    QString     m_version;
+    QJSValue    m_args;
+    QJSValue    m_run;
+    ViewEngine* m_engine;
 
-    ScriptCommandLineParser* m_parser;
+    QmlScriptArgumentsParser* m_parser;
 };
-
-inline const QJSValue &QmlMain::options() const{
-    return m_options;
-}
 
 inline const QString &QmlMain::version() const{
     return m_version;
 }
 
-inline void QmlMain::setOptions(const QJSValue& options){
-    m_options = options;
-    emit optionsChanged();
+inline const QJSValue &QmlMain::run() const{
+    return m_run;
 }
 
-inline void QmlMain::setVersion(const QString &version){
-    if (m_version == version)
-        return;
-
-    m_version = version;
-    emit versionChanged();
+inline const QJSValue &QmlMain::args() const{
+    return m_args;
 }
 
 }// namespace

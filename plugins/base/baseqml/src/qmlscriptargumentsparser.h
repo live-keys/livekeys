@@ -23,14 +23,14 @@
 namespace lv{
 
 /// \private
-class ScriptCommandLineParser{
+class QmlScriptArgumentsParser{
 
 public:
     class Option;
 
 public:
-    ScriptCommandLineParser(const QStringList& argvTail);
-    ~ScriptCommandLineParser();
+    QmlScriptArgumentsParser(const QStringList& argvTail);
+    ~QmlScriptArgumentsParser();
 
     Option* helpOption();
     Option* versionOption();
@@ -65,15 +65,15 @@ private:
     Option*        m_versionOption;
 };
 
-inline const QStringList &ScriptCommandLineParser::arguments(){
+inline const QStringList &QmlScriptArgumentsParser::arguments(){
     return m_arguments;
 }
 
-inline ScriptCommandLineParser::Option *ScriptCommandLineParser::helpOption(){
+inline QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::helpOption(){
     return m_helpOption;
 }
 
-inline ScriptCommandLineParser::Option *ScriptCommandLineParser::versionOption(){
+inline QmlScriptArgumentsParser::Option *QmlScriptArgumentsParser::versionOption(){
     return m_versionOption;
 }
 

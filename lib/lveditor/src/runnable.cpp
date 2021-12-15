@@ -80,6 +80,7 @@ Runnable::Runnable(Program *program, RunnableContainer *parent, const QSet<QStri
     m_project = qobject_cast<Project*>(parent->parent());
 
     QmlProgram* qmlProgram = static_cast<QmlProgram*>(program);
+
     if ( qmlProgram ){
         if ( qmlProgram->mainPath().find(':') == std::string::npos ){
             QFileInfo mainPath(QString::fromStdString(qmlProgram->mainPath().data()));
@@ -91,6 +92,11 @@ Runnable::Runnable(Program *program, RunnableContainer *parent, const QSet<QStri
         }
         m_viewEngine = qmlProgram->viewEngine();
         m_program = qmlProgram;
+
+        qmlProgram->onExit([](int code){
+            vlog("program").i() << "Program exited with code: " << code;
+        });
+
         initialize();
     }
 }

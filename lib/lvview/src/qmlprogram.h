@@ -21,6 +21,7 @@ public:
     virtual ~QmlProgram();
 
     void setRunSpace(QObject* runSpace);
+    void setArguments(const QStringList& arguments);
     void setFileReader(std::function<QByteArray(QUrl,QObject*)> reader, QObject* instance = nullptr);
     void setContextProvider(std::function<QQmlContext*(QObject*)> provider, QObject* instance = nullptr);
 
@@ -31,6 +32,8 @@ public:
     void clearCache();
     bool isLoading();
     ViewEngine* viewEngine() const;
+
+    void onExit(const std::function<void(int)>& exitHandler);
 
     static QmlProgram* create(ViewEngine* engine, const Utf8& path);
     static QmlProgram* create(ViewEngine* engine, const Utf8& path, const Utf8& filePath);
@@ -55,6 +58,7 @@ private:
     QmlProjectInfo* m_projectInfo;
     QObject*        m_runSpace;
     bool            m_isLoading;
+    QStringList     m_arguments;
 
     QObject*        m_readerInstance;
     std::function<QByteArray(QUrl,QObject*)> m_reader;

@@ -35,6 +35,7 @@
 #include "qmlstreamact.h"
 #include "qmlthreadinfo.h"
 #include "qmltime.h"
+#include "qmlmain.h"
 #include "qmldata.h"
 #include "qmlarrange.h"
 #include "qmlcollector.h"
@@ -71,6 +72,7 @@ static QObject* scriptProvider(QQmlEngine *engine, QJSEngine *){
 void BasePlugin::registerTypes(const char *uri){
     lv::ViewEngine::registerBaseTypes(uri);
     qmlRegisterType<lv::QmlIndexSelector>(   uri, 1, 0, "IndexSelector");
+    qmlRegisterType<lv::QmlMain>(            uri, 1, 0, "Main");
     qmlRegisterType<lv::QmlAct>(             uri, 1, 0, "Act");
     qmlRegisterType<lv::QmlExec>(            uri, 1, 0, "Exec");
     qmlRegisterType<lv::QmlStreamLog>(       uri, 1, 0, "StreamLog");

@@ -8,7 +8,6 @@ HEADERS += \
     $$PWD/worker.h \
     $$PWD/qmlcomponentmap.h \
     $$PWD/qmlcomponentmapdata.h \
-    $$PWD/qmlmain.h \
     $$PWD/tcplineserver.h \
     $$PWD/tcplinesocket.h \
     $$PWD/tcplineconnection.h \
@@ -21,7 +20,6 @@ HEADERS += \
     $$PWD/remotelineproperty.h \
     $$PWD/remotecontainer.h \
     $$PWD/remotelineresponse.h \
-    $$PWD/scriptcommandlineparser_p.h \
     $$PWD/valuehistory.h \
     $$PWD/licensesettings.h \
     $$PWD/loglistener.h \
@@ -37,7 +35,6 @@ SOURCES += \
     $$PWD/stringbasedloader.cpp \
     $$PWD/qmlcomponentmap.cpp \
     $$PWD/qmlcomponentmapdata.cpp \
-    $$PWD/qmlmain.cpp \
     $$PWD/tcplineserver.cpp \
     $$PWD/tcplinesocket.cpp \
     $$PWD/tcplineconnection.cpp \
@@ -50,7 +47,6 @@ SOURCES += \
     $$PWD/remoteline.cpp \
     $$PWD/remotelineproperty.cpp \
     $$PWD/remotelineresponse.cpp \
-    $$PWD/scriptcommandlineparser.cpp \
     $$PWD/valuehistory.cpp \
     $$PWD/licensesettings.cpp \
     $$PWD/loglistener.cpp \
