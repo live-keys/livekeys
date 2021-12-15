@@ -111,7 +111,7 @@ void Project::newProject(){
         );
 
         document->addEditingState(ProjectDocument::Read);
-        document->setContent("import QtQuick 2.3\n\nGrid{\n}");
+        document->setContent("import QtQuick 2.3\nimport base 1.0\nMain{\n}");
         document->removeEditingState(ProjectDocument::Read);
         m_documentModel->openDocument("T:0", document);
 
