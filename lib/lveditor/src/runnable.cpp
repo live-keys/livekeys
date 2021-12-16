@@ -136,6 +136,10 @@ Runnable::~Runnable(){
     }
 }
 
+QUrl Runnable::url() const{
+    return QUrl::fromLocalFile(m_path);
+}
+
 void Runnable::run(){
     if ( m_type == Runnable::QmlFile ){
 

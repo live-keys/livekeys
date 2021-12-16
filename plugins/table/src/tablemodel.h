@@ -71,12 +71,12 @@ public slots:
 
 private:
     Q_DISABLE_COPY(TableModel)
-    QHash<int, QByteArray>            m_roles;
-    bool                              m_isComponentComplete;
+    QHash<int, QByteArray> m_roles;
+    bool                   m_isComponentComplete;
 
-    TableModelHeader*                      m_headerModel;
-    TableModelRowsInfo*                    m_rowModel;
-    Table*                  m_table;
+    TableModelHeader*      m_headerModel;
+    TableModelRowsInfo*    m_rowModel;
+    Table*                 m_table;
 };
 
 inline QHash<int, QByteArray> TableModel::roleNames() const{

@@ -26,6 +26,7 @@ class LV_EDITOR_EXPORT Runnable : public QObject{
     Q_PROPERTY(QString name   READ name       WRITE setName       NOTIFY nameChanged)
     Q_PROPERTY(int runTrigger READ runTrigger WRITE setRunTrigger NOTIFY runTriggerChanged)
     Q_PROPERTY(QString path   READ path CONSTANT)
+    Q_PROPERTY(QUrl url       READ url  CONSTANT)
 
 public:
     enum Type{
@@ -59,6 +60,8 @@ public:
 
     const QString& name() const;
     void setName(const QString& name);
+    const QString& path() const;
+    QUrl url() const;
 
     QObject* viewRoot();
     QQmlContext* viewContext();
@@ -68,7 +71,6 @@ public:
 
     const QSet<QString>& activations() const;
 
-    const QString& path() const;
 
     int runTrigger() const;
 

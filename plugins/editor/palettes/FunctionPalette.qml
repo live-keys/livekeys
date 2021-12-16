@@ -29,7 +29,7 @@ CodePalette{
     property QtObject theme: lk.layers.workspace.themes.current
 
     function writeBinding(){
-        var text = input.text
+        var text = editor.textEdit.text
 
         try{
             if ( text ){
@@ -45,32 +45,58 @@ CodePalette{
 
     item: Item{
 
-        width: 280
-        height: 40
+        width: 300
+        height: 80
 
         //TODO: ErrorBox when not compiling
 
-        Input.InputBox{
-            id: input
+        Editor{
+            id: editor
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.rightMargin: 35
             anchors.top: parent.top
-            height: 25
-
-            style: theme.inputStyle
-
-            onTextChanged: {
-               commitButton.visible = true
-            }
-
-            onKeyPressed: {
-                if ( event.key === Qt.Key_Enter || event.key === Qt.Key_Return ){
+            height: parent.height - 5
+            style: theme.editorStyle
+            document: lk.layers.workspace.project.createDocument({fileSystem: false, type: 'text'})
+            onKeyPress: {
+                if ( (event.key === Qt.Key_Enter || event.key === Qt.Key_Return)
+                        && (event.modifiers & Qt.ControlModifier) )
+                {
                     palette.writeBinding()
                     commitButton.visible = false
                 }
             }
+
+            Connections{
+                target: editor.textEdit
+                function onTextChanged(){
+                    commitButton.visible = true
+                }
+            }
         }
+
+//        Input.InputBox{
+//            id: input
+//            anchors.left: parent.left
+//            anchors.right: parent.right
+//            anchors.rightMargin: 35
+//            anchors.top: parent.top
+//            height: 25
+
+//            style: theme.inputStyle
+
+//            onTextChanged: {
+//               commitButton.visible = true
+//            }
+
+//            onKeyPressed: {
+//                if ( event.key === Qt.Key_Enter || event.key === Qt.Key_Return ){
+//                    palette.writeBinding()
+//                    commitButton.visible = false
+//                }
+//            }
+//        }
 
         Input.Button{
             id: commitButton
@@ -84,11 +110,17 @@ CodePalette{
                 visible = false
             }
         }
+
+        ResizeArea{
+            minimumHeight: 50
+            minimumWidth: 150
+        }
     }
 
     onInit: {
         var contents = editFragment.readValueText()
-        if ( contents )
-            input.text = contents
+        if ( contents ){
+            editor.textEdit.text = contents
+        }
     }
 }

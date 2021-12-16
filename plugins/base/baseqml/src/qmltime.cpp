@@ -1,6 +1,9 @@
 #include "qmltime.h"
+#include "live/viewengine.h"
+#include "live/qmlerror.h"
 
 #include <QTimer>
+#include <QQmlEngine>
 #include <QThread>
 
 namespace lv{
@@ -26,8 +29,14 @@ void QmlTime::usleep(int useconds){
 }
 
 void QmlTime::delay(int mseconds, QJSValue callback){
-    QTimer::singleShot(mseconds, [callback]() mutable{
-        callback.call();
+    ViewEngine* ve = ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
+    if ( !ve )
+        QmlError::warnNoEngineCaptured(this);
+    QTimer::singleShot(mseconds, [callback, ve]() mutable{
+        QJSValue res = callback.call();
+        if ( res.isError() ){
+            ve->throwError(res);
+        }
     });
 }
 
