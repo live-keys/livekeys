@@ -443,16 +443,6 @@ template<typename T> VisualLog& VisualLog::operator<< ( std::ostream (*f)(std::i
     return *this;
 }
 
-/** \brief Stream output operator for bool */
-inline std::ostream& operator << (std::ostream &stream, bool val ){
-    stream << (val ? "true" : "false");
-    return stream;
-}
-
-
-/** \brief Stream output operator for bool */
-std::ostream& operator << (std::ostream &stream, const Utf8& val );
-
 }// namespace
 
 #ifndef VLOG_NO_MACROS

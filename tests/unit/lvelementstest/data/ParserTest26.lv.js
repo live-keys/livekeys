@@ -1,6 +1,6 @@
-var Test = imports.get('Test')
+import {Test} from '__UNRESOLVED__'
 
-module.exports["C"] = class C extends Element{
+export class C extends Element{
 
     constructor(){
         super()
@@ -28,8 +28,6 @@ module.exports["C"] = class C extends Element{
 
             return d.y
         })()
-
-
 
         Element.assignDefaultProperty(this, [
             (function(parent){

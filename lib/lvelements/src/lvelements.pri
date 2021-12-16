@@ -2,9 +2,12 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/bindingpath.h \
+    $$PWD/compiler.h \
     $$PWD/cursorcontext.h \
+    $$PWD/elementsmodule.h \
     $$PWD/function.h \
     $$PWD/engine.h \
+    $$PWD/jsmodule.h \
     $$PWD/languageinfo.h \
     $$PWD/languagenodes_p.h \
     $$PWD/languageparser.h \
@@ -36,7 +39,6 @@ HEADERS += \
     $$PWD/mlnodetojs.h \
     $$PWD/visuallogjsobject.h \
     $$PWD/modulefile.h \
-    $$PWD/elementsplugin.h \
     $$PWD/imports_p.h \
     $$PWD/modulelibrary.h \
     $$PWD/moduleloader.h \
@@ -45,9 +47,12 @@ HEADERS += \
 
 SOURCES += \
     $$PWD/bindingpath.cpp \
+    $$PWD/compiler.cpp \
     $$PWD/cursorcontext.cpp \
+    $$PWD/elementsmodule.cpp \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \
+    $$PWD/jsmodule.cpp \
     $$PWD/languageinfo.cpp \
     $$PWD/languagenodes.cpp \
     $$PWD/languageparser.cpp \
@@ -74,7 +79,6 @@ SOURCES += \
     $$PWD/mlnodetojs.cpp \
     $$PWD/visuallogjsobject.cpp \
     $$PWD/modulefile.cpp \
-    $$PWD/elementsplugin.cpp \
     $$PWD/imports.cpp \
     $$PWD/modulelibrary.cpp \
     $$PWD/tuple.cpp \

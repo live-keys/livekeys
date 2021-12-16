@@ -1,0 +1,45 @@
+////// plugin1/live.plugin.json
+
+{
+    "name" : "plugin1",
+    "package": "..",
+    "modules": ["A", "B"]
+}
+
+////// plugin1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// plugin1/B.lv
+
+component default < A{}
+
+
+////// live.package.json
+
+{
+    "name" : "test-package",
+    "version" : "1.0.0"
+}
+
+////// live.plugin.json
+
+{
+    "name" : "test-package",
+    "package": ".",
+    "modules": ["main"]
+}
+
+////// main.lv
+
+import .plugin1
+
+instance default Element{
+    string b : {
+        return (new B()).toString()
+    }
+}

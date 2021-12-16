@@ -93,7 +93,7 @@ int TestCase::exec(){
                     p.assign(0, ScopedValue(engine(), tester));
 
                     //TODO: Check if run() is null
-                    vlog() << scenario->run().isNull();
+//                    vlog() << scenario->run().isNull();
                     if ( !scenario->run().isNull() )
                         scenario->run().call(scenario, p);
 

@@ -42,6 +42,7 @@ public:
     public:
         Accessor(Object o);
         Accessor(Context* context);
+        Accessor(const ScopedValue& sv);
         ~Accessor();
 
         ScopedValue get(Engine* engine, int index);
@@ -52,6 +53,7 @@ public:
         void set(Engine* engine, const std::string& key, const ScopedValue& value);
 
         bool has(Engine* engine, const ScopedValue& key) const;
+        bool has(Engine* engine, const std::string& key) const;
 
         ScopedValue ownProperties(Engine *engine) const;
 

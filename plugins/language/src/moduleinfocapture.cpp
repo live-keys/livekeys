@@ -49,7 +49,7 @@ Object ModuleInfoCapture::extract(const std::string &uri){
 }
 
 void ModuleInfoCapture::readModule(){
-    ElementsPlugin::Ptr ep = engine()->require(m_current->importUri().data());
+    ElementsModule::Ptr ep = engine()->require(m_current->importUri().data());
     Object epexports = ep->collectExportsObject();
     Object::Accessor lo(epexports);
     ScopedValue lokeys = lo.ownProperties(engine());

@@ -1,4 +1,4 @@
-module.exports["ParserTest15"] = class ParserTest15 extends Element{
+export class ParserTest15 extends Element{
 
     constructor(){
         super()

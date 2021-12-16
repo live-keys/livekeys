@@ -91,8 +91,9 @@ Plugin::Ptr Plugin::createFromPath(const std::string &path){
 
 /** Creates plugin from a given MLNode*/
 Plugin::Ptr Plugin::createFromNode(const std::string &path, const std::string &filePath, const MLNode &m){
-    if ( !m.hasKey("name") || !m.hasKey("package") )
-        return Plugin::Ptr(nullptr);
+    if ( !m.hasKey("name") || !m.hasKey("package") ){
+        THROW_EXCEPTION(lv::Exception, "Failed to read plugin file at: " + path + ". Plugin requries 'name' and 'package' info.", Exception::toCode("~Keys"));
+    }
 
     QString package = QString::fromStdString(m["package"].asString());
 

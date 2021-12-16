@@ -1,9 +1,10 @@
-var Div = imports.get('Div')
-var TodoForm = imports.get('TodoForm')
-var TodoHeader = imports.get('TodoHeader')
-var TodoList = imports.get('TodoList')
+import {Div} from '__UNRESOLVED__'
+import {TodoForm} from '__UNRESOLVED__'
+import {TodoHeader} from '__UNRESOLVED__'
+import {TodoList} from '__UNRESOLVED__'
+import {todoItems} from '__UNRESOLVED__'
 
-module.exports["TodoApp"] = class TodoApp extends Div{
+export class TodoApp extends Div{
 
     constructor(){
         super()
@@ -35,7 +36,7 @@ module.exports["TodoApp"] = class TodoApp extends Div{
                     ]
                 )
                 this.on('remove', function(index){ this.todoItems.splice(index, 1); this.todoItemsChanged() }.bind(this));
-                this.on('markTodoDone', function(index){ 
+                this.on('markTodoDone', function(itemIndex){
                     var todo = todoItems[itemIndex];
                     todoItems.splice(itemIndex, 1);
                     todo.done = !todo.done;
@@ -46,9 +47,8 @@ module.exports["TodoApp"] = class TodoApp extends Div{
             }.bind(new TodoList())(this)),
             (function(parent){
                 this.setParent(parent)
-                onAddItem(name) => {
-                    this.todoItems.unshift({ index: todoItems.length+1, value: name, done: false })
-                }
+                this.on('addItem', function(name){
+                    this.todoItems.unshift({ index: todoItems.length+1, value: name, done: false }) }.bind(this));
                 return this
             }.bind(new TodoForm())(this))
         ])

@@ -1,7 +1,6 @@
-imports.require('package')
-var T = imports.get('T')
+import {T} from '__UNRESOLVED__'
 
-module.exports["ParserTest12"] = (function(parent){
+export let ParserTest12 = (function(parent){
     this.setParent(parent)
     this.a = 20
     return this

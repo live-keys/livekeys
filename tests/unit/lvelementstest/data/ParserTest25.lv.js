@@ -1,6 +1,6 @@
-var Test = imports.get('Test')
+import {Test} from '__UNRESOLVED__'
 
-module.exports["B"] = class B extends Element{
+export class B extends Element{
 
     constructor(){
         super()

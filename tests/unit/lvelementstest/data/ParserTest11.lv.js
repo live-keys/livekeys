@@ -1,6 +1,4 @@
-imports.require('package')
-
-var T = imports.get('T')
+import {T} from '__UNRESOLVED__'
 
 (function(parent){
     this.setParent(parent)

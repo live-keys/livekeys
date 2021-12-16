@@ -23,55 +23,51 @@ void LvParseTest::initTestCase(){
     m_scriptPath  = lv::ApplicationContext::instance().releasePath() + "/data";
 }
 
-
 void LvParseTest::constructorParseTest(){
-    parseTestTemplate("ParserTest1");
+    parseTestTemplate("ParserTest01");
 }
 
 void LvParseTest::functionParseTest(){
-    parseTestTemplate("ParserTest2");
+    parseTestTemplate("ParserTest02");
 }
 
 void LvParseTest::nestingAndShortIdParseTest(){
-    parseTestTemplate("ParserTest3");
+    parseTestTemplate("ParserTest03");
 }
 
 void LvParseTest::scopeParseTest(){
-    parseTestTemplate("ParserTest4");
+    parseTestTemplate("ParserTest04");
 }
 
 void LvParseTest::propertyNewExpressionParseTest(){
-    parseTestTemplate("ParserTest5");
+    parseTestTemplate("ParserTest05");
 }
 
 void LvParseTest::propertyDeclarationParseTest(){
-    parseTestTemplate("ParserTest6");
+    parseTestTemplate("ParserTest06");
 }
 
 void LvParseTest::propertyExpressionsParseTest(){
-    parseTestTemplate("ParserTest7");
+    parseTestTemplate("ParserTest07");
 }
 
 void LvParseTest::taggedStringParseTest(){
-    parseTestTemplate("ParserTest8");
+    parseTestTemplate("ParserTest08");
 }
 
 void LvParseTest::instanceParseTest(){
-    parseTestTemplate("ParserTest9");
+    parseTestTemplate("ParserTest09");
 }
 
-void LvParseTest::namespaceInheritance()
-{
+void LvParseTest::namespaceInheritance(){
     parseTestTemplate("ParserTest10");
 }
 
-void LvParseTest::testComplexPropertyAssignment()
-{
+void LvParseTest::testComplexPropertyAssignment(){
     parseTestTemplate("ParserTest11");
 }
 
-void LvParseTest::testSimplePropertyAssignment()
-{
+void LvParseTest::testSimplePropertyAssignment(){
     parseTestTemplate("ParserTest12");
 }
 
@@ -83,67 +79,62 @@ void LvParseTest::nestedLanguageScannerTest(){
     parseTestTemplate("ParserTest14");
 }
 
-void LvParseTest::nestedFunctionAssignment()
-{
+void LvParseTest::nestedFunctionAssignment(){
     parseTestTemplate("ParserTest15");
 }
 
-void LvParseTest::arrowFunctionElement()
-{
+void LvParseTest::arrowFunctionElement(){
     parseTestTemplate("ParserTest16");
 }
 
-void LvParseTest::todoListItemSmall()
-{
+void LvParseTest::todoListItemSmall(){
     parseTestTemplate("ParserTest17");
 }
 
-void LvParseTest::todoList()
-{
+void LvParseTest::todoList(){
     parseTestTemplate("ParserTest18");
 }
 
-void LvParseTest::todoListItem()
-{
+void LvParseTest::todoListItem(){
     parseTestTemplate("ParserTest19");
 }
 
 
-void LvParseTest::todoForm()
-{
+void LvParseTest::todoForm(){
     parseTestTemplate("ParserTest20");
 }
 
 
-void LvParseTest::todoApp()
-{
+void LvParseTest::todoApp(){
     parseTestTemplate("ParserTest21");
 }
 
-void LvParseTest::complexTernaryOperator()
-{
+void LvParseTest::complexTernaryOperator(){
     parseTestTemplate("ParserTest22");
 }
 
-void LvParseTest::doublyNestedElement()
-{
+void LvParseTest::doublyNestedElement(){
     parseTestTemplate("ParserTest23");
 }
 
-void LvParseTest::idObjectInJsScope()
-{
+void LvParseTest::idObjectInJsScope(){
     parseTestTemplate("ParserTest24");
 }
 
-void LvParseTest::nestedObjectsInJsScope()
-{
+void LvParseTest::nestedObjectsInJsScope(){
     parseTestTemplate("ParserTest25");
 }
 
-void LvParseTest::sameIdInBothScopes()
-{
+void LvParseTest::sameIdInBothScopes(){
     parseTestTemplate("ParserTest26");
+}
 
+void LvParseTest::namespaceImportTest(){
+    parseTestTemplate("ParserTest27");
+}
+
+void LvParseTest::multiNamespaceImportTest(){
+    parseTestTemplate("ParserTest28");
 }
 
 void LvParseTest::parseTestTemplate(std::string name)
@@ -155,11 +146,12 @@ void LvParseTest::parseTestTemplate(std::string name)
 
     std::string conversion = parser->toJs(contents, name);
 
+//    vlog() << conversion;
+
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
     el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 
     el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
-
     parser->destroy(conversionAST);
     parser->destroy(expectedAST);
 

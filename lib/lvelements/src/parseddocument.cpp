@@ -323,7 +323,7 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
 
 
     auto count = ts_node_child_count(node);
-    for (int i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++)
     {
         TSNode cdChild = ts_node_child(node, i);
 
@@ -342,7 +342,7 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
         else if (strcmp(ts_node_type(cdChild), "component_body") == 0)
         {
             auto component_body_count = ts_node_child_count(cdChild);
-            for (int cb = 1; cb < component_body_count-1; ++cb)
+            for (uint32_t cb = 1; cb < component_body_count-1; ++cb)
             {
                 TSNode component_body_child = ts_node_child(cdChild, cb);
 
@@ -359,7 +359,7 @@ TypeInfo::Ptr ParsedDocument::extractType(const std::string& source, TSNode node
 
                     TSNode formal_type_parameters = ts_node_child(component_body_child, 2);
                     auto ftpc = ts_node_child_count(formal_type_parameters);
-                    for (int ftpcidx = 1; ftpcidx < ftpc; ftpcidx+=2)
+                    for (uint32_t ftpcidx = 1; ftpcidx < ftpc; ftpcidx+=2)
                     {
                         TSNode formal_type_parameter = ts_node_child(formal_type_parameters, ftpcidx);
                         fi.addParameter(slice(source, ts_node_child(formal_type_parameter, 1)), slice(source, ts_node_child(formal_type_parameter, 0)));

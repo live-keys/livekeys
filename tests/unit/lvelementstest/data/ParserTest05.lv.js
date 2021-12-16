@@ -1,7 +1,5 @@
-// Note that when dealing with ids, components are only aware of their own context,
-// any child or parent component context will not be available
 
-module.exports["ParserTest5"] = class ParserTest5 extends Container{
+export class ParserTest05 extends Container{
 
     constructor(){
         super()

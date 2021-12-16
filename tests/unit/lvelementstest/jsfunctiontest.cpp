@@ -86,7 +86,7 @@ void JsFunctionTest::typesTest(){
     Engine* engine = new Engine();
 
     engine->scope([engine](){
-        ElementsPlugin::Ptr epl = ElementsPlugin::create(Plugin::createEmpty("test"), engine);
+        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
 
         ModuleLibrary* m = ModuleLibrary::create(engine, "");
         m->addType<FunctionStub>();

@@ -4,13 +4,15 @@
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/value.h"
 #include "live/packagegraph.h"
-#include "elementsplugin.h"
+#include "live/elements/jsmodule.h"
+#include "elementsmodule.h"
 
 #include <memory>
 #include <list>
 
 namespace lv{ namespace el{
 
+class ProgramNode;
 class Imports;
 class ModuleFilePrivate;
 class ModuleFile{
@@ -18,7 +20,8 @@ class ModuleFile{
     DISABLE_COPY(ModuleFile);
 
 public:
-    friend class ElementsPlugin;
+    friend class ElementsModule;
+    friend class Engine;
 
     enum State{
         Initiaized = 0,
@@ -27,28 +30,62 @@ public:
         Ready
     };
 
+    class Export{
+    public:
+        enum Type{
+            Component,
+            Element
+        };
+    public:
+        std::string name;
+        Type        type;
+    };
+
+    class Import{
+    public:
+        Import() : isRelative(false){}
+
+    public:
+        std::string uri;
+        std::string as;
+        bool isRelative;
+        ElementsModule::Ptr module;
+    };
+
 public:
     ~ModuleFile();
 
     ScopedValue get(Engine* engine, ModuleFile* from, const std::string& name);
     void parse(Engine *engine = nullptr);
 
+    void resolveTypes();
+    void compile();
+
     State state() const;
     const std::string& name() const;
     std::string fileName() const;
+    std::string jsFileName() const;
+    std::string jsFilePath() const;
     std::string filePath() const;
-    const ElementsPlugin::Ptr& plugin() const;
-    const std::list<std::string>& exports() const;
-    Imports* imports();
+    const ElementsModule::Ptr& plugin() const;
+    const std::list<Export>& exports() const;
+    const std::list<Import>& imports() const;
+    void resolveImport(const std::string& uri, ElementsModule::Ptr epl);
+
+    Imports* importsObject();
     ScopedValue createObject(Engine *engine) const;
 
 private:
+    void addDependency(ModuleFile* to);
+    void setJsModule(const JsModule::Ptr& jsModule);
+
     void initializeImportsExports(Engine* engine);
     bool hasDependency(ModuleFile* module, ModuleFile* dependency);
-    PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf);
-    PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf, ModuleFile* current, std::list<ModuleFile*> path);
+    static PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf);
+    static PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf, ModuleFile* current, std::list<ModuleFile*> path);
 
-    ModuleFile(const ElementsPlugin::Ptr& plugin, const std::string &name);
+
+    ModuleFile(ElementsModule::Ptr plugin, const std::string& name, const std::string& content, ProgramNode* node);
 
     ModuleFilePrivate* m_d;
 

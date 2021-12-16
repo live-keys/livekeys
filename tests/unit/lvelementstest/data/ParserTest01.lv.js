@@ -1,4 +1,4 @@
-module.exports["A"] = class A extends Element{
+export class A extends Element{
     constructor(a, b){
         super()
         this.__initialize()
@@ -15,7 +15,7 @@ module.exports["A"] = class A extends Element{
     }
 }
 
-module.exports["B"] = class B extends Element{
+export class B extends Element{
     constructor(){
         super()
         this.__initialize()
@@ -34,7 +34,7 @@ module.exports["B"] = class B extends Element{
     }
 }
 
-module.exports["C"] = class C extends Element{
+export class C extends Element{
     constructor(){
         super()
         this.__initialize()
@@ -51,7 +51,7 @@ module.exports["C"] = class C extends Element{
     }
 }
 
-module.exports["D"] = class D extends Container{
+export class D extends Container{
     constructor(){
         super()
         this.__initialize()

@@ -3,8 +3,10 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/live/elements/bindingpath.h \
     $$PWD/live/elements/cursorcontext.h \
+    $$PWD/live/elements/elementsmodule.h \
     $$PWD/live/elements/function.h \
     $$PWD/live/elements/engine.h \
+    $$PWD/live/elements/jsmodule.h \
     $$PWD/live/elements/languageinfo.h \
     $$PWD/live/elements/languageparser.h \
     $$PWD/live/elements/languagequery.h \
@@ -30,5 +32,4 @@ HEADERS += \
     $$PWD/live/elements/list.h \
     $$PWD/live/elements/container.h \
     $$PWD/live/elements/mlnodetojs.h \
-    $$PWD/live/elements/modulelibrary.h \
-    $$PWD/live/elements/elementsplugin.h
+    $$PWD/live/elements/modulelibrary.h

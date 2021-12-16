@@ -290,6 +290,11 @@ Object::Accessor::Accessor(Context *context)
 {
 }
 
+Object::Accessor::Accessor(const ScopedValue &sv)
+    : m_d(new Object::AccessorPrivate(sv.data().As<v8::Object>()))
+{
+}
+
 Object::Accessor::Accessor(const v8::Local<v8::Object> &vo)
     : m_d(new Object::AccessorPrivate(vo))
 {
@@ -335,6 +340,10 @@ void Object::Accessor::set(Engine *engine, const std::string &key, const ScopedV
 bool Object::Accessor::has(Engine* engine, const ScopedValue &key) const{
     v8::Maybe<bool> result = m_d->data->HasOwnProperty(engine->currentContext()->asLocal(), v8::Local<v8::Name>::Cast(key.data()));
     return result.IsJust() && result.ToChecked();
+}
+
+bool Object::Accessor::has(Engine *engine, const std::string &key) const{
+    return has(engine, ScopedValue(engine, key));
 }
 
 ScopedValue Object::Accessor::ownProperties(Engine *engine) const{

@@ -30,9 +30,7 @@ public:
     std::list<Plugin::Ptr> localDependents;
 
 private:
-    // disable copy
-    Context(const Plugin::Context&);
-    void operator=(const Plugin::Context&);
+    DISABLE_COPY(Context);
 };
 
 } // namespace

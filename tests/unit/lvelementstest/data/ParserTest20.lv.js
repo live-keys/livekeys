@@ -1,8 +1,8 @@
-var Button = imports.get('Button')
-var Form = imports.get('Form')
-var Input = imports.get('Input')
+import {Button} from '__UNRESOLVED__'
+import {Form} from '__UNRESOLVED__'
+import {Input} from '__UNRESOLVED__'
 
-module.exports["TodoForm"] = class TodoForm extends Form{
+export class TodoForm extends Form{
 
     constructor(){
         super()

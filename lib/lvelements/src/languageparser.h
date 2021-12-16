@@ -15,6 +15,8 @@ struct TSParser;
 namespace lv{ namespace el{
 
 class Engine;
+class ProgramNode;
+class BaseNode;
 
 class LV_ELEMENTS_EXPORT SyntaxException: public lv::Exception{
 public:
@@ -111,6 +113,9 @@ public:
 
     std::string toJs(const std::string &contents, const std::string filename = "") const;
     std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;
+
+    ProgramNode* toJsNodes(AST *ast, const std::string filename) const;
+    std::string toJs(const std::string& contents, BaseNode* node) const;
 
     std::list<std::string> parseExportNames(const std::string &moduleFile);
     std::list<std::string> parseExportNames(const std::string& moduleFile, const std::string& content, AST* ast);
