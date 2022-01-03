@@ -3,7 +3,7 @@ export class A extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        A.prototype.__initialize.call(this)
     }
 
     __initialize(){

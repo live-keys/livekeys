@@ -1,11 +1,13 @@
 // Note that when dealing with ids, components are only aware of their own context,
 // any child or parent component context will not be available
 
+import {Container} from '__UNRESOLVED__'
+
 export class ParserTest06 extends Container{
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest06.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -17,7 +19,7 @@ export class ParserTest06 extends Container{
 
             constructor(){
                 super()
-                this.__initialize()
+                T.prototype.__initialize.call(this)
             }
 
             __initialize(){
@@ -35,7 +37,7 @@ export class ParserTest06 extends Container{
 
         // Assign all properties
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.addProperty(this, 'y', {type: "Element", notify: 'yChanged'})
@@ -46,7 +48,7 @@ export class ParserTest06 extends Container{
                     function(){ return new parent.ElemProp() }.bind(this),
                     [[parent, "ElemPropChanged"]]
                 )
-                // Element.assignDefaultProperty(null)
+                 Element.complete(this)
                 return this
             }.bind(new Element())(this))
         ])

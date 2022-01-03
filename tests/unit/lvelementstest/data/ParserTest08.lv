@@ -14,9 +14,10 @@ instance default Article{
         T`
             This is paragraph 2.
             Lines are merged into one. To add space and new
-            lines we would you \\n and \\s characters. \n
+            lines we would use \\n and \\s characters. \n
             This will be `B`bold text. \n
             And this will be an `A{ href:'https://livekeys.io'; T`link`}
-        
+
     }
 }
+

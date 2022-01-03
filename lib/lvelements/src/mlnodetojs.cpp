@@ -36,7 +36,11 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
         break;
     }
     case MLNode::Type::Bytes:{
-        v = v8::ArrayBuffer::New(engine->isolate(), n.asBytes().data(), n.asBytes().size());
+        v = v8::ArrayBuffer::New(engine->isolate(), n.asBytes().size());
+
+        //HERE
+//        v8::ArrayBuffer::NewBackingStore(
+//        v = v8::ArrayBuffer::New(engine->isolate(), n.asBytes().data(), n.asBytes().size());
         break;
     }
     case MLNode::Type::String:{

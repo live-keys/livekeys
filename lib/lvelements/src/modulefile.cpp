@@ -38,21 +38,6 @@ ModuleFile::~ModuleFile(){
     delete m_d;
 }
 
-ScopedValue ModuleFile::get(Engine* engine, ModuleFile *from, const std::string &name){
-    return ScopedValue(engine);
-}
-
-void ModuleFile::parse(Engine* engine){
-    if ( !engine )
-        return;
-    std::string fp = filePath();
-    //if ( engine->moduleFileType() == Engine::JsOnly ){
-        fp += ".js";
-    //}
-//    m_d->exports = engine->parser()->parseExportNames(fp);
-        //    m_d->state = ModuleFile::Parsed;
-}
-
 void ModuleFile::resolveTypes(){
     auto impTypes = m_d->rootNode->importTypes();
     for ( auto nsit = impTypes.begin(); nsit != impTypes.end(); ++nsit ){
@@ -116,8 +101,7 @@ void ModuleFile::resolveTypes(){
 }
 
 void ModuleFile::compile(){
-    std::string jsContents = m_d->plugin->engine()->parser()->toJs(m_d->content, m_d->rootNode);
-    m_d->plugin->engine()->fileInterceptor()->writeToFile(filePath() + ".js", jsContents);
+    m_d->plugin->engine()->compiler()->compileToJs(filePath(), m_d->content, m_d->rootNode);
 }
 
 ModuleFile::State ModuleFile::state() const{
@@ -133,7 +117,7 @@ std::string ModuleFile::fileName() const{
 }
 
 std::string ModuleFile::jsFileName() const{
-    return fileName() + ".js";
+    return fileName() + m_d->plugin->engine()->compiler()->outputExtension();
 }
 
 std::string ModuleFile::jsFilePath() const{
@@ -161,33 +145,6 @@ void ModuleFile::resolveImport(const std::string &uri, ElementsModule::Ptr epl){
         if ( it->uri == uri )
             it->module = epl;
     }
-}
-
-Imports *ModuleFile::importsObject(){
-    return m_d->importsObject;
-}
-
-ScopedValue ModuleFile::createObject(Engine* engine) const{
-    return ScopedValue(engine);
-//    v8::Local<v8::Object> obj = v8::Object::New(engine->isolate());
-//    v8::Local<v8::Value> exports = ScopedValue(engine, *m_d->exports).data();
-
-//    auto isolate = engine->isolate();
-//    auto context = isolate->GetCurrentContext();
-//    v8::Local<v8::String> exportsKey = v8::String::NewFromUtf8(
-//        engine->isolate(), "exports", v8::NewStringType::kInternalized
-//    ).ToLocalChecked();
-//    v8::Local<v8::String> pathKey = v8::String::NewFromUtf8(
-//        engine->isolate(), "path", v8::NewStringType::kInternalized
-//    ).ToLocalChecked();
-//    v8::Local<v8::String> pathStr = v8::String::NewFromUtf8(
-//        engine->isolate(), filePath().c_str(), v8::NewStringType::kInternalized
-//    ).ToLocalChecked();
-
-//    obj->Set(context, exportsKey, exports).IsNothing();
-//    obj->Set(context, pathKey, pathStr).IsNothing();
-
-    //    return ScopedValue(obj);
 }
 
 void ModuleFile::addDependency(ModuleFile *dependency){
@@ -284,9 +241,8 @@ ModuleFile::ModuleFile(ElementsModule::Ptr plugin, const std::string &name, cons
     m_d->content = content;
     m_d->rootNode = node;
 
-    node->collectImportTypes(content);
+    std::vector<BaseNode*> exports = m_d->plugin->engine()->compiler()->collectProgramExports(content, node);
 
-    std::vector<BaseNode*> exports = node->exports();
     for ( auto val : exports ){
         if ( val->typeString() == "RootNewComponentExpression" ){
             auto expression = val->as<RootNewComponentExpressionNode>();

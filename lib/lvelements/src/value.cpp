@@ -68,7 +68,7 @@ ScopedValue::ScopedValue(Engine *engine, const std::string &val)
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *engine, Callable val)
+ScopedValue::ScopedValue(Engine *, Callable val)
     : m_d(new ScopedValuePrivate(val.data()))
     , m_ref(new int)
 {
@@ -83,7 +83,7 @@ ScopedValue::ScopedValue(Engine *engine, Object val)
 }
 
 ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
-    : m_d(new ScopedValuePrivate(v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size())))
+    : m_d(new ScopedValuePrivate(v8::Undefined(engine->isolate())))/*v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size()))*/
     , m_ref(new int)
 {
     ++(*m_ref);

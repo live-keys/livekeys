@@ -39,12 +39,22 @@ private slots:
     void todoForm();
     void todoApp();
     void complexTernaryOperator();
-    void doublyNestedElement();
+    void doubleNestedElement();
     void idObjectInJsScope();
     void nestedObjectsInJsScope();
     void sameIdInBothScopes();
     void namespaceImportTest();
     void multiNamespaceImportTest();
+    void customBaseComponentTest();
+    void defaultChildrenTest();
+    void bindShouldNotBeImportedTest();
+    void initializeElementTest();
+    void customConstructorArgumentsTest();
+    void unassignedPropertyTest();
+    void staticPropertyTest();
+    void functionAnnotationTest();
+    void jsImportsTest();
+    void trippleTagTest();
 
 private:
     void parseTestTemplate(std::string name);

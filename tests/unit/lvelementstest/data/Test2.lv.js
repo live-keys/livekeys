@@ -1,4 +1,4 @@
-module.exports["Test2"] = class Test2 extends Container{
+export class Test2 extends Container{
 
     constructor(){
         super()

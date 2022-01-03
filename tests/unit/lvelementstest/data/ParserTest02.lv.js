@@ -1,11 +1,10 @@
 export class FunctionComponent extends Element{
     constructor(){
         super()
-        this.__initialize()
+        FunctionComponent.prototype.__initialize.call(this)
     }
     
     __initialize(){
-        // Element.assignDefaultProperty(null)
     }
 
     test(param1, param2){
@@ -14,13 +13,12 @@ export class FunctionComponent extends Element{
         class InsideComponent extends Element{
             constructor(){
                 super()
-                this.__initialize()
+                InsideComponent.prototype.__initialize.call(this)
             }
 
             __initialize(){
                 Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
                 this.x = 200
-                // Element.assignDefaultProperty(null)
             }
         }
     }
@@ -29,11 +27,10 @@ export class FunctionComponent extends Element{
 export class FunctionCreatesComponent extends Element{
     constructor(){
         super()
-        this.__initialize()
+        FunctionCreatesComponent.prototype.__initialize.call(this)
     }
 
     __initialize(){
-        // Element.assignDefaultProperty(null)
     }
 
     test(param1, param2){
@@ -44,7 +41,7 @@ export class FunctionCreatesComponent extends Element{
 
             Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
             this.x = 200
-            // Element.assignDefaultProperty(null)
+             Element.complete(this)
             return this
         }.bind(new Element())(null))
     }

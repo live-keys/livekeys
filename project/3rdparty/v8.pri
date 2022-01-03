@@ -79,8 +79,9 @@ else:macx{
     }
 
     V8_ABSOLUTE_PATH = $$absolute_path($$V8_PATH, $$V8_DIR)
+    V8_BIN_PATH      = $$dirname(V8_ABSOLUTE_PATH)
 
-    V8_LIBRARY_PATH = $$dirname(V8_ABSOLUTE_PATH)
+    V8_LIBRARY_PATH = $$dirname(V8_BIN_PATH)/lib
     V8_INCLUDE_PATH = $$dirname(V8_LIBRARY_PATH)/include
 
     INCLUDEPATH += $$V8_INCLUDE_PATH

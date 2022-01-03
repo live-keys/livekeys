@@ -273,65 +273,6 @@ std::string LanguageParser::toString(LanguageParser::AST *ast) const {
     return result;
 }
 
-std::string LanguageParser::toJs(const std::string &contents, const std::string filename) const{
-    LanguageParser::AST* ast = parse(contents);
-
-    std::string result = toJs(contents, ast, filename);
-
-    destroy(ast);
-
-    return result;
-}
-
-std::string LanguageParser::toJs(const std::string& contents, AST *ast, const std::string filename) const{
-    std::string result;
-
-    if ( !ast )
-        return result;
-
-    ProgramNode* root = toJsNodes(ast, filename);
-    root->collectImportTypes(contents);
-
-    result = toJs(contents, root);
-
-    delete root;
-
-    return result;
-}
-
-ProgramNode *LanguageParser::toJsNodes(AST *ast, const std::string filename) const{
-    if ( !ast )
-        return nullptr;
-
-    BaseNode* root = el::BaseNode::visit(ast);
-    ProgramNode* pn = dynamic_cast<ProgramNode*>(root);
-    if (!filename.empty()){
-        pn->setFilename(filename);
-    }
-
-    return pn;
-}
-
-std::string LanguageParser::toJs(const std::string &contents, BaseNode *node) const{
-    std::string result;
-    el::JSSection* section = new el::JSSection;
-    section->from = 0;
-    section->to   = static_cast<int>(contents.size());
-
-    node->convertToJs(contents, section->m_children);
-
-    std::vector<std::string> flatten;
-    section->flatten(contents, flatten);
-
-    for ( const std::string& s : flatten ){
-        result += s;
-    }
-
-    delete section;
-
-    return result;
-}
-
 std::list<std::string> LanguageParser::parseExportNames(const std::string& moduleFile){
     if ( moduleFile.rfind(".lv.js") != std::string::npos ){
         return parseExportNamesJs(moduleFile);

@@ -88,7 +88,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
         componentName = name.substr(0, i);
     }
 
-    ProgramNode* pn = epl->m_d->engine->parser()->toJsNodes(ast, componentName);
+    ProgramNode* pn = epl->m_d->engine->compiler()->parseProgramNodes(componentName, ast);
 
     ModuleFile* mf = new ModuleFile(epl, name, content, pn);
     epl->m_d->fileModules[name] = mf;

@@ -188,13 +188,13 @@ void Runnable::run(){
 
 #ifdef BUILD_ELEMENTS
         try{
-            el::Object o = m_engine->loadFile(m_path.toStdString(), content);
-            std::string componentName = QFileInfo(m_path).baseName().toStdString();
-            el::Object::Accessor lo(o);
-            el::ScopedValue lval = lo.get(m_engine, componentName);
+//            el::Object o = m_engine->loadFile(m_path.toStdString(), content);
+//            std::string componentName = QFileInfo(m_path).baseName().toStdString();
+//            el::Object::Accessor lo(o);
+//            el::ScopedValue lval = lo.get(m_engine, componentName);
 
-            el::Element* e = lval.toElement(m_engine);
-            m_runtimeRoot = e;
+//            el::Element* e = lval.toElement(m_engine);
+//            m_runtimeRoot = e;
         } catch ( lv::Exception& e ){
             vlog("main").e() << e.message();
         }

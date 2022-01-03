@@ -8,7 +8,7 @@ export class TodoApp extends Div{
 
     constructor(){
         super()
-        this.__initialize()
+        TodoApp.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -21,9 +21,10 @@ export class TodoApp extends Div{
         this.todoItems = todoItems
 
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
+                Element.complete(this)
                 return this
             }.bind(new TodoHeader())(this)),
             (function(parent){
@@ -35,7 +36,10 @@ export class TodoApp extends Div{
                         [ this, 'todoItemsChanged' ]
                     ]
                 )
-                this.on('remove', function(index){ this.todoItems.splice(index, 1); this.todoItemsChanged() }.bind(this));
+                this.on('remove', function(index){
+                    this.todoItems.splice(index, 1);
+                    this.todoItemsChanged()
+                }.bind(this));
                 this.on('markTodoDone', function(itemIndex){
                     var todo = todoItems[itemIndex];
                     todoItems.splice(itemIndex, 1);
@@ -43,12 +47,13 @@ export class TodoApp extends Div{
                     todo.done ? todoItems.push(todo) : todoItems.unshift(todo);
                     this.todoItemsChanged()
                 }.bind(this));
+                Element.complete(this)
                 return this
             }.bind(new TodoList())(this)),
             (function(parent){
                 this.setParent(parent)
-                this.on('addItem', function(name){
-                    this.todoItems.unshift({ index: todoItems.length+1, value: name, done: false }) }.bind(this));
+                this.on('addItem', function(name){ this.todoItems.unshift({ index: todoItems.length+1, value: name, done: false }) }.bind(this));
+                Element.complete(this)
                 return this
             }.bind(new TodoForm())(this))
         ])

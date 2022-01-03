@@ -14,6 +14,8 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wunused-parameter"
 
+#define V8_COMPRESS_POINTERS
+
 #include "v8.h"
 #include "libplatform/libplatform.h"
 

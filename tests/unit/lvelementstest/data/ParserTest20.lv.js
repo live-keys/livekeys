@@ -6,7 +6,7 @@ export class TodoForm extends Form{
 
     constructor(){
         super()
-        this.__initialize()
+        TodoForm.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -23,20 +23,22 @@ export class TodoForm extends Form{
                 this.reset()
             }
         }.bind(this));
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(itemName, "itemName")
-                this.type = "text";
-                this.classes = "form-control";
+                this.type = "text"
+                this.classes = "form-control"
                 this.placeholder = "Add New TODO..."
+                Element.complete(this)
                 return this
             }.bind(itemName)(this)),
             (function(parent){
                 this.setParent(parent)
-                this.type = "submit";
-                this.classes = "btn btn-default";
+                this.type = "submit"
+                this.classes = "btn btn-default"
                 this.text = "Add"
+                Element.complete(this)
                 return this
             }.bind(new Button())(this))
         ])

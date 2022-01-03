@@ -102,8 +102,30 @@ DISTFILES += \
     data/ParserTest27.lv.js \
     data/ParserTest28.lv \
     data/ParserTest28.lv.js \
+    data/ParserTest29.lv \
+    data/ParserTest29.lv.js \
     data/ParserTest3.lv \
     data/ParserTest3.lv.js \
+    data/ParserTest30.lv \
+    data/ParserTest30.lv.js \
+    data/ParserTest31.lv \
+    data/ParserTest31.lv.js \
+    data/ParserTest32.lv \
+    data/ParserTest32.lv.js \
+    data/ParserTest33.lv \
+    data/ParserTest33.lv.js \
+    data/ParserTest34.lv \
+    data/ParserTest34.lv.js \
+    data/ParserTest35.lv \
+    data/ParserTest35.lv.js \
+    data/ParserTest36.lv \
+    data/ParserTest36.lv.js \
+    data/ParserTest37.lv \
+    data/ParserTest37.lv.js \
+    data/ParserTest38.lv \
+    data/ParserTest38.lv \
+    data/ParserTest38.lv.js \
+    data/ParserTest38.lv.js \
     data/ParserTest4.lv \
     data/ParserTest4.lv.js \
     data/ParserTest5.lv \

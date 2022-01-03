@@ -1,4 +1,7 @@
 // Assign module
+
+import {Container} from '__UNRESOLVED__'
+
 export let ParserTest09 = (function(parent){
     this.setParent(parent)
     Element.assignId(root, "root")
@@ -13,12 +16,12 @@ export let ParserTest09 = (function(parent){
     this.x = 20
 
     // assign default property
-    Element.assignDefaultProperty(this, [
+    Element.assignChildrenAndComplete(this, [
         (function(parent){
             this.setParent(parent)
             Element.assignId(rootChild, "rootChild")
             this.y = 10
-            // Element.assignDefaultProperty(null)
+            Element.complete(this)
             return this
         }.bind(rootChild)(this))
     ])

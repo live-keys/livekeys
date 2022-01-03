@@ -1,8 +1,11 @@
+
+import {Container} from '__UNRESOLVED__'
+
 export class ParserTest07 extends Container{
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest07.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -15,7 +18,8 @@ export class ParserTest07 extends Container{
         this.b = 30
         this.c = 20
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
+
             (function(parent){
                 this.setParent(parent)
                 Element.addProperty(this, 'x', {type: "int", notify: 'xChanged'})
@@ -26,7 +30,7 @@ export class ParserTest07 extends Container{
                     function(){ return parent.a + parent.b }.bind(this),
                     [[parent, "aChanged"], [parent, "bChanged"]]
                 )
-                // Element.assignDefaultProperty(null)
+                 Element.complete(this)
                 return this
             }.bind(new Element())(this)),
 
@@ -46,10 +50,10 @@ export class ParserTest07 extends Container{
                     // only b gets bound, 'parent.a' is not in the binding scope
                     [[parent, "bChanged"]]
                 )
-                // Element.assignDefaultProperty(null)
-
+                 Element.complete(this)
                 return this
             }.bind(new Element())(this)),
+
 
             (function(parent){
                 this.setParent(parent)
@@ -71,7 +75,7 @@ export class ParserTest07 extends Container{
                     // should activate their bindings
                     [[parent, "aChanged"], [parent, "bChanged"]]
                 )
-                // Element.assignDefaultProperty(null)
+                 Element.complete(this)
 
                 return this
             }.bind(new Element())(this)),
@@ -80,8 +84,6 @@ export class ParserTest07 extends Container{
                 this.setParent(parent)
                 Element.addProperty(this, 'w', {type: "int", notify: 'wChanged'})
 
-                // just as functions above, properties used inside classes do not activate their
-                // bindings, so there are no bindings in this element
                 this.w = (function(){
                     var result = 0;
 
@@ -93,8 +95,8 @@ export class ParserTest07 extends Container{
 
                     result += (new A()).field;
                     return result
-                }())
-                // Element.assignDefaultProperty(null)
+                }.bind(this)())
+                 Element.complete(this)
 
                 return this
             }.bind(new Element())(this))

@@ -9,7 +9,7 @@ export class ParserTest27 extends mod.A{
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest27.prototype.__initialize.call(this)
     }
 
     __initialize(){

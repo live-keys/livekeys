@@ -69,7 +69,6 @@ public:
         , pendingExceptionNesting(-1)
         , hasGlobalErrorHandler(false)
         , moduleFileType(Engine::Lv)
-        , parser(LanguageParser::createForElements())
     {}
 
     Context*                   context;
@@ -92,7 +91,7 @@ public:
 
     Engine::ModuleFileType moduleFileType;
 
-    LanguageParser::Ptr parser;
+    Compiler::Ptr compiler;
 
     PackageGraph* packageGraph;
     Engine::FileInterceptor* fileInterceptor;
@@ -116,7 +115,8 @@ public: // helpers
     static v8::MaybeLocal<v8::Promise> resolveModuleDynamically(
         v8::Local<v8::Context> context,
         v8::Local<v8::ScriptOrModule> referrer,
-        v8::Local<v8::String> specifier
+        v8::Local<v8::String> specifier,
+        v8::Local<v8::FixedArray>
     );
     static v8::MaybeLocal<v8::Module> resolveModule(
         v8::Local<v8::Context> context,
@@ -145,7 +145,8 @@ JsModule::Ptr EnginePrivate::getFromModule(const v8::Local<v8::Module> &mod){
 v8::MaybeLocal<v8::Promise> EnginePrivate::resolveModuleDynamically(
         v8::Local<v8::Context> context,
         v8::Local<v8::ScriptOrModule> referrer,
-        v8::Local<v8::String> specifier)
+        v8::Local<v8::String> specifier,
+        v8::Local<v8::FixedArray>)
 {
     v8::Local<v8::Promise::Resolver> resolver =
         v8::Promise::Resolver::New(context).ToLocalChecked();
@@ -300,7 +301,7 @@ void EnginePrivate::messageListener(v8::Local<v8::Message> message, v8::Local<v8
 
     v8::String::Utf8Value msg(engine->isolate(), message->Get());
     v8::String::Utf8Value file(engine->isolate(), v8::Local<v8::String>::Cast(message->GetScriptResourceName()));
-    int line = message->GetScriptOrigin().ResourceLineOffset()->Int32Value(engine->isolate()->GetCurrentContext()).ToChecked();
+    int line = message->GetScriptOrigin().LineOffset();
 
     engine->handleError(*msg, "", *file, line);
 }
@@ -376,11 +377,13 @@ const LockedFileIOSession::Ptr &Engine::FileInterceptor::fileInput() const{
 // Engine Implementation
 // --------------------------------------------------------------------------------------------
 
-Engine::Engine(PackageGraph *pg)
+Engine::Engine(PackageGraph *pg, const Compiler::Ptr &compiler)
     : m_d(new EnginePrivate)
 {
     if ( !isInitialized() )
         THROW_EXCEPTION(lv::Exception, "Call Engine::Initialize() before creating a new engine.", 0);
+
+    m_d->compiler = compiler;
 
     // Create a new Isolate and make it the current one.
 
@@ -494,7 +497,7 @@ Script::Ptr Engine::compileJsModuleFile(const std::string &path){
 
 
 JsModule::Ptr Engine::loadAsJsModule(ModuleFile *file){
-    return loadJsModule(file->filePath());
+    return loadJsModule(file->jsFilePath());
 }
 
 JsModule::Ptr Engine::loadJsModule(const std::string &path){
@@ -559,7 +562,6 @@ JsModule::Ptr Engine::loadJsModule(const std::string &path){
             mf->setJsModule(jsModule);
         }
     }
-
 
     v8::TryCatch tc(m_d->isolate);
 
@@ -677,8 +679,8 @@ Script::Ptr Engine::compileModuleFile(const std::string &path){
 }
 
 Script::Ptr Engine::compileModuleSource(const std::string &path, const std::string &source){
-    m_d->parser->setEngine(this);
-    std::string jssource = m_d->parser->toJs(source, QFileInfo(QString::fromStdString(path)).baseName().toStdString());
+    m_d->compiler->parser()->setEngine(this);
+    std::string jssource = m_d->compiler->compileToJs(QFileInfo(QString::fromStdString(path)).baseName().toStdString(), source);
 
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
@@ -698,85 +700,6 @@ Script::Ptr Engine::compileModuleSource(const std::string &path, const std::stri
 
     Script::Ptr sc(new Script(this, script.ToLocalChecked(), path));
     return sc;
-}
-
-Object Engine::loadJsFile(const std::string &path){
-    QFileInfo finfo(QString::fromStdString(path));
-    std::string pluginPath = finfo.path().toStdString();
-    std::string fileName = finfo.fileName().toStdString();
-    std::string baseName = finfo.baseName().toStdString();
-
-    Plugin::Ptr plugin(nullptr);
-    if ( Plugin::existsIn(pluginPath) ){
-        plugin = Plugin::createFromPath(pluginPath);
-        Package::Ptr package = Package::createFromPath(plugin->package());
-        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
-    } else {
-        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
-    }
-
-    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
-    ModuleFile* mf = ElementsModule::addModuleFile(epl, baseName);
-
-    Script::Ptr sc = compileJsModuleFile(path);
-    Object m = sc->loadAsModule(mf);
-    if ( m.isNull() )
-        return m;
-
-    Object::Accessor lm(m);
-    return lm.get(this, "exports").toObject(this);
-}
-
-Object Engine::loadFile(const std::string &path){
-    QFileInfo finfo(QString::fromStdString(path));
-    std::string pluginPath = finfo.path().toStdString();
-    std::string fileName = finfo.fileName().toStdString();
-
-    Plugin::Ptr plugin(nullptr);
-    if ( Plugin::existsIn(pluginPath) ){
-        plugin = Plugin::createFromPath(pluginPath);
-        Package::Ptr package = Package::createFromPath(plugin->package());
-        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
-    } else {
-        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
-    }
-
-    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
-    ModuleFile* mf = ElementsModule::addModuleFile(epl, fileName);
-
-    Script::Ptr sc = compileModuleFile(path);
-    Object m = sc->loadAsModule(mf);
-    if ( m.isNull() )
-        return m;
-
-    Object::Accessor lm(m);
-    return lm.get(this, "exports").toObject(this);
-}
-
-Object Engine::loadFile(const std::string &path, const std::string &content){
-    QFileInfo finfo(QString::fromStdString(path));
-    std::string pluginPath = finfo.path().toStdString();
-    std::string fileName = finfo.fileName().toStdString();
-
-    Plugin::Ptr plugin(nullptr);
-    if ( Plugin::existsIn(pluginPath) ){
-        plugin = Plugin::createFromPath(pluginPath);
-        Package::Ptr package = Package::createFromPath(plugin->package());
-        m_d->packageGraph->loadRunningPackageAndPlugin(package, plugin);
-    } else {
-        plugin = m_d->packageGraph->createRunningPlugin(pluginPath);
-    }
-
-    ElementsModule::Ptr epl = ElementsModule::create(plugin, this);
-    ModuleFile* mf = ElementsModule::addModuleFile(epl, fileName);
-
-    Script::Ptr sc = compileModuleSource(path, content);
-    Object m = sc->loadAsModule(mf);
-    if ( m.isNull() )
-        return m;
-
-    Object::Accessor lm(m);
-    return lm.get(this, "exports").toObject(this);
 }
 
 ComponentTemplate *Engine::registerTemplate(const MetaObject *t){
@@ -1073,7 +996,11 @@ void Engine::setModuleFileType(Engine::ModuleFileType type){
 }
 
 const LanguageParser::Ptr &Engine::parser() const{
-    return m_d->parser;
+    return m_d->compiler->parser();
+}
+
+const Compiler::Ptr &Engine::compiler() const{
+    return m_d->compiler;
 }
 
 const Engine::FileInterceptor *Engine::fileInterceptor() const{
@@ -1086,6 +1013,11 @@ void Engine::setFileInterceptor(Engine::FileInterceptor *fileInterceptor){
 }
 
 void Engine::importInternals(){
+    m_d->compiler->configureImplicitType("vlog");
+    m_d->compiler->configureImplicitType("console");
+    m_d->compiler->configureImplicitType("import");
+    m_d->compiler->configureImplicitType("Object");
+
     v8::HandleScope handle(isolate());
     v8::Local<v8::Context> context = m_d->context->asLocal();
     v8::Context::Scope context_scope(context);

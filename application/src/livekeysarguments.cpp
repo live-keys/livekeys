@@ -24,6 +24,7 @@ namespace lv{
 
 LivekeysArguments::LivekeysArguments(const std::string& header)
     : m_parser(new CommandLineParser(header))
+    , m_command(LivekeysArguments::None)
     , m_globalScript(false)
 {
 }
@@ -32,8 +33,20 @@ LivekeysArguments::~LivekeysArguments(){
     delete m_parser;
 }
 
+bool LivekeysArguments::isCommand() const{
+    return m_command != LivekeysArguments::None;
+}
+
+LivekeysArguments::Command LivekeysArguments::command() const{
+    return m_command;
+}
+
 bool LivekeysArguments::helpFlag() const{
     return m_parser->isSet(m_parser->helpOption());
+}
+
+bool LivekeysArguments::versionFlag() const{
+    return m_parser->isSet(m_parser->versionOption());
 }
 
 void LivekeysArguments::initialize(int argc, const char* const argv[]){
@@ -75,6 +88,12 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* globalScript = m_parser->addFlag({"--global"},
         "Run project by looking its path up in the global packages folder.");
 
+    CommandLineParser::Option* compile = m_parser->addFlag({"--compile"},
+        "Compile an lv file.");
+    CommandLineParser::Option* compileConfigOption = m_parser->addOption({"--compile-config"},
+        "Custom configuration for compiler options. Each property is configured via a key value pair. "
+        "(i.e. baseComponent=CustomElement;)", "string");
+
     m_parser->parse(argc, argv);
 
     QString layersValue = QString::fromStdString(m_parser->value(layers));
@@ -93,6 +112,15 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
     }
     if ( m_parser->isSet(globalScript) ){
         m_globalScript = true;
+    }
+    if ( m_parser->isSet(m_parser->helpOption()) ){
+        m_command = LivekeysArguments::Help;
+    }
+    if ( m_parser->isSet(m_parser->versionOption() ) ){
+        m_command = LivekeysArguments::Version;
+    }
+    if ( m_parser->isSet(compile)){
+        m_command = LivekeysArguments::Compile;
     }
 
     if ( m_parser->isSet(logConfigFileOption) ){
@@ -173,6 +201,34 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
         }
     }
 
+
+    if ( m_parser->isSet(compileConfigOption) ){
+        m_compileConfiguration = MLNode(MLNode::Type::Object);
+
+        // separate assignments, and check for optional configuration name
+        QStringList cf = QString::fromStdString(m_parser->value(compileConfigOption)).split(";");
+        for( auto it = cf.begin(); it != cf.end(); ++it ){
+            QString& cfs = *it;
+            if ( cfs.isEmpty() )
+                continue;
+            int apos = cfs.indexOf('=');
+            if ( apos == -1 )
+                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), Exception::toCode("Init"));
+
+            QString configurationKey = "";
+            QString configurationValue = "";
+
+            configurationKey   = cfs.mid(0, apos);
+            configurationValue = cfs.mid(apos + 1);
+
+            if ( configurationKey.isEmpty() || configurationValue.isEmpty() )
+                THROW_EXCEPTION(lv::Exception, "Failed to parse configuration segment: " + cfs.toStdString(), Exception::toCode("Init"));
+
+            MLNode::StringType cfgkey  = configurationKey.toStdString();
+            m_compileConfiguration[cfgkey] = configurationValue.toStdString();
+        }
+    }
+
     if ( m_parser->isSet(layerConfigOption) ){
         // i.e: workspace.monitor=monitor.qml;editor.highlighter=disabled
         m_layerConfiguration = MLNode(MLNode::Type::Object);
@@ -223,8 +279,8 @@ const MLNode &LivekeysArguments::logConfiguration() const{
     return m_logConfiguration;
 }
 
-bool LivekeysArguments::versionFlag() const{
-    return m_parser->isSet(m_parser->versionOption());
+const MLNode &LivekeysArguments::compileConfiguration() const{
+    return m_compileConfiguration;
 }
 
 bool LivekeysArguments::globalFlag() const{

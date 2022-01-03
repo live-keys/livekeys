@@ -36,8 +36,10 @@ export let ParserTest28 = (function(parent){
             function(){ return mod2.Y.value}.bind(this),
             [[ mod2.Y, 'valueChanged' ] ]
         )
+        Element.complete(this)
         return this
     }.bind(new mod2.X())(this))
 
+    Element.complete(this)
     return this
 }.bind(new mod.A())(null))

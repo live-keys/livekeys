@@ -135,9 +135,9 @@ void BindingSpanModel::initializeScanner(LanguageLvHandler* lvHandler){
 
 //    connect(m_scanner, &QmlUsageGraphScanner::bindingPathAdded, this, &BindingSpanModel::__scannerBindingPathAdded);
 // TODO: ELEMENTS #382
-    QString componentPath = m_edit->declaration()->document()->file()->path();
-    QString componentName = m_edit->declaration()->document()->file()->name();
-    componentName = componentName.mid(0, componentName.indexOf('.'));
+//    QString componentPath = m_edit->declaration()->document()->file()->path();
+//    QString componentName = m_edit->declaration()->document()->file()->name();
+//    componentName = componentName.mid(0, componentName.indexOf('.'));
 
 //    m_scanner->setSearchComponent(componentPath, componentName);
 //    m_scanner->start();

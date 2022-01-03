@@ -627,7 +627,7 @@ void DocumentInfo::fromMLNode(const MLNode &node)
     m_status = static_cast<DocumentInfo::ScanStatus>(object.at("status").asInt());
 
     auto imports = object.at("imports").asArray();
-    for (int i = 0; i < imports.size(); ++i)
+    for (size_t i = 0; i < imports.size(); ++i)
     {
         ImportInfo ii({});
         ii.fromMLNode(imports.at(i));
@@ -635,7 +635,7 @@ void DocumentInfo::fromMLNode(const MLNode &node)
     }
 
     auto types = object.at("types").asArray();
-    for (int i =0; i<types.size(); ++i)
+    for (size_t i = 0; i<types.size(); ++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("", "", false, false);
         ti->fromMLNode(types.at(i));
@@ -725,7 +725,7 @@ MLNode ModuleInfo::toMLNode() const
     result["dependencies"] = deps;
 
     MLNode types(MLNode::Array);
-    for (int i =0; i<m_types.size();++i)
+    for (size_t i =0; i<m_types.size();++i)
         types.append(m_types[i]->toMLNode());
     result["types"] = types;
 
@@ -738,13 +738,13 @@ void ModuleInfo::fromMLNode(const MLNode &node)
     m_importUri = object.at("import_uri").asString();
 
     auto deps = object.at("dependencies").asArray();
-    for (int i =0; i<deps.size();++i)
+    for (size_t i =0; i < deps.size();++i)
     {
         m_dependencies.push_back(deps.at(i).asString());
     }
 
     auto types = object.at("types").asArray();
-    for (int i =0; i<types.size();++i)
+    for (size_t i =0; i < types.size();++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
         ti->fromMLNode(types.at(i));
@@ -791,8 +791,7 @@ MLNode ImportInfo::toMLNode() const
 
     result["is_relative"] = m_isRelative;
     MLNode segs(MLNode::Array);
-    for (int i=0; i<m_segments.size();++i)
-    {
+    for (size_t i = 0; i < m_segments.size();++i){
         segs.append(m_segments[i].data());
     }
     result["segments"] = segs;
@@ -810,7 +809,7 @@ void ImportInfo::fromMLNode(const MLNode &node)
     m_isRelative = obj.at("is_relative").asBool();
     MLNode::ArrayType arr = obj.at("segments").asArray();
 
-    for (int i=0;i<arr.size();++i)
+    for (size_t i = 0;i < arr.size();++i)
     {
         m_segments.push_back(Utf8(arr.at(i).asString()));
     }

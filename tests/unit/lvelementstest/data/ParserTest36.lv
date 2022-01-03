@@ -1,0 +1,17 @@
+component X{
+    static fn test1(int x){
+        return 100
+    }
+
+    static async fn test2(int y){
+        return 200
+    }
+
+    static fn test3() int{
+        return 100
+    }
+
+    fn test4(int x) int{
+        return 200
+    }
+}

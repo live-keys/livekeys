@@ -222,10 +222,10 @@ void LvEditFragment::emitRemoval(){
 BindingSpanModel* LvEditFragment::bindingModel(lv::LanguageLvHandler *codeHandler){
     if ( !m_bindingSpanModel ){
         m_bindingSpanModel = new BindingSpanModel(this);
-        QString fileName = declaration()->document()->file()->name();
-        if ( fileName.length() && fileName.front().isUpper() ){
-            m_bindingSpanModel->initializeScanner(codeHandler);
-        }
+//        QString fileName = declaration()->document()->file()->name();
+//        if ( fileName.length() && fileName.front().isUpper() ){
+//            m_bindingSpanModel->initializeScanner(codeHandler);
+//        }
     }
     return m_bindingSpanModel;
 }

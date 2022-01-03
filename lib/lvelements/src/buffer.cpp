@@ -11,7 +11,7 @@ Buffer::Buffer(void *data, size_t size)
 }
 
 Buffer::Buffer(const v8::Local<v8::ArrayBuffer> &value)
-    : m_data(value->GetContents().Data())
+    : m_data(/*value->GetContents().Data()*/) //HERE: Will need to use backing stores
     , m_size(value->ByteLength())
     , m_externalized(value->IsExternal())
 {

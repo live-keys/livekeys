@@ -4,7 +4,7 @@ export class B extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        B.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -27,10 +27,11 @@ export class B extends Element{
                     
                     Element.addProperty(did, 'y', { type: 'int', notify: 'yChanged' })
                     this.y = 10
-                    Element.assignDefaultProperty(this, [
+                    Element.assignChildrenAndComplete(this, [
                         (function(parent){
                             this.setParent(parent)
                             Element.assignId(nested, "nested")
+                            Element.complete(this)
                             return this
                         }.bind(nested)(this))
                     ])
@@ -38,22 +39,24 @@ export class B extends Element{
                 }.bind(new Element())(null))
 
                 return d.y
-            })()
+            }.bind(this))()
 
 
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(test, "test")
                 this.x = 10
+                Element.complete(this)
                 return this
             }.bind(test)(this)),
             
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(extra, "extra")
+                Element.complete(this)
                 return this
             }.bind(extra)(this))
         ])

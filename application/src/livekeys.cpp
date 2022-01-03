@@ -31,13 +31,12 @@
 
 #include "live/program.h"
 #include "live/qmlprogram.h"
-#include "live/editorprivate_plugin.h"
-
+#include "live/libraryloadpath.h"
 
 #include <QUrl>
 #include <QDir>
-#include <QFileInfo>
 #include <QQmlApplicationEngine>
+#include <QFileInfo>
 #include <QQmlContext>
 #include <QJSValue>
 #include <QJSValueIterator>
@@ -327,7 +326,7 @@ int Livekeys::execElements(const QGuiApplication &app){
     int result = 0;
     m_engine->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
     m_engine->scope([&result, this, &app](){
-        loadDefaultLayers();
+        loadConfiguredLayers();
         result = app.exec();
     });
     return result;
@@ -403,6 +402,56 @@ void Livekeys::loadInternalPackages(){
             PackageGraph::addInternalPackage(package);
         }
     }
+}
+
+int Livekeys::run(const QGuiApplication &app){
+    if ( m_arguments->isCommand() ){
+        if ( m_arguments->command() == LivekeysArguments::Help ){
+            printf("%s", m_arguments->helpString().c_str());
+            return 0;
+        } else if ( m_arguments->command() == LivekeysArguments::Version ){
+            printf("%s\n", qPrintable(versionString()));
+            return 0;
+        } else if ( m_arguments->command() == LivekeysArguments::Compile ){
+#ifdef BUILD_ELEMENTS
+            lv::el::Compiler::Config config;
+
+            if ( m_arguments->compileConfiguration().hasKey("baseComponent") ){
+                std::string baseComponent = m_arguments->compileConfiguration()["baseComponent"].asString();
+                std::string baseComponentPath;
+                if ( m_arguments->compileConfiguration().hasKey("baseComponentPath") )
+                    baseComponentPath = m_arguments->compileConfiguration()["baseComponentPath"].asString();
+
+                config.setBaseComponent(baseComponent, baseComponentPath);
+            }
+
+            lv::el::Engine* engine = new lv::el::Engine(nullptr, lv::el::Compiler::create(config));
+            engine->setModuleFileType(lv::el::Engine::Lv);
+
+            try{
+                std::string filePath = scriptPath().toStdString();
+
+                engine->scope([engine, filePath](){
+                    engine->compile(filePath);
+                });
+            } catch ( lv::Exception& e ){
+                vlog().e() << "Compiler Error: " << e.message();
+            }
+
+            delete engine;
+
+            return 0;
+#endif
+        }
+
+        return -1;
+    }
+
+    LibraryLoadPath::addRecursive(ApplicationContext::instance().pluginPath(), ApplicationContext::instance().linkPath());
+    if ( QFileInfo::exists(QString::fromStdString(ApplicationContext::instance().externalPath())) )
+        LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
+
+    return exec(app);
 }
 
 void Livekeys::addDefaultLayers(){

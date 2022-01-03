@@ -2,9 +2,8 @@
 #define LVMODULEFILE_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/value.h"
-#include "live/packagegraph.h"
 #include "live/elements/jsmodule.h"
+#include "live/packagegraph.h"
 #include "elementsmodule.h"
 
 #include <memory>
@@ -55,9 +54,6 @@ public:
 public:
     ~ModuleFile();
 
-    ScopedValue get(Engine* engine, ModuleFile* from, const std::string& name);
-    void parse(Engine *engine = nullptr);
-
     void resolveTypes();
     void compile();
 
@@ -71,9 +67,6 @@ public:
     const std::list<Export>& exports() const;
     const std::list<Import>& imports() const;
     void resolveImport(const std::string& uri, ElementsModule::Ptr epl);
-
-    Imports* importsObject();
-    ScopedValue createObject(Engine *engine) const;
 
 private:
     void addDependency(ModuleFile* to);

@@ -1,9 +1,10 @@
+import {Container} from '__UNRESOLVED__'
 
 export class ParserTest05 extends Container{
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest05.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -17,19 +18,19 @@ export class ParserTest05 extends Container{
             Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
             // Assign properties
             this.x = 20
-            // Element.assignDefaultProperty(null)
+            Element.complete(this)
             return this
         }.bind(new Element())(this))
 
         // Assign all properties
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
 
                 this.y = 20
-                // Element.assignDefaultProperty(null)
+                Element.complete(this)
                 return this
             }.bind(new Element())(this))
         ])

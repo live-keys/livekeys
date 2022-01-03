@@ -1,6 +1,7 @@
 component A < Element{
     constructor(a, b){
         super()
+        A.prototype.__initialize.call(this)
         this.a = a
         this.b = b
     }
@@ -19,6 +20,7 @@ component B{
 component C{
     constructor(){
         super()
+        C.prototype.__initialize.call(this)
     }
 
     int c1 : 200
@@ -28,6 +30,7 @@ component C{
 component D < Container{
     constructor(){
         super()
+        D.prototype.__initialize.call(this)
     }
 
     A{}(12, 13)

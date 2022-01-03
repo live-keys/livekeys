@@ -19,8 +19,7 @@ TestPack::~TestPack(){
         clear();
 }
 
-void TestPack::unpack(std::string filePath)
-{
+void TestPack::unpack(std::string filePath){
     std::ifstream inputStream(filePath);
     if (!inputStream.is_open())
         THROW_EXCEPTION(lv::Exception, "Can't find the file " + filePath, 1);

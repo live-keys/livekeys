@@ -4,7 +4,7 @@ import {not2} from '__UNRESOLVED__'
 export class B extends Element{
     constructor(){
         super()
-        this.__initialize()
+        B.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -15,8 +15,6 @@ export class B extends Element{
 
         Element.addProperty(this, 'not2', {type: "int", notify: 'not2Changed'})
         this.not2 = 10
-
-        // Element.assignDefaultProperty(null)
     }
 
     not1(d, e){

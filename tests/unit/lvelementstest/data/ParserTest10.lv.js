@@ -4,11 +4,10 @@ export class ParserTest10 extends namespace.Comp {
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest10.prototype.__initialize.call(this)
     }
 
     __initialize(){
-        // Element.assignDefaultProperty(null)
     }
 
 }

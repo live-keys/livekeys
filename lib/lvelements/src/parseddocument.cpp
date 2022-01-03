@@ -29,8 +29,8 @@ std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source
             std::vector<Utf8> segs;
             Utf8 alias;
 
-            auto import_count = ts_node_child_count(child);
-            int j = 0;
+            uint32_t import_count = ts_node_child_count(child);
+            uint32_t j = 0;
             while (j < import_count)
             {
                 TSNode import_child = ts_node_child(child, j);
@@ -39,7 +39,7 @@ std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source
                     rel = true;
                 } else if (strcmp(ts_node_type(import_child), "import_path") == 0) {
                     auto import_child_count = ts_node_child_count(import_child);
-                    for (int k = 0; k < import_child_count; k+=2)
+                    for (uint32_t k = 0; k < import_child_count; k+=2)
                     {
                         segs.push_back(slice(source, ts_node_child(import_child, k)));
                     }
@@ -56,7 +56,7 @@ std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source
     return result;
 }
 
-CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int position){
+CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, uint32_t position){
 
     std::vector<TSNode> path;
     treePath(ast, position, path);
@@ -82,7 +82,7 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
         {
             bool isAssign = strcmp(type, "property_assignment") == 0;
 
-            int delimiter_pos = ts_node_start_byte(ts_node_child(curr, isAssign? 1: 2)); // position of :
+            uint32_t delimiter_pos = ts_node_start_byte(ts_node_child(curr, isAssign? 1: 2)); // position of :
             if (position < delimiter_pos) context = CursorContext::InLeftOfDeclaration;
             else context |= CursorContext::InRightOfDeclaration;
             context |= CursorContext::InElements;
@@ -242,7 +242,7 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, int po
                 context |=  CursorContext::InRelativeImport;
             }
 
-            for (int ip = 0; ip < count; ip+=2)
+            for (uint32_t ip = 0; ip < count; ip+=2)
             {
                 auto start = ts_node_start_byte(ts_node_child(curr, ip));
                 auto end = ts_node_end_byte(ts_node_child(curr, ip));

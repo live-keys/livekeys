@@ -26,11 +26,22 @@ class CommandLineParser;
 class LivekeysArguments{
 
 public:
+    enum Command{
+        None = 0,
+        Help,
+        Version,
+        Compile
+    };
+
+public:
     explicit LivekeysArguments(const std::string &header);
     ~LivekeysArguments();
 
     bool pluginInfoFlag() const;
     const QString& pluginInfoImport() const;
+
+    bool isCommand() const;
+    Command command() const;
 
     bool helpFlag() const;
     bool versionFlag() const;
@@ -50,10 +61,13 @@ public:
     const MLNode& layerConfiguration() const;
     MLNode layerConfigurationFor(const std::string& layerName) const;
     const MLNode& logConfiguration() const;
+    const MLNode& compileConfiguration() const;
 
 private:
     CommandLineParser* m_parser;
+    Command m_command;
 
+    MLNode m_compileConfiguration;
     MLNode m_logConfiguration;
     MLNode m_layerConfiguration;
 

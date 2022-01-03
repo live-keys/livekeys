@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/exception.h \
+    $$PWD/fileio.h \
     $$PWD/library.h \
     $$PWD/libraryloadpath.h \
     $$PWD/librarytable.h \
@@ -31,6 +32,7 @@ HEADERS += \
 SOURCES += \
     $$PWD/exception.cpp \
     $$PWD/commandlineparser.cpp \
+    $$PWD/fileio.cpp \
     $$PWD/library.cpp \
     $$PWD/librarytable.cpp \
     $$PWD/lockedfileiosession.cpp \

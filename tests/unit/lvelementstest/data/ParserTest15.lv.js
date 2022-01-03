@@ -2,7 +2,7 @@ export class ParserTest15 extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        ParserTest15.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -12,11 +12,12 @@ export class ParserTest15 extends Element{
                 this.setParent(parent)
                 Element.addProperty(this, 'y', { type: 'int', notify: 'yChanged' })
                 this.y = 20
+                Element.complete(this)
                 return this
             }.bind(new Element())(null))
 
             return newElement.y
-        })()
+        }.bind(this))()
 
     }
 }

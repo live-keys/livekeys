@@ -16,16 +16,15 @@ public:
 private slots:
     void initTestCase();
 
-    void test1Js();
-    void test2Js();
-    void test3Js();
-    void test4Js();
-
     void test1Lv();
     void test2Lv();
     void test3Lv();
     void test4Lv();
 
+    void test1Js();
+    void test2Js();
+    void test3Js();
+    void test4Js();
 };
 
 #endif // LVCOMPILETEST_H

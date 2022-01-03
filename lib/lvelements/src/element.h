@@ -65,7 +65,9 @@ class LV_ELEMENTS_EXPORT Element{
             .scriptMethod<void, ScopedValue, Callable>("on", &Element::on)
             .scriptMethod("setParent", &Element::setParent)
             .scriptProperty<Element*>("parent", &Element::parent)
-            .scriptFunction("assignDefaultProperty", &Element::assignDefaultProperty)
+            .scriptFunction("assignChildrenAndComplete", &Element::assignChildrenAndComplete)
+            .scriptFunction("assignChildren", &Element::assignChildren)
+            .scriptFunction("complete", &Element::complete)
             .scriptFunction<void, Element*, ScopedValue, ScopedValue>("addEvent", &Element::addEvent)
             .scriptFunction("addProperty", &Element::addProperty)
             .scriptFunction("assignPropertyExpression", &Element::assignPropertyExpression)
@@ -131,7 +133,9 @@ public:
         ScopedValue propertyName,
         ScopedValue propertyExpression,
         ScopedValue bindings);
-    static void assignDefaultProperty(Element* e, ScopedValue value);
+    static void assignChildrenAndComplete(Element* e, ScopedValue value);
+    static void assignChildren(Element* e, ScopedValue value);
+    static void complete(Element* e);
     static void assignId(Element* e, const std::string& id);
 
     void clearPropertyBoundExpression(const std::string& propertyName);

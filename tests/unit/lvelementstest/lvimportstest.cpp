@@ -24,7 +24,7 @@ std::string LvImportsTest::scriptPath(const std::string &scriptName){
 }
 
 std::string LvImportsTest::testPath(){
-    return (QCoreApplication::applicationDirPath() + "/test").toStdString();
+    return lv::ApplicationContext::instance().releasePath() + "/test";
 }
 
 ////////////////////////////////////////////////////

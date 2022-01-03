@@ -248,10 +248,6 @@ Utf8 Utf8::join(const std::vector<Utf8> &parts, const Utf8 &delim){
     return result;
 }
 
-bool Utf8::isEmpty() const{
-    return m_data->empty();
-}
-
 size_t Utf8::size() const{
     return m_data->size();
 }
@@ -300,6 +296,15 @@ void Utf8::trim(std::string &s){
     trimLeft(s);
 }
 
+void Utf8::replaceAll(std::string &data, const std::string &from, const std::string &to){
+    size_t start_pos = 0;
+
+    while( (start_pos = data.find(from, start_pos)) != std::string::npos) {
+        data.replace(start_pos, from.length(), to);
+        start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
+    }
+}
+
 Utf8 Utf8::trimLeft() const{
     Utf8 result(*m_data);
     trimLeft(*result.m_data);
@@ -326,5 +331,6 @@ Utf8::Utf8(std::string *strPtr)
 void Utf8::throwFormatError(const std::string &message) const{
     THROW_EXCEPTION(lv::Exception, message, lv::Exception::toCode("Format"));
 }
+
 
 }// namespace

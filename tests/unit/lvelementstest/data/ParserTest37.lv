@@ -1,0 +1,7 @@
+import {A} from './a.js'
+import {B, C} from './b.js'
+
+component X < A{
+    var x : B{}
+    var y : C{}
+}

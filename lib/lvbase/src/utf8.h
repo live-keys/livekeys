@@ -15,6 +15,8 @@
 
 namespace lv{
 
+class VisualLog;
+
 class LV_BASE_EXPORT Utf8{
 
 public:
@@ -87,8 +89,6 @@ public:
     template<typename ...Args>
     Utf8 format(Args... args) const;
 
-    bool isEmpty() const;
-
     size_t size() const;
     size_t length() const;
 
@@ -99,6 +99,7 @@ public:
     static void trimLeft(std::string &str);
     static void trimRight(std::string &str);
     static void trim(std::string& str);
+    static void replaceAll(std::string& str, const std::string& from, const std::string& to);
 
     Utf8 trimLeft() const;
     Utf8 trimRight() const;
@@ -115,6 +116,11 @@ private:
 
     std::shared_ptr<std::string> m_data;
 };
+
+inline std::ostream& operator << (std::ostream& os, const Utf8& str){
+    os << str.data();
+    return os;
+}
 
 template<typename ...Args>
 Utf8 Utf8::format(Args... args) const{

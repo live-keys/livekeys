@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/elements/bindingpath.h \
+    $$PWD/live/elements/compiler.h \
     $$PWD/live/elements/cursorcontext.h \
     $$PWD/live/elements/elementsmodule.h \
     $$PWD/live/elements/function.h \

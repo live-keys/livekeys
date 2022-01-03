@@ -10,6 +10,7 @@
 #include "live/elements/jsmodule.h"
 #include "live/packagegraph.h"
 #include "live/lockedfileiosession.h"
+#include "live/elements/compiler.h"
 
 namespace lv{
 
@@ -98,7 +99,7 @@ public:
     };
 
 public:
-    Engine(PackageGraph* pg = nullptr);
+    Engine(PackageGraph* pg = nullptr, const Compiler::Ptr& compiler = Compiler::create());
     ~Engine();
 
     Object require(ModuleLibrary* module, const Object& o);
@@ -121,10 +122,6 @@ public:
 
     Script::Ptr compileModuleFile(const std::string& path);
     Script::Ptr compileModuleSource(const std::string& path, const std::string& source);
-
-    Object loadFile(const std::string& path);
-    Object loadFile(const std::string& path, const std::string& content);
-    Object loadJsFile(const std::string& path);
 
     ComponentTemplate* registerTemplate(const MetaObject* mo);
     v8::Local<v8::FunctionTemplate> pointTemplate();
@@ -151,6 +148,7 @@ public:
     void setModuleFileType(ModuleFileType type);
 
     const LanguageParser::Ptr& parser() const;
+    const Compiler::Ptr& compiler() const;
 
     const FileInterceptor* fileInterceptor() const;
     void setFileInterceptor(FileInterceptor* fileInterceptor);

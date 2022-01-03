@@ -21,28 +21,21 @@ void LvCompileTest::initTestCase(){
 }
 
 void LvCompileTest::test1Lv(){
-    lv::el::Engine* engine = new lv::el::Engine();
+    lv::el::Engine* engine = new lv::el::Engine(nullptr, Compiler::create(Compiler::Config(true, ".test.js")));
+    engine->setModuleFileType(Engine::Lv);
     engine->scope([engine](){
-
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv";
         ElementsModule::Ptr epl = engine->compile(scriptsPath);
+
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
-
         JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
-        jsMf->evaluate();
+        jsMod->evaluate();
 
-        ScopedValue sv = jsMf->moduleNamespace();
+        ScopedValue sv = jsMod->moduleNamespace();
         Object::Accessor oa(sv);
 
-
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
-
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
-
-        Callable c = le.get(engine, "Test1").toCallable(engine);
+        ScopedValue rootValue = oa.get(engine, "Test1");
+        Callable c = rootValue.toCallable(engine);
         QVERIFY(c.isComponent());
 
         Component test1 = c.toComponent();
@@ -74,22 +67,20 @@ void LvCompileTest::test1Lv(){
 }
 
 void LvCompileTest::test2Lv(){
-    lv::el::Engine* engine = new lv::el::Engine();
+    lv::el::Engine* engine = new lv::el::Engine(nullptr, Compiler::create(Compiler::Config(true, ".test.js")));
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv";
-        Script::Ptr sc = engine->compileModuleFile(scriptsPath);
+        ElementsModule::Ptr epl = engine->compile(scriptsPath);
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test2");
+        ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        jsMod->evaluate();
 
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor oa(sv);
 
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
-
-        Callable c = le.get(engine, "Test2").toCallable(engine);
+        ScopedValue rootValue = oa.get(engine, "Test2");
+        Callable c = rootValue.toCallable(engine);
         QVERIFY(c.isComponent());
 
         Component test2 = c.toComponent();
@@ -118,19 +109,17 @@ void LvCompileTest::test3Lv(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv";
-        Script::Ptr sc = engine->compileModuleFile(scriptsPath);
+        ElementsModule::Ptr epl = engine->compile(scriptsPath);
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test3");
+        ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        jsMod->evaluate();
 
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor oa(sv);
 
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
-
-        Callable c = le.get(engine, "Test3").toCallable(engine);
+        ScopedValue rootValue = oa.get(engine, "Test3");
+        Callable c = rootValue.toCallable(engine);
         QVERIFY(c.isComponent());
 
         Component test3 = c.toComponent();
@@ -163,19 +152,17 @@ void LvCompileTest::test4Lv(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv";
-        Script::Ptr sc = engine->compileModuleFile(scriptsPath);
+        ElementsModule::Ptr epl = engine->compile(scriptsPath);
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test4");
+        ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        jsMod->evaluate();
 
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor oa(sv);
 
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
-
-        Callable c = le.get(engine, "Test4").toCallable(engine);
+        ScopedValue rootValue = oa.get(engine, "Test4");
+        Callable c = rootValue.toCallable(engine);
         QVERIFY(c.isComponent());
 
         Component test4 = c.toComponent();
@@ -210,17 +197,11 @@ void LvCompileTest::test1Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv.js";
-        Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadJsModule(scriptsPath);
+        jsMod->evaluate();
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test1");
-
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
-
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor le(sv);
 
         Callable c = le.get(engine, "Test1").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -257,17 +238,11 @@ void LvCompileTest::test2Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv.js";
-        Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadJsModule(scriptsPath);
+        jsMod->evaluate();
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test2");
-
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
-
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor le(sv);
 
         Callable c = le.get(engine, "Test2").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -298,17 +273,11 @@ void LvCompileTest::test3Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv.js";
-        Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadJsModule(scriptsPath);
+        jsMod->evaluate();
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test3");
-
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
-
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor le(sv);
 
         Callable c = le.get(engine, "Test3").toCallable(engine);
         QVERIFY(c.isComponent());
@@ -343,17 +312,11 @@ void LvCompileTest::test4Js(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv.js";
-        Script::Ptr sc = engine->compileJsModuleFile(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadJsModule(scriptsPath);
+        jsMod->evaluate();
 
-        ElementsModule::Ptr epl = ElementsModule::create(Plugin::createEmpty("test"), engine);
-        ModuleFile* mf = ElementsModule::addModuleFile(epl, "Test4");
-
-        Object m = sc->loadAsModule(mf);
-        Object::Accessor lm(m);
-        ScopedValue exports = lm.get(engine, "exports");
-
-        Object e = exports.toObject(engine);
-        Object::Accessor le(e);
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor le(sv);
 
         Callable c = le.get(engine, "Test4").toCallable(engine);
         QVERIFY(c.isComponent());

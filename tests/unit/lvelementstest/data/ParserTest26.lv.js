@@ -4,7 +4,7 @@ export class C extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        C.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -23,17 +23,19 @@ export class C extends Element{
 
                 Element.addProperty(test, 'y', { type: 'int', notify: 'yChanged' })
                 this.y = 10
+                Element.complete(this)
                 return this
             }.bind(new Element())(null))
 
             return d.y
-        })()
+        }.bind(this))()
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(test, "test")
                 this.x = 10
+                Element.complete(this)
                 return this
             }.bind(test)(this))
         ])

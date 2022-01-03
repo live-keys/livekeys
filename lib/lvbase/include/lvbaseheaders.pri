@@ -2,6 +2,7 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/live/exception.h \
+    $$PWD/live/fileio.h \
     $$PWD/live/library.h \
     $$PWD/live/libraryloadpath.h \
     $$PWD/live/lvbaseglobal.h \

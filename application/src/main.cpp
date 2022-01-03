@@ -56,19 +56,7 @@ int main(int argc, char *argv[]){
         Livekeys::Ptr livekeys = Livekeys::create(argc, argv);
         livekeys->loadInternals();
 
-        if ( livekeys->arguments()->helpFlag() ){
-            printf("%s", livekeys->arguments()->helpString().c_str());
-            return 0;
-        } else if ( livekeys->arguments()->versionFlag() ){
-            printf("%s\n", qPrintable(livekeys->versionString()));
-            return 0;
-        }
-
-        LibraryLoadPath::addRecursive(ApplicationContext::instance().pluginPath(), ApplicationContext::instance().linkPath());
-        if ( QFileInfo(QString::fromStdString(ApplicationContext::instance().externalPath())).exists() )
-            LibraryLoadPath::addRecursive(ApplicationContext::instance().externalPath(), ApplicationContext::instance().linkPath());
-
-        return livekeys->exec(app);
+        return livekeys->run(app);
 
     } catch ( lv::Exception& e ){
         if ( e.code() == Exception::toCode("Init") ){

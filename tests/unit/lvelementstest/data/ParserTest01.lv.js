@@ -1,13 +1,14 @@
+import {Container} from '__UNRESOLVED__'
+
 export class A extends Element{
     constructor(a, b){
         super()
-        this.__initialize()
+        A.prototype.__initialize.call(this)
         this.a = a
         this.b = b
     }
     
     __initialize(){
-        // Element.assignDefaultProperty(null)
     }
 
     otherFunction(a){
@@ -18,17 +19,16 @@ export class A extends Element{
 export class B extends Element{
     constructor(){
         super()
-        this.__initialize()
+        B.prototype.__initialize.call(this)
     }
     
     __initialize(){
-        // Element.assignDefaultProperty(null)
     }
 
     createA(){
         return (function(parent){
             this.setParent(parent)
-            // Element.assignDefaultProperty(null)
+            Element.complete(this)
             return this
         }.bind(new A(12, 13))(null))
     }
@@ -37,7 +37,7 @@ export class B extends Element{
 export class C extends Element{
     constructor(){
         super()
-        this.__initialize()
+        C.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -46,32 +46,30 @@ export class C extends Element{
 
         this.c1 = 200
         this.c2 = 300
-
-        // Element.assignDefaultProperty(null)
     }
 }
 
 export class D extends Container{
     constructor(){
         super()
-        this.__initialize()
+        D.prototype.__initialize.call(this)
     }
 
     __initialize(){
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
-                // Element.assignDefaultProperty(null)
+                 Element.complete(this)
                 return this
             }.bind(new A(12, 13))(this)),
             (function(parent){
               this.setParent(parent)
-              // Element.assignDefaultProperty(null)
+                Element.complete(this)
               return this
             }.bind(new A(14, 15))(this)),
             (function(parent){
               this.setParent(parent)
-              // Element.assignDefaultProperty(null)
+              Element.complete(this)
               return this
             }.bind(new A(16, 17))(this))
         ])

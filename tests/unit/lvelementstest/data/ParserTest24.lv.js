@@ -3,7 +3,7 @@ export class A extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        A.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -16,11 +16,12 @@ export class A extends Element{
 
                 Element.addProperty(did, 'y', { type: 'int', notify: 'yChanged' })
                 this.y = 10
+                Element.complete(this)
                 return this
             }.bind(new Element())(null))
 
             return d.y
-        })()
+        }.bind(this))()
 
     }
 

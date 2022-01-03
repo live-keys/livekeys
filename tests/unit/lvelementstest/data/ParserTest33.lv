@@ -1,0 +1,6 @@
+component X < Y{
+    constructor(x, y){
+        super(x, y)
+        X.prototype.__initialize.call(this)
+    }
+}

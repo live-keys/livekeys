@@ -8,7 +8,7 @@ export class TodoListItem extends Li{
 
     constructor(){
         super()
-        this.__initialize()
+        TodoListItem.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -21,22 +21,21 @@ export class TodoListItem extends Li{
         Element.addEvent(this, 'markDone', [])
         this.item = null
         this.classes = "list-group-item"
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.assignPropertyExpression(this,
                     'classes',
                     function(){ return todoListItem.item.done ? "done" : "undone"}.bind(this),
-                    [
-                        [ todoListItem.item, 'doneChanged' ]
-                    ]
+                    [ [ todoListItem.item, 'doneChanged' ] ]
                 )
-                Element.assignDefaultProperty(this, [
+                Element.assignChildrenAndComplete(this, [
                     (function(parent){
                         this.setParent(parent)
-                        this.classes = "glyphicon glyphicon-ok icon";
-                        this.ariaHidden = true;
+                        this.classes = "glyphicon glyphicon-ok icon"
+                        this.ariaHidden = true
                         this.on('click', function(){ todoListItem.markDone() }.bind(this));
+                        Element.complete(this)
                         return this
                     }.bind(new Span())(this)),
                     (function(parent){
@@ -48,13 +47,15 @@ export class TodoListItem extends Li{
                                 [ todoListItem.item, 'valueChanged' ]
                             ]
                         )
+                        Element.complete(this)
                         return this
                     }.bind(new T())(this)),
                     (function(parent){
                         this.setParent(parent)
-                        this.classes = "close";
+                        this.classes = "close"
                         this.text = "&times;"
                         this.on('click', function(){ todoListItem.remove()}.bind(this));
+                        Element.complete(this)
                         return this
                     }.bind(new Button())(this))
                 ])

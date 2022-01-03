@@ -178,9 +178,7 @@ EventConnection* Element::on(const std::string &key, std::function<void (const F
 }
 
 EventConnection *Element::on(const std::string &key, Callable callback){
-
     EventFunction* fnc = typeMetaObject().getEvent(key);
-
     if ( fnc ){
         EventListenerContainerBase* container = nullptr;
         auto delegateIt = m_listeningConnections.find(fnc->eventId());
@@ -447,7 +445,12 @@ void Element::assignPropertyExpression(
     }
 }
 
-void Element::assignDefaultProperty(Element *e, ScopedValue value){
+void Element::assignChildrenAndComplete(Element *e, ScopedValue value){
+    Element::assignChildren(e, value);
+    Element::complete(e);
+}
+
+void Element::assignChildren(Element *e, ScopedValue value){
     if ( !value.isNull() ){
         if ( e->defaultProperty().empty() )
         {
@@ -459,6 +462,9 @@ void Element::assignDefaultProperty(Element *e, ScopedValue value){
         Property* p = e->property(e->defaultProperty());
         p->write(e, value.data());
     }
+}
+
+void Element::complete(Element *e){
     e->onReady();
 }
 

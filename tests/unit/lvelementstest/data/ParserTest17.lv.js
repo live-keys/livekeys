@@ -2,7 +2,7 @@ export class TodoListItem extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        TodoListItem.prototype.__initialize.call(this)
     }
 
     __initialize(){

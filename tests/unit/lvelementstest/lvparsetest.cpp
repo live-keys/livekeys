@@ -99,11 +99,9 @@ void LvParseTest::todoListItem(){
     parseTestTemplate("ParserTest19");
 }
 
-
 void LvParseTest::todoForm(){
     parseTestTemplate("ParserTest20");
 }
-
 
 void LvParseTest::todoApp(){
     parseTestTemplate("ParserTest21");
@@ -113,7 +111,7 @@ void LvParseTest::complexTernaryOperator(){
     parseTestTemplate("ParserTest22");
 }
 
-void LvParseTest::doublyNestedElement(){
+void LvParseTest::doubleNestedElement(){
     parseTestTemplate("ParserTest23");
 }
 
@@ -137,17 +135,79 @@ void LvParseTest::multiNamespaceImportTest(){
     parseTestTemplate("ParserTest28");
 }
 
-void LvParseTest::parseTestTemplate(std::string name)
-{
+void LvParseTest::customBaseComponentTest(){
+    std::string name = "ParserTest29";
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
     std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
 
+    Compiler::Config compConfig = Compiler::Config();
+    compConfig.setBaseComponent("CustomElement", "custom/CustomElement.js");
+
+    Compiler::Ptr compiler = Compiler::create(compConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
 
-    std::string conversion = parser->toJs(contents, name);
+    std::string conversion = compiler->compileToJs(name, contents);
 
-//    vlog() << conversion;
+    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 
+    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+    parser->destroy(conversionAST);
+    parser->destroy(expectedAST);
+
+    QVERIFY(compare.isEqual());
+}
+
+void LvParseTest::defaultChildrenTest(){
+    parseTestTemplate("ParserTest30");
+}
+
+void LvParseTest::bindShouldNotBeImportedTest(){
+    parseTestTemplate("ParserTest31");
+}
+
+void LvParseTest::initializeElementTest(){
+    parseTestTemplate("ParserTest32");
+}
+
+void LvParseTest::customConstructorArgumentsTest(){
+    parseTestTemplate("ParserTest33");
+}
+
+void LvParseTest::unassignedPropertyTest(){
+    parseTestTemplate("ParserTest34");
+}
+
+void LvParseTest::staticPropertyTest(){
+    parseTestTemplate("ParserTest35");
+}
+
+void LvParseTest::functionAnnotationTest(){
+    parseTestTemplate("ParserTest36");
+}
+
+void LvParseTest::jsImportsTest(){
+    parseTestTemplate("ParserTest37");
+}
+
+void LvParseTest::trippleTagTest(){
+    parseTestTemplate("ParserTest38");
+}
+
+void LvParseTest::parseTestTemplate(std::string name){
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
+    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
+
+    Compiler::Ptr compiler = Compiler::create();
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    std::string conversion = compiler->compileToJs(name, contents);
+
+    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
     el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 

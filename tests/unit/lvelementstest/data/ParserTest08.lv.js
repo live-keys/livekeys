@@ -8,25 +8,29 @@ import {T} from '__UNRESOLVED__'
 export let ParserTest08 = (function(parent){
     this.setParent(parent)
 
-    Element.assignDefaultProperty(this, [
+    Element.assignChildrenAndComplete(this, [
         (function(parent){
             this.setParent(parent)
+            Element.complete(this)
             return this
         }.bind(new H1("Paragraph 1"))(this)),
         (function(parent){
             this.setParent(parent)
 
-            Element.assignDefaultProperty(this, [
+            Element.assignChildrenAndComplete(this, [
                 (function(parent){
                     this.setParent(parent)
+                    Element.complete(this)
                     return this
                 }.bind(new T("This is"))(this)),
                (function(parent){
                    this.setParent(parent)
+                    Element.complete(this)
                    return this
                }.bind(new B("paragraph 1"))(this)),
                (function(parent){
                    this.setParent(parent)
+                    Element.complete(this)
                    return this
                }.bind(new T("."))(this))
             ])
@@ -35,28 +39,31 @@ export let ParserTest08 = (function(parent){
         }.bind(new P())(this)),
       (function(parent){
           this.setParent(parent)
+          Element.complete(this)
           return this
       }.bind(new H1("Paragraph 2"))(this)),
           (function(parent){
               this.setParent(parent)
 
-              Element.assignDefaultProperty(this, [
+              Element.assignChildrenAndComplete(this, [
                   (function(parent){
                       this.setParent(parent)
+                      Element.complete(this)
                       return this
-                  }.bind(new T(" This is paragraph 2. Lines are merged into one. To add space and new lines we would you \\n and \\s characters. \n This will be"))(this)),
+                  }.bind(new T(" This is paragraph 2. Lines are merged into one. To add space and new lines we would use \\n and \\s characters. \n This will be"))(this)),
                  (function(parent){
                      this.setParent(parent)
+                     Element.complete(this)
                      return this
                  }.bind(new B("bold text. \n And this will be an"))(this)),
                  (function(parent){
                      this.setParent(parent)
+                     this.href = "https://livekeys.io"
 
-                     this.href = "https://livekeys.io";
-
-                     Element.assignDefaultProperty(this, [
+                     Element.assignChildrenAndComplete(this, [
                         (function(parent){
                             this.setParent(parent)
+                            Element.complete(this)
                             return this
                         }.bind(new T("link"))(this))
                      ])

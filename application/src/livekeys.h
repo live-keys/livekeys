@@ -97,6 +97,8 @@ public:
     void loadInternalPlugins();
     void loadInternalPackages();
 
+    int run(const QGuiApplication& app);
+
     std::vector<std::string> packageImportPaths() const;
 
     const LivekeysArguments* arguments() const;

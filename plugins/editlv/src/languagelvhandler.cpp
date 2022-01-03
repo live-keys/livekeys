@@ -307,7 +307,7 @@ void LanguageLvHandler::suggestionsForImport(const el::CursorContext &ctx, QList
 {
     if (ctx.context() & el::CursorContext::InRelativeImport)
     {
-        auto folderPath = m_document->file()->parentEntry()->path();
+//        auto folderPath = m_document->file()->parentEntry()->path();
     }
     else {
         foreach (const QString& importPath, m_engine->importPathList()){

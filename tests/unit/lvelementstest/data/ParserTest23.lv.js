@@ -2,7 +2,7 @@ export class A extends Element{
 
     constructor(){
         super()
-        this.__initialize()
+        A.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -17,12 +17,14 @@ export class A extends Element{
                     this.setParent(parent)
                     Element.addProperty(this, 'y', { type: 'var', notify: 'yChanged' })
                     this.y = 10
+                    Element.complete(this)
                     return this
                 }.bind(new Element())(null))
 
                 return d.y
-            }())
+            }.bind(this)())
 
+            Element.complete(this)
             return this
         }.bind(new Element())(null))
     }

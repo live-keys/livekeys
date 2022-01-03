@@ -111,18 +111,11 @@ public:
     ComparisonResult compare(const std::string& source1, AST* ast1, const std::string& source2, AST* ast2);
     std::string toString(AST* ast) const;
 
-    std::string toJs(const std::string &contents, const std::string filename = "") const;
-    std::string toJs(const std::string &contents, AST* ast, const std::string filename = "") const;
-
-    ProgramNode* toJsNodes(AST *ast, const std::string filename) const;
-    std::string toJs(const std::string& contents, BaseNode* node) const;
-
     std::list<std::string> parseExportNames(const std::string &moduleFile);
     std::list<std::string> parseExportNames(const std::string& moduleFile, const std::string& content, AST* ast);
 
     TSParser* internal() const{ return m_parser; }
     Language* language() const;
-
 
     Engine *engine() const;
     void setEngine(Engine *engine);

@@ -1,7 +1,9 @@
+import {Container} from '__UNRESOLVED__'
+
 export class NestingTest extends Container{
     constructor(){
         super()
-        this.__initialize()
+        NestingTest.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -21,7 +23,7 @@ export class NestingTest extends Container{
         Element.addProperty(e1, 'x', {type: 'int', notify: 'xChanged'})
         Element.addProperty(enested, 'y', {type: 'int', notify: 'yChanged'})
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(e1,"e1")
@@ -31,18 +33,18 @@ export class NestingTest extends Container{
                     function(){ return enested.y }.bind(this),
                     [[enested, "yChanged"]]
                 )
-                // Element.assignDefaultProperty(null)
+                Element.complete(this)
                 return this
             }.bind(e1)(this)),
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(c1, "c1")
-                Element.assignDefaultProperty(this, [
+                Element.assignChildrenAndComplete(this, [
                     (function(parent){
                         this.setParent(parent)
                         Element.assignId(enested, "enested")
                         this.y = 200
-                        // Element.assignDefaultProperty(null)
+                        Element.complete(this)
                         return this
                     }.bind(enested)(this))
                 ])
@@ -55,7 +57,7 @@ export class NestingTest extends Container{
 export class ShortIdTest extends Container{
     constructor(){
         super()
-        this.__initialize()
+        ShortIdTest.prototype.__initialize.call(this)
     }
 
     __initialize(){
@@ -65,13 +67,12 @@ export class ShortIdTest extends Container{
 
         Element.addProperty(e1, 'x', {type: 'int', notify: 'xChanged'})
 
-        Element.assignDefaultProperty(this, [
+        Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
                 Element.assignId(e1, "e1")
                 this.x = 10
-                // Element.assignDefaultProperty(null)
-
+                Element.complete(this)
                 return this
             }.bind(e1)(this))
         ])
