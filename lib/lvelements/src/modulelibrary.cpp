@@ -55,10 +55,6 @@ ModuleLibrary *ModuleLibrary::load(Engine* engine, const std::string &path){
     return ml;
 }
 
-void ModuleLibrary::loadExports(const Object& exportsObject){
-    m_d->engine->require(this, exportsObject);
-}
-
 void ModuleLibrary::addInstance(const std::string &name, Element *element){
     m_instances[name] = element;
 }

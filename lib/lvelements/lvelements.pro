@@ -36,13 +36,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 include(3rdparty/treesitter.pri)
 include(3rdparty/treesitterelements.pri)
 
-include($$PROJECT_ROOT/project/3rdparty/v8.pri)
-include($$PWD/include/lvelementsheaders.pri)
-include($$PWD/src/lvelements.pri)
+include($$PWD/src/compiler/compiler.pri)
+include($$PWD/include/lvelementscompilerheaders.pri)
 
-deployV8()
+!isEmpty(BUILD_ELEMENTS_ENGINE){
+    DEFINES += BUILD_ELEMENTS_ENGINE
+    include($$PWD/include/lvelementsheaders.pri)
+    include($$PWD/src/lvelements.pri)
+    include($$PROJECT_ROOT/project/3rdparty/v8.pri)
+    deployV8()
+}
 
 OTHER_FILES += $$PWD/doc/*.dox
-
 DISTFILES += \
     doc/page_v8.dox

@@ -1,5 +1,5 @@
 #include "languagescanner.h"
-#include "live/plugincontext.h"
+#include "live/modulecontext.h"
 #include "live/elements/parseddocument.h"
 
 namespace lv{ namespace el{
@@ -38,7 +38,7 @@ LanguageScanner::Ptr LanguageScanner::create(LanguageParser::Ptr parser, LockedF
  * is parsed.
  */
 ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
-    Plugin::Ptr plugin = m_packageGraph->loadPlugin(importUri);
+    Module::Ptr plugin = m_packageGraph->loadModule(importUri);
 
     if ( !plugin || !plugin->context() )
         return ModuleInfo::Ptr(nullptr);
@@ -47,9 +47,9 @@ ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
 
     ModuleInfo::Ptr module = ModuleInfo::create(plugin->context()->importId, plugin->path());
 
-    const std::list<Plugin::Ptr>& localdeps = plugin->context()->localDependencies;
+    const std::list<Module::Ptr>& localdeps = plugin->context()->localDependencies;
     for ( auto it = localdeps.begin(); it != localdeps.end(); ++it ){
-        Plugin::Ptr dep = *it;
+        Module::Ptr dep = *it;
         module->addDependency(dep->context()->importId);
     }
 
@@ -59,7 +59,7 @@ ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
         module->addDependency(dep);
     }
 
-    const std::list<std::string>& files = plugin->modules();
+    const std::list<std::string>& files = plugin->fileModules();
     for ( auto it = files.begin(); it != files.end(); ++it ){
         std::string filePath = plugin->filePath() + "/" + *it + ".lv";
         std::string content = m_io->readFromFile(filePath);
@@ -67,7 +67,7 @@ ModuleInfo::Ptr LanguageScanner::parseModule(const std::string &importUri){
         DocumentInfo::Ptr info = ParsedDocument::extractInfo(content, ast);
 
         for ( size_t i = 0; i < info->totalImports(); ++i ){
-            Plugin::Ptr depPlugin = m_packageGraph->loadPlugin(info->importAt(i).segments(), plugin);
+            Module::Ptr depPlugin = m_packageGraph->loadModule(info->importAt(i).segments(), plugin);
             if ( depPlugin && depPlugin->context() )
                 module->addDependency(depPlugin->context()->importId);
         }

@@ -2,7 +2,8 @@
 #define LVELEMENTSPLUGIN_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/plugin.h"
+#include "live/elements/compiler/compiler.h"
+#include "live/module.h"
 
 #include <memory>
 
@@ -11,9 +12,8 @@ namespace lv{ namespace el{
 class Engine;
 class ModuleFile;
 class ModuleLibrary;
-class Object;
 
-class ElementsPluginPrivate;
+class ElementsModulePrivate;
 class LV_ELEMENTS_EXPORT ElementsModule{
 
     DISABLE_COPY(ElementsModule);
@@ -42,21 +42,19 @@ public:
 public:
     ~ElementsModule();
 
-    static ElementsModule::Ptr create(Plugin::Ptr plugin, Engine* engine);
+    static ElementsModule::Ptr create(Module::Ptr module, Engine* engine);
+    static ElementsModule::Ptr create(Module::Ptr module, Compiler::Ptr compiler);
 
     static ModuleFile *addModuleFile(ElementsModule::Ptr& epl, const std::string& name);
-    void addModuleLibrary(ModuleLibrary* library);
 
     ModuleFile* findModuleFileByName(const std::string& name) const;
     ModuleFile* moduleFileBypath(const std::string& path) const;
 
-    const Plugin::Ptr &plugin() const;
-
-    Object collectExportsObject();
-    const Object& libraryExports() const;
+    const Module::Ptr &module() const;
 
     void compile();
 
+    Compiler::Ptr compiler() const;
     Engine* engine() const;
 
     Export findExport(const std::string& name) const;
@@ -65,9 +63,12 @@ public:
     const std::list<ModuleLibrary*>& libraryModules() const;
 
 private:
-    ElementsModule(Plugin::Ptr plugin, Engine* engine);
+    void initializeLibraries(const std::list<std::string>& libs);
 
-    ElementsPluginPrivate* m_d;
+    static ElementsModule::Ptr create(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
+    ElementsModule(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
+
+    ElementsModulePrivate* m_d;
 
 };
 

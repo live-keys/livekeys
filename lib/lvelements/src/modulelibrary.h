@@ -1,5 +1,5 @@
-#ifndef LVMODULE_H
-#define LVMODULE_H
+#ifndef LVMODULELIBRARY_H
+#define LVMODULELIBRARY_H
 
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/metaobject.h"
@@ -19,8 +19,6 @@ public:
 
     static ModuleLibrary* create(Engine* engine, const std::string& path);
     static ModuleLibrary* load(Engine *engine, const std::string& path);
-
-    void loadExports(const Object &exportsObject);
 
     void addInstance(const std::string& name, Element* element);
     template<typename T> void addType();
@@ -66,4 +64,4 @@ template<typename T> void ModuleLibrary::addType(){
 
 }} // namespace lv, el
 
-#endif // LVMODULE_H
+#endif // LVMODULELIBRARY_H

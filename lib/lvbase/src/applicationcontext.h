@@ -17,8 +17,8 @@
 #ifndef LVAPPLICATIONCONTEXT_H
 #define LVAPPLICATIONCONTEXT_H
 
-#include <string>
 #include "live/lvbaseglobal.h"
+#include <string>
 #include <vector>
 
 class QString;

@@ -31,7 +31,8 @@ HEADERS += \
     $$PWD/metaobjecttypeinfotest.h \
     $$PWD/lvimportstest.h \
     $$PWD/lvelparseddocumenttest.h \
-    $$PWD/lvellanguageinfoserializationtest.h
+    $$PWD/lvellanguageinfoserializationtest.h \
+    lvparseerrortest.h
 
 SOURCES += \
     $$PWD/main.cpp \
@@ -55,7 +56,8 @@ SOURCES += \
     $$PWD/metaobjecttypeinfotest.cpp \
     $$PWD/lvimportstest.cpp \
     $$PWD/lvelparseddocumenttest.cpp \
-    $$PWD/lvellanguageinfoserializationtest.cpp
+    $$PWD/lvellanguageinfoserializationtest.cpp \
+    lvparseerrortest.cpp
 
 OTHER_FILES += $$PWD/data/*.*
 
@@ -91,6 +93,8 @@ DISTFILES += \
     data/ImportTest10.lvep \
     data/ImportTest11.lvep \
     data/ImportTest12.lvep \
+    data/ImportTest13.lvep \
+    data/ParserErrorTest01.lv \
     data/ParserTest011.lv \
     data/ParserTest1.lv.js \
     data/ParserTest11.lv \
@@ -126,8 +130,12 @@ DISTFILES += \
     data/ParserTest38.lv \
     data/ParserTest38.lv.js \
     data/ParserTest38.lv.js \
+    data/ParserTest39.lv \
+    data/ParserTest39.lv.js \
     data/ParserTest4.lv \
     data/ParserTest4.lv.js \
+    data/ParserTest40.lv \
+    data/ParserTest40.lv.js \
     data/ParserTest5.lv \
     data/ParserTest5.lv.js \
     data/ParserTest6.lv \

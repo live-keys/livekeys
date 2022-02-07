@@ -10,7 +10,6 @@
 
 #include <fstream>
 #include <queue>
-#include "engine.h"
 
 namespace lv{ namespace el{
 
@@ -72,19 +71,8 @@ std::string slice(const std::string& source, TSNode& node){
 LanguageParser::LanguageParser(Language *language)
     : m_parser(ts_parser_new())
     , m_language(language)
-    , m_engine(nullptr)
 {
     ts_parser_set_language(m_parser, reinterpret_cast<const TSLanguage*>(language));
-}
-
-Engine *LanguageParser::engine() const
-{
-    return m_engine;
-}
-
-void LanguageParser::setEngine(Engine *engine)
-{
-    m_engine = engine;
 }
 
 LanguageParser::~LanguageParser(){

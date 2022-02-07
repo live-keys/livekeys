@@ -1,6 +1,6 @@
 // This holds an import from the same path
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "main",

@@ -4,7 +4,7 @@
 #include <QObject>
 #include "testrunner.h"
 #include "live/lockedfileiosession.h"
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 
 class LvElParsedDocumentTest : public QObject{
 

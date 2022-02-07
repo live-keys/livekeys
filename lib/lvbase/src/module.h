@@ -1,5 +1,5 @@
-#ifndef LVPLUGIN_H
-#define LVPLUGIN_H
+#ifndef LVMODULE_H
+#define LVMODULE_H
 
 #include "live/lvbaseglobal.h"
 
@@ -13,14 +13,14 @@ namespace lv{
 class MLNode;
 class PackageGraph;
 
-class PluginPrivate;
-class LV_BASE_EXPORT Plugin{
+class ModulePrivate;
+class LV_BASE_EXPORT Module{
 
-    DISABLE_COPY(Plugin);
+    DISABLE_COPY(Module);
 
 public:
     /** Shared pointer to plugin */
-    typedef std::shared_ptr<Plugin> Ptr;
+    typedef std::shared_ptr<Module> Ptr;
 
     class Context;
 
@@ -29,34 +29,38 @@ public:
     static const char* fileName;
 
 public:
-    ~Plugin();
+    ~Module();
 
     static bool existsIn(const std::string& path);
-    static Plugin::Ptr createFromPath(const std::string& path);
-    static Plugin::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
-    static Plugin::Ptr createEmpty(const std::string& name);
+    static Module::Ptr createFromPath(const std::string& path);
+    static Module::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
+    static Module::Ptr createEmpty(const std::string& name);
 
     const std::string& name() const;
     const std::string& path() const;
     const std::string& filePath() const;
-    /** Package getter */
+
+    std::string packagePath() const;
+    std::string pathFromPackage() const;
+
     const std::string& package() const;
     const std::list<std::string>& dependencies() const;
-    const std::list<std::string>& modules() const;
+    const std::list<std::string>& fileModules() const;
     const std::list<std::string>& libraryModules() const;
+    const std::list<std::string>& assets() const;
     const std::list<std::pair<std::string, std::string> >& palettes() const;
 
     void assignContext(PackageGraph* graph);
     Context* context();
 
 private:
-    Plugin(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);
+    Module(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);
 
     void addPalette(const std::string& type, const std::string& path);
 
-    PluginPrivate* m_d;
+    ModulePrivate* m_d;
 };
 
 } // namespace
 
-#endif // PLUGIN_H
+#endif // LVMODULE_H

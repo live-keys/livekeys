@@ -3,7 +3,7 @@
 
 #include "live/lvbaseglobal.h"
 #include "live/package.h"
-#include "live/plugin.h"
+#include "live/module.h"
 
 namespace lv{
 
@@ -24,8 +24,8 @@ public:
     std::list<Package::Ptr> dependents;
     /** Dependencies of the package */
     std::list<Package::Ptr> dependencies;
-    /** Plugins */
-    std::map<std::string, Plugin::Ptr> plugins;
+    /** Modules */
+    std::map<std::string, Module::Ptr> modules;
 
 private:
     // disable copy

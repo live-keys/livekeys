@@ -1,0 +1,12 @@
+component A < Element{
+    int x: 20
+    get x(){ return Element.getProperty('x') }
+    set x(int val){ Element.setProperty('x', val) }
+
+    get y(){ return this._y }
+    set y(var val){ this._y = val }
+
+    int z: 30
+    get z(){ return Element{} }
+    set z(var val){ Element{ int x: val } }
+}

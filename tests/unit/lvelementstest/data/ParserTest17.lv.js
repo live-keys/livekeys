@@ -12,8 +12,8 @@ export class TodoListItem extends Element{
         this.on('markDone', function(index){
             this.todoList.markTodoDone(index)
         }.bind(this));
-        this.key = index
-        this.item = item
+        this.key = 0
+        this.item = null
     }
 
 }

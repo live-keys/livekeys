@@ -118,6 +118,6 @@ DISTFILES += \
     qml/VideoSurfaceView.qml \
     qml/VideoTrackExtension.qml \
     qml/VideoTrackFactory.qml \
-    qml/live.package.json \
-    qml/live.plugin.json
+    qml/live.module.json \
+    qml/live.package.json
 

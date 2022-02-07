@@ -93,6 +93,8 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
     CommandLineParser::Option* compileConfigOption = m_parser->addOption({"--compile-config"},
         "Custom configuration for compiler options. Each property is configured via a key value pair. "
         "(i.e. baseComponent=CustomElement;)", "string");
+    CommandLineParser::Option* compileConfigFileOption = m_parser->addOption({"--compile-config-file"},
+        "Custom configuration file for compiler options.", "path");
 
     m_parser->parse(argc, argv);
 
@@ -227,6 +229,15 @@ void LivekeysArguments::initialize(int argc, const char* const argv[]){
             MLNode::StringType cfgkey  = configurationKey.toStdString();
             m_compileConfiguration[cfgkey] = configurationValue.toStdString();
         }
+    }
+    if ( m_parser->isSet(compileConfigFileOption) ){
+        m_compileConfiguration = MLNode();
+        QFile lcf(QString::fromStdString(m_parser->value(compileConfigFileOption)));
+        if ( !lcf.open(QIODevice::ReadOnly) )
+            THROW_EXCEPTION(lv::Exception, "Failed to open log configuration file: " + lcf.fileName().toStdString(), Exception::toCode("Init"));
+
+        QByteArray content = lcf.readAll();
+        ml::fromJson(content, m_compileConfiguration);
     }
 
     if ( m_parser->isSet(layerConfigOption) ){

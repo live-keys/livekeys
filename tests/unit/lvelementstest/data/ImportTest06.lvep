@@ -1,6 +1,6 @@
 // This file holds a simple import of a plugin from a main file.
 
-////// plugin1/live.plugin.json
+////// plugin1/live.module.json
 
 {
     "name" : "plugin1",
@@ -36,11 +36,11 @@ component default < Element{
 ////// live.package.json
 
 {
-    "name" : "test-package",
+    "name" : "main",
     "version" : "1.0.0"
 }
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "main",
@@ -51,9 +51,9 @@ component default < Element{
 
 ////// main.lv
 
-import .plugin1
-import .plugin1 as p1
-import .plugin1 as p2
+import .main.plugin1
+import .main.plugin1 as p1
+import .main.plugin1 as p2
 
 instance default Element{
     string a : {

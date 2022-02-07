@@ -2,20 +2,16 @@ INCLUDEPATH += $$PWD
 
 HEADERS += \
     $$PWD/bindingpath.h \
-    $$PWD/compiler.h \
     $$PWD/cursorcontext.h \
-    $$PWD/elementsmodule.h \
     $$PWD/function.h \
     $$PWD/engine.h \
     $$PWD/jsmodule.h \
     $$PWD/languageinfo.h \
-    $$PWD/languagenodes_p.h \
-    $$PWD/languageparser.h \
     $$PWD/languagequery.h \
     $$PWD/languagescanner.h \
     $$PWD/metaobject.h \
+    $$PWD/modulefilejsdata.h \
     $$PWD/parseddocument.h \
-    $$PWD/sourcerange.h \
     $$PWD/value.h \
     $$PWD/element.h \
     $$PWD/element_p.h \
@@ -38,29 +34,22 @@ HEADERS += \
     $$PWD/errorhandler.h \
     $$PWD/mlnodetojs.h \
     $$PWD/visuallogjsobject.h \
-    $$PWD/modulefile.h \
-    $$PWD/imports_p.h \
     $$PWD/modulelibrary.h \
     $$PWD/moduleloader.h \
-    $$PWD/tuple.h \
-    $$PWD/elementssections_p.h
+    $$PWD/tuple.h
 
 SOURCES += \
     $$PWD/bindingpath.cpp \
-    $$PWD/compiler.cpp \
     $$PWD/cursorcontext.cpp \
-    $$PWD/elementsmodule.cpp \
     $$PWD/function.cpp \
     $$PWD/engine.cpp \
     $$PWD/jsmodule.cpp \
     $$PWD/languageinfo.cpp \
-    $$PWD/languagenodes.cpp \
-    $$PWD/languageparser.cpp \
     $$PWD/languagequery.cpp \
     $$PWD/languagescanner.cpp \
     $$PWD/metaobject.cpp \
+    $$PWD/modulefilejsdata.cpp \
     $$PWD/parseddocument.cpp \
-    $$PWD/sourcerange.cpp \
     $$PWD/value.cpp \
     $$PWD/element.cpp \
     $$PWD/property.cpp \
@@ -78,8 +67,5 @@ SOURCES += \
     $$PWD/errorhandler.cpp \
     $$PWD/mlnodetojs.cpp \
     $$PWD/visuallogjsobject.cpp \
-    $$PWD/modulefile.cpp \
-    $$PWD/imports.cpp \
     $$PWD/modulelibrary.cpp \
-    $$PWD/tuple.cpp \
-    $$PWD/elementssections.cpp
+    $$PWD/tuple.cpp

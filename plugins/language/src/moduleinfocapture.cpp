@@ -49,33 +49,34 @@ Object ModuleInfoCapture::extract(const std::string &uri){
 }
 
 void ModuleInfoCapture::readModule(){
-    ElementsModule::Ptr ep = engine()->require(m_current->importUri().data());
-    Object epexports = ep->collectExportsObject();
-    Object::Accessor lo(epexports);
-    ScopedValue lokeys = lo.ownProperties(engine());
-    Object::ArrayAccessor lokeysArray(engine(), lokeys);
+    //TODO: Read exports directly
+//    ElementsModule::Ptr ep = engine()->require(m_current->importUri().data());
+//    Object epexports = ep->collectExportsObject();
+//    Object::Accessor lo(epexports);
+//    ScopedValue lokeys = lo.ownProperties(engine());
+//    Object::ArrayAccessor lokeysArray(engine(), lokeys);
 
-    for ( int i = 0; i < lokeysArray.length(); ++i ){
-        ScopedValue exportValue = lo.get(engine(), lokeysArray.get(engine(), i));
-        if ( exportValue.isElement() ){
-            TypeInfo::Ptr ti = TypeInfo::extract(
-                exportValue.toElement(engine())->typeMetaObject(), m_current->importUri(), true, false
-            );
-            m_current->addType(ti);
+//    for ( int i = 0; i < lokeysArray.length(); ++i ){
+//        ScopedValue exportValue = lo.get(engine(), lokeysArray.get(engine(), i));
+//        if ( exportValue.isElement() ){
+//            TypeInfo::Ptr ti = TypeInfo::extract(
+//                exportValue.toElement(engine())->typeMetaObject(), m_current->importUri(), true, false
+//            );
+//            m_current->addType(ti);
 
-        } else if ( exportValue.isCallable() ){
-            //TODO
-        }
-    }
+//        } else if ( exportValue.isCallable() ){
+//            //TODO
+//        }
+//    }
 
     //TODO: resolve typeinfo through dependencies
 
-    MLNode moduleInfoMl = m_current->toMLNode();
+//    MLNode moduleInfoMl = m_current->toMLNode();
 
-    ScopedValue result(engine());
-    ml::toJs(moduleInfoMl, result, engine());
+//    ScopedValue result(engine());
+//    ml::toJs(moduleInfoMl, result, engine());
 
-    moduleReady(result);
+//    moduleReady(result);
 }
 
 

@@ -5,12 +5,14 @@
 #include "live/elements/modulelibrary.h"
 #include "live/elements/value.h"
 #include "live/elements/script.h"
-#include "live/elements/elementsmodule.h"
-#include "live/elements/languageparser.h"
 #include "live/elements/jsmodule.h"
+
+#include "live/elements/compiler/elementsmodule.h"
+#include "live/elements/compiler/languageparser.h"
+#include "live/elements/compiler/compiler.h"
+
 #include "live/packagegraph.h"
 #include "live/lockedfileiosession.h"
-#include "live/elements/compiler.h"
 
 namespace lv{
 
@@ -99,11 +101,10 @@ public:
     };
 
 public:
-    Engine(PackageGraph* pg = nullptr, const Compiler::Ptr& compiler = Compiler::create());
+    Engine(const Compiler::Ptr& compiler = Compiler::create());
     ~Engine();
 
     Object require(ModuleLibrary* module, const Object& o);
-    ElementsModule::Ptr require(const std::string& importKey, Plugin::Ptr requestingPlugin = nullptr);
 
     void scope(const std::function<void()> &f);
 
@@ -116,9 +117,7 @@ public:
     Script::Ptr compileJsModuleFile(const std::string& path);
 
     JsModule::Ptr loadJsModule(const std::string& path);
-    JsModule::Ptr loadAsJsModule(ModuleFile* file);
     Element* runFile(const std::string& path);
-    ElementsModule::Ptr compile(const std::string& path);
 
     Script::Ptr compileModuleFile(const std::string& path);
     Script::Ptr compileModuleSource(const std::string& path, const std::string& source);
@@ -138,9 +137,6 @@ public:
     void incrementTryCatchNesting();
     void decrementTryCatchNesting();
     void clearPendingException();
-
-    const std::vector<std::string> &packageImportPaths() const;
-    void setPackageImportPaths(const std::vector<std::string>& paths);
 
     void handleError(const std::string& message, const std::string& stack, const std::string& file, int line);
 

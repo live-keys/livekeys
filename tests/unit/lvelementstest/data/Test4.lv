@@ -1,8 +1,12 @@
-component default < Container{
+component Test4 < Element{
 
     constructor(var1, var2){
+        super()
+        Test4.prototype.__initialize.call(this)
         this.someVar = 20
     }
+
+    default children
 
     int x: 20
     int y: 20

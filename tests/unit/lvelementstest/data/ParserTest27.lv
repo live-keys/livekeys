@@ -4,7 +4,7 @@ component ParserTest27 < mod.A{
     string b : mod.B.value
     string c : mod.C.value
 
-    toString(){
+    fn toString(){
         var e = mod.E.value
         return mod.D.value + e
     }

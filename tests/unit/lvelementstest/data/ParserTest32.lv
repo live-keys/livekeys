@@ -1,4 +1,4 @@
-instance default Element{
+component default < Element{
 
     fn x(){
         return Element{}

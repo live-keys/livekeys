@@ -13,6 +13,12 @@ public:
     LvCompileTest(QObject* parent = nullptr);
     ~LvCompileTest(){}
 
+    void test1Js();
+    void test2Js();
+    void test3Js();
+    void test4Js();
+
+
 private slots:
     void initTestCase();
 
@@ -20,11 +26,6 @@ private slots:
     void test2Lv();
     void test3Lv();
     void test4Lv();
-
-    void test1Js();
-    void test2Js();
-    void test3Js();
-    void test4Js();
 };
 
 #endif // LVCOMPILETEST_H

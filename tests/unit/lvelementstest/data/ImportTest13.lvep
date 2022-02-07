@@ -1,0 +1,36 @@
+// This file creates a packages folder to test imports
+
+
+////// packages/dash-package-1/live.module.json
+
+{
+    "name" : "dash-package-1",
+    "package": ".",
+    "modules": ["A"]
+}
+
+////// packages/dash-package-1/live.package.json
+
+{
+    "name" : "dash-package-1",
+    "version" : "1.0.0"
+}
+
+////// packages/dash-package-1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// main.lv
+
+import dash-package-1
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+}
+

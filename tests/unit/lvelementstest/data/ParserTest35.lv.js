@@ -1,4 +1,3 @@
-
 export class X extends Element{
 
     constructor(){
@@ -7,9 +6,10 @@ export class X extends Element{
     }
     __initialize(){
     }
-
-    static prop1 = 100
-    static prop2 = { x: 1, y: 2}
-    static prop3 = (function(){ return 100 })()
-    static prop4
 }
+
+
+X.prop1 = 100
+X.prop2 = { x: 1, y: 2}
+X.prop3 = (function(){ return 100 })()
+X.prop4

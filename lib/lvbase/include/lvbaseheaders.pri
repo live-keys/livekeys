@@ -7,6 +7,8 @@ HEADERS += \
     $$PWD/live/libraryloadpath.h \
     $$PWD/live/lvbaseglobal.h \
     $$PWD/live/lvglobal.h \
+    $$PWD/live/module.h \
+    $$PWD/live/modulecontext.h \
     $$PWD/live/palettecontainer.h \
     $$PWD/live/program.h \
     $$PWD/live/programholder.h \
@@ -22,8 +24,6 @@ HEADERS += \
     $$PWD/live/meta/functionargs.h \
     $$PWD/live/package.h \
     $$PWD/live/version.h \
-    $$PWD/live/plugin.h \
     $$PWD/live/packagegraph.h \
-    $$PWD/live/plugincontext.h \
     $$PWD/live/packagecontext.h \
     $$PWD/live/utf8.h

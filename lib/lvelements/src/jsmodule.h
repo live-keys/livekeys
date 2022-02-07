@@ -4,7 +4,7 @@
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/value.h"
 #include "live/packagegraph.h"
-#include "elementsmodule.h"
+#include "live/elements/compiler/elementsmodule.h"
 
 namespace lv{ namespace el{
 

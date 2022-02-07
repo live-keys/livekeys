@@ -1,6 +1,6 @@
 # Adding a palette
 
-To add a palette, we have to make sure that LiveKeys is made aware that the palette exists. That's done through the appropriate `live.plugin.json` file for each plugin, under the `palettes` key. An example is given below.
+To add a palette, we have to make sure that LiveKeys is made aware that the palette exists. That's done through the appropriate `live.module.json` file for each module, under the `palettes` key. An example is given below.
 
 ```json
 {
@@ -17,7 +17,7 @@ To add a palette, we have to make sure that LiveKeys is made aware that the pale
 }
 ```
 
-We give the path to the palette file relative to the `live.plugin.json` as the key, and the type that the palette supports as the value. For example, both the `SliderPalette` and `NumberHistoryPlotPalette` can be used to display a variable of the `double` type.
+We give the path to the palette file relative to the `live.module.json` as the key, and the type that the palette supports as the value. For example, both the `SliderPalette` and `NumberHistoryPlotPalette` can be used to display a variable of the `double` type.
 
 After registering the palette in such a manner, we create the appropriate Qml file. The palette itself has to be of CodePalette type.
 
@@ -31,7 +31,7 @@ CodePalette {
 }
 ```
 
-The code palette has the `type` property, which should match the one given inside the `live.plugin.json` file.  
+The code palette has the `type` property, which should match the one given inside the `live.module.json` file.  
 The `item` property is the actual item that will be displayed when we open up a palette.   
 The palette can be initialized in the `onInit` handler e.g. that's how we would set it up to display the correct value.  
 Palettes get an extension called QmlCodeConverter which represents the Qml part for the palette.  

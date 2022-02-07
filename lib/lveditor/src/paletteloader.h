@@ -18,7 +18,7 @@
 #define LVPALLETECONTAINER_H
 
 #include "live/lveditorglobal.h"
-#include "live/plugin.h"
+#include "live/module.h"
 #include "live/palettecontainer.h"
 
 #include <QString>

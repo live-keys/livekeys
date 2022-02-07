@@ -188,7 +188,7 @@ void LvImportsTest::packageImportTest()
     tp.unpack(scriptPath("ImportTest09.lvep"));
 
     engine->scope([engine, &tp](){
-        engine->setPackageImportPaths({tp.path() + "/packages"});
+        engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
         Element* main = engine->runFile(tp.path() + "/main.lv");
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
@@ -206,7 +206,7 @@ void LvImportsTest::packageDependencyCycleTest(){
     tp.unpack(scriptPath("ImportTest10.lvep"));
 
     engine->scope([engine, &tp](){
-        engine->setPackageImportPaths({tp.path() + "/packages"});
+        engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
         bool hadException = false;
         try {
             engine->runFile(tp.path() + "/main.lv");
@@ -252,6 +252,23 @@ void LvImportsTest::importMetaTest(){
         QVERIFY(main->get("aModule").toStdString(engine) == "main.plugin1");
         QVERIFY(main->get("bUrl").toStdString(engine) == tp.path() + "/plugin1/subplugin/B.lv");
         QVERIFY(main->get("bModule").toStdString(engine) == "main.plugin1.subplugin");
+    });
+
+    delete engine;
+}
+
+void LvImportsTest::dashPackageImportTest(){
+    Engine* engine = new Engine;
+    engine->setModuleFileType(Engine::Lv);
+
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest13.lvep"));
+
+    engine->scope([engine, &tp](){
+        engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
+        Element* main = engine->runFile(tp.path() + "/main.lv");
+        QVERIFY(main != nullptr);
+        QVERIFY(main->get("a").toStdString(engine) == "class[A]");
     });
 
     delete engine;

@@ -1,4 +1,4 @@
-////// plugin1/subplugin1/live.plugin.json
+////// plugin1/subplugin1/live.module.json
 
 {
     "name" : "subplugin1",
@@ -22,7 +22,7 @@ component default < Element{
     }
 }
 
-////// plugin1/subplugin2/live.plugin.json
+////// plugin1/subplugin2/live.module.json
 
 {
     "name" : "subplugin2",
@@ -32,11 +32,11 @@ component default < Element{
 
 ////// plugin1/subplugin2/C.lv
 
-import .plugin1.subplugin1
+import .test-package.plugin1.subplugin1
 
 component default < B{}
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "test-package",
@@ -53,7 +53,7 @@ component default < B{}
 
 ////// main.lv
 
-import .plugin1.subplugin2
+import .test-package.plugin1.subplugin2
 
 instance default Element{
     string c : {

@@ -45,7 +45,12 @@
 #include <QProcess>
 
 #ifdef BUILD_ELEMENTS
+#include "live/elements/compiler/compiler.h"
+
+#ifdef BUILD_ELEMENTS_ENGINE
 #include "live/elements/engine.h"
+#endif
+
 #endif
 
 namespace lv{
@@ -56,7 +61,7 @@ Livekeys::Livekeys(QObject *parent)
     , m_viewEngine(new ViewEngine(new QQmlApplicationEngine, m_lockedFileIO))
     , m_arguments(new LivekeysArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))
-#ifdef BUILD_ELEMENTS
+#ifdef BUILD_ELEMENTS_ENGINE
     , m_engine(new lv::el::Engine)
 #else
     , m_engine(nullptr)
@@ -95,7 +100,7 @@ Livekeys::~Livekeys(){
     delete m_viewEngine;
     delete m_packageGraph;
 
-#ifdef BUILD_ELEMENTS
+#ifdef BUILD_ELEMENTS_ENGINE
     delete m_engine;
     el::Engine::dispose();
 #endif
@@ -104,7 +109,7 @@ Livekeys::~Livekeys(){
 }
 
 Livekeys::Ptr Livekeys::create(int argc, const char * const argv[], QObject *parent){
-#ifdef BUILD_ELEMENTS
+#ifdef BUILD_ELEMENTS_ENGINE
     std::string blobsPath = lv::ApplicationContext::instance().externalPath() + "/v8";
     lv::el::Engine::initialize(blobsPath);
 #endif
@@ -321,10 +326,10 @@ QString Livekeys::scriptPath() const{
     return QString();
 }
 
-#ifdef BUILD_ELEMENTS
+#ifdef BUILD_ELEMENTS_ENGINE
 int Livekeys::execElements(const QGuiApplication &app){
     int result = 0;
-    m_engine->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
+    m_engine->compiler()->setPackageImportPaths({lv::ApplicationContext::instance().pluginPath()});
     m_engine->scope([&result, this, &app](){
         loadConfiguredLayers();
         result = app.exec();
@@ -415,31 +420,30 @@ int Livekeys::run(const QGuiApplication &app){
         } else if ( m_arguments->command() == LivekeysArguments::Compile ){
 #ifdef BUILD_ELEMENTS
             lv::el::Compiler::Config config;
+            config.initialize(m_arguments->compileConfiguration());
 
-            if ( m_arguments->compileConfiguration().hasKey("baseComponent") ){
-                std::string baseComponent = m_arguments->compileConfiguration()["baseComponent"].asString();
-                std::string baseComponentPath;
-                if ( m_arguments->compileConfiguration().hasKey("baseComponentPath") )
-                    baseComponentPath = m_arguments->compileConfiguration()["baseComponentPath"].asString();
-
-                config.setBaseComponent(baseComponent, baseComponentPath);
-            }
-
-            lv::el::Engine* engine = new lv::el::Engine(nullptr, lv::el::Compiler::create(config));
-            engine->setModuleFileType(lv::el::Engine::Lv);
+            lv::el::Compiler::Ptr compiler = lv::el::Compiler::create(config);
 
             try{
                 std::string filePath = scriptPath().toStdString();
 
-                engine->scope([engine, filePath](){
-                    engine->compile(filePath);
-                });
+                QFileInfo finfo(QString::fromStdString(filePath));
+                std::string pluginPath = finfo.path().toStdString();
+
+                Module::Ptr module(nullptr);
+                if ( Module::existsIn(pluginPath) ){
+                    module = Module::createFromPath(pluginPath);
+                    Package::Ptr package = Package::createFromPath(module->package());
+                    if ( package ){
+                        compiler->setPackageImportPaths({package->path() + "/" + compiler->importLocalPath()});
+                    }
+                }
+                lv::el::Compiler::compile(compiler, filePath);
+            } catch ( lv::el::SyntaxException& e ){
+                vlog().e() << "Compiler Error: " << e.message() << " (" << e.parsedFile() << ":" << e.parsedLine() << ")";
             } catch ( lv::Exception& e ){
                 vlog().e() << "Compiler Error: " << e.message();
             }
-
-            delete engine;
-
             return 0;
 #endif
         }

@@ -1,4 +1,4 @@
-////// plugin1/live.plugin.json
+////// plugin1/live.module.json
 
 {
     "name" : "plugin1",
@@ -26,7 +26,7 @@ component default < A{}
     "version" : "1.0.0"
 }
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "test-package",
@@ -36,7 +36,7 @@ component default < A{}
 
 ////// main.lv
 
-import .plugin1
+import .test-package.plugin1
 
 instance default Element{
     string b : {

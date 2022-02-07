@@ -50,5 +50,5 @@ OTHER_FILES *= \
     samples/*.qml
 
 DISTFILES += \
-    qml/live.plugin.json \
+    qml/live.module.json \
     qml/live.package.json

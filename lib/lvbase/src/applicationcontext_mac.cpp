@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "applicationcontext.h"
-#include <QString>
 
 #include <fcntl.h>
 #include <errno.h>

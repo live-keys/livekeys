@@ -46,8 +46,8 @@ include($$PWD/src/test.pri)
 
 OTHER_FILES += \
     lv/*.lv \
-    lv/live.package.json \
-    lv/live.plugin.json
+    lv/live.module.json \
+    lv/live.package.json
 
 
 # --- Handling the lv deployment ---

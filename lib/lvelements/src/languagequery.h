@@ -2,7 +2,7 @@
 #define LVLANGUAGEQUERY_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 
 #include "live/exception.h"
 

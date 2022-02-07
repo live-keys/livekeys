@@ -15,7 +15,6 @@
 ****************************************************************************/
 
 #include "applicationcontext.h"
-#include <QString>
 
 #include <windows.h>
 #include <tchar.h>

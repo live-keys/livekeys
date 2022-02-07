@@ -350,7 +350,6 @@ Runnable *Project::openRunnable(const QString &path, const QStringList &activati
             activ.insert(*it);
         QmlProgram* qmlProgram = QmlProgram::create(viewEngine(), m_path.toStdString(), path.toStdString());
         if ( qmlProgram && !qmlProgram->mainPath().isEmpty() ){
-            vlog() << qmlProgram->mainPath();
             r = new Runnable(qmlProgram, m_runnables, activ);
             m_runnables->addRunnable(r);
         }

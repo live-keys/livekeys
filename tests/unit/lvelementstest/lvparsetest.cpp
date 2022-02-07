@@ -6,7 +6,7 @@
 #include "live/elements/metaobject.h"
 #include "live/elements/component.h"
 #include "live/elements/modulelibrary.h"
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 
 Q_TEST_RUNNER_REGISTER(LvParseTest);
 
@@ -197,6 +197,14 @@ void LvParseTest::trippleTagTest(){
     parseTestTemplate("ParserTest38");
 }
 
+void LvParseTest::componentImportTest(){
+    parseTestTemplate("ParserTest39");
+}
+
+void LvParseTest::getterSetterTest(){
+    parseTestTemplate("ParserTest40");
+}
+
 void LvParseTest::parseTestTemplate(std::string name){
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
     std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
@@ -206,6 +214,7 @@ void LvParseTest::parseTestTemplate(std::string name){
     compiler->configureImplicitType("vlog");
 
     std::string conversion = compiler->compileToJs(name, contents);
+//    vlog() << conversion;
 
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);

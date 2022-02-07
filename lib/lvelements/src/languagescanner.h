@@ -3,9 +3,9 @@
 
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/languageinfo.h"
+#include "live/elements/compiler/languageparser.h"
 #include "live/packagegraph.h"
 #include "live/lockedfileiosession.h"
-#include "live/elements/languageparser.h"
 
 #include <memory>
 #include <functional>

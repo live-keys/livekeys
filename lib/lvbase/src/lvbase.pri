@@ -7,6 +7,8 @@ HEADERS += \
     $$PWD/libraryloadpath.h \
     $$PWD/librarytable.h \
     $$PWD/lvbaseglobal.h \
+    $$PWD/module.h \
+    $$PWD/modulecontext.h \
     $$PWD/palettecontainer.h \
     $$PWD/program.h \
     $$PWD/programholder.h \
@@ -22,10 +24,8 @@ HEADERS += \
     $$PWD/functionargs.h \
     $$PWD/lvglobal.h \
     $$PWD/package.h \
-    $$PWD/plugin.h \
     $$PWD/version.h \
     $$PWD/packagegraph.h \
-    $$PWD/plugincontext.h \
     $$PWD/packagecontext.h \
     $$PWD/utf8.h
 
@@ -40,13 +40,13 @@ SOURCES += \
     $$PWD/mlnode.cpp \
     $$PWD/mlnodetojson.cpp \
     $$PWD/libraryloadpath.cpp \
+    $$PWD/module.cpp \
     $$PWD/palettecontainer.cpp \
     $$PWD/program.cpp \
     $$PWD/typename.cpp \
     $$PWD/visuallog.cpp \
     $$PWD/stacktrace.cpp \
     $$PWD/package.cpp \
-    $$PWD/plugin.cpp \
     $$PWD/version.cpp \
     $$PWD/packagegraph.cpp \
     $$PWD/utf8.cpp

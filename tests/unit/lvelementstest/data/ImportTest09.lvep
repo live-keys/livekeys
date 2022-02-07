@@ -1,7 +1,7 @@
 // This file creates a packages folder to test imports
 
 
-////// packages/package1/live.plugin.json
+////// packages/package1/live.module.json
 
 {
     "name" : "package1",

@@ -2,9 +2,8 @@
 #define LVMODULEFILE_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/jsmodule.h"
+#include "live/elements/compiler/elementsmodule.h"
 #include "live/packagegraph.h"
-#include "elementsmodule.h"
 
 #include <memory>
 #include <list>
@@ -14,9 +13,15 @@ namespace lv{ namespace el{
 class ProgramNode;
 class Imports;
 class ModuleFilePrivate;
-class ModuleFile{
+class LV_ELEMENTS_EXPORT ModuleFile{
 
     DISABLE_COPY(ModuleFile);
+
+public:
+    class CompilationData{
+    public:
+        virtual ~CompilationData(){}
+    };
 
 public:
     friend class ElementsModule;
@@ -63,16 +68,15 @@ public:
     std::string jsFileName() const;
     std::string jsFilePath() const;
     std::string filePath() const;
-    const ElementsModule::Ptr& plugin() const;
+    const ElementsModule::Ptr& module() const;
     const std::list<Export>& exports() const;
     const std::list<Import>& imports() const;
     void resolveImport(const std::string& uri, ElementsModule::Ptr epl);
 
 private:
     void addDependency(ModuleFile* to);
-    void setJsModule(const JsModule::Ptr& jsModule);
+    void setCompilationData(CompilationData* cd);
 
-    void initializeImportsExports(Engine* engine);
     bool hasDependency(ModuleFile* module, ModuleFile* dependency);
     static PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf);
     static PackageGraph::CyclesResult<ModuleFile*> checkCycles(ModuleFile* mf, ModuleFile* current, std::list<ModuleFile*> path);

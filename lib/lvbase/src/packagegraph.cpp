@@ -1,12 +1,11 @@
 #include "packagegraph.h"
 #include "live/packagecontext.h"
-#include "live/plugincontext.h"
+#include "live/modulecontext.h"
 #include "live/exception.h"
 #include "live/applicationcontext.h"
 #include "live/palettecontainer.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
-#include "live/plugincontext.h"
 
 #include <list>
 #include <iostream>
@@ -43,7 +42,7 @@ public:
  * \brief Structure to represent packages and their dependencies
  *
  * It also stores all the libraries, stores in the LibraryNode structure.
- * We also check for dependency cycles on multiple levels: plugins, packages, Elements files
+ * We also check for dependency cycles on multiple levels: modules, packages, Elements files
  * \ingroup lvbase
  */
 
@@ -202,20 +201,20 @@ PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(const Package
     return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);
 }
 
-/** Check if there are cycles between plugins, starting from the given plugin */
-PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(const Plugin::Ptr &p){
+/** Check if there are cycles between modules, starting from the given module */
+PackageGraph::CyclesResult<Module::Ptr> PackageGraph::checkCycles(const Module::Ptr &p){
     if ( p->context() == nullptr || p->context()->packageGraph != this )
-        THROW_EXCEPTION(lv::Exception, "Failed to find loaded plugin for cycles: " + p->name(), 2);
+        THROW_EXCEPTION(lv::Exception, "Failed to find loaded module for cycles: " + p->name(), 2);
 
-    std::list<Plugin::Ptr> path;
+    std::list<Module::Ptr> path;
     path.push_back(p);
 
     for ( auto it = p->context()->localDependencies.begin(); it != p->context()->localDependencies.end(); ++it ){
-        PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(p, *it, path);
+        PackageGraph::CyclesResult<Module::Ptr> cr = checkCycles(p, *it, path);
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);
+    return PackageGraph::CyclesResult<Module::Ptr>(PackageGraph::CyclesResult<Module::Ptr>::NotFound);
 }
 
 PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(
@@ -233,19 +232,19 @@ PackageGraph::CyclesResult<Package::Ptr> PackageGraph::checkCycles(
     return PackageGraph::CyclesResult<Package::Ptr>(PackageGraph::CyclesResult<Package::Ptr>::NotFound);
 }
 
-PackageGraph::CyclesResult<Plugin::Ptr> PackageGraph::checkCycles(
-        const Plugin::Ptr &p, Plugin::Ptr current, std::list<Plugin::Ptr> path)
+PackageGraph::CyclesResult<Module::Ptr> PackageGraph::checkCycles(
+        const Module::Ptr &p, Module::Ptr current, std::list<Module::Ptr> path)
 {
     path.push_back(current);
     if ( current.get() == p.get() )
-        return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::Found, path);
+        return PackageGraph::CyclesResult<Module::Ptr>(PackageGraph::CyclesResult<Module::Ptr>::Found, path);
 
     for ( auto it = current->context()->localDependencies.begin(); it != current->context()->localDependencies.end(); ++it ){
-        PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(p, *it, path);
+        PackageGraph::CyclesResult<Module::Ptr> cr = checkCycles(p, *it, path);
         if ( cr.found() )
             return cr;
     }
-    return PackageGraph::CyclesResult<Plugin::Ptr>(PackageGraph::CyclesResult<Plugin::Ptr>::NotFound);
+    return PackageGraph::CyclesResult<Module::Ptr>(PackageGraph::CyclesResult<Module::Ptr>::NotFound);
 }
 
 /**
@@ -536,40 +535,40 @@ PackageGraph *&PackageGraph::internalsContextOwner(){
     return pg;
 }
 
-Plugin::Ptr PackageGraph::createRunningPlugin(const std::string &pluginPath){
-    Plugin::Ptr plugin = Plugin::createFromNode(pluginPath, pluginPath + "/live.plugin.json", {
+Module::Ptr PackageGraph::createRunningModule(const std::string &pluginPath){
+    Module::Ptr module = Module::createFromNode(pluginPath, pluginPath + "/live.module.json", {
         {"name", "main"}, {"package", "."}
     });
-    Package::Ptr package = Package::createFromNode(pluginPath, pluginPath + "/live.package.json", {
+    Package::Ptr package = Package::createFromNode(pluginPath, pluginPath + "/live.module.json", {
         {"name", "."}, {"version", "0.1.0"}
     });
 
     package->assignContext(this);
-    plugin->assignContext(this);
-    plugin->context()->package = package;
-    package->context()->plugins["."] = plugin;
+    module->assignContext(this);
+    module->context()->package = package;
+    package->context()->modules["."] = module;
 
-    return plugin;
+    return module;
 }
 
-void PackageGraph::loadRunningPackageAndPlugin(const Package::Ptr &package, const Plugin::Ptr &plugin){
+void PackageGraph::loadRunningPackageAndModule(const Package::Ptr &package, const Module::Ptr &module){
     package->assignContext(this);
-    plugin->assignContext(this);
-    plugin->context()->package = package;
-    package->context()->plugins[plugin->name()] = plugin;
+    module->assignContext(this);
+    module->context()->package = package;
+    package->context()->modules[module->name()] = module;
 }
 
 /**
- * \brief Load plugin given the import segment
+ * \brief Load module given the import segment
  */
-Plugin::Ptr PackageGraph::loadPlugin(const std::string &importSegment, Plugin::Ptr requestingPlugin){
-    return loadPlugin(splitString(importSegment, '.'), requestingPlugin);
+Module::Ptr PackageGraph::loadModule(const std::string &importSegment, Module::Ptr requestingModule){
+    return loadModule(splitString(importSegment, '.'), requestingModule);
 }
 
 /**
- * \brief Loads plugin given split-up import segments
+ * \brief Loads module given split-up import segments
  */
-Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegments, Plugin::Ptr requestingPlugin){
+Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegments, Module::Ptr requestingModule){
     PackageGraphPrivate* d = m_d;
 
     if ( importSegments.empty() )
@@ -579,8 +578,8 @@ Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegme
 
     Package::Ptr foundPackage = nullptr;
 
-    if ( requestingPlugin ){
-        Package::Ptr requestingPackage = requestingPlugin->context() ? requestingPlugin->context()->package : nullptr;
+    if ( requestingModule ){
+        Package::Ptr requestingPackage = requestingModule->context() ? requestingModule->context()->package : nullptr;
 
         if ( requestingPackage ){
             if ( requestingPackage->name() == packageName || (requestingPackage->name() == "." && packageName.empty() )){
@@ -613,97 +612,97 @@ Plugin::Ptr PackageGraph::loadPlugin(const std::vector<std::string> &importSegme
     }
 
     if ( !foundPackage->filePath().empty() ){ // some internal packages may not have the package file
-        std::string pluginPath = foundPackage->path();
+        std::string modulePath = foundPackage->path();
         std::string importId = packageName;
         for ( size_t i = 1; i < importSegments.size(); ++i ){
-            pluginPath += "/" + importSegments[i];
+            modulePath += "/" + importSegments[i];
             importId += "." + importSegments[i];
         }
 
-        auto pluginIt = foundPackage->context()->plugins.find(importId);
-        if ( pluginIt != foundPackage->context()->plugins.end() ){
-            addDependency(requestingPlugin, pluginIt->second);
-            return pluginIt->second;
+        auto moduleIt = foundPackage->context()->modules.find(importId);
+        if ( moduleIt != foundPackage->context()->modules.end() ){
+            addDependency(requestingModule, moduleIt->second);
+            return moduleIt->second;
         }
 
-        if ( !Plugin::existsIn(pluginPath) )
-            THROW_EXCEPTION(lv::Exception, "No \'live.plugin.json\' file has been found in " + pluginPath, 7);
+        if ( !Module::existsIn(modulePath) )
+            THROW_EXCEPTION(lv::Exception, "No \'live.module.json\' file has been found in " + modulePath, 7);
 
-        Plugin::Ptr plugin = Plugin::createFromPath(pluginPath);
-        plugin->assignContext(this);
-        plugin->context()->package  = foundPackage;
-        plugin->context()->importId = importId;
+        Module::Ptr module = Module::createFromPath(modulePath);
+        module->assignContext(this);
+        module->context()->package  = foundPackage;
+        module->context()->importId = importId;
 
-        for ( auto it = plugin->dependencies().begin(); it != plugin->dependencies().end(); ++it )
-            addDependency(plugin, *it);
+        for ( auto it = module->dependencies().begin(); it != module->dependencies().end(); ++it )
+            addDependency(module, *it);
 
-        vlog("lvbase-packagegraph").v() << "Loaded plugin: " << importId;
+        vlog("lvbase-packagegraph").v() << "Loaded module: " << importId;
 
-        foundPackage->context()->plugins[importId] = plugin;
+        foundPackage->context()->modules[importId] = module;
 
-        return plugin;
+        return module;
     }
 
-    return Plugin::Ptr(nullptr);
+    return Module::Ptr(nullptr);
 }
 
 /**
- * \brief Adds plugin dependency
+ * \brief Adds module dependency
  */
-void PackageGraph::addDependency(const Plugin::Ptr &plugin, const std::string &dependency){
-    Plugin::Ptr dependsOn = loadPlugin(dependency);
+void PackageGraph::addDependency(const Module::Ptr &module, const std::string &dependency){
+    Module::Ptr dependsOn = loadModule(dependency);
     if ( dependsOn == nullptr )
         THROW_EXCEPTION(
             lv::Exception,
-            "Failed to find dependency \'" + dependency + "\' plugin for: " + plugin->context()->importId,
+            "Failed to find dependency \'" + dependency + "\' module for: " + module->context()->importId.data(),
             8);
 
-    addDependency(plugin, dependsOn);
+    addDependency(module, dependsOn);
 }
 
 /**
- * \brief Add dependency between two given plugins
+ * \brief Add dependency between two given modules
  */
-void PackageGraph::addDependency(const Plugin::Ptr& plugin, const Plugin::Ptr& dependsOn){
-    if ( plugin.get() == dependsOn.get() )
+void PackageGraph::addDependency(const Module::Ptr& module, const Module::Ptr& dependsOn){
+    if ( module.get() == dependsOn.get() )
         return;
 
-    if ( plugin->context()->package.get() == dependsOn->context()->package.get() ){ // within the same package
+    if ( module->context()->package.get() == dependsOn->context()->package.get() ){ // within the same package
 
-        if ( !hasDependency(plugin, dependsOn) ){
-            plugin->context()->localDependencies.push_back(dependsOn);
-            dependsOn->context()->localDependents.push_back(plugin);
+        if ( !hasDependency(module, dependsOn) ){
+            module->context()->localDependencies.push_back(dependsOn);
+            dependsOn->context()->localDependents.push_back(module);
 
-            PackageGraph::CyclesResult<Plugin::Ptr> cr = checkCycles(plugin);
+            PackageGraph::CyclesResult<Module::Ptr> cr = checkCycles(module);
             if ( cr.found() ){
                 std::stringstream ss;
 
                 for ( auto it = cr.path().begin(); it != cr.path().end(); ++it ){
-                    Plugin::Ptr n = *it;
+                    Module::Ptr n = *it;
                     if ( it != cr.path().begin() )
                         ss << " -> ";
                     ss << n->name();
                 }
 
-                for ( auto it = plugin->context()->localDependencies.begin(); it != plugin->context()->localDependencies.end(); ++it ){
+                for ( auto it = module->context()->localDependencies.begin(); it != module->context()->localDependencies.end(); ++it ){
                     if ( *it == dependsOn ){
-                        plugin->context()->localDependencies.erase(it);
+                        module->context()->localDependencies.erase(it);
                         break;
                     }
                 }
                 for ( auto it = dependsOn->context()->localDependents.begin(); it != dependsOn->context()->localDependents.end(); ++it ){
-                    if ( *it == plugin ){
+                    if ( *it == module ){
                         dependsOn->context()->localDependents.erase(it);
                         break;
                     }
                 }
 
-                THROW_EXCEPTION(lv::Exception, "Plugin dependency cycle found: "  + ss.str(), Exception::toCode("Cycle"));
+                THROW_EXCEPTION(lv::Exception, "Module dependency cycle found: "  + ss.str(), Exception::toCode("Cycle"));
             }
         }
 
     } else { // add package dependency instead
-        addDependency(plugin->context()->package, dependsOn->context()->package);
+        addDependency(module->context()->package, dependsOn->context()->package);
     }
 }
 
@@ -719,8 +718,8 @@ bool PackageGraph::hasDependency(const Package::Ptr &package, const Package::Ptr
     return false;
 }
 
-bool PackageGraph::hasDependency(const Plugin::Ptr &plugin, const Plugin::Ptr &dependency){
-    for ( auto it = plugin->context()->localDependencies.begin(); it != plugin->context()->localDependencies.end(); ++it ){
+bool PackageGraph::hasDependency(const Module::Ptr &module, const Module::Ptr &dependency){
+    for ( auto it = module->context()->localDependencies.begin(); it != module->context()->localDependencies.end(); ++it ){
         if ( *it == dependency )
             return true;
     }

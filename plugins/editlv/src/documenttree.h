@@ -1,7 +1,7 @@
 #ifndef DOCUMENTTREE_H
 #define DOCUMENTTREE_H
 
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 #include "live/projectdocument.h"
 
 namespace lv { namespace el {

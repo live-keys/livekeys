@@ -452,8 +452,7 @@ void Element::assignChildrenAndComplete(Element *e, ScopedValue value){
 
 void Element::assignChildren(Element *e, ScopedValue value){
     if ( !value.isNull() ){
-        if ( e->defaultProperty().empty() )
-        {
+        if ( e->defaultProperty().empty() ){
             auto exc = CREATE_EXCEPTION(lv::Exception, "Default property doesn't exist", lv::Exception::toCode("~Element"));
             e->engine()->throwError(&exc, e);
             return;
@@ -498,6 +497,10 @@ InstanceProperty* Element::addProperty(
         bool isWritable,
         const std::string &notifyEvent)
 {
+    if ( type == "default" ){
+        isDefault = true;
+    }
+
     ElementPrivate* d = m_d;
 
     auto isolate = engine()->isolate();

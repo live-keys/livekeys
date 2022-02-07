@@ -1,4 +1,6 @@
-component default < Container{
+component default < Element{
+    default children
+
     Element elemProp : Element{
         id: twenty
         int x: 20

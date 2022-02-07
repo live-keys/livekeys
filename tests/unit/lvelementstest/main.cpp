@@ -38,6 +38,7 @@
 #include "jstupletest.h"
 #include "lvimportstest.h"
 #include "lvparsetest.h"
+#include "lvparseerrortest.h"
 #include "metaobjecttypeinfotest.h"
 #include "lvelparseddocumenttest.h"
 #include "lvellanguageinfoserializationtest.h"
@@ -50,5 +51,9 @@ int main(int argc, char *argv[]){
 
     lv::el::Engine::InitializeScope initializer("");
 
+//    return lv::TestRunner::runTest(LvParseErrorTest::testIndex, argc, argv);
+//    return lv::TestRunner::runTest(LvParseTest::testIndex, argc, argv);
+//    return lv::TestRunner::runTest(LvCompileTest::testIndex, argc, argv);
+//    return lv::TestRunner::runTest(LvImportsTest::testIndex, argc, argv);
     return lv::TestRunner::runTests(argc, argv);
 }

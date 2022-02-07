@@ -16,6 +16,6 @@ QMAKE_EXTRA_TARGETS += first qmlcopy
 
 OTHER_FILES += \
     qml/*.qml \
-    qml/live.plugin.json \
+    qml/live.module.json \
     qml/qmldir
 

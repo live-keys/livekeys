@@ -33,9 +33,9 @@ OTHER_FILES += \
 
 OTHER_FILES += \
     qml/style/*.qml \
+    qml/style/live.module.json \
     qml/style/qmldir \
-    qml/style/plugins.qmltypes \
-    qml/style/live.plugin.json
+    qml/style/plugins.qmltypes
 
 # Handling the palette
 
@@ -75,8 +75,8 @@ DISTFILES += \
     qml/PaletteConnection.qml \
     qml/PalettePane.qml \
     qml/TextReplace.qml \
+    qml/live.module.json \
     qml/live.package.json \
-    qml/live.plugin.json \
     qml/PaletteListView.qml \
     palettes/EditPalette.qml \
     qml/PaneMenuButton.qml \

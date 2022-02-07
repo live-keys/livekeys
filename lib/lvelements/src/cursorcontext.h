@@ -2,7 +2,7 @@
 #define LVCOMPLETIONCONTEXT_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/sourcerange.h"
+#include "live/elements/compiler/sourcerange.h"
 #include "live/utf8.h"
 #include <set>
 #include <vector>

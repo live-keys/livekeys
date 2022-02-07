@@ -8,7 +8,7 @@
     "version" : "1.0.0"
 }
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "main",
@@ -23,7 +23,7 @@ instance default A{
 }
 
 
-////// packages/packagea/live.plugin.json
+////// packages/packagea/live.module.json
 
 {
     "name" : "packagea",
@@ -48,7 +48,7 @@ component default < B{
     }
 }
 
-////// packages/packageb/live.plugin.json
+////// packages/packageb/live.module.json
 
 {
     "name" : "packageb",
@@ -73,7 +73,7 @@ component default < C{
     }
 }
 
-////// packages/packagec/live.plugin.json
+////// packages/packagec/live.module.json
 
 {
     "name" : "packagec",

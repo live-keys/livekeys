@@ -5,6 +5,7 @@
 #include "live/elements/modulelibrary.h"
 #include "live/elements/component.h"
 #include "live/elements/container.h"
+#include "live/elements/object.h"
 #include "live/applicationcontext.h"
 
 Q_TEST_RUNNER_REGISTER(LvCompileTest);
@@ -21,11 +22,11 @@ void LvCompileTest::initTestCase(){
 }
 
 void LvCompileTest::test1Lv(){
-    lv::el::Engine* engine = new lv::el::Engine(nullptr, Compiler::create(Compiler::Config(true, ".test.js")));
+    lv::el::Engine* engine = new lv::el::Engine(Compiler::create(Compiler::Config(true, ".test.js")));
     engine->setModuleFileType(Engine::Lv);
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test1.lv";
-        ElementsModule::Ptr epl = engine->compile(scriptsPath);
+        ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
         JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
@@ -67,10 +68,10 @@ void LvCompileTest::test1Lv(){
 }
 
 void LvCompileTest::test2Lv(){
-    lv::el::Engine* engine = new lv::el::Engine(nullptr, Compiler::create(Compiler::Config(true, ".test.js")));
+    lv::el::Engine* engine = new lv::el::Engine(Compiler::create(Compiler::Config(true, ".test.js")));
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test2.lv";
-        ElementsModule::Ptr epl = engine->compile(scriptsPath);
+        ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
         JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
@@ -89,11 +90,11 @@ void LvCompileTest::test2Lv(){
         QVERIFY(elem->hasProperty("x"));
         QVERIFY(elem->get("x").toInt32(engine) == 20);
 
-        Container* container = elem->cast<Container>();
-        QVERIFY(container);
-        QVERIFY(container->data().size() == 1);
+        QVERIFY(elem->get("children").isArray());
+        Object::ArrayAccessor oaa(engine, elem->get("children"));
+        QVERIFY(oaa.length() == 1);
 
-        Element* child0 = container->data().at(0);
+        Element* child0 = oaa.get(engine, 0).toElement(engine);
         QVERIFY(child0->hasProperty("l"));
         QVERIFY(child0->get("l").toInt32(engine) == 40);
 
@@ -109,7 +110,7 @@ void LvCompileTest::test3Lv(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test3.lv";
-        ElementsModule::Ptr epl = engine->compile(scriptsPath);
+        ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
         JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
@@ -132,18 +133,17 @@ void LvCompileTest::test3Lv(){
         QVERIFY(elem->get("elemProp").toElement(engine)->get("x").toInt32(engine) == 20);
         QVERIFY(elem->get("elemProp").toElement(engine)->getId() == "twenty");
 
-        Container* container = elem->cast<Container>();
-        QVERIFY(container);
-        QVERIFY(container->data().size() == 1);
+        QVERIFY(elem->get("children").isArray());
+        Object::ArrayAccessor oaa(engine, elem->get("children"));
+        QVERIFY(oaa.length() == 1);
 
-        Element* child0 = container->data().at(0);
+        Element* child0 = oaa.get(engine, 0).toElement(engine);
         QVERIFY(child0->hasProperty("y"));
         QVERIFY(child0->get("y").toInt32(engine) == 20);
 
         elem->get("elemProp").toElement(engine)->set("x", ScopedValue(engine, 100));
         QVERIFY(child0->get("y").toInt32(engine) == 100);
     });
-
 
     delete engine;
 }
@@ -152,7 +152,7 @@ void LvCompileTest::test4Lv(){
     lv::el::Engine* engine = new lv::el::Engine();
     engine->scope([engine](){
         std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test4.lv";
-        ElementsModule::Ptr epl = engine->compile(scriptsPath);
+        ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
         JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
@@ -176,15 +176,16 @@ void LvCompileTest::test4Lv(){
         elem->trigger("dataChanged", Function::Parameters(0));
         QVERIFY(elem->get("x").toInt32(engine) == 100);
 
-        Container* container = elem->cast<Container>();
-        QVERIFY(container);
-        QVERIFY(container->data().size() == 2);
 
-        Element* child0 = container->data().at(0);
+        QVERIFY(elem->get("children").isArray());
+        Object::ArrayAccessor oaa(engine, elem->get("children"));
+        QVERIFY(oaa.length() == 2);
+
+        Element* child0 = oaa.get(engine, 0).toElement(engine);
         QVERIFY(child0->hasProperty("k"));
         QVERIFY(child0->get("k").toInt32(engine) == 20);
 
-        Element* child1 = container->data().at(1);
+        Element* child1 = oaa.get(engine, 1).toElement(engine);
         QVERIFY(child1->hasProperty("message"));
         QVERIFY(child1->get("message").toStdString(engine) == "thirty");
     });

@@ -55,6 +55,8 @@ private slots:
     void functionAnnotationTest();
     void jsImportsTest();
     void trippleTagTest();
+    void componentImportTest();
+    void getterSetterTest();
 
 private:
     void parseTestTemplate(std::string name);

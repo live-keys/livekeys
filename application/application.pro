@@ -8,6 +8,9 @@ linkLocalLibrary(lveditor,    lveditor)
 
 !isEmpty(BUILD_ELEMENTS){
     DEFINES += BUILD_ELEMENTS
+    !isEmpty(BUILD_ELEMENTS_ENGINE){
+        DEFINES += BUILD_ELEMENTS_ENGINE
+    }
     linkLocalLibrary(lvelements, lvelements)
 }
 

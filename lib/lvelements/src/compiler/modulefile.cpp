@@ -1,13 +1,10 @@
 #include "modulefile.h"
-#include "imports_p.h"
 #include "languagenodes_p.h"
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 #include "live/exception.h"
-#include "live/plugin.h"
-#include "live/plugincontext.h"
+#include "live/module.h"
+#include "live/modulecontext.h"
 #include "live/packagegraph.h"
-#include "live/elements/engine.h"
-#include "live/elements/script.h"
 
 #include <sstream>
 
@@ -17,24 +14,20 @@ class ModuleFilePrivate{
 public:
     std::string name;
     std::string content;
-    ElementsModule::Ptr plugin;
+    ElementsModule::Ptr elementsModule;
     ProgramNode* rootNode;
-    JsModule::Ptr jsModule;
+    ModuleFile::CompilationData* compilationData;
 
     ModuleFile::State state;
 
     std::list<ModuleFile::Export> exports;
     std::list<ModuleFile::Import> imports;
-
     std::list<ModuleFile*> dependencies;
     std::list<ModuleFile*> dependents;
-
-    Script::Ptr script;
-    Imports* importsObject;
 };
 
 ModuleFile::~ModuleFile(){
-    delete m_d->importsObject;
+    delete m_d->compilationData;
     delete m_d;
 }
 
@@ -45,7 +38,7 @@ void ModuleFile::resolveTypes(){
             ProgramNode::ImportType& impType = it->second;
             bool foundLocalExport = false;
             if ( impType.importNamespace.empty() ){
-                auto foundExp = m_d->plugin->findExport(impType.name);
+                auto foundExp = m_d->elementsModule->findExport(impType.name);
                 if ( foundExp.isValid() ){
                     addDependency(foundExp.file);
 
@@ -61,7 +54,7 @@ void ModuleFile::resolveTypes(){
                         if ( foundExp.isValid() ){
                             if ( impIt->isRelative ){
                                 // this plugin to package
-                                std::vector<Utf8> parts = Utf8(m_d->plugin->plugin()->context()->importId).split(".");
+                                std::vector<Utf8> parts = Utf8(m_d->elementsModule->module()->context()->importId).split(".");
                                 if ( parts.size() > 0 ){
                                     parts.erase(parts.begin());
                                 }
@@ -79,17 +72,28 @@ void ModuleFile::resolveTypes(){
 
                                 // package to new plugin
 
-                                std::vector<Utf8> packageToNewPluginParts = Utf8(impIt->module->plugin()->context()->importId).split(".");
+                                std::vector<Utf8> packageToNewPluginParts = Utf8(impIt->module->module()->context()->importId).split(".");
                                 if ( packageToNewPluginParts.size() > 0 ){
                                     packageToNewPluginParts.erase(packageToNewPluginParts.begin());
                                 }
                                 std::string packageToNewPlugin = Utf8::join(packageToNewPluginParts, "/").data();
                                 if ( !packageToNewPlugin.empty() )
                                     packageToNewPlugin += "/";
+
                                 m_d->rootNode->resolveImport(impType.importNamespace, impType.name, pluginToPackage + "/" + packageToNewPlugin + foundExp.file->jsFileName());
 
                             } else {
-                                m_d->rootNode->resolveImport(impType.importNamespace, impType.name, impIt->module->plugin()->context()->importId + "/" + foundExp.file->jsFileName());
+                                std::vector<Utf8> packageToPlugin = impIt->module->module()->context()->importId.split(".");
+                                packageToPlugin.erase(packageToPlugin.begin());
+
+                                std::string configPackageBuildPath = m_d->elementsModule->compiler()->packageBuildPath();
+                                std::string packageBuildPath =
+                                    impIt->module->module()->context()->package->name() +
+                                    (configPackageBuildPath.empty() ? "" : "/" + configPackageBuildPath);
+                                std::string packageToPluginStr = Utf8::join(packageToPlugin, "/").data();
+                                std::string importPath = packageBuildPath + (packageToPluginStr.empty() ? "" : "/" + packageToPluginStr) + "/" + foundExp.file->jsFileName();
+
+                                m_d->rootNode->resolveImport(impType.importNamespace, impType.name, importPath);
                             }
                             break;
                         }
@@ -101,7 +105,7 @@ void ModuleFile::resolveTypes(){
 }
 
 void ModuleFile::compile(){
-    m_d->plugin->engine()->compiler()->compileToJs(filePath(), m_d->content, m_d->rootNode);
+    m_d->elementsModule->compiler()->compileModuleFileToJs(m_d->elementsModule->module(), filePath(), m_d->content, m_d->rootNode);
 }
 
 ModuleFile::State ModuleFile::state() const{
@@ -117,19 +121,19 @@ std::string ModuleFile::fileName() const{
 }
 
 std::string ModuleFile::jsFileName() const{
-    return fileName() + m_d->plugin->engine()->compiler()->outputExtension();
+    return fileName() + m_d->elementsModule->compiler()->outputExtension();
 }
 
 std::string ModuleFile::jsFilePath() const{
-    return m_d->plugin->plugin()->path() + "/" + jsFileName();
+    return m_d->elementsModule->compiler()->moduleBuildPath(m_d->elementsModule->module()) + "/" + jsFileName();
 }
 
 std::string ModuleFile::filePath() const{
-    return m_d->plugin->plugin()->path() + "/" + fileName();
+    return m_d->elementsModule->module()->path() + "/" + fileName();
 }
 
-const ElementsModule::Ptr &ModuleFile::plugin() const{
-    return m_d->plugin;
+const ElementsModule::Ptr &ModuleFile::module() const{
+    return m_d->elementsModule;
 }
 
 const std::list<ModuleFile::Export> &ModuleFile::exports() const{
@@ -181,14 +185,10 @@ void ModuleFile::addDependency(ModuleFile *dependency){
     }
 }
 
-void ModuleFile::setJsModule(const JsModule::Ptr &jsModule){
-    m_d->jsModule = jsModule;
-}
-
-void ModuleFile::initializeImportsExports(Engine *engine){
-//    m_d->imports = new Imports(engine, this);
-//    m_d->exports = new Object(engine);
-//    *m_d->exports = Object::create(engine);
+void ModuleFile::setCompilationData(CompilationData *cd){
+    if ( m_d->compilationData )
+        delete m_d->compilationData;
+    m_d->compilationData = cd;
 }
 
 bool ModuleFile::hasDependency(ModuleFile *module, ModuleFile *dependency){
@@ -234,18 +234,18 @@ ModuleFile::ModuleFile(ElementsModule::Ptr plugin, const std::string &name, cons
     if ( extension != std::string::npos )
         componentName = componentName.substr(0, extension);
 
-    m_d->plugin = plugin;
+    m_d->elementsModule = plugin;
     m_d->name = componentName;
     m_d->state = ModuleFile::Initiaized;
-    m_d->importsObject = nullptr;
     m_d->content = content;
     m_d->rootNode = node;
+    m_d->compilationData = nullptr;
 
-    std::vector<BaseNode*> exports = m_d->plugin->engine()->compiler()->collectProgramExports(content, node);
+    std::vector<BaseNode*> exports = m_d->elementsModule->compiler()->collectProgramExports(content, node);
 
     for ( auto val : exports ){
-        if ( val->typeString() == "RootNewComponentExpression" ){
-            auto expression = val->as<RootNewComponentExpressionNode>();
+        if ( val->typeString() == "ComponentInstanceStatement" ){
+            auto expression = val->as<ComponentInstanceStatementNode>();
             ModuleFile::Export expt;
             expt.type = ModuleFile::Export::Element;
             expt.name = expression->name(content);

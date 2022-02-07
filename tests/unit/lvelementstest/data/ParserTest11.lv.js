@@ -1,6 +1,6 @@
 import {T} from '__UNRESOLVED__'
 
-(function(parent){
+export let ParserTest11 = (function(parent){
     this.setParent(parent)
     this.a.b.c = 20
     Element.complete(this)

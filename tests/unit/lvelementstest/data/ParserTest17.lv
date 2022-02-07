@@ -1,6 +1,6 @@
 component TodoListItem{
-    key: index
-    item: item
+    key: 0
+    item: null
     on remove: (index) => {
         this.todoList.remove(index)
     }

@@ -1,5 +1,7 @@
-component default < Container{
+component default < Element{
     int x: 20
+    default children
+
     Element{
         int l: parent.x + 20
     }

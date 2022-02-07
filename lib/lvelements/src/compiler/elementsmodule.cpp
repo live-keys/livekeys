@@ -1,74 +1,95 @@
 #include "elementsmodule.h"
 #include "modulefile.h"
-#include "modulelibrary.h"
-
-#include "live/plugincontext.h"
+#include "live/modulecontext.h"
 #include "live/exception.h"
-#include "live/elements/engine.h"
+#include "live/fileio.h"
+#include <QFile>
 
-#include "v8nowarnings.h"
+#ifdef BUILD_ELEMENTS_ENGINE
+#include "live/elements/engine.h"
+#include "live/elements/modulelibrary.h"
+#endif
 
 namespace lv{ namespace el{
 
 /**
- * \class ElementsPlugin
- * \brief Container for a plugin functionality on the Elements side.
- *
- * Plugins are cached within the Engine class, so they require initialization through the Engine::require
- * function. The plugins are cached based on their importkey, for example ```import opencv.core``` will be cached
- * as <i>opencv.core</i>.
+ * \class ElementsModule
+ * \brief Container for module functionality on the Elements side.
  */
 
-
-class ElementsPluginPrivate{
+class ElementsModulePrivate{
 public:
-    ElementsPluginPrivate(Engine* e)
-        : engine(e), libraryExports(Object::create(e)), typesResolved(false), compiled(false){}
+    ElementsModulePrivate(Engine* e)
+        : engine(e), typesResolved(false), isCompiled(false){}
 
-    Plugin::Ptr plugin;
-    Engine*     engine;
+    Module::Ptr   module;
+    Compiler::Ptr compiler;
+    Engine*       engine;
     std::map<std::string, ModuleFile*> fileModules;
-    std::map<std::string, ElementsModule::Export> exports;
-
-    Object      libraryExports;
-    std::map<std::string, ModuleFile*> fileExports;
-
     std::list<ModuleLibrary*>          libraries;
 
-    bool        typesResolved;
-    bool        compiled;
+    std::map<std::string, ElementsModule::Export> exports;
+
+    bool typesResolved;
+    bool isCompiled;
 };
 
 
-ElementsModule::ElementsModule(Plugin::Ptr plugin, Engine *engine)
-    : m_d(new ElementsPluginPrivate(engine))
+ElementsModule::ElementsModule(Module::Ptr plugin, Compiler::Ptr compiler, Engine *engine)
+    : m_d(new ElementsModulePrivate(engine))
 {
-    m_d->plugin = plugin;
+    m_d->compiler = compiler;
+    m_d->module = plugin;
 }
 
 
 ElementsModule::~ElementsModule(){
+#ifdef BUILD_ELEMENTS_ENGINE
     for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
         delete *it;
     }
-    m_d->libraries.clear();
+#endif
     delete m_d;
 }
 
-ElementsModule::Ptr ElementsModule::create(Plugin::Ptr plugin, Engine *engine){
-    ElementsModule::Ptr epl(new ElementsModule(plugin, engine));
+#ifdef BUILD_ELEMENTS_ENGINE
+ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Engine *engine){
+    return create(module, engine->compiler(), engine);
+}
+#else
+ElementsModule::Ptr ElementsModule::create(Module::Ptr, Engine *){
+    THROW_EXCEPTION(lv::Exception, "This build does not support the engine as a module loader.", lv::Exception::toCode("~Build"));
+}
+#endif
 
-    for ( auto it = plugin->modules().begin(); it != plugin->modules().end(); ++it ){
+ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr compiler){
+    return create(module, compiler, nullptr);
+}
+
+ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr compiler, Engine *engine){
+    ElementsModule::Ptr epl(new ElementsModule(module, compiler, engine));
+
+    for ( auto it = module->fileModules().begin(); it != module->fileModules().end(); ++it ){
         ElementsModule::addModuleFile(epl, *it + ".lv");
     }
 
-    for ( auto it = plugin->libraryModules().begin(); it != plugin->libraryModules().end(); ++it ){
-        ModuleLibrary* lib = ModuleLibrary::load(epl->m_d->engine, *it);
-        lib->loadExports(epl->m_d->libraryExports);
-        epl->m_d->libraries.push_back(lib);
-    }
+    epl->initializeLibraries(module->libraryModules());
 
     return epl;
+}
+
+
+void ElementsModule::initializeLibraries(const std::list<std::string> &libs){
+#ifdef BUILD_ELEMENTS_ENGINE
+    for ( auto it = libs.begin(); it != libs.end(); ++it ){
+        ModuleLibrary* lib = ModuleLibrary::load(m_d->engine, *it);
+        //TODO: Load library exports (instances and types)
+        m_d->libraries.push_back(lib);
+    }
+#else
+    if ( !libs.empty() )
+        THROW_EXCEPTION(lv::Exception, "Module contains libraries that cannot be loaded in this build", lv::Exception::toCode("~Build"));
+#endif
 }
 
 ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::string &name){
@@ -77,10 +98,11 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
         return it->second;
     }
 
-    std::string filePath = epl->plugin()->path() + "/" + name;
-    std::string content = epl->m_d->engine->fileInterceptor()->readFile(filePath);
+    Compiler::Ptr compiler = epl->m_d->compiler;
 
-    LanguageParser::AST* ast = epl->m_d->engine->parser()->parse(content);
+    std::string filePath = epl->module()->path() + "/" + name;
+    std::string content = compiler->fileIO()->readFromFile(filePath);
+    LanguageParser::AST* ast = compiler->parser()->parse(content);
 
     std::string componentName = name;
     size_t i = componentName.find(".lv");
@@ -88,7 +110,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
         componentName = name.substr(0, i);
     }
 
-    ProgramNode* pn = epl->m_d->engine->compiler()->parseProgramNodes(componentName, ast);
+    ProgramNode* pn = compiler->parseProgramNodes(componentName, ast);
 
     ModuleFile* mf = new ModuleFile(epl, name, content, pn);
     epl->m_d->fileModules[name] = mf;
@@ -107,12 +129,12 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
     for ( auto it = mfImports.begin(); it != mfImports.end(); ++it ){
         ModuleFile::Import& imp = *it;
         if ( imp.isRelative ){
-            if ( epl->plugin()->context()->package == nullptr ){
+            if ( epl->module()->context()->package == nullptr ){
                 THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
             }
 
-            std::string importUri = epl->plugin()->context()->package->name() + imp.uri;
-            ElementsModule::Ptr ep = epl->m_d->engine->require(importUri, epl->plugin());
+            std::string importUri = imp.uri.substr(1);
+            ElementsModule::Ptr ep = Compiler::compileImport(epl->m_d->compiler, importUri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
             }
@@ -120,21 +142,14 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             mf->resolveImport(imp.uri, ep);
 
         } else {
-            ElementsModule::Ptr ep = epl->m_d->engine->require(it->uri, epl->plugin());
+            ElementsModule::Ptr ep = Compiler::compileImport(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
             }
-
             mf->resolveImport(imp.uri, ep);
         }
     }
-
     return mf;
-}
-
-void ElementsModule::addModuleLibrary(ModuleLibrary *library){
-    m_d->libraries.push_back(library);
-    library->loadExports(m_d->libraryExports);
 }
 
 ModuleFile *ElementsModule::findModuleFileByName(const std::string &name) const{
@@ -154,36 +169,12 @@ ModuleFile *ElementsModule::moduleFileBypath(const std::string &path) const{
     return nullptr;
 }
 
-const Plugin::Ptr& ElementsModule::plugin() const{
-    return m_d->plugin;
-}
-
-Object ElementsModule::collectExportsObject(){
-    auto isolate = m_d->engine->isolate();
-    auto context = isolate->GetCurrentContext();
-    v8::Local<v8::Object> result = v8::Object::New(isolate);
-
-    v8::Local<v8::Object> lo = m_d->libraryExports.data();
-    v8::Local<v8::Array> pn = lo->GetOwnPropertyNames(context, v8::ALL_PROPERTIES).ToLocalChecked();
-
-    for (uint32_t i = 0; i < pn->Length(); ++i) {
-        v8::Local<v8::Value> key = pn->Get(context, i).ToLocalChecked();
-        v8::Local<v8::Value> value = lo->Get(context, key).ToLocalChecked();
-
-        result->Set(context, key, value).IsNothing();
-    }
-
-    //TODO: Capture file exports
-
-    return Object(m_d->engine, result);
-}
-
-const Object &ElementsModule::libraryExports() const{
-    return m_d->libraryExports;
+const Module::Ptr& ElementsModule::module() const{
+    return m_d->module;
 }
 
 void ElementsModule::compile(){
-    if ( m_d->compiled )
+    if ( m_d->isCompiled )
         return;
 
     // resolve types
@@ -211,7 +202,22 @@ void ElementsModule::compile(){
         it->second->compile();
     }
 
-    m_d->compiled = true;
+    auto assets = m_d->module->assets();
+    std::string moduleBuildPath = m_d->compiler->moduleBuildPath(m_d->module);
+
+    for ( auto it = assets.begin(); it != assets.end(); ++it ){
+        QString assetPath = QString::fromStdString(m_d->module->path() + "/" + *it);
+        QString resultPath = QString::fromStdString(moduleBuildPath + "/" + *it);
+        if (QFile::exists(resultPath))
+            QFile::remove(resultPath);
+        QFile::copy(assetPath, resultPath);
+    }
+
+    m_d->isCompiled = true;
+}
+
+Compiler::Ptr ElementsModule::compiler() const{
+    return m_d->compiler;
 }
 
 Engine *ElementsModule::engine() const{
@@ -224,10 +230,6 @@ ElementsModule::Export ElementsModule::findExport(const std::string &name) const
         return ElementsModule::Export();
     }
     return exp->second;
-}
-
-const std::map<std::string, ModuleFile *> &ElementsModule::fileExports() const{
-    return m_d->fileExports;
 }
 
 const std::list<ModuleLibrary *> &ElementsModule::libraryModules() const{

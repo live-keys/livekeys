@@ -31,7 +31,7 @@ OTHER_FILES += \
     $$PWD/qml/*.qml \
     $$PWD/qml/qmldir \
     $$PWD/qml/live.package.json \
-    $$PWD/qml/live.plugin.json
+    $$PWD/qml/live.module.json
 
 DISTFILES += \
     qml/KeyframeEditor.qml \

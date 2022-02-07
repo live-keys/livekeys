@@ -8,7 +8,7 @@
     "version" : "1.0.0"
 }
 
-////// live.plugin.json
+////// live.module.json
 
 {
     "name" : "main",
@@ -17,13 +17,13 @@
 
 ////// main.lv
 
-import .plugina
+import .main.plugina
 
 instance default A{
 }
 
 
-////// plugina/live.plugin.json
+////// plugina/live.module.json
 
 {
     "name" : "plugina",
@@ -33,11 +33,11 @@ instance default A{
 
 ////// plugina/A.lv
 
-import .pluginb
+import .main.pluginb
 
 component default < B {}
 
-////// pluginb/live.plugin.json
+////// pluginb/live.module.json
 
 {
     "name" : "pluginb",
@@ -47,11 +47,11 @@ component default < B {}
 
 ////// pluginb/B.lv
 
-import .pluginc
+import .main.pluginc
 
 component default < C {}
 
-////// pluginc/live.plugin.json
+////// pluginc/live.module.json
 
 {
     "name" : "pluginc",
@@ -61,7 +61,7 @@ component default < C {}
 
 ////// pluginc/C.lv
 
-import .plugina
+import .main.plugina
 
 component C < A {}
 

@@ -1,14 +1,14 @@
-#ifndef LVPARSER_H
-#define LVPARSER_H
+#ifndef LVLANGUAGEPARSER_H
+#define LVLANGUAGEPARSER_H
 
 #include "live/elements/lvelementsglobal.h"
-#include "live/elements/sourcerange.h"
+#include "live/elements/compiler/treesitterapi.h"
+#include "live/elements/compiler/sourcerange.h"
+#include "live/exception.h"
 
 #include <string>
 #include <list>
 #include <vector>
-#include "live/elements/treesitterapi.h"
-#include "live/exception.h"
 
 struct TSParser;
 
@@ -117,9 +117,6 @@ public:
     TSParser* internal() const{ return m_parser; }
     Language* language() const;
 
-    Engine *engine() const;
-    void setEngine(Engine *engine);
-
 private:
     std::list<std::string> parseExportNamesJs(const std::string& jsModuleFile);
 
@@ -130,9 +127,8 @@ private:
 
     TSParser* m_parser;
     Language* m_language;
-    Engine*   m_engine;
 };
 
 }} // namespace lv, el
 
-#endif // LVPARSER_H
+#endif // LVLANGUAGEPARSER_H

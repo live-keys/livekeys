@@ -7,7 +7,7 @@
 #include "live/codehandler.h"
 #include "live/syntaxhighlighter.h"
 
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 #include "live/elements/languagequery.h"
 #include "live/textdocumentdata.h"
 #include "documenttree.h"

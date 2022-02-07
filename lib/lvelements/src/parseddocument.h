@@ -3,7 +3,7 @@
 
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/languageinfo.h"
-#include "live/elements/languageparser.h"
+#include "live/elements/compiler/languageparser.h"
 #include "live/elements/cursorcontext.h"
 
 namespace lv{ namespace el{

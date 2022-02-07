@@ -206,6 +206,10 @@
         "named": true
       },
       {
+        "type": "component_instance_statement",
+        "named": true
+      },
+      {
         "type": "continue_statement",
         "named": true
       },
@@ -911,10 +915,6 @@
             "named": true
           },
           {
-            "type": "method_definition",
-            "named": true
-          },
-          {
             "type": "new_component_expression",
             "named": true
           },
@@ -924,6 +924,10 @@
           },
           {
             "type": "new_tripple_tagged_component_expression",
+            "named": true
+          },
+          {
+            "type": "property_accessor_declaration",
             "named": true
           },
           {
@@ -1036,6 +1040,25 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "component_instance_statement",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "component_instance",
+          "named": true
+        },
+        {
+          "type": "new_component_expression",
           "named": true
         }
       ]
@@ -1667,7 +1690,7 @@
       "required": true,
       "types": [
         {
-          "type": "identifier",
+          "type": "import_path_segment",
           "named": true
         }
       ]
@@ -2176,6 +2199,50 @@
     }
   },
   {
+    "type": "new_component_body",
+    "named": true,
+    "fields": {
+      "member": {
+        "multiple": true,
+        "required": false,
+        "types": [
+          {
+            "type": "event_declaration",
+            "named": true
+          },
+          {
+            "type": "identifier_property_assignment",
+            "named": true
+          },
+          {
+            "type": "listener_declaration",
+            "named": true
+          },
+          {
+            "type": "new_component_expression",
+            "named": true
+          },
+          {
+            "type": "new_tagged_component_expression",
+            "named": true
+          },
+          {
+            "type": "new_tripple_tagged_component_expression",
+            "named": true
+          },
+          {
+            "type": "property_assignment",
+            "named": true
+          },
+          {
+            "type": "property_declaration",
+            "named": true
+          }
+        ]
+      }
+    }
+  },
+  {
     "type": "new_component_expression",
     "named": true,
     "fields": {
@@ -2205,19 +2272,15 @@
       "required": true,
       "types": [
         {
-          "type": "component_body",
-          "named": true
-        },
-        {
           "type": "component_identifier",
           "named": true
         },
         {
-          "type": "component_instance",
+          "type": "identifier",
           "named": true
         },
         {
-          "type": "identifier",
+          "type": "new_component_body",
           "named": true
         }
       ]
@@ -2545,6 +2608,52 @@
           "named": true
         }
       ]
+    }
+  },
+  {
+    "type": "property_accessor_declaration",
+    "named": true,
+    "fields": {
+      "body": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "statement_block",
+            "named": true
+          }
+        ]
+      },
+      "name": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "property_declaration_name",
+            "named": true
+          }
+        ]
+      },
+      "parameters": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "formal_type_parameters",
+            "named": true
+          }
+        ]
+      },
+      "return": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "typed_function_return_type",
+            "named": true
+          }
+        ]
+      }
     }
   },
   {
@@ -3778,6 +3887,10 @@
   {
     "type": "import",
     "named": false
+  },
+  {
+    "type": "import_path_segment",
+    "named": true
   },
   {
     "type": "in",

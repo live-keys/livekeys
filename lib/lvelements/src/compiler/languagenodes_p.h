@@ -35,6 +35,7 @@ class SubscriptExpressionNode;
 class ArgumentsNode;
 class ObjectNode;
 class RootNewComponentExpressionNode;
+class PropertyAccessorDeclarationNode;
 
 class BaseNode{
     friend class JsBlockNode;
@@ -100,10 +101,12 @@ private:
     static void visitImport(BaseNode* parent, const TSNode& node);
     static void visitJsImport(BaseNode* parent, const TSNode& node);
     static void visitIdentifier(BaseNode* parent, const TSNode& node);
+    static void visitPropertyIdentifier(BaseNode* parent, const TSNode& node);
     static void visitImportPath(BaseNode* parent, const TSNode& node);
     static void visitComponentDeclaration(BaseNode* parent, const TSNode& node);
     static void visitComponentBody(BaseNode* parent, const TSNode& node);
     static void visitNewComponentExpression(BaseNode* parent, const TSNode& node);
+    static void visitComponentInstanceStatement(BaseNode* parent, const TSNode& node);
     static void visitPropertyDeclaration(BaseNode* parent, const TSNode& node);
     static void visitStaticPropertyDeclaration(BaseNode* parent, const TSNode& node);
     static void visitBindableExpression(BaseNode* parent, const TSNode& node);
@@ -116,6 +119,7 @@ private:
     static void visitListenerDeclaration(BaseNode* parent, const TSNode& node);
     static void visitMethodDefinition(BaseNode* parent, const TSNode& node);
     static void visitTypedMethodDeclaration(BaseNode* parent, const TSNode& node);
+    static void visitPropertyAccessorDeclaration(BaseNode* parent, const TSNode& node);
     static void visitJsScope(BaseNode* parent, const TSNode& node);
     static void visitNumber(BaseNode* parent, const TSNode& node);
     static void visitConstructorDefinition(BaseNode* parent, const TSNode& node);
@@ -129,6 +133,8 @@ private:
     static void visitFunction(BaseNode* parent, const TSNode& node);
     static void visitClassDeclaration(BaseNode* parent, const TSNode& node);
     static void visitVariableDeclaration(BaseNode* parent, const TSNode& node);
+    static void visitLexicalDeclaration(BaseNode* parent, const TSNode& node);
+    static void visitDestructuringPattern(BaseNode* parent, const TSNode& node);
     static void visitNewExpression(BaseNode* parent, const TSNode& node);
     static void visitReturnStatement(BaseNode* parent, const TSNode& node);
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
@@ -267,15 +273,21 @@ private:
 
 };
 
+class ImportPathSegmentNode : public BaseNode{
+    friend class BaseNode;
+public:
+    ImportPathSegmentNode(const TSNode& node) : BaseNode(node, "ImportPathSegment"){}
+};
+
 class ImportPathNode : public BaseNode{
     friend class BaseNode;
 public:
     ImportPathNode(const TSNode& node) : BaseNode(node, "ImportPath"){}
 
-    const std::vector<IdentifierNode*>& segments() const{ return m_segments; }
+    const std::vector<ImportPathSegmentNode*>& segments() const{ return m_segments; }
 
 private:
-    std::vector<IdentifierNode*> m_segments;
+    std::vector<ImportPathSegmentNode*> m_segments;
 };
 
 class NewTaggedComponentExpressionNode : public BaseNode{
@@ -490,8 +502,9 @@ public:
     void pushToStaticProperties(StaticPropertyDeclarationNode* prop){ m_staticProperties.push_back(prop); }
     void pushToIdComponents(NewComponentExpressionNode* nce){ m_idComponents.push_back(nce); }
     void pushToDefault(BaseNode* nce){ m_nestedComponents.push_back(nce); }
+    void pushToPropertyAccessors(PropertyAccessorDeclarationNode* pa){ m_propertyAccesors.push_back(pa); }
 
-    void pushToAssignments(PropertyAssignmentNode* ass) { m_assignments.push_back(ass); }
+    void pushToAssignments(PropertyAssignmentNode* pan) { m_assignments.push_back(pan); }
     std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 
     std::string name(const std::string &source) const;
@@ -504,6 +517,7 @@ private:
     ComponentBodyNode* m_body;
 
     std::vector<PropertyDeclarationNode*> m_properties;
+    std::vector<PropertyAccessorDeclarationNode*> m_propertyAccesors;
     std::vector<StaticPropertyDeclarationNode*> m_staticProperties;
     std::vector<EventDeclarationNode*> m_events;
     std::vector<ListenerDeclarationNode*> m_listeners;
@@ -515,6 +529,7 @@ private:
 class NewComponentExpressionNode : public JsBlockNode{
 
     friend class ComponentBodyNode;
+    friend class BaseNode;
 
 public:
     NewComponentExpressionNode(const TSNode& node);
@@ -531,34 +546,38 @@ public:
 
     void pushToDefault(BaseNode* nce){ m_nestedComponents.push_back(nce); }
 
-    std::string name(const std::string &source) const;
-
-    bool hasInstance() const{ return m_instance ? true : false; }
-
     std::string initializerName(const std::string& source);
 
 protected:
     NewComponentExpressionNode(const TSNode& node, const std::string& typeString);
+
 private:
     std::vector<IdentifierNode*> m_name;
     IdentifierNode* m_id;
     ComponentBodyNode* m_body;
     ArgumentsNode* m_arguments;
-    IdentifierNode* m_instance;
 
     std::vector<BaseNode*> m_nestedComponents;
     std::vector<PropertyDeclarationNode*> m_properties;
     std::vector<PropertyAssignmentNode*> m_assignments;
     std::vector<NewComponentExpressionNode*> m_idComponents;
-
-    friend class BaseNode;
-
 };
 
 class RootNewComponentExpressionNode: public NewComponentExpressionNode {
     friend class BaseNode;
 public:
     RootNewComponentExpressionNode(const TSNode& node) : NewComponentExpressionNode(node, "RootNewComponentExpression"){}
+};
+
+class ComponentInstanceStatementNode: public BaseNode{
+    friend class BaseNode;
+public:
+    ComponentInstanceStatementNode(const TSNode& node) : BaseNode(node, "ComponentInstanceStatement"), m_name(nullptr){}
+
+    std::string name(const std::string &source) const;
+
+private:
+    IdentifierNode* m_name;
 };
 
 class ExpressionStatementNode : public BaseNode{
@@ -696,12 +715,43 @@ public:
     bool isAsync() const{ return m_async; }
     bool isStatic() const{ return m_static; }
 
+protected:
+    TypedMethodDeclarationNode(const TSNode& node, const std::string& typeString);
+
 private:
     IdentifierNode*    m_name;
     ParameterListNode* m_parameters;
     JsBlockNode*       m_body;
     bool               m_async;
     bool               m_static;
+};
+
+class PropertyAccessorDeclarationNode : public TypedMethodDeclarationNode{
+
+public:
+    friend class BaseNode;
+
+    enum Access{
+        Unknown = 0,
+        Getter,
+        Setter
+    };
+
+public:
+    PropertyAccessorDeclarationNode(const TSNode& node)
+        : TypedMethodDeclarationNode(node, "PropertyAccessorDeclaration")
+        , m_access(PropertyAccessorDeclarationNode::Unknown)
+        , m_isPropertyAttached(false)
+    {}
+
+    Access access() const{ return m_access; }
+    void setIsPropertyAttached(bool attached) { m_isPropertyAttached = attached; }
+    bool isPropertyAttached() const{ return m_isPropertyAttached; }
+    IdentifierNode* firstParameterName() const;
+
+private:
+    Access m_access;
+    bool   m_isPropertyAttached;
 };
 
 }} // namespace lv, el

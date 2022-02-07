@@ -49,7 +49,7 @@ lcvimgproc.depends    = lcvcore live base
 lcvphoto.depends      = lcvcore live
 lcvvideo.depends      = lcvcore live
 
-!isEmpty(BUILD_ELEMENTS){
+!isEmpty(BUILD_ELEMENTS_ENGINE){
     SUBDIRS += editlv
     editlv.depends = live
     editlv.subdir = $$PWD/editlv

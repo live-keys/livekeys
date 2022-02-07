@@ -50,7 +50,7 @@ DISTFILES += \
     qml/FileLineReader.qml \
     qml/FileReader.qml \
     qml/VisualFileSelector.qml \
+    qml/live.module.json \
     qml/live.package.json \
-    qml/live.plugin.json \
     qml/palettes/DirectoryReadPalette.qml \
     qml/plugins.qmltypes

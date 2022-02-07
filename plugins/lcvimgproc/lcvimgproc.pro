@@ -75,8 +75,8 @@ DISTFILES += \
     qml/Sobel.qml \
     qml/StructuringElement.qml \
     qml/Threshold.qml \
+    qml/live.module.json \
     qml/live.package.json \
-    qml/live.plugin.json \
     qml/palettes/PadPalette.json \
     qml/palettes/ProjectionMapperPalette.qml \
     qml/palettes/TransformPaletteProperties.json

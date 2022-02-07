@@ -1,4 +1,3 @@
-
 import {Container} from '__UNRESOLVED__'
 
 export class ParserTest07 extends Container{

@@ -1,7 +1,7 @@
-#ifndef LVPLUGINCONTEXT_H
-#define LVPLUGINCONTEXT_H
+#ifndef LVMODULECONTEXT_H
+#define LVMODULECONTEXT_H
 
-#include "live/plugin.h"
+#include "live/module.h"
 #include "live/package.h"
 
 namespace lv{
@@ -11,28 +11,35 @@ namespace lv{
   \brief Presents a context for the given plugin in relation to the package graph
   \ingroup lvbase
  */
-class LV_BASE_EXPORT Plugin::Context{
+class LV_BASE_EXPORT Module::Context{
 
 public:
     /** Blank constructor */
     Context(){}
 
+    std::vector<Utf8> importSegments() const;
+
+public:
     /** Package graph */
     PackageGraph* packageGraph;
     /** Package */
     Package::Ptr package;
 
     /** Import id */
-    std::string importId;
+    Utf8 importId;
     /** Local dependencies */
-    std::list<Plugin::Ptr> localDependencies;
+    std::list<Module::Ptr> localDependencies;
     /** Local dependents */
-    std::list<Plugin::Ptr> localDependents;
+    std::list<Module::Ptr> localDependents;
 
 private:
     DISABLE_COPY(Context);
 };
 
+inline std::vector<Utf8> Module::Context::importSegments() const{
+    return Utf8(importId).split(".");
+}
+
 } // namespace
 
-#endif // LVPLUGINCONTEXT_H
+#endif // LVMODULECONTEXT_H
