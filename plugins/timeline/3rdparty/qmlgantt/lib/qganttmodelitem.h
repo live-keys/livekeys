@@ -1,7 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2015-2016 Dinu SV.
-** (contact: mail@dinusv.com)
+**
 ** This file is part of QML Gantt library.
 **
 ** GNU Lesser General Public License Usage

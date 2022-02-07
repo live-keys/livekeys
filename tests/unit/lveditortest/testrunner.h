@@ -1,7 +1,7 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2018 Dinu SV.
-** (contact: mail@dinusv.com)
+** Copyright (C) 2022 Dinu SV.
+**
 ** This file is part of Live CV Application.
 **
 ** GNU Lesser General Public License Usage

@@ -1,11 +1,10 @@
 {
     "extensions": ["h", "hpp", "cpp", "qml", "js"],
-    "replace": "\\/\\*{20,}.*Copyright\\s\\(C\\)\\s2014-2017\\sDinu\\sSV.*\\*{20,}\\/",
+    "replace": "\\/\\*{20,}.*Copyright\\s\\(C\\)\\s2022\\sDinu\\sSV.*\\*{20,}\\/",
     "license" : [
         "/****************************************************************************\n",
         "**\n",
-        "** Copyright (C) 2014-2018 Dinu SV.\n",
-        "** (contact: mail@dinusv.com)\n",
+        "** Copyright (C) 2022 Dinu SV.\n",
         "** This file is part of Livekeys Application.\n",
         "**\n",
         "** GNU Lesser General Public License Usage\n",
@@ -20,16 +19,18 @@
     ],
     "paths" : [
         "application/src",
+        "application/qml",
         "lib/lvbase/src",
+        "lib/lvview/src",
         "lib/lveditor/src",
         "lib/lveditqmljs/src",
+        "lib/lvelements/src",
         "plugins/live/src",
         "plugins/editor/src",
         "plugins/lcvcore/src",
         "plugins/lcvfeatures2d/src",
         "plugins/lcvimgproc/src",
         "plugins/lcvphoto/src",
-        "plugins/lcvvideo/src",
-        "tests"
+        "plugins/lcvvideo/src"
     ]
 }

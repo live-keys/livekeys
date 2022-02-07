@@ -1,7 +1,6 @@
 /****************************************************************************
 **
-** Copyright (C) 2014-2019 Dinu SV.
-** (contact: mail@dinusv.com)
+** Copyright (C) 2022 Dinu SV.
 ** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
