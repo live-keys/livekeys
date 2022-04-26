@@ -25,6 +25,7 @@
 
 #include <fstream>
 #include <queue>
+#include <string.h>
 
 namespace lv{ namespace el{
 

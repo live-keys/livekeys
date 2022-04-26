@@ -444,7 +444,8 @@ Rectangle{
         }
 
         var selector = root.activeIndex === 0 ? listView.currentItem.category : root.activeIndex
-        if (root.activeIndex === 0) idChecked = true // add id by default
+        if (root.activeIndex === 0)
+            idChecked = true // add id by default
 
         var type = listView.currentItem.type
         var code = listView.currentItem.code

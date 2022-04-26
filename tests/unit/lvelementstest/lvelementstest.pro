@@ -94,7 +94,9 @@ DISTFILES += \
     data/ImportTest11.lvep \
     data/ImportTest12.lvep \
     data/ImportTest13.lvep \
+    data/ImportTest14.lvep \
     data/ParserErrorTest01.lv \
+    data/ParserErrorTest02.lv \
     data/ParserTest011.lv \
     data/ParserTest1.lv.js \
     data/ParserTest11.lv \
@@ -136,6 +138,14 @@ DISTFILES += \
     data/ParserTest4.lv.js \
     data/ParserTest40.lv \
     data/ParserTest40.lv.js \
+    data/ParserTest41.lv \
+    data/ParserTest41.lv.js \
+    data/ParserTest42.lv \
+    data/ParserTest42.lv.js \
+    data/ParserTest43.lv \
+    data/ParserTest43.lv.js \
+    data/ParserTest44.lv \
+    data/ParserTest44.lv.js \
     data/ParserTest5.lv \
     data/ParserTest5.lv.js \
     data/ParserTest6.lv \
@@ -145,4 +155,5 @@ DISTFILES += \
     data/ParserTest8.lv \
     data/ParserTest8.lv.js \
     data/ParserTest9.lv \
-    data/ParserTest9.lv.js
+    data/ParserTest9.lv.js \
+    data/Test5.lv

@@ -1,0 +1,29 @@
+instance elem Element{
+    on remove: (index) => {
+        this.items.remove(index)
+    }
+    on add: (item) => {
+        this.items.push(item)
+    }
+    event add(Element item)
+    event remove(Element item)
+
+    fn insert(Element item, int index){
+        this.items.insert(item, index)
+    }
+}
+
+component X < Element{
+    on remove: (index) => {
+        this.items.remove(index)
+    }
+    on add: (item) => {
+        this.items.push(item)
+    }
+    event add(Element item)
+    event remove(Element item)
+
+    fn insert(Element item, int index){
+        this.items.insert(item, index)
+    }
+}

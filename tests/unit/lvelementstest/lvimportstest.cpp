@@ -274,3 +274,25 @@ void LvImportsTest::dashPackageImportTest(){
     delete engine;
 }
 
+void LvImportsTest::rootPackageImportTest(){
+    Engine* engine = new Engine;
+    engine->setModuleFileType(Engine::Lv);
+
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest14.lvep"));
+
+    engine->scope([engine, &tp](){
+        Element* main = engine->runFile(tp.path() + "/plugin1/main.lv");
+        QVERIFY(main != nullptr);
+        QVERIFY(main->get("a").toStdString(engine) == "class[A]");
+        QVERIFY(main->get("b").toStdString(engine) == "class[B]");
+
+        Element* main2 = engine->runFile(tp.path() + "/plugin1/plugin2/main2.lv");
+        QVERIFY(main2 != nullptr);
+        QVERIFY(main2->get("a").toStdString(engine) == "class[A]");
+        QVERIFY(main2->get("b").toStdString(engine) == "class[B]");
+    });
+
+    delete engine;
+}
+

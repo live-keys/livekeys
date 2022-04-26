@@ -134,9 +134,6 @@ public:
     JsModule::Ptr loadJsModule(const std::string& path);
     Element* runFile(const std::string& path);
 
-    Script::Ptr compileModuleFile(const std::string& path);
-    Script::Ptr compileModuleSource(const std::string& path, const std::string& source);
-
     ComponentTemplate* registerTemplate(const MetaObject* mo);
     v8::Local<v8::FunctionTemplate> pointTemplate();
     v8::Local<v8::FunctionTemplate> sizeTemplate();

@@ -125,7 +125,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
         componentName = name.substr(0, i);
     }
 
-    ProgramNode* pn = compiler->parseProgramNodes(componentName, ast);
+    ProgramNode* pn = compiler->parseProgramNodes(filePath, componentName, ast);
 
     ModuleFile* mf = new ModuleFile(epl, name, content, pn);
     epl->m_d->fileModules[name] = mf;
@@ -148,7 +148,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
                 THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
             }
 
-            std::string importUri = imp.uri.substr(1);
+            std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
             ElementsModule::Ptr ep = Compiler::compileImport(epl->m_d->compiler, importUri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));

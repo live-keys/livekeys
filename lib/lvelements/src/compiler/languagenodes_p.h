@@ -58,11 +58,12 @@ class BaseNode{
 public:
     class ConversionContext{
     public:
-        ConversionContext() : jsImportsEnabled(true){}
+        ConversionContext() : jsImportsEnabled(true), allowUnresolved(true){}
 
         std::string baseComponent;
         std::string baseComponentImportUri;
         bool        jsImportsEnabled;
+        bool        allowUnresolved;
         std::list<std::string> implicitTypes;
 
         static std::string baseComponentName(ConversionContext* ctx);
@@ -78,11 +79,12 @@ public:
     std::string astString() const;
     virtual std::string toString(int indent = 0) const;
 
-    static BaseNode* visit(LanguageParser::AST* ast);
+    static BaseNode* visit(const std::string& filePath, const std::string& fileName, LanguageParser::AST* ast);
     static bool checkIdentifierDeclared(const std::string& source, BaseNode* node, std::string id, ConversionContext* ctx);
     const std::string& typeString() const{ return m_typeString; }
 
     template <typename T> T* as(){ return static_cast<T*>(this); }
+    template <typename T> bool canCast(){ return dynamic_cast<T*>(this) != nullptr; }
     const std::vector<BaseNode *> &children() const;
 
     int startByte() const;
@@ -139,6 +141,7 @@ private:
     static void visitNumber(BaseNode* parent, const TSNode& node);
     static void visitConstructorDefinition(BaseNode* parent, const TSNode& node);
     static void visitExpressionStatement(BaseNode* parent, const TSNode& node);
+    static void visitAssignmentExpression(BaseNode* parent, const TSNode& node);
     static void visitCallExpression(BaseNode* parent, const TSNode& node);
     static void visitNewTaggedComponentExpression(BaseNode* parent, const TSNode& node);
     static void visitNewTrippleTaggedComponentExpression(BaseNode* parent, const TSNode& node);
@@ -219,8 +222,10 @@ public:
 
 public:
     ProgramNode(const TSNode& node) : JsBlockNode(node, "Program"), m_importTypesCollected(false) {}
-    void setFilename(std::string fn){ m_fileName = fn; }
-    std::string filename() const { return m_fileName; }
+    void setFileName(std::string fn){ m_fileName = fn; }
+    std::string fileName() const { return m_fileName; }
+    void setFilePath(const std::string& fp){ m_filePath = fp; }
+    const std::string& filePath() const{ return m_filePath; }
 
     const std::vector<BaseNode*> exports(){ return m_exports; }
     const std::vector<ImportNode*> imports(){ return m_imports; }
@@ -242,12 +247,14 @@ private:
     void addImportType(const ImportType& t);
 
 private:
+    std::string m_fileName;
+    std::string m_filePath;
+
     std::vector<ImportNode*>   m_imports;
     std::vector<BaseNode*>     m_exports; // Exports are not owned
     std::vector<JsImportNode*> m_jsImports;
     bool                       m_importTypesCollected;
     std::map<std::string, std::map<std::string, ImportType> > m_importTypes;
-    std::string m_fileName;
     std::vector<NewComponentExpressionNode*> m_idComponents;
 };
 
@@ -297,11 +304,13 @@ public:
 class ImportPathNode : public BaseNode{
     friend class BaseNode;
 public:
-    ImportPathNode(const TSNode& node) : BaseNode(node, "ImportPath"){}
+    ImportPathNode(const TSNode& node) : BaseNode(node, "ImportPath"), m_isRelative(false){}
 
+    bool isRelative(){ return m_isRelative; }
     const std::vector<ImportPathSegmentNode*>& segments() const{ return m_segments; }
 
 private:
+    bool m_isRelative;
     std::vector<ImportPathSegmentNode*> m_segments;
 };
 
@@ -362,11 +371,10 @@ public:
     ImportNode(const TSNode& node)
         : BaseNode(node, "Import")
         , m_importPath(nullptr)
-        , m_isRelative(false)
         , m_importAs(nullptr){}
     virtual std::string toString(int indent = 0) const;
 
-    bool isRelative() const{ return m_isRelative; }
+    bool isRelative() const{ return m_importPath && m_importPath->isRelative(); }
     std::string path(const std::string& source) const;
     std::string as(const std::string& source) const;
     bool hasNamespace() const{ return m_importAs; }
@@ -375,7 +383,6 @@ protected:
     virtual void addChild(BaseNode *child);
 private:
     ImportPathNode* m_importPath;
-    bool            m_isRelative;
     IdentifierNode* m_importAs;
 };
 
@@ -536,6 +543,7 @@ private:
     std::vector<StaticPropertyDeclarationNode*> m_staticProperties;
     std::vector<EventDeclarationNode*> m_events;
     std::vector<ListenerDeclarationNode*> m_listeners;
+    std::vector<TypedMethodDeclarationNode*> m_methods;
     std::vector<BaseNode*> m_nestedComponents;
     std::vector<PropertyAssignmentNode*> m_assignments;
     std::vector<NewComponentExpressionNode*> m_idComponents;
@@ -559,6 +567,10 @@ public:
     void pushToAssignments(PropertyAssignmentNode* ass) { m_assignments.push_back(ass); }
     std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 
+    std::vector<EventDeclarationNode*> events(){ return m_events; }
+    std::vector<ListenerDeclarationNode*> listeners(){ return m_listeners; }
+    std::vector<TypedMethodDeclarationNode*> methods(){ return m_methods; }
+
     void pushToDefault(BaseNode* nce){ m_nestedComponents.push_back(nce); }
 
     std::string initializerName(const std::string& source);
@@ -575,6 +587,9 @@ private:
     std::vector<BaseNode*> m_nestedComponents;
     std::vector<PropertyDeclarationNode*> m_properties;
     std::vector<PropertyAssignmentNode*> m_assignments;
+    std::vector<EventDeclarationNode*> m_events;
+    std::vector<ListenerDeclarationNode*> m_listeners;
+    std::vector<TypedMethodDeclarationNode*> m_methods;
     std::vector<NewComponentExpressionNode*> m_idComponents;
 };
 
@@ -599,6 +614,22 @@ class ExpressionStatementNode : public BaseNode{
 public:
     ExpressionStatementNode(const TSNode& node) : BaseNode(node, "ExpressionStatement"){}
     virtual std::string toString(int indent = 0) const;
+};
+
+class AssignmentExpressionNode : public BaseNode{
+public:
+    AssignmentExpressionNode(const TSNode& node) : BaseNode(node, "AssignmentExpression"), m_left(nullptr), m_right(nullptr){}
+    virtual std::string toString(int indent = 0) const;
+
+    BaseNode* left() const{ return m_left; }
+    BaseNode* right() const{ return m_right; }
+
+protected:
+    virtual void addChild(BaseNode *child);
+
+private:
+    BaseNode* m_left;
+    BaseNode* m_right;
 };
 
 class BindableExpressionNode : public BaseNode{

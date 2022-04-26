@@ -18,14 +18,15 @@ public:
     void test3Js();
     void test4Js();
 
-
-private slots:
-    void initTestCase();
-
     void test1Lv();
     void test2Lv();
     void test3Lv();
     void test4Lv();
+
+private slots:
+    void initTestCase();
+
+    void test5Lv();
 };
 
 #endif // LVCOMPILETEST_H

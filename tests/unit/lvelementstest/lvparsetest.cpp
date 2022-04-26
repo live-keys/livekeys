@@ -149,7 +149,7 @@ void LvParseTest::customBaseComponentTest(){
 
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
 
-    std::string conversion = compiler->compileToJs(name, contents);
+    std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv.js", contents);
 
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);
     el::LanguageParser::AST* expectedAST   = parser->parse(expect);
@@ -205,16 +205,33 @@ void LvParseTest::getterSetterTest(){
     parseTestTemplate("ParserTest40");
 }
 
+void LvParseTest::jsSectionsTest(){
+    parseTestTemplate("ParserTest41");
+}
+
+void LvParseTest::eventsMethodsAndListenersTest(){
+    parseTestTemplate("ParserTest42");
+}
+
+void LvParseTest::propertyAssignmentInBindingTest(){
+    parseTestTemplate("ParserTest43");
+}
+
+void LvParseTest::instanceIdsTest(){
+    parseTestTemplate("ParserTest44");
+}
+
 void LvParseTest::parseTestTemplate(std::string name){
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
     std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
 
-    Compiler::Ptr compiler = Compiler::create();
+    Compiler::Config compilerConfig;
+    compilerConfig.allowUnresolvedTypes(true);
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
     compiler->configureImplicitType("console");
     compiler->configureImplicitType("vlog");
 
-    std::string conversion = compiler->compileToJs(name, contents);
-//    vlog() << conversion;
+    std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
 
     el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
     el::LanguageParser::AST* conversionAST = parser->parse(conversion);

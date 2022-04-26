@@ -1,0 +1,81 @@
+// This file holds a root package import from 2 main files inside a modules.
+
+////// plugin1/live.module.json
+
+{
+    "name" : "plugin1",
+    "package": "..",
+    "modules": ["main"]
+}
+
+////// plugin1/main.lv
+
+import .
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+}
+
+
+////// plugin1/plugin2/live.module.json
+
+{
+    "name" : "plugin2",
+    "package": "../..",
+    "modules": ["main2"]
+}
+
+////// plugin1/plugin2/main2.lv
+
+import .
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+}
+
+
+
+////// A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+
+////// B.lv
+
+component default < Element{
+    fn toString(){
+        return "class[B]"
+    }
+}
+
+////// live.package.json
+
+{
+    "name" : "main",
+    "version" : "1.0.0"
+}
+
+////// live.module.json
+
+{
+    "name" : "main",
+    "package": ".",
+    "modules": ["A", "B"]
+}
+
+
+

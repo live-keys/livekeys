@@ -42,7 +42,7 @@ component default < Element{
 
 ////// main.lv
 
-import .main.plugin1 as plug
+import .plugin1 as plug
 
 instance default Element{
     string a : {

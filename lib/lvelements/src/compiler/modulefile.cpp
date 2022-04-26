@@ -20,6 +20,7 @@
 #include "live/module.h"
 #include "live/modulecontext.h"
 #include "live/packagegraph.h"
+#include "live/visuallog.h"
 
 #include <sstream>
 

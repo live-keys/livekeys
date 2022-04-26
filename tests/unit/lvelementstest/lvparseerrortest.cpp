@@ -33,12 +33,34 @@ void LvParseErrorTest::programBodyExtraElements(){
     bool hadException = false;
 
     try {
-        compiler->compileToJs(name, contents);
+        compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
     } catch (lv::el::SyntaxException& e) {
-        QVERIFY(e.parsedLine() == 3);
-        QVERIFY(e.parsedColumn() == 0);
+        QVERIFY(e.parsedLine() == 4);
+        QVERIFY(e.parsedColumn() == 1);
         QVERIFY(e.code() == lv::Exception::toCode("~Parse"));
         hadException = true;
     }
     QVERIFY(hadException);
+}
+
+void LvParseErrorTest::identifierNotFound(){
+    std::string name = "ParserErrorTest02";
+    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
+
+    Compiler::Config compilerConfig;
+    compilerConfig.allowUnresolvedTypes(false);
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    bool hadException = false;
+
+    try {
+        compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
+    } catch (lv::Exception& e) {
+        QVERIFY(e.code() == lv::Exception::toCode("~Identifier"));
+        hadException = true;
+    }
+    QVERIFY(hadException);
+
 }

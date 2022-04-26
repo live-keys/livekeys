@@ -627,6 +627,24 @@ void Element::set(const std::string &name, const ScopedValue &value){
     p->write(this, value.data());
 }
 
+void Element::onReady(){
+    if ( !m_d->persistent.IsEmpty() ){
+        auto lo = m_d->persistent.Get(m_d->engine->isolate());
+        auto context = m_d->engine->isolate()->GetCurrentContext();
+        v8::Local<v8::String> key = v8::String::NewFromUtf8(m_d->engine->isolate(), "completed").ToLocalChecked();
+        v8::MaybeLocal<v8::Value> val = lo->Get(context, key);
+        if ( !val.IsEmpty() ){
+            v8::Local<v8::Value> localValue = val.ToLocalChecked();
+            if (localValue->IsFunction()){
+                v8::Local<v8::Function> fn = v8::Local<v8::Function>::Cast(localValue);
+                v8::MaybeLocal<v8::Value> rs = fn->Call(context, lo, 0, nullptr);
+                if ( rs.IsEmpty() )
+                    return;
+            }
+        }
+    }
+}
+
 void Element::removeListeningConnection(EventConnection *conn){
     // If there's a listener, remove the connection from it's emission
     if ( conn->listener() ){

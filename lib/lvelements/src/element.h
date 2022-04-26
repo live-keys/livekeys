@@ -185,7 +185,7 @@ public:
     // Ready
     // -----
 
-    virtual void onReady(){}
+    virtual void onReady();
 
 protected:
     template<typename ...Args> Event notify(Event::Id eventId, Args... args);

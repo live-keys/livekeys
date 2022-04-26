@@ -57,6 +57,10 @@ private slots:
     void trippleTagTest();
     void componentImportTest();
     void getterSetterTest();
+    void jsSectionsTest();
+    void eventsMethodsAndListenersTest();
+    void propertyAssignmentInBindingTest();
+    void instanceIdsTest();
 
 private:
     void parseTestTemplate(std::string name);

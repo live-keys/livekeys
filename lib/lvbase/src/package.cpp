@@ -97,7 +97,7 @@ Package::Ptr Package::createFromPath(const std::string &path){
 
     std::ifstream instream(packagePath.toStdString(), std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
-        THROW_EXCEPTION(lv::Exception, std::string("Cannot open file: ") + path, 1);
+        THROW_EXCEPTION(lv::Exception, Utf8("Cannot open package file: %. The file might not exist or the path might be wrong.").format(path), 1);
     }
 
     instream.seekg(0, std::ios::end);
@@ -140,6 +140,8 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
                     lib->flags.push_back(it->asString());
                 }
             }
+
+            pt->m_d->libraries[it->first] = lib;
         }
     }
     if ( m.hasKey("internalLibraries") ){

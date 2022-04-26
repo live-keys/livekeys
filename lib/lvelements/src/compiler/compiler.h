@@ -56,6 +56,7 @@ public:
         void addImportPath(const std::string& path);
         void setBaseComponent(const std::string& name, const std::string& importUri);
         void initialize(const MLNode& config);
+        void allowUnresolvedTypes(bool allow){ m_allowUnresolved = allow; }
 
     private:
         bool                   m_fileOutput;
@@ -69,6 +70,7 @@ public:
         std::string            m_importLocalPath;
         std::string            m_packageBuildPath;
         bool                   m_enableJsImports;
+        bool                   m_allowUnresolved;
     };
 
 public:
@@ -90,7 +92,7 @@ public:
     std::string moduleBuildPath(const Module::Ptr& module);
 
     std::vector<BaseNode*> collectProgramExports(const std::string& contents, ProgramNode* node);
-    ProgramNode* parseProgramNodes(const std::string& path, LanguageParser::AST* ast);
+    ProgramNode* parseProgramNodes(const std::string& filePath, const std::string &fileName, LanguageParser::AST* ast);
 
     const std::string& outputExtension() const;
     const std::string& importLocalPath() const;

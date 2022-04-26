@@ -17,7 +17,11 @@ instance default Article{
             lines we would use \\n and \\s characters. \n
             This will be `B`bold text. \n
             And this will be an `A{ href:'https://livekeys.io'; T`link`}
+    }
 
+    P{
+        T` This paragraph will have an extra space \s\shere, at the start and at the
+            end of it. `
     }
 }
 

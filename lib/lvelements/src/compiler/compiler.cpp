@@ -43,6 +43,7 @@ public:
             ctx->baseComponent = config.m_baseComponent;
             ctx->baseComponentImportUri = config.m_baseComponentUri;
         }
+        ctx->allowUnresolved = config.m_allowUnresolved;
         ctx->jsImportsEnabled = config.m_enableJsImports;
 
         return ctx;
@@ -88,7 +89,8 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     if ( !ast )
         return result;
 
-    ProgramNode* root = parseProgramNodes(path, ast);
+    std::string name = QFileInfo(QString::fromStdString(path)).baseName().toStdString();
+    ProgramNode* root = parseProgramNodes(path, name, ast);
 
     auto ctx = m_d->createConversionContext();
     root->collectImportTypes(contents, ctx);
@@ -196,17 +198,11 @@ std::vector<BaseNode *> Compiler::collectProgramExports(const std::string &conte
     return node->exports();
 }
 
-ProgramNode *Compiler::parseProgramNodes(const std::string &path, LanguageParser::AST *ast){
+ProgramNode *Compiler::parseProgramNodes(const std::string& filePath, const std::string &fileName, LanguageParser::AST *ast){
     if ( !ast )
         return nullptr;
-
-    BaseNode* root = el::BaseNode::visit(ast);
-
+    BaseNode* root = el::BaseNode::visit(filePath, fileName, ast);
     ProgramNode* pn = dynamic_cast<ProgramNode*>(root);
-    if (!path.empty()){
-        pn->setFilename(path);
-    }
-
     return pn;
 }
 
@@ -287,6 +283,7 @@ Compiler::Config::Config(bool fileOutput, const std::string &outputExtension, Fi
     , m_fileIO(ioInterface)
     , m_outputExtension(outputExtension)
     , m_enableJsImports(true)
+    , m_allowUnresolved(true)
 {
     if ( m_fileOutput && !m_fileIO ){
         THROW_EXCEPTION(lv::Exception, "File reader & writer not defined for compiler.", lv::Exception::toCode("~FileIO"));
@@ -341,6 +338,9 @@ void Compiler::Config::initialize(const MLNode &config){
     }
     if ( config.hasKey("outputExtension") ){
         m_outputExtension = "." + config["outputExtension"].asString();
+    }
+    if ( config.hasKey("allowUnresolved") ){
+        m_allowUnresolved = config["allowUnresolved"].asBool();
     }
 }
 

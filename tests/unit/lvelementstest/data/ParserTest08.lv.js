@@ -22,7 +22,7 @@ export let ParserTest08 = (function(parent){
                     this.setParent(parent)
                     Element.complete(this)
                     return this
-                }.bind(new T("This is"))(this)),
+                }.bind(new T("This is "))(this)),
                (function(parent){
                    this.setParent(parent)
                     Element.complete(this)
@@ -50,12 +50,12 @@ export let ParserTest08 = (function(parent){
                       this.setParent(parent)
                       Element.complete(this)
                       return this
-                  }.bind(new T(" This is paragraph 2. Lines are merged into one. To add space and new lines we would use \\n and \\s characters. \n This will be"))(this)),
+                  }.bind(new T("This is paragraph 2. Lines are merged into one. To add space and new lines we would use \\n and \\s characters. \n This will be "))(this)),
                  (function(parent){
                      this.setParent(parent)
                      Element.complete(this)
                      return this
-                 }.bind(new B("bold text. \n And this will be an"))(this)),
+                 }.bind(new B("bold text. \n And this will be an "))(this)),
                  (function(parent){
                      this.setParent(parent)
                      this.href = "https://livekeys.io"
@@ -73,7 +73,19 @@ export let ParserTest08 = (function(parent){
               ])
 
               return this
-          }.bind(new P())(this))
+          }.bind(new P())(this)),
+         (function(parent){
+            this.setParent(parent)
+            Element.assignChildrenAndComplete(this, [
+                (function(parent){
+                    this.setParent(parent)
+                    Element.complete(this)
+                    return this
+                }.bind(new T(" This paragraph will have an extra space   here, at the start and at the end of it. "))(this))
+
+            ])
+            return this
+         }.bind(new P())(this))
     ])
 
     return this

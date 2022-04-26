@@ -55,7 +55,7 @@ public:
     int to;
     std::vector<ElementsInsertion*> m_children;
 
-    JSSection(): InsertionSection(Js){}
+    JSSection(int pFrom = 0, int pTo = 0): InsertionSection(Js), from(pFrom), to(pTo){}
 
     virtual std::string toString() const;
 

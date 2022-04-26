@@ -21,9 +21,14 @@ export class B extends Element{
             this.x = (function(){
                 var d = (function(parent){
                     this.setParent(parent)
+                    this.ids = {}
+
                     Element.assignId(did, "did")
                     var did = this
+                    this.ids["did"] = did
+
                     var nested = new Element()
+                    this.ids["nested"] = nested
                     
                     Element.addProperty(did, 'y', { type: 'int', notify: 'yChanged' })
                     this.y = 10

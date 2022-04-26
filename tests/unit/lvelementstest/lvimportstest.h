@@ -29,6 +29,7 @@ private slots:
     void packageDependencyCycleTest();
     void importMetaTest();
     void dashPackageImportTest();
+    void rootPackageImportTest();
 
 private:
     std::string scriptPath(const std::string& scriptName);

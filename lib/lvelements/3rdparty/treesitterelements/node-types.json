@@ -1684,10 +1684,21 @@
   {
     "type": "import_path",
     "named": true,
-    "fields": {},
+    "fields": {
+      "relative": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": ".",
+            "named": false
+          }
+        ]
+      }
+    },
     "children": {
       "multiple": true,
-      "required": true,
+      "required": false,
       "types": [
         {
           "type": "import_path_segment",
@@ -2236,6 +2247,10 @@
           },
           {
             "type": "property_declaration",
+            "named": true
+          },
+          {
+            "type": "typed_method_declaration",
             "named": true
           }
         ]

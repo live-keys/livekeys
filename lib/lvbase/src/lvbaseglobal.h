@@ -25,7 +25,7 @@
 #    define LV_BASE_EXPORT LV_IMPORT
 #  endif
 #else
-#  define LVBASE_EXPORT
+#  define LV_BASE_EXPORT
 #endif
 
 #endif //LVBASEGLOBAL_H

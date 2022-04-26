@@ -51,9 +51,9 @@ component default < Element{
 
 ////// main.lv
 
-import .main.plugin1
-import .main.plugin1 as p1
-import .main.plugin1 as p2
+import .plugin1
+import .plugin1 as p1
+import .plugin1 as p2
 
 instance default Element{
     string a : {

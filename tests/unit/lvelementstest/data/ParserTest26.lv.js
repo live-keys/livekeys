@@ -18,8 +18,11 @@ export class C extends Element{
         this.x = (function(){
             var d = (function(parent){
                 this.setParent(parent)
+                this.ids = {}
+
                 Element.assignId(test, "test")
                 var test = this
+                this.ids["test"] = test
 
                 Element.addProperty(test, 'y', { type: 'int', notify: 'yChanged' })
                 this.y = 10

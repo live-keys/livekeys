@@ -17,7 +17,7 @@ public:
 private slots:
     void initTestCase();
     void programBodyExtraElements();
-
+    void identifierNotFound();
 
 private:
     lv::LockedFileIOSession::Ptr m_fileSession;

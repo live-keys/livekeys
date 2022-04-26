@@ -6,6 +6,7 @@
 #include "live/elements/component.h"
 #include "live/elements/container.h"
 #include "live/elements/object.h"
+#include "live/elements/compiler/modulefile.h"
 #include "live/applicationcontext.h"
 
 Q_TEST_RUNNER_REGISTER(LvCompileTest);
@@ -29,7 +30,7 @@ void LvCompileTest::test1Lv(){
         ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
-        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        JsModule::Ptr jsMod = engine->loadJsModule(mf->jsFilePath());
         jsMod->evaluate();
 
         ScopedValue sv = jsMod->moduleNamespace();
@@ -74,7 +75,7 @@ void LvCompileTest::test2Lv(){
         ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
-        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        JsModule::Ptr jsMod = engine->loadJsModule(mf->jsFilePath());
         jsMod->evaluate();
 
         ScopedValue sv = jsMod->moduleNamespace();
@@ -113,7 +114,7 @@ void LvCompileTest::test3Lv(){
         ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
-        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        JsModule::Ptr jsMod = engine->loadJsModule(mf->jsFilePath());
         jsMod->evaluate();
 
         ScopedValue sv = jsMod->moduleNamespace();
@@ -155,7 +156,7 @@ void LvCompileTest::test4Lv(){
         ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
 
         ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
-        JsModule::Ptr jsMod = engine->loadAsJsModule(mf);
+        JsModule::Ptr jsMod = engine->loadJsModule(mf->jsFilePath());
         jsMod->evaluate();
 
         ScopedValue sv = jsMod->moduleNamespace();
@@ -188,6 +189,28 @@ void LvCompileTest::test4Lv(){
         Element* child1 = oaa.get(engine, 1).toElement(engine);
         QVERIFY(child1->hasProperty("message"));
         QVERIFY(child1->get("message").toStdString(engine) == "thirty");
+    });
+
+    delete engine;
+}
+
+void LvCompileTest::test5Lv(){
+    lv::el::Engine* engine = new lv::el::Engine();
+    engine->scope([engine](){
+        std::string scriptsPath = lv::ApplicationContext::instance().releasePath() + "/data/Test5.lv";
+        ElementsModule::Ptr epl = Compiler::compile(engine->compiler(), scriptsPath, engine);
+
+        ModuleFile* mf = epl->moduleFileBypath(scriptsPath);
+        JsModule::Ptr jsMod = engine->loadJsModule(mf->jsFilePath());
+        jsMod->evaluate();
+
+        ScopedValue sv = jsMod->moduleNamespace();
+        Object::Accessor oa(sv);
+
+        ScopedValue rootValue = oa.get(engine, "main");
+        QVERIFY(rootValue.isElement());
+        Element* elem = rootValue.toElement(engine);
+        QVERIFY(elem->get("x").toInt32(engine) == 200);
     });
 
 

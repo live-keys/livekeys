@@ -4,10 +4,14 @@ import {Container} from '__UNRESOLVED__'
 
 export let ParserTest09 = (function(parent){
     this.setParent(parent)
-    Element.assignId(root, "root")
+    this.ids = {}
 
+    Element.assignId(root, "root")
     var root = this
+    this.ids['root'] = root
+
     var rootChild = new Element()
+    this.ids['rootChild'] = rootChild
     
     Element.addProperty(root, 'x', { type: 'int', notify: 'xChanged' })
     Element.addProperty(rootChild, 'y', { type: 'int', notify: 'yChanged' })

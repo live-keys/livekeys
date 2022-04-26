@@ -32,7 +32,7 @@ component default < Element{
 
 ////// plugin1/subplugin2/C.lv
 
-import .test-package.plugin1.subplugin1
+import .plugin1.subplugin1
 
 component default < B{}
 
@@ -53,7 +53,7 @@ component default < B{}
 
 ////// main.lv
 
-import .test-package.plugin1.subplugin2
+import .plugin1.subplugin2
 
 instance default Element{
     string c : {

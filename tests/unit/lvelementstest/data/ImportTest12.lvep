@@ -56,8 +56,8 @@ component default < Element{
 
 ////// main.lv
 
-import .main.plugin1
-import .main.plugin1.subplugin
+import .plugin1
+import .plugin1.subplugin
 
 instance default Element{
     string aUrl: (new A()).url

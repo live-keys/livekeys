@@ -17,7 +17,7 @@
 
 ////// main.lv
 
-import .main.plugina
+import .plugina
 
 instance default A{
 }
@@ -33,7 +33,7 @@ instance default A{
 
 ////// plugina/A.lv
 
-import .main.pluginb
+import .pluginb
 
 component default < B {}
 
@@ -47,7 +47,7 @@ component default < B {}
 
 ////// pluginb/B.lv
 
-import .main.pluginc
+import .pluginc
 
 component default < C {}
 
@@ -61,7 +61,7 @@ component default < C {}
 
 ////// pluginc/C.lv
 
-import .main.plugina
+import .plugina
 
 component C < A {}
 

@@ -1,0 +1,12 @@
+instance app Container{
+    id: app
+
+    var x: Element{
+        id: elemX
+    }
+
+    Element{
+        id: elemChild
+    }
+
+}
