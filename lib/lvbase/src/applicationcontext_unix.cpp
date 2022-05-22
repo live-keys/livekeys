@@ -25,7 +25,6 @@
 #ifdef __linux__
 #include <linux/limits.h>
 #endif
-
 #ifdef __HAIKU__
 #include <image.h>
 #endif
