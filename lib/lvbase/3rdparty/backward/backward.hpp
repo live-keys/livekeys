@@ -41,6 +41,10 @@
 #	endif
 #endif
 
+#ifdef __HAIKU__
+#include <execinfo.h>
+#endif
+
 // You can define one of the following (or leave it to the auto-detection):
 //
 // #define BACKWARD_SYSTEM_LINUX
