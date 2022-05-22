@@ -22,6 +22,10 @@ macx{
     QMAKE_SONAME_PREFIX = @rpath/Live.framework/Libraries
 }
 
+haiku{
+    LIBS    += -lexecinfo
+}
+
 ## Destination
 
 win32:{
