@@ -27,9 +27,6 @@
 #endif
 
 #ifdef __HAIKU__
-#include <posix/limits.h>
-#include <libgen.h>
-#include <unistd.h>
 #include <image.h>
 #endif
 
@@ -52,7 +49,6 @@ std::string ApplicationContext::applicationFilePathImpl(){
 	{
 		if (info.type == B_APP_IMAGE)
 		{
-
 			return std::string(info.name);
 			break;
 		}
