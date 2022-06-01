@@ -7,6 +7,7 @@ HEADERS += \
     $$PWD/languagenodes_p.h \
     $$PWD/languageparser.h \
     $$PWD/modulefile.h \
+    $$PWD/propertybindingcontainer_p.h \
     $$PWD/sourcerange.h
 
 
@@ -17,4 +18,5 @@ SOURCES += \
     $$PWD/languagenodes.cpp \
     $$PWD/languageparser.cpp \
     $$PWD/modulefile.cpp \
+    $$PWD/propertybindingcontainer.cpp \
     $$PWD/sourcerange.cpp

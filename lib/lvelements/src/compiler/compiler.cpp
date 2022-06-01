@@ -36,7 +36,7 @@ public:
     std::map<std::string, ElementsModule::Ptr> loadedModules;
     std::map<std::string, ElementsModule::Ptr> loadedModulesByPath;
 
-    BaseNode::ConversionContext* createConversionContext(){
+    BaseNode::ConversionContext* createConversionContext(const std::string& componentPath = "", const std::string& relativePathFromBuild = ""){
         BaseNode::ConversionContext* ctx = new BaseNode::ConversionContext;
         ctx->implicitTypes = config.m_implicitTypes;
         if ( config.hasCustomBaseComponent() ){
@@ -45,6 +45,8 @@ public:
         }
         ctx->allowUnresolved = config.m_allowUnresolved;
         ctx->jsImportsEnabled = config.m_enableJsImports;
+        ctx->componentPath = componentPath;
+        ctx->relativePathFromBuild = relativePathFromBuild;
 
         return ctx;
     }
@@ -136,7 +138,37 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std
     section->from = 0;
     section->to   = static_cast<int>(contents.size());
 
-    auto ctx = m_d->createConversionContext();
+    Utf8 outputPath = moduleFileBuildPath(plugin, path);
+    Utf8 relativePathFromOutput;
+
+    auto outputPathSegments = outputPath.split("/");
+    outputPathSegments.pop_back();
+    auto filePathSegments = Utf8(path).split("/");
+    filePathSegments.pop_back();
+
+    std::vector<Utf8> relativePathFromOutputSegments;
+    size_t i = 0;
+    while ( i < outputPathSegments.size() && i < filePathSegments.size() ){
+        if ( outputPathSegments[i] != filePathSegments[i] )
+            break;
+        ++i;
+    }
+    if ( i == 0 ){
+        relativePathFromOutput = Utf8("/") + Utf8::join(outputPathSegments, "/");
+    } else {
+        for ( size_t j = i; j < outputPathSegments.size(); ++j ){
+            if ( !outputPathSegments[j].isEmpty() )
+                relativePathFromOutputSegments.push_back("..");
+        }
+        for ( size_t j = i; j < filePathSegments.size(); ++j ){
+            if ( !filePathSegments[j].isEmpty() )
+                relativePathFromOutputSegments.push_back(filePathSegments[j]);
+        }
+    }
+
+    relativePathFromOutput = Utf8::join(relativePathFromOutputSegments, "/");
+
+    auto ctx = m_d->createConversionContext(path, relativePathFromOutput.data());
     node->convertToJs(contents, section->m_children, 0, ctx);
     delete ctx;
 
@@ -150,8 +182,7 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std
     delete section;
 
     if ( m_d->config.m_fileOutput ){
-        std::string outputPath = moduleFileBuildPath(plugin, path);
-        m_d->config.m_fileIO->writeToFile(outputPath, result);
+        m_d->config.m_fileIO->writeToFile(outputPath.data(), result);
     }
 
     return result;

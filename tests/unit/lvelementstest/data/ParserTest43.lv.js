@@ -7,7 +7,7 @@ export let elem = (function(parent){
             this.a = this.b
             return 100
         }.bind(this),
-        [[this, 'bChanged']]
+        [[this, 'b']]
     )
 
     this.x = (function(){
@@ -20,7 +20,7 @@ export let elem = (function(parent){
         function(){
             return this.c
         }.bind(this),
-        [[this, 'cChanged']]
+        [[this, 'c']]
     )
     Element.complete(this)
     return this

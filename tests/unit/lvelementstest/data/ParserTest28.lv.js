@@ -16,17 +16,17 @@ export let ParserTest28 = (function(parent){
     Element.assignPropertyExpression(this,
         'b',
         function(){ return mod.B.value}.bind(this),
-        [[ mod.B, 'valueChanged' ]]
+        [[mod,['B','value']]]
     )
     Element.assignPropertyExpression(this,
         'c',
         function(){ return mod.C.value}.bind(this),
-        [[ mod.C, 'valueChanged' ]]
+        [[mod,['C','value']]]
     )
     Element.assignPropertyExpression(this,
         'd',
         function(){ return mod.D.value + mod2.Y.value}.bind(this),
-        [[ mod.D, 'valueChanged' ], [ mod2.Y, 'valueChanged' ]]
+        [[mod,['D','value']],[mod2,['Y','value']]]
     )
     this.t = (function(parent){
         this.setParent(parent)
@@ -34,7 +34,7 @@ export let ParserTest28 = (function(parent){
         Element.assignPropertyExpression(this,
             'a',
             function(){ return mod2.Y.value}.bind(this),
-            [[ mod2.Y, 'valueChanged' ] ]
+            [[mod2,['Y','value']]]
         )
         Element.complete(this)
         return this

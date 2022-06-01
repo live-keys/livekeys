@@ -26,10 +26,12 @@ private slots:
     void moduleFileDependencyCycleTest();
     void pluginDependencyCycleTest();
     void packageImportTest();
+
     void packageDependencyCycleTest();
     void importMetaTest();
     void dashPackageImportTest();
     void rootPackageImportTest();
+    void jsImportTest();
 
 private:
     std::string scriptPath(const std::string& scriptName);

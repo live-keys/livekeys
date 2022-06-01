@@ -31,7 +31,7 @@ export class NestingTest extends Container{
                     this,
                     "x",
                     function(){ return enested.y }.bind(this),
-                    [[enested, "yChanged"]]
+                    [[enested, 'y']]
                 )
                 Element.complete(this)
                 return this

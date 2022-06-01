@@ -590,6 +590,7 @@ Element *Engine::runFile(const std::string &path){
     jsMf->evaluate();
 
     ScopedValue sv = jsMf->moduleNamespace();
+
     Object::Accessor oa(sv);
 
     ScopedValue rootValue = oa.get(this, mf->name());

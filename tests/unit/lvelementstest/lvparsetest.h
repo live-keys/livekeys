@@ -61,6 +61,7 @@ private slots:
     void eventsMethodsAndListenersTest();
     void propertyAssignmentInBindingTest();
     void instanceIdsTest();
+    void bindingChainTest();
 
 private:
     void parseTestTemplate(std::string name);

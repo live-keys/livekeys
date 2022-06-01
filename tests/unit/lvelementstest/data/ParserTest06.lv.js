@@ -46,7 +46,7 @@ export class ParserTest06 extends Container{
                     this,
                     "y",
                     function(){ return new parent.ElemProp() }.bind(this),
-                    [[parent, "ElemPropChanged"]]
+                    [[parent, "ElemProp"]]
                 )
                  Element.complete(this)
                 return this

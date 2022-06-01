@@ -1,0 +1,92 @@
+// This file creates js files to test js imports
+
+
+////// packages/package1/live.module.json
+
+{
+    "name" : "package1",
+    "package": "."
+}
+
+////// packages/package1/live.package.json
+
+{
+    "name" : "package1",
+    "version" : "1.0.0"
+}
+
+////// a.js
+
+export class A{
+    toString(){ return "class[A]" }
+}
+
+////// packages/package1/b.js
+
+export class B{
+    toString(){ return "class[B]" }
+}
+
+////// folder/c.js
+
+export class C{
+    toString(){ return "class[C]" }
+}
+
+
+////// e.js
+
+export class E{
+    toString(){ return "class[E]" }
+}
+
+////// folder/f.js
+
+export class F{
+    toString(){ return "class[F]" }
+}
+
+////// submodule/live.module.json
+
+{
+    "name" : "submodule",
+    "package": "..",
+    "modules": ["D"]
+}
+
+////// submodule/D.lv
+
+import {E} from '../e.js'
+import {F} from '../folder/f.js'
+
+component D{
+    fn toString(){
+        return (new E()).toString() + (new F()).toString();
+    }
+}
+
+
+
+////// main.lv
+
+import {A} from './a.js'
+import {B} from 'package1/b.js'
+import {C} from './folder/c.js'
+
+import .submodule
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+    string b : {
+        return (new B()).toString()
+    }
+    string c : {
+        return (new C()).toString()
+    }
+    string d: {
+        return (new D()).toString()
+    }
+}
+

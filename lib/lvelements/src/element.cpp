@@ -431,33 +431,34 @@ void Element::assignPropertyExpression(
     }
     d->boundPropertyExpressions[name] = be;
 
-    v8::Local<v8::Array> bindingsArray = v8::Local<v8::Array>::Cast(bindings.data());
-    for ( uint32_t i = 0; i < bindingsArray->Length(); ++i ){
-        v8::Local<v8::Array> baItem = v8::Local<v8::Array>::Cast(bindingsArray->Get(context, i).ToLocalChecked());
-        if ( baItem->Length() != 2 ){
-            lv::Exception exc = CREATE_EXCEPTION(
-                lv::Exception, "Bindings require array of dual arrays: [[object, name]].", Exception::toCode("~Binding")
-            );
-            d->engine->throwError(&exc, e);
-            return;
-        }
+    //TODO
+//    v8::Local<v8::Array> bindingsArray = v8::Local<v8::Array>::Cast(bindings.data());
+//    for ( uint32_t i = 0; i < bindingsArray->Length(); ++i ){
+//        v8::Local<v8::Array> baItem = v8::Local<v8::Array>::Cast(bindingsArray->Get(context, i).ToLocalChecked());
+//        if ( baItem->Length() != 2 ){
+//            lv::Exception exc = CREATE_EXCEPTION(
+//                lv::Exception, "Bindings require array of dual arrays: [[object, name]].", Exception::toCode("~Binding")
+//            );
+//            d->engine->throwError(&exc, e);
+//            return;
+//        }
 
-        ScopedValue bindingElementValue = ScopedValue(e->engine(), baItem->Get(context, 0).ToLocalChecked());
-        if ( bindingElementValue.isElement() ){
-            Element* bindingElement  = bindingElementValue.toElement(e->engine());
-            std::string bindingEvent = ScopedValue(e->engine(), baItem->Get(context, 1).ToLocalChecked()).toStdString(e->engine());
+//        ScopedValue bindingElementValue = ScopedValue(e->engine(), baItem->Get(context, 0).ToLocalChecked());
+//        if ( bindingElementValue.isElement() ){
+//            Element* bindingElement  = bindingElementValue.toElement(e->engine());
+//            std::string bindingEvent = ScopedValue(e->engine(), baItem->Get(context, 1).ToLocalChecked()).toStdString(e->engine());
 
-            try {
-                EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
-                    be->run();
-                });
-                be->bindables.push_back(bec);
-            } catch (lv::Exception exc) {
-                e->engine()->throwError(&exc, e);
-                return;
-            }
-        }
-    }
+//            try {
+//                EventConnection* bec = bindingElement->on(bindingEvent, [be](const Function::Parameters&){
+//                    be->run();
+//                });
+//                be->bindables.push_back(bec);
+//            } catch (lv::Exception exc) {
+//                e->engine()->throwError(&exc, e);
+//                return;
+//            }
+//        }
+//    }
 }
 
 void Element::assignChildrenAndComplete(Element *e, ScopedValue value){

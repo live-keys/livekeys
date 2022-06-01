@@ -42,7 +42,7 @@ export class X extends Element{
                     return this
                 }.bind(new Element())(null)).toString()
             }.bind(this),
-            [[ this, 'dExprChanged']]
+            [[this,'dExpr']]
         )
 
         Element.assignPropertyExpression(this,
@@ -56,7 +56,7 @@ export class X extends Element{
                     return this
                 }.bind(new Element())(null)).toString()
             }.bind(this)),
-            [[ this, 'dExprChanged' ]]
+            [[this,'dExpr']]
         )
 
         this.aExpr = '10' + (function(parent){
@@ -89,7 +89,7 @@ export class X extends Element{
                     return this
                 }.bind(new Element())(null)).toString()
             }.bind(this),
-            [[ this, 'dExprChanged' ]]
+            [[ this, 'dExpr' ]]
         )
 
         Element.assignPropertyExpression(this,
@@ -103,7 +103,7 @@ export class X extends Element{
                     return this
                 }.bind(new Element())(null)).toString()
             }.bind(this),
-            [[ this, 'dExprChanged' ]]
+            [[ this, 'dExpr' ]]
         )
     }
 }
@@ -141,7 +141,7 @@ export let y = (function(parent){
                 Element.complete(this)
                 return this
             }.bind(new Element())(null)).toString()}.bind(this),
-            [[ this, 'dExprChanged' ]]
+            [[ this, 'dExpr' ]]
         )
 
         Element.assignPropertyExpression(this,
@@ -155,7 +155,7 @@ export let y = (function(parent){
                 return this
                 }.bind(new Element())(null)).toString()
             }.bind(this),
-            [[this, 'dExprChanged']]
+            [[this, 'dExpr']]
         )
 
         this.aExpr = '10' + (function(parent){
@@ -185,7 +185,7 @@ export let y = (function(parent){
             Element.complete(this)
             return this
         }.bind(new Element())(null)).toString()}.bind(this),
-        [[this, 'dExprChanged']]
+        [[this, 'dExpr']]
     )
 
     Element.assignPropertyExpression(this,
@@ -199,7 +199,7 @@ export let y = (function(parent){
                 return this
             }.bind(new Element())(null)).toString()
         }.bind(this),
-        [[this, 'dExprChanged']]
+        [[this, 'dExpr']]
     )
 
     Element.complete(this)

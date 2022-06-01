@@ -95,6 +95,7 @@ DISTFILES += \
     data/ImportTest12.lvep \
     data/ImportTest13.lvep \
     data/ImportTest14.lvep \
+    data/ImportTest15.lvep \
     data/ParserErrorTest01.lv \
     data/ParserErrorTest02.lv \
     data/ParserTest011.lv \
@@ -146,6 +147,8 @@ DISTFILES += \
     data/ParserTest43.lv.js \
     data/ParserTest44.lv \
     data/ParserTest44.lv.js \
+    data/ParserTest45.lv \
+    data/ParserTest45.lv.js \
     data/ParserTest5.lv \
     data/ParserTest5.lv.js \
     data/ParserTest6.lv \

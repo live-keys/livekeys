@@ -325,7 +325,10 @@ ScopedValue Object::Accessor::get(Engine* engine, int index){
 }
 
 ScopedValue Object::Accessor::get(Engine* engine, const ScopedValue &key){
-    return m_d->data->Get(engine->isolate()->GetCurrentContext(), key.data()).ToLocalChecked();
+    v8::MaybeLocal<v8::Value> r = m_d->data->Get(engine->isolate()->GetCurrentContext(), key.data());
+    if ( r.IsEmpty() )
+        return ScopedValue(engine);
+    return ScopedValue(r.ToLocalChecked());
 }
 
 ScopedValue Object::Accessor::get(Engine *engine, const std::string &str){
@@ -353,7 +356,7 @@ void Object::Accessor::set(Engine *engine, const std::string &key, const ScopedV
 }
 
 bool Object::Accessor::has(Engine* engine, const ScopedValue &key) const{
-    v8::Maybe<bool> result = m_d->data->HasOwnProperty(engine->currentContext()->asLocal(), v8::Local<v8::Name>::Cast(key.data()));
+    v8::Maybe<bool> result = m_d->data->HasOwnProperty(engine->currentContext()->asLocal(), v8::Local<v8::String>::Cast(key.data()));
     return result.IsJust() && result.ToChecked();
 }
 

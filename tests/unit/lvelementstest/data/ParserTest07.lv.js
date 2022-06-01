@@ -27,7 +27,7 @@ export class ParserTest07 extends Container{
                     this,
                     "x",
                     function(){ return parent.a + parent.b }.bind(this),
-                    [[parent, "aChanged"], [parent, "bChanged"]]
+                    [[parent, 'a', 'b']]
                 )
                  Element.complete(this)
                 return this
@@ -47,7 +47,7 @@ export class ParserTest07 extends Container{
                         return a() + parent.b
                     }.bind(this),
                     // only b gets bound, 'parent.a' is not in the binding scope
-                    [[parent, "bChanged"]]
+                    [[parent, 'b']]
                 )
                  Element.complete(this)
                 return this
@@ -72,7 +72,7 @@ export class ParserTest07 extends Container{
                     }.bind(this),
                     // conditionals and loops or any other scopes that are not functions/classes/components
                     // should activate their bindings
-                    [[parent, "aChanged"], [parent, "bChanged"]]
+                    [[parent, 'a', 'b']]
                 )
                  Element.complete(this)
 

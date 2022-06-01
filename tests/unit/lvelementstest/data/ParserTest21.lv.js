@@ -33,7 +33,7 @@ export class TodoApp extends Div{
                     'items',
                     function(){ return this.todoItems}.bind(this),
                     [
-                        [ this, 'todoItemsChanged' ]
+                        [ this, 'todoItems' ]
                     ]
                 )
                 this.on('remove', function(index){

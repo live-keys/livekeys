@@ -197,7 +197,6 @@ void LvImportsTest::packageImportTest()
     delete engine;
 }
 
-
 void LvImportsTest::packageDependencyCycleTest(){
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::Lv);
@@ -291,6 +290,29 @@ void LvImportsTest::rootPackageImportTest(){
         QVERIFY(main2 != nullptr);
         QVERIFY(main2->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main2->get("b").toStdString(engine) == "class[B]");
+    });
+
+    delete engine;
+}
+
+void LvImportsTest::jsImportTest(){
+    Compiler::Config conf;
+    conf.initialize({{"packageBuildPath", "build"}});
+    Compiler::Ptr compiler = Compiler::create(conf);
+    Engine* engine = new Engine(compiler);
+    engine->setModuleFileType(Engine::Lv);
+
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest15.lvep"));
+
+    engine->scope([engine, &tp](){
+        engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
+        Element* main = engine->runFile(tp.path() + "/main.lv");
+        QVERIFY(main != nullptr);
+        QVERIFY(main->get("a").toStdString(engine) == "class[A]");
+        QVERIFY(main->get("b").toStdString(engine) == "class[B]");
+        QVERIFY(main->get("c").toStdString(engine) == "class[C]");
+        QVERIFY(main->get("d").toStdString(engine) == "class[E]class[F]");
     });
 
     delete engine;

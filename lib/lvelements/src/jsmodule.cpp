@@ -45,8 +45,31 @@ v8::Local<v8::Value> JsModule::evaluate(v8::Local<v8::Context> ctx){
     v8::Local<v8::Value> retValue;
 
     v8::Local<v8::Module> mod = localModule();
+
     if (!mod->Evaluate(ctx).ToLocal(&retValue)) {
         THROW_EXCEPTION(lv::Exception, "Failed to evaluate module: " + m_file, lv::Exception::toCode("~Module"));
+    }
+    if ( mod->GetStatus() == v8::Module::kErrored ){
+        v8::Local<v8::Object> excp = mod->GetException()->ToObject(ctx).ToLocalChecked();
+        v8::Local<v8::String> messageKey = v8::String::NewFromUtf8(m_engine->isolate(), "message", v8::NewStringType::kInternalized).ToLocalChecked();
+        v8::Local<v8::String> fileNameKey = v8::String::NewFromUtf8(m_engine->isolate(), "fileName", v8::NewStringType::kInternalized).ToLocalChecked();
+        v8::Local<v8::String> lineNumberKey = v8::String::NewFromUtf8(m_engine->isolate(), "lineNumber", v8::NewStringType::kInternalized).ToLocalChecked();
+
+        int lineNumber = static_cast<int>(excp->Get(ctx, lineNumberKey).ToLocalChecked()->ToInteger(ctx).ToLocalChecked()->Value());
+        std::string fileName = "", message = "";
+        if ( excp->Has(ctx, fileNameKey).ToChecked() ){
+            v8::String::Utf8Value result(m_engine->isolate(), excp->Get(ctx, fileNameKey).ToLocalChecked());
+            fileName = *result;
+        } else {
+            fileName = m_file;
+        }
+        if ( excp->Has(ctx, messageKey).ToChecked() ){
+            v8::String::Utf8Value result(m_engine->isolate(), excp->Get(ctx, messageKey).ToLocalChecked());
+            message = *result;
+        }
+
+        std::string lineNumberStr = lineNumber > 0 ? ":" + std::to_string(lineNumber) : "";
+        THROW_EXCEPTION(Exception, "Uncaught exception: " + message + " at " + fileName + lineNumberStr, Exception::toCode("~Module"));
     }
 
     return retValue;

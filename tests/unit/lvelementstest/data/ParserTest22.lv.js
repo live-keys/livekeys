@@ -16,7 +16,7 @@ export class A extends Element{
                 })(100) : 15
             }.bind(this),
             [
-                [ this, 'yChanged' ]
+                [ this, 'y' ]
             ]
         )
         this.y = true

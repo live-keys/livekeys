@@ -221,6 +221,10 @@ void LvParseTest::instanceIdsTest(){
     parseTestTemplate("ParserTest44");
 }
 
+void LvParseTest::bindingChainTest(){
+    parseTestTemplate("ParserTest45");
+}
+
 void LvParseTest::parseTestTemplate(std::string name){
     std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
     std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");

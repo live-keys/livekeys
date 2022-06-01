@@ -19,13 +19,13 @@ export class ParserTest27 extends mod.A{
             this,
             'b',
             function(){ return mod.B.value}.bind(this),
-            [[ mod.B, 'valueChanged' ]]
+            [[mod,['B','value']]]
         )
         Element.assignPropertyExpression(
             this,
             'c',
             function(){ return mod.C.value}.bind(this),
-            [[ mod.C, 'valueChanged' ]]
+            [[mod,['C','value']]]
         )
     }
 

@@ -27,7 +27,7 @@ export class TodoListItem extends Li{
                 Element.assignPropertyExpression(this,
                     'classes',
                     function(){ return todoListItem.item.done ? "done" : "undone"}.bind(this),
-                    [ [ todoListItem.item, 'doneChanged' ] ]
+                    [[todoListItem,['item','done']]]
                 )
                 Element.assignChildrenAndComplete(this, [
                     (function(parent){
@@ -43,9 +43,7 @@ export class TodoListItem extends Li{
                         Element.assignPropertyExpression(this,
                             'text',
                             function(){ return todoListItem.item.value}.bind(this),
-                            [
-                                [ todoListItem.item, 'valueChanged' ]
-                            ]
+                            [[todoListItem,['item','value']]]
                         )
                         Element.complete(this)
                         return this

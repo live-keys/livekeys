@@ -59,7 +59,7 @@ component default < Element{
 import .plugin1
 import .plugin1.subplugin
 
-instance default Element{
+instance main Element{
     string aUrl: (new A()).url
     string aModule: (new A()).module
     string bUrl: (new B()).url

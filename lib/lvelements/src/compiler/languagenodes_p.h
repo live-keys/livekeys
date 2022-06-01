@@ -20,6 +20,7 @@
 #include <map>
 
 #include "live/utf8.h"
+#include "live/mlnode.h"
 
 #include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
@@ -27,6 +28,8 @@
 #include "languageparser.h"
 
 namespace lv{ namespace el{
+
+class PropertyBindingContainer;
 
 class BaseNode;
 class IdentifierNode;
@@ -65,6 +68,8 @@ public:
         bool        jsImportsEnabled;
         bool        allowUnresolved;
         std::list<std::string> implicitTypes;
+        std::string componentPath;
+        std::string relativePathFromBuild;
 
         static std::string baseComponentName(ConversionContext* ctx);
         static std::string baseComponentImport(ConversionContext* ctx);
@@ -229,6 +234,7 @@ public:
 
     const std::vector<BaseNode*> exports(){ return m_exports; }
     const std::vector<ImportNode*> imports(){ return m_imports; }
+    const std::vector<JsImportNode*> jsImports(){ return m_jsImports; }
     std::map<std::string, std::map<std::string, ImportType> >& importTypes() { return m_importTypes; }
 
     void collectImportTypes(const std::string& source, ConversionContext* ctx = nullptr);
@@ -416,23 +422,23 @@ private:
 
 };
 
-
-
 class PropertyDeclarationNode : public JsBlockNode{
 
     friend class BaseNode;
 
 public:
     PropertyDeclarationNode(const TSNode& node);
+    virtual ~PropertyDeclarationNode();
+
     virtual std::string toString(int indent = 0) const;
     IdentifierNode* type() const{ return m_type; }
     IdentifierNode* name() const{ return m_name; }
     BindableExpressionNode* expression() const{ return m_expression; }
     JsBlockNode* statementBlock() const {return m_statementBlock; }
 
-    void pushToBindings(BaseNode* bn) { m_bindings.push_back(bn); }
-    bool hasBindings() { return m_bindings.size() > 0; }
-    std::vector<BaseNode*>& bindings() { return m_bindings; }
+    void pushToBindings(BaseNode* bn);
+    std::string bindingIdentifiersToString(const std::string& source) const;
+    std::string bindingIdentifiersToJs(const std::string& source) const;
 
     bool hasAssignment(){ return m_expression != nullptr || m_statementBlock != nullptr; }
 
@@ -441,7 +447,7 @@ private:
     IdentifierNode* m_type;
     BindableExpressionNode* m_expression;
     JsBlockNode* m_statementBlock;
-    std::vector<BaseNode*> m_bindings;
+    PropertyBindingContainer* m_bindingContainer;
 };
 
 
@@ -477,20 +483,25 @@ public:
 };
 
 class PropertyAssignmentNode : public JsBlockNode{
+
     friend class BaseNode;
     friend class ComponentDeclarationNode;
+    friend class NewComponentExpressionNode;
+
 public:
     PropertyAssignmentNode(const TSNode& node);
+    virtual ~PropertyAssignmentNode();
     virtual std::string toString(int indent = 0) const;
+
+    void pushToBindings(BaseNode* bn);
+    std::string bindingIdentifiersToString(const std::string& source) const;
+    std::string bindingIdentifiersToJs(const std::string& source) const;
 
 private:
     std::vector<IdentifierNode*> m_property;
-    BindableExpressionNode* m_expression;
-    JsBlockNode*            m_statementBlock;
-    std::vector<BaseNode*> m_bindings;
-
-    friend class BaseNode;
-    friend class NewComponentExpressionNode;
+    BindableExpressionNode*   m_expression;
+    JsBlockNode*              m_statementBlock;
+    PropertyBindingContainer* m_bindingContainer;
 };
 
 class PublicFieldDeclarationNode : public BaseNode{
@@ -640,6 +651,8 @@ public:
 class MemberExpressionNode : public BaseNode{
 public:
     MemberExpressionNode(const TSNode& node) : BaseNode(node, "MemberExpression"){}
+
+    std::vector<std::string> identifierChain(const std::string& source) const;
 };
 
 class SubscriptExpressionNode : public BaseNode{
@@ -699,7 +712,7 @@ private:
 };
 
 
-class ArrowFunctionNode: public BaseNode {
+class ArrowFunctionNode: public JsBlockNode{
     friend class BaseNode;
 public:
     ArrowFunctionNode(const TSNode& node);
