@@ -5,5 +5,4 @@ namespace lv{
 QmlStreamProvider::QmlStreamProvider(){}
 QmlStreamProvider::~QmlStreamProvider(){}
 
-
-}
+}// namespace

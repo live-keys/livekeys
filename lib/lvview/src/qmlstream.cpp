@@ -14,14 +14,20 @@ QmlStream::Observer::~Observer()
 {
 }
 
-QmlStream::JsCallbackObserver::JsCallbackObserver(unsigned int id, QJSValue callback)
+QmlStream::JsCallbackObserver::JsCallbackObserver(unsigned int id, QJSValue callback, QJSValue endCallback)
     : Observer(id, QmlStream::Observer::JsCallback)
     , m_callback(callback)
+    , m_endCallback(endCallback)
 {
 }
 
 void QmlStream::JsCallbackObserver::push(ViewEngine* engine, QObject *object){
     m_callback.call(QJSValueList() << engine->engine()->newQObject(object));
+}
+
+void QmlStream::JsCallbackObserver::close(){
+    if ( m_endCallback.isCallable() )
+        m_endCallback.call();
 }
 
 void QmlStream::JsCallbackObserver::push(ViewEngine*, const QJSValue &value){
@@ -30,10 +36,11 @@ void QmlStream::JsCallbackObserver::push(ViewEngine*, const QJSValue &value){
 
 
 
-QmlStream::CppCallbackObserver::CppCallbackObserver(unsigned int id, QObject *object, QmlStream::CppCallbackObserver::CppCallback cb)
+QmlStream::CppCallbackObserver::CppCallbackObserver(unsigned int id, QObject *object, QmlStream::CppCallbackObserver::CppCallback cb, CppEndCallback ecb)
     : Observer(id, QmlStream::Observer::CppCallback)
     , m_object(object)
     , m_callback(cb)
+    , m_endCallback(ecb)
 {
 }
 
@@ -45,17 +52,23 @@ void QmlStream::CppCallbackObserver::push(ViewEngine *engine, QObject *object){
     m_callback(m_object, engine->engine()->newQObject(object));
 }
 
+void QmlStream::CppCallbackObserver::close(){
+    if ( m_endCallback )
+        m_endCallback(m_object);
+}
+
 QObject *QmlStream::CppCallbackObserver::object(){
     return m_object;
 }
 
-QmlStream::PropertyObserver::PropertyObserver(unsigned int id, QJSValue callback)
+QmlStream::PropertyObserver::PropertyObserver(unsigned int id, QJSValue callback, QJSValue endCallback)
     : Observer(id, QmlStream::Observer::Property)
 {
     QObject* ob = callback.property(0).toQObject();
     QString prop = callback.property(1).toString();
 
     m_callback = QQmlProperty(ob, prop);
+    m_endCallback = endCallback;
 }
 
 void QmlStream::PropertyObserver::push(ViewEngine*, const QJSValue &value){
@@ -66,6 +79,11 @@ void QmlStream::PropertyObserver::push(ViewEngine*, QObject *object){
     m_callback.write(QVariant::fromValue(object));
 }
 
+void QmlStream::PropertyObserver::close(){
+    if ( m_endCallback.isCallable() )
+        m_endCallback.call();
+}
+
 // QmlStream
 // ----------------------------------------------------------------------------
 
@@ -73,9 +91,10 @@ QmlStream::QmlStream(QObject *parent)
     : Shared(parent)
     , m_provider(nullptr)
     , m_idCounter(1)
+    , m_closed(false)
     , m_observers(new std::list<QmlStream::Observer*>())
 {
-    //TODO: Capture engine from component complete
+    //TODO: Require engine at constructor
     m_engine = lv::ViewContext::instance().engine();
 }
 
@@ -83,9 +102,10 @@ QmlStream::QmlStream(QmlStreamProvider *provider, QObject *parent)
     : Shared(parent)
     , m_provider(provider)
     , m_idCounter(1)
+    , m_closed(false)
     , m_observers(new std::list<QmlStream::Observer*>())
 {
-    //TODO: Capture engine from component complete
+    //TODO: Require engine at constructor
     m_engine = lv::ViewContext::instance().engine();
 }
 
@@ -107,8 +127,19 @@ void QmlStream::push(const QJSValue &value){
     }
 }
 
-QmlStream::Observer* QmlStream::forward(QObject *object, std::function<void (QObject *, const QJSValue &)> fn){
-    QmlStream::Observer* observer = new QmlStream::CppCallbackObserver(m_idCounter, object, fn);
+void QmlStream::close(){
+    if ( m_closed )
+        return;
+
+    m_closed = true;
+    for(auto it = m_observers->begin(); it != m_observers->end(); ++it ){
+        QmlStream::Observer* observer = *it;
+        observer->close();
+    }
+}
+
+QmlStream::Observer* QmlStream::forward(QObject* object, QmlStream::CppCallbackObserver::CppCallback fn, QmlStream::CppCallbackObserver::CppEndCallback efn){
+    QmlStream::Observer* observer = new QmlStream::CppCallbackObserver(m_idCounter, object, fn, efn);
     incrementIdCounter();
     m_observers->push_back(observer);
     return observer;
@@ -145,11 +176,20 @@ QmlStreamProvider *QmlStream::provider(){
     return m_provider;
 }
 
-QJSValue QmlStream::forward(const QJSValue &callback){
+QmlStream *QmlStream::fromValue(const QJSValue &val){
+    if ( val.isQObject() ){
+        QObject* resultOb = val.toQObject();
+        QmlStream* stream = qobject_cast<QmlStream*>(resultOb);
+        return stream;
+    }
+    return nullptr;
+}
+
+QJSValue QmlStream::forward(const QJSValue &callback, const QJSValue &endCallback){
     if ( callback.isCallable() ){
-        m_observers->push_back(new QmlStream::JsCallbackObserver(m_idCounter, callback));
+        m_observers->push_back(new QmlStream::JsCallbackObserver(m_idCounter, callback, endCallback.isCallable() ? endCallback : QJSValue()));
     } else if ( callback.isArray() && callback.property("length").toInt() == 2 ){
-        m_observers->push_back(new QmlStream::PropertyObserver(m_idCounter, callback));
+        m_observers->push_back(new QmlStream::PropertyObserver(m_idCounter, callback, endCallback.isCallable() ? endCallback : QJSValue()));
     }
     QJSValue observerId(m_idCounter);
     incrementIdCounter();

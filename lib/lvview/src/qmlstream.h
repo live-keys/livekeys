@@ -35,6 +35,7 @@ public:
 
         virtual void push(ViewEngine* engine, const QJSValue& value) = 0;
         virtual void push(ViewEngine* engine, QObject* object) = 0;
+        virtual void close() = 0;
 
     protected:
         Observer(unsigned int id, Type type) : m_id(id), m_type(type){}
@@ -47,36 +48,43 @@ public:
 private:
     class JsCallbackObserver : public Observer{
     public:
-        JsCallbackObserver(unsigned int id, QJSValue callback);
+        JsCallbackObserver(unsigned int id, QJSValue callback, QJSValue endCallback);
         void push(ViewEngine* engine, const QJSValue& value) override;
         void push(ViewEngine* engine, QObject* object) override;
+        void close() override;
+
     private:
         QJSValue m_callback;
+        QJSValue m_endCallback;
     };
 
     class CppCallbackObserver : public Observer{
     public:
-        typedef std::function<void(QObject*, const QJSValue& val)> CppCallback;
+        typedef std::function<void(QObject*, const QJSValue&)> CppCallback;
+        typedef std::function<void(QObject*)>                  CppEndCallback;
 
-        CppCallbackObserver(unsigned int id, QObject* object, CppCallback cb);
+        CppCallbackObserver(unsigned int id, QObject* object, CppCallback cb, CppEndCallback ecb = nullptr);
         void push(ViewEngine* engine, const QJSValue& value) override;
         void push(ViewEngine* engine, QObject* object) override;
+        void close() override;
         QObject* object();
 
     private:
-        QObject*    m_object;
-        CppCallback m_callback;
+        QObject*       m_object;
+        CppCallback    m_callback;
+        CppEndCallback m_endCallback;
     };
 
     class PropertyObserver : public Observer{
     public:
-        PropertyObserver(unsigned int id, QJSValue callback);
+        PropertyObserver(unsigned int id, QJSValue callback, QJSValue endCallback = QJSValue());
         void push(ViewEngine* engine, const QJSValue& value) override;
         void push(ViewEngine* engine, QObject* object) override;
+        void close() override;
     private:
         QQmlProperty m_callback;
+        QJSValue     m_endCallback;
     };
-
 
 public:
     explicit QmlStream(QObject *parent = nullptr);
@@ -85,15 +93,18 @@ public:
 
     void push(QObject* object);
     void push(const QJSValue& value);
+    void close();
 
-    Observer* forward(QObject* object, std::function<void(QObject*, const QJSValue& val)> fn);
+    Observer* forward(QObject* object, CppCallbackObserver::CppCallback fn, CppCallbackObserver::CppEndCallback efn = nullptr);
     void unsubscribeObject(QObject* object);
     void unsubscribe(Observer* observer);
 
     QmlStreamProvider* provider();
 
+    static QmlStream* fromValue(const QJSValue& val);
+
 public slots:
-    QJSValue forward(const QJSValue& callback);
+    QJSValue forward(const QJSValue& callback, const QJSValue& endCallback = QJSValue());
     bool unsubscribe(const QJSValue& val);
 
 private:
@@ -103,6 +114,7 @@ private:
     QmlStreamProvider* m_provider;
     ViewEngine*        m_engine;
     unsigned int       m_idCounter;
+    bool               m_closed;
     std::list<QmlStream::Observer*>* m_observers;
 };
 
