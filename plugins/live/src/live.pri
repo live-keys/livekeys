@@ -12,8 +12,6 @@ HEADERS += \
     $$PWD/tcplinesocket.h \
     $$PWD/tcplineconnection.h \
     $$PWD/lvliveglobal.h \
-    $$PWD/componentsource.h \
-    $$PWD/qmlsubproject.h \
     $$PWD/qmlfork.h \
     $$PWD/qmlforknode.h \
     $$PWD/remoteline.h \
@@ -39,8 +37,6 @@ SOURCES += \
     $$PWD/tcplinesocket.cpp \
     $$PWD/tcplineconnection.cpp \
     $$PWD/worker.cpp \
-    $$PWD/componentsource.cpp \
-    $$PWD/qmlsubproject.cpp \
     $$PWD/qmlfork.cpp \
     $$PWD/qmlforknode.cpp \
     $$PWD/remotecontainer.cpp \

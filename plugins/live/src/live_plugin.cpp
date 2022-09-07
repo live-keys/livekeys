@@ -37,8 +37,6 @@
 #include "live/settings.h"
 #include "live/visuallogfilter.h"
 
-#include "qmlsubproject.h"
-#include "componentsource.h"
 #include "tcplineconnection.h"
 #include "remotelineresponse.h"
 #include "tcplineserver.h"
@@ -68,7 +66,6 @@ void LivePlugin::registerTypes(const char *uri){
     qmlRegisterType<lv::Worker>(              uri, 1, 0, "Worker");
     qmlRegisterType<lv::QmlFork>(             uri, 1, 0, "Fork");
     qmlRegisterType<lv::QmlForkNode>(         uri, 1, 0, "ForkNode");
-    qmlRegisterType<lv::ComponentSource>(     uri, 1, 0, "ComponentSource");
     qmlRegisterType<lv::RemoteLine>(          uri, 1, 0, "RemoteLine");
     qmlRegisterType<lv::QmlComponentMap>(     uri, 1, 0, "ComponentMap");
     qmlRegisterType<lv::QmlComponentMapData>( uri, 1, 0, "ComponentMapData");
@@ -77,7 +74,6 @@ void LivePlugin::registerTypes(const char *uri){
         uri, 1, 0, "LicenseSettings", "LicenseSettings is available through the settings property.");
 
     qmlRegisterType<lv::TcpLineServer>(         uri, 1, 0, "TcpLineServer");
-    qmlRegisterType<lv::QmlSubproject>(         uri, 1, 0, "Subproject");
     qmlRegisterType<lv::TcpLineConnection>(     uri, 1, 0, "TcpLineConnection");
     qmlRegisterUncreatableType<lv::RemoteLineResponse>(
         uri, 1, 0, "RemoteLineResponse", "RemoteLineResponse is part of RemoteLine.");
