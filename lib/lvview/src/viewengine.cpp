@@ -28,14 +28,15 @@
 #include "live/qmlvisuallog.h"
 #include "live/qmlerror.h"
 
-#include "group.h"
 #include "layer.h"
 #include "windowlayer.h"
 #include "qmlstream.h"
 #include "qmlwritablestream.h"
 #include "qmlclipboard.h"
 #include "qmlprojectinfo.h"
+#include "qmlpromise.h"
 #include "viewengineinterceptor_p.h"
+#include "propertyparserhook_p.h"
 
 #include "private/qqmlcontext_p.h"
 
@@ -112,7 +113,20 @@ const char* languageProgram =
          "}\n"
          "return Language.translate\n"
     "})\n";
-}
+
+const char* propertyReferenceProgram =
+    "(function PropertyReference(path){\n"
+        "this.path = path;\n"
+    "})\n";
+
+const char* prefProgram =
+    "(function(){ "
+        "var path = []; "
+        "for ( var i = 0; i < arguments.length; ++i ) path.push(arguments[i]); "
+        "return new PropertyReference(path); "
+    "})\n";
+
+}// namespace
 
 class ViewEnginePrivate{
 public:
@@ -162,6 +176,12 @@ ViewEngine::ViewEngine(QQmlEngine *engine, LockedFileIOSession::Ptr fileIO, QObj
     QJSValue languageFn = languageConstructor.call(QJSValueList() << QJSValue(QJSValue::NullValue));
     m_engine->globalObject().setProperty("lang", languageFn);
 
+    QJSValue propertyReferenceClass = m_engine->evaluate(propertyReferenceProgram);
+    m_engine->globalObject().setProperty("PropertyReference", propertyReferenceClass);
+
+    QJSValue prefFn = m_engine->evaluate(prefProgram);
+    m_engine->globalObject().setProperty("pref", prefFn);
+
 //    connect(m_engine, &QQmlEngine::quit, QCoreApplication::instance(),
 //                      &QCoreApplication::quit, Qt::QueuedConnection);
 
@@ -188,6 +208,11 @@ ViewEngine::~ViewEngine(){
 /** Displays the errors the engine had previously */
 const QList<QQmlError> &ViewEngine::lastErrors() const{
     return m_lastErrors;
+}
+
+QByteArray ViewEngine::componentSource(const QString &componentPath) const{
+    auto it = m_componentSources.find(componentPath);
+    return it != m_componentSources.end() ? it.value() : QByteArray::fromStdString(m_fileIO->readFromFile(componentPath.toStdString()));
 }
 
 /** Evaluates the piece of code given the filename and line number */
@@ -267,32 +292,6 @@ void ViewEngine::setInterceptor(ViewEngineInterceptor *interceptor){
     m_engine->setNetworkAccessManagerFactory(d->networkInterceptor);
 }
 
-/** Returns the type info for a given meta-object*/
-MetaInfo::Ptr ViewEngine::typeInfo(const QMetaObject *key) const{
-    auto it = m_types.find(key);
-    if ( it == m_types.end() )
-        return MetaInfo::Ptr(nullptr);
-    return it.value();
-}
-
-/** Returns the type info for a given type name */
-MetaInfo::Ptr ViewEngine::typeInfo(const QByteArray &typeName) const{
-    auto it = m_typeNames.find(typeName);
-    if ( it == m_typeNames.end() )
-        return MetaInfo::Ptr(nullptr);
-
-    return m_types[*it];
-}
-
-/** Returns the type info for a given meta-type by extracting the meta-object and calling the appropriate variant of the getter */
-MetaInfo::Ptr ViewEngine::typeInfo(const QMetaType &metaType) const{
-    const QMetaObject* mo = metaType.metaObject();
-    if ( !mo )
-        return MetaInfo::Ptr(nullptr);
-
-    return typeInfo(mo);
-}
-
 ComponentDeclaration ViewEngine::rootDeclaration(QObject *object) const{
     QQmlContext* ctx = qmlContext(object);
     QQmlContextPrivate* pctx = QQmlContextPrivate::get(ctx);
@@ -325,7 +324,6 @@ QString ViewEngine::typeAsPropertyMessage(const QString &typeName, const QString
  */
 void ViewEngine::registerBaseTypes(const char *uri){
     qmlRegisterType<lv::ErrorHandler>(          uri, 1, 0, "ErrorHandler");
-    qmlRegisterType<lv::Group>(                 uri, 1, 0, "Group");
     qmlRegisterType<lv::QmlVariantList>(        uri, 1, 0, "VariantList");
     qmlRegisterType<lv::QmlObjectList>(         uri, 1, 0, "ObjectList");
     qmlRegisterType<lv::QmlVariantListModel>(   uri, 1, 0, "VariantListModel");
@@ -339,6 +337,8 @@ void ViewEngine::registerBaseTypes(const char *uri){
         uri, 1, 0, "Shared", "Shared is of abstract type.");
     qmlRegisterUncreatableType<lv::Layer>(
         uri, 1, 0, "Layer", "Layer is of abstract type.");
+    qmlRegisterUncreatableType<lv::QmlPromise>(
+        uri, 1, 0, "Promise", "Promise can be created via base.PromiseOp.create().");
 
     qmlRegisterUncreatableType<lv::ViewEngine>(
         uri, 1, 0, "LiveEngine",      ViewEngine::typeAsPropertyMessage("LiveEngine", "engine"));
@@ -354,11 +354,6 @@ void ViewEngine::registerBaseTypes(const char *uri){
         uri, 1, 0, "VisualLog",       ViewEngine::typeAsPropertyMessage("VisualLog", "vlog"));
     qmlRegisterUncreatableType<lv::VisualLogBaseModel>(
         uri, 1, 0, "VisualLogBaseModel", "VisualLogBaseModel is of abstract type.");
-}
-
-void ViewEngine::initializeBaseTypes(ViewEngine *engine){
-    MetaInfo::Ptr ti = engine->registerQmlTypeInfo<lv::Group>(nullptr, nullptr, [](){return new Group;}, false);
-    ti->addSerialization(&lv::Group::serialize, &lv::Group::deserialize);
 }
 
 QJSValue ViewEngine::typeDefaultValue(const QString &ti, lv::ViewEngine *engine){
@@ -395,8 +390,7 @@ QJSValue ViewEngine::typeDefaultValue(const QString &ti, lv::ViewEngine *engine)
 }
 
 QString ViewEngine::toErrorString(const QQmlError &error){
-    QString result;
-    result.sprintf(
+    QString result = QString::asprintf(
         "\'%s\':%d,%d %s",
         qPrintable(error.url().toString()),
         error.line(),
@@ -522,6 +516,15 @@ bool ViewEngine::propagateError(const QmlError &error){
         errorHandler = errorHandler->parent();
     }
     return false;
+}
+
+QQmlCustomParser *ViewEngine::createParserHook(
+        const ViewEngine::ParsedPropertyValidator &propertyValidator,
+        const ViewEngine::ParsedPropertyHandler &propertyHandler,
+        const ViewEngine::ParsedChildrenHandler &childrenHandler,
+        const ViewEngine::ParserReadyHandler &readyHandler)
+{
+    return new PropertyParserHook(propertyValidator, propertyHandler, childrenHandler, readyHandler);
 }
 
 /**
@@ -683,6 +686,8 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
     result->component = new QQmlComponent(m_engine, parent);
     result->component->setData(source, QUrl::fromLocalFile(filePath));
 
+    m_componentSources[filePath] = source;
+
     QList<QQmlError> errors = result->component->errors();
     if ( errors.size() ){
         for ( const QQmlError& e : errors ){
@@ -692,6 +697,7 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
     }
 
     if ( !result->component->isReady() ){
+        m_componentSources.remove(filePath);
         result->errors.append(QmlError(
             this,
             CREATE_EXCEPTION(
@@ -702,7 +708,9 @@ ViewEngine::ComponentResult::Ptr ViewEngine::createObject(const QString &filePat
         return result;
     }
 
+
     result->object = result->component->create(context);
+    m_componentSources.remove(filePath);
 
     errors = result->component->errors();
     if ( errors.size() ){

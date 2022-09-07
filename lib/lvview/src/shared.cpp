@@ -38,7 +38,9 @@ Shared::~Shared(){
 }
 
 QJSValue Shared::transfer(const QVariant &v, QJSEngine *engine){
-    if( v.canConvert(QVariant::Map) ){
+    if ( v.isNull() ){
+        return v.isValid() ? QJSValue(QJSValue::NullValue) : QJSValue();
+    } else if( v.canConvert(QVariant::Map) ){
         QJSValue vm = engine->newObject();
         auto qm = v.toMap();
         for ( auto it = qm.begin(); it != qm.end(); ++it ){
@@ -77,12 +79,14 @@ QJSValue Shared::transfer(const QVariant &v, QJSEngine *engine){
 }
 
 QVariant Shared::transfer(const QJSValue &value, QList<Shared *> &shared){
-    if ( value.isQObject() ){
+    if ( value.isNull() ){
+        return value.isUndefined() ? QVariant() : QVariant::fromValue(nullptr);
+    } else if ( value.isQObject() ){
         QObject* ob = value.toQObject();
         Shared* shob = static_cast<Shared*>(ob);
         if ( shob ){
             shared.append(shob);
-            return  QVariant::fromValue(ob);
+            return QVariant::fromValue(ob);
         }
     } else if ( value.isArray() ){
        QJSValueIterator it(value);
@@ -117,11 +121,13 @@ QVariant Shared::transfer(const QJSValue &value, QList<Shared *> &shared){
     return QVariant();
 }
 
+//TODO: Rename to ViewEngine::detachValue() and ViewEngine::toJsValue(...)
 QVariant Shared::transfer(const QVariant &v, QList<Shared *> &shared){
     if ( v.canConvert<QJSValue>()){
         return transfer(v.value<QJSValue>(), shared);
-    }
-    else if( v.canConvert(QVariant::Map) ){
+    } else if ( v.isNull() ){
+        return v;
+    } else if( v.canConvert(QVariant::Map) ){
         QVariantMap vm;
 
         auto qm = v.toMap();
@@ -149,6 +155,8 @@ QVariant Shared::transfer(const QVariant &v, QList<Shared *> &shared){
             if ( sotransfer ){
                 shared.append(sotransfer);
                 return QVariant::fromValue(sotransfer);
+            } else {
+                THROW_EXCEPTION(lv::Exception, Utf8("Cannot transfer object of type \'%\' to another thread.").format(so->metaObject()->className()), Exception::toCode("~Transfer"));
             }
         }
 

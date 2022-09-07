@@ -4,12 +4,15 @@
 #include <QObject>
 #include <QJSValue>
 #include "table.h"
+#include "live/qmlmetaextension.h"
 
 namespace lv{
 
 class LocalTable : public Table{
 
     Q_OBJECT
+
+    META_EXTENSION_BASE(LocalTable, &LocalTable::objectConstructor);
 
 public:
     explicit LocalTable(QObject *parent = nullptr);
@@ -27,6 +30,11 @@ public:
     void updateField(int index, const QJSValue& opt) override;
     void removeField(int index) override;
 
+    static QObject* objectConstructor();
+
+    static void serialize(ViewEngine* ve, const QObject* ob, MLNode& result);
+    static QObject* deserialize(ViewEngine* ve, const MLNode& n);
+
 public slots:
     void readFromFile(const QString& path, const QJSValue& options);
     void writeToFile(const QString& path, const QJSValue& options);
@@ -38,6 +46,10 @@ private:
 
     QList<QList<QString> > m_data;
 };
+
+inline QObject *LocalTable::objectConstructor(){
+    return new LocalTable;
+}
 
 }// namespace
 

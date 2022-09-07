@@ -5,6 +5,7 @@
 #include "live/viewcontext.h"
 #include "live/visuallogqt.h"
 #include "live/shared.h"
+#include "live/packagegraph.h"
 
 #include <QJSEngine>
 #include <QQmlEngine>
@@ -61,6 +62,7 @@ ViewEngine *QmlWorkerPool::WorkerData::engine(){
     if ( !m_engine ){
         m_engine = new ViewEngine(new QQmlEngine, ViewContext::instance().engine()->fileIO());
         m_engine->engine()->installExtensions(QJSEngine::ConsoleExtension);
+        m_engine->setPackageGraph(new PackageGraph);
         QStringList engineImportPaths = m_engine->engine()->importPathList();
 
         engineImportPaths.removeAll(QString::fromStdString(ApplicationContext::instance().applicationPath()));

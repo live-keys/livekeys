@@ -16,6 +16,8 @@
 
 void TablePlugin::registerTypes(const char *uri)
 {
+    lv::QmlMetaExtension::add<lv::LocalTable, lv::MetaSerializableI>(lv::LocalTable::serialize, lv::LocalTable::deserialize);
+
     qmlRegisterType<lv::LocalTable>(  uri, 1, 0, "LocalTable");
     qmlRegisterType<lv::TableRowEach>(uri, 1, 0, "TableRowEach");
     qmlRegisterType<lv::TableGroup>(  uri, 1, 0, "TableGroup");

@@ -14,29 +14,40 @@
 **
 ****************************************************************************/
 
-#include "metainfo.h"
+#include "qmlmetaextension.h"
 #include <QVariant>
+
 #include "live/viewengine.h"
-#include "live/group.h"
+#include "live/exception.h"
 
 namespace lv{
 
-MetaInfo::MetaInfo(const QByteArray &name)
+QmlMetaExtension::I::~I(){
+}
+
+QmlMetaExtension::QmlMetaExtension(const QByteArray &name, QmlMetaExtension::TypeConstructor tc)
     : m_name(name)
-    , m_serialize(nullptr)
-    , m_log(nullptr)
 {
+    m_constructor = tc;
 }
 
-MetaInfo::~MetaInfo(){
+QmlMetaExtension::~QmlMetaExtension(){
 
 }
 
-MetaInfo::Ptr MetaInfo::create(const QByteArray &name){
-    return MetaInfo::Ptr(new MetaInfo(name));
+QmlMetaExtension::Ptr QmlMetaExtension::create(const QByteArray &name, QmlMetaExtension::TypeConstructor tc){
+    return QmlMetaExtension::Ptr(new QmlMetaExtension(name, tc));
 }
 
-void MetaInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &node){
+void QmlMetaExtension::store(QmlMetaExtension::I::Identifier identif, QmlMetaExtension::I *interface){
+    if ( m_interfaces.find(identif) != m_interfaces.end() ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Interface already exists with identifier").format(identif), lv::Exception::toCode("Exists"));
+    }
+    m_interfaces[identif] = interface;
+}
+
+
+void QmlMetaExtension::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &node){
     if ( v.type() == QVariant::UInt ||
          v.type() == QVariant::ULongLong ||
          v.type() == QVariant::Int ||
@@ -51,28 +62,27 @@ void MetaInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &n
         node = v.toBool();
     } else if ( v.value<QObject*>() ){
         QObject* ob = v.value<QObject*>();
+        //TODO
+//        const QMetaObject* mo = ob->metaObject();
+//        if ( mo->inherits(&lv::Group::staticMetaObject))
+//            mo = &lv::Group::staticMetaObject;
+//        QmlMetaInfo::Ptr ti = engine->typeInfo(mo);
+//        if ( ti.isNull() || !ti->isSerializable() ){
+//            node = MLNode(MLNode::Object);
+//            lv::Exception e = CREATE_EXCEPTION(
+//                lv::Exception, std::string("Non serializable object: ") + ob->metaObject()->className(), 0
+//            );
+//            engine->throwError(&e);
+//            return;
+//        }
 
-        const QMetaObject* mo = ob->metaObject();
-        if ( mo->inherits(&lv::Group::staticMetaObject))
-            mo = &lv::Group::staticMetaObject;
+//        MLNode obSerialize;
+//        ti->serialize(engine, ob, obSerialize);
 
-        MetaInfo::Ptr ti = engine->typeInfo(mo);
-        if ( ti.isNull() || !ti->isSerializable() ){
-            node = MLNode(MLNode::Object);
-            lv::Exception e = CREATE_EXCEPTION(
-                lv::Exception, std::string("Non serializable object: ") + ob->metaObject()->className(), 0
-            );
-            engine->throwError(&e);
-            return;
-        }
-
-        MLNode obSerialize;
-        ti->serialize(engine, ob, obSerialize);
-
-        if ( obSerialize.type() == MLNode::Object ){
-            obSerialize["__type"] = ti->name().toStdString();
-        }
-        node = obSerialize;
+//        if ( obSerialize.type() == MLNode::Object ){
+//            obSerialize["__type"] = ti->name().toStdString();
+//        }
+//        node = obSerialize;
 
     } else if ( v.canConvert(QMetaType::QVariantList) ){
 
@@ -81,25 +91,25 @@ void MetaInfo::serializeVariant(ViewEngine *engine, const QVariant &v, MLNode &n
 
         for ( auto it = vl.begin(); it != vl.end(); ++it ){
             MLNode result;
-            MetaInfo::serializeVariant(engine, *it, result);
+            QmlMetaExtension::serializeVariant(engine, *it, result);
             node.append(result);
         }
     }
 }
 
-QVariant MetaInfo::deserializeVariant(ViewEngine *engine, const MLNode &n){
+QVariant QmlMetaExtension::deserializeVariant(ViewEngine *engine, const MLNode &n){
     switch( n.type() ){
     case MLNode::Type::Object: {
         //Object / QVariantMap
         if ( n.hasKey("__type") ){
             QByteArray objectType = QByteArray(n["__type"].asString().c_str());
-            MetaInfo::Ptr ti = engine->typeInfo(objectType);
-            if ( ti.isNull() || !ti->isSerializable() ){
-                THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType .toStdString()+ "\'", 0);
-            }
-
-            QObject* ob = ti->deserialize(engine, n);
-
+            //TODO
+//            QmlMetaInfo::Ptr ti = engine->typeInfo(objectType);
+//            if ( ti.isNull() || !ti->isSerializable() ){
+//                THROW_EXCEPTION(lv::Exception, "Tuple deserialize: Unknown type: \'" + objectType .toStdString()+ "\'", 0);
+//            }
+//            QObject* ob = ti->deserialize(engine, n);
+            QObject* ob = nullptr;
             return QVariant::fromValue(ob);
         }
         break;
@@ -134,5 +144,6 @@ QVariant MetaInfo::deserializeVariant(ViewEngine *engine, const MLNode &n){
     }
     return QVariant();
 }
+
 
 }// namespace

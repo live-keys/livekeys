@@ -140,6 +140,53 @@ void LocalTable::removeField(int /*index*/){
     //TODO
 }
 
+void LocalTable::serialize(ViewEngine *, const QObject *ob, MLNode &n){
+    LocalTable* lo = qobject_cast<LocalTable*>(ob);
+    if ( !lo )
+        return;
+
+    MLNode header = MLNode(MLNode::Array);
+    MLNode data = MLNode(MLNode::Array);
+
+    if ( lo->schema()->totalFields() ){
+        for ( int i = 0; i < lo->schema()->totalFields(); ++i ){
+            header.append(lo->schema()->fieldAt(i)->name().toStdString());
+        }
+    }
+
+    for ( auto it = lo->m_data.begin(); it != lo->m_data.end(); ++it ){
+        const QList<QString>& row = *it;
+        MLNode dataRow = MLNode(MLNode::Array);
+        for ( auto rt = row.begin(); rt != row.end(); ++rt ){
+            const QString& cellStr = *rt;
+            dataRow.append(cellStr.toStdString());
+        }
+        data.append(dataRow);
+    }
+
+    n = MLNode(MLNode::Object);
+    n["header"] = header;
+    n["data"] = data;
+}
+
+QObject *LocalTable::deserialize(ViewEngine *, const MLNode &n){
+    LocalTable* lo = new LocalTable();
+    const MLNode::ArrayType& header = n["header"].asArray();
+    for( size_t i = 0; i < header.size(); ++i ){
+        lo->insertField(static_cast<int>(i), TableField::create(QString::fromStdString(header[i].asString())));
+    }
+    const MLNode::ArrayType& data = n["data"].asArray();
+    for( size_t i = 0; i < data.size(); ++i ){
+        MLNode::ArrayType dataRow = data[i].asArray();
+        QList<QString> row;
+        for ( auto it = dataRow.begin(); it != dataRow.end(); ++it ){
+            row.append(QString::fromStdString(it->asString()));
+        }
+        lo->m_data.append(row);
+    }
+    return lo;
+}
+
 QJSValue LocalTable::rowAt(int index){
     ViewEngine* ve = ViewEngine::grab(this);
     if (!ve)

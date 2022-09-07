@@ -4,11 +4,15 @@ HEADERS += \
     $$PWD/componentdeclaration.h \
     $$PWD/errorhandler.h \
     $$PWD/incubationcontroller.h \
-    $$PWD/metainfo.h \
+    $$PWD/lockedfileiosession.h \
+    $$PWD/propertyparserhook_p.h \
     $$PWD/qmlbuild.h \
     $$PWD/qmlerror.h \
+    $$PWD/qmlfunctionsource.h \
+    $$PWD/qmlmetaextension.h \
     $$PWD/qmlprogram.h \
     $$PWD/qmlprojectinfo.h \
+    $$PWD/qmlsourcelocation.h \
     $$PWD/qmlstreamprovider.h \
     $$PWD/qmlvisuallog.h \
     $$PWD/qmlwritablestream.h \
@@ -37,9 +41,9 @@ HEADERS += \
     $$PWD/windowlayer.h \
     $$PWD/qmlpropertywatcher.h \
     $$PWD/qmlstream.h \
+    $$PWD/qmlpromise.h \
     $$PWD/qmlworkerpool.h \
     $$PWD/qmlworkerpool_p.h \
-    $$PWD/group.h \
     $$PWD/sharedmemoryreadworker.h \
     $$PWD/sharedmemorywriteworker.h
 
@@ -47,11 +51,14 @@ SOURCES += \
     $$PWD/componentdeclaration.cpp \
     $$PWD/errorhandler.cpp \
     $$PWD/incubationcontroller.cpp \
-    $$PWD/metainfo.cpp \
+    $$PWD/propertyparserhook.cpp \
     $$PWD/qmlbuild.cpp \
     $$PWD/qmlerror.cpp \
+    $$PWD/qmlfunctionsource.cpp \
+    $$PWD/qmlmetaextension.cpp \
     $$PWD/qmlprogram.cpp \
     $$PWD/qmlprojectinfo.cpp \
+    $$PWD/qmlsourcelocation.cpp \
     $$PWD/qmlstreamprovider.cpp \
     $$PWD/qmlvisuallog.cpp \
     $$PWD/qmlwritablestream.cpp \
@@ -65,8 +72,9 @@ SOURCES += \
     $$PWD/mlnodetoqml.cpp \
     $$PWD/viewcontext.cpp \
     $$PWD/viewengine.cpp \
+    $$PWD/qmlpromise.cpp \
     $$PWD/memory.cpp \
-    $$PWD/group.cpp \
+    $$PWD/lockedfileiosession.cpp \
     $$PWD/shared.cpp \
     $$PWD/qmlvariantlist.cpp \
     $$PWD/qmlvariantlistmodel.cpp \

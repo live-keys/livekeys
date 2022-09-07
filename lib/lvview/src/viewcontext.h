@@ -26,12 +26,14 @@ public:
     ViewEngine* engine();
     Settings* settings();
     Memory* memory();
+    QString appDataPath();
 
 private:
     ViewContext(ViewEngine* engine, Settings* settings, lv::Memory *memory);
 
     static QScopedPointer<ViewContext> m_instance;
 
+    QString     m_appDataPath;
     ViewEngine* m_engine;
     Settings*   m_settings;
     Memory*     m_memory;

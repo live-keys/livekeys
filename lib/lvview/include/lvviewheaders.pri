@@ -4,10 +4,14 @@ HEADERS += \
     $$PWD/live/componentdeclaration.h \
     $$PWD/live/errorhandler.h \
     $$PWD/live/incubationcontroller.h \
-    $$PWD/live/metainfo.h \
+    $$PWD/live/lockedfileiosession.h \
     $$PWD/live/qmlbuild.h \
     $$PWD/live/qmlerror.h \
+    $$PWD/live/qmlfunctionsource.h \
+    $$PWD/live/qmlmetaextension.h \
     $$PWD/live/qmlprogram.h \
+    $$PWD/live/qmlpromise.h \
+    $$PWD/live/qmlsourcelocation.h \
     $$PWD/live/qmlstreamprovider.h \
     $$PWD/live/qmlvisuallog.h \
     $$PWD/live/qmlwritablestream.h \
@@ -29,7 +33,6 @@ HEADERS += \
     $$PWD/live/linemessage.h \
     $$PWD/live/linecapture.h \
     $$PWD/live/qmlworkerpool.h \
-    $$PWD/live/group.h \
     $$PWD/live/layer.h \
     $$PWD/live/windowlayer.h \
     $$PWD/live/qmlpropertywatcher.h \

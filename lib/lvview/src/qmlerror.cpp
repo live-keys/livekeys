@@ -83,7 +83,7 @@ void QmlError::initializeFromException(const Exception &e, QObject *object){
         QJSValue stackTrace = m_engine->engine()->newArray(static_cast<quint32>(st->size()));
         quint32 i = 0;
         for ( auto it = st->begin(); it != st->end(); ++it ){
-            stackTrace.setProperty(i++, QString::fromStdString(it->functionName()) + "(" + it->fileName().c_str() + ":" + QString::number(it->line()) + ")");
+            stackTrace.setProperty(i++, QString::fromStdString(it->functionName().data()) + "(" + it->fileName().data().c_str() + ":" + QString::number(it->line()) + ")");
         }
         assignCStackTrace(stackTrace);
     }

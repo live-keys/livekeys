@@ -6,6 +6,8 @@
 
 #include <QQmlEngine>
 #include <QQmlContext>
+#include <QStandardPaths>
+#include <QDir>
 
 namespace lv{
 
@@ -26,6 +28,28 @@ void ViewContext::initFromEngine(QQmlEngine *engine){
         THROW_EXCEPTION(lv::Exception, "Failed to load properties from context", 2);
 
     m_instance.reset(new ViewContext(e, s, m));
+}
+
+/**
+ * Returns the AppData path
+ *
+ * Depending on the platform, this can be:
+ *  - Windows %APPDATA%/LiveKeys
+ *  - macOS $HOME/Library/Application Support/LiveKeys
+ *  - Linux $HOME/.config/LiveKeys
+ */
+QString ViewContext::appDataPath(){
+    if ( m_appDataPath.isEmpty() ){
+        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
+        QDir pathDir(path);
+        if ( !pathDir.exists() ){
+            if ( !QDir().mkpath(path) ){
+                THROW_EXCEPTION(lv::Exception, "Failed to create directory: " + path.toStdString(), lv::Exception::toCode("~dir"));
+            }
+        }
+        m_appDataPath = path;
+    }
+    return m_appDataPath;
 }
 
 ViewContext::ViewContext(ViewEngine *engine, Settings *settings, Memory* memory)

@@ -1,5 +1,6 @@
 #include "viewengineinterceptor.h"
 #include "viewengineinterceptor_p.h"
+#include "live/visuallogqt.h"
 
 namespace lv{
 
@@ -56,9 +57,9 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
 
                 try{
                     if ( Module::existsIn(localPath.toStdString() ) ){
-                        Module::Ptr plugin = m_engine->packageGraph()->loadModule(partsConverted);
-                        if ( plugin != nullptr ){
-                            return QUrl::fromLocalFile(QString::fromStdString(plugin->path() + "/qmldir"));
+                        Module::Ptr module = m_engine->packageGraph()->loadModule(partsConverted);
+                        if ( module != nullptr ){
+                            return QUrl::fromLocalFile(QString::fromStdString(module->path() + "/qmldir"));
                         }
                     }
                 } catch ( lv::Exception& ){}

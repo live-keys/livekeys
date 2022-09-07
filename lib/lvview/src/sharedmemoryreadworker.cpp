@@ -11,8 +11,8 @@ namespace lv{
 
 SharedMemoryReadWorker::SharedMemoryReadWorker(const QString &sharedMemoryKey, QObject *parent)
     : QThread(parent)
-    , m_memory(sharedMemoryKey, this)
     , m_isReady(false)
+    , m_memory(sharedMemoryKey, this)
 {
     m_lineCapture.onMessage(&SharedMemoryReadWorker::receiveMessage, this);
     m_lineCapture.onError([this](int code, const std::string& errorString){

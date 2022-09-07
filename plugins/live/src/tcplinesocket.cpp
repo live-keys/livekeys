@@ -19,7 +19,7 @@
 #include "live/exception.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
-#include "live/metainfo.h"
+#include "live/qmlmetaextension.h"
 #include "live/visuallogqt.h"
 
 #include "remotelineresponse.h"
@@ -116,7 +116,7 @@ void TcpLineSocket::onMessage(const LineMessage &message){
             for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
                 m_post->insert(
                     QByteArray::fromStdString(it.key().c_str()),
-                    MetaInfo::deserializeVariant(engine, it.value())
+                    QmlMetaExtension::deserializeVariant(engine, it.value())
                 );
             }
         } catch ( Exception& e ){
@@ -151,7 +151,7 @@ void TcpLineSocket::responseValueChanged(const QString &key, const QVariant &val
     MLNode n(MLNode::Object);
 
     MLNode result;
-    MetaInfo::serializeVariant(ViewContext::instance().engine(), value, result);
+    QmlMetaExtension::serializeVariant(ViewContext::instance().engine(), value, result);
 
     n[key.toStdString()] = result;
 

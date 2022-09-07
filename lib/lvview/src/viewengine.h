@@ -20,15 +20,14 @@
 #include <QObject>
 #include <QJSValue>
 #include <QMap>
-#include <QLinkedList>
 #include <functional>
 
 #include "live/lvviewglobal.h"
 #include "live/exception.h"
-#include "live/metainfo.h"
 #include "live/mlnode.h"
 #include "live/qmlerror.h"
 #include "live/lockedfileiosession.h"
+#include "live/qmlsourcelocation.h"
 
 class QQmlEngine;
 class QQmlError;
@@ -45,6 +44,7 @@ class ComponentDeclaration;
 class IncubationController;
 class QmlVisualLog;
 class ViewEngineInterceptor;
+class PropertyParserHook;
 
 class LV_VIEW_EXPORT FatalException : public lv::Exception{
 
@@ -99,6 +99,11 @@ public:
         ComponentResult& operator=(const ComponentResult&);
     };
 
+    typedef std::function<bool(QmlSourceLocation,QmlSourceLocation,const QString&)> ParsedPropertyValidator;
+    typedef std::function<void(ViewEngine*,QObject*,const QByteArray&,QmlSourceLocation,QmlSourceLocation,const QString&,const QString&)> ParsedPropertyHandler;
+    typedef std::function<void(ViewEngine*,QObject*,const QByteArray&,const QList<QmlSourceLocation>&)> ParsedChildrenHandler;
+    typedef std::function<void(ViewEngine*,QObject*)> ParserReadyHandler;
+
 public:
     explicit ViewEngine(QQmlEngine* engine, LockedFileIOSession::Ptr fileIO, QObject *parent = nullptr);
     ~ViewEngine();
@@ -110,6 +115,8 @@ public:
     Memory* memory();
 
     const QList<QQmlError>& lastErrors() const;
+
+    QByteArray componentSource(const QString& component) const;
 
     QQmlEngine* engine();
     QMutex* engineMutex();
@@ -125,16 +132,16 @@ public:
 
     void setInterceptor(ViewEngineInterceptor* interceptor);
 
-    template<typename T> MetaInfo::Ptr registerQmlTypeInfo(
-        const std::function<void(const T&, MLNode&)>& serializeFunction,
-        const std::function<void(const MLNode&, T&)>& deserializeFunction,
-        const std::function<QObject*()>& constructorFunction,
-        bool canLog
+    template<typename T> static int registerPropertyParserType(
+        const char* uri,
+        int major,
+        int minor,
+        const char* name,
+        const ParsedPropertyValidator& propertyValidator = nullptr,
+        const ParsedPropertyHandler& propertyHandler = nullptr,
+        const ParsedChildrenHandler& childrenHandler = nullptr,
+        const ParserReadyHandler& readyHandler = nullptr
     );
-
-    MetaInfo::Ptr typeInfo(const QMetaObject *type) const;
-    MetaInfo::Ptr typeInfo(const QByteArray& typeName) const;
-    MetaInfo::Ptr typeInfo(const QMetaType& metaType) const;
 
     ComponentDeclaration rootDeclaration(QObject* object) const;
 
@@ -213,6 +220,13 @@ private:
     void storeError(const QmlError& error);
     bool propagateError(const QmlError &error);
 
+    static QQmlCustomParser* createParserHook(
+        const ParsedPropertyValidator& propertyValidator,
+        const ParsedPropertyHandler& propertyHandler,
+        const ParsedChildrenHandler& childrenHandler,
+        const ParserReadyHandler& readyHandler
+    );
+
     Q_DECLARE_PRIVATE(ViewEngine)
     QScopedPointer<ViewEnginePrivate> d_ptr;
 
@@ -225,13 +239,12 @@ private:
 
     LockedFileIOSession::Ptr m_fileIO;
 
+    QMap<QString, QByteArray>     m_componentSources;
+
     QList<QQmlError>              m_lastErrors;
     int                           m_errorCounter;
     QMap<QObject*, ErrorHandler*> m_errorHandlers;
     QMap<QString,  QmlError>      m_errorObjects;
-
-    QHash<const QMetaObject*, MetaInfo::Ptr> m_types;
-    QHash<QString, const QMetaObject*>       m_typeNames;
 
     QmlVisualLog* m_logger;
 
@@ -239,27 +252,24 @@ private:
     bool        m_isLoading;
 };
 
-/**
- * \brief Allows the engine to register info about a type
- *
- * Store a constructor, serialization functions and a logging flag for this type.
- */
 template<typename T>
-MetaInfo::Ptr ViewEngine::registerQmlTypeInfo(
-        const std::function<void(const T&, MLNode&)>& serializeFunction,
-        const std::function<void(const MLNode&, T&)>& deserializeFunction,
-        const std::function<QObject*()>& constructorFunction,
-        bool canLog)
-{
-    MetaInfo::Ptr t = MetaInfo::create(T::staticMetaObject.className());
-    t->addSerialization<T>(serializeFunction, deserializeFunction);
-    t->addConstructor(constructorFunction);
-    if ( canLog )
-        t->addLogging<T>();
-    m_types[&T::staticMetaObject] = t;
-    m_typeNames[T::staticMetaObject.className()] = &T::staticMetaObject;
-
-    return t;
+int ViewEngine::registerPropertyParserType(
+        const char* uri,
+        int major,
+        int minor,
+        const char* name,
+        const ViewEngine::ParsedPropertyValidator& propertyValidator,
+        const ViewEngine::ParsedPropertyHandler& propertyHandler,
+        const ViewEngine::ParsedChildrenHandler& childrenHandler,
+        const ViewEngine::ParserReadyHandler& readyHandler
+){
+    return qmlRegisterCustomType<T>(
+        uri,
+        major,
+        minor,
+        name,
+        ViewEngine::createParserHook(propertyValidator, propertyHandler,childrenHandler,readyHandler)
+    );
 }
 
 inline bool ViewEngine::isLoading() const{
