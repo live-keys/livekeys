@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "testrunner.h"
-#include "live/lockedfileiosession.h"
+#include "live/fileio.h"
 
 class LvParseTest : public QObject{
 
@@ -66,8 +66,8 @@ private slots:
 private:
     void parseTestTemplate(std::string name);
 
-    lv::LockedFileIOSession::Ptr m_fileSession;
-    std::string                  m_scriptPath;
+    lv::FileIO*  m_fileIO;
+    std::string  m_scriptPath;
 };
 
 #endif // LVPARSETEST_H

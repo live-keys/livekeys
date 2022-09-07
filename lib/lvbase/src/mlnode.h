@@ -17,12 +17,11 @@
 #define LVMLNODE_H
 
 #include "live/exception.h"
+#include "live/bytebuffer.h"
 
 #include <map>
 #include <sstream>
 #include <initializer_list>
-
-class QByteArray;
 
 namespace lv{
 
@@ -101,35 +100,10 @@ public:
     typedef std::vector<MLNode>          ArrayType;
     /** Map of string-MLNode pairs */
     typedef std::map<StringType, MLNode> ObjectType;
-    /** Byte type i.e. unsigned char */
-    typedef unsigned char                ByteType;
-
-    // MLNode::BytesType
-    // -----------------
-
-    class LV_BASE_EXPORT BytesType{
-
-    public:
-        BytesType(unsigned char* data, size_t size);
-        BytesType(const BytesType& other);
-        BytesType();
-        ~BytesType();
-
-        BytesType& operator=(const BytesType& other);
-        bool operator == (const BytesType& other) const;
-
-        QByteArray toBase64();
-        StringType toBase64String();
-        static BytesType fromBase64(const StringType& str);
-
-        ByteType* data();
-        size_t size() const;
-
-    private:
-        ByteType* m_data;
-        size_t    m_size;
-        int*      m_ref;
-    };
+    /** Byte type i.e. char */
+    typedef char                         ByteType;
+    /** BytesType */
+    typedef ByteBuffer                   BytesType;
 
     // MLNode::IteratorValue
     // ---------------------

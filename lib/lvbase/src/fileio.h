@@ -13,8 +13,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVFILEIOINTERFACE_H
-#define LVFILEIOINTERFACE_H
+#ifndef LVFILEIO_H
+#define LVFILEIO_H
 
 #include "live/lvbaseglobal.h"
 #include <string>
@@ -46,4 +46,4 @@ public:
 
 }// namespace
 
-#endif // FILEIOINTERFACE_H
+#endif // LVFILEIO_H

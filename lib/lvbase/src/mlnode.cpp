@@ -16,7 +16,6 @@
 #include "live/mlnode.h"
 #include "live/visuallog.h"
 #include "assert.h"
-#include <QByteArray>
 
 namespace lv{
 
@@ -139,141 +138,7 @@ namespace lv{
 */
 
 
-// MLNode::BytesType
-// ----------------------------------------------------------------------------
 
-/**
- * \class lv::MLNode::BytesType
- * \brief Internal type strongly related to MLNode, as one of the types.
- *
- * \ingroup lvbase
- */
-
-/**
- * \brief Constructor from data
- *
- * Params are an array of unsigned chars and its size, both copied. A reference counter is included in order
- * to implement shallow copies of this object.
- */
-MLNode::BytesType::BytesType(unsigned char *data, size_t size)
-    : m_data(new unsigned char[size])
-    , m_size(size)
-    , m_ref(new int)
-{
-    ++(*m_ref);
-    memcpy((void*)m_data, (void*)data, size);
-}
-
-/**
- * \brief Copy constructor of BytesType
- *
- * Creates only a shallow copy by copying pointers and incrementing the reference counter.
- */
-MLNode::BytesType::BytesType(const MLNode::BytesType &other)
-    : m_data(other.m_data)
-    , m_size(other.m_size)
-    , m_ref(other.m_ref)
-{
-    ++(*m_ref);
-}
-
-/**
- * \brief Default constructor of BytesType
- *
- * Initializes the object with zeroes.
- */
-MLNode::BytesType::BytesType()
-    : m_data(0)
-    , m_size(0)
-    , m_ref(new int)
-{
-    ++(*m_ref);
-}
-
-/**
- * \brief Destructor of BytesType
- *
- * We decrement the ref counter. If the ref counter is zero, we delete the pointers.
- */
-MLNode::BytesType::~BytesType(){
-    --(*m_ref);
-    if ( *m_ref == 0 ){
-        delete m_ref;
-        delete[] m_data;
-    }
-}
-
-/**
- * \brief Assignment operator for BytesType
- *
- * Reference counters are updated, and the pointers are copied from one to the other object.
- */
-MLNode::BytesType &MLNode::BytesType::operator=(const MLNode::BytesType &other){
-    if ( this != &other ){
-        --(*m_ref);
-        if ( *m_ref == 0 ){
-            delete[] m_data;
-            delete m_ref;
-        }
-
-        m_data = other.m_data;
-        m_size = other.m_size;
-        m_ref  = other.m_ref;
-        ++(*m_ref);
-    }
-    return *this;
-}
-
-/**
- * @brief Equals relational operator for BytesType
- *
- * Compares the respective pointers of two objects to check if they're identical.
- * Shallow comparison only.
- */
-bool MLNode::BytesType::operator ==(const MLNode::BytesType &other) const{
-    return (m_data == other.m_data && m_ref == other.m_ref && m_size == other.m_size);
-}
-
-/**
- * \brief Returns a base64 string representation of the BytesType
- */
-MLNode::StringType MLNode::BytesType::toBase64String(){
-    return MLNode::StringType(QByteArray::fromRawData(
-        reinterpret_cast<const char*>(m_data), static_cast<int>(m_size)).toBase64().data()
-    );
-}
-
-/**
- * \brief Returns a byte array base64 representation of BytesType object
- */
-QByteArray MLNode::BytesType::toBase64(){
-    return QByteArray::fromRawData(reinterpret_cast<const char*>(m_data), static_cast<int>(m_size)).toBase64();
-}
-
-/**
- * \brief Converts given string to BytesType
- */
-MLNode::BytesType MLNode::BytesType::fromBase64(const MLNode::StringType &str){
-    QByteArray result = QByteArray::fromBase64(QByteArray::fromRawData(str.c_str(), static_cast<int>(str.size())));
-    return MLNode::BytesType(reinterpret_cast<MLNode::ByteType*>(result.data()), result.size());
-}
-
-/**
- * \brief Returns the actual data array
- *
- * This data array contains unsigned chars.
- */
-MLNode::ByteType *MLNode::BytesType::data(){
-    return m_data;
-}
-
-/**
- * \brief Returns the size of the BytesType array
- */
-
-size_t MLNode::BytesType::size() const{
-    return m_size;
-}
 
 // MLNode::Iterator
 // ----------------------------------------------------------------------------
@@ -1333,9 +1198,8 @@ void MLNode::toStringImpl(std::ostream &o, int indent, int indentStep) const{
     case Type::Float:
         o << m_value.asFloat;
         return;
-    case Type::Bytes:
-    {
-        QByteArray b64 = m_value.asBytes->toBase64();
+    case Type::Bytes:{
+        ByteBuffer b64 = ByteBuffer::encodeBase64(*m_value.asBytes);
         o << StringType("\"") << b64.data() << "\"";
     }
         return;
@@ -1491,7 +1355,7 @@ MLNode::BytesType MLNode::asBytes() const{
     if ( m_type == Type::Bytes ){
         return *m_value.asBytes;
     } else if ( m_type == Type::String ){
-        return MLNode::BytesType::fromBase64(*m_value.asString);
+        return MLNode::BytesType::decodeBase64(m_value.asString->c_str(), m_value.asString->size());
     } else
         THROW_EXCEPTION(InvalidMLTypeException, "Node is not of bytes type.", 0);
 }

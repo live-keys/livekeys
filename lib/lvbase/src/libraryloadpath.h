@@ -30,7 +30,7 @@ public:
     static void addRecursive(const std::string& path, const std::string& linkPath);
 
 private:
-    static void addImpl(const QString& path, const QString& , bool recursive = false);
+    static void addImpl(const std::string& path, const std::string& , bool recursive = false);
 
 };
 

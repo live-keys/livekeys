@@ -18,7 +18,7 @@
 #include "live/modulecontext.h"
 #include "live/exception.h"
 #include "live/fileio.h"
-#include <QFile>
+#include "live/path.h"
 
 #ifdef BUILD_ELEMENTS_ENGINE
 #include "live/elements/engine.h"
@@ -221,11 +221,11 @@ void ElementsModule::compile(){
     std::string moduleBuildPath = m_d->compiler->moduleBuildPath(m_d->module);
 
     for ( auto it = assets.begin(); it != assets.end(); ++it ){
-        QString assetPath = QString::fromStdString(m_d->module->path() + "/" + *it);
-        QString resultPath = QString::fromStdString(moduleBuildPath + "/" + *it);
-        if (QFile::exists(resultPath))
-            QFile::remove(resultPath);
-        QFile::copy(assetPath, resultPath);
+        std::string assetPath = Path::join(m_d->module->path(), *it);
+        std::string resultPath = Path::join(moduleBuildPath, *it);
+        if (Path::exists(resultPath))
+            Path::remove(resultPath);
+        Path::copyFile(assetPath, resultPath, Path::OverwriteExisting);
     }
 
     m_d->isCompiled = true;

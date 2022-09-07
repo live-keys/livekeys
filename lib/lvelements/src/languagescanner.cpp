@@ -14,12 +14,13 @@
 ****************************************************************************/
 
 #include "languagescanner.h"
+#include "live/fileio.h"
 #include "live/modulecontext.h"
 #include "live/elements/parseddocument.h"
 
 namespace lv{ namespace el{
 
-LanguageScanner::LanguageScanner(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io)
+LanguageScanner::LanguageScanner(LanguageParser::Ptr parser, FileIOInterface* io)
     : m_packageGraph(new PackageGraph)
     , m_parser(parser)
     , m_io(io)
@@ -42,7 +43,7 @@ void LanguageScanner::resolveModule(ModuleInfo::Ptr module){
 LanguageScanner::~LanguageScanner(){
 }
 
-LanguageScanner::Ptr LanguageScanner::create(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io){
+LanguageScanner::Ptr LanguageScanner::create(LanguageParser::Ptr parser, FileIOInterface* io){
     return LanguageScanner::Ptr(new LanguageScanner(parser, io));
 }
 

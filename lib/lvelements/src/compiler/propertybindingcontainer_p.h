@@ -2,6 +2,7 @@
 #define LVPROPERTYBINDINGCONTAINER_H
 
 #include <vector>
+#include <functional>
 #include "live/utf8.h"
 
 namespace lv{ namespace el{

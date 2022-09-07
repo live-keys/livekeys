@@ -20,7 +20,7 @@
 #include "live/elements/languageinfo.h"
 #include "live/elements/compiler/languageparser.h"
 #include "live/packagegraph.h"
-#include "live/lockedfileiosession.h"
+#include "live/fileio.h"
 
 #include <memory>
 #include <functional>
@@ -36,7 +36,7 @@ public:
 public:
     ~LanguageScanner();
 
-    static LanguageScanner::Ptr create(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io);
+    static LanguageScanner::Ptr create(LanguageParser::Ptr parser, FileIOInterface* io);
 
     ModuleInfo::Ptr parseModule(const std::string& importUri);
     void onModuleReady(const std::function<void(ModuleInfo::ConstPtr)> callback);
@@ -53,7 +53,7 @@ public:
     const std::vector<std::string>& packageImportPaths() const;
 
 private:
-    LanguageScanner(LanguageParser::Ptr parser, LockedFileIOSession::Ptr io);
+    LanguageScanner(LanguageParser::Ptr parser, FileIOInterface *io);
     DISABLE_COPY(LanguageScanner);
 
     void resolveModule(ModuleInfo::Ptr module);
@@ -64,8 +64,8 @@ private:
     std::map<std::string, ModuleInfo::ConstPtr> m_loadedModules;
     std::function<void(ModuleInfo::ConstPtr)>   m_onModuleReady;
 
-    LanguageParser::Ptr                                 m_parser;
-    LockedFileIOSession::Ptr                    m_io;
+    LanguageParser::Ptr                         m_parser;
+    FileIOInterface*                            m_io;
 };
 
 inline void LanguageScanner::onModuleReady(const std::function<void(ModuleInfo::ConstPtr)> callback){

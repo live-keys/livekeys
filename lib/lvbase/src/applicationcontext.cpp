@@ -17,12 +17,6 @@
 #include "live/exception.h"
 #include "live/mlnode.h"
 
-#include "librarytable.h"
-
-#include <QCoreApplication>
-#include <QStandardPaths>
-#include <QDir>
-
 namespace lv{
 
 /**
@@ -54,8 +48,6 @@ public:
 
     MLNode      defaults;
 
-    LibraryTable* libraries;
-
     std::vector<std::string> scriptArguments;
 };
 
@@ -65,7 +57,6 @@ std::unique_ptr<ApplicationContext> ApplicationContextPrivate::ApplicationContex
  * Default destructor
  */
 ApplicationContext::~ApplicationContext(){
-    delete m_d->libraries;
     delete m_d;
 }
 
@@ -80,19 +71,17 @@ ApplicationContext::ApplicationContext(const lv::MLNode &defaults)
     : m_d(new ApplicationContextPrivate)
 {
     m_d->defaults = defaults;
-    m_d->libraries = new LibraryTable;
     initializePaths();
 }
 
 void ApplicationContext::initializePaths(){
 
     m_d->applicationFilePath = applicationFilePathImpl();
-    QString applicationFilePath = QString::fromStdString(m_d->applicationFilePath);
 
-#ifdef Q_OS_DARWIN
-    m_d->applicationPath = QDir(QFileInfo(applicationFilePath).path() + "/..").absolutePath().toStdString();
-    m_d->executablePath = QDir(QFileInfo(applicationFilePath).path()).absolutePath().toStdString();
-    m_d->releasePath = QDir(QFileInfo(applicationFilePath).path() + "/../../..").absolutePath().toStdString();
+#if defined(__APPLE__)
+    m_d->applicationPath = Path::resolve(Path::parent(m_d->applicationFilePath) + "/..");
+    m_d->executablePath = Path::resolve(Path::parent(m_d->applicationFilePath));
+    m_d->releasePath = Path::resolve(Path::parent(m_d->applicationFilePath) + "/../../..");
     m_d->linkPath = applicationPath() + "/Link";
     m_d->pluginPath = applicationPath() + "/PlugIns";
     m_d->externalPath = applicationPath() + "/External";
@@ -101,9 +90,9 @@ void ApplicationContext::initializePaths(){
     m_d->developmentPath = applicationPath() + "/Dev";
     m_d->configPath = applicationPath() + "/config";
 #else
-    m_d->applicationPath = QFileInfo(applicationFilePath).path().toStdString();
-    m_d->executablePath = QFileInfo(applicationFilePath).path().toStdString();
-    m_d->releasePath = QFileInfo(applicationFilePath).path().toStdString();
+    m_d->applicationPath = Path::parent(m_d->applicationFilePath);
+    m_d->executablePath = Path::parent(m_d->applicationFilePath);
+    m_d->releasePath = Path::parent(m_d->applicationFilePath);
     m_d->linkPath = applicationPath() + "/link";
     m_d->pluginPath = applicationPath() + "/plugins";
     m_d->docsPath = applicationPath() + "/docs";
@@ -172,28 +161,6 @@ const std::string &ApplicationContext::configPath(){
 }
 
 /**
- * Returns the AppData path
- *
- * Depending on the platform, this can be:
- *  - Windows %APPDATA%/LiveKeys
- *  - macOS $HOME/Library/Application Support/LiveKeys
- *  - Linux $HOME/.config/LiveKeys
- */
-const std::string &ApplicationContext::appDataPath(){
-    if ( m_d->appDataPath.empty() ){
-        QString path = QStandardPaths::writableLocation(QStandardPaths::AppDataLocation);
-        QDir pathDir(path);
-        if ( !pathDir.exists() ){
-            if ( !QDir().mkpath(path) ){
-                THROW_EXCEPTION(lv::Exception, "Failed to create directory: " + path.toStdString(), lv::Exception::toCode("~dir"));
-            }
-        }
-        m_d->appDataPath = path.toStdString();
-    }
-    return m_d->appDataPath;
-}
-
-/**
  * \brief Returns the startup configuration for Livekeys
  */
 const MLNode &ApplicationContext::startupConfiguration(){
@@ -206,10 +173,6 @@ void ApplicationContext::setScriptArguments(const std::vector<std::string> &args
 
 const std::vector<std::string> ApplicationContext::scriptArguments() const{
     return m_d->scriptArguments;
-}
-
-LibraryTable *ApplicationContext::libraries(){
-    return m_d->libraries;
 }
 
 /** Executable path getter */

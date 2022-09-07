@@ -26,7 +26,6 @@ namespace lv{
 
 class MLNode;
 class Settings;
-class LibraryTable;
 
 class ApplicationContextPrivate;
 
@@ -49,14 +48,11 @@ public:
     const std::string& librariesPath();
     const std::string& developmentPath();
     const std::string& configPath();
-    const std::string& appDataPath();
 
     const MLNode& startupConfiguration();
 
     void setScriptArguments(const std::vector<std::string>& args);
     const std::vector<std::string> scriptArguments() const;
-
-    LibraryTable* libraries();
 
 private:
     ApplicationContext(const MLNode& defaults);

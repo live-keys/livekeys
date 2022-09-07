@@ -16,22 +16,19 @@
 #include "module.h"
 #include "modulecontext.h"
 
-#include "lockedfileiosession.h"
 #include "live/mlnodetojson.h"
 #include "live/exception.h"
 #include "live/package.h"
 #include "live/packagegraph.h"
 #include "live/palettecontainer.h"
 #include "live/visuallog.h"
+#include "live/path.h"
 #include <list>
 #include <map>
 
 #include <fstream>
 #include <istream>
 #include <sstream>
-
-#include <QDir>
-#include <QFileInfo>
 
 
 /**
@@ -67,30 +64,26 @@ Module::~Module(){
 
 /** Checks if live.module.json exists in the given path */
 bool Module::existsIn(const std::string &path){
-    QDir d(QString::fromStdString(path));
-    if ( !d.exists() )
-         return false;
-
-    QFileInfo finfo(d.path() + "/"  + QString(Module::fileName));
-    return finfo.exists();
+    if ( !Path::exists(path) )
+        return false;
+    return Path::exists(Path::join(path, Module::fileName));
 }
 
 /** Creates module from a given path */
 Module::Ptr Module::createFromPath(const std::string &path){
-    QString modulePath = QString::fromStdString(path);
-    QString moduleDirPath;
+    std::string modulePath = path;
+    std::string moduleDirPath;
 
-    QFileInfo finfo(modulePath);
-    if ( finfo.isDir() ){
-        modulePath = finfo.filePath() + "/" + QString(Module::fileName);
-        moduleDirPath = finfo.filePath();
+    if ( Path::isDir(modulePath) ){
+        moduleDirPath = Path::resolve(modulePath);
+        modulePath    = Path::join(moduleDirPath, Module::fileName);
     } else {
-        moduleDirPath = finfo.path();
+        moduleDirPath = Path::parent(modulePath);
     }
 
-    std::ifstream instream(modulePath.toStdString(), std::ifstream::in | std::ifstream::binary);
+    std::ifstream instream(modulePath, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
-        THROW_EXCEPTION(lv::Exception, std::string("Cannot open file: ") + path, 1);
+        THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: %").format(path), 1);
     }
 
     instream.seekg(0, std::ios::end);
@@ -102,30 +95,27 @@ Module::Ptr Module::createFromPath(const std::string &path){
     MLNode m;
     ml::fromJson(buffer, m);
 
-    return createFromNode(moduleDirPath.toStdString(), modulePath.toStdString(), m);
+    return createFromNode(moduleDirPath, modulePath, m);
 }
 
 /** Creates plugin from a given MLNode*/
 Module::Ptr Module::createFromNode(const std::string &path, const std::string &filePath, const MLNode &m){
+
     if ( !m.hasKey("name") || !m.hasKey("package") ){
         THROW_EXCEPTION(lv::Exception, "Failed to read plugin file at: " + path + ". Plugin requries 'name' and 'package' info.", Exception::toCode("~Keys"));
     }
 
-    QString package = QString::fromStdString(m["package"].asString());
+    std::string package = m["package"].asString();
 
-    QFileInfo finfo(package);
-    if ( finfo.isRelative() ){
-        package = QDir::cleanPath(QString::fromStdString(path) + "/" + package);
-        finfo = QFileInfo(package);
+    if ( Path::isRelative(package) ){
+        package = Path::resolve(Path::join(path, package));
     }
 
-    if ( finfo.isDir() ){
-        package = finfo.filePath() + "/" + QString(Package::fileName);
+    if ( Path::isDir(package) ){
+        package = Path::join(package, Package::fileName);
     }
 
-
-    Module::Ptr pt(new Module(path, filePath, m["name"].asString(), package.toStdString()));
-
+    Module::Ptr pt(new Module(path, filePath, m["name"].asString(), package));
 
     if ( m.hasKey("palettes") ){
         MLNode::ObjectType pal = m["palettes"].asObject();
@@ -197,7 +187,7 @@ const std::string &Module::filePath() const{
 
 /** Returns the package path */
 std::string Module::packagePath() const{
-    return QFileInfo(QString::fromStdString(package())).path().toStdString();
+    return Path::parent(package());
 }
 
 /** Gets this plugins path relative to the package */
@@ -269,11 +259,10 @@ Module::Module(const std::string &path, const std::string &filePath, const std::
 
 void Module::addPalette(const std::string &type, const std::string &path){
     if ( context() ){
-        QFileInfo finfo(QString::fromStdString(path));
-        Utf8 extension = finfo.suffix().toStdString();
-        Utf8 name = finfo.baseName().toStdString();
+        Utf8 extension = Path::suffix(path);
+        Utf8 name = Path::baseName(path);
         Utf8 plugin = m_d->name;
-        Utf8 fullPath = m_d->path + "/" + path;
+        Utf8 fullPath = Path::join(m_d->path, path);
         context()->packageGraph->paletteContainer()->addPalette(type, fullPath, name, extension, plugin);
     }
 }

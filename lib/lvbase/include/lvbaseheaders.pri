@@ -1,6 +1,9 @@
 INCLUDEPATH += $$PWD
 
 HEADERS += \
+    $$PWD/live/bytebuffer.h \
+    $$PWD/live/datetime.h \
+    $$PWD/live/directory.h \
     $$PWD/live/exception.h \
     $$PWD/live/fileio.h \
     $$PWD/live/library.h \
@@ -10,11 +13,11 @@ HEADERS += \
     $$PWD/live/module.h \
     $$PWD/live/modulecontext.h \
     $$PWD/live/palettecontainer.h \
+    $$PWD/live/path.h \
     $$PWD/live/program.h \
     $$PWD/live/programholder.h \
     $$PWD/live/stacktrace.h \
     $$PWD/live/commandlineparser.h \
-    $$PWD/live/lockedfileiosession.h \
     $$PWD/live/applicationcontext.h \
     $$PWD/live/mlnode.h \
     $$PWD/live/mlnodetojson.h \

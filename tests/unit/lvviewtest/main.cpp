@@ -20,8 +20,7 @@
 
 #include "testrunner.h"
 #include "mlnodetoqmltest.h"
-#include "visuallogtest.h"
-#include "grouptest.h"
+#include "visuallogqttest.h"
 #include "linecapturetest.h"
 #include "memorytest.h"
 

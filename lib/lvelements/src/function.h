@@ -16,6 +16,7 @@
 #ifndef LVFUNCTION_H
 #define LVFUNCTION_H
 
+#define DISABLE_UNUSED_WARNING(arg) (void)arg
 
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/value.h"
@@ -27,8 +28,6 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <tuple>
-#include <QDebug>
 
 namespace lv{
 

@@ -35,9 +35,6 @@
 #include <iomanip>
 #include <unordered_map>
 
-#include <QFileInfo>
-#include <QDateTime>
-
 namespace lv{ namespace el{
 
 class ComponentTemplate{
@@ -107,8 +104,6 @@ public:
 
     Compiler::Ptr compiler;
 
-    Engine::FileInterceptor* fileInterceptor;
-
     std::map<std::string, JsModule::Ptr>             pathToModule;
     std::unordered_multimap<uint32_t, JsModule::Ptr> hashToModule;
 
@@ -176,8 +171,7 @@ v8::MaybeLocal<v8::Promise> EnginePrivate::resolveModuleDynamically(
 
         for ( auto it = engine->m_d->hashToModule.begin(); it != engine->m_d->hashToModule.end(); ++it ){
             if ( it->second->filePath() == referrerPath ){
-                QFileInfo finfo(QString::fromStdString(it->second->filePath()));
-                std::string fileParent = finfo.path().toStdString();
+                std::string fileParent = Path::parent(it->second->filePath());
                 path = fileParent + "/" + path;
                 break;
             }
@@ -185,8 +179,7 @@ v8::MaybeLocal<v8::Promise> EnginePrivate::resolveModuleDynamically(
     } else {
         auto packagePaths = engine->compiler()->packageImportPaths();
         for ( auto it = packagePaths.begin(); it != packagePaths.end(); ++it ){
-            QFileInfo finfo(QString::fromStdString(*it + "/" + path));
-            if ( finfo.exists() ){
+            if ( Path::exists(*it + "/" + path) ){
                 path = *it + "/" + path;
             }
         }
@@ -222,30 +215,26 @@ v8::MaybeLocal<v8::Module> EnginePrivate::resolveModule(
 
     std::string path = *name;
 
-    QFileInfo finfo(QString::fromStdString(path));
-    if ( finfo.isRelative() ){
+    if ( Path::isRelative(path) ){
         if ( path.length() >= 2 && path[0] == '.' && path[1] == '/' ){
             path = path.substr(2);
 
             JsModule::Ptr module = engine->m_d->getFromModule(referrer);
             if ( module ){
-                QFileInfo finfo(QString::fromStdString(module->filePath()));
-                QString fullPath = finfo.path() + "/" + QString::fromStdString(path);
-                path = QFileInfo(fullPath).absoluteFilePath().toStdString();
+                std::string fullPath = Path::parent(module->filePath()) + "/" + path;
+                path = Path::resolve(fullPath);
             }
         } else if ( path.length() >= 2 && path[0] == '.' && path[1] == '.' ){
             JsModule::Ptr module = engine->m_d->getFromModule(referrer);
             if ( module ){
-                QFileInfo finfo(QString::fromStdString(module->filePath()));
-                QString fullPath = finfo.path() + "/" + QString::fromStdString(path);
-                path = QFileInfo(fullPath).absoluteFilePath().toStdString();
+                std::string fullPath = Path::parent(module->filePath()) + "/" + path;
+                path = Path::resolve(fullPath);
             }
 
         } else {
             auto packagePaths = engine->compiler()->packageImportPaths();
             for ( auto it = packagePaths.begin(); it != packagePaths.end(); ++it ){
-                QFileInfo finfo(QString::fromStdString(*it + "/" + path));
-                if ( finfo.exists() ){
+                if ( Path::exists(*it + "/" + path) ){
                     path = *it + "/" + path;
                 }
             }
@@ -359,31 +348,6 @@ void Engine::disposeAtExit(){
     }
 }
 
-// Engine Input
-// -------------------------------------------------------------------------------------------
-
-Engine::FileInterceptor::FileInterceptor(LockedFileIOSession::Ptr fileInput)
-    : m_fileInput(fileInput)
-{
-    if ( !m_fileInput )
-        m_fileInput = LockedFileIOSession::createInstance();
-}
-
-Engine::FileInterceptor::~FileInterceptor(){
-}
-
-std::string Engine::FileInterceptor::readFile(const std::string &path) const{
-    return m_fileInput->readFromFile(path);
-}
-
-bool Engine::FileInterceptor::writeToFile(const std::string &path, const std::string &data) const{
-    return m_fileInput->writeToFile(path, data);
-}
-
-const LockedFileIOSession::Ptr &Engine::FileInterceptor::fileInput() const{
-    return m_fileInput;
-}
-
 // Engine Implementation
 // --------------------------------------------------------------------------------------------
 
@@ -417,8 +381,6 @@ Engine::Engine(const Compiler::Ptr &compiler)
 
     m_d->isolate->SetHostImportModuleDynamicallyCallback(&EnginePrivate::resolveModuleDynamically);
     m_d->isolate->SetHostInitializeImportMetaObjectCallback(&EnginePrivate::resolveModuleMeta);
-
-    m_d->fileInterceptor = new Engine::FileInterceptor;
 
     importInternals();
 }
@@ -556,7 +518,7 @@ JsModule::Ptr Engine::loadJsModule(const std::string &path){
     m_d->hashToModule.insert(std::make_pair(mod->GetIdentityHash(), jsModule));
     m_d->pathToModule.insert(std::make_pair(jsModule->filePath(), jsModule));
 
-    std::string pluginPath = QFileInfo(QString::fromStdString(path)).path().toStdString();
+    std::string pluginPath = Path::parent(path);
 
     auto module = m_d->compiler->findLoadedModuleByPath(pluginPath);
     if ( module ){
@@ -784,10 +746,10 @@ void Engine::throwError(const Exception *exception, Element *object){
 
             const StackFrame& sf = *it;
             if ( sf.line() ){
-                stackCapture << "at " << sf.functionName().c_str() << "(" << sf.fileName().c_str() << ":" << sf.line()
+                stackCapture << "at " << sf.functionName() << "(" << sf.fileName() << ":" << sf.line()
                    << ")" << "[0x" << std::setbase(16) << sf.address() << "]" << std::setbase(10);
             } else {
-                stackCapture << "at " << sf.functionName().c_str() << "[0x" << std::setbase(16) << sf.address()
+                stackCapture << "at " << sf.functionName() << "[0x" << std::setbase(16) << sf.address()
                              << std::setbase(10) << "]";
             }
         }
@@ -886,15 +848,6 @@ const LanguageParser::Ptr &Engine::parser() const{
 
 const Compiler::Ptr &Engine::compiler() const{
     return m_d->compiler;
-}
-
-const Engine::FileInterceptor *Engine::fileInterceptor() const{
-    return m_d->fileInterceptor;
-}
-
-void Engine::setFileInterceptor(Engine::FileInterceptor *fileInterceptor){
-    delete m_d->fileInterceptor;
-    m_d->fileInterceptor = fileInterceptor;
 }
 
 void Engine::importInternals(){

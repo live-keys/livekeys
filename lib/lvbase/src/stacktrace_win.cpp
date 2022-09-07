@@ -14,7 +14,6 @@
 ****************************************************************************/
 
 #include "stacktrace.h"
-#include <QtGlobal>
 
 #ifdef USE_STACK_TRACE
 #include <Windows.h>
@@ -88,7 +87,7 @@ StackTrace::Ptr StackTrace::capture(int maxFrames){
     delete[] stack;
     return dest;
 #else
-    Q_UNUSED(maxFrames);
+    (void)maxFrames;
     return StackTrace::Ptr(0);
 #endif
 }

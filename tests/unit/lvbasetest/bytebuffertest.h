@@ -1,6 +1,7 @@
 /****************************************************************************
 **
 ** Copyright (C) 2022 Dinu SV.
+**
 ** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
@@ -13,11 +14,25 @@
 **
 ****************************************************************************/
 
-#include "librarytable.h"
+#ifndef BYTEBUFFERTEST_H
+#define BYTEBUFFERTEST_H
 
-namespace lv{
+#include <QObject>
+#include "testrunner.h"
 
-LibraryTable::LibraryTable(){
-}
+class ByteBufferTest : public QObject{
 
-}// namespace
+    Q_OBJECT
+    Q_TEST_RUNNER_SUITE
+
+public:
+    ByteBufferTest(QObject* parent = 0);
+    ~ByteBufferTest();
+
+private slots:
+    void initTestCase();
+    void testEncode();
+    void testRoundTrip();
+};
+
+#endif // BYTEBUFFERTEST_H

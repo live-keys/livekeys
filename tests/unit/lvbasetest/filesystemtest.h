@@ -1,6 +1,8 @@
+
 /****************************************************************************
 **
 ** Copyright (C) 2022 Dinu SV.
+**
 ** This file is part of Livekeys Application.
 **
 ** GNU Lesser General Public License Usage
@@ -13,19 +15,33 @@
 **
 ****************************************************************************/
 
-#ifndef LVLIBRARYTABLE_H
-#define LVLIBRARYTABLE_H
+#ifndef FILESYSTEMTEST_H
+#define FILESYSTEMTEST_H
 
-#include "live/lvbaseglobal.h"
+#include <QObject>
+#include "testrunner.h"
+#include "live/mlnode.h"
 
-namespace lv{
+class FileSystemTest : public QObject{
 
-class LV_BASE_EXPORT LibraryTable{
+    Q_OBJECT
+    Q_TEST_RUNNER_SUITE
 
 public:
-    LibraryTable();
+    FileSystemTest(QObject* parent = 0);
+    ~FileSystemTest(){}
+
+private slots:
+    void initTestCase();
+    void testWorkPath();
+    void testDirectoryCreation();
+    void testFileCreation();
+    void testCopy();
+    void testDirectoryIterator();
+
+private:
+    std::string workPath();
+
 };
 
-}// namespace
-
-#endif // LVLIBRARYTABLE_H
+#endif // FILESYSTEMTEST_H

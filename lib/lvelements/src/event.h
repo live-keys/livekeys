@@ -269,6 +269,7 @@ public:
 
     virtual EventConnection* append(Element* emitter, Event::Id eid, const Callable& f) override{
         Engine* eng = elementEngine(emitter);
+        DISABLE_UNUSED_WARNING(eng);
         EventConnectionFunction<Args...>* ecf = new EventConnectionFunction<Args...>( emitter, eid, [emitter, eng, f](Args ...args){
             f.call(emitter, Function::Parameters({ScopedValue::createValue<Args>(eng, args)...})); }
         );
@@ -279,8 +280,11 @@ public:
     virtual EventConnection* append(Element* emitter, Event::Id eid, std::function<void(const Function::Parameters&)> f) override{
         Engine* eng = elementEngine(emitter);
         EventConnectionFunction<Args...>* ecf = new EventConnectionFunction<Args...>( emitter, eid, [emitter, eng, f](Args ...args){
-            f(Function::Parameters({ScopedValue::createValue<Args>(eng, args)...})); }
-        );
+            DISABLE_UNUSED_WARNING(emitter);
+            DISABLE_UNUSED_WARNING(eng);
+            DISABLE_UNUSED_WARNING(f);
+            f(Function::Parameters({ScopedValue::createValue<Args>(eng, args)...}));
+        });
         append(ecf);
         return ecf;
     }

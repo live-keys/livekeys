@@ -15,10 +15,8 @@
 ****************************************************************************/
 
 #include "visuallogtest.h"
-#include "visuallogteststub.h"
 #include "live/visuallog.h"
 #include "live/exception.h"
-#include "live/visuallogmodel.h"
 
 #include <QQmlEngine>
 #include <QCoreApplication>
@@ -57,8 +55,6 @@ public:
 
 VisualLogTest::VisualLogTest(QObject *parent)
     : QObject(parent)
-    , m_engine(0)
-    , m_vlogModel(0)
 {
 }
 
@@ -66,9 +62,6 @@ VisualLogTest::~VisualLogTest(){
 }
 
 void VisualLogTest::initTestCase(){
-    m_engine = new QQmlEngine;
-    m_vlogModel = new VisualLogModel(m_engine);
-
     vlog().configure("global", {
         {"defaultLevel", "Info"},
         {"toConsole",    false}
@@ -76,8 +69,6 @@ void VisualLogTest::initTestCase(){
 }
 
 void VisualLogTest::cleanupTestCase(){
-    delete m_vlogModel;
-    delete m_engine;
 }
 
 void VisualLogTest::levelTest(){
@@ -119,47 +110,6 @@ void VisualLogTest::levelTest(){
     QCOMPARE(ts->messages[0].second, QString("test error"));
     QCOMPARE(ts->messages[1].second, QString("test info"));
     QCOMPARE(ts->objects.size(), 0);
-
-    vlog().removeTransports("test");
-}
-
-void VisualLogTest::levelObjectTest(){
-    VisualLogTransportStub* ts = new VisualLogTransportStub;
-    VisualLogTestStub teststub(100, "test");
-
-    vlog().addTransport("test", ts);
-    vlog().configure("test", {
-        {"level", VisualLog::MessageInfo::Error},
-        {"defaultLevel",     VisualLog::MessageInfo::Info}
-    });
-
-    vlog("test").f(teststub);
-    vlog("test").e(teststub);
-
-    QCOMPARE(ts->objects.size(), 2);
-
-    QCOMPARE(ts->objects[0].second["type"].asString(), MLNode::StringType("VisualLogTestStub"));
-    QCOMPARE(ts->objects[0].second["field1"].asInt(),  100);
-
-    QCOMPARE(ts->objects[1].second["type"].asString(), MLNode::StringType("VisualLogTestStub"));
-    QCOMPARE(ts->objects[1].second["field1"].asInt(),  100);
-
-    ts->messages.clear();
-    vlog().configure("test", {
-        {"level", VisualLog::MessageInfo::Info}
-    });
-
-    vlog("test").e(teststub);
-    vlog("test").i(teststub);
-    vlog("test").d(teststub);
-
-    QCOMPARE(ts->messages.size(), 2);
-
-    QCOMPARE(ts->objects[0].second["type"].asString(), MLNode::StringType("VisualLogTestStub"));
-    QCOMPARE(ts->objects[0].second["field1"].asInt(),  100);
-
-    QCOMPARE(ts->objects[1].second["type"].asString(), MLNode::StringType("VisualLogTestStub"));
-    QCOMPARE(ts->objects[1].second["field1"].asInt(),  100);
 
     vlog().removeTransports("test");
 }
@@ -241,22 +191,3 @@ void VisualLogTest::dailyFileOutputTest(){
     vlog().configure("test", {{"file", ""}, {"logDaily", false}});
 }
 
-void VisualLogTest::viewOutputTest(){
-    QQmlEngine engine;
-    VisualLogModel vlm(&engine);
-
-    vlog().configure("test", {
-        {"level", VisualLog::MessageInfo::Info},
-        {"defaultLevel",     VisualLog::MessageInfo::Info}
-    });
-
-    VisualLog::setViewTransport(&vlm);
-
-    vlog("test")     << "test" << " " << "info";
-    vlog("test").d() << "test" << " " << "debug";
-
-    QCOMPARE(vlm.rowCount(QModelIndex()), 1);
-    QCOMPARE(vlm.entryAt(0).data, QString("test info"));
-
-    VisualLog::setViewTransport(0);
-}

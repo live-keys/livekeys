@@ -16,7 +16,6 @@
 #include "package.h"
 #include "packagecontext.h"
 
-#include "lockedfileiosession.h"
 #include "live/mlnodetojson.h"
 #include "live/exception.h"
 #include "live/visuallog.h"
@@ -27,9 +26,6 @@
 #include <fstream>
 #include <istream>
 #include <sstream>
-
-#include <QDir>
-#include <QFileInfo>
 
 /**
   \class lv::Package
@@ -74,28 +70,24 @@ Package::~Package(){
 
 /** Static method that checks if a package exists in the given folder */
 bool Package::existsIn(const std::string &path){
-    QDir d(QString::fromStdString(path));
-    if ( !d.exists() )
-         return false;
-
-    QFileInfo finfo(d.path() + "/"  + QString::fromStdString(Package::fileName));
-    return finfo.exists();
+    if ( !Path::exists(path) )
+        return false;
+    return Path::exists(Path::join(path, Package::fileName));
 }
 
 /** Creates a package pointer from that path, considering that path has a package */
 Package::Ptr Package::createFromPath(const std::string &path){
-    QString packagePath = QString::fromStdString(path);
-    QString packageDirPath;
+    std::string packagePath = path;
+    std::string packageDirPath;
 
-    QFileInfo finfo(packagePath);
-    if ( finfo.isDir() ){
-        packagePath = finfo.filePath() + "/" + QString::fromStdString(Package::fileName);
-        packageDirPath = finfo.filePath();
+    if ( Path::isDir(path) ){
+        packageDirPath = Path::resolve(path);
+        packagePath    = Path::join(packageDirPath, Package::fileName);
     } else {
-        packageDirPath = finfo.path();
+        packageDirPath = Path::parent(path);
     }
 
-    std::ifstream instream(packagePath.toStdString(), std::ifstream::in | std::ifstream::binary);
+    std::ifstream instream(packagePath, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
         THROW_EXCEPTION(lv::Exception, Utf8("Cannot open package file: %. The file might not exist or the path might be wrong.").format(path), 1);
     }
@@ -109,7 +101,7 @@ Package::Ptr Package::createFromPath(const std::string &path){
     MLNode m;
     ml::fromJson(buffer, m);
 
-    return createFromNode(packageDirPath.toStdString(), packagePath.toStdString(), m);
+    return createFromNode(packageDirPath, packagePath, m);
 }
 
 /** This function actually creates the path pointer that is returned to the above function */

@@ -90,21 +90,21 @@ ScopedValue::ScopedValue(Engine *, Callable val)
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *engine, Object val)
+ScopedValue::ScopedValue(Engine *, Object val)
     : m_d(new ScopedValuePrivate(val.data()))
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *engine, const Buffer &val)
+ScopedValue::ScopedValue(Engine *engine, const Buffer &val) //TODO
     : m_d(new ScopedValuePrivate(v8::Undefined(engine->isolate())))/*v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size()))*/
     , m_ref(new int)
 {
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *engine, Element* val)
+ScopedValue::ScopedValue(Engine *, Element* val)
     : m_d(new ScopedValuePrivate(ElementPrivate::localObject(val)))
     , m_ref(new int)
 {
@@ -143,7 +143,7 @@ ScopedValue::ScopedValue(Engine *engine, const Value &value)
     }
 }
 
-ScopedValue::ScopedValue(Engine *engine, const ScopedValue &other)
+ScopedValue::ScopedValue(Engine *, const ScopedValue &other)
     : m_d(other.m_d)
     , m_ref(other.m_ref)
 {

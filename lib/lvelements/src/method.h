@@ -27,7 +27,6 @@
 #include <vector>
 #include <string>
 #include <tuple>
-#include <QDebug>
 
 namespace lv{ namespace el{
 

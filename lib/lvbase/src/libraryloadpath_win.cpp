@@ -16,12 +16,10 @@
 
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
+#include "live/path.h"
+#include "live/directory.h"
+
 #include "Windows.h"
-
-#include <QDir>
-#include <QDirIterator>
-#include <QFile>
-
 
 namespace lv{
 
@@ -35,37 +33,39 @@ namespace lv{
 
 namespace{
 
-QByteArray pathContents;
+std::string pathContents;
 
 }// namespace
 
-void LibraryLoadPath::addImpl(const QString& path, const QString& , bool recursive){
+void LibraryLoadPath::addImpl(const std::string& path, const std::string& , bool recursive){
     bool firstRun = false;
 
-    if ( pathContents.isEmpty() ){
+    if ( pathContents.empty() ){
         firstRun = true;
-        pathContents = qgetenv("PATH");
+
+        const size_t bufferSize = 4096;
+        char* buffer = reinterpret_cast<char*>(malloc(bufferSize));
+        GetEnvironmentVariableA("PATH", buffer, bufferSize);
+        pathContents = std::string(buffer);
+        free(buffer);
     }
 
-    QDirIterator dit(path);
-    while ( dit.hasNext() ){
-        dit.next();
-        QFileInfo info = dit.fileInfo();
-        if ( info.fileName() == "." || info.fileName() == ".." )
-            continue;
 
-        if ( info.isDir() ){
-            QString filePath = info.filePath();
-            filePath.replace('/', '\\');
-            pathContents += ";" + filePath.toUtf8();
-            vlog_debug("libraryloadpasth", "Added path \'" + filePath + "\'");
+    Directory::Iterator dit = Directory::iterate(path);
+    while ( !dit.isEnd() ){
+        std::string current = dit.path();
+        if ( Path::isDir(current)){
+            std::string currentToWrite = current;
+            Utf8::replaceAll(currentToWrite, "/", "\\");
+            pathContents += ";" + currentToWrite;
             if ( recursive )
-                addImpl(info.filePath(), "", recursive);
+                addImpl(current, "", recursive);
         }
+        dit.next();
     }
 
     if ( firstRun ){
-        SetEnvironmentVariableA("PATH", pathContents.data());
+        SetEnvironmentVariableA("PATH", pathContents.c_str());
         firstRun = false;
         pathContents.clear();
     }

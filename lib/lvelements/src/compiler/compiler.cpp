@@ -20,9 +20,6 @@
 #include "elementssections_p.h"
 #include "elementsmodule.h"
 
-#include <QFileInfo>
-#include <QDir>
-
 namespace lv{ namespace el {
 
 class CompilerPrivate{
@@ -91,7 +88,7 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     if ( !ast )
         return result;
 
-    std::string name = QFileInfo(QString::fromStdString(path)).baseName().toStdString();
+    std::string name = Path::baseName(path);
     ProgramNode* root = parseProgramNodes(path, name, ast);
 
     auto ctx = m_d->createConversionContext();
@@ -198,7 +195,7 @@ std::string Compiler::moduleFileBuildPath(const Module::Ptr &plugin, const std::
     }
 
     std::string buildPath = createModuleBuildPath(plugin);
-    std::string fileName = QFileInfo(QString::fromStdString(path)).fileName().toStdString();
+    std::string fileName = Path::name(path);
     return buildPath + "/" + fileName + m_d->config.m_outputExtension;
 }
 
@@ -213,11 +210,8 @@ std::string Compiler::moduleBuildPath(const Module::Ptr &module){
 
 std::string Compiler::createModuleBuildPath(const Module::Ptr &module){
     std::string buildDir = moduleBuildPath(module);
-    QString bd = QString::fromStdString(buildDir);
-    if ( !QDir(bd).exists() ){
-        QDir(".").mkpath(bd);
-    }
-
+    if ( !Path::exists(buildDir) )
+        Path::createDirectories(buildDir);
     return buildDir;
 }
 
@@ -257,9 +251,8 @@ void Compiler::configureImplicitType(const std::string &type){
 }
 
 std::shared_ptr<ElementsModule> Compiler::compile(Ptr compiler, const std::string &path, Engine *engine){
-    QFileInfo finfo(QString::fromStdString(path));
-    std::string pluginPath = finfo.path().toStdString();
-    std::string fileName = finfo.fileName().toStdString();
+    std::string pluginPath = Path::parent(path);
+    std::string fileName = Path::name(path);
 
     Module::Ptr plugin(nullptr);
     if ( Module::existsIn(pluginPath) ){

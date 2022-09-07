@@ -60,7 +60,7 @@ void MLNodeTest::assignmentTest(){
     n = {{"object", "value"}};
     QCOMPARE(n.type(), MLNode::Object);
 
-    unsigned char* data = new unsigned char[10];
+    char* data = new char[10];
     for ( unsigned char i = 0; i < 10; ++i )
         data[i] = i;
     n = MLNode::BytesType(data, 10);

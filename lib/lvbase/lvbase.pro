@@ -1,7 +1,7 @@
 TEMPLATE = lib
 TARGET   = lvbase
 QT      += core qml quick
-CONFIG  += qt
+CONFIG  += qt c++17
 
 
 ## Win stack trace
@@ -16,6 +16,8 @@ unix:!isEmpty(ENABLE_STACK_TRACE_BFD){
 }
 
 macx{
+    QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.15
+
     QMAKE_LFLAGS += \
         '-Wl,-rpath,\'@executable_path/../Link\'' \
         '-Wl,-rpath,\'@executable_path/../Frameworks\''

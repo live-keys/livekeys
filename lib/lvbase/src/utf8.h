@@ -98,6 +98,7 @@ public:
 
     std::vector<Utf8> split(const char* sep);
     static Utf8 join(const std::vector<Utf8>& parts, const Utf8& delim = ",");
+    static Utf8 join(const std::vector<std::string>& parts, const std::string& delim = ",");
 
     bool isEmpty() const;
 
@@ -115,6 +116,8 @@ public:
     static void trimRight(std::string &str);
     static void trim(std::string& str);
     static void replaceAll(std::string& str, const std::string& from, const std::string& to);
+
+    static Utf8 numberToHex(unsigned long long nr);
 
     Utf8 trimLeft() const;
     Utf8 trimRight() const;

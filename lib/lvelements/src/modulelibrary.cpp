@@ -16,16 +16,14 @@
 #include "modulelibrary.h"
 #include "moduleloader.h"
 #include "element_p.h"
-
-#include <QLibrary>
-#include <QString>
+#include "live/library.h"
 
 namespace lv{ namespace el{
 
 class ModuleLibraryPrivate{
 public:
     std::string   path;
-    QLibrary*     library;
+    Library::Ptr  library;
     ModuleLoader* loader;
     Engine*       engine;
 };
@@ -33,13 +31,15 @@ public:
 ModuleLibrary::~ModuleLibrary(){
     if ( m_d->library ){
         ModuleLoader::DestroyLoaderFunction deleteFunction =
-            reinterpret_cast<ModuleLoader::DestroyLoaderFunction>(m_d->library->resolve("destroyModuleLoader"));
+            m_d->library->symbolAs<ModuleLoader::DestroyLoaderFunction>("destroyModuleLoader");
 
-        if ( !deleteFunction )
-            vlog().e() << "Failed to find delete function for ModuleLoader in :" << m_d->path << ". This may result in memory leaks";
+        if ( !deleteFunction ){
+            vlog().e() << "ModuleLibrary: Failed to find delete function for ModuleLoader in :" << m_d->path << ". This may result in memory leaks";
+            return;
+        }
 
         deleteFunction(m_d->loader);
-        delete m_d->library;
+        m_d->library = nullptr;
     }
 
     delete m_d;
@@ -52,11 +52,10 @@ ModuleLibrary* ModuleLibrary::create(Engine* engine, const std::string &path){
 ModuleLibrary *ModuleLibrary::load(Engine* engine, const std::string &path){
     ModuleLibrary* ml = create(engine, path);
 
-    QLibrary* library = new QLibrary(QString::fromStdString(path));
-    ml->m_d->library = library;
+    ml->m_d->library = Library::load(path);
 
     ModuleLoader::CreateLoaderFunction loaderFunction =
-        reinterpret_cast<ModuleLoader::CreateLoaderFunction>(library->resolve("createModuleLoader"));
+        ml->m_d->library->symbolAs<ModuleLoader::CreateLoaderFunction>("createModuleLoader");
 
     if ( !loaderFunction )
         THROW_EXCEPTION(lv::Exception, "Failed to find loader function in library: " + path, 1);

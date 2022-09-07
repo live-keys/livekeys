@@ -35,5 +35,21 @@
   Class(const Class&);   \
   void operator=(const Class&)
 
+#define MARK_UNUSED(arg) (void)arg
+
+#if defined(_WIN32)
+    #define PLATFORM_OS_WIN
+#elif defined(_WIN64)
+    #define PLATFORM_OS_WIN
+#elif defined(__CYGWIN__) && !defined(_WIN32)
+    #define PLATFORM_OS_WIN
+#elif defined(__linux__)
+    #define PLATFORM_OS_UNIX
+    #define PLATFORM_OS_LINUX
+#elif defined(__APPLE__) && defined(__MACH__) // Apple OSX and iOS (Darwin)
+    #define PLATFORM_OS_UNIX
+    #define PLATFORM_OS_MAC
+#endif
+
 
 #endif //LVGLOBAL_H

@@ -15,10 +15,6 @@
 
 #include "live/libraryloadpath.h"
 
-#include <QDir>
-#include <QDirIterator>
-#include <QFile>
-
 namespace lv{
 
 /**
@@ -34,7 +30,7 @@ namespace lv{
  * \brief Non-recursive version of loader function, adds only libraries available on given folder level
  */
 void LibraryLoadPath::add(const std::string path, const std::string &linkPath){
-    addImpl(QString::fromStdString(path), QString::fromStdString(linkPath));
+    addImpl(path, linkPath);
 }
 
 
@@ -42,7 +38,7 @@ void LibraryLoadPath::add(const std::string path, const std::string &linkPath){
  * \brief Recursive version of loader function, adds all of the relevant subfolder contents as well
  */
 void LibraryLoadPath::addRecursive(const std::string &path, const std::string &linkPath){
-    addImpl(QString::fromStdString(path), QString::fromStdString(linkPath), true);
+    addImpl(path, linkPath, true);
 }
 
 }// namespace

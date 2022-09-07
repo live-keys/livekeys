@@ -17,48 +17,53 @@
 #include "live/exception.h"
 #include "live/visuallog.h"
 
-#include <QLibrary>
-
 namespace lv{
 
-class LibraryPrivate{
+class Library::Table{
 public:
-    LibraryPrivate(const QString& path) : lib(path){}
-
-    QLibrary lib;
+    std::map<std::string, Library::Ptr> loadedLibraries;
 };
 
+
+Library::Library()
+    : m_d(nullptr)
+{
+}
+
+Library::~Library(){
+    cleanImpl();
+}
+
+void Library::close(){
+    auto it = table().loadedLibraries.find(path());
+    if ( it != table().loadedLibraries.end() )
+        table().loadedLibraries.erase(it);
+    closeImpl();
+}
+
+Library::Table &Library::table(){
+    static Library::Table tb;
+    return tb;
+}
+
+
 Library::Ptr lv::Library::load(const std::string &path){
-    //TODO: Search library table for duplicates
-    Library::Ptr l(new Library(path));
-    if ( !l->m_d->lib.load() ){
-        THROW_EXCEPTION(
-            lv::Exception,
-            "Failed to load library \'" + path + "\': " + l->m_d->lib.errorString().toStdString(),
-            Exception::toCode("~Library")
-        );
-    }
+    std::string fullPath = Path::resolve(path);
+    Library::Ptr l = isLoaded(path);
+    if ( l )
+        return l;
+
+    l = loadImpl(fullPath);
+    table().loadedLibraries[fullPath] = l;
     return l;
 }
 
-void *Library::symbol(const std::string &name){
-    return symbol(name.c_str());
-}
-
-void *Library::symbol(const char *name){
-    return reinterpret_cast<void*>(m_d->lib.resolve(name));
-}
-
-void Library::handleReference(const std::string &path){
-#if defined(_MSC_VER) && !defined(__INTEL_COMPILER)
-    QLibrary lib(QString::fromStdString(path));
-    lib.load();
-#endif
-}
-
-Library::Library(const std::string &path)
-    : m_d(new LibraryPrivate(QString::fromStdString(path)))
-{
+Library::Ptr Library::isLoaded(const std::string &path){
+    Library::Table& t = table();
+    auto it = t.loadedLibraries.find(path);
+    if ( it == t.loadedLibraries.end() )
+        return nullptr;
+    return it->second;
 }
 
 }// namespace

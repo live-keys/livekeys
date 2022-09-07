@@ -21,6 +21,8 @@
 #include <memory>
 
 #include "live/lvbaseglobal.h"
+#include "live/path.h"
+#include "live/utf8.h"
 
 namespace lv{
 
@@ -29,8 +31,6 @@ class VisualLog;
 // StackFrame
 // ----------
 
-LV_BASE_EXPORT std::string pathFileName(const std::string& path);
-
 /**
   \class lv::StackFrame
   \brief A frame of debug-related data that gets pushed to the stack trace.
@@ -38,7 +38,7 @@ LV_BASE_EXPORT std::string pathFileName(const std::string& path);
   Very simple structure, containing only getters of its various fields.
   \ingroup lvbase
  */
-class StackFrame{
+class LV_BASE_EXPORT StackFrame{
 
 public:
     /**
@@ -51,19 +51,12 @@ public:
       \brief Default constructor, only function name and addr. pointer are mandatory parameters
     */
     StackFrame(
-        const std::string& functionName,
+        const Utf8& functionName,
         AddressPtr address,
-        const std::string& objectPath = "",
-        const std::string& filePath = "",
+        const Utf8& objectPath = "",
+        const Utf8& filePath = "",
         int line = -1
-    )
-        : m_functionName(functionName)
-        , m_address(address)
-        , m_objectPath(objectPath)
-        , m_filePath(filePath)
-        , m_line(line)
-    {
-    }
+    );
 
     /**
       \brief Default (empty) destructor
@@ -73,7 +66,7 @@ public:
     /**
       \brief Function name getter
     */
-    const std::string& functionName() const{ return m_functionName; }
+    const Utf8& functionName() const{ return m_functionName; }
     /**
      * \brief Adress pointer getter
      */
@@ -82,15 +75,15 @@ public:
     /**
      * \brief Object path getter
      */
-    const std::string& objectPath() const{ return m_objectPath; }
+    const Utf8& objectPath() const{ return m_objectPath; }
     /**
      * \brief File path getter
      */
-    const std::string& filePath() const{ return m_filePath; }
+    const Utf8& filePath() const{ return m_filePath; }
     /**
      * \brief File name getter (extracted from file path)
      */
-    std::string fileName() const{ return pathFileName(m_filePath); }
+    Utf8 fileName() const;
     /**
      * \brief Line number getter
      */
@@ -102,11 +95,11 @@ public:
     bool hasLocation() const{ return m_line != -1; }
 
 private:
-    std::string m_functionName;
-    AddressPtr  m_address;
-    std::string m_objectPath;
-    std::string m_filePath;
-    int         m_line;
+    Utf8       m_functionName;
+    AddressPtr m_address;
+    Utf8       m_objectPath;
+    Utf8       m_filePath;
+    int        m_line;
 };
 
 LV_BASE_EXPORT VisualLog &operator <<(VisualLog &vl, const StackFrame &value);

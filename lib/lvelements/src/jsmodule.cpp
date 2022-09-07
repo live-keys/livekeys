@@ -16,8 +16,7 @@
 #include "jsmodule.h"
 #include "v8nowarnings.h"
 #include "live/elements/engine.h"
-
-#include <QFileInfo>
+#include "live/path.h"
 
 namespace lv{ namespace el{
 
@@ -105,7 +104,7 @@ JsModule::JsModule(Engine* engine, const std::string& file, const v8::Local<v8::
     , m_moduleFile(nullptr)
     , m_engine(engine)
 {
-    m_name = QFileInfo(QString::fromStdString(file)).baseName().toStdString();
+    m_name = Path::baseName(file);
     d_ptr->module.Reset(engine->isolate(), mod);
 }
 

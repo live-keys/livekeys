@@ -18,13 +18,13 @@ LvParseErrorTest::LvParseErrorTest(QObject *parent)
 }
 
 void LvParseErrorTest::initTestCase(){
-    m_fileSession = LockedFileIOSession::createInstance();
+    m_fileIO = new FileIO;
     m_scriptPath  = lv::ApplicationContext::instance().releasePath() + "/data";
 }
 
 void LvParseErrorTest::programBodyExtraElements(){
     std::string name = "ParserErrorTest01";
-    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
+    std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
 
     Compiler::Ptr compiler = Compiler::create();
     compiler->configureImplicitType("console");
@@ -45,7 +45,7 @@ void LvParseErrorTest::programBodyExtraElements(){
 
 void LvParseErrorTest::identifierNotFound(){
     std::string name = "ParserErrorTest02";
-    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
+    std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
 
     Compiler::Config compilerConfig;
     compilerConfig.allowUnresolvedTypes(false);

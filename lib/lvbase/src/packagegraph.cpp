@@ -645,7 +645,7 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
         }
 
         if ( !Module::existsIn(modulePath) )
-            THROW_EXCEPTION(lv::Exception, "No \'live.module.json\' file has been found in " + modulePath, 7);
+            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'").format(modulePath), 7);
 
         Module::Ptr module = Module::createFromPath(modulePath);
         module->assignContext(this);
@@ -656,7 +656,6 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
             addDependency(module, *it);
 
         vlog("lvbase-packagegraph").v() << "Loaded module: " << importId;
-
         foundPackage->context()->modules[importId] = module;
 
         return module;
@@ -674,7 +673,7 @@ void PackageGraph::addDependency(const Module::Ptr &module, const std::string &d
         THROW_EXCEPTION(
             lv::Exception,
             "Failed to find dependency \'" + dependency + "\' module for: " + module->context()->importId.data(),
-            8);
+            lv::Exception::toCode("~Dependency"));
 
     addDependency(module, dependsOn);
 }
@@ -684,6 +683,8 @@ void PackageGraph::addDependency(const Module::Ptr &module, const std::string &d
  */
 void PackageGraph::addDependency(const Module::Ptr& module, const Module::Ptr& dependsOn){
     if ( module.get() == dependsOn.get() )
+        return;
+    if ( module == nullptr )
         return;
 
     if ( module->context()->package.get() == dependsOn->context()->package.get() ){ // within the same package

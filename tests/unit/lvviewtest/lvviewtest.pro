@@ -12,8 +12,7 @@ HEADERS += \
     $$PWD/testrunner.h \
     $$PWD/enginetest.h \
     $$PWD/mlnodetoqmltest.h \
-    $$PWD/visuallogtest.h \
-    $$PWD/grouptest.h \
+    $$PWD/visuallogqttest.h \
     $$PWD/linecapturetest.h \
     $$PWD/memorytest.h
 
@@ -21,8 +20,7 @@ SOURCES += \
     $$PWD/main.cpp \
     $$PWD/enginetest.cpp \
     $$PWD/mlnodetoqmltest.cpp \
-    $$PWD/visuallogtest.cpp \
-    $$PWD/grouptest.cpp \
+    $$PWD/visuallogqttest.cpp \
     $$PWD/linecapturetest.cpp \
     $$PWD/memorytest.cpp
 

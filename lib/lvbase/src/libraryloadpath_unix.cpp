@@ -16,50 +16,46 @@
 
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
-
-#include <QDir>
-#include <QDirIterator>
-#include <QFile>
-#include <QDebug>
+#include "live/path.h"
+#include "live/directory.h"
 
 namespace lv{
 
 namespace{
 
-bool assertLinkPathExists(const QString& linkPath){
-    if ( !QDir(linkPath).exists() )
-        return QDir().mkdir(linkPath);
+bool assertLinkPathExists(const std::string& linkPath){
+    if ( !Path::exists(linkPath) )
+        return Path::createDirectory(linkPath);
     return true;
 }
 
 }// namespace
 
-void LibraryLoadPath::addImpl(const QString& path, const QString& linkPath, bool recursive){
+void LibraryLoadPath::addImpl(const std::string &path, const std::string &linkPath, bool recursive){
     if ( !assertLinkPathExists(linkPath) ){
-        qCritical("Failed to create link directory. Some library dependencies may fail to load.");
+        vlog("global").e() << "Failed to create link directory. Some library dependencies may fail to load.";
         return;
     }
 
-    QDirIterator dit(path);
-    while ( dit.hasNext() ){
-        dit.next();
-        QFileInfo info = dit.fileInfo();
-        if ( info.fileName() == "." || info.fileName() == ".." )
-            continue;
+    Directory::Iterator dit = Directory::iterate(path);
+    while ( !dit.isEnd() ){
+        std::string current = dit.path();
 
-        if (  (info.isFile() || info.isSymLink()) &&
-               info.fileName().startsWith("lib") &&
-               ( info.fileName().contains(".so") || info.fileName().contains(".dylib") )
-              )
+        if(  ( Path::isFile(current) || Path::isSymlink(current) ) &&
+              ( current.find(".so") != std::string::npos || current.find(".dylib") != std::string::npos )
+          )
         {
-            QFile f(dit.filePath());
-            f.link(linkPath + "/" + info.fileName());
-
-            vlog_debug("libraryloadpath", "Added \'" + linkPath + "/" + info.fileName() + "\' -> \'" + f.fileName() + "\'");
-
-        } else if ( info.isDir() && recursive ){
-            addImpl(info.filePath(), linkPath, recursive);
+            std::string fileName = Path::name(current);
+            if( fileName.find("lib") == 0 ){
+                std::string fullLinkPath = Path::join(linkPath, fileName);
+                if ( !Path::exists(fullLinkPath) )
+                    Path::createSymlink(fullLinkPath, current);
+                vlog_debug("libraryloadpath", "Added \'" + linkPath + "\' -> \'" + current + "\'");
+            }
+        } else if ( Path::isDir(current) && recursive ){
+            addImpl(current, linkPath, recursive);
         }
+        dit.next();
     }
 }
 

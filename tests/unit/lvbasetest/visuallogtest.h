@@ -20,12 +20,6 @@
 #include <QObject>
 #include "testrunner.h"
 
-namespace lv{
-class VisualLogModel;
-}
-class QQmlEngine;
-class QCoreApplication;
-
 class VisualLogTest : public QObject{
 
     Q_OBJECT
@@ -40,16 +34,9 @@ private slots:
     void cleanupTestCase();
 
     void levelTest();
-    void levelObjectTest();
     void prefixTest();
     void fileOutputTest();
     void dailyFileOutputTest();
-    void viewOutputTest();
-
-private:
-    QQmlEngine*          m_engine;
-    lv::VisualLogModel* m_vlogModel;
-
 };
 
 #endif // VISUALLOGTEST_H

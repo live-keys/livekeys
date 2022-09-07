@@ -234,7 +234,7 @@ MLNode FunctionInfo::toMLNode() const
 
     rhs["return_type"] = m_returnType.data();
     MLNode params(MLNode::Array);
-    for (int i=0; i<m_parameters.size(); ++i)
+    for (size_t i = 0; i<m_parameters.size(); ++i)
     {
         params.append(MLNode({{m_parameters[i].first.data(), m_parameters[i].second.data()}}));
     }
@@ -445,22 +445,22 @@ MLNode TypeInfo::toMLNode() const
     result["constructor"] = m_constructor.toMLNode();
 
     MLNode properties(MLNode::Array);
-    for (int i = 0; i<m_properties.size();++i)
+    for (size_t i = 0; i<m_properties.size();++i)
         properties.append(m_properties[i].toMLNode());
     result["properties"] = properties;
 
     MLNode functions(MLNode::Array);
-    for (int i = 0; i<m_functions.size();++i)
+    for (size_t i = 0; i<m_functions.size();++i)
         functions.append(m_functions[i].toMLNode());
     result["functions"] = functions;
 
     MLNode methods(MLNode::Array);
-    for (int i = 0; i<m_methods.size();++i)
+    for (size_t i = 0; i<m_methods.size();++i)
         methods.append(m_methods[i].toMLNode());
     result["methods"] = methods;
 
     MLNode events(MLNode::Array);
-    for (int i = 0; i<m_events.size();++i)
+    for (size_t i = 0; i < m_events.size();++i)
         events.append(m_events[i].toMLNode());
     result["events"] = events;
 
@@ -490,7 +490,7 @@ void TypeInfo::fromMLNode(const MLNode &node)
 
     MLNode func = object.at("functions");
     MLNode::ArrayType func_array = func.asArray();
-    for (int i = 0; i < func_array.size(); ++i)
+    for (size_t i = 0; i < func_array.size(); ++i)
     {
         MLNode function = func_array[i];
         FunctionInfo fi({});
@@ -500,7 +500,7 @@ void TypeInfo::fromMLNode(const MLNode &node)
 
     MLNode meth = object.at("methods");
     MLNode::ArrayType meth_array = meth.asArray();
-    for (int i = 0; i < meth_array.size(); ++i)
+    for (size_t i = 0; i < meth_array.size(); ++i)
     {
         MLNode method = meth_array[i];
         FunctionInfo fi({});
@@ -510,7 +510,7 @@ void TypeInfo::fromMLNode(const MLNode &node)
 
     MLNode ev = object.at("events");
     MLNode::ArrayType ev_array = ev.asArray();
-    for (int i = 0; i < ev_array.size(); ++i)
+    for (size_t i = 0; i < ev_array.size(); ++i)
     {
         MLNode event = ev_array[i];
         FunctionInfo fi({});
@@ -547,7 +547,7 @@ MLNode InheritanceInfo::toMLNode() const
 {
     MLNode result(MLNode::Array);
 
-    for (int i = 0; i < m_types.size();++i)
+    for (size_t i = 0; i < m_types.size();++i)
     {
         result.append(m_types[i]->toMLNode());
     }
@@ -557,7 +557,7 @@ MLNode InheritanceInfo::toMLNode() const
 void InheritanceInfo::fromMLNode(const MLNode &node)
 {
     MLNode::ArrayType arr = node.asArray();
-    for (int i = 0; i<arr.size();++i)
+    for (size_t i = 0; i<arr.size();++i)
     {
         TypeInfo::Ptr ti = TypeInfo::create("","", false, false);
         ti->fromMLNode(arr.at(i));
@@ -620,14 +620,14 @@ MLNode DocumentInfo::toMLNode() const
     result["status"] = m_status;
 
     MLNode imports(MLNode::Array);
-    for (int i = 0; i < m_imports.size(); ++i)
+    for (size_t i = 0; i < m_imports.size(); ++i)
     {
         imports.append(m_imports[i].toMLNode());
     }
     result["imports"] = imports;
 
     MLNode types(MLNode::Array);
-    for (int i =0; i<m_types.size();++i)
+    for (size_t i =0; i<m_types.size();++i)
     {
         types.append(m_types[i]->toMLNode());
     }
@@ -735,7 +735,7 @@ MLNode ModuleInfo::toMLNode() const
     result["import_uri"] = m_importUri.data();
 
     MLNode deps(MLNode::Array);
-    for (int i = 0; i<m_dependencies.size();++i)
+    for (size_t i = 0; i<m_dependencies.size();++i)
         deps.append(m_dependencies[i].data());
     result["dependencies"] = deps;
 

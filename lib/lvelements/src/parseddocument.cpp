@@ -35,7 +35,7 @@ std::vector<ImportInfo> ParsedDocument::extractImports(const std::string &source
     std::vector<ImportInfo> result;
 
     auto count = ts_node_child_count(root_node);
-    for (int i = 0; i < count; ++i)
+    for (uint32_t i = 0; i < count; ++i)
     {
         TSNode child = ts_node_child(root_node, i);
         if (strcmp(ts_node_type(child), "import_statement") == 0)
@@ -288,7 +288,7 @@ CursorContext ParsedDocument::findCursorContext(LanguageParser::AST *ast, uint32
     return CursorContext(context, expressionPath);
 }
 
-void ParsedDocument::treePath(LanguageParser::AST *ast, int position, std::vector<TSNode> &result)
+void ParsedDocument::treePath(LanguageParser::AST *ast, uint32_t position, std::vector<TSNode> &result)
 {
     TSTree* tree = reinterpret_cast<TSTree*>(ast);
     TSNode root_node = ts_tree_root_node(tree);
@@ -299,7 +299,7 @@ void ParsedDocument::treePath(LanguageParser::AST *ast, int position, std::vecto
     {
         auto count = ts_node_child_count(current);
         found = false;
-        for (int idx = 0; idx < count; ++idx)
+        for (uint32_t idx = 0; idx < count; ++idx)
         {
             TSNode child = ts_node_child(current, idx);
             auto start = ts_node_start_byte(child);
@@ -411,7 +411,7 @@ DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &source, Languag
 
     DocumentInfo::Ptr result = DocumentInfo::create();
     auto count = ts_node_child_count(root_node);
-    for (int i = 0; i < count; ++i)
+    for (uint32_t i = 0; i < count; ++i)
     {
         TSNode child = ts_node_child(root_node, i);
         if (strcmp(ts_node_type(child), "import_statement") == 0)
@@ -421,7 +421,7 @@ DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &source, Languag
             Utf8 alias;
 
             auto import_count = ts_node_child_count(child);
-            int j = 0;
+            uint32_t j = 0;
             while (j < import_count)
             {
                 TSNode import_child = ts_node_child(child, j);
@@ -430,7 +430,7 @@ DocumentInfo::Ptr ParsedDocument::extractInfo(const std::string &source, Languag
                     rel = true;
                 } else if (strcmp(ts_node_type(import_child), "import_path") == 0) {
                     auto import_child_count = ts_node_child_count(import_child);
-                    for (int k = 0; k < import_child_count; k+=2)
+                    for (uint32_t k = 0; k < import_child_count; k+=2)
                     {
                         segs.push_back(slice(source, ts_node_child(import_child, k)));
                     }

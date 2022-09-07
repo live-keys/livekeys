@@ -21,6 +21,7 @@
 #include <functional>
 #include <algorithm>
 #include <cctype>
+#include <iomanip>
 
 namespace lv{
 
@@ -263,6 +264,16 @@ Utf8 Utf8::join(const std::vector<Utf8> &parts, const Utf8 &delim){
     return result;
 }
 
+Utf8 Utf8::join(const std::vector<std::string> &parts, const std::string &delim){
+    Utf8 result;
+    for( const auto &s : parts ){
+        if(!result.isEmpty())
+            *result.m_data += delim;
+        *result.m_data += s;
+    }
+    return result;
+}
+
 size_t Utf8::size() const{
     return m_data->size();
 }
@@ -297,13 +308,15 @@ bool Utf8::isSpace(uint32_t c){
 }
 
 void Utf8::trimLeft(std::string &s){
-    s.erase(s.begin(), std::find_if(s.begin(), s.end(),
-            std::not1(std::ptr_fun<int, int>(std::isspace))));
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char c){
+        return !std::isspace(c); }
+    ));
 }
 
 void Utf8::trimRight(std::string &s){
-    s.erase(std::find_if(s.rbegin(), s.rend(),
-            std::not1(std::ptr_fun<int, int>(std::isspace))).base(), s.end());
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+            return !std::isspace(ch);
+    }).base(), s.end());
 }
 
 void Utf8::trim(std::string &s){
@@ -318,6 +331,14 @@ void Utf8::replaceAll(std::string &data, const std::string &from, const std::str
         data.replace(start_pos, from.length(), to);
         start_pos += to.length(); // Handles case where 'to' is a substring of 'from'
     }
+}
+
+Utf8 Utf8::numberToHex(unsigned long long nr){
+    std::stringstream stream;
+    stream << "0x"
+         << std::setfill ('0') << std::setw(sizeof(unsigned long long) * 2)
+         << std::hex << nr;
+    return stream.str();
 }
 
 Utf8 Utf8::trimLeft() const{

@@ -32,28 +32,70 @@ public:
     typedef std::shared_ptr<const Library> ConstPtr;
 
 public:
+    class Table;
+
+public:
+    ~Library();
+
     static Ptr load(const std::string& path);
+    static Ptr isLoaded(const std::string& path);
+    void close();
+
     void* symbol(const std::string& name);
     void* symbol(const char* name);
+    template<typename T> T symbolAs(const std::string& name);
+    template<typename T> T symbolAs(const char* name);
 
-    template<typename T> T fn(const std::string& name);
-    template<typename T> T fn(const char* name);
+    const std::string& path() const;
+    const std::string& name() const;
 
     static void handleReference(const std::string& path);
 
 private:
-    Library(const std::string& path);
+    static std::string extensionImpl();
+    static Library::Ptr loadImpl(const std::string& path);
+    static void handleReferenceImpl(const std::string& path);
+    bool closeImpl();
+    void cleanImpl();
+    void* symbolImpl(const char* symbol);
+    const std::string& pathImpl() const;
+    const std::string& nameImpl() const;
+
+private:
+    static Library::Table& table();
+
+private:
+    Library();
     DISABLE_COPY(Library);
 
     LibraryPrivate* m_d;
-
 };
 
-template<typename T> T Library::fn(const std::string& name){
+inline void *Library::symbol(const std::string &name){
+    return symbol(name.c_str());
+}
+
+inline void *Library::symbol(const char *name){
+    return symbolImpl(name);
+}
+
+inline void Library::handleReference(const std::string &path){
+    Library::handleReferenceImpl(path);
+}
+
+inline const std::string &Library::path() const{
+    return pathImpl();
+}
+
+inline const std::string& Library::name() const{
+    return nameImpl();
+}
+
+template<typename T> T Library::symbolAs(const std::string& name){
     return reinterpret_cast<T>(symbol(name));
 }
 
-template<typename T> T Library::fn(const char* name){
+template<typename T> T Library::symbolAs(const char* name){
     return reinterpret_cast<T>(symbol(name));
 }
 

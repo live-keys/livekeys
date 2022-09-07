@@ -23,16 +23,21 @@
 
 #include "live/mlnode.h"
 
-class QDateTime;
 class QVariant;
 
 namespace lv{
 
 class Utf8;
+class DateTime;
 
 class LV_BASE_EXPORT VisualLog{
 
 public:
+    class Configuration;
+    class ConfigurationContainer;
+
+    typedef std::function<void(int, const std::string&)> MessageHandlerFunction;
+
     /** Bitmasks for each type of output */
     enum Output{
         /** Console output */
@@ -46,9 +51,6 @@ public:
         /** Extentions output */
         Extensions = 16
     };
-
-    class Configuration;
-    class ConfigurationContainer;
 
     /**
       \class lv::VisualLog::SourceLocation
@@ -101,7 +103,7 @@ public:
         std::string sourceFileName() const;
         int         sourceLineNumber() const;
         std::string sourceFunctionName() const;
-        const QDateTime& stamp() const;
+        const DateTime& stamp() const;
         std::string prefix(const VisualLog::Configuration* configuration) const;
         std::string tag(const VisualLog::Configuration* configuration) const;
         Level       level() const;
@@ -114,9 +116,9 @@ public:
 
         std::string expand(const std::string& pattern) const;
 
-        Level              m_level;
-        SourceLocation*    m_location;
-        mutable QDateTime* m_stamp;
+        Level            m_level;
+        SourceLocation*  m_location;
+        mutable DateTime* m_stamp;
     };
 
     /**
@@ -172,7 +174,7 @@ public:
 
     VisualLog& at(const std::string& file, int line = 0, const std::string& functionName = "");
     VisualLog& at(const std::string& remote, const std::string& file, int line = 0, const std::string& functionName = "");
-    VisualLog& overrideStamp(const QDateTime& stamp);
+    VisualLog& overrideStamp(const DateTime &stamp);
 
     template<typename T> VisualLog& operator <<( const T& x );
     template<typename T> VisualLog& operator <<( std::ostream& (*f)(std::ostream&) );
@@ -213,11 +215,11 @@ public:
     template<typename T> void asObject(const std::string& type, const T& value);
     void asObject(const std::string& type, const MLNode& value);
 
-
     static ViewTransport* model();
     static void setViewTransport(ViewTransport* model);
 
     static void flushConsole(const std::string& data);
+    static void setInternalMessageHandler(const MessageHandlerFunction& fn);
 
 private:
     DISABLE_COPY(VisualLog);
@@ -234,6 +236,8 @@ private:
 
     static ConfigurationContainer createDefaultConfigurations();
     static ConfigurationContainer& registeredConfigurations();
+    static MessageHandlerFunction& internalMessageHandler();
+    static void defaultInternalMessageHandler(int, const std::string& message);
 
     static ViewTransport* m_model;
 

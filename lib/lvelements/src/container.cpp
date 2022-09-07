@@ -34,7 +34,7 @@ ScopedValue Container::children(){
 
 void Container::setChildren(ScopedValue children){
     v8::Local<v8::Value> data = children.data();
-    foreach( Element* e, m_data ){
+    for( Element* e: m_data ){
         e->setParent(nullptr);
     }
     m_data.clear();

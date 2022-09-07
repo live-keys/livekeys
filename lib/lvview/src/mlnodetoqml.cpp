@@ -52,7 +52,8 @@ void toQml(const MLNode &n, QJSValue &result, QJSEngine *engine){
         break;
     }
     case MLNode::Type::Bytes:{
-        result = QString(n.asBytes().toBase64());
+        ByteBuffer bb = ByteBuffer::encodeBase64(n.asBytes(), true);
+        result = QString::fromUtf8(bb.data(), bb.size());
         break;
     }
     case MLNode::Type::String:{

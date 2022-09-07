@@ -3,7 +3,7 @@
 
 #include <QObject>
 #include "testrunner.h"
-#include "live/lockedfileiosession.h"
+#include "live/fileio.h"
 
 class LvParseErrorTest : public QObject{
 
@@ -20,8 +20,8 @@ private slots:
     void identifierNotFound();
 
 private:
-    lv::LockedFileIOSession::Ptr m_fileSession;
-    std::string                  m_scriptPath;
+    lv::FileIO* m_fileIO;
+    std::string m_scriptPath;
 };
 
 #endif // LVPARSEERRORTEST_H

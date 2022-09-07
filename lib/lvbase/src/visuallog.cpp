@@ -16,11 +16,11 @@
 #include "visuallog.h"
 #include "live/mlnodetojson.h"
 #include "live/utf8.h"
+#include "live/datetime.h"
 #include <unordered_map>
-#include <QFile>
-#include <QDateTime>
+#include <fstream>
+
 #include <QVariant>
-#include <QSharedPointer>
 
 
 /**
@@ -93,14 +93,13 @@
  * \ingroup lvbase
  */
 
-#if defined(Q_OS_UNIX) || (defined(Q_OS_WIN) && defined(QS_LOG_WIN_PRINTF_CONSOLE))
+#if defined(PLATFORM_OS_UNIX)
 #include <cstdio>
-void vLoggerConsole(const std::string& message)
-{
+void vLoggerConsole(const std::string& message){
    fprintf(stderr, "%s", message.c_str());
    fflush(stderr);
 }
-#elif defined(Q_OS_WIN)
+#elif defined(PLATFORM_OS_WIN)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 void vLoggerConsole(const std::string& message)
@@ -112,41 +111,6 @@ void vLoggerConsole(const std::string& message)
 namespace lv{
 
 namespace{
-
-    std::string visualLogDateFormat(const std::string& format, const QDateTime& dt){
-        std::string base = "";
-        char c = 0;
-
-        std::string::const_iterator it = format.begin();
-        while ( it != format.end() ){
-            if ( c == '%' ){
-                ++it;
-                if ( it != format.end() ){
-                    char c = *it;
-                    switch(c){ //TODO: Optimize conversions
-                    case 'w': base += QDate::shortDayName(dt.date().dayOfWeek()).toStdString(); break;
-                    case 'W': base += QDate::longDayName(dt.date().dayOfWeek()).toStdString(); break;
-                    case 'b': base += QDate::shortMonthName(dt.date().month()).toStdString(); break;
-                    case 'B': base += QDate::longMonthName(dt.date().month()).toStdString(); break;
-                    case 'd': base += QString::asprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
-                    case 'e': base += QString::asprintf("%d",      dt.date().day() ).toStdString(); break;
-                    case 'f': base += QString::asprintf("%*d",  2, dt.date().day() ).toStdString(); break;
-                    case 'm': base += QString::asprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
-                    case 'n': base += QString::asprintf("%d",      dt.date().month() ).toStdString(); break;
-                    case 'o': base += QString::asprintf("%*d",  2, dt.date().month() ).toStdString(); break;
-                    case 'y': base += QString::asprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
-                    case 'Y': base += QString::asprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
-                    default: base += *it;
-                    }
-                }
-            } else {
-                base += *it;
-            }
-            ++it;
-        }
-
-        return base;
-    }
 
     std::string extractFileNameSegment(const std::string& file){
         std::string::size_type pos = file.rfind('/');
@@ -202,11 +166,12 @@ public:
     int            m_output;
     int            m_logObjects;
     bool           m_logDaily;
-    QFile*         m_logFile;
-    QDate          m_lastLog;
+    std::ofstream* m_logFile;
+    std::string    m_logFilePath;
+    DateTime       m_lastLog;
     std::string    m_prefix;
 
-    QList<QSharedPointer<VisualLog::Transport> > m_transports;
+    std::list<std::shared_ptr<VisualLog::Transport> > m_transports;
 };
 
 
@@ -293,6 +258,15 @@ VisualLog::ConfigurationContainer VisualLog::createDefaultConfigurations(){
 VisualLog::ConfigurationContainer &VisualLog::registeredConfigurations(){
     static ConfigurationContainer registeredConfigurations = createDefaultConfigurations();
     return registeredConfigurations;
+}
+
+VisualLog::MessageHandlerFunction &VisualLog::internalMessageHandler(){
+    static VisualLog::MessageHandlerFunction m = &VisualLog::defaultInternalMessageHandler;
+    return m;
+}
+
+void VisualLog::defaultInternalMessageHandler(int, const std::string& message){
+    printf("Internal Log: %s\n", message.c_str());
 }
 
 VisualLog::ConfigurationContainer::ConfigurationContainer(){
@@ -530,7 +504,9 @@ void VisualLog::configure(VisualLog::Configuration *configuration, const MLNode 
         } else if ( it.key() == "prefix" ){
             configuration->m_prefix = it.value().asString();
         } else {
-            qWarning("Unknown configuration key: %s", it.key().c_str());
+            VisualLog::internalMessageHandler()(
+                VisualLog::MessageInfo::Warning, Utf8("Unknown configuration key: %.").format(it.key()).data()
+            );
         }
     }
 
@@ -555,7 +531,7 @@ void VisualLog::addTransport(const std::string &configuration, VisualLog::Transp
 void VisualLog::addTransport(VisualLog::Configuration *configuration, VisualLog::Transport *transport){
     m_output = 0; // Disable output
 
-    configuration->m_transports.append(QSharedPointer<VisualLog::Transport>(transport));
+    configuration->m_transports.push_back(std::shared_ptr<VisualLog::Transport>(transport));
 }
 
 /** \brief Removes transport given a predefined configuration */
@@ -662,32 +638,46 @@ void VisualLog::init(){
 
 void VisualLog::flushFile(const std::string& data){
     if ( m_configuration->m_logDaily ){
-        QDateTime cdt = m_messageInfo.stamp();
-        if ( cdt.date() != m_configuration->m_lastLog || m_configuration->m_logFile == nullptr ){
-            m_configuration->m_logFile = new QFile(QString::fromStdString(visualLogDateFormat(m_configuration->m_filePath, cdt)));
-            if ( !m_configuration->m_logFile->open(QIODevice::Append) ){
+        DateTime cdt = m_messageInfo.stamp();
+        if ( cdt.dayOfYear() != m_configuration->m_lastLog.dayOfYear() || m_configuration->m_logFile == nullptr ){
+            m_configuration->m_logFile = new std::ofstream;
+            m_configuration->m_logFilePath = cdt.format(m_configuration->m_filePath);
+            m_configuration->m_logFile->open(m_configuration->m_logFilePath, std::ios::out | std::ios::binary | std::ios::app );
+            if ( !m_configuration->m_logFile->is_open() ){
                 m_configuration->m_output = removeOutputFlag(m_configuration->m_output, VisualLog::File);
-                std::string fileName = m_configuration->m_logFile->fileName().toStdString();
-                qCritical("Failed to open file: \'%s\'. Closing file output stream.", fileName.c_str());
+                std::string fileName = m_configuration->m_logFilePath;
+                delete m_configuration->m_logFile;
+                m_configuration->m_logFile = nullptr;
+                m_configuration->m_logFilePath = "";
+                VisualLog::internalMessageHandler()(
+                    VisualLog::MessageInfo::Error, Utf8("Failed to open file: \'%\'. Closing file output stream.").format(fileName).data()
+                );
                 return;
             }
         }
     } else if ( m_configuration->m_logFile == nullptr ){
-        m_configuration->m_logFile = new QFile(QString::fromStdString(m_configuration->m_filePath));
-        if ( !m_configuration->m_logFile->open(QIODevice::Append) ){
+        m_configuration->m_logFile = new std::ofstream;
+        m_configuration->m_logFilePath = m_configuration->m_filePath;
+        m_configuration->m_logFile->open(m_configuration->m_logFilePath, std::ios::out | std::ios::binary | std::ios::app );
+        if ( !m_configuration->m_logFile->is_open() ){
             m_configuration->m_output = removeOutputFlag(m_configuration->m_output, VisualLog::File);
-            std::string fileName = m_configuration->m_logFile->fileName().toStdString();
-            qCritical("Failed to open file: \'%s\'. Closing file output stream.", fileName.c_str());
+            std::string fileName = m_configuration->m_logFilePath;
+            delete m_configuration->m_logFile;
+            m_configuration->m_logFile = nullptr;
+            m_configuration->m_logFilePath = "";
+            VisualLog::internalMessageHandler()(
+                VisualLog::MessageInfo::Error, Utf8("Failed to open file: \'%\'. Closing file output stream.").format(fileName).data()
+            );
             return;
         }
     }
 
-    m_configuration->m_logFile->write(data.c_str());
+    m_configuration->m_logFile->write(data.c_str(), data.length());
     m_configuration->m_logFile->flush();
 }
 
 void VisualLog::flushHandler(const std::string &data){
-    if ( !m_configuration->m_transports.isEmpty() ){
+    if ( !m_configuration->m_transports.empty() ){
         for ( auto it = m_configuration->m_transports.begin(); it != m_configuration->m_transports.end(); ++it ){
             (*it)->onMessage(m_configuration, m_messageInfo, data);
         }
@@ -699,10 +689,15 @@ void VisualLog::flushConsole(const std::string &data){
     vLoggerConsole(data);
 }
 
+void VisualLog::setInternalMessageHandler(const VisualLog::MessageHandlerFunction &fn){
+    if (fn)
+        VisualLog::internalMessageHandler() = fn;
+}
+
 std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
 
     std::stringstream base;
-    QDateTime dt = stamp();
+    DateTime dt = stamp();
 
     std::string::const_iterator it = pattern.begin();
     while ( it != pattern.end() ){
@@ -715,20 +710,7 @@ std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
                         base << m_location->remote + "> ";
 
                     std::string levelToLower = asciiToLower(levelToString(m_level));
-
-                    base << QString::asprintf(
-                        "%0*d-%0*d-%0*d %0*d:%0*d:%0*d.%0*d %s %s@%d: ",
-                        4, dt.date().year(),
-                        2, dt.date().month(),
-                        2, dt.date().day(),
-                        2, dt.time().hour(),
-                        2, dt.time().minute(),
-                        2, dt.time().second(),
-                        3, dt.time().msec(),
-                        levelToLower.c_str(),
-                        sourceFunctionName().c_str(),
-                        sourceLineNumber()
-                    ).toStdString();
+                    base << dt.format("%Y-%m-%d %H:%M:%S.%i ") << levelToLower << " " << sourceFunctionName() << "@" << sourceLineNumber() << ": ";
                     break;
                 }
                 case 'r': base << sourceRemoteLocation(); break;
@@ -738,31 +720,29 @@ std::string VisualLog::MessageInfo::expand(const std::string &pattern) const{
                 case 'L': base << sourceLineNumber(); break;
                 case 'V': base << levelToString(m_level); break;
                 case 'v': base << asciiToLower(levelToString(m_level)); break;
-                case 'w': base << QDate::shortDayName(dt.date().dayOfWeek()).toStdString(); break;
-                case 'W': base << QDate::longDayName(dt.date().dayOfWeek()).toStdString(); break;
-                case 'b': base << QDate::shortMonthName(dt.date().month()).toStdString(); break;
-                case 'B': base << QDate::longMonthName(dt.date().month()).toStdString(); break;
-                case 'd': base << QString::asprintf("%0*d", 2, dt.date().day() ).toStdString(); break;
-                case 'e': base << QString::asprintf("%d",      dt.date().day() ).toStdString(); break;
-                case 'f': base << QString::asprintf("%*d",  2, dt.date().day() ).toStdString(); break;
-                case 'm': base << QString::asprintf("%0*d", 2, dt.date().month() ).toStdString(); break;
-                case 'n': base << QString::asprintf("%d",      dt.date().month() ).toStdString(); break;
-                case 'o': base << QString::asprintf("%*d",  2, dt.date().month() ).toStdString(); break;
-                case 'y': base << QString::asprintf("%0*d", 2, dt.date().year() % 100 ).toStdString(); break;
-                case 'Y': base << QString::asprintf("%0*d", 4, dt.date().year() ).toStdString(); break;
-                case 'H': base << QString::asprintf("%0*d", 2, dt.time().hour() ).toStdString(); break;
-                case 'I': {
-                    int hour = dt.time().hour();
-                    base << QString::asprintf("%0*d", 2, (hour < 1 ? 12 : (hour > 12 ? hour - 12  : hour))).toStdString();
+                case 'w':
+                case 'W':
+                case 'b':
+                case 'B':
+                case 'd':
+                case 'e':
+                case 'f':
+                case 'm':
+                case 'n':
+                case 'o':
+                case 'y':
+                case 'Y':
+                case 'H':
+                case 'I':
+                case 'a':
+                case 'A':
+                case 'M':
+                case 'S':
+                case 's':
+                case 'i':
+                case 'c':
+                    base << dt.formatSymbol(*it);
                     break;
-                }
-                case 'a': base << QString::asprintf(dt.time().hour() < 12  ? "am" : "pm" ).toStdString(); break;
-                case 'A': base << QString::asprintf(dt.time().hour() < 12  ? "AM" : "PM" ).toStdString(); break;
-                case 'M': base << QString::asprintf("%0*d", 2, dt.time().minute()).toStdString(); break;
-                case 'S': base << QString::asprintf("%0*d", 2, dt.time().second() ).toStdString(); break;
-                case 's': base << QString::asprintf("%0*d.%0*d", 2, dt.time().second(), 3, dt.time().msec() ).toStdString(); break;
-                case 'i': base << QString::asprintf("%0*d", 3, dt.time().msec() ).toStdString(); break;
-                case 'c': base << QString::asprintf("%d",      dt.time().msec() / 100 ).toStdString(); break;
                 default: base << *it;
                 }
             } else {
@@ -834,9 +814,9 @@ VisualLog::MessageInfo::MessageInfo(VisualLog::MessageInfo::Level level)
 }
 
 /** \brief Overrides the previous timestamp with the given one */
-VisualLog &lv::VisualLog::overrideStamp(const QDateTime &stamp){
+VisualLog &lv::VisualLog::overrideStamp(const DateTime &stamp){
     if ( !m_messageInfo.m_stamp )
-        m_messageInfo.m_stamp = new QDateTime(stamp);
+        m_messageInfo.m_stamp = new DateTime(stamp);
     else
         *m_messageInfo.m_stamp = stamp;
     return *this;
@@ -847,9 +827,10 @@ VisualLog &lv::VisualLog::overrideStamp(const QDateTime &stamp){
  *
  * If there's none, it takes the current time and sets it as the stamp.
  */
-const QDateTime &lv::VisualLog::MessageInfo::stamp() const{
-    if ( !m_stamp )
-        m_stamp = new QDateTime(QDateTime::currentDateTime());
+const DateTime &lv::VisualLog::MessageInfo::stamp() const{
+    if ( !m_stamp ){
+        m_stamp = new DateTime(DateTime().toLocal());
+    }
     return *m_stamp;
 }
 

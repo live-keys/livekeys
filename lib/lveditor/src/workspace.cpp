@@ -146,7 +146,7 @@ void Workspace::saveRecentsIfChanged(){
 
 
 QString Workspace::absolutePath(const QString &appDataPath){
-    return QString::fromStdString(lv::ApplicationContext::instance().appDataPath()) + "/" + appDataPath;
+    return lv::ViewContext::instance().appDataPath() + "/" + appDataPath;
 }
 
 QString Workspace::absoluteDir(const QString &dir){

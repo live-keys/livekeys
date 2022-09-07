@@ -22,8 +22,6 @@
 #include "modulefile.h"
 #include "v8nowarnings.h"
 
-#include <QFileInfo>
-
 namespace lv{ namespace el{
 
 class ScriptPrivate{

@@ -100,6 +100,7 @@ public:
 template<typename C, typename ...Args>
 Constructor::UnwrapFunction Constructor::createUnwrapConstructor(ConcreteConstructor<C, Args...>* p){
     return [p](const Function::CallInfo& params){
+        DISABLE_UNUSED_WARNING(p);
         //TODO: Check params size; throw error
         return ConcreteConstructor<C, Args...>::createNative(params.engine(), params.template getValue<0, Args>()...);
     };

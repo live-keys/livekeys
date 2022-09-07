@@ -15,11 +15,9 @@
 
 #include "fileio.h"
 #include "live/exception.h"
+#include "live/visuallog.h"
 #include <fstream>
 #include <istream>
-
-#include <QFile>
-#include <QTextStream>
 
 namespace lv{
 
@@ -55,13 +53,14 @@ bool FileIO::writeToFile(const std::string &path, const std::string &content){
 }
 
 bool FileIO::writeToFile(const std::string &path, const char *content, size_t length){
-    QFile fileInput(path.c_str());
-    if ( !fileInput.open(QIODevice::WriteOnly ) ){
+    std::fstream outStream;
+    outStream.open(path, std::ios::out | std::ios::binary | std::ios::trunc);
+    if ( !outStream.is_open() ){
         THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file for writing: %").format(path), lv::Exception::toCode("~File"));
     }
 
-    fileInput.write(content, static_cast<int>(length));
-    fileInput.close();
+    outStream.write(content, static_cast<int>(length));
+    outStream.close();
 
     return true;
 }

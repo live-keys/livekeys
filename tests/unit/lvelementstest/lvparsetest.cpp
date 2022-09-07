@@ -1,5 +1,5 @@
 #include "lvparsetest.h"
-#include "live/lockedfileiosession.h"
+#include "live/fileio.h"
 #include "live/applicationcontext.h"
 
 #include "live/elements/element.h"
@@ -19,7 +19,7 @@ LvParseTest::LvParseTest(QObject *parent)
 }
 
 void LvParseTest::initTestCase(){
-    m_fileSession = LockedFileIOSession::createInstance();
+    m_fileIO = new FileIO;
     m_scriptPath  = lv::ApplicationContext::instance().releasePath() + "/data";
 }
 
@@ -137,8 +137,8 @@ void LvParseTest::multiNamespaceImportTest(){
 
 void LvParseTest::customBaseComponentTest(){
     std::string name = "ParserTest29";
-    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
-    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
+    std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
+    std::string expect   = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv.js");
 
     Compiler::Config compConfig = Compiler::Config();
     compConfig.setBaseComponent("CustomElement", "custom/CustomElement.js");
@@ -226,8 +226,8 @@ void LvParseTest::bindingChainTest(){
 }
 
 void LvParseTest::parseTestTemplate(std::string name){
-    std::string contents = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv");
-    std::string expect   = m_fileSession->readFromFile(m_scriptPath + "/" + name + ".lv.js");
+    std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
+    std::string expect   = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv.js");
 
     Compiler::Config compilerConfig;
     compilerConfig.allowUnresolvedTypes(true);

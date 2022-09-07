@@ -32,6 +32,7 @@ public:
 
 private slots:
     void initTestCase();
+
     void constructorTest();
     void constructorFromInitializerListTest();
     void assignmentTest();

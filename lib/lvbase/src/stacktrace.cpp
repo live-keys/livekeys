@@ -15,8 +15,6 @@
 
 #include "stacktrace.h"
 #include "live/visuallog.h"
-#include <QString>
-
 
 /**
   \class lv::StackTrace
@@ -26,32 +24,33 @@
 
 namespace lv{
 
-std::string pathFileName(const std::string &path){
-    std::string::size_type pos = path.rfind('/');
-
-#ifdef Q_OS_WIN
-    if ( pos == std::string::npos ){
-        pos = path.rfind('\\');
-    }
-#endif
-
-    if ( pos != std::string::npos ){
-        return path.substr(pos + 1);
-    }
-
-    return path;
-}
-
 // StackFrame
 // -----------------------------------------------------------------
 
 
+StackFrame::StackFrame(const Utf8 &functionName,
+        StackFrame::AddressPtr address,
+        const Utf8 &objectPath,
+        const Utf8 &filePath,
+        int line)
+    : m_functionName(functionName)
+    , m_address(address)
+    , m_objectPath(objectPath)
+    , m_filePath(filePath)
+    , m_line(line)
+{
+}
+
+Utf8 StackFrame::fileName() const{
+    return Path::name(m_filePath.data());
+}
+
 VisualLog &operator <<(VisualLog &vl, const StackFrame &value){
     if ( value.line() ){
-        vl << "at " << value.functionName().c_str() << "(" << value.fileName().c_str() << ":" << value.line()
-           << ")" << "[0x" << QString::number(value.address(), 16).toStdString() << "]";
+        vl << "at " << value.functionName() << "(" << value.fileName() << ":" << value.line()
+           << ")" << "[" << Utf8::numberToHex(value.address()) << "]";
     } else {
-        vl << "at " << value.functionName().c_str() << "[0x" << QString::number(value.address(), 16).toStdString() << "]";
+        vl << "at " << value.functionName() << "[" << Utf8::numberToHex(value.address()) << "]";
     }
     return vl;
 }
@@ -80,5 +79,6 @@ VisualLog &operator <<(VisualLog &vl, const StackTrace &value){
     }
     return vl;
 }
+
 
 }// namespace

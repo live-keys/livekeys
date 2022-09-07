@@ -30,7 +30,7 @@ public:
     static DocumentInfo::Ptr extractInfo(const std::string& source, LanguageParser::AST* ast);
     static CursorContext findCursorContext(LanguageParser::AST* ast, uint32_t position);
 private:
-    static void treePath(LanguageParser::AST* ast, int position, std::vector<TSNode>& result);
+    static void treePath(LanguageParser::AST* ast, uint32_t position, std::vector<TSNode>& result);
     static TypeInfo::Ptr extractType(const std::string& source, TSNode node);
 
     static std::string slice(const std::string& source, TSNode node);

@@ -18,7 +18,6 @@
 #include "live/visuallog.h"
 #include "live/stacktrace.h"
 
-#include <queue>
 #include <map>
 #include <vector>
 #include <algorithm>

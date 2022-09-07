@@ -14,42 +14,28 @@
 **
 ****************************************************************************/
 
-#ifndef VISUALLOGTEST_H
-#define VISUALLOGTEST_H
+#ifndef DATETIMETEST_H
+#define DATETIMETEST_H
 
 #include <QObject>
 #include "testrunner.h"
 
-namespace lv{
-class VisualLogModel;
-}
-class QQmlEngine;
-class QCoreApplication;
-
-class VisualLogTest : public QObject{
+class DateTimeTest : public QObject{
 
     Q_OBJECT
     Q_TEST_RUNNER_SUITE
 
 public:
-    explicit VisualLogTest(QObject *parent = 0);
-    ~VisualLogTest();
+    DateTimeTest(QObject* parent = 0);
+    ~DateTimeTest(){}
 
 private slots:
     void initTestCase();
-    void cleanupTestCase();
-
-    void levelTest();
-    void levelObjectTest();
-    void prefixTest();
-    void fileOutputTest();
-    void dailyFileOutputTest();
-    void viewOutputTest();
-
-private:
-    QQmlEngine*          m_engine;
-    lv::VisualLogModel* m_vlogModel;
-
+    void testCreation();
+    void testToString();
+    void testInvalidDate();
+    void testComparison();
+    void testOperations();
 };
 
-#endif // VISUALLOGTEST_H
+#endif // DATETIMETEST_H
