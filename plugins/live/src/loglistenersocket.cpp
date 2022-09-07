@@ -20,12 +20,12 @@
 #include "live/viewengine.h"
 #include "live/mlnodetojson.h"
 #include "live/viewcontext.h"
+#include "live/datetime.h"
 
 #include <QMetaType>
 #include <QMetaObject>
 #include <QHostAddress>
 #include <QTcpSocket>
-#include <QDateTime>
 
 namespace lv{
 
@@ -40,7 +40,7 @@ public:
     QString address;
     QString functionName;
     QByteArray typeName;
-    QDateTime stamp;
+    DateTime stamp;
 };
 
 // LogListenerSocket
@@ -141,25 +141,26 @@ int LogListenerSocket::isIp(const QByteArray &buffer){
 
 void LogListenerSocket::logLine(const QByteArray &buffer){
     if ( m_expectObject ){
-        lv::MetaInfo::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
+        //TODO
+//        lv::QmlMetaExtension::Ptr ti = lv::ViewContext::instance().engine()->typeInfo(m_expectObject->typeName);
 
-        lv::VisualLog vl(m_expectObject->level);
-        vl.at(m_expectObject->address.toStdString(), "", m_expectObject->line, m_expectObject->functionName.toStdString());
-        vl.overrideStamp(m_expectObject->stamp);
+//        lv::VisualLog vl(m_expectObject->level);
+//        vl.at(m_expectObject->address.toStdString(), "", m_expectObject->line, m_expectObject->functionName.toStdString());
+//        vl.overrideStamp(m_expectObject->stamp);
 
-        if ( !ti.isNull() && ti->isSerializable() && ti->isLoggable() ){
-            try{
-                lv::MLNode node;
-                lv::ml::fromJson(buffer, node);
-                QObject* object = ti->deserialize(lv::ViewContext::instance().engine(), node);
-                ti->log(vl, object);
-            } catch ( lv::Exception& e ){
-                lv::ViewContext::instance().engine()->throwError(&e, this);
-            }
+//        if ( !ti.isNull() && ti->isSerializable() && ti->isLoggable() ){
+//            try{
+//                lv::MLNode node;
+//                lv::ml::fromJson(buffer, node);
+//                QObject* object = ti->deserialize(lv::ViewContext::instance().engine(), node);
+//                ti->log(vl, object);
+//            } catch ( lv::Exception& e ){
+//                lv::ViewContext::instance().engine()->throwError(&e, this);
+//            }
 
-        } else {
-            vl << "[Object object]";
-        }
+//        } else {
+//            vl << "[Object object]";
+//        }
 
         delete m_expectObject;
         m_expectObject = 0;
@@ -187,7 +188,7 @@ void LogListenerSocket::logLine(const QByteArray &buffer){
                     int second  = buffer.mid(dateIndex + 17, 2).toInt();
                     int msecond = buffer.mid(dateIndex + 20, 3).toInt();
 
-                    QDateTime stamp(QDate(year, month, day), QTime(hour, minute, second, msecond));
+                    DateTime stamp(year, month, day, hour, minute, second, msecond);
 
                     lv::VisualLog::MessageInfo::Level level = lv::VisualLog::MessageInfo::levelFromString(
                         buffer.mid(levelIndex, functionIndex - levelIndex - 1).toStdString()
@@ -221,7 +222,7 @@ void LogListenerSocket::logLine(const QByteArray &buffer){
         if ( buffer.size() > 3 && buffer[0] == '\\' && buffer[1] == '@' )
         {
             m_expectObject = new LogListenerSocket::ObjectMessageInfo;
-            m_expectObject->stamp = QDateTime::currentDateTime();
+            m_expectObject->stamp = DateTime().toLocal();
             m_expectObject->typeName = buffer.mid(2);
         } else {
             lv::VisualLog().at(m_address.toStdString(), "") << buffer;

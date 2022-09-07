@@ -16,7 +16,7 @@
 #include "remoteline.h"
 #include "remotelineproperty.h"
 
-#include "live/metainfo.h"
+#include "live/qmlmetaextension.h"
 #include "live/visuallogqt.h"
 #include "live/viewcontext.h"
 #include "live/viewengine.h"
@@ -31,7 +31,7 @@ RemoteLine::RemoteLine(QObject *parent)
     : QObject(parent)
     , m_componentComplete(false)
     , m_componentBuild(false)
-    , m_source(nullptr)
+//    , m_source(nullptr)
     , m_connection(nullptr)
     , m_result(new QQmlPropertyMap)
 {
@@ -55,7 +55,7 @@ void RemoteLine::sendProperty(const QString &propertyName){
 
     QQmlProperty pp(this, propertyName);
 
-    MetaInfo::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
+    QmlMetaExtension::serializeVariant(lv::ViewContext::instance().engine(), pp.read(), inputValue);
 
     input[propertyName.toStdString()] = inputValue;
 
@@ -132,7 +132,7 @@ void RemoteLine::onMessage(const LineMessage &message){
             for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
                 m_result->insert(
                     QByteArray::fromStdString(it.key().c_str()),
-                    MetaInfo::deserializeVariant(engine, it.value())
+                    QmlMetaExtension::deserializeVariant(engine, it.value())
                 );
             }
 
@@ -148,34 +148,34 @@ void RemoteLine::onMessage(const LineMessage &message){
 
 void RemoteLine::initialize(){
 
-    if ( m_source && m_connection && m_connection->isReady() ){
+//    if ( m_source && m_connection && m_connection->isReady() ){
 
-        QByteArray source =
-            m_source->importSourceCode().toUtf8() +
-            "\nItem" +
-            m_source->sourceCode().toUtf8();
+//        QByteArray source =
+//            m_source->importSourceCode().toUtf8() +
+//            "\nItem" +
+//            m_source->sourceCode().toUtf8();
 
-        vlog("remote-line").v() << "Initializing remote component.";
+//        vlog("remote-line").v() << "Initializing remote component.";
 
-        m_connection->sendBuild(source);
+//        m_connection->sendBuild(source);
 
-        m_componentBuild = true;
+//        m_componentBuild = true;
 
-        for ( auto it = m_properties.begin(); it != m_properties.end(); ++it ){
-            RemoteLineProperty* tlp = *it;
-            sendProperty(tlp->name());
-        }
-    }
+//        for ( auto it = m_properties.begin(); it != m_properties.end(); ++it ){
+//            RemoteLineProperty* tlp = *it;
+//            sendProperty(tlp->name());
+//        }
+//    }
 }
 
-void RemoteLine::setSource(ComponentSource *source){
-    if (m_source == source)
-        return;
+//void RemoteLine::setSource(ComponentSource *source){
+//    if (m_source == source)
+//        return;
 
-    m_source = source;
-    emit sourceChanged();
+//    m_source = source;
+//    emit sourceChanged();
 
-    initialize();
-}
+//    initialize();
+//}
 
 }// namespace

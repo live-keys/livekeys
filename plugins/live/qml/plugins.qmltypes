@@ -226,19 +226,6 @@ Module {
         }
     }
     Component {
-        name: "lv::QmlSubproject"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["live/Subproject 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "label"; type: "QString" }
-        Property { name: "sourceComponent"; type: "QQmlComponent"; isPointer: true }
-        Property { name: "source"; type: "QString" }
-        Property { name: "sourceMonitor"; type: "bool" }
-        Property { name: "root"; type: "QObject"; isReadonly: true; isPointer: true }
-        Method { name: "_runnableDestroyed" }
-    }
-    Component {
         name: "lv::RemoteContainer"
         prototype: "QObject"
         exports: ["live/RemoteContainer 1.0"]

@@ -24,6 +24,7 @@
 #include "live/viewcontext.h"
 #include "live/mlnode.h"
 #include "live/mlnodetojson.h"
+#include "live/qmlmetaextension.h"
 
 #include "remotelineresponse.h"
 
@@ -68,7 +69,7 @@ void QmlForkNode::responseValueChanged(const QString &key, const QVariant &value
     MLNode n(MLNode::Object);
 
     MLNode result;
-    MetaInfo::serializeVariant(ViewContext::instance().engine(), value, result);
+    QmlMetaExtension::serializeVariant(ViewContext::instance().engine(), value, result);
 
     n[key.toStdString()] = result;
 
@@ -165,7 +166,7 @@ void QmlForkNode::onSharedMemoryMessage(const QByteArray &message, int type, int
             for ( auto it = inputOb.begin(); it != inputOb.end(); ++it ){
                 m_post->insert(
                     QByteArray::fromStdString(it.key().c_str()),
-                    MetaInfo::deserializeVariant(engine, it.value())
+                    QmlMetaExtension::deserializeVariant(engine, it.value())
                 );
             }
         } catch ( Exception& e ){

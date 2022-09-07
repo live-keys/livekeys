@@ -56,7 +56,6 @@ private:
     static void clearActs(QQmlListProperty<QObject>*);
 
 private:
-    Project*          m_project;
     bool              m_componentComplete;
     QList<QString>    m_actSource;
     WorkerThread*     m_filterWorker;

@@ -20,7 +20,6 @@
 #include <QQmlPropertyMap>
 #include <QSet>
 
-#include "componentsource.h"
 #include "remotecontainer.h"
 
 namespace lv{
@@ -32,7 +31,7 @@ class RemoteLine : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(lv::ComponentSource* source     READ source     WRITE setSource     NOTIFY sourceChanged)
+//    Q_PROPERTY(lv::ComponentSource* source     READ source     WRITE setSource     NOTIFY sourceChanged)
     Q_PROPERTY(lv::RemoteContainer* connection READ connection WRITE setConnection NOTIFY connectionChanged)
     Q_PROPERTY(QQmlPropertyMap* result         READ result     NOTIFY resultChanged)
     Q_CLASSINFO("DefaultProperty", "source")
@@ -48,8 +47,8 @@ public:
 
     bool isComponentComplete() const;
 
-    lv::ComponentSource* source() const;
-    void setSource(lv::ComponentSource* source);
+//    lv::ComponentSource* source() const;
+//    void setSource(lv::ComponentSource* source);
 
     RemoteContainer *connection() const;
     void setConnection(lv::RemoteContainer* connection);
@@ -75,7 +74,7 @@ private:
     QList<RemoteLineProperty*> m_properties;
     bool                    m_componentComplete;
     bool                    m_componentBuild;
-    lv::ComponentSource*    m_source;
+//    lv::ComponentSource*    m_source;
     lv::RemoteContainer*    m_connection;
     QQmlPropertyMap*        m_result;
 
@@ -86,9 +85,9 @@ inline bool RemoteLine::isComponentComplete() const{
     return m_componentComplete;
 }
 
-inline ComponentSource *RemoteLine::source() const{
-    return m_source;
-}
+//inline ComponentSource *RemoteLine::source() const{
+//    return m_source;
+//}
 
 inline RemoteContainer *RemoteLine::connection() const{
     return m_connection;
