@@ -44,6 +44,14 @@ ByteBuffer::ByteBuffer(ByteBuffer::Byte *data, size_t size)
     memcpy((void*)((*m_data)->buffer), (void*)data, size);
 }
 
+ByteBuffer::ByteBuffer(const ByteBuffer::Byte *data, size_t size)
+    : m_data(new std::shared_ptr<ByteBufferData>(new ByteBufferData))
+{
+    m_data->get()->buffer = new ByteBuffer::Byte[size];
+    m_data->get()->size = size;
+    memcpy((void*)((*m_data)->buffer), (void*)data, size);
+}
+
 /**
  * \brief Copy constructor of ByteBuffer
  *

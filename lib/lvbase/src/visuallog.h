@@ -23,8 +23,6 @@
 
 #include "live/mlnode.h"
 
-class QVariant;
-
 namespace lv{
 
 class Utf8;
@@ -141,6 +139,12 @@ public:
                               const MLNode& node) = 0;
     };
 
+
+    class LV_BASE_EXPORT ViewObject{
+    public:
+        virtual ~ViewObject(){}
+    };
+
     /**
      * \class lv::VisualLog::ViewTransport
      * \brief Abstraction of the transport used to pass visual (view) messages
@@ -161,7 +165,7 @@ public:
             const VisualLog::Configuration* configuration,
             const VisualLog::MessageInfo& messageInfo,
             const std::string& viewName,
-            const QVariant& value
+            ViewObject* vo
         ) = 0;
     };
 
@@ -210,10 +214,8 @@ public:
     void flushLine();
     void closeFile();
 
-    void asView(const std::string& viewPath, const QVariant& viewData);
-    void asView(const std::string& viewPath, std::function<QVariant()> cloneFunction);
-    template<typename T> void asObject(const std::string& type, const T& value);
     void asObject(const std::string& type, const MLNode& value);
+    template<typename LogBehavior, typename T> VisualLog& behavior(const T& value);
 
     static ViewTransport* model();
     static void setViewTransport(ViewTransport* model);
@@ -288,13 +290,30 @@ template<typename T> void VisualLog::object(VisualLog::MessageInfo::Level level,
     object(value);
 }
 
-/** \brief Display value as object of given type */
-template<typename T> void VisualLog::asObject(const std::string &type, const T &value){
+
+template<typename LogBehavior, typename T>
+VisualLog &VisualLog::behavior(const T &value){
+    // as object
     if ( canLog() && m_objectOutput && canLogObjects(m_configuration) ){
-        MLNode mlvalue;
-        ml::serialize(value, mlvalue);
-        asObject(type, mlvalue);
+        if ( LogBehavior::hasTransport() ){
+            MLNode mlvalue;
+            LogBehavior::toTransport(value, mlvalue);
+            ml::serialize(value, mlvalue);
+            asObject(LogBehavior::typeId(value), mlvalue);
+        }
     }
+    // as view
+    if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
+        if ( LogBehavior::hasViewObject() ){
+            VisualLog::ViewObject* vo = LogBehavior::toView(value);
+            std::string viewDelegate = LogBehavior::defaultViewDelegate(value);
+            m_model->onView(m_configuration, m_messageInfo, viewDelegate, vo);
+            m_output = removeOutputFlag(m_output, VisualLog::View);
+        }
+    }
+    // as stream
+    LogBehavior::toStream(*this, value);
+    return *this;
 }
 
 /** \brief Log given value as object with level Fatal */

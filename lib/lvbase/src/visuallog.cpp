@@ -19,8 +19,7 @@
 #include "live/datetime.h"
 #include <unordered_map>
 #include <fstream>
-
-#include <QVariant>
+#include <list>
 
 
 /**
@@ -235,7 +234,7 @@ public:
     int configurationCount() const;
 
 private:
-    QList<VisualLog::Configuration*>          m_configurations;
+    std::vector<VisualLog::Configuration*>                     m_configurations;
     std::unordered_map<std::string, VisualLog::Configuration*> m_configurationMap;
 };
 
@@ -273,9 +272,11 @@ VisualLog::ConfigurationContainer::ConfigurationContainer(){
 }
 
 int VisualLog::ConfigurationContainer::addConfiguration(const std::string &key, VisualLog::Configuration *configuration){
-    Q_ASSERT(m_configurationMap.find(key) == m_configurationMap.end());
+    if ( m_configurationMap.find(key) != m_configurationMap.end() ){
+        THROW_EXCEPTION(lv::Exception, "Configuration key already exists.", lv::Exception::toCode("~Key"));
+    }
 
-    m_configurations.append(configuration);
+    m_configurations.push_back(configuration);
     m_configurationMap[key] = configuration;
 
     return m_configurations.size();
@@ -579,22 +580,6 @@ void VisualLog::flushLine(){
 void VisualLog::closeFile(){
     m_output = 0; // Disable output
     m_configuration->closeFile();
-}
-
-/** \brief Display viewData in the View given by the viewPath */
-void VisualLog::asView(const std::string &viewPath, const QVariant &viewData){
-    if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
-        m_model->onView(m_configuration, m_messageInfo, viewPath, viewData);
-        m_output = removeOutputFlag(m_output, VisualLog::View);
-    }
-}
-
-/** \brief Display view data returned by the given function in the View given by the viewPath */
-void VisualLog::asView(const std::string &viewPath, std::function<QVariant ()> cloneFunction){
-    if ( canLog() && m_objectOutput && (m_output & VisualLog::View) ){
-        m_model->onView(m_configuration, m_messageInfo, viewPath, cloneFunction());
-        m_output = removeOutputFlag(m_output, VisualLog::View);
-    }
 }
 
 /** \brief Display MLNode as object of given type */

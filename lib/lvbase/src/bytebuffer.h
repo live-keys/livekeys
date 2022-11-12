@@ -16,6 +16,7 @@ public:
 public:
     ByteBuffer();
     ByteBuffer(Byte* data, size_t size);
+    ByteBuffer(const Byte* data, size_t size);
     ByteBuffer(const ByteBuffer& other);
     ~ByteBuffer();
 
