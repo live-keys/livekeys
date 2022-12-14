@@ -24,11 +24,24 @@
 
 namespace lv{
 
+// class Document::RunTrigger
+// ----------------------------------------------------------------------------
+
+Document::RunTrigger::RunTrigger(){
+}
+
+Document::RunTrigger::~RunTrigger(){
+}
+
+// class Document
+// ----------------------------------------------------------------------------
+
 Document::Document(const QString& filePath, const QString &formatType, bool isMonitored, Project *parent)
     : QObject(parent)
     , m_formatType(formatType)
     , m_isMonitored(isMonitored)
     , m_isDirty(false)
+    , m_runTrigger(nullptr)
 {
     setPath(filePath);
     readContent();
@@ -39,6 +52,7 @@ Document::Document(const QString& filePath, Project *parent)
     : QObject(parent)
     , m_isMonitored(false)
     , m_isDirty(false)
+    , m_runTrigger(nullptr)
 {
     setPath(filePath);
 }
@@ -97,6 +111,8 @@ bool Document::save(){
             emit saved();
             if ( parentAsProject() )
                 parentAsProject()->documentSaved(this);
+            if ( m_runTrigger )
+                m_runTrigger->onContentSaved();
             return true;
         }
     }
@@ -167,6 +183,21 @@ QString Document::pathHash() const{
     if ( isOnDisk() )
         return QString::fromUtf8(Project::hashPath(path().toUtf8()).toHex());
     return "";
+}
+
+void Document::notifyRunTriggerChanged(){
+    emit runTriggerChanged();
+}
+
+void Document::setRunTrigger(Document::RunTrigger *trigger){
+    if ( m_runTrigger )
+        delete m_runTrigger;
+    m_runTrigger = trigger;
+
+}
+
+Document::RunTrigger *Document::runTrigger() const{
+    return m_runTrigger;
 }
 
 }// namespace

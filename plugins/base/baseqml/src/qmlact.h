@@ -5,6 +5,7 @@
 #include "live/shared.h"
 #include "live/qmlworkerinterface.h"
 #include "live/componentdeclaration.h"
+#include "live/qmlfunctionsource.h"
 
 #include <QObject>
 #include <QVariant>
@@ -12,33 +13,25 @@
 
 namespace lv{
 
-/// \private
+
+class QmlPromise;
 class LV_BASEQML_EXPORT QmlAct : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
     Q_ENUMS(Trigger)
     Q_INTERFACES(QQmlParserStatus)
-    Q_PROPERTY(QJSValue run                   READ run     WRITE setRun     NOTIFY runChanged)
-    Q_PROPERTY(QJSValue args                  READ args    WRITE setArgs    NOTIFY argsChanged)
-    Q_PROPERTY(QJSValue unwrap                READ unwrap  WRITE setUnwrap  NOTIFY unwrapChanged)
-    Q_PROPERTY(QJSValue returns               READ returns WRITE setReturns NOTIFY returnsChanged)
-    Q_PROPERTY(QJSValue result                READ result  NOTIFY resultChanged)
-    Q_PROPERTY(Trigger trigger                READ trigger WRITE setTrigger NOTIFY triggerChanged)
-    Q_PROPERTY(lv::QmlWorkerInterface* worker READ worker  WRITE setWorker NOTIFY workerChanged)
+    Q_PROPERTY(QJSValue runFunction           READ runFunction NOTIFY runFunctionChanged)
+    Q_PROPERTY(QJSValue args                  READ args        WRITE setArgs    NOTIFY argsChanged)
+    Q_PROPERTY(QJSValue unwrap                READ unwrap      WRITE setUnwrap  NOTIFY unwrapChanged)
+    Q_PROPERTY(QJSValue returns               READ returns     WRITE setReturns NOTIFY returnsChanged)
+    Q_PROPERTY(QJSValue result                READ result      NOTIFY resultChanged)
+    Q_PROPERTY(Trigger trigger                READ trigger     WRITE setTrigger NOTIFY triggerChanged)
+    Q_PROPERTY(lv::QmlWorkerInterface* worker READ worker      WRITE setWorker NOTIFY workerChanged)
 
 public:
     enum Trigger{
         PropertyChange,
         Manual
-    };
-
-    class RunSource{
-    public:
-        RunSource(ComponentDeclaration cd) : declarationLocation(cd){}
-
-        ComponentDeclaration declarationLocation;
-        QByteArray imports;
-        QByteArray source;
     };
 
 public:
@@ -49,10 +42,7 @@ public:
 
     const QJSValue& result() const;
 
-    virtual void process(){}
-
-    void setRun(QJSValue run);
-    const QJSValue& run() const;
+    QJSValue runFunction() const;
 
     void setArgs(QJSValue args);
     const QJSValue& args() const;
@@ -76,6 +66,24 @@ public:
 
     bool isRunning() const;
 
+
+    QJSValue apply(const QJSValueList& args);
+    const QJSValueList& argumentCallList() const;
+
+    static bool parserPropertyValidateHook(
+        QmlSourceLocation location,
+        QmlSourceLocation valueLocation,
+        const QString& name);
+    static void parserPropertyHook(
+        ViewEngine* ve,
+        QObject* target,
+        const QByteArray& imports,
+        QmlSourceLocation location,
+        QmlSourceLocation valueLocation,
+        const QString& name,
+        const QString& source
+    );
+
 public slots:
     void exec();
 
@@ -83,7 +91,7 @@ public slots:
 
 signals:
     void complete();
-    void runChanged();
+    void runFunctionChanged();
     void resultChanged();
     void argsChanged();
     void workerChanged();
@@ -96,19 +104,17 @@ protected:
     virtual void componentComplete() override;
 
 private:
-    void extractSource(ViewEngine* engine);
-
-    bool     m_isComponentComplete;
-    Trigger  m_trigger;
-    QJSValue m_result;
-    QJSValue m_run;
-    QJSValue m_args;
-    QJSValue m_returns;
+    bool                            m_isComponentComplete;
+    Trigger                         m_trigger;
+    QJSValue                        m_result;
+    QJSValue                        m_args;
+    QJSValue                        m_returns;
+    QmlFunctionSource*              m_runSource;
     QList<QPair<int, QQmlProperty>> m_argBindings;
-    QJSValueList m_argList;
+    QJSValueList                    m_argList;
 
-    QmlWorkerInterface*  m_worker;
-    RunSource*           m_source;
+    QmlPromise*                     m_promiseResult;
+    QmlWorkerInterface*             m_worker;
     QmlWorkerPool::QmlFunctionTask* m_currentTask;
     bool                            m_execAfterCurrent;
 };
@@ -123,10 +129,6 @@ inline const QJSValue &QmlAct::result() const{
 
 inline const QJSValue& QmlAct::args() const{
     return m_args;
-}
-
-inline const QJSValue& QmlAct::run() const{
-    return m_run;
 }
 
 inline QJSValue QmlAct::returns() const{
@@ -151,6 +153,10 @@ inline void QmlAct::setTrigger(QmlAct::Trigger trigger){
 
 inline bool QmlAct::isRunning() const{
     return m_currentTask;
+}
+
+inline const QJSValueList &QmlAct::argumentCallList() const{
+    return m_argList;
 }
 
 inline QJSValue QmlAct::unwrap() const{

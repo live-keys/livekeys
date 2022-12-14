@@ -1,11 +1,9 @@
 import QtQuick 2.4
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.12
 import editor 1.0
 import editor.private 1.0
 import editor.style 1.0
 import base 1.0
-import live 1.0
 import visual.input 1.0 as Input
 
 Rectangle{
@@ -45,12 +43,12 @@ Rectangle{
 
     function cursorWindowCoords(reference){
         var r = reference ? reference : root
-        return Qt.point(r.x, r.y - flick.flickableItem.contentY);
+        return Qt.point(r.x, r.y - editorFlickable.contentY);
     }
 
     function makePositionVisible(y){
         if (y < 0 || y > root.height - 30)
-            flick.flickableItem.contentY = Math.min(flick.flickableItem.contentY + y, Math.max(0,flick.flickableItem.contentHeight - root.height))
+            editorFlickable.contentY = Math.min(editorFlickable.contentY + y, Math.max(0,editorFlickable.contentHeight - root.height))
     }
 
     function getCursorFragment(){
@@ -88,13 +86,13 @@ Rectangle{
             anchors.fill: parent
             anchors.bottomMargin: 10
             anchors.leftMargin: 5
-            contentY: flick.flickableItem.contentY
+            contentY: editorFlickable.contentY
             interactive: false
 
             LineSurface{
                 id: lineSurface
                 color: root.style.lineSurfaceTextColor
-                viewport: Qt.rect(0,flick.flickableItem.contentY,0,flick.height)
+                viewport: Qt.rect(0,editorFlickable.contentY,0,flick.height)
                 Component.onCompleted: {
                     setComponents(textEdit);
                 }
@@ -102,7 +100,7 @@ Rectangle{
         }
     }
 
-    ScrollView {
+    ScrollView{
         id: flick
 
         anchors.fill: parent
@@ -110,58 +108,43 @@ Rectangle{
         anchors.leftMargin: 7 + lineSurfaceBackground.width
         anchors.rightMargin: 3
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: root.style.scrollbarHandleColor
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: root.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Item{}
-            corner: Rectangle{color: root.color}
-        }
+        clip: true
 
-        frameVisible: false
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: root.style.scrollbarHandleColor
+            visible: flick.contentHeight > flick.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: root.style.scrollbarHandleColor
+            visible: flick.contentWidth > flick.width
+        }
 
         function ensureVisible(r){
             if (!root.internalActiveFocus )
                 return;
-            if (flickableItem.contentX >= r.x)
-                flickableItem.contentX = r.x;
-            else if (flickableItem.contentX + width <= r.x + r.width + 20)
-                flickableItem.contentX = r.x + r.width - width + 20;
-            if (flickableItem.contentY >= r.y)
-                flickableItem.contentY = r.y;
-            else if (flickableItem.contentY + height <= r.y + r.height + 20)
-                flickableItem.contentY = r.y + r.height - height + 20;
+            if (editorFlickable.contentX >= r.x)
+                editorFlickable.contentX = r.x;
+            else if (editorFlickable.contentX + width <= r.x + r.width + 20)
+                editorFlickable.contentX = r.x + r.width - width + 20;
+            if (editorFlickable.contentY >= r.y)
+                editorFlickable.contentY = r.y;
+            else if (editorFlickable.contentY + height <= r.y + r.height + 20)
+                editorFlickable.contentY = r.y + r.height - height + 20;
         }
-
-        flickableItem.interactive: false
-        flickableItem.contentHeight: textEdit.totalHeight
-        flickableItem.contentWidth: textEdit.totalWidth + 10
 
         Flickable {
             id: editorFlickable
+            contentHeight: textEdit.totalHeight
+            contentWidth: textEdit.totalWidth + 10
 
             NewTextEdit {
                 id : textEdit
 
                 anchors.left: parent.left
                 anchors.leftMargin: 2
-                viewport: Qt.rect(flick.flickableItem.contentX,flick.flickableItem.contentY,flick.width,flick.height)
+                viewport: Qt.rect(editorFlickable.contentX,editorFlickable.contentY,flick.width,flick.height)
 
                 fragmentStart: root.fragmentStart
                 fragmentEnd: root.fragmentEnd
@@ -329,9 +312,9 @@ Rectangle{
 
             var rect = {
                 x:  textEdit.positionToRectangle(code.completionModel.completionPosition).x -
-                    flick.flickableItem.contentX +
+                    editorFlickable.contentX +
                     167, // compensate for center alignment when creating the editor box
-                y: r.y - flick.flickableItem.contentY,
+                y: r.y - editorFlickable.contentY,
                 width: r.width,
                 height: r.height
             }

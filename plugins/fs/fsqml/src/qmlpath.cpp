@@ -219,19 +219,16 @@ QDateTime QmlPath::lastModified(QJSValue path)
     return QDateTime();
 }
 
-QDateTime QmlPath::created(QJSValue path)
-{
+QDateTime QmlPath::created(QJSValue path){
     if (path.isString())
-        return QFileInfo(path.toString()).created();
+        return QFileInfo(path.toString()).birthTime();
 
     return QDateTime();
 }
 
-QString QmlPath::owner(QJSValue path)
-{
+QString QmlPath::owner(QJSValue path){
     if (path.isString())
         return QFileInfo(path.toString()).owner();
-
     return "";
 }
 

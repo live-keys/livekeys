@@ -70,18 +70,19 @@ auto    EdgeItem::setEdge(qan::Edge* edge) noexcept -> void
         edge->setItem(this);
 }
 
-auto    EdgeItem::getGraph() const noexcept -> const qan::Graph* {
+auto    EdgeItem::getGraph() const noexcept -> const QObject* {
     if ( _graph )
         return _graph;
-    return _edge ? _edge->getGraph() : nullptr;
+    return _edge ? qobject_cast<qan::Graph*>(_edge->getGraph()) : nullptr;
 }
-auto    EdgeItem::getGraph() noexcept -> qan::Graph* {
+auto    EdgeItem::getGraph() noexcept -> QObject* {
     if ( _graph )
         return _graph;
-    return _edge ? _edge->getGraph() : nullptr;
+    return _edge ? qobject_cast<qan::Graph*>(_edge->getGraph()) : nullptr;
 }
-auto    EdgeItem::setGraph(qan::Graph* graph) noexcept -> void {
-    _graph = graph; emit graphChanged();
+auto    EdgeItem::setGraph(QObject *graph) noexcept -> void {
+    _graph = qobject_cast<qan::Graph*>(graph);
+    emit graphChanged();
 }
 //-----------------------------------------------------------------------------
 
@@ -262,7 +263,7 @@ EdgeItem::GeometryCache  EdgeItem::generateGeometryCache() const noexcept
     EdgeItem::GeometryCache cache{};
     cache.valid = false;
 
-    const QQuickItem*     graphContainerItem = ( getGraph() != nullptr ? getGraph()->getContainerItem() : nullptr );
+    const QQuickItem*     graphContainerItem = ( getGraph() != nullptr ? qobject_cast<const qan::Graph*>(getGraph())->getContainerItem() : nullptr );
     if ( graphContainerItem == nullptr ) {
         qWarning() << "qan::EdgeItem::generateEdgeGeometry(): No access to valid graph container item.";
         return cache;    // Return INVALID geometry cache
@@ -347,6 +348,8 @@ EdgeItem::GeometryCache  EdgeItem::generateGeometryCache() const noexcept
     // Generate edge geometry Z according to actual src and dst z
     const qreal srcZ = qan::getItemGlobalZ_rec(srcItem);
     const qreal dstZ = qan::getItemGlobalZ_rec(dstItem);
+    Q_UNUSED(srcZ);
+    Q_UNUSED(dstZ);
     // cache.z = qMax(srcZ, dstZ) - 0.1;   // Edge z value should be less than src/dst value to ensure port item and selection is on top of edge
     cache.z = -1;
 
@@ -890,7 +893,7 @@ void    EdgeItem::applyGeometry(const GeometryCache& cache) noexcept
         return;
     }
 
-    const QQuickItem*   graphContainerItem = getGraph() != nullptr ? getGraph()->getContainerItem() : nullptr;
+    const QQuickItem*   graphContainerItem = getGraph() != nullptr ? qobject_cast<qan::Graph*>(getGraph())->getContainerItem() : nullptr;
     if ( graphContainerItem != nullptr ) {
         QPolygonF edgeBrPolygon;
         edgeBrPolygon << cache.p1 << cache.p2;
@@ -973,7 +976,7 @@ QPointF  EdgeItem::getLineIntersection( const QPointF& p1, const QPointF& p2,
     QPointF intersection;
     for ( auto p = 0; p < polygon.length() - 1 ; ++p ) {
         const QLineF polyLine( polygon[p], polygon[p + 1] );
-        if ( line.intersect( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
+        if ( line.intersects( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
             source = intersection;
             break;
         }
@@ -989,7 +992,7 @@ QLineF  EdgeItem::getLineIntersection( const QPointF& p1, const QPointF& p2,
     QPointF intersection;
     for ( auto p = 0; p < srcBp.length() - 1 ; ++p ) {
         const QLineF polyLine( srcBp[p], srcBp[p + 1] );
-        if ( line.intersect( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
+        if ( line.intersects( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
             source = intersection;
             break;
         }
@@ -997,7 +1000,7 @@ QLineF  EdgeItem::getLineIntersection( const QPointF& p1, const QPointF& p2,
     QPointF destination{p2};
     for ( auto p = 0; p < dstBp.length() - 1 ; ++p ) {
         const QLineF polyLine( dstBp[p], dstBp[p + 1] );
-        if ( line.intersect( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
+        if ( line.intersects( polyLine, &intersection ) == QLineF::BoundedIntersection ) {
             destination = intersection;
             break;
         }

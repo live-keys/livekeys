@@ -229,7 +229,7 @@ void DescribeValueVisitor::visit(const ObjectValue *value)
             if (v->typeName()) {
                 dumpNewline();
                 dump("typeName:");
-                dump(v->typeName()->name.toString());
+                dump(v->typeName()->name);
             }
             dumpNewline();
             dump("defaultPropertyName:");
@@ -241,7 +241,7 @@ void DescribeValueVisitor::visit(const ObjectValue *value)
             if (printDetail && v->ast()) {
                 dumpNewline();
                 dump("name:");
-                dump(v->ast()->name.toString());
+                dump(v->ast()->name);
             }
         } else if (const ASTSignal *v = f->asAstSignal()) {
             basicDump("ASTSignal", v, printDetail);
@@ -249,7 +249,7 @@ void DescribeValueVisitor::visit(const ObjectValue *value)
                 if (v->ast()) {
                     dumpNewline();
                     dump("name:");
-                    dump(v->ast()->name.toString());
+                    dump(v->ast()->name);
                 }
                 dumpNewline();
                 dump("slotName:");
@@ -365,7 +365,7 @@ void DescribeValueVisitor::visit(const Reference *value)
             if (AST::UiPublicMember *ast = v->ast()) {
                 dumpNewline();
                 dump("property:");
-                dump(ast->name.toString());
+                dump(ast->name);
             }
             dumpNewline();
             dump("onChangedSlotName:");
@@ -377,7 +377,7 @@ void DescribeValueVisitor::visit(const Reference *value)
         if (printDetail && var) {
             dumpNewline();
             dump("variable:");
-            dump(var->bindingIdentifier.toString());
+            dump(var->bindingIdentifier);
         }
     } else if (const QmlPrototypeReference *v = value->asQmlPrototypeReference()) {
         basicDump("QmlPrototypeReference", v, printDetail);
@@ -385,7 +385,7 @@ void DescribeValueVisitor::visit(const Reference *value)
         if (printDetail && qmlTypeName) {
             dumpNewline();
             dump("qmlTypeName:");
-            dump(qmlTypeName->name.toString());
+            dump(qmlTypeName->name);
         }
     } else if (value->asQtObjectPrototypeReference()) {
         basicDump("QtObjectPrototypeReference", value, printDetail);

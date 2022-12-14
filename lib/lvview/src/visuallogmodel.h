@@ -64,7 +64,7 @@ public:
         const VisualLog::Configuration* configuration,
         const VisualLog::MessageInfo& messageInfo,
         const std::string& viewName,
-        const QVariant& value
+        VisualLog::ViewObject* vo
     ) Q_DECL_OVERRIDE;
 
     /** Returns the width */

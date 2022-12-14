@@ -47,7 +47,7 @@ VisualLogFilter::SearchQuery::SearchQuery(const QJSValue &value, QJSEngine *engi
 {
     if ( value.isRegExp() ){
         m_type = SearchQuery::Regexp;
-        m_container = new SearchContainer(engine->fromScriptValue<QRegExp>(value));
+        m_container = new SearchContainer(engine->fromScriptValue<QRegularExpression>(value));
     } else if ( value.isString() && !value.toString().isEmpty() ){
         m_type = SearchQuery::String;
         m_container = new SearchContainer(value.toString());
@@ -98,9 +98,13 @@ QJSValue VisualLogFilter::SearchQuery::toJs(QJSEngine *engine) const{
 
 int VisualLogFilter::SearchQuery::locateIn(const QString &str){
     if ( m_type == SearchQuery::String ){
-        return str.indexOf(m_container->searchString);
+        return str.indexOf(*m_container->searchString);
     } else if ( m_type == SearchQuery::Regexp ){
-        return m_container->searchRegexp->indexIn(str);
+        QRegularExpressionMatch m = m_container->searchRegexp->match(str);
+        if ( m.hasMatch() ){
+            return m.capturedStart(0);
+        }
+        return -1;
     } else {
         return -1;
     }

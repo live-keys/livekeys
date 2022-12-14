@@ -17,10 +17,10 @@
 #define LVQMLEDITFRAGMENTCONTAINER_H
 
 #include <QObject>
-#include <QLinkedList>
 #include <QJSValue>
 
 #include "lveditqmljsglobal.h"
+#include "live/viewengine.h"
 
 namespace lv{
 
@@ -36,7 +36,7 @@ public:
     friend class LanguageQmlHandler;
 
 public:
-    explicit QmlEditFragmentContainer(LanguageQmlHandler *parent = nullptr);
+    explicit QmlEditFragmentContainer(lv::ViewEngine *ve, LanguageQmlHandler *parent = nullptr);
     ~QmlEditFragmentContainer() override;
 
     int editCount() const;
@@ -58,12 +58,13 @@ signals:
     void editCountChanged();
 
 private:
-    QLinkedList<QmlEditFragment*> m_edits; // opened fragments
-    LanguageQmlHandler*               m_codeHandler;
+    ViewEngine*                  m_engine;
+    std::list<QmlEditFragment*>* m_edits; // opened fragments
+    LanguageQmlHandler*          m_codeHandler;
 };
 
 inline int QmlEditFragmentContainer::editCount() const{
-    return m_edits.size();
+    return static_cast<int>(m_edits->size());
 }
 
 }// namespace

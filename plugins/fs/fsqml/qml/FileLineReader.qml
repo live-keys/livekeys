@@ -1,24 +1,25 @@
 import QtQuick 2.3
-import base 1.0
+import base 1.0 as B
 import fs 1.0 as Fs
 
-QtObject{
-
+B.Act{
     property string path: ''
-    onPathChanged: {
-        file = Fs.File.open(path, Fs.File.ReadOnly)
+
+    returns: 'qml/object'
+    args: ['$path']
+    run: function(path){
+        var file = Fs.File.open(path, Fs.File.ReadOnly)
         if ( file === null ){
             throw linkError(new Error("Path does not exist"), this)
         }
-        while ( !file.isEof() ){
-            __writableStream.push(file.readLine())
-        }
+        return B.StreamOperations.createProvider(file, (writableStream, file) => {
+            if ( !file.isEof() ){
+                writableStream.push(file.readLine())
+                return true
+            } else {
+                writableStream.close()
+                return false
+            }
+        })
     }
-
-    property Stream stream: __writableStream.stream
-    property Fs.FileDescriptor file : null
-
-    property WritableStream __writableStream: WritableStream{
-    }
-
 }

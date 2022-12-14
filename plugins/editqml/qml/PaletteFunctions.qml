@@ -746,7 +746,6 @@ QtObject{
         }
         if ( !paletteName.length )
             return
-
         var palette = ch.expand(ef, { "palettes" : [paletteName] })
         var paletteBox = __factories.createPaletteContainer(palette, paletteBoxParent, { moveEnabled: false })
 
@@ -761,10 +760,10 @@ QtObject{
     }
 
     function addPropertyToObjectContainer(objectContainer, name, readOnly, position, context){
-
         var languageHandler = objectContainer.editFragment.language
 
         var propContainer = objectContainer.propertyByName(name)
+
         if ( propContainer ){
             objectContainer.expand()
             return propContainer
@@ -968,8 +967,8 @@ QtObject{
     }
 
     function objectContainerToPane(objectContainer){
-        if ( objectContainer.pane ){
-            objectContainer.closeAsPane()
+        if ( objectContainer.frame.pane ){
+            objectContainer.frame.closeAsPane()
             return
         }
 
@@ -977,19 +976,19 @@ QtObject{
 
         var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            objectContainer.editor.parentSplitView,
-            objectContainer.editor.parentSplitViewIndex(),
+            objectContainer.editor.parent.parentSplitView,
+            objectContainer.editor.parent.parentSplitViewIndex(),
             objectPane
         )
 
         var root = objectContainer.parent
 
-        objectContainer.objectContainerTitle.parent = objectPane.paneHeaderContent
-        objectPane.objectContainer = objectContainer
-        objectPane.title = objectContainer.title
-        objectContainer.pane = objectPane
+        objectContainer.frame.objectContainerTitle.parent = objectPane.paneHeaderContent
+        objectPane.objectContainer = objectContainer.frame
+        objectPane.title = objectContainer.frame.title
+        objectContainer.frame.pane = objectPane
 
-        root.placeHolder.parent = root
+        objectContainer.placeHolder.parent = root
 
         return objectPane
     }

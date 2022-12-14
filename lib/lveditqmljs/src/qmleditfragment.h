@@ -214,6 +214,7 @@ signals:
 
 private:
     static QString buildCode(const QJSValue& value, bool additionalBraces = false);
+    void rebuildComponent();
     void checkIsNull();
 
     QmlDeclaration::Ptr  m_declaration;

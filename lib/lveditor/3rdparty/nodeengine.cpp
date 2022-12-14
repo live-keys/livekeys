@@ -681,11 +681,11 @@ void TextNodeEngine::addFrameDecorations(QTextDocument *document, QTextFrame *fr
     }
 }
 
-uint qHash(const TextNodeEngine::BinaryTreeNodeKey &key)
+uint qHash(const TextNodeEngine::BinaryTreeNodeKey &key, size_t seed = 0)
 {
-    // Just use the default hash for pairs
     return qHash(qMakePair(key.fontEngine, qMakePair(key.clipNode,
-                                                     qMakePair(key.color, key.selectionState))));
+                                                         qMakePair(key.color, key.selectionState))));
+//    return qHashMulti(seed, key.fontEngine, key.clipNode, key.color, key.selectionState);
 }
 
 void TextNodeEngine::mergeProcessedNodes(QList<BinaryTreeNode *> *regularNodes,

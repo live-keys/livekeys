@@ -26,6 +26,8 @@
 #include "live/package.h"
 #include "live/lockedfileiosession.h"
 #include "live/programholder.h"
+#include "live/settings.h"
+#include "live/visuallogmodel.h"
 
 // Versioning
 // ----------
@@ -45,9 +47,7 @@ namespace lv{
 
 class LivekeysArguments;
 class ViewEngine;
-class Settings;
 class Memory;
-class VisualLogModel;
 class PackageGraph;
 class Layer;
 

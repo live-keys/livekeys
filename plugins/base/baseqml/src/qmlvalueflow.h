@@ -2,16 +2,18 @@
 #define LVQMLVALUEFLOW_H
 
 #include <QObject>
+#include <QQmlParserStatus>
 #include <QJSValue>
 #include <QQmlListProperty>
 
 namespace lv{
 
-class QmlValueFlow : public QObject{
+class QmlValueFlow : public QObject, public QQmlParserStatus{
 
     Q_OBJECT
-    Q_PROPERTY(QJSValue value READ value   WRITE setValue  NOTIFY valueChanged)
-    Q_PROPERTY(QJSValue result READ result WRITE setResult NOTIFY resultChanged)
+    Q_PROPERTY(QJSValue value     READ value     WRITE setValue  NOTIFY valueChanged)
+    Q_PROPERTY(QString  valueType READ valueType WRITE setValueType NOTIFY valueTypeChanged)
+    Q_PROPERTY(QJSValue result    READ result    WRITE setResult NOTIFY resultChanged)
     Q_PROPERTY(QQmlListProperty<QObject> childObjects READ childObjects)
     Q_CLASSINFO("DefaultProperty", "childObjects")
 
@@ -31,12 +33,21 @@ public:
     QObject *childObject(int index) const;
     void clearChildObjects();
 
-public slots:
+    const QString& valueType() const;
+    void setValueType(const QString& valueType);
 
+public slots:
+    void exec();
 
 signals:
     void valueChanged();
     void resultChanged();
+    void valueTypeChanged();
+    void complete();
+
+protected:
+    void classBegin() override{};
+    void componentComplete() override;
 
 private:
     static void appendChildObject(QQmlListProperty<QObject>*, QObject*);
@@ -47,7 +58,10 @@ private:
 private:
     QJSValue m_value;
     QJSValue m_result;
+    QString  m_valueType;
+    bool     m_componentComplete;
     QList<QObject*> m_childObjects;
+
 };
 
 inline void QmlValueFlow::setValue(const QJSValue& value){
@@ -62,6 +76,10 @@ inline const QJSValue& QmlValueFlow::result() const{
 inline void QmlValueFlow::setResult(const QJSValue& result){
     m_result = result;
     emit resultChanged();
+}
+
+inline const QString &QmlValueFlow::valueType() const{
+    return m_valueType;
 }
 
 inline const QJSValue& QmlValueFlow::value() const{

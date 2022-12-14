@@ -198,38 +198,38 @@ void LanguageLvHandler::assistCompletion(
 //        return;
 //    }
 
-    QList<CodeCompletionSuggestion> suggestions;
-    if ( ctx.context() & el::CursorContext::InImport ){
-        suggestionsForImport(ctx, suggestions);
-        model->setSuggestions(suggestions, filter);
-    } else if ( ctx.context() & el::CursorContext::InLeftOfDeclaration ){
-        auto propertyDeclaredType = ctx.propertyDeclaredType();
-        if (m_documentTree->slice(propertyDeclaredType) == "on")
-        {
-            suggestionsForListener(ctx, cursor.position(), suggestions);
-            model->setSuggestions(suggestions, filter);
+//    QList<CodeCompletionSuggestion> suggestions;
+//    if ( ctx.context() & el::CursorContext::InImport ){
+//        suggestionsForImport(ctx, suggestions);
+//        model->setSuggestions(suggestions, filter);
+//    } else if ( ctx.context() & el::CursorContext::InLeftOfDeclaration ){
+//        auto propertyDeclaredType = ctx.propertyDeclaredType();
+//        if (m_documentTree->slice(propertyDeclaredType) == "on")
+//        {
+//            suggestionsForListener(ctx, cursor.position(), suggestions);
+//            model->setSuggestions(suggestions, filter);
 
-        } else {
-            suggestionsForLeftOfDeclaration(ctx, cursor.position(), suggestions);
-            model->setSuggestions(suggestions, filter);
+//        } else {
+//            suggestionsForLeftOfDeclaration(ctx, cursor.position(), suggestions);
+//            model->setSuggestions(suggestions, filter);
 
-        }
-    } else if ( ctx.context() & el::CursorContext::InRightOfDeclaration ){
-        suggestionsForRightOfDeclaration(ctx, cursor.position(), suggestions);
-        model->setSuggestions(suggestions, filter);
-    } else {
-        defaultSuggestions(ctx, cursor.position(), suggestions);
+//        }
+//    } else if ( ctx.context() & el::CursorContext::InRightOfDeclaration ){
+//        suggestionsForRightOfDeclaration(ctx, cursor.position(), suggestions);
+//        model->setSuggestions(suggestions, filter);
+//    } else {
+//        defaultSuggestions(ctx, cursor.position(), suggestions);
 
-        if ( ctx.expressionPath().size() > 1 ){
-            // TODO: ELEMENTS
-            model->setSuggestions(suggestions, filter);
-        } else {
-            // suggestionsForGlobalContext(*ctx, suggestions); TODO: ELEMENTS
-            // suggestionsForNamespaceTypes(ctx.expressionPath().size() > 1 ? ctx.expressionPath().first() : "", suggestions);
-            model->setSuggestions(suggestions, filter);
-        }
+//        if ( ctx.expressionPath().size() > 1 ){
+//            // TODO: ELEMENTS
+//            model->setSuggestions(suggestions, filter);
+//        } else {
+//            // suggestionsForGlobalContext(*ctx, suggestions); TODO: ELEMENTS
+//            // suggestionsForNamespaceTypes(ctx.expressionPath().size() > 1 ? ctx.expressionPath().first() : "", suggestions);
+//            model->setSuggestions(suggestions, filter);
+//        }
 
-}
+//}
 
 }
 
@@ -303,39 +303,39 @@ void LanguageLvHandler::__aboutToDelete(){
     //TODO
 }
 
-void LanguageLvHandler::suggestionsForImport(const el::CursorContext &ctx, QList<CodeCompletionSuggestion> &suggestions)
-{
-    if (ctx.context() & el::CursorContext::InRelativeImport)
-    {
-//        auto folderPath = m_document->file()->parentEntry()->path();
-    }
-    else {
-        foreach (const QString& importPath, m_engine->importPathList()){
-            //suggestionsForRecursiveImport(0, importPath, ctx.expressionPath(), suggestions); // TODO: ELEMENTS
-        }
-    }
-    std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
+//void LanguageLvHandler::suggestionsForImport(const el::CursorContext &ctx, QList<CodeCompletionSuggestion> &suggestions)
+//{
+//    if (ctx.context() & el::CursorContext::InRelativeImport)
+//    {
+////        auto folderPath = m_document->file()->parentEntry()->path();
+//    }
+//    else {
+//        foreach (const QString& importPath, m_engine->importPathList()){
+//            //suggestionsForRecursiveImport(0, importPath, ctx.expressionPath(), suggestions); // TODO: ELEMENTS
+//        }
+//    }
+//    std::sort(suggestions.begin(), suggestions.end(), &CodeCompletionSuggestion::compare);
 
-}
+//}
 
-void LanguageLvHandler::suggestionsForListener(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
-{
+//void LanguageLvHandler::suggestionsForListener(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+//{
 
-}
+//}
 
-void LanguageLvHandler::suggestionsForLeftOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
-{
+//void LanguageLvHandler::suggestionsForLeftOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+//{
 
-}
+//}
 
-void LanguageLvHandler::suggestionsForRightOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
-{
+//void LanguageLvHandler::suggestionsForRightOfDeclaration(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+//{
 
-}
+//}
 
-void LanguageLvHandler::defaultSuggestions(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
-{
+//void LanguageLvHandler::defaultSuggestions(const el::CursorContext &ctx, int position, QList<CodeCompletionSuggestion> &suggestions)
+//{
 
-}
+//}
 
 }// namespace

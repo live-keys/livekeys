@@ -34,7 +34,6 @@ class DocumentQmlChannels : public QAbstractListModel{
     Q_PROPERTY(int selectedIndex READ selectedIndex NOTIFY selectedIndexChanged)
 
 public:
-    // Model roles
     enum Roles{
         Path = Qt::UserRole + 1,
         IsConnected,
@@ -71,11 +70,15 @@ public:
 
     void desyncInactiveChannels();
 
+    bool canRebuild() const;
     void rebuild();
+
+    void runnableBuildReady(Runnable* r);
 
 public slots:
     lv::ProjectDocument* document() const;
     void selectChannel(int index);
+    lv::Runnable* selectedChannelRunnable() const;
 
 signals:
     void selectedIndexChanged();
@@ -85,7 +88,7 @@ private:
     void initialize();
 
     int                    m_selectedIndex;
-    LanguageQmlHandler*        m_languageHandler;
+    LanguageQmlHandler*    m_languageHandler;
     QHash<int, QByteArray> m_roles;
     QmlBindingChannel::Ptr m_selectedChannel;
 

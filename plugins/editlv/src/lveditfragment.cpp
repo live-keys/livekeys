@@ -175,7 +175,7 @@ QString LvEditFragment::readValueText() const{
     return tc.selectedText();
 }
 
-void LvEditFragment::updatePaletteValue(CodePalette *palette){
+void LvEditFragment::updatePaletteValue(CodePalette */*palette*/){
     BindingChannel::Ptr inputChannel = bindingSpan()->connectedChannel();
     if ( !inputChannel )
         return;
@@ -245,15 +245,15 @@ void LvEditFragment::updateValue(){
     BindingChannel::Ptr inputPath = bindingSpan()->connectedChannel();
 
     if ( inputPath && inputPath->listIndex() == -1 ){
-        for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
-            CodePalette* cp = *it;
+//        for ( auto it = m_palettes.begin(); it != m_palettes.end(); ++it ){
+//            CodePalette* cp = *it;
             // cp->setValueFromBinding(inputPath->property()->read()); // TODO: ELEMENTS #381
-        }
-        if ( m_bindingPalette ){
+//        }
+//        if ( m_bindingPalette ){
             // m_bindingPalette->setValueFromBinding(inputPath->property().read()); // TODO: ELEMENTS #381
             // CodeConverter* cvt = static_cast<CodeConverter*>(m_bindingPalette->extension());
             // cvt->whenBinding().call();
-        }
+//        }
     }
 }
 

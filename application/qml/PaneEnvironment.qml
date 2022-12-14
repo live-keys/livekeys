@@ -49,7 +49,6 @@ QtObject{
         property Component log: Component{
             LogContainer{
                 id: logView
-                isInWindow: false
                 width: 300
                 height: 200
             }
@@ -57,16 +56,14 @@ QtObject{
 
         property LogContainer mainLog : LogContainer{
             visible: false
-            isInWindow: false
             width: 300
             height: 200
 
-            //TODO: Fix this
-
-            onItemAdded: {
-                if ( !parent  )
-                    header.isLogWindowDirty = true
-            }
+            //TODO: Fix
+//            onItemAdded: {
+//                if ( !parent  )
+//                    header.isLogWindowDirty = true
+//            }
         }
     }
 

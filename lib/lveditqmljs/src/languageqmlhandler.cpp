@@ -29,6 +29,8 @@
 #include "qmladdcontainer.h"
 #include "qmlusagegraphscanner.h"
 #include "documentqmlchannels.h"
+#include "qmlcomponentsource.h"
+#include "qmlbindingchannelsmodel_p.h"
 
 #include "qmljs/parser/qqmljsast_p.h"
 #include "qmljs/qmljsbind.h"
@@ -49,7 +51,6 @@
 #include "live/hookcontainer.h"
 
 #include "qmlsuggestionmodel.h"
-#include "qmlbuilder.h"
 #include "qmlwatcher.h"
 #include "qmlmetatypeinfo_p.h"
 
@@ -67,6 +68,151 @@
 #include "live/codepalette.h"
 
 namespace lv{
+
+// LanguageQmlHandlerRunTrigger
+// ----------------------------------------------------------------------------
+
+class LanguageQmlHandler::RunTrigger : public Document::RunTrigger{
+
+public:
+    RunTrigger() : m_triggerType(Document::RunOnChange), m_scheduler(nullptr){}
+    RunTrigger(Runnable* r);
+    ~RunTrigger();
+
+    void onContentSet() override;
+    void onContentSaved() override;
+    void onContentChanged(int pos, int removed, int added, int flags) override;
+    Runnable* triggerRunnable() override;
+
+    Document::RunTriggerType triggerType() const override;
+    void setTriggerType(Document::RunTriggerType rtt) override;
+
+    //TODO: Will need to remove the channel with the ComponentSource
+    //TODO: Channel will need to be updated on rebuild
+
+    const QmlBindingChannel::Ptr& channel() const;
+    void setChannel(const QmlBindingChannel::Ptr& ch);
+
+    void scheduleRun();
+    void run();
+
+    QTimer* scheduler();
+
+    void schedulerReady();
+
+private:
+    QmlBindingChannel::Ptr   m_channel;
+    Document::RunTriggerType m_triggerType;
+    QTimer*                  m_scheduler;
+};
+
+LanguageQmlHandler::RunTrigger::RunTrigger(Runnable *r)
+    : m_triggerType(Document::RunOnChange)
+    , m_scheduler(nullptr)
+{
+    if (r){
+        QmlBindingPath::Ptr bp =  QmlBindingPath::create();
+        bp->appendFile(r->path());
+        m_channel = QmlBindingChannel::create(bp, r, nullptr);
+        m_channel->setIsBuilder(true);
+    }
+}
+
+LanguageQmlHandler::RunTrigger::~RunTrigger(){
+    delete m_scheduler;
+}
+
+void LanguageQmlHandler::RunTrigger::onContentSet(){
+    if ( m_triggerType == Document::RunOnChange ){
+        scheduleRun();
+    }
+}
+
+void LanguageQmlHandler::RunTrigger::onContentSaved(){
+    if ( m_triggerType == Document::RunOnSave ){
+        scheduleRun();
+    }
+}
+
+void LanguageQmlHandler::RunTrigger::onContentChanged(int, int, int, int flags){
+    if ( flags & ProjectDocument::Read ||
+         flags & ProjectDocument::Overlay ||
+         flags & ProjectDocument::Silent )
+    {
+        return;
+    }
+
+    if ( m_triggerType == Document::RunOnChange ){
+        scheduleRun();
+    }
+}
+
+Runnable *LanguageQmlHandler::RunTrigger::triggerRunnable(){
+    if (! m_channel->object() )
+        return m_channel->runnable();
+    return nullptr;
+}
+
+Document::RunTriggerType LanguageQmlHandler::RunTrigger::triggerType() const{
+    return m_triggerType;
+}
+
+void LanguageQmlHandler::RunTrigger::setTriggerType(Document::RunTriggerType rtt){
+    m_triggerType = rtt;
+}
+
+const QmlBindingChannel::Ptr &LanguageQmlHandler::RunTrigger::channel() const{
+    return m_channel;
+}
+
+void LanguageQmlHandler::RunTrigger::setChannel(const QmlBindingChannel::Ptr &ch){
+    m_channel = ch;
+}
+
+void LanguageQmlHandler::RunTrigger::scheduleRun(){
+    if ( !m_channel->object() ){
+        if ( m_channel->runnable() ){
+            m_channel->runnable()->scheduleRun();
+        }
+    } else {
+        QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(m_channel->object());
+        if ( cs ){
+            scheduler()->start();
+        }
+    }
+}
+
+void LanguageQmlHandler::RunTrigger::run(){
+    if ( !m_channel->object() ){
+        if ( m_channel->runnable() ){
+            m_channel->runnable()->run();
+        }
+    } else {
+        QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(m_channel->object());
+        if ( cs ){
+            cs->updateFromUrl();
+        }
+    }
+}
+
+QTimer *LanguageQmlHandler::RunTrigger::scheduler(){
+    if ( !m_scheduler ){
+        m_scheduler = new QTimer();
+        m_scheduler->setSingleShot(true);
+        m_scheduler->setInterval(1000);
+        connect(m_scheduler, &QTimer::timeout, [this](){
+            this->schedulerReady();
+        });
+    }
+    return m_scheduler;
+}
+
+void LanguageQmlHandler::RunTrigger::schedulerReady(){
+    QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(m_channel->object());
+    if ( cs ){
+        cs->updateFromUrl();
+    }
+}
 
 // LanguageQmlHandlerPrivate
 // ----------------------------------------------------------------------------
@@ -304,9 +450,12 @@ LanguageQmlHandler::LanguageQmlHandler(
     , m_settings(settings)
     , m_engine(engine)
     , m_completionContextFinder(new QmlCompletionContextFinder)
+    , m_document(nullptr)
+    , m_documentParseListeners(new LanguageQmlHandler::CallbackList)
+    , m_importsScannedListeners(new LanguageQmlHandler::CallbackList)
     , m_newScope(false)
     , m_editFragment(nullptr)
-    , m_editContainer(new QmlEditFragmentContainer(this))
+    , m_editContainer(new QmlEditFragmentContainer(engine, this))
     , m_bindingChannels(nullptr)
     , m_importsFragment(nullptr)
     , m_rootFragment(nullptr)
@@ -343,6 +492,8 @@ LanguageQmlHandler::~LanguageQmlHandler(){
     }
 
     delete m_completionContextFinder;
+    delete m_documentParseListeners;
+    delete m_importsScannedListeners;
 }
 
 /**
@@ -547,6 +698,13 @@ void LanguageQmlHandler::setDocument(ProjectDocument *document){
     m_highlighter->setTarget(m_target);
 
     if ( m_document ){
+        if ( !m_document->runTrigger() ){
+            RunTrigger* rt = new LanguageQmlHandler::RunTrigger(document->parentAsProject()->active());
+            m_document->setRunTrigger(rt);
+        } else {
+            //TODO: Capture run trigger if its the same
+        }
+
         connect(m_document->textDocument(), &QTextDocument::contentsChange,
                 this, &LanguageQmlHandler::__documentContentsChanged);
         connect(m_document, &ProjectDocument::formatChanged, this, &LanguageQmlHandler::__documentFormatUpdate);
@@ -554,6 +712,7 @@ void LanguageQmlHandler::setDocument(ProjectDocument *document){
             m_document->textDocument(), &QTextDocument::cursorPositionChanged,
             this, &LanguageQmlHandler::__cursorWritePositionChanged
         );
+        connect(m_document, &Document::runTriggerChanged, this, &LanguageQmlHandler::__documentRunTriggerChanged);
 
         m_editContainer->clearAllFragments();
     }
@@ -609,6 +768,10 @@ void LanguageQmlHandler::__cursorWritePositionChanged(QTextCursor cursor){
             dh->requestCursorPosition(newCursor.position());
         }
     }
+}
+
+void LanguageQmlHandler::__documentRunTriggerChanged(){
+    emit runTriggerChanged();
 }
 
 /**
@@ -1090,7 +1253,6 @@ QmlDeclaration::Ptr LanguageQmlHandler::getDeclarationViaCompletionContext(int p
                     QmlTypeReference qlt = propref.resultType();
 
                     bool isWritable = propref.property.isValid() ? propref.property.isWritable : false;
-
                     if ( !qlt.isEmpty() ){
                         return QmlDeclaration::create(
                             expression,
@@ -1233,7 +1395,6 @@ QmlEditFragment *LanguageQmlHandler::createInjectionChannel(QmlDeclaration::Ptr 
             m_document, d->documentObjects()->root(), declaration
         );
         QmlBindingPath::Ptr bp = tr.bindingPath;
-
         if ( !bp )
             return nullptr;
 
@@ -1295,7 +1456,7 @@ void LanguageQmlHandler::__aboutToDelete()
     }
 }
 
-void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &type, const QString& id, const QJSValue &properties){
+void LanguageQmlHandler::createObjectInRuntimeImpl(QmlEditFragment *edit, const QString &type, const QString& /*id*/, const QJSValue &properties){
     Q_D(LanguageQmlHandler);
 
     if ( !edit )
@@ -2485,7 +2646,7 @@ QList<QObject *> LanguageQmlHandler::openNestedFragments(QmlEditFragment *edit, 
 
 
                     if (!child) {
-                        if ( n == rp->name().length()-1 ){
+                        if ( n == rp->name().length() - 1 ){
 
                             QString propertyType = rp->type();
 
@@ -2788,7 +2949,7 @@ lv::QmlEditFragment *LanguageQmlHandler::removePalette(lv::CodePalette *palette)
     if ( !palette )
         return nullptr;
 
-    lv::QmlEditFragment* edit = palette->editFragment();
+    lv::QmlEditFragment* edit = qobject_cast<lv::QmlEditFragment*>(palette->editFragment());
     if ( edit ){
         edit->removePalette(palette);
     }
@@ -3107,7 +3268,6 @@ QJSValue LanguageQmlHandler::addPropertyToCode(
         }
     }
 
-
     // Check wether the property is already added
 
     QTextCursor sourceSelection(m_target);
@@ -3115,6 +3275,7 @@ QJSValue LanguageQmlHandler::addPropertyToCode(
     sourceSelection.setPosition(blockEnd, QTextCursor::KeepAnchor);
 
     lv::DocumentQmlValueObjects::RangeObject* rangeObject = d->documentObjects()->objectThatWrapsPosition(position);
+
     if ( !rangeObject ){
         lv::Exception e = CREATE_EXCEPTION(
             lv::Exception, "Failed to add property: " + name.toStdString() + " at position " + QString::number(position).toStdString(), lv::Exception::toCode("~Attributes")
@@ -3122,6 +3283,7 @@ QJSValue LanguageQmlHandler::addPropertyToCode(
         m_engine->throwError(&e, this);
         return -1;
     }
+
 
     for ( auto it = rangeObject->properties.begin(); it != rangeObject->properties.end(); ++it ){
         lv::DocumentQmlValueObjects::RangeProperty* p = *it;
@@ -3183,8 +3345,8 @@ QJSValue LanguageQmlHandler::addPropertyToCode(
     }
 
     QJSValue result = m_engine->engine()->newObject();
-    result.setProperty("position", cursorPosition - fullName.size() - 2);
-    result.setProperty("totalCharsAdded", insertionText.size());
+    result.setProperty("position", static_cast<int>(cursorPosition - fullName.size() - 2));
+    result.setProperty("totalCharsAdded", static_cast<int>(insertionText.size()));
 
     return result;
 }
@@ -3531,11 +3693,10 @@ void LanguageQmlHandler::suggestCompletion(int cursorPosition){
         true,
         dh->completionModel(),
         newCursor
-    );
+                );
 }
 
-int LanguageQmlHandler::checkPragma(int position)
-{
+int LanguageQmlHandler::checkPragma(int position){
     QString content = m_document->contentString();
     QString sub = content.left(position);
     int find = sub.lastIndexOf("pragma Singleton");
@@ -3581,6 +3742,135 @@ QJSValue LanguageQmlHandler::compileFunctionInContext(const QString &functionSou
     return compiledFn;
 }
 
+QJSValue LanguageQmlHandler::runTrigger() const{
+    Document::RunTrigger* trigger = m_document->runTrigger();
+    LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+    QJSValue result;
+    if ( languageTrigger ){
+        result = m_engine->engine()->newObject();
+        result.setProperty("triggerType", static_cast<int>(languageTrigger->triggerType()));
+        Runnable* r = languageTrigger->triggerRunnable();
+        if ( r )
+            result.setProperty("runnable", m_engine->engine()->newQObject(r));
+        QmlBindingChannel::Ptr bc = languageTrigger->channel();
+        if ( bc ){
+            QStringList bps = DocumentQmlChannels::describePath(bc->bindingPath());
+            QJSValue bpv = m_engine->engine()->newArray(bps.size());
+            for ( int i = 0; i < bps.size(); ++i ){
+                bpv.setProperty(i, bps[i]);
+            }
+            result.setProperty("bindingPath", bpv);
+        }
+    }
+    return result;
+}
+
+void LanguageQmlHandler::runnableBuildReady(Runnable *r){
+    Document::RunTrigger* trigger = m_document->runTrigger();
+    LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+    if ( languageTrigger && languageTrigger->channel() ){
+        if ( languageTrigger->channel()->runnable() == r ){
+            for ( int i = 0; i < m_bindingChannels->totalChannels(); ++i ){
+                QmlBindingChannel::Ptr bc = m_bindingChannels->channelAt(i);
+                if ( bc->isBuilder() ){
+                    if ( *bc->bindingPath() == *languageTrigger->channel()->bindingPath() ){
+                        languageTrigger->setChannel(bc);
+                    }
+                }
+            }
+        }
+    }
+}
+
+void LanguageQmlHandler::configureRunTrigger(const QJSValue &options){
+    if ( !options.isObject() )
+        return;
+
+    bool triggerChanged = false;
+    if ( options.hasOwnProperty("triggerType") ){
+        int triggerType = options.property("triggerType").toInt();
+        Document::RunTrigger* trigger = m_document->runTrigger();
+        LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+        if ( languageTrigger ){
+            Document::RunTriggerType rtt = static_cast<Document::RunTriggerType>(triggerType);
+            if ( rtt != languageTrigger->triggerType() ){
+                languageTrigger->setTriggerType(rtt);
+                triggerChanged = true;
+            }
+        }
+    }
+    if ( options.hasOwnProperty("channel") ){
+        QJSValue channel = options.property("channel");
+        QmlBindingChannelsModel* bcs = qobject_cast<QmlBindingChannelsModel*>(channel.property("model").toQObject());
+        int selectedIndex = channel.property("index").toInt();
+
+        Document::RunTrigger* trigger = m_document->runTrigger();
+        LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+        if ( languageTrigger ){
+            languageTrigger->setChannel(bcs->channelAt(selectedIndex));
+            triggerChanged = true;
+        }
+    }
+
+    if ( triggerChanged ){
+        m_document->notifyRunTriggerChanged();
+    }
+}
+
+QmlBindingChannelsModel *LanguageQmlHandler::runChannels(){
+    Document::RunTrigger* trigger = m_document->runTrigger();
+    LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+    if ( !languageTrigger ){
+        return nullptr;
+    }
+
+    int selectedIndex = -1;
+    QList<QmlBindingChannel::Ptr> bcs;
+
+    Project* p = m_document->parentAsProject();
+    RunnableContainer* rc = p->runnables();
+    Runnable* selectedChannelRunnable = languageTrigger->triggerRunnable();
+
+    int totalRunnables = rc->rowCount();
+    for ( int i = 0; i < totalRunnables; ++i ){
+        Runnable* r = rc->runnableAt(i);
+
+        QmlBindingPath::Ptr bp =  QmlBindingPath::create();
+        bp->appendFile(r->path());
+        QmlBindingChannel::Ptr rbc = QmlBindingChannel::create(bp, r, nullptr);
+        rbc->setIsBuilder(true);
+
+        bcs.push_back(rbc);
+        if ( r == selectedChannelRunnable ){
+            selectedIndex = bcs.size() - 1;
+        }
+    }
+
+
+    for ( int i = 0; i < m_bindingChannels->totalChannels(); ++i ){
+        QmlBindingChannel::Ptr bc = m_bindingChannels->channelAt(i);
+        if ( bc->isBuilder() ){
+            bcs.push_back(bc);
+            if ( languageTrigger->channel() && *bc->bindingPath() == *languageTrigger->channel()->bindingPath() ){
+                selectedIndex = bcs.size() - 1;
+            }
+        }
+    }
+
+    auto result = new QmlBindingChannelsModel(bcs);
+    result->selectChannel(selectedIndex);
+    return result;
+}
+
+void LanguageQmlHandler::buildRunChannel(){
+    Document::RunTrigger* trigger = m_document->runTrigger();
+    LanguageQmlHandler::RunTrigger* languageTrigger = dynamic_cast<LanguageQmlHandler::RunTrigger*>(trigger);
+    if ( !languageTrigger ){
+        return;
+    }
+    languageTrigger->run();
+}
+
 QmlMetaTypeInfo *LanguageQmlHandler::typeInfo(const QJSValue &typeOrFragment){
     QmlMetaTypeInfo* mti = nullptr;
     if ( typeOrFragment.isQObject() ){
@@ -3612,8 +3902,8 @@ void LanguageQmlHandler::newDocumentScanReady(DocumentQmlInfo::Ptr documentInfo)
     QJSValueList args;
     args << d->wasDocumentUpdatedFromBackground();
 
-    QLinkedList<QJSValue> callbacks = m_documentParseListeners;
-    m_documentParseListeners.clear();
+    std::list<QJSValue> callbacks = *m_documentParseListeners;
+    m_documentParseListeners->clear();
 
     for ( QJSValue cb : callbacks ){
         QJSValue res = cb.call();
@@ -3628,8 +3918,8 @@ CodeHandler *LanguageQmlHandler::code() const{
 }
 
 void LanguageQmlHandler::__whenLibraryScanQueueCleared(){
-    QLinkedList<QJSValue> callbacks = m_importsScannedListeners;
-    m_importsScannedListeners.clear();
+    std::list<QJSValue> callbacks = *m_importsScannedListeners;
+    m_importsScannedListeners->clear();
 
     for ( QJSValue cb : callbacks ){
         QJSValue res = cb.call();
@@ -3651,7 +3941,7 @@ void LanguageQmlHandler::onDocumentParsed(QJSValue callback){
     if ( d->wasDocumentUpdatedFromBackground() ){
         callback.call(QJSValueList() << true);
     } else {
-        m_documentParseListeners.append(callback);
+        m_documentParseListeners->push_back(callback);
         if ( !d->isDocumentBeingScanned() ){
             d->documentQueuedForScanning();
             d->projectHandler->scanMonitor()->queueDocumentScan(m_document->path(), m_document->contentString(), this);
@@ -3666,12 +3956,12 @@ void LanguageQmlHandler::onImportsScanned(QJSValue callback){
             m_engine->throwError(res, this);
         }
     } else {
-        m_importsScannedListeners.append(callback);
+        m_importsScannedListeners->push_back(callback);
     }
 }
 
 void LanguageQmlHandler::removeSyncImportsListeners(){
-    m_importsScannedListeners.clear();
+    m_importsScannedListeners->clear();
 }
 
 /**
@@ -4052,8 +4342,8 @@ void LanguageQmlHandler::createChannelForFragment(QmlEditFragment *parentFragmen
 
         if ( parentFragment ){
             auto parentBp = parentFragment->fullBindingPath();
-
             int copyLength = bindingPath->length() - parentBp->length();
+
             QmlBindingPath::Ptr relativeBp = QmlBindingPath::create();
 
             while ( copyLength > 0){
@@ -4063,10 +4353,33 @@ void LanguageQmlHandler::createChannelForFragment(QmlEditFragment *parentFragmen
             }
 
             QmlBindingChannel::Ptr newChannel = DocumentQmlChannels::traverseBindingPathFrom(parentFragment->channel(), relativeBp);
+
             if ( !newChannel ){
                 //TODO
                 qWarning("Warning: Failed to get new channel at: %s from %s", qPrintable(relativeBp->toString()), qPrintable(parentBp->toString()));
             } else {
+                QmlBindingPath::Node* n = newChannel->bindingPath()->lastNode();
+                if ( n && n->parent && n->type() == QmlBindingPath::Node::Component ){
+
+                    if ( newChannel->object() && newChannel->object()->parent() ){
+
+                        if ( n->parent->type() == QmlBindingPath::Node::Property ){
+                            QmlBindingPath::PropertyNode* pn = static_cast<QmlBindingPath::PropertyNode*>(n->parent);
+
+                            QObject* object = newChannel->object();
+                            QString name = pn->propertyName;
+
+                            object->setProperty("__buildAssignment", QVariantList() << QVariant::fromValue(object->parent()) << name);
+
+                        } else if ( n->parent->type() == QmlBindingPath::Node::Index ){
+                            QObject* object = newChannel->object();
+                            QString name = "__default";
+
+                            object->setProperty("__buildAssignment", QVariantList() << QVariant::fromValue(object->parent()) << name);
+                        }
+                    }
+                }
+
                 newChannel->setEnabled(true);
                 fragment->setChannel(newChannel);
             }
@@ -4133,5 +4446,6 @@ void LanguageQmlHandler::setImportsFragment(QmlEditFragment *importsFragment)
     m_importsFragment = importsFragment;
     emit importsFragmentChanged();
 }
+
 
 }// namespace

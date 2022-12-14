@@ -1,15 +1,13 @@
 #include "qmlact.h"
 #include "workerthread.h"
 
-#include "live/viewcontext.h"
 #include "live/viewengine.h"
 #include "live/exception.h"
 #include "live/shared.h"
 #include "live/visuallogqt.h"
-#include "live/componentdeclaration.h"
-#include "live/documentqmlinfo.h"
 #include "live/viewcontext.h"
-#include "live/project.h"
+#include "live/qmlstreamprovider.h"
+#include "live/qmlpromise.h"
 
 #include <QQmlContext>
 #include <QQmlEngine>
@@ -26,15 +24,20 @@ QmlAct::QmlAct(QObject *parent)
     : QObject(parent)
     , m_isComponentComplete(false)
     , m_trigger(QmlAct::PropertyChange)
+    , m_runSource(nullptr)
+    , m_promiseResult(nullptr)
     , m_worker(nullptr)
-    , m_source(nullptr)
     , m_currentTask(nullptr)
     , m_execAfterCurrent(false)
 {
 }
 
 QmlAct::~QmlAct(){
-    delete m_source;
+    if ( m_promiseResult ){
+        m_promiseResult->clearInternalCallbacks();
+        Shared::unref(m_promiseResult);
+    }
+    delete m_runSource;
 }
 
 void QmlAct::componentComplete(){
@@ -76,7 +79,8 @@ void QmlAct::componentComplete(){
              name != "result" &&
              name != "trigger" &&
              name != "worker" &&
-             name != "unwrap")
+             name != "unwrap" &&
+             !name.startsWith("__" ))
         {
             QQmlProperty pp(this, name);
             pp.connectNotifySignal(this, SLOT(__propertyChange()));
@@ -89,7 +93,7 @@ void QmlAct::componentComplete(){
 void QmlAct::setArgs(QJSValue args){
     if ( m_isComponentComplete ){
         Exception e = CREATE_EXCEPTION(lv::Exception, "Act: Cannot configure arguments after component is complete.", Exception::toCode("~ActFnConfig"));
-        ViewContext::instance().engine()->throwError(&e, this);
+        QmlError(e, this).jsThrow();
         return;
     }
 
@@ -107,10 +111,44 @@ void QmlAct::setResult(const QVariant &result){
 void QmlAct::setResult(const QJSValue &result){
     if ( result.isError() ){
         Exception e = CREATE_EXCEPTION(lv::Exception, "Act Error: " + result.toString().toStdString(), Exception::toCode("~ActFnRun"));
-        ViewContext::instance().engine()->throwError(&e, this);
+        ViewEngine* ve = ViewEngine::grab(this);
+        if ( !ve ){
+            QmlError::warnNoEngineCaptured(this);
+            return;
+        }
+        ve->throwError(result, this);
         return;
     }
 
+    QmlStream* localStream = QmlStream::fromValue(m_result);
+    if ( localStream ){
+        QmlStreamProvider* sp = localStream->provider(); // This stream provider is owned by this Act
+        delete sp;
+    }
+
+    QmlPromise* promise = QmlPromise::fromValue(result);
+    if ( promise ){
+        m_promiseResult = promise;
+        Shared::ref(m_promiseResult);
+        m_promiseResult->then(
+            [this](QJSValue v){
+                Shared::unref(m_promiseResult);
+                m_promiseResult = nullptr;
+                setResult(v);
+                if ( m_execAfterCurrent ){
+                    m_execAfterCurrent = false;
+                    exec();
+                }
+            },
+            [this](QJSValue v){
+                Shared::unref(m_promiseResult);
+                m_promiseResult = nullptr;
+                m_execAfterCurrent = false;
+                QmlError(ViewEngine::grab(this), v).jsThrow();
+            }
+        );
+        return;
+    }
 
     if ( m_returns.isArray() ){
         ViewEngine* engine = ViewContext::instance().engine();
@@ -139,35 +177,23 @@ void QmlAct::setResult(const QJSValue &result){
         emit resultChanged();
     }
 
-}
-
-void QmlAct::extractSource(ViewEngine* ve){
-    if ( !m_source ){
-        ComponentDeclaration cd = ve->rootDeclaration(this);
-        if ( cd.id().isEmpty() ){
-            THROW_EXCEPTION(Exception, "Act: Act requires id to be used in workers.", Exception::toCode("~Id"));
-        }
-        if ( cd.url().isEmpty() ){
-            THROW_EXCEPTION(Exception, "Act: Failed ot find path for act " + cd.id().toStdString() + ".", Exception::toCode("~Id"));
-        }
-
-        m_source = new QmlAct::RunSource(cd);
-
-        QString path = m_source->declarationLocation.url().toLocalFile();
-
-        DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(path);
-        QString code = QString::fromStdString(ve->fileIO()->readFromFile(path.toStdString()));
-        dqi->parse(code);
-        dqi->createRanges();
-
-        m_source->source = dqi->propertySourceFromObjectId(m_source->declarationLocation.id(), "run").toUtf8();
-        m_source->imports = DocumentQmlInfo::Import::join(dqi->imports()).toUtf8();
+    QmlStream* stream = QmlStream::fromValue(result);
+    if ( stream ){
+        QmlStreamProvider* sp = stream->provider();
+        sp->resume();
     }
 }
 
 void QmlAct::exec(){
-    if ( m_worker ){
+    if ( !m_runSource )
+        return;
 
+    if ( m_promiseResult ){
+        m_execAfterCurrent = true;
+        return;
+    }
+
+    if ( m_worker ){
         if ( m_currentTask ){ // is working
             m_execAfterCurrent = true;
             return;
@@ -176,8 +202,6 @@ void QmlAct::exec(){
         ViewEngine* ve = ViewEngine::grab(this);
 
         try {
-            extractSource(ve);
-
             QmlWorkerPool::TransferArguments transferArguments;
 
             for ( auto it = m_argList.begin(); it != m_argList.end(); ++it ){
@@ -190,11 +214,13 @@ void QmlAct::exec(){
                 transferArguments.values[it->first] = Shared::transfer(v, transferArguments.transfers);
             }
 
+            QString id = qmlContext(this)->nameForObject(this);
+
             m_currentTask = new QmlWorkerPool::QmlFunctionTask(
-                m_source->declarationLocation.url().toLocalFile(),
-                m_source->declarationLocation.id(),
-                m_source->imports,
-                m_source->source,
+                m_runSource->path(),
+                id,
+                m_runSource->imports(),
+                m_runSource->source().toUtf8(),
                 transferArguments,
                 this
             );
@@ -209,27 +235,27 @@ void QmlAct::exec(){
     } else {
         ViewEngine* ve = ViewEngine::grab(this);
         if ( !ve ){
-            qWarning("Act: Failed to capture view engine for %s.", metaObject()->className());
+            QmlError::warnNoEngineCaptured(this, "Act");
             return;
         }
-        if ( m_run.isCallable() ){
+        if ( m_runSource->fn().isCallable() ){
             QJSEngine* engine = ve->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());
             }
 
-            QJSValue r = m_run.call(currentArgs);
+            QJSValue r = m_runSource->fn().call(currentArgs);
             setResult(r);
-        } else if ( m_run.isArray() ){
+        } else if ( m_runSource->fn().isArray() ){
             QJSEngine* engine = ve->engine();
             QJSValueList currentArgs = m_argList;
             for ( auto it = m_argBindings.begin(); it != m_argBindings.end(); ++it ){
                 currentArgs[it->first] = engine->toScriptValue(it->second.read());
             }
 
-            QJSValue ob = m_run.property(0);
-            QJSValue prop = m_run.property(1);
+            QJSValue ob = m_runSource->fn().property(0);
+            QJSValue prop = m_runSource->fn().property(1);
             QJSValue run = ob.property(prop.toString());
             QJSValue r = run.call(currentArgs);
             setResult(r);
@@ -267,20 +293,58 @@ void QmlAct::setUnwrap(QJSValue unwrap){
     emit unwrapChanged();
 }
 
+QJSValue QmlAct::apply(const QJSValueList &args){
+    return m_runSource->fn().call(args);
+}
+
+bool QmlAct::parserPropertyValidateHook(QmlSourceLocation, QmlSourceLocation, const QString &name){
+    if ( name != "run" && !name.startsWith("on") ){
+        return false;
+    }
+    return true;
+}
+
+
+QJSValue QmlAct::runFunction() const{
+    if ( m_runSource )
+        return m_runSource->fn();
+    return QJSValue();
+}
+
+void QmlAct::parserPropertyHook(
+        ViewEngine *ve,
+        QObject *target,
+        const QByteArray &imports,
+        QmlSourceLocation,
+        QmlSourceLocation valueLocation,
+        const QString &name,
+        const QString &source)
+{
+    if ( name != "run" ){
+        THROW_EXCEPTION(lv::Exception, "Invalid property: " + name.toStdString() + ". Note: Signal handlers are also not supported directly on Act.", Exception::toCode("~Property"));
+    }
+
+    QmlFunctionSource* fns = QmlFunctionSource::createCompiled(ve, imports, source, valueLocation);
+
+    QmlAct* act = qobject_cast<QmlAct*>(target);
+    if ( act->m_runSource )
+        delete act->m_runSource;
+    act->m_runSource = fns;
+}
+
 bool QmlAct::event(QEvent *ev){
     QmlWorkerPool::TaskReadyEvent* tr = dynamic_cast<QmlWorkerPool::TaskReadyEvent*>(ev);
     if (!tr)
         return QObject::event(ev);
 
     auto ftask = static_cast<QmlWorkerPool::QmlFunctionTask*>(tr->task());
+    ViewEngine* ve = ViewEngine::grab(this);
 
     if ( ftask->isErrored() ){
-        QmlError qe(ViewContext::instance().engine(), ftask->error(), this);
+        QmlError qe(ve, ftask->error(), this);
         qe.jsThrow();
         return true;
     }
-
-    ViewEngine* ve = ViewEngine::grab(this);
 
     setResult(Shared::transfer(ftask->result(), ve->engine()));
 
@@ -293,22 +357,6 @@ bool QmlAct::event(QEvent *ev){
     }
 
     return true;
-}
-
-void QmlAct::setRun(QJSValue run){
-    if ( m_isComponentComplete ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set run method after component is complete.", Exception::toCode("~ActFnConfig"));
-        ViewContext::instance().engine()->throwError(&e, this);
-        return;
-    }
-    if ( !run.isCallable() && !run.isArray() ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Run property needs to be a function.", Exception::toCode("~Function"));
-        ViewContext::instance().engine()->throwError(&e, this);
-        return;
-    }
-
-    m_run = run;
-    emit runChanged();
 }
 
 void QmlAct::setReturns(QJSValue returns){
@@ -325,8 +373,8 @@ void QmlAct::setReturns(QJSValue returns){
 
 void lv::QmlAct::setWorker(QmlWorkerInterface *worker){
     if ( m_isComponentComplete ){
-        Exception e = CREATE_EXCEPTION(lv::Exception, "ActFn: Cannot set run method after component is complete.", Exception::toCode("~ActFnConfig"));
-        ViewContext::instance().engine()->throwError(&e, this);
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Act: Cannot set worker after component is complete.", Exception::toCode("~ActFnConfig"));
+        QmlError(e, this).jsThrow();
         return;
     }
     if (m_worker == worker)

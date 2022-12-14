@@ -21,8 +21,8 @@
 #include "live/languageqmlhandler.h"
 #include "live/editorsettings.h"
 #include "live/editorlayer.h"
+#include "live/qmlcomponentsource.h"
 
-#include "qmlbuilder.h"
 #include "qmlwatcher.h"
 #include "qmljssettings.h"
 #include "qmlprojectmonitor_p.h"
@@ -30,6 +30,7 @@
 #include "qmleditfragment.h"
 #include "qmleditfragmentcontainer.h"
 #include "documentqmlchannels.h"
+#include "qmlbindingchannelsmodel_p.h"
 #include "qmlbindingchannelsdispatcher.h"
 #include "qmltokenizer_p.h"
 #include "qmlsyntax_p.h"
@@ -178,7 +179,12 @@ void ProjectQmlExtension::removeLanguageQmlHandler(LanguageQmlHandler *handler){
 void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterType<lv::ProjectQmlExtension>(uri, 1, 0, "ProjectQmlExtension");
     qmlRegisterType<lv::QmlWatcher>(         uri, 1, 0, "Watcher");
-    qmlRegisterType<lv::QmlBuilder>(         uri, 1, 0, "Builder");
+
+    lv::ViewEngine::registerPropertyParserType<lv::QmlComponentSource>(
+        uri, 1, 0, "ComponentSource",
+        &lv::QmlComponentSource::parserPropertyValidateHook,
+        &lv::QmlComponentSource::parserPropertyHook,
+        &lv::QmlComponentSource::parserDefaultPropertyHook);
 
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
         uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.code.language.");
@@ -188,6 +194,8 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         uri, 1, 0, "QmlEditFragmentContainer", "QmlEditFragmentContainer can only be accessed through the Editor.code.language.editContainer");
     qmlRegisterUncreatableType<lv::DocumentQmlChannels>(
         uri, 1, 0, "DocumentQmlChannels", "DocumentQmlChannels can only be accessed through the Editor.code.language.bindingChannels");
+    qmlRegisterUncreatableType<lv::QmlBindingChannelsModel>(
+        uri, 1, 0, "BindingChannelsModel", "BindingChannelsModel can only be accessed through the Editor.code.language.runChannels()");
     qmlRegisterUncreatableType<lv::QmlAddContainer>(
         uri, 1, 0, "QmlAddContainer", "QmlAddContainer can only be accessed through the qmledit extension.");
     qmlRegisterUncreatableType<lv::QmlSuggestionModel>(
@@ -198,13 +206,6 @@ void ProjectQmlExtension::registerTypes(const char *uri){
     qmlRegisterSingletonType<lv::QmlTokenizer>(uri, 1, 0, "Tokenizer", &qmlTokenizerProvider);
     qmlRegisterSingletonType<lv::QmlSyntax>(   uri, 1, 0, "Syntax", &qmlSyntaxProvider);
     qmlRegisterSingletonType<lv::QmlMetaInfo>( uri, 1, 0, "MetaInfo", &qmlMetaInfoProvider);
-}
-
-/**
- * \brief Assign initialization params for this object
- */
-void ProjectQmlExtension::setParams(Settings *settings, Project *project, ViewEngine *engine, Workspace *workspace){
-
 }
 
 bool ProjectQmlExtension::pluginTypesEnabled(){

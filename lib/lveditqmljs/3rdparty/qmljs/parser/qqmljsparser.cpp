@@ -112,7 +112,7 @@ static inline AST::SourceLocation location(Lexer *lexer)
 
 AST::UiQualifiedId *Parser::reparseAsQualifiedId(AST::ExpressionNode *expr)
 {
-    QVarLengthArray<QStringRef, 4> nameIds;
+    QVarLengthArray<QString, 4> nameIds;
     QVarLengthArray<AST::SourceLocation, 4> locations;
 
     AST::ExpressionNode *it = expr;
@@ -1903,7 +1903,7 @@ case 213: {
     } break;
 
     case 447: {
-        AST::BreakStatement *node = new (pool) AST::BreakStatement(QStringRef());
+        AST::BreakStatement *node = new (pool) AST::BreakStatement(QString());
         node->breakToken = loc(1);
         node->semicolonToken = loc(2);
         sym(1).Node = node;
@@ -2089,7 +2089,7 @@ case 213: {
     case 476: {
         if (!ensureNoFunctionTypeAnnotations(sym(5).TypeAnnotation, sym(3).FormalParameterList))
             return false;
-        AST::FunctionDeclaration *node = new (pool) AST::FunctionDeclaration(QStringRef(), sym(3).FormalParameterList, sym(7).StatementList,
+        AST::FunctionDeclaration *node = new (pool) AST::FunctionDeclaration(QString(), sym(3).FormalParameterList, sym(7).StatementList,
                                                                              /*type annotation*/nullptr);
         node->functionToken = loc(1);
         node->lparenToken = loc(2);
@@ -2117,7 +2117,7 @@ case 213: {
     case 478: {
         if (!ensureNoFunctionTypeAnnotations(sym(5).TypeAnnotation, sym(3).FormalParameterList))
             return false;
-        AST::FunctionExpression *node = new (pool) AST::FunctionExpression(QStringRef(), sym(3).FormalParameterList, sym(7).StatementList,
+        AST::FunctionExpression *node = new (pool) AST::FunctionExpression(QString(), sym(3).FormalParameterList, sym(7).StatementList,
                                                                            /*type annotation*/nullptr);
         node->functionToken = loc(1);
         node->lparenToken = loc(2);
@@ -2168,7 +2168,7 @@ case 213: {
         ret->returnToken = sym(4).Node->firstSourceLocation();
         ret->semicolonToken = sym(4).Node->lastSourceLocation();
         AST::StatementList *statements = (new (pool) AST::StatementList(ret))->finish();
-        AST::FunctionExpression *f = new (pool) AST::FunctionExpression(QStringRef(), sym(1).FormalParameterList, statements);
+        AST::FunctionExpression *f = new (pool) AST::FunctionExpression(QString(), sym(1).FormalParameterList, statements);
         f->isArrowFunction = true;
         f->functionToken = sym(1).Node ? sym(1).Node->firstSourceLocation() : loc(1);
         f->lbraceToken = sym(4).Node->firstSourceLocation();
@@ -2177,7 +2177,7 @@ case 213: {
     } break;
   case 493: Q_FALLTHROUGH(); 
     case 494: {
-        AST::FunctionExpression *f = new (pool) AST::FunctionExpression(QStringRef(), sym(1).FormalParameterList, sym(6).StatementList);
+        AST::FunctionExpression *f = new (pool) AST::FunctionExpression(QString(), sym(1).FormalParameterList, sym(6).StatementList);
         f->isArrowFunction = true;
         f->functionToken = sym(1).Node ? sym(1).Node->firstSourceLocation() : loc(1);
         f->lbraceToken = loc(6);
@@ -2292,7 +2292,7 @@ case 213: {
     } break;
 
     case 507: {
-        AST::FunctionDeclaration *node = new (pool) AST::FunctionDeclaration(QStringRef(), sym(4).FormalParameterList, sym(7).StatementList);
+        AST::FunctionDeclaration *node = new (pool) AST::FunctionDeclaration(QString(), sym(4).FormalParameterList, sym(7).StatementList);
         node->functionToken = loc(1);
         node->lparenToken = loc(3);
         node->rparenToken = loc(5);
@@ -2316,7 +2316,7 @@ case 213: {
     } break;
 
     case 509: {
-        AST::FunctionExpression *node = new (pool) AST::FunctionExpression(QStringRef(), sym(4).FormalParameterList, sym(7).StatementList);
+        AST::FunctionExpression *node = new (pool) AST::FunctionExpression(QString(), sym(4).FormalParameterList, sym(7).StatementList);
         node->functionToken = loc(1);
         node->lparenToken = loc(3);
         node->rparenToken = loc(5);
@@ -2364,7 +2364,7 @@ case 213: {
     } break;
 
     case 519: {
-        AST::ClassDeclaration *node = new (pool) AST::ClassDeclaration(QStringRef(), sym(2).Expression, sym(4).ClassElementList);
+        AST::ClassDeclaration *node = new (pool) AST::ClassDeclaration(QString(), sym(2).Expression, sym(4).ClassElementList);
         node->classToken = loc(1);
         node->lbraceToken = loc(3);
         node->rbraceToken = loc(5);
@@ -2372,7 +2372,7 @@ case 213: {
     } break;
 
     case 520: {
-        AST::ClassExpression *node = new (pool) AST::ClassExpression(QStringRef(), sym(2).Expression, sym(4).ClassElementList);
+        AST::ClassExpression *node = new (pool) AST::ClassExpression(QString(), sym(2).Expression, sym(4).ClassElementList);
         node->classToken = loc(1);
         node->lbraceToken = loc(3);
         node->rbraceToken = loc(5);

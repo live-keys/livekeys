@@ -42,7 +42,7 @@ QmlLibraryDependency QmlLibraryDependency::parse(const QString &import){
     return QmlLibraryDependency(import.mid(0, position).trimmed(), major, minor);
 }
 
-int QmlLibraryDependency::parseInt(const QStringRef &str, bool *ok){
+int QmlLibraryDependency::parseInt(const QString &str, bool *ok){
     int pos = 0;
     int number = 0;
     while (pos < str.length() && str.at(pos).isDigit()) {
@@ -62,9 +62,9 @@ bool QmlLibraryDependency::parseVersion(const QString &str, int *major, int *min
     const int dotIndex = str.indexOf(QLatin1Char('.'));
     if (dotIndex != -1 && str.indexOf(QLatin1Char('.'), dotIndex + 1) == -1) {
         bool ok = false;
-        *major = parseInt(QStringRef(&str, 0, dotIndex), &ok);
+        *major = parseInt(str.mid(0, dotIndex), &ok);
         if (ok)
-            *minor = parseInt(QStringRef(&str, dotIndex + 1, str.length() - dotIndex - 1), &ok);
+            *minor = parseInt(str.mid(dotIndex + 1, str.length() - dotIndex - 1), &ok);
         return ok;
     }
     return false;

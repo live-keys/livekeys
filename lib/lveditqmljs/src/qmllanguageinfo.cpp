@@ -456,9 +456,10 @@ QmlFunctionInfo QmlTypeInfoPrivate::fromMetaMethod(
         }
     }
 
-    for ( int i = 0; i < method.parameterNames().size(); ++i ){
-        QString pname = method.parameterNames()[i];
-        QString ptype = method.parameterTypes()[i];
+    QStringList parameterNames = method.parameterNames();
+    for ( int i = 0; i < parameterNames.size(); ++i ){
+        QString pname = parameterNames[i];
+        QString ptype = parameterNames[i];
         if ( QmlTypeInfo::isObject(ptype) ){
             fi.parameters.append(QPair<QString, QmlTypeReference>(
                 pname, QmlTypeReference(QmlTypeReference::Unknown, ptype))
@@ -506,7 +507,7 @@ QmlPropertyInfo QmlTypeInfoPrivate::fromMetaProperty(const QmlTypeInfo &parent, 
         } else if (typeName == "QQuaternion"){
             typeName = "quaternion";
         } else if (typeName == "QVector2D" || typeName == "QVector3D" || typeName == "QVector4D"){
-            typeName = "vector" + typeName[7] + "d";
+            typeName = "vector" + QString(typeName[7]) + "d";
         } else if (typeName == "uint" || typeName == "qlonglong" ){
             typeName = "int";
         }

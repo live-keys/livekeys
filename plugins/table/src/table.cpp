@@ -26,7 +26,7 @@ TableModel *Table::model(){
     return m_model;
 }
 
-TableSchema *Table::schema(){
+TableSchema *Table::schema() const{
     return m_schema;
 }
 

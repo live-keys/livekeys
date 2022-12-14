@@ -17,12 +17,12 @@
 #define QCALCOPTICALFLOWPYRLK_H
 
 #include <QQuickItem>
-#include "qmatfilter.h"
+#include "qmat.h"
 
 class QCalcOpticalFlowPyrLKPrivate;
 
 /// \private
-class QCalcOpticalFlowPyrLK : public QMatFilter{
+class QCalcOpticalFlowPyrLK : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(QSize   winSize         READ winSize         WRITE setWinSize         NOTIFY winSizeChanged)
@@ -43,13 +43,14 @@ public:
     void setMinEigThreshold(double minEigThreshold);
 
     virtual void transform(const cv::Mat& in, cv::Mat& out);
-    virtual QSGNode *updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData);
 
 public slots:
+    QMat* draw(QMat* input);
+    QMat* transform(QMat* input);
+
     void addPoint(const QPoint& point);
     QList<QPoint> points();
     int totalPoints() const;
-    void staticLoad(const QString& id);
 
 signals:
     void winSizeChanged();

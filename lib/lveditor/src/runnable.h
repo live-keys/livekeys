@@ -56,14 +56,11 @@ public:
         el::Engine* engine,
         const QString &path,
         RunnableContainer* parent,
-        const QString& name = "",
-        const QSet<QString>& activations = QSet<QString>());
+        const QString& name = "");
 
     Runnable(
         Program* program,
-        RunnableContainer* parent,
-        const QSet<QString>& activations = QSet<QString>()
-    );
+        RunnableContainer* parent);
 
     Runnable(
         ViewEngine* engine,
@@ -87,6 +84,8 @@ public:
     const QSet<QString>& activations() const;
 
 
+    void scheduleRun();
+
     int runTrigger() const;
 
     Type type() const;
@@ -106,8 +105,6 @@ public slots:
     QObject* runSpace();
 
     void __activationContentsChanged(int, int, int);
-    void __documentOpened(Document* document);
-    void __documentSaved();
 
     void setRunTrigger(int runTrigger);
     void clearRoot();
@@ -134,7 +131,6 @@ private:
     QObject*              m_viewRoot;
     QQmlContext*          m_viewContext;
     Type                  m_type;
-    QSet<QString>         m_activations;
     Project*              m_project;
     QTimer*               m_scheduleTimer;
     int                   m_runTrigger;
@@ -164,10 +160,6 @@ inline QObject *Runnable::viewRoot(){
 
 inline QQmlContext *Runnable::viewContext(){
     return m_viewContext;
-}
-
-inline const QSet<QString> &Runnable::activations() const{
-    return m_activations;
 }
 
 inline const QString &Runnable::path() const{

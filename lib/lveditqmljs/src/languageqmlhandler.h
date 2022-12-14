@@ -26,7 +26,14 @@
 #include "live/codecompletionmodel.h"
 #include "live/qmlimportsmodel.h"
 #include "live/documentqmlinfo.h"
-#include "qmlscopesnap_p.h"
+#include "live/codepalette.h"
+#include "live/codehandler.h"
+#include "live/qmleditfragment.h"
+#include "live/qmleditfragmentcontainer.h"
+
+#include "qmlbindingpath.h"
+
+#include <list>
 
 #include <QObject>
 #include <QTimer>
@@ -41,8 +48,6 @@ class ProjectQmlScanner;
 class ProjectQmlExtension;
 
 class DocumentQmlChannels;
-class QmlEditFragment;
-class QmlEditFragmentContainer;
 class QmlJsHighlighter;
 class QmlJsSettings;
 class QmlAddContainer;
@@ -51,6 +56,8 @@ class QmlCompletionContext;
 class QmlUsageGraphScanner;
 class QmlSuggestionModel;
 class QmlMetaTypeInfo;
+class QmlScopeSnap;
+class QmlBindingChannelsModel;
 
 class LanguageQmlHandlerPrivate;
 class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
@@ -60,11 +67,17 @@ class LV_EDITQMLJS_EXPORT LanguageQmlHandler : public QObject{
     Q_PROPERTY(lv::CodeHandler*                 code            READ code                   CONSTANT)
     Q_PROPERTY(lv::QmlEditFragmentContainer*    editContainer   READ editContainer          CONSTANT)
     Q_PROPERTY(lv::DocumentQmlChannels*         bindingChannels READ bindingChannels        CONSTANT)
-    Q_PROPERTY(QmlEditFragment*                 importsFragment READ importsFragment  WRITE setImportsFragment NOTIFY importsFragmentChanged)
-    Q_PROPERTY(QmlEditFragment*                 rootFragment    READ rootFragment     WRITE setRootFragment    NOTIFY rootFragmentChanged)
+    Q_PROPERTY(QJSValue                         runTrigger      READ runTrigger       NOTIFY runTriggerChanged)
+    Q_PROPERTY(lv::QmlEditFragment*             importsFragment READ importsFragment  WRITE setImportsFragment NOTIFY importsFragmentChanged)
+    Q_PROPERTY(lv::QmlEditFragment*             rootFragment    READ rootFragment     WRITE setRootFragment    NOTIFY rootFragmentChanged)
+
 public:
     friend class ProjectQmlExtension;
     friend class QmlEditFragmentContainer;
+
+    class RunTrigger;
+
+    typedef std::list<QJSValue> CallbackList;
 
 public:
     explicit LanguageQmlHandler(
@@ -124,9 +137,15 @@ public:
 
     QJSValue compileFunctionInContext(const QString& functionSource);
 
+    QJSValue runTrigger() const;
+
+    void runnableBuildReady(Runnable* r);
+
 signals:
     void importsFragmentChanged();
     void rootFragmentChanged();
+    void runTriggerChanged();
+
 public slots:
     //TOCHECK IF THESE ARE SLOTS
     bool areImportsScanned();
@@ -187,6 +206,12 @@ public slots:
 
     void suggestCompletion(int cursorPosition);
 
+    // Run Options
+
+    void configureRunTrigger(const QJSValue& options);
+    lv::QmlBindingChannelsModel* runChannels();
+    void buildRunChannel();
+
     // Direct editing management
 
     lv::CodePalette *edit(lv::QmlEditFragment* ef);
@@ -211,6 +236,7 @@ public slots:
     void __documentContentsChanged(int position, int charsRemoved, int charsAdded);
     void __documentFormatUpdate(int position, int length);
     void __cursorWritePositionChanged(QTextCursor cursor);
+    void __documentRunTriggerChanged();
 
     void __newProjectScopeReady();
     void __aboutToDelete();
@@ -298,8 +324,8 @@ private:
 
     ProjectDocument*       m_document;
 
-    QLinkedList<QJSValue>  m_documentParseListeners;
-    QLinkedList<QJSValue>  m_importsScannedListeners;
+    CallbackList*          m_documentParseListeners;
+    CallbackList*          m_importsScannedListeners;
 
     bool                   m_newScope;
     QTimer                 m_scopeTimer;

@@ -35,6 +35,30 @@ public:
     friend void lv::ml::deserialize<VisualLogTestStub>(const lv::MLNode& node, VisualLogTestStub& d);
     friend lv::VisualLog& operator << (lv::VisualLog& vl, const VisualLogTestStub& v);
 
+public:
+    class LogBehavior{
+    public:
+        static std::string typeId(const VisualLogTestStub&){
+            return "@VisualLogTestStub";
+        }
+        static std::string defaultViewDelegate(const VisualLogTestStub&){
+            return std::string();
+        }
+        static bool hasViewObject(){
+            return false;
+        }
+        static bool hasTransport(){
+            return true;
+        }
+        static lv::VisualLog::ViewObject* toView(const VisualLogTestStub&){
+            return nullptr;
+        }
+        static bool toTransport(const VisualLogTestStub& m, lv::MLNode& output);
+        static void toStream(lv::VisualLog& vl, const VisualLogTestStub& v){
+            vl << v.m_field1 << " " << v.m_field2;
+        }
+    };
+
 private:
     int     m_field1;
     QString m_field2;
@@ -59,9 +83,14 @@ inline void deserialize<VisualLogTestStub>(const MLNode& node, VisualLogTestStub
 }// namespace ml
 }// namespace lv
 
+inline bool VisualLogTestStub::LogBehavior::toTransport(const VisualLogTestStub &m, lv::MLNode &output){
+    lv::ml::serialize(m, output);
+    return true;
+}
+
+
 inline lv::VisualLog& operator << (lv::VisualLog& vl, const VisualLogTestStub& v){
-    vl.asObject("VisualLogTestStub", v);
-    return vl << v.m_field1 << " " << v.m_field2;
+    return vl.behavior<VisualLogTestStub::LogBehavior>(v);
 }
 
 #endif // VISUALLOGTESTSTUB_H

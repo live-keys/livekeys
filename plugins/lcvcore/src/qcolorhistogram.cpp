@@ -146,7 +146,7 @@ void QColorHistogramNode::render(
 
     m_paintDevice->setSize(size);
     m_painter->begin(m_paintDevice);
-    m_painter->setRenderHints(QPainter::Antialiasing | QPainter::HighQualityAntialiasing);
+    m_painter->setRenderHints(QPainter::Antialiasing);
 
     static QColor colors[5] = {QColor("#05426e"), QColor("#00803c"), QColor("#6e0516"), QColor("#eee"), QColor("#9b0bbf")};
 

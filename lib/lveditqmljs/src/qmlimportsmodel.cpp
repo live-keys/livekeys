@@ -28,6 +28,10 @@ QmlImportsModel::QmlImportsModel(ViewEngine *engine, QObject *parent)
     m_roles[Line] = "line";
 }
 
+QString QmlImportsModel::joinImports() const{
+    return DocumentQmlInfo::Import::join(m_data);
+}
+
 int QmlImportsModel::firstBlock()
 {
     if (m_data.empty()) return -1;

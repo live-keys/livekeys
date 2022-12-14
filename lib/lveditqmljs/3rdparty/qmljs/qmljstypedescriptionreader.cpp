@@ -115,8 +115,8 @@ void TypeDescriptionReader::readDocument(UiProgram *ast)
     const QString versionString = _source.mid(import->versionToken.offset, import->versionToken.length);
     const int dotIdx = versionString.indexOf(QLatin1Char('.'));
     if (dotIdx != -1) {
-        version = ComponentVersion(versionString.leftRef(dotIdx).toInt(),
-                                   versionString.midRef(dotIdx + 1).toInt());
+        version = ComponentVersion(versionString.left(dotIdx).toInt(),
+                                   versionString.mid(dotIdx + 1).toInt());
     }
     if (version.majorVersion() != 1) {
         addError(import->versionToken, tr("Major version different from 1 not supported."));
@@ -205,7 +205,7 @@ void TypeDescriptionReader::readDependencies(UiScriptBinding *ast)
             addWarning(l->element->firstSourceLocation(),
                        tr("Cannot read dependency: skipping."));
         }
-        *_dependencies << str->value.toString();
+        *_dependencies << str->value;
     }
 }
 
@@ -467,7 +467,7 @@ QString TypeDescriptionReader::readStringBinding(UiScriptBinding *ast)
         return QString();
     }
 
-    return stringLit->value.toString();
+    return stringLit->value;
 }
 
 bool TypeDescriptionReader::readBoolBinding(AST::UiScriptBinding *ast)
@@ -583,7 +583,7 @@ void TypeDescriptionReader::readExports(UiScriptBinding *ast, FakeMetaObject::Pt
             addError(arrayLit->firstSourceLocation(), tr("Expected array literal with only string literal members."));
             return;
         }
-        QString exp = stringLit->value.toString();
+        QString exp = stringLit->value;
         int slashIdx = exp.indexOf(QLatin1Char('/'));
         int spaceIdx = exp.indexOf(QLatin1Char(' '));
         ComponentVersion version(exp.mid(spaceIdx + 1));
@@ -665,7 +665,7 @@ void TypeDescriptionReader::readEnumValues(AST::UiScriptBinding *ast, LanguageUt
         for (PatternPropertyList *it = objectLit->properties; it; it = it->next) {
             if (PatternProperty *assignement = it->property) {
                 if (auto *name = AST::cast<StringLiteralPropertyName *>(assignement->name)) {
-                    fme->addKey(name->id.toString());
+                    fme->addKey(name->id);
                     continue;
                 }
             }
@@ -675,7 +675,7 @@ void TypeDescriptionReader::readEnumValues(AST::UiScriptBinding *ast, LanguageUt
         for (PatternElementList *it = arrayLit->elements; it; it = it->next) {
             if (PatternElement *element = it->element) {
                 if (auto *name = AST::cast<StringLiteral *>(element->initializer)) {
-                    fme->addKey(name->value.toString());
+                    fme->addKey(name->value);
                     continue;
                 }
             }

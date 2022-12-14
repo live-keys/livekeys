@@ -14,7 +14,6 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractorknn.h"
-#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -62,7 +61,9 @@ QBackgroundSubtractorKnnPrivate::QBackgroundSubtractorKnnPrivate() :
     nSamples(7),
     shadowThreshold(0.5),
     shadowValue(127),
-    m_subtractorKnn(0){
+    m_subtractorKnn(0)
+{
+    m_subtractorKnn = createSubtractor();
 }
 
 QBackgroundSubtractorKnnPrivate::~QBackgroundSubtractorKnnPrivate(){
@@ -262,15 +263,4 @@ void QBackgroundSubtractorKnn::setShadowValue(int shadowValue){
             d->subtractorKnn()->setShadowValue(shadowValue);
         emit shadowValueChanged();
     }
-}
-
-void QBackgroundSubtractorKnn::staticLoad(const QString &id){
-    Q_D(QBackgroundSubtractorKnn);
-    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
-    d->m_subtractorKnn = container->get< Ptr<BackgroundSubtractorKNN> >(id);
-    if ( !d->m_subtractorKnn ){
-        d->m_subtractorKnn = d->createSubtractor();
-        container->set< Ptr<BackgroundSubtractorKNN> >(id, d->m_subtractorKnn);
-    }
-    QMatFilter::transform();
 }

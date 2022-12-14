@@ -15,16 +15,13 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import QtQuick.Window 2.0
 import base 1.0
 import workspace 1.0
 import editor 1.0
 import editor.private 1.0
 import workspace.icons 1.0 as Icons
-import live 1.0
 import visual.input 1.0 as Input
 
 Item{
@@ -101,9 +98,9 @@ Item{
 //                    'addHorizontalEditorView' : [mainVerticalSplit.addHorizontalEditor, "Add Horizontal Editor"],
 //                    'addHorizontalFragmentEditorView': [mainVerticalSplit.addHorizontalFragmentEditor, "Add Horizontal Fragment Editor"],
 //                    'removeHorizontalEditorView' : [mainVerticalSplit.removeHorizontalEditor, "Remove Horizontal Editor"],
-                    'setLiveCodingMode': [root.panes.__factories.viewer.modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
-                    'setOnSaveCodingMode': [root.panes.__factories.viewer.modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
-                    'setDisabledCodingMode': [root.panes.__factories.viewer.modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
+//                    'setLiveCodingMode': [root.panes.__factories.viewer.modeContainer.setLiveCodingMode, "Set 'Live' Coding Mode"],
+//                    'setOnSaveCodingMode': [root.panes.__factories.viewer.modeContainer.setOnSaveCodingMode, "Set 'On Save' Coding Mode"],
+//                    'setDisabledCodingMode': [root.panes.__factories.viewer.modeContainer.setDisabledCodingMode, "Set 'Disabled' Coding Mode"],
                     'runProject': [lk.layers.workspace.project.run, "Run Project"],
                     'addRunView' : [root.addRunView, "Add Run View"],
                     "help" : [root.help, "Help"]

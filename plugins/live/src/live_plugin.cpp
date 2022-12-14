@@ -14,8 +14,6 @@
 ****************************************************************************/
 
 #include "live_plugin.h"
-#include "staticloader.h"
-#include "live/staticcontainer.h"
 #include "licensesettings.h"
 #include "loglistener.h"
 #include "worker.h"
@@ -58,7 +56,6 @@ static QObject* eventRelayProvider(QQmlEngine *engine, QJSEngine *){
 
 void LivePlugin::registerTypes(const char *uri){
     // @uri modules.live
-    qmlRegisterType<lv::StaticLoader>(        uri, 1, 0, "StaticLoader");
     qmlRegisterType<lv::VisualLogFilter>(     uri, 1, 0, "VisualLogFilter");
     qmlRegisterType<lv::LogListener>(         uri, 1, 0, "LogListener");
     qmlRegisterType<lv::ValueHistory>(        uri, 1, 0, "ValueHistory");
@@ -85,9 +82,6 @@ void LivePlugin::registerTypes(const char *uri){
 }
 
 void LivePlugin::initializeEngine(QQmlEngine *engine, const char *){
-    lv::StaticContainer* sc = new lv::StaticContainer(engine);
-    engine->rootContext()->setContextProperty("staticContainer", sc);
-
     QObject* livekeys   = engine->rootContext()->contextProperty("lk").value<QObject*>();
     lv::Settings* settings = static_cast<lv::Settings*>(livekeys->property("settings").value<QObject*>());
 

@@ -44,7 +44,7 @@ int ThemeContainer::rowCount(const QModelIndex &) const{
 QVariant ThemeContainer::data(const QModelIndex &index, int role) const{
     if ( index.row() < 0 || index.row() >= m_themes.size() )
         return QVariant();
-    auto it = m_themes.constBegin() + index.row();
+    auto it = iteratorAt(index.row());
 
     if ( role == ThemeContainer::Label ){
         return QVariant::fromValue(it.value());
@@ -116,6 +116,16 @@ void ThemeContainer::setTheme(const QString &name){
 
     if ( prevTheme )
         prevTheme->deleteLater();
+}
+
+QMap<QString, QString>::const_iterator ThemeContainer::iteratorAt(int index) const{
+    int i = 0;
+    for (auto it = m_themes.constBegin(); it != m_themes.constEnd(); ++it ){
+        if ( i == index )
+            return it;
+        ++i;
+    }
+    return m_themes.constEnd();
 }
 
 }// namespace

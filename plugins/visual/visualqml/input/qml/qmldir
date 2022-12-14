@@ -27,6 +27,7 @@ PlayPause                  1.0 PlayPause.qml
 RectangleButton            1.0 RectangleButton.qml
 RectangleButtonStyle       1.0 RectangleButtonStyle.qml
 RectangleSelection         1.0 RectangleSelection.qml
+ScrollbarHandle            1.0 ScrollbarHandle.qml
 SelectableListView         1.0 SelectableListView.qml
 SelectableListViewStyle    1.0 SelectableListViewStyle.qml
 SaturationBrightnessSlider 1.0 SaturationBrightnessSlider.qml

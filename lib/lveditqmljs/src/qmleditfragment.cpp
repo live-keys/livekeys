@@ -21,8 +21,11 @@
 #include "live/languageqmlhandler.h"
 #include "live/viewcontext.h"
 #include "live/visuallogqt.h"
+#include "live/qmlcomponentsource.h"
 #include "qmlbindingchannel.h"
 #include "documentqmlchannels.h"
+#include "qmljs/parser/qqmljsparser_p.h"
+#include "qmljs/qmljsscanner.h"
 
 #include <QJSValue>
 #include <QJSValueIterator>
@@ -138,9 +141,87 @@ bool QmlEditFragment::isBuilder() const{
 }
 
 void QmlEditFragment::rebuild(){
-    if ( m_channel->isBuilder() ){
+    if ( !m_channel->isBuilder() )
+        return;
+    if ( language()->bindingChannels()->canRebuild() ){
         language()->bindingChannels()->rebuild();
+        return;
     }
+
+    rebuildComponent();
+}
+
+void QmlEditFragment::rebuildComponent(){
+    if ( m_channel ){
+        if ( m_channel->bindingPath()->lastNode()->type() == QmlBindingPath::Node::Component ){
+            QObject* obj = m_channel->object();
+
+            if ( !obj || obj->property("__buildAssignment").type() != QVariant::List ){
+                Exception e = CREATE_EXCEPTION(
+                    Exception, "Rebuild error: Could not figure out Component assignment.", Exception::toCode("~Component"));
+                QmlError(ViewContext::instance().engine(), e, this).jsThrow();
+                return;
+            }
+
+            QVariantList vl = obj->property("__buildAssignment").toList();
+            if ( vl.length() > 1 ){
+                QObject* target = vl[0].value<QObject*>();
+                QString prop = vl[1].toString();
+
+                QString code = readValueText();
+                int cutStart = code.indexOf('{') + 1;
+                int cutEnd = code.lastIndexOf('}');
+                code = code.mid(cutStart, cutEnd - cutStart);
+
+                QString importsCode = m_language->importsModel()->joinImports();
+
+                QQmlComponent* compObj = qobject_cast<QQmlComponent*>(obj);
+                if ( compObj ){
+                    QQmlComponent* newComp = new QQmlComponent(ViewContext::instance().engine()->engine());
+                    newComp->setData(importsCode.toUtf8() + "\n" + code.toUtf8(), compObj->url());
+
+                    if ( prop == "__default" ){
+                        QQmlProperty(target).write(QVariant::fromValue(newComp));
+                    } else {
+                        QQmlProperty(target, prop).write(QVariant::fromValue(newComp));
+                    }
+
+                } else {
+                    QmlComponentSource* compSrc = qobject_cast<QmlComponentSource*>(obj);
+                    if ( compSrc ){
+                        QmlComponentSource* newCompSrc = new QmlComponentSource(
+                            ViewContext::instance().engine(), compSrc->url(), importsCode.toUtf8(), code
+                        );
+
+                        if ( prop == "__default" ){
+                            QQmlProperty(target).write(QVariant::fromValue(newCompSrc));
+                        } else {
+                            QQmlProperty(target, prop).write(QVariant::fromValue(newCompSrc));
+                        }
+                    } else {
+                        Exception e = CREATE_EXCEPTION(
+                            Exception, "Rebuild error: Object does not seem to be a Component or ComponentSource.", Exception::toCode("~Component"));
+                        QmlError(ViewContext::instance().engine(), e, this).jsThrow();
+                        return;
+                    }
+                }
+            }
+            return;
+
+        }
+    }
+
+    QmlEditFragment* parentFrag = parentFragment();
+
+    if (!parentFrag ){
+        ViewEngine* engine = ViewContext::instance().engine();
+        Exception e = CREATE_EXCEPTION(
+            Exception, "Rebuild error: Failed to find component. The component being rebuild should also be shaped.", Exception::toCode("~Component"));
+        QmlError(engine, e, this).jsThrow();
+        return;
+    }
+
+    parentFrag->rebuildComponent();
 }
 
 bool QmlEditFragment::isGroup() const

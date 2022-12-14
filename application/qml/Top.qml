@@ -15,10 +15,9 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import QtQuick.Controls 1.4
+import QtQuick.Controls 2.4
 import editor.private 1.0
 import base 1.0
-import live 1.0
 import workspace 1.0 as Workspace
 import workspace.icons 1.0 as Icons
 
@@ -342,7 +341,7 @@ Rectangle {
     Rectangle{
         anchors.left: parent.left
         anchors.leftMargin: 220 + 35 * 6
-        color : lk.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
+        color : lk.settings.file('license') && lk.settings.file('license').highlights > 0 ? "#44130b" : "transparent"
         height : openLicenseArea.containsMouse ? parent.height : parent.height - 5
         width : 25
         Image{

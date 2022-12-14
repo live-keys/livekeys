@@ -149,14 +149,14 @@ void Engine::setDirectives(Directives *directives)
 MemoryPool *Engine::pool()
 { return &_pool; }
 
-QStringRef Engine::newStringRef(const QString &text)
+QString Engine::newStringRef(const QString &text)
 {
     const int pos = _extraCode.length();
     _extraCode += text;
-    return _extraCode.midRef(pos, text.length());
+    return _extraCode.mid(pos, text.length());
 }
 
-QStringRef Engine::newStringRef(const QChar *chars, int size)
+QString Engine::newStringRef(const QChar *chars, int size)
 { return newStringRef(QString(chars, size)); }
 
 } // end of namespace QmlJS

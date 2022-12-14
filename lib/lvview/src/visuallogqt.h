@@ -20,6 +20,7 @@
 #include "live/visuallog.h"
 
 #include <QString>
+#include <QStringView>
 #include <QTextStream>
 #include <QUrl>
 
@@ -56,7 +57,7 @@ inline std::ostream& operator << (std::ostream &stream, const QByteArray& val ){
  * Stream output operator for QStringRefs
  * \ingroup lvview
  */
-inline std::ostream& operator << (std::ostream &stream, const QStringRef& val ){
+inline std::ostream& operator << (std::ostream &stream, const QStringView& val ){
     QByteArray utf8 = val.toUtf8();
     stream << utf8.data();
     return stream;

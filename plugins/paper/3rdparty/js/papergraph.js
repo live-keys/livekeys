@@ -2043,7 +2043,7 @@ function Pg(paper){
                 var kerningPairValue = 0;
                 if(lastGlyphIndex >= 0) {
                     var kerning = font.kerningPairs[lastGlyphIndex+','+glyph.index];
-                    if(kerning != undefined) {
+                    if(kerning !== undefined) {
                         kerningPairValue = kerning;
                     }
                 }
@@ -2051,7 +2051,7 @@ function Pg(paper){
                 var glyphRect = new paper.Rectangle(new paper.Point(0, -asc), new paper.Point(glyph.advanceWidth, desc * -1));
                 var glyphRectPaperPath = new paper.Path.Rectangle(glyphRect);
                 glyphRectPaperPath.data.isPGGlyphRect = true;
-                glyphRectPaperPath.fillColor = 'rgba(0,0,0,0.00001)'; //hack to make finrect fill
+                glyphRectPaperPath.fillColor = 'rgba(0,0,0,0.00001)';
                 glyphGroup.addChild(glyphRectPaperPath);
                 glyphGroup.data.isPGGlyphGroup = true;
 

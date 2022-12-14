@@ -242,7 +242,6 @@ public:
     const_iterator end() const { return _documents.end(); }
 
     void insert(const Document::Ptr &document, bool allowInvalid = false);
-    void insertLibraryInfo(const QString &path, const LibraryInfo &info);
     void remove(const QString &fileName);
 
     const ImportDependencies *importDependencies() const;

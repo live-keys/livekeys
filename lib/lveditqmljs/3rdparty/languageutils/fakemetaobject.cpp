@@ -200,7 +200,7 @@ QString FakeMetaMethod::describe(int baseIndent) const
     res += methodName();
     res += newLine;
     res += QLatin1String("  methodType:");
-    res += methodType();
+    res += methodType() ? "true" : "false";
     res += newLine;
     res += QLatin1String("  parameterNames:[");
     foreach (const QString &pName, parameterNames()) {
@@ -286,13 +286,13 @@ QString FakeMetaProperty::describe(int baseIndent) const
     res += QString::number(revision());
     res += newLine;
     res += QLatin1String("  isList:");
-    res += isList();
+    res += isList() ? "true" : "false";
     res += newLine;
     res += QLatin1String("  isPointer:");
-    res += isPointer();
+    res += isPointer() ? "true" : "false";
     res += newLine;
     res += QLatin1String("  isWritable:");
-    res += isWritable();
+    res += isWritable() ? "true" : "false";
     res += newLine;
     res += QLatin1Char('}');
     return res;
@@ -507,13 +507,13 @@ QString FakeMetaObject::describe(bool printDetails, int baseIndent) const
     res += superclassName();
     res += newLine;
     res += QLatin1String("isSingleton:");
-    res += isSingleton();
+    res += isSingleton() ? "true" : "false";
     res += newLine;
     res += QLatin1String("isCreatable:");
-    res += isCreatable();
+    res += isCreatable() ? "true" : "false";
     res += newLine;
     res += QLatin1String("isComposite:");
-    res += isComposite();
+    res += isComposite() ? "true" : "false";
     res += newLine;
     res += QLatin1String("defaultPropertyName:");
     res += defaultPropertyName();

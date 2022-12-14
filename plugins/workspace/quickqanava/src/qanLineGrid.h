@@ -169,10 +169,10 @@ private:
     QVector<impl::GridLine*>    _majorLines;
 
 private:
-    static int              callMinorLinesCount(QQmlListProperty<impl::GridLine>*);
+    static int callMinorLinesCount(QQmlListProperty<impl::GridLine>*);
     static impl::GridLine*  callMinorLinesAt(QQmlListProperty<impl::GridLine>*, int index);
 
-    static int              callMajorLinesCount(QQmlListProperty<impl::GridLine>*);
+    static int callMajorLinesCount(QQmlListProperty<impl::GridLine>*);
     static impl::GridLine*  callMajorLinesAt(QQmlListProperty<impl::GridLine>*, int index);
     //@}
     //-------------------------------------------------------------------------

@@ -256,7 +256,7 @@ static QString generatedSlotName(const QString &base)
         if (c != QLatin1Char('_'))
             break;
     }
-    slotName += base.midRef(firstChar);
+    slotName += base.mid(firstChar);
     return slotName;
 }
 
@@ -1889,12 +1889,12 @@ void ASTObjectValue::processMembers(MemberProcessor *processor) const
         uint pFlags = PropertyInfo::Readable;
         if (!ref->ast()->isReadonlyMember)
             pFlags |= PropertyInfo::Writeable;
-        processor->processProperty(ref->ast()->name.toString(), ref, PropertyInfo(pFlags));
+        processor->processProperty(ref->ast()->name, ref, PropertyInfo(pFlags));
         // ### Should get a different value?
         processor->processGeneratedSlot(ref->onChangedSlotName(), ref);
     }
     foreach (ASTSignal *ref, m_signals) {
-        processor->processSignal(ref->ast()->name.toString(), ref);
+        processor->processSignal(ref->ast()->name, ref);
         // ### Should get a different value?
         processor->processGeneratedSlot(ref->slotName(), ref);
     }
@@ -1907,7 +1907,7 @@ QString ASTObjectValue::defaultPropertyName() const
     if (m_defaultPropertyRef) {
         UiPublicMember *prop = m_defaultPropertyRef->ast();
         if (prop)
-            return prop->name.toString();
+            return prop->name;
     }
     return QString();
 }
@@ -2014,7 +2014,7 @@ ASTFunctionValue::ASTFunctionValue(FunctionExpression *ast, const Document *doc,
     setPrototype(valueOwner->functionPrototype());
 
     for (FormalParameterList *it = ast->formals; it; it = it->next)
-        m_argumentNames.append(it->element->bindingIdentifier.toString());
+        m_argumentNames.append(it->element->bindingIdentifier);
 
     m_isVariadic = UsesArgumentsArray()(ast->body);
 }
@@ -2098,7 +2098,7 @@ const Value *QmlPrototypeReference::value(ReferenceContext *) const
 ASTPropertyReference::ASTPropertyReference(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
     : Reference(valueOwner), m_ast(ast), m_doc(doc)
 {
-    const QString &propertyName = ast->name.toString();
+    const QString &propertyName = ast->name;
     m_onChangedSlotName = generatedSlotName(propertyName);
     m_onChangedSlotName += QLatin1String("Changed");
 }
@@ -2142,7 +2142,7 @@ const Value *ASTPropertyReference::value(ReferenceContext *) const
 //        return evaluator(m_ast->statement);
 //    }
 
-    const QString memberType = m_ast->memberType->name.toString();
+    const QString memberType = m_ast->memberType->name;
 
     const Value *builtin = valueOwner()->defaultValueForBuiltinType(memberType);
     if (!builtin->asUndefinedValue())
@@ -2161,13 +2161,13 @@ const Value *ASTPropertyReference::value(ReferenceContext *) const
 ASTSignal::ASTSignal(UiPublicMember *ast, const Document *doc, ValueOwner *valueOwner)
     : FunctionValue(valueOwner), m_ast(ast), m_doc(doc)
 {
-    const QString &signalName = ast->name.toString();
+    const QString &signalName = ast->name;
     m_slotName = generatedSlotName(signalName);
 
     ObjectValue *v = valueOwner->newObject(/*prototype=*/0);
     for (UiParameterList *it = ast->parameters; it; it = it->next) {
         if (!it->name.isEmpty())
-            v->setMember(it->name.toString(), valueOwner->defaultValueForBuiltinType(it->type->name.toString()));
+            v->setMember(it->name, valueOwner->defaultValueForBuiltinType(it->type->name));
     }
     m_bodyScope = v;
 }
@@ -2196,7 +2196,7 @@ const Value *ASTSignal::argument(int index) const
         param = param->next;
     if (!param || !param->type || param->type->name.isEmpty())
         return valueOwner()->unknownValue();
-    return valueOwner()->defaultValueForBuiltinType(param->type->name.toString());
+    return valueOwner()->defaultValueForBuiltinType(param->type->name);
 }
 
 QString ASTSignal::argumentName(int index) const
@@ -2206,7 +2206,7 @@ QString ASTSignal::argumentName(int index) const
         param = param->next;
     if (!param || param->name.isEmpty())
         return FunctionValue::argumentName(index);
-    return param->name.toString();
+    return param->name;
 }
 
 bool ASTSignal::getSourceLocation(QString *fileName, int *line, int *column) const

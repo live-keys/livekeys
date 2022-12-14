@@ -1,6 +1,6 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -108,6 +108,7 @@ Rectangle{
     }
 
     ScrollView{
+        id: scrollView
         z: 300
         width: parent.width
         height: runnablesView.count * runnablesView.delegateHeight > parent.height - runnablesMenuInputBox.height ?
@@ -117,28 +118,15 @@ Rectangle{
         anchors.left: parent.left
         anchors.topMargin: runnablesMenuInputBox.height
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#0b1f2e"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: "#091823"
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentHeight > scrollView.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentWidth > scrollView.width
         }
 
         ListView{

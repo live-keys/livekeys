@@ -7,3 +7,5 @@ JsonDecoder        1.0 JsonDecoder.qml
 TextLineAtPosition 1.0 TextLineAtPosition.qml
 TextClip           1.0 TextClip.qml
 ConvertToInt       1.0 ConvertToInt.qml
+StreamCollector    1.0 StreamCollector.qml
+TextConcat         1.0 TextConcat.qml

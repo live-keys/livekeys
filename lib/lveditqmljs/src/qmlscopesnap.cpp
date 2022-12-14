@@ -391,15 +391,29 @@ QmlInheritanceInfo QmlScopeSnap::generateTypePathFromClassName(const QString &ty
     if ( !libraryInfo )
         return QmlInheritanceInfo();
 
-    QmlTypeInfo::Ptr object = libraryInfo->typeInfoByClassName(typeName);
+    QmlTypeInfo::Ptr objectTi = libraryInfo->typeInfoByClassName(typeName);
 
-    if ( !object ){
+    if ( !objectTi ){
         foreach( const QString& libraryDependency, libraryInfo->dependencies() ){
             libraryInfo = project->libraryInfo(libraryDependency);
             if ( libraryInfo ){
-                object = libraryInfo->typeInfoByClassName(typeName);
-                if ( !object.isNull() ){
+                objectTi = libraryInfo->typeInfoByClassName(typeName);
+                if ( !objectTi.isNull() ){
                     typeLibrary = libraryDependency;
+                    break;
+                }
+            }
+        }
+    }
+
+    if ( !objectTi ){
+        auto defaultLibraries = project->defaultLibraries();
+        for ( const QString& libraryUri: defaultLibraries ){
+            libraryInfo = project->libraryInfo(libraryUri);
+            if ( libraryInfo ){
+                objectTi = libraryInfo->typeInfoByClassName(typeName);
+                if ( !objectTi.isNull() ){
+                    typeLibrary = libraryUri;
                     break;
                 }
             }
@@ -408,9 +422,9 @@ QmlInheritanceInfo QmlScopeSnap::generateTypePathFromClassName(const QString &ty
 
     QmlInheritanceInfo typePath;
 
-    if ( !object.isNull() ){
-        typePath.nodes.append(object);
-        typePath.join(generateTypePathFromObject(object));
+    if ( !objectTi.isNull() ){
+        typePath.nodes.append(objectTi);
+        typePath.join(generateTypePathFromObject(objectTi));
     }
 
     return typePath;
@@ -445,6 +459,7 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(
     for ( auto it = classTypePath.nodes.begin(); it != classTypePath.nodes.end(); ++it ){
         const QmlTypeInfo::Ptr& currentType = *it;
         QmlPropertyInfo prop = currentType->propertyAt(propertyName);
+
         if ( prop.isValid() ){
             return QmlScopeSnap::PropertyReference(
                 prop,
@@ -465,7 +480,6 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::propertyInType(
                 );
             }
         }
-
     }
     return QmlScopeSnap::PropertyReference();
 }
@@ -498,7 +512,6 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
                 );
             }
         }
-
     }
 
     QmlInheritanceInfo contextTypePath = getTypePath(contextObject);
@@ -507,6 +520,9 @@ QmlScopeSnap::PropertyReference QmlScopeSnap::getProperty(
     for ( auto it = contextTypePath.nodes.begin(); it != contextTypePath.nodes.end(); ++it ){
         const QmlTypeInfo::Ptr& currentType = *it;
         QmlPropertyInfo prop = currentType->propertyAt(propertyName);
+
+        QmlInheritanceInfo info = generateTypePathFromClassName(prop.typeName.name(), currentType->prefereredType().path());
+
         if ( prop.isValid() ){
             return QmlScopeSnap::PropertyReference(
                 prop,
@@ -573,7 +589,6 @@ QList<QmlScopeSnap::PropertyReference> QmlScopeSnap::getProperties(
         return QList<QmlScopeSnap::PropertyReference>();
 
     QList<QmlScopeSnap::PropertyReference> result;
-
     QmlScopeSnap::PropertyReference propRef = getProperty(context, propertyChain.first(), position);
     if ( !propRef.isValid() )
         return result;

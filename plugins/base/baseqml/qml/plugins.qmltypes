@@ -65,6 +65,23 @@ Module {
         Method { name: "release" }
     }
     Component {
+        name: "lv::ComponentSource"
+        prototype: "QObject"
+        exports: ["base/ComponentSource 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "component"; type: "QQmlComponent"; isPointer: true }
+    }
+    Component {
+        name: "lv::QmlValueFlowGraph"
+        defaultProperty: "source"
+        prototype: "QObject"
+        exports: ["base/ValueFlowGraph 1.0"]
+        exportMetaObjectRevisions: [0]
+        Property { name: "source"; type: "lv::QmlComponentSource"; isPointer: true }
+        Property { name: "input"; type: "QJSValue"; }
+        Property { name: "result"; type: "QJSValue"; isReadonly: true; }
+    }
+    Component {
         name: "lv::Layer"
         prototype: "QObject"
         exports: ["base/Layer 1.0"]
@@ -188,15 +205,14 @@ Module {
         exportMetaObjectRevisions: [0]
     }
     Component {
-        name: "lv::QmlEachValueApply"
+        name: "lv::QmlMap"
         prototype: "QObject"
-        exports: ["base/EachValueApply 1.0"]
+        exports: ["base/Map 1.0"]
         exportMetaObjectRevisions: [0]
         Property { name: "input"; type: "QJSValue" }
         Property { name: "result"; type: "QJSValue"; isReadonly: true }
-        Property { name: "flow"; type: "QQmlComponent"; isPointer: true }
+        Property { name: "f"; type: "lv::QmlValueFlowGraph"; isPointer: true }
         Method { name: "exec" }
-        Method { name: "__flowResultReady" }
     }
     Component {
         name: "lv::QmlExec"

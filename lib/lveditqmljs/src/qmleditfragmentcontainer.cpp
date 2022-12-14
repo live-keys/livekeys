@@ -14,37 +14,47 @@
 ****************************************************************************/
 
 #include "qmleditfragmentcontainer.h"
+#include "qmleditfragment.h"
 #include "languageqmlhandler.h"
 
 namespace lv{
 
-QmlEditFragmentContainer::QmlEditFragmentContainer(LanguageQmlHandler *parent)
+QmlEditFragmentContainer::QmlEditFragmentContainer(ViewEngine* ve, LanguageQmlHandler *parent)
     : QObject(parent)
+    , m_engine(ve)
+    , m_edits(new std::list<QmlEditFragment*>)
     , m_codeHandler(parent)
 {
-
 }
 
 QmlEditFragmentContainer::~QmlEditFragmentContainer(){
-
+    delete m_edits;
 }
 
 bool QmlEditFragmentContainer::addEdit(QmlEditFragment *edit){
-    auto it = m_edits.begin();
-    while ( it != m_edits.end() ){
+    auto it = m_edits->begin();
+    while ( it != m_edits->end() ){
         QmlEditFragment* itEdit = *it;
 
         if ( itEdit->declaration()->position() < edit->declaration()->position() ){
             break;
 
         } else if ( itEdit->declaration()->position() == edit->declaration()->position() ){
-            qWarning("Multiple editing fragments at the same position: %d", edit->position());
+            QmlError(
+                m_engine,
+                CREATE_EXCEPTION(
+                    lv::Exception,
+                    Utf8("Multiple editing fragments at the same position: %s").format(edit->position()),
+                    lv::Exception::toCode("~Duplicate")
+                ),
+                this
+            ).jsThrow();
             return false;
         }
         ++it;
     }
 
-    m_edits.insert(it, edit);
+    m_edits->insert(it, edit);
 
     emit editCountChanged();
     return true;
@@ -56,15 +66,15 @@ void QmlEditFragmentContainer::derefEdit(QmlEditFragment *edit){
     if (edit->refCount() == 0){
         QObject* parent = edit->parent();
         if ( parent == m_codeHandler ){
-            auto it = m_edits.begin();
-            while( it != m_edits.end() ){
+            auto it = m_edits->begin();
+            while( it != m_edits->end() ){
                 QmlEditFragment* itEdit = *it;
 
                 if ( itEdit->declaration()->position() < edit->declaration()->position() )
                     break;
 
                 if ( itEdit == edit ){
-                    m_edits.erase(it);
+                    m_edits->erase(it);
 
                     for (auto child: edit->childFragments())
                         derefEdit(child);
@@ -98,16 +108,16 @@ void QmlEditFragmentContainer::removeEdit(QmlEditFragment *edit){
 
     QObject* parent = edit->parent();
     if ( parent == m_codeHandler ){
-        auto it = m_edits.begin();
+        auto it = m_edits->begin();
 
-        while( it != m_edits.end() ){
+        while( it != m_edits->end() ){
             QmlEditFragment* itEdit = *it;
 
             if ( itEdit->declaration()->position() < edit->declaration()->position() )
                 break;
 
             if ( itEdit == edit ){
-                m_edits.erase(it);
+                m_edits->erase(it);
 
                 for (auto child: edit->childFragments())
                     removeEdit(child);
@@ -134,19 +144,19 @@ void QmlEditFragmentContainer::removeEdit(QmlEditFragment *edit){
 }
 
 QJSValue QmlEditFragmentContainer::allEdits(){
-    QJSValue result = m_codeHandler->m_engine->engine()->newArray(static_cast<quint32>(m_edits.size()));
+    QJSValue result = m_engine->engine()->newArray(static_cast<quint32>(m_edits->size()));
     quint32 i = 0;
-    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
+    for ( auto it = m_edits->begin(); it != m_edits->end(); ++it ){
         result.setProperty(i++, m_codeHandler->m_engine->engine()->newQObject(*it));
     }
     return result;
 }
 
 void QmlEditFragmentContainer::clearAllFragments(){
-    auto it = m_edits.begin();
-    while( it != m_edits.end() ){
+    auto it = m_edits->begin();
+    while( it != m_edits->end() ){
         QmlEditFragment* edit = *it;
-        it = m_edits.erase(it);
+        it = m_edits->erase(it);
         edit->emitRemoval();
         edit->deleteLater();
     }
@@ -154,7 +164,7 @@ void QmlEditFragmentContainer::clearAllFragments(){
 }
 
 QmlEditFragment *QmlEditFragmentContainer::topEditAtPosition(int position){
-    for ( auto it = m_edits.begin(); it != m_edits.end(); ++it ){
+    for ( auto it = m_edits->begin(); it != m_edits->end(); ++it ){
         QmlEditFragment* edit = *it;
         if ( edit->declaration()->position() == position ){
             return edit;
@@ -165,8 +175,8 @@ QmlEditFragment *QmlEditFragmentContainer::topEditAtPosition(int position){
 
 QmlEditFragment *QmlEditFragmentContainer::findObjectFragmentByPosition(int position){
     QmlEditFragment* result = nullptr;
-    QLinkedList<QmlEditFragment*> q;
-    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
+    std::list<QmlEditFragment*> q;
+    for (auto it = m_edits->begin(); it != m_edits->end(); ++it)
     {
         q.push_back(*it);
     }
@@ -191,9 +201,8 @@ QmlEditFragment *QmlEditFragmentContainer::findObjectFragmentByPosition(int posi
 QmlEditFragment *QmlEditFragmentContainer::findFragmentByPosition(int position){
     QmlEditFragment* result = nullptr;
 
-    QLinkedList<QmlEditFragment*> q;
-    for (auto it = m_edits.begin(); it != m_edits.end(); ++it)
-    {
+    std::list<QmlEditFragment*> q;
+    for (auto it = m_edits->begin(); it != m_edits->end(); ++it){
         q.push_back(*it);
     }
 

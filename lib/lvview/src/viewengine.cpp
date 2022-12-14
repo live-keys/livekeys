@@ -152,12 +152,13 @@ ViewEngine::ViewEngine(QQmlEngine *engine, LockedFileIOSession::Ptr fileIO, QObj
     , m_packageGraph(nullptr)
     , m_fileIO(fileIO)
     , m_errorCounter(0)
-    , m_logger(new QmlVisualLog(this))
+    , m_logger(new QmlVisualLog(engine))
     , m_memory(new Memory(this))
 {
     Q_D(ViewEngine);
     d->urlInterceptor = new QmlEngineInterceptor::UrlInterceptor(this);
     m_engine->setUrlInterceptor(d->urlInterceptor);
+//    m_engine->addUrlInterceptor(d->urlInterceptor);
 
     m_engine->rootContext()->setContextProperty("engine", this);
     m_engine->globalObject().setProperty("vlog", m_engine->newQObject(m_logger));
@@ -195,6 +196,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, LockedFileIOSession::Ptr fileIO, QObj
 ViewEngine::~ViewEngine(){
     Q_D(ViewEngine);
     m_engine->setUrlInterceptor(nullptr);
+//    m_engine->removeUrlInterceptor(d->urlInterceptor);
     m_engine->setNetworkAccessManagerFactory(nullptr);
     m_engine->setProperty("viewEngine", QVariant());
     delete m_engineMutex;
@@ -294,12 +296,15 @@ void ViewEngine::setInterceptor(ViewEngineInterceptor *interceptor){
 
 ComponentDeclaration ViewEngine::rootDeclaration(QObject *object) const{
     QQmlContext* ctx = qmlContext(object);
-    QQmlContextPrivate* pctx = QQmlContextPrivate::get(ctx);
 
-    QUrl url = pctx->data->url();
-    QString objectId = pctx->data->findObjectId(object);
+    QQmlContextData* data = QQmlContextPrivate::get(ctx)->data;
+//    QQmlRefPointer<QQmlContextData> data = QQmlContextData::get(ctx);
 
-    QQmlContextData* child = pctx->data->childContexts;
+    QUrl url = data->url();
+    QString objectId = data->findObjectId(object);
+
+//    QQmlRefPointer<QQmlContextData> child = data->childContexts();
+    QQmlContextData* child = data->childContexts;
 
     while (child) {
         if ( !child->url().isEmpty() && child->contextObject == object ){

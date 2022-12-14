@@ -23,18 +23,12 @@
 #include "qmatview.h"
 #include "qimread.h"
 #include "qimageview.h"
-#include "qmatroi.h"
 #include "qmatread.h"
 #include "qcamcapture.h"
-#include "qvideocapture.h"
 #include "qvideowriter.h"
-#include "qmatbuffer.h"
-#include "qalphamerge.h"
-#include "qabsdiff.h"
 #include "qdrawhistogram.h"
 #include "qcolorhistogram.h"
 #include "qimagefile.h"
-#include "qoverlapmat.h"
 #include "qitemcapture.h"
 #include "qgradient.h"
 #include "qvideodecoder.h"
@@ -74,18 +68,12 @@ void LcvcorePlugin::registerTypes(const char *uri){
     qmlRegisterType<QMatView>(               uri, 1, 0, "MatView");
     qmlRegisterType<QImageView>(             uri, 1, 0, "ImageView");
     qmlRegisterType<QImRead>(                uri, 1, 0, "ImRead");
-    qmlRegisterType<QMatRoi>(                uri, 1, 0, "MatRoi");
     qmlRegisterType<QMatRead>(               uri, 1, 0, "MatRead");
     qmlRegisterType<QCamCapture>(            uri, 1, 0, "CamCapture");
-    qmlRegisterType<QVideoCapture>(          uri, 1, 0, "VideoCapture");
     qmlRegisterType<QVideoWriter>(           uri, 1, 0, "VideoWriter");
-    qmlRegisterType<QMatBuffer>(             uri, 1, 0, "MatBuffer");
-    qmlRegisterType<QAlphaMerge>(            uri, 1, 0, "AlphaMerge");
-    qmlRegisterType<QAbsDiff>(               uri, 1, 0, "AbsDiff");
     qmlRegisterType<QDrawHistogram>(         uri, 1, 0, "DrawHistogram");
     qmlRegisterType<QColorHistogram>(        uri, 1, 0, "ColorHistogram");
     qmlRegisterType<QImageFile>(             uri, 1, 0, "ImageFile");
-    qmlRegisterType<QOverlapMat>(            uri, 1, 0, "OverlapMat");
     qmlRegisterType<QItemCapture>(           uri, 1, 0, "ItemCapture");
 
     qmlRegisterType<QVideoDecoder>(          uri, 1, 0, "VideoDecoder");
@@ -107,14 +95,6 @@ void LcvcorePlugin::initializeEngine(QQmlEngine * engine, const char *){
         lv::TimelineSettings* ts = lv::TimelineSettings::grabFrom(lv::ViewContext::instance().settings());
         ts->addTrackType("lcvcore#VideoTrack", "Video", "lcvcore/VideoTrackFactory", true, "lcvcore/VideoTrackExtension");
     }
-
-
-    lv::ViewContext::instance().engine()->registerQmlTypeInfo<QMat>(
-        &lv::ml::serialize<QMat>,
-        &lv::ml::deserialize<QMat>,
-        [](){return new QMat;},
-        true
-    );
 }
 
 

@@ -24,7 +24,7 @@
 namespace lv{
 
 class Project;
-class ProjectFile;
+class Runnable;
 
 class LV_EDITOR_EXPORT Document : public QObject{
 
@@ -34,7 +34,6 @@ class LV_EDITOR_EXPORT Document : public QObject{
     Q_PROPERTY(QString formatType     READ formatType  NOTIFY formatTypeChanged)
     Q_PROPERTY(bool isMonitored       READ isMonitored NOTIFY isMonitoredChanged)
     Q_PROPERTY(bool isDirty           READ isDirty     WRITE  setIsDirty     NOTIFY isDirtyChanged)
-    Q_ENUMS(OpenMode)
 
 public:
     friend class Project;
@@ -52,6 +51,28 @@ public:
         int m_column;
     };
 
+
+public:
+    enum RunTriggerType{
+        RunManual,
+        RunOnSave,
+        RunOnChange
+    };
+
+    class LV_EDITOR_EXPORT RunTrigger{
+    public:
+        RunTrigger();
+        virtual ~RunTrigger();
+
+        virtual void onContentSet() = 0;
+        virtual void onContentSaved() = 0;
+        virtual void onContentChanged(int pos, int removed, int added, int flags) = 0;
+        virtual Runnable* triggerRunnable() = 0;
+
+        virtual Document::RunTriggerType triggerType() const = 0;
+        virtual void setTriggerType(Document::RunTriggerType rtt) = 0;
+    };
+
 public:
     /** Enum containing possible modes of opening documents */
     enum OpenMode{
@@ -62,6 +83,9 @@ public:
         /** If not opened, will be open for editing. If already monitored, it will not be available for editing. */
         EditIfNotOpen
     };
+
+    Q_ENUM(OpenMode)
+    Q_ENUM(RunTriggerType)
 
 public:
     explicit Document(const QString &filePath, const QString& formatType, bool isMonitored, Project *parent);
@@ -85,6 +109,10 @@ public:
     const QString& path() const;
     QString pathHash() const;
 
+    void notifyRunTriggerChanged();
+    void setRunTrigger(RunTrigger* trigger);
+    RunTrigger* runTrigger() const;
+
 signals:
     /** shows dirty state changed */
     void isDirtyChanged();
@@ -102,6 +130,8 @@ signals:
     void pathChanged();
     /** triggered before the document would close */
     void aboutToClose();
+    /** when runTrigger changed */
+    void runTriggerChanged();
 
 public slots:
     virtual void setContent(const QByteArray& content);
@@ -131,6 +161,7 @@ private:
     bool         m_isDirty;
     QString      m_fileName;
     QString      m_path;
+    RunTrigger*  m_runTrigger;
 };
 
 inline QByteArray Document::content(){
@@ -140,6 +171,9 @@ inline QByteArray Document::content(){
 inline void Document::setContent(const QByteArray &content){
     m_content = content;
     emit contentChanged();
+
+    if ( m_runTrigger )
+        m_runTrigger->onContentSet();
 }
 
 inline bool Document::isMonitored() const{

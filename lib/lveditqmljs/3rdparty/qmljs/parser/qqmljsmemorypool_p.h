@@ -105,9 +105,9 @@ public:
     template <typename Tp, typename... Ta> Tp *New(Ta... args)
     { return new (this->allocate(sizeof(Tp))) Tp(args...); }
 
-    QStringRef newString(const QString &string) {
+    QString newString(const QString &string) {
         strings.append(new QString(string));
-        return QStringRef(strings.last());
+        return *strings.last();
     }
 
 private:

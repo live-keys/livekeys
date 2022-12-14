@@ -10,44 +10,48 @@ namespace lv{
 class QmlStreamOperator : public QObject, public QmlStreamProvider{
 
     Q_OBJECT
-    Q_PROPERTY(lv::QmlStream* input  READ input  WRITE setInput NOTIFY inputChanged)
-    Q_PROPERTY(lv::QmlStream* output READ output NOTIFY outputChanged)
-    Q_PROPERTY(QJSValue next         READ next   WRITE setNext   NOTIFY nextChanged)
 
 public:
-    explicit QmlStreamOperator(QObject *parent = nullptr);
+    enum OperationType{
+        StreamFunction = 1,
+        ValueFunction,
+        Act
+    };
+
+public:
+    explicit QmlStreamOperator(ViewEngine* ve, OperationType ot, QmlStream* input, const QJSValue& options, const QJSValue& step, QObject *parent = nullptr);
     virtual ~QmlStreamOperator();
 
     lv::QmlStream* input() const;
-    void setInput(lv::QmlStream* stream);
-
     lv::QmlStream* output() const;
 
-    QJSValue next() const;
-    void setNext(QJSValue next);
+    static void streamFunctionHandler(QObject* that, const QJSValue& val);
+    void applyStreamFunction(const QJSValue& val);
 
-    static void streamHandler(QObject* that, const QJSValue& val);
-    void onStreamValue(const QJSValue& val);
+    static void valueFunctionHandler(QObject* that, const QJSValue& val);
+    void applyValueFunction(const QJSValue& val);
+
+
+    static void actHandler(QObject* that, const QJSValue& val);
+    void applyAct(const QJSValue& val);
 
     // QmlStreamProvider interface
     void wait() override;
     void resume() override;
 
 public slots:
-    void writeNext(QJSValue val);
     void ready();
-
-signals:
-    void inputChanged();
-    void outputChanged();
-    void nextChanged();
+    void push(const QJSValue& val);
 
 private:
+    ViewEngine*    m_engine;
+    OperationType  m_operationType;
     lv::QmlStream* m_input;
     lv::QmlStream* m_output;
-    QJSValue       m_next;
-    bool           m_isRunning;
+    QJSValue       m_step;
+    QJSValueList   m_args;
     int            m_wait;
+    bool           m_isRunning;
 };
 
 inline QmlStream *QmlStreamOperator::input() const{
@@ -56,10 +60,6 @@ inline QmlStream *QmlStreamOperator::input() const{
 
 inline QmlStream *QmlStreamOperator::output() const{
     return m_output;
-}
-
-inline QJSValue QmlStreamOperator::next() const{
-    return m_next;
 }
 
 }// namespace

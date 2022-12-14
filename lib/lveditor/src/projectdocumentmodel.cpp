@@ -58,7 +58,7 @@ int ProjectDocumentModel::rowCount(const QModelIndex &) const{
 QVariant ProjectDocumentModel::data(const QModelIndex &index, int role) const{
     if ( index.row() < 0 || index.row() >= m_openedFiles.size() )
         return QVariant();
-    QHash<QString, Document*>::const_iterator it = m_openedFiles.constBegin() + index.row();
+    QHash<QString, Document*>::const_iterator it = iteratorAt(index.row());
 
     if ( role == ProjectDocumentModel::Name ){
         return it.value()->fileName();
@@ -258,6 +258,18 @@ Document *ProjectDocumentModel::isOpened(const QString &path){
     if ( m_openedFiles.contains(path) )
         return m_openedFiles[path];
     return nullptr;
+}
+
+
+
+QHash<QString, Document*>::const_iterator ProjectDocumentModel::iteratorAt(int index) const{
+    int i = 0;
+    for (auto it = m_openedFiles.constBegin(); it != m_openedFiles.constEnd(); ++it ){
+        if ( i == index )
+            return it;
+        ++i;
+    }
+    return m_openedFiles.constEnd();
 }
 
 

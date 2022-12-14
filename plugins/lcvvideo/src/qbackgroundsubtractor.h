@@ -18,7 +18,7 @@
 
 #include <QQuickItem>
 #include "qlcvvideoglobal.h"
-#include "qmatfilter.h"
+#include "qmat.h"
 #include "opencv2/video.hpp"
 
 /// \private
@@ -36,10 +36,9 @@ public:
 private:
     QString m_stateId;
     double m_learningRate;
-
 };
 
-class Q_LCVVIDEO_EXPORT QBackgroundSubtractor : public QMatFilter{
+class Q_LCVVIDEO_EXPORT QBackgroundSubtractor : public QObject{
 
     Q_OBJECT
     Q_PROPERTY(double learningRate READ learningRate WRITE setLearningRate NOTIFY learningRateChanged)
@@ -53,6 +52,9 @@ public:
     void setLearningRate(double rate);
 
     virtual void transform(const cv::Mat& in, cv::Mat& out);
+
+public slots:
+    QMat* subtract(QMat* input);
 
 signals:
     /// \private

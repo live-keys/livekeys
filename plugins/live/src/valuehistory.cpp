@@ -51,7 +51,7 @@ DrawValueHistoryNode::~DrawValueHistoryNode(){
     delete m_glFunctions;
 }
 
-void DrawValueHistoryNode::render(const QLinkedList<double> &values, double minVal, double maxVal, const QColor& color){
+void DrawValueHistoryNode::render(const std::list<double> &values, double minVal, double maxVal, const QColor& color){
     QSize size = rect().size().toSize();
 
     if ( !m_fbo ){
@@ -72,22 +72,22 @@ void DrawValueHistoryNode::render(const QLinkedList<double> &values, double minV
         m_fbo->release();
         return;
     }
-    if ( values.isEmpty() ){
+    if ( values.empty() ){
         m_fbo->release();
         return;
     }
 
     m_paintDevice->setSize(size);
     m_painter->begin(m_paintDevice);
-    m_painter->setRenderHints(QPainter::Antialiasing | QPainter::HighQualityAntialiasing);
+    m_painter->setRenderHints(QPainter::Antialiasing);
 
     m_painter->setPen(QPen(color, 1));
     int totalItems = values.size();
     qreal widthStep  = (qreal)size.width() / (totalItems > 1 ? totalItems - 1 : totalItems);
     qreal heightStep = (qreal)size.height() / qFabs(maxVal - minVal);
 
-    QLinkedList<double>::const_iterator prevIt = values.begin();
-    QLinkedList<double>::const_iterator it = prevIt + 1;
+    std::list<double>::const_iterator prevIt = values.begin();
+    std::list<double>::const_iterator it = prevIt; ++it;
     int itIndex = 1;
 
     while ( it != values.end() ){
@@ -110,15 +110,17 @@ ValueHistory::ValueHistory(QQuickItem *parent)
     , m_minDisplayValue(ValueHistory::Auto)
     , m_maxHistory(400)
     , m_displayColor(QColor(255, 255, 255))
+    , m_values(new std::list<double>)
 {
     setFlag(ItemHasContents, true);
 }
 
 ValueHistory::~ValueHistory(){
+    delete m_values;
 }
 
 QSGNode *ValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaintNodeData *){
-    if ( m_values.size() < 2 )
+    if ( m_values->size() < 2 )
         return oldNode;
     if ( boundingRect().isEmpty() )
         return oldNode;
@@ -134,7 +136,7 @@ QSGNode *ValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaint
 
     if ( maxValue == ValueHistory::Auto ){
         maxValue = INT_MIN;
-        for ( auto it = m_values.begin(); it != m_values.end(); ++it ){
+        for ( auto it = m_values->begin(); it != m_values->end(); ++it ){
             if ( *it > maxValue ){
                 maxValue = *it;
             }
@@ -142,7 +144,7 @@ QSGNode *ValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaint
     }
     if ( minValue == ValueHistory::Auto ){
         minValue = INT_MAX;
-        for ( auto it = m_values.begin(); it != m_values.end(); ++it ){
+        for ( auto it = m_values->begin(); it != m_values->end(); ++it ){
             if ( *it < minValue ){
                 minValue = *it;
             }
@@ -150,12 +152,16 @@ QSGNode *ValueHistory::updatePaintNode(QSGNode *oldNode, QQuickItem::UpdatePaint
     }
 
     if ( minValue == maxValue && m_minDisplayValue != ValueHistory::Auto && m_maxDisplayValue != ValueHistory::Auto){
-        lv::Exception e = CREATE_EXCEPTION(lv::Exception, "ValueHistory error: minDisplayValue == maxDisplayValue.", 0);
-        lv::ViewContext::instance().engine()->throwError(&e);
+        THROW_QMLERROR(
+            Exception,
+            "ValueHistory error: minDisplayValue == maxDisplayValue.",
+            Exception::toCode("~Equal"),
+            this
+        );
         return node;
     }
 
-    node->render(m_values, minValue, maxValue, m_displayColor);
+    node->render(*m_values, minValue, maxValue, m_displayColor);
 
     return node;
 

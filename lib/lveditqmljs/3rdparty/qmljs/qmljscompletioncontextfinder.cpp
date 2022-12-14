@@ -189,11 +189,11 @@ void CompletionContextFinder::checkBinding()
             break;
 
         case Token::Identifier: {
-            QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
+            QString tokenString = yyLine->mid(token.begin(), token.length);
             dotExpected = false;
             if (identifierExpected) {
                 m_propertyNamePosition = yyLinizerState.iter.position() + token.begin();
-                m_bindingPropertyName.prepend(tokenString.toString());
+                m_bindingPropertyName.prepend(tokenString);
                 identifierExpected = false;
                 dotExpected = true;
             } else if (tokenString.startsWith(QLatin1String("on"))) {
@@ -260,7 +260,7 @@ void CompletionContextFinder::checkImport()
 
         switch (token.kind) {
         case Token::Identifier: {
-            const QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
+            const QString tokenString = yyLine->mid(token.begin(), token.length);
             if (tokenString == QLatin1String("as")) {
                 isInLibVersionImport = 0;
                 if (state == Unknown) {
@@ -277,7 +277,7 @@ void CompletionContextFinder::checkImport()
                 if (state == Unknown || (state & ExpectAnyTarget)
                         || (state & ExpectTargetIdentifier)) {
                     state = State(ExpectImport | ExpectTargetDot);
-                    libVersionImport.prepend(tokenString.toString());
+                    libVersionImport.prepend(tokenString);
                     if (isInLibVersionImport == -1) {
                         if (token.end() < m_cursor.position())
                             libVersionImport.append(QLatin1String(" "));
@@ -299,7 +299,7 @@ void CompletionContextFinder::checkImport()
         case Token::Number:
             if (state == Unknown || (state & ExpectVersion)) {
                 state = ExpectAnyTarget;
-                libVersionImport.prepend(yyLine->midRef(token.begin(), token.length).toString());
+                libVersionImport.prepend(yyLine->mid(token.begin(), token.length));
                 libVersionImport.prepend(QLatin1String(" "));
                 if (isInLibVersionImport == -1)
                     isInLibVersionImport = 1;

@@ -6,8 +6,6 @@
             { "link" : "samples/filereading.qml"},
             { "link" : "samples/mainscript.qml" },
             { "link" : "samples/palettesandbinding.qml" },
-            { "link" : "samples/staticfilereading.qml" },
-            { "link" : "samples/staticloader.qml" },
             { "link" : "samples/stringbasedloader.qml" },
             { "link" : "samples/subproject.qml" },
             { "link" : "samples/valuehistory.qml" },

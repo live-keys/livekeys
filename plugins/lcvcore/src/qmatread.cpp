@@ -78,7 +78,7 @@ void QMatReadNode::render(QMat *image, const QFont &font, const QColor& color, i
 
         m_paintDevice->setSize(size);
         m_painter->begin(m_paintDevice);
-        m_painter->setRenderHints(QPainter::Antialiasing | QPainter::HighQualityAntialiasing | QPainter::TextAntialiasing );
+        m_painter->setRenderHints(QPainter::Antialiasing | QPainter::TextAntialiasing );
         m_painter->setPen(QPen(color, 1));
         m_painter->setFont(font);
 

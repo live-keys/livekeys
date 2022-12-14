@@ -6,7 +6,7 @@ LanguageScannerWrap::LanguageScannerWrap(Engine* engine)
     : Element(engine)
 {
     m_languageScanner = LanguageScanner::create(
-        LanguageParser::createForElements(), engine->fileInterceptor()->fileInput()
+        LanguageParser::createForElements(), engine->compiler()->fileIO()
     );
     m_languageScanner->setPackageImportPaths(engine->compiler()->packageImportPaths());
     m_languageScanner->onModuleReady([this](ModuleInfo::ConstPtr mi){

@@ -20,11 +20,11 @@ void LvImportsTest::initTestCase(){
 }
 
 std::string LvImportsTest::scriptPath(const std::string &scriptName){
-    return lv::ApplicationContext::instance().releasePath() + "/data/" + scriptName;
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/data/" + scriptName;
 }
 
 std::string LvImportsTest::testPath(){
-    return lv::ApplicationContext::instance().releasePath() + "/test";
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/test";
 }
 
 ////////////////////////////////////////////////////
@@ -184,7 +184,7 @@ void LvImportsTest::packageImportTest()
     Engine* engine = new Engine;
     engine->setModuleFileType(Engine::Lv);
 
-    TestPack tp(testPath(), true);
+    TestPack tp(testPath(), false);
     tp.unpack(scriptPath("ImportTest09.lvep"));
 
     engine->scope([engine, &tp](){

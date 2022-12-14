@@ -27,8 +27,7 @@ class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
 
-/// \private
-class ProjectFileModel : public QAbstractItemModel{
+class LV_EDITOR_EXPORT ProjectFileModel : public QAbstractItemModel{
 
     Q_OBJECT
 

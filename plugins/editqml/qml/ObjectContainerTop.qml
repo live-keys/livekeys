@@ -1,5 +1,4 @@
 import QtQuick 2.3
-import live 1.0
 import workspace 1.0 as Workspace
 import editqml 1.0
 import workspace.icons 1.0 as Icons
@@ -24,6 +23,7 @@ Rectangle{
     signal compose()
     signal paletteToPane()
     signal close()
+//    signal toggleBuilder()
     signal createObject()
 
     MouseArea{
@@ -70,6 +70,35 @@ Rectangle{
         anchors.right: parent.right
         anchors.rightMargin: 5
         spacing: 3
+
+//        Item{
+//            id: itemSelection
+//            anchors.verticalCenter: parent.verticalCenter
+//            width: 15
+//            height: 20
+//            Rectangle{
+//                anchors.top: parent.top
+//                anchors.topMargin: 2
+//                anchors.left: parent.left
+//                anchors.leftMargin: 3
+//                width: 10
+//                height: 10
+//                radius: 2
+//            }
+//            MouseArea{
+//                id: itemSelectionMouseArea
+//                anchors.fill: parent
+//                hoverEnabled: true
+//                onClicked: {
+//                    objectContainerTitle.toggleBuilder()
+//                }
+//            }
+//            Workspace.Tooltip{
+//                mouseOver: itemSelectionMouseArea.containsMouse
+//                text: "Toggle builder"
+//            }
+//        }
+
 
         Item{
             id: paletteToPane

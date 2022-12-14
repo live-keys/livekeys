@@ -165,8 +165,8 @@ public:
     int tokenStartLine() const { return _tokenLine; }
     int tokenStartColumn() const { return _tokenColumn; }
 
-    inline QStringRef tokenSpell() const { return _tokenSpell; }
-    inline QStringRef rawString() const { return _rawString; }
+    inline QString tokenSpell() const { return _tokenSpell; }
+    inline QString rawString() const { return _rawString; }
     double tokenValue() const { return _tokenValue; }
     QString tokenText() const;
 
@@ -219,8 +219,8 @@ private:
     QString _code;
     QString _tokenText;
     QString _errorMessage;
-    QStringRef _tokenSpell;
-    QStringRef _rawString;
+    QString _tokenSpell;
+    QString _rawString;
 
     const QChar *_codePtr;
     const QChar *_endPtr;

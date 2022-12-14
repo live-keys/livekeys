@@ -1,6 +1,5 @@
 #include <QCoreApplication>
 #include <QTest>
-#include <qqml.h>
 
 #include "testrunner.h"
 #include "lvlinecontroltest.h"

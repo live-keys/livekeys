@@ -17,7 +17,7 @@
 #define QCACHEDWARPPERSPECTIVE_H
 
 #include <QQuickItem>
-#include "qmatfilter.h"
+#include "qmat.h"
 
 class QCachedWarpPerspective : public QQuickItem{
 

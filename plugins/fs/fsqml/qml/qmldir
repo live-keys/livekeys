@@ -7,3 +7,4 @@ FileLineReader       1.0 FileLineReader.qml
 SelectableFolderView 1.0 SelectableFolderView.qml
 VisualFileSelector   1.0 VisualFileSelector.qml
 ExtensionPass        1.0 ExtensionPass.qml
+DirectoryRead        1.0 DirectoryRead.qml

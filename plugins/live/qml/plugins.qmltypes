@@ -258,24 +258,6 @@ Module {
         }
     }
     Component {
-        name: "lv::StaticLoader"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["live/StaticLoader 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "source"; type: "QQmlComponent"; isPointer: true }
-        Property { name: "item"; type: "QObject"; isReadonly: true; isPointer: true }
-        Signal { name: "itemCreated" }
-        Method {
-            name: "setSource"
-            Parameter { name: "arg"; type: "QQmlComponent"; isPointer: true }
-        }
-        Method {
-            name: "staticLoad"
-            Parameter { name: "id"; type: "QString" }
-        }
-    }
-    Component {
         name: "lv::StringBasedLoader"
         defaultProperty: "data"
         prototype: "QQuickItem"

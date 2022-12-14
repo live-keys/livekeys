@@ -19,6 +19,9 @@
 #include "live/lveditorglobal.h"
 #include "live/projectdocument.h"
 #include "live/document.h"
+#include "live/projectdocumentmodel.h"
+#include "live/runnablecontainer.h"
+#include "live/projectfilemodel.h"
 
 #include "live/runnable.h"
 
@@ -33,10 +36,7 @@ class Runnable;
 class ViewEngine;
 class ProjectEntry;
 class ProjectFile;
-class ProjectFileModel;
 class ProjectFileIndexer;
-class ProjectDocumentModel;
-class RunnableContainer;
 class ProjectEngineInterceptor;
 class Program;
 class ProgramHolder;
@@ -50,21 +50,12 @@ class LV_EDITOR_EXPORT Project : public QObject{
     Q_PROPERTY(lv::ProjectDocumentModel* documentModel     READ documentModel   CONSTANT)
     Q_PROPERTY(lv::RunnableContainer* runnables            READ runnables       CONSTANT)
     Q_PROPERTY(QString rootPath                            READ rootPath        NOTIFY pathChanged)
-    Q_PROPERTY(lv::Project::RunTrigger runTrigger          READ runTrigger      WRITE setRunTrigger NOTIFY runTriggerChanged)
-    Q_ENUMS(RunTrigger)
 
     friend class ProjectFileModel;
     friend class Document;
     friend class ProjectDocument;
     friend class ProjectDocumentModel;
     friend class Runnable;
-
-public:
-    enum RunTrigger{
-        RunManual,
-        RunOnSave,
-        RunOnChange
-    };
 
 public:
     Project(WorkspaceLayer* workspaceLayer, QObject* parent = nullptr);
@@ -86,15 +77,10 @@ public:
      */
     const QString& rootPath() const;
 
-    lv::Project::RunTrigger runTrigger() const;
-    void setRunTrigger(lv::Project::RunTrigger runTrigger);
-
     void setRunSpace(QObject* runSpace);
 
     static QByteArray hashPath(const QByteArray& path);
-
-    void excludeRunTriggers(const QSet<QString>& paths);
-    void removeExcludedRunTriggers(const QSet<QString>& paths);
+    static Project* grabFromLayer(ViewEngine *engine);
 
     void monitorFiles(const QStringList& files);
 
@@ -119,7 +105,7 @@ public slots:
     void setActive(const QString& rootPath);
     lv::Document* createDocument(const QJSValue& options);
 
-    lv::Runnable* openRunnable(const QString& path, const QStringList& activations = QStringList());
+    lv::Runnable* openRunnable(const QString& path);
 
     bool isDirProject() const;
     bool canRunFile(const QString& path) const;
@@ -127,7 +113,6 @@ public slots:
     QString dir() const;
     QString path(const QString& relative) const;
 
-    void scheduleRun();
     void run();
 
     QObject* runSpace();
@@ -174,10 +159,7 @@ private:
     Runnable*        m_active;
     QString          m_path;
     QObject*         m_runspace;
-    QTimer*          m_scheduleRunTimer;
-    RunTrigger       m_runTrigger;
 
-    QSet<QString>    m_excludedRunTriggers;
     el::Engine*      m_engine;
 };
 
@@ -208,25 +190,6 @@ inline Runnable* Project::active() const{
 
 inline const QString &Project::rootPath() const{
     return m_path;
-}
-
-/**
- * \brief Returns the trigger type to rerun the project.
- */
-inline Project::RunTrigger Project::runTrigger() const{
-    return m_runTrigger;
-}
-
-
-/**
- * \brief Sets the trigger type to rerun the project.
- */
-inline void Project::setRunTrigger(Project::RunTrigger runTrigger){
-    if (m_runTrigger == runTrigger)
-        return;
-
-    m_runTrigger = runTrigger;
-    emit runTriggerChanged();
 }
 
 /**

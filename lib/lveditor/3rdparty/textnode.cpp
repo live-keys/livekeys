@@ -111,6 +111,8 @@ QSGGlyphNode *TextNode::addGlyphs(const QPointF &position, const QGlyphRun &glyp
     }
 
     QSGGlyphNode *node = sg->sceneGraphContext()->createGlyphNode(sg, preferNativeGlyphNode);
+//    int renderQuality = -1;
+//    QSGGlyphNode *node = sg->sceneGraphContext()->createGlyphNode(sg, preferNativeGlyphNode, renderQuality);
 
     node->setOwnerElement(m_ownerElement);
     node->setGlyphs(position + QPointF(0, glyphs.rawFont().ascent()), glyphs);

@@ -95,9 +95,6 @@ signals:
     void varThresholdChanged();
     void varThresholdGenChanged();
 
-public slots:
-    void staticLoad(const QString& id);
-
 private:
     QBackgroundSubtractorMog2(const QBackgroundSubtractorMog2& other);
     QBackgroundSubtractorMog2& operator= (const QBackgroundSubtractorMog2& other);

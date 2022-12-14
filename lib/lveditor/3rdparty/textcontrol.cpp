@@ -1423,7 +1423,7 @@ void TextControlPrivate::mouseReleaseEvent(QMouseEvent *e, const QPointF &pos)
 #ifndef QT_NO_CLIPBOARD
         setClipboardSelection();
         selectionChanged(true);
-    } else if (e->button() == Qt::MidButton
+    } else if (e->button() == Qt::MiddleButton
                && (interactionFlags & Qt::TextEditable)
                && QGuiApplication::clipboard()->supportsSelection()) {
         setCursorPosition(pos);

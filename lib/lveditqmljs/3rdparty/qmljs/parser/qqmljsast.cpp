@@ -41,6 +41,8 @@
 
 #include "qqmljsastvisitor_p.h"
 
+#include <QLocale>
+
 QT_BEGIN_NAMESPACE
 
 namespace QQmlJS { namespace AST {
@@ -989,7 +991,7 @@ BoundNames FormalParameterList::formals() const
     int i = 0;
     for (const FormalParameterList *it = this; it; it = it->next) {
         if (it->element) {
-            QString name = it->element->bindingIdentifier.toString();
+            QString name = it->element->bindingIdentifier;
             int duplicateIndex = formals.indexOf(name);
             if (duplicateIndex >= 0) {
                 // change the name of the earlier argument to enforce the lookup semantics from the spec
@@ -1386,7 +1388,7 @@ void PatternElement::boundNames(BoundNames *names)
         else if (PatternPropertyList *p = propertyList())
             p->boundNames(names);
     } else {
-        names->append({bindingIdentifier.toString(), typeAnnotation});
+        names->append({bindingIdentifier, typeAnnotation});
     }
 }
 

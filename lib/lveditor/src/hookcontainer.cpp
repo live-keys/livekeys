@@ -16,6 +16,7 @@
 #include "hookcontainer.h"
 #include "live/visuallogqt.h"
 
+#include <QtDebug>
 namespace lv{
 
 HookContainer::HookContainer(const QString &projectPath, Runnable* r, QObject *parent)

@@ -62,8 +62,6 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
     , m_programHolder(nullptr)
     , m_active(nullptr)
     , m_runspace(nullptr)
-    , m_scheduleRunTimer(new QTimer())
-    , m_runTrigger(Project::RunOnChange)
     , m_engine(nullptr)
 {
     ViewEngine* ve = viewEngine();
@@ -73,9 +71,6 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
     ProjectEngineInterceptor* interceptor = new ProjectEngineInterceptor(ve, this);
     ve->setInterceptor(interceptor);
 
-    m_scheduleRunTimer->setInterval(1000);
-    m_scheduleRunTimer->setSingleShot(true);
-    connect(m_scheduleRunTimer, &QTimer::timeout, this, &Project::run);
     connect(QCoreApplication::instance(), &QCoreApplication::aboutToQuit, this, &Project::closeProject);
 
     if ( m_programHolder && m_programHolder->main() ){
@@ -92,7 +87,6 @@ Project::Project(WorkspaceLayer *workspaceLayer, QObject *parent)
 Project::~Project(){
     delete m_documentModel;
     delete m_fileModel;
-    delete m_scheduleRunTimer;
 }
 
 /**
@@ -127,7 +121,8 @@ void Project::newProject(){
         emit pathChanged("");
         emit activeChanged(m_active);
 
-        scheduleRun();
+        if ( m_active )
+            m_active->scheduleRun();
     }
 }
 
@@ -341,15 +336,12 @@ void Project::setActive(const QString &path){
     }
 }
 
-Runnable *Project::openRunnable(const QString &path, const QStringList &activations){
+Runnable *Project::openRunnable(const QString &path){
     Runnable* r = m_runnables->runnableAt(path);
     if (!r){
-        QSet<QString> activ;
-        for ( auto it = activations.begin(); it != activations.end(); ++it )
-            activ.insert(*it);
         QmlProgram* qmlProgram = QmlProgram::create(viewEngine(), m_path.toStdString(), path.toStdString());
         if ( qmlProgram && !qmlProgram->mainPath().isEmpty() ){
-            r = new Runnable(qmlProgram, m_runnables, activ);
+            r = new Runnable(qmlProgram, m_runnables);
             m_runnables->addRunnable(r);
         }
     }
@@ -429,21 +421,19 @@ QByteArray Project::hashPath(const QByteArray &path){
 }
 
 /**
- * \brief Exclude these paths from scheduling a run
+ * \brief Returns the project instance associated with the WorkspaceLayer if the
+ * WorkspaceLayer has been loaded.
  */
-void Project::excludeRunTriggers(const QSet<QString> &paths){
-    for ( auto it = paths.begin(); it != paths.end(); ++it ){
-        m_excludedRunTriggers.insert(*it);
-    }
-}
+Project *Project::grabFromLayer(ViewEngine *engine){
+    QObject* lk = engine->engine()->rootContext()->contextProperty("lk").value<QObject*>();
+    if ( !lk )
+        return nullptr;
+    QObject* workspaceLayerOb = lk->property("layers").value<QQmlPropertyMap*>()->property("workspace").value<QObject*>();
+    WorkspaceLayer* workl = qobject_cast<WorkspaceLayer*>(workspaceLayerOb);
+    if ( !workl )
+        return nullptr;
 
-/**
- * \brief Remove these paths from excluding a scheduled run
- */
-void Project::removeExcludedRunTriggers(const QSet<QString> &paths){
-    for ( auto it = paths.begin(); it != paths.end(); ++it ){
-        m_excludedRunTriggers.remove(*it);
-    }
+    return workl->project();
 }
 
 void Project::monitorFiles(const QStringList &files){
@@ -541,34 +531,14 @@ void Project::setActive(Runnable* runnable){
             m_programHolder->setMain(m_active->program());
         }
 
-        scheduleRun();
+        if ( m_active )
+            m_active->scheduleRun();
     }
 }
 
 ProjectDocument *Project::createTextDocument(ProjectFile *file, const QString& format, bool isMonitored){
     ProjectDocument* document = new ProjectDocument(file->path(), format, isMonitored, this);
     file->setDocument(document);
-
-    connect(document->textDocument(), &QTextDocument::contentsChange, [this, document](int, int, int){
-
-        if ( m_excludedRunTriggers.contains(document->path()) )
-            return;
-
-        if ( document->editingStateIs(ProjectDocument::Read) && document->isMonitored() ){
-            if ( m_runTrigger != Project::RunManual )
-                scheduleRun();
-            return;
-        }
-
-        if ( document->editingStateIs(ProjectDocument::Read) ||
-             document->editingStateIs(ProjectDocument::Overlay) ||
-             document->editingStateIs(ProjectDocument::Silent ) )
-        {
-            return;
-        }
-        if ( m_runTrigger == Project::RunOnChange )
-            scheduleRun();
-    });
 
     emit documentOpened(document);
 
@@ -583,9 +553,6 @@ Document *Project::createDocument(ProjectFile *file, const QString &formatType, 
 }
 
 void Project::documentSaved(Document *document){
-    if ( m_runTrigger == Project::RunOnSave ){
-        scheduleRun();
-    }
     emit fileChanged(document->path());
 }
 
@@ -594,13 +561,6 @@ void Project::documentSaved(Document *document){
  */
 QString Project::path(const QString &relative) const{
     return dir() + '/' + relative;
-}
-
-/**
- * \brief Schedules a run in 1 second. Clears any previous schedule.
- */
-void Project::scheduleRun(){
-    m_scheduleRunTimer->start();
 }
 
 /**

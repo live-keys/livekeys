@@ -109,7 +109,7 @@ void EventTest::removeAllEventsFromWithinTest(){
 
     double value = 0;
 
-    *eHolder = e.on(&EventEmitter::valueChanged, [eHolder, &value, &e](double v){
+    *eHolder = e.on(&EventEmitter::valueChanged, [&value, &e](double v){
         value = v;
         e.removeListeners();
         e.setValue(40.0);

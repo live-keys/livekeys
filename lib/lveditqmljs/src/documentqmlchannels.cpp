@@ -23,8 +23,8 @@
 #include "live/projectfile.h"
 #include "live/hookcontainer.h"
 #include "qmlwatcher.h"
-#include "qmlbuilder.h"
 
+#include <QQmlContext>
 
 #include "qmlbindingchannelsdispatcher.h"
 
@@ -100,7 +100,10 @@ QmlBindingChannel::Ptr traversePath(QmlBindingPath::Ptr path, Runnable* r, QmlBi
     } else if ( n->type() == QmlBindingPath::Node::File ){
         return traversePath(path, r, n->child, object);
     } else if ( n->type() == QmlBindingPath::Node::Component ){
-        return traversePath(path, r, n->child, object);
+        QmlBindingChannel::Ptr builderChannel = QmlBindingChannel::create(path, r);
+        builderChannel->updateConnection(object);
+        builderChannel->setIsBuilder(true);
+        return builderChannel;
     }
     return QmlBindingChannel::Ptr(nullptr);
 
@@ -197,6 +200,10 @@ void DocumentQmlChannels::selectChannel(int index){
     }
 }
 
+Runnable *DocumentQmlChannels::selectedChannelRunnable() const{
+    return m_selectedChannel ? m_selectedChannel->runnable() : nullptr;
+}
+
 void DocumentQmlChannels::updateChannelForRunnable(Runnable *r){
     QmlBindingPath::Ptr runnableBp = QmlBindingPath::create();
     runnableBp->appendFile(r->path());
@@ -253,7 +260,6 @@ void DocumentQmlChannels::removeIndirectChannels(){
     // remove all watchers and builders, but do not remove main runnable channels
     auto it = m_channels.begin();
     while ( it != m_channels.end() ){
-
         QmlBindingChannel::Ptr& bc = *it;
         QmlBindingPath::Ptr channelPath = bc->bindingPath();
         if ( channelPath->root() && (
@@ -356,6 +362,7 @@ QmlBindingChannel::Ptr DocumentQmlChannels::traverseBindingPathFrom(QmlBindingCh
 
     if ( from->isBuilder() ){
         QmlBindingChannel::Ptr builderChannel = QmlBindingChannel::create(path, r);
+        builderChannel->updateConnection(from->object());
         builderChannel->setIsBuilder(true);
         return builderChannel;
     }
@@ -466,13 +473,21 @@ void DocumentQmlChannels::desyncInactiveChannels(){
     endResetModel();
 }
 
-void DocumentQmlChannels::rebuild(){
+bool DocumentQmlChannels::canRebuild() const{
     if ( !m_selectedChannel || !m_selectedChannel->isBuilder() ){
-        return;
+        return false;
     }
+    return true;
+}
 
-    m_selectedChannel->rebuild();
+void DocumentQmlChannels::rebuild(){
+    if ( canRebuild() ){
+        m_selectedChannel->rebuild();
+    }
+}
 
+void DocumentQmlChannels::runnableBuildReady(Runnable *r){
+    m_languageHandler->runnableBuildReady(r);
 }
 
 }// namespace

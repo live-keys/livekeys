@@ -44,13 +44,11 @@
 
 namespace lv{
 
-Runnable::Runnable(
-        ViewEngine* viwEngine,
+Runnable::Runnable(ViewEngine* viwEngine,
         el::Engine* e,
         const QString &path,
         RunnableContainer* parent,
-        const QString &name,
-        const QSet<QString>& activations)
+        const QString &name)
     : QObject(parent)
     , m_name(name)
     , m_path(path)
@@ -61,9 +59,8 @@ Runnable::Runnable(
     , m_viewRoot(nullptr)
     , m_viewContext(nullptr)
     , m_type(Runnable::QmlFile)
-    , m_activations(activations)
     , m_scheduleTimer(nullptr)
-    , m_runTrigger(Project::RunManual)
+    , m_runTrigger(Document::RunOnChange)
     , m_engine(e)
 {
     QString ext = QFileInfo(path).suffix();
@@ -76,7 +73,7 @@ Runnable::Runnable(
     initialize();
 }
 
-Runnable::Runnable(Program *program, RunnableContainer *parent, const QSet<QString> &activations)
+Runnable::Runnable(Program *program, RunnableContainer *parent)
     : QObject(parent)
     , m_name("")
     , m_path("")
@@ -87,9 +84,8 @@ Runnable::Runnable(Program *program, RunnableContainer *parent, const QSet<QStri
     , m_viewRoot(nullptr)
     , m_viewContext(nullptr)
     , m_type(Runnable::QmlFile)
-    , m_activations(activations)
     , m_scheduleTimer(nullptr)
-    , m_runTrigger(Project::RunManual)
+    , m_runTrigger(Document::RunOnChange)
     , m_engine(nullptr)
 {
     m_project = qobject_cast<Project*>(parent->parent());
@@ -125,7 +121,7 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContain
     , m_viewRoot(nullptr)
     , m_type(Runnable::QmlComponent)
     , m_scheduleTimer(nullptr)
-    , m_runTrigger(Project::RunManual)
+    , m_runTrigger(Document::RunOnChange)
 {
     m_project = qobject_cast<Project*>(parent->parent());
     m_program = QmlProgram::create(m_viewEngine, m_project->dir().toStdString(), m_path.toStdString());
@@ -133,8 +129,6 @@ Runnable::Runnable(ViewEngine* engine, QQmlComponent *component, RunnableContain
 }
 
 Runnable::~Runnable(){
-    m_project->removeExcludedRunTriggers(m_activations);
-
     if ( m_viewRoot ){
         disconnect(m_viewRoot, &QObject::destroyed, this, &Runnable::clearRoot);
 
@@ -221,92 +215,23 @@ void Runnable::__activationContentsChanged(int, int, int){
     m_scheduleTimer->start();
 }
 
-void Runnable::__documentOpened(Document *document){
-    ProjectDocument* pd = ProjectDocument::castFrom(document);
-    if ( !pd )
-        return;
-
-    if ( m_activations.contains(document->path()) ){
-        if ( m_runTrigger == Project::RunOnChange ){
-            connect(pd->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
-        } else {
-            connect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
-        }
-    }
-}
-
-void Runnable::__documentSaved(){
-    m_scheduleTimer->start();
-}
-
 void Runnable::setRunTrigger(int runTrigger){
     if (m_runTrigger == runTrigger)
         return;
 
-    if ( m_activations.size() ){
+    m_runTrigger = runTrigger;
+    emit runTriggerChanged();
 
-        if ( m_runTrigger == Project::RunOnChange ){
-            m_project->removeExcludedRunTriggers(m_activations);
-            m_scheduleTimer->deleteLater();
-            m_scheduleTimer = nullptr;
-            disconnect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
-            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
-                const QString& activation = *it;
-                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
-                if ( document ){
-                    disconnect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
-                }
-            }
-
-        } else if ( m_runTrigger == Project::RunOnSave ){
-            m_project->removeExcludedRunTriggers(m_activations);
-            m_scheduleTimer->deleteLater();
-            m_scheduleTimer = nullptr;
-            disconnect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
-            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
-                const QString& activation = *it;
-                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
-                if ( document ){
-                    disconnect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
-                }
-            }
-
-        }
-
-        if ( runTrigger == Project::RunOnChange ){
-            m_project->excludeRunTriggers(m_activations);
-            m_scheduleTimer = new QTimer(this);
-            m_scheduleTimer->setInterval(1000);
-            m_scheduleTimer->setSingleShot(true);
-            connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
-            connect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
-
-            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
-                const QString& activation = *it;
-                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
-                if ( document ){
-                    connect(document->textDocument(), &QTextDocument::contentsChange, this, &Runnable::__activationContentsChanged);
-                }
-            }
-
-        } else if ( runTrigger == Project::RunOnSave ){
-            m_project->excludeRunTriggers(m_activations);
-            m_scheduleTimer = new QTimer(this);
-            m_scheduleTimer->setInterval(1000);
-            m_scheduleTimer->setSingleShot(true);
-            connect(m_project, &Project::documentOpened, this, &Runnable::__documentOpened);
-            for ( auto it = m_activations.begin(); it != m_activations.end(); ++it ){
-                const QString& activation = *it;
-                ProjectDocument* document = ProjectDocument::castFrom(m_project->isOpened(activation));
-                if ( document ){
-                    connect(document, &ProjectDocument::saved, this, &Runnable::__documentSaved);
-                }
+    for ( auto it = m_project->documentModel()->openedFiles().begin(); it != m_project->documentModel()->openedFiles().end(); ++it ){
+        Document* doc = it.value();
+        if ( doc->runTrigger() && doc->runTrigger()->triggerRunnable() == this ){
+            if ( doc->runTrigger()->triggerType() != m_runTrigger ){
+                doc->runTrigger()->setTriggerType(static_cast<Document::RunTriggerType>(m_runTrigger));
+                doc->notifyRunTriggerChanged();
             }
         }
     }
 
-    m_runTrigger = runTrigger;
-    emit runTriggerChanged();
 }
 
 void Runnable::clearRoot(){
@@ -466,6 +391,16 @@ void Runnable::setRunSpace(QObject *runspace){
 
 Program *Runnable::program() const{
     return m_program;
+}
+
+void Runnable::scheduleRun(){
+    if ( !m_scheduleTimer ){
+        m_scheduleTimer = new QTimer(this);
+        m_scheduleTimer->setInterval(1000);
+        m_scheduleTimer->setSingleShot(true);
+        connect(m_scheduleTimer, &QTimer::timeout, this, &Runnable::run);
+    }
+    m_scheduleTimer->start();
 }
 
 }// namespace

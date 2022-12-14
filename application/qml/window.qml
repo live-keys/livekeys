@@ -16,7 +16,7 @@
 
 import QtQuick 2.3
 import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.2
+import QtQuick.Controls 2.2
 import QtQuick.Window 2.0
 import base 1.0 as B
 
@@ -149,7 +149,6 @@ ApplicationWindow{
     FontLoader{ id: openSansRegular;      source: "qrc:/fonts/OpenSans-Regular.ttf"; }
     FontLoader{ id: openSansLightItalic;  source: "qrc:/fonts/OpenSans-Bold.ttf"; }
 
-
     FileDialog {
         id: fileOpenDialog
         title: "Please choose a file"
@@ -268,7 +267,6 @@ ApplicationWindow{
         opacity: 0.3
         source : "qrc:/images/logo.png"
         z: 2222
-
 
         Connections{
             target: lk

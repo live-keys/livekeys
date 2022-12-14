@@ -17,9 +17,9 @@
 
 import QtQuick 2.3
 import QtQuick.Window 2.1
-import QtQuick.Controls 1.4
-import QtQuick.Controls.Styles 1.4
+import QtQuick.Controls 2.4
 import QtQuick.Dialogs 1.2
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -65,31 +65,19 @@ Rectangle{
     Behavior on opacity{ NumberAnimation{ duration: 250} }
 
     ScrollView{
+        id: scrollView
         anchors.fill: parent
         anchors.bottomMargin: 60
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#222b38"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: root.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Item{}
-            corner: Rectangle{color: root.color}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentHeight > scrollView.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentWidth > scrollView.width
         }
 
         Text{

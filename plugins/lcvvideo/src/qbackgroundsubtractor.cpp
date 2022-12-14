@@ -14,7 +14,6 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractor.h"
-#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -31,7 +30,7 @@ QBackgroundSubtractorPrivate::~QBackgroundSubtractorPrivate(){
 }
 
 cv::BackgroundSubtractor* QBackgroundSubtractorPrivate::subtractor(){
-    qWarning() << "QBackgroundSubtractorPrivate::subtractor MUST be overridden by a subclass!";
+    qWarning() << "QBackgroundSubtractorPrivate::subtractor is an abstract type!";
     return 0;
 }
 
@@ -64,7 +63,7 @@ void QBackgroundSubtractorPrivate::setLearningRate(double rate){
 * \a parent
 */
 QBackgroundSubtractor::QBackgroundSubtractor(QBackgroundSubtractorPrivate *d_ptr, QQuickItem *parent)
-    : QMatFilter(parent)
+    : QObject(parent)
     , d_ptr(d_ptr ? d_ptr : new QBackgroundSubtractorPrivate){
     if ( !d_ptr ){
         qWarning() << "QBackgroundSubtractor may not be initialized directly!"
@@ -112,4 +111,10 @@ void QBackgroundSubtractor::transform(const Mat& in, Mat& out){
     BackgroundSubtractor* subtractor = d->subtractor();
     if ( subtractor && !in.empty() )
         subtractor->apply(in, out, d->learningRate());
+}
+
+QMat *QBackgroundSubtractor::subtract(QMat *input){
+    QMat* out = new QMat;
+    transform(input->internal(), out->internal());
+    return out;
 }

@@ -20,7 +20,7 @@ LvParseTest::LvParseTest(QObject *parent)
 
 void LvParseTest::initTestCase(){
     m_fileIO = new FileIO;
-    m_scriptPath  = lv::ApplicationContext::instance().releasePath() + "/data";
+    m_scriptPath = Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/data";
 }
 
 void LvParseTest::constructorParseTest(){

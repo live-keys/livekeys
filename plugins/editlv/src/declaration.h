@@ -175,7 +175,7 @@ inline int Declaration::valueOffset() const{
 
 /// \brief Assings a new \p positionOffset for this declaration
 inline void Declaration::setValuePositionOffset(int positionOffset){
-    int vl = valueLength();
+//    int vl = valueLength();
     m_valueOffset = positionOffset;
     // m_section->resize(m_identifierLength + valueOffset() + vl);
 }

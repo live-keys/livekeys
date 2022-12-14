@@ -78,9 +78,9 @@ public:
             return true;
         } else if ( const QQmlJS::ASTPropertyReference* vr = value->asAstPropertyReference() ){
             if ( vr->ast()->memberType->next ){
-                type = (vr->ast() != nullptr) ? (vr->ast()->memberType->name.toString() + "." + vr->ast()->memberType->next->name.toString()) : QString("object");
+                type = (vr->ast() != nullptr) ? (vr->ast()->memberType->name + "." + vr->ast()->memberType->next->name) : QString("object");
             } else {
-                type = (vr->ast() != nullptr) ? vr->ast()->memberType->name.toString() : QString("object");
+                type = (vr->ast() != nullptr) ? vr->ast()->memberType->name : QString("object");
             }
 
         } else if ( const QQmlJS::ASTFunctionValue* fv = value->asAstFunctionValue() ){

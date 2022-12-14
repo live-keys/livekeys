@@ -97,6 +97,11 @@ void QmlWatcher::resolveTarget(){
 
     if ( checkChildDeclarations() ){
         HookContainer* hk = qobject_cast<HookContainer*>(ctx->contextProperty("hooks").value<QObject*>());
+        if ( !hk ){
+            auto tctx = qmlContext(m_target);
+            if ( tctx )
+                hk = qobject_cast<HookContainer*>(tctx->contextProperty("hooks").value<QObject*>());
+        }
         hk->insertKey(m_referencedFile, m_declaredId, this);
     }
 
@@ -157,6 +162,11 @@ void QmlWatcher::setTarget(QObject *target){
     emit targetChanged();
 
     resolveTarget();
+}
+
+void QmlWatcher::setDynamicTarget(QObject *target, const QString &id){
+    m_declaredId = id;
+    setTarget(target);
 }
 
 }// namespace

@@ -13,8 +13,8 @@
 **
 ****************************************************************************/
 
-#ifndef LVQMLMEMORYINFO_H
-#define LVQMLMEMORYINFO_H
+#ifndef LVQMLMETAINFO_H
+#define LVQMLMETAINFO_H
 
 #include <QObject>
 #include <QJSValue>

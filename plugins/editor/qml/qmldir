@@ -3,11 +3,15 @@ plugin editor
 
 depends QtQuick 2.3
 
-Editor            1.0 Editor.qml
-EditorPane        1.0 EditorPane.qml
-SuggestionBox     1.0 SuggestionBox.qml
-PaletteListView   1.0 PaletteListView.qml
-PaletteConnection 1.0 PaletteConnection.qml
-ObjectPalettePane 1.0 ObjectPalettePane.qml
-PalettePane       1.0 PalettePane.qml
-TextReplace       1.0 TextReplace.qml
+Editor                 1.0 Editor.qml
+EditorPane             1.0 EditorPane.qml
+SuggestionBox          1.0 SuggestionBox.qml
+PaletteListView        1.0 PaletteListView.qml
+PaletteConnection      1.0 PaletteConnection.qml
+BindingPathView        1.0 BindingPathView.qml
+BindingChannelListView 1.0 BindingChannelListView.qml
+ObjectPalettePane      1.0 ObjectPalettePane.qml
+PalettePane            1.0 PalettePane.qml
+TextReplace            1.0 TextReplace.qml
+RunTriggerTypeSelector 1.0 RunTriggerTypeSelector.qml
+RunnableControl        1.0 RunnableControl.qml

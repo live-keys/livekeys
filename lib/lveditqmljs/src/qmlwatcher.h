@@ -50,6 +50,9 @@ public:
 
     void setTarget(QObject* target);
 
+public slots:
+    void setDynamicTarget(QObject* target, const QString& id);
+
 signals:
     void ready();
     void targetChanged();

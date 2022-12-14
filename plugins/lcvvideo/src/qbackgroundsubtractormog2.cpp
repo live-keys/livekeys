@@ -14,7 +14,6 @@
 ****************************************************************************/
 
 #include "qbackgroundsubtractormog2.h"
-#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -114,7 +113,10 @@ BackgroundSubtractor* QBackgroundSubtractorMog2Private::subtractor(){
  */
 QBackgroundSubtractorMog2::QBackgroundSubtractorMog2(QQuickItem *parent)
     : QBackgroundSubtractor(new QBackgroundSubtractorMog2Private, parent)
-    , d_ptr(static_cast<QBackgroundSubtractorMog2Private*>(QBackgroundSubtractor::d_ptr)){
+    , d_ptr(static_cast<QBackgroundSubtractorMog2Private*>(QBackgroundSubtractor::d_ptr))
+{
+    Q_D(QBackgroundSubtractorMog2);
+    d->m_subtractorMog2 = d->createSubtractor();
 }
 
 /**
@@ -339,15 +341,4 @@ void QBackgroundSubtractorMog2::setVarThresholdGen(float varThresholdGen){
             d->subtractorMog2()->setVarThresholdGen(varThresholdGen);
          emit varThresholdGenChanged();
     }
-}
-
-void QBackgroundSubtractorMog2::staticLoad(const QString &id){
-    Q_D(QBackgroundSubtractorMog2);
-    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
-    d->m_subtractorMog2 = container->get<Ptr<BackgroundSubtractorMOG2> >(id);
-    if ( !d->m_subtractorMog2 ){
-        d->m_subtractorMog2 = d->createSubtractor();
-        container->set< Ptr<BackgroundSubtractorMOG2> >(id, d->m_subtractorMog2);
-    }
-    QMatFilter::transform();
 }

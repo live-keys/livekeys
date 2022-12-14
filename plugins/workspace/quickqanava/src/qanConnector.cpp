@@ -54,8 +54,9 @@ Connector::Connector(QQuickItem* parent) :
     setVisible(false);
 }
 
-auto    Connector::setGraph(qan::Graph* graph) noexcept -> void
+auto    Connector::setGraph(QObject* graphob) noexcept -> void
 {
+    qan::Graph* graph = qobject_cast<qan::Graph*>(graphob);
     if ( graph != _graph.data() ) {
         _graph = graph;
         if ( _edgeItem ) {
@@ -69,7 +70,7 @@ auto    Connector::setGraph(qan::Graph* graph) noexcept -> void
     }
 }
 
-auto    Connector::getGraph() const noexcept -> qan::Graph* { return _graph.data(); }
+auto    Connector::getGraph() const noexcept -> QObject* { return _graph.data(); }
 //-----------------------------------------------------------------------------
 
 /* Node Static Factories *///--------------------------------------------------
@@ -227,8 +228,9 @@ auto    Connector::setEdgeComponent(QQmlComponent* edgeComponent) noexcept -> vo
                     _edgeItem->setVisible( false );
                     _edgeItem->setAcceptDrops(false);
                     if ( getGraph() != nullptr ) {
-                        _edgeItem->setGraph( getGraph() );
-                        _edgeItem->setParentItem( getGraph()->getContainerItem() );
+                        qan::Graph* grp = qobject_cast<qan::Graph*>(getGraph());
+                        _edgeItem->setGraph( grp );
+                        _edgeItem->setParentItem( grp->getContainerItem() );
                     }
                     if ( _sourceNode &&
                          _sourceNode->getItem() ) {

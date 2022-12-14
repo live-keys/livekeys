@@ -22,7 +22,7 @@ QmlValueFlowInput::~QmlValueFlowInput(){
 
 QJSValue QmlValueFlowInput::value(){
     if ( !m_isComponentComplete )
-        initializeParent();
+        initializeVars();
 
     if ( m_valueFlow )
         return m_valueFlow->value();
@@ -30,6 +30,8 @@ QJSValue QmlValueFlowInput::value(){
         return m_streamValueFlow->value();
     return QJSValue();
 }
+
+void QmlValueFlowInput::classBegin(){}
 
 void QmlValueFlowInput::componentComplete(){
     m_isComponentComplete = true;
@@ -47,18 +49,20 @@ void QmlValueFlowInput::componentComplete(){
     }
 }
 
-void QmlValueFlowInput::initializeParent(){
+void QmlValueFlowInput::initializeVars(){
     if ( m_valueFlow || m_streamValueFlow )
         return;
-
     m_valueFlow = qobject_cast<QmlValueFlow*>(parent());
+    if ( !m_valueFlow )
+        m_streamValueFlow = qobject_cast<QmlStreamValueFlow*>(parent());
+}
+
+void QmlValueFlowInput::initializeParent(){
+    initializeVars();
     if ( m_valueFlow ){
         connect(m_valueFlow, &QmlValueFlow::valueChanged, this, &QmlValueFlowInput::valueChanged);
-    } else {
-        m_streamValueFlow = qobject_cast<QmlStreamValueFlow*>(parent());
-        if ( m_streamValueFlow ){
-            connect(m_streamValueFlow, &QmlStreamValueFlow::valueChanged, this, &QmlValueFlowInput::valueChanged);
-        }
+    } else if ( m_streamValueFlow ){
+        connect(m_streamValueFlow, &QmlStreamValueFlow::valueChanged, this, &QmlValueFlowInput::valueChanged);
     }
 }
 

@@ -17,7 +17,6 @@
 #define LVRUNNABLECONTAINER_H
 
 #include <QAbstractListModel>
-#include <QQmlContext>
 
 #include "live/lveditorglobal.h"
 

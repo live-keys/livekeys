@@ -76,6 +76,10 @@ public slots:
     void fill(QMat* m, const QColor& color);
     void fillWithMask(QMat* m, const QColor& color, QMat* mask);
 
+    QMat* roi(QMat* m, int x, int y, int w, int h);
+    QMat* overlap(QMat* in, QMat* in2, QMat *mask);
+    QMat* alphaMerge(QMat* in, QMat* mask);
+
     QMat* reloc(QMat* m);
     QMat* crop(QMat* m, const QRect& region);
     QMat* flip(QMat* m, int direction);
@@ -88,6 +92,8 @@ public slots:
 
     QMatrix4x4 to4x4Matrix(QMat* m);
     QVariantList toArray(QMat* m);
+
+    QMat* absdiff(QMat* in1, QMat *in2);
 
     QMat* bitwiseXor(QMat* arg1, QMat* arg2);
     QMat* bitwiseOr(QMat* arg1, QMat* arg2);

@@ -15,14 +15,13 @@
 ****************************************************************************/
 
 import QtQuick 2.4
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
 import base 1.0
 import fs 1.0 as Fs
 import visual.input 1.0 as Input
+import visual.shapes 1.0
 
 Workspace.Pane{
     id : root
@@ -39,6 +38,8 @@ Workspace.Pane{
     property alias textEdit: editor.textEdit
     property alias internalActiveFocus : editor.internalActiveFocus
     property alias internalFocus: editor.internalFocus
+    property var runTrigger: editor.code.language ? editor.code.language.runTrigger : null
+
     onInternalActiveFocusChanged: {
         if ( internalActiveFocus && panes.activePane !== root ){
             panes.activateItem(textEdit, root)
@@ -78,6 +79,10 @@ Workspace.Pane{
     }
 
     paneCleared: function(){
+        for ( var i = 0; i < extraOptions.children.length; ++i ){
+            extraOptions.children[i].destroy()
+        }
+        extraOptions.children = []
         root.destroy()
     }
 
@@ -301,6 +306,17 @@ Workspace.Pane{
         }
     }
 
+    Item{
+        id: extraOptions
+
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.topMargin: 30
+
+        width: parent.width
+        height: 0
+    }
+
     Workspace.PaneMenu{
         id: editorAddRemoveMenu
         visible: false
@@ -336,12 +352,32 @@ Workspace.Pane{
             }
         }
         Workspace.PaneMenuItem{
-            text: qsTr("Remove Pane")
+            text: qsTr("Toggle Run Triggers")
             onClicked: {
+                var found = false
+                var newChildren = []
+                for ( var i = 0; i < extraOptions.children.length; ++i ){
+                    var c = extraOptions.children[i]
+                    if ( c.objectName === 'runControl' ){
+                        extraOptions.height -= c.height
+                        c.destroy()
+                        found = true
+                    } else {
+                        newChildren.push(c)
+                    }
+                }
+                if ( found ){
+                    extraOptions.children = newChildren
+                } else {
+                    var rc = lk.layers.editor.environment.createRunnableControl(editor, extraOptions)
+                    rc.currentTheme = root.currentTheme
+                    extraOptions.height += rc.height
+                    extraOptions.children.push(rc)
+                }
                 editorAddRemoveMenu.visible = false
-                root.panes.clearPane(root)
             }
         }
+
         Workspace.PaneMenuItem{
             text: qsTr("Save Layout")
             visible: editorAddRemoveMenu.supportsShaping
@@ -441,15 +477,26 @@ Workspace.Pane{
                 })
             }
         }
+        Workspace.PaneMenuItem{
+            text: qsTr("Remove Pane")
+            onClicked: {
+                editorAddRemoveMenu.visible = false
+                root.panes.clearPane(root)
+            }
+        }
     }
 
     Editor{
         id: editor
         anchors.fill: parent
-        anchors.topMargin: 30
+        anchors.topMargin: 30 + extraOptions.height
         style: root.currentTheme.editorStyle
         lineSurfaceVisible: !(code && code.language && code.language.importsFragment && code.language.rootFragment)
-        getGlobalPosition: function(){ return root.mapGlobalPosition() }
+        getGlobalPosition: function(){
+            var g = root.mapGlobalPosition()
+            g.y += extraOptions.height
+            return g
+        }
 
         onKeyPress: {
             var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)

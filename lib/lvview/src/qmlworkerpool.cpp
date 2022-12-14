@@ -228,7 +228,10 @@ void QmlWorkerPool::Thread::run()
             if (m_workerContainer->tooManyThreadsActive())
                 break;
 
-            t = !m_workerContainer->queue.isEmpty() ? m_workerContainer->queue.takeFirst().first : nullptr;
+            t = !m_workerContainer->queue.empty() ? m_workerContainer->queue.front().first : nullptr;
+            if ( !m_workerContainer->queue.empty() ){
+                m_workerContainer->queue.pop_front();
+            }
         } while (t != nullptr);
 
         if (m_workerContainer->isExiting) {
@@ -319,9 +322,15 @@ void QmlWorkerPoolPrivate::enqueueTask(QmlWorkerPool::Task *task, int priority)
         ++task->m_ref;
 
     // put it on the queue
-    QList<QPair<QmlWorkerPool::Task *, int> >::iterator at =
-        qUpperBound(queue.begin(), queue.end(), priority);
-    queue.insert(at, qMakePair(task, priority));
+    std::list<std::pair<QmlWorkerPool::Task *, int> >::iterator at = std::upper_bound(
+        queue.begin(),
+        queue.end(),
+        priority,
+        [](int value, const std::pair<QmlWorkerPool::Task *, int>& ti){
+            return value < ti.second;
+        }
+    );
+    queue.insert(at, std::make_pair(task, priority));
     taskReady.wakeOne();
 }
 
@@ -338,8 +347,8 @@ int QmlWorkerPoolPrivate::activeThreadCount() const
 void QmlWorkerPoolPrivate::tryToStartMoreThreads()
 {
     // try to push tasks on the queue to any available threads
-    while (!queue.isEmpty() && tryStart(queue.first().first))
-        queue.removeFirst();
+    while (!queue.empty() && tryStart(queue.front().first))
+        queue.pop_front();
 }
 
 bool QmlWorkerPoolPrivate::tooManyThreadsActive() const
@@ -395,7 +404,7 @@ void QmlWorkerPoolPrivate::reset()
 void QmlWorkerPoolPrivate::waitForDone()
 {
     QMutexLocker locker(&mutex);
-    while (!(queue.isEmpty() && activeThreads == 0))
+    while (!(queue.empty() && activeThreads == 0))
         noActiveThreads.wait(locker.mutex());
 }
 

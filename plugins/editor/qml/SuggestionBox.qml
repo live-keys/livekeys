@@ -15,10 +15,10 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import base 1.0
 import editor.private 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -88,33 +88,21 @@ Rectangle{
     }
 
     ScrollView{
+        id: scrollView
         anchors.top : parent.top
 
         height : root.height
         width: root.width
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#0b1f2e"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: root.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: root.color}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentHeight > scrollView.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentWidth > scrollView.width
         }
 
         ListView{

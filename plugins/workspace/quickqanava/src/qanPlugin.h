@@ -32,8 +32,6 @@
 // \date	2018 08 19
 //-----------------------------------------------------------------------------
 
-#pragma once
-
 #include <QQmlExtensionPlugin>
 
 class QuickQanavaPlugin : public QQmlExtensionPlugin

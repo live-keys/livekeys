@@ -179,7 +179,23 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std
     delete section;
 
     if ( m_d->config.m_fileOutput ){
-        m_d->config.m_fileIO->writeToFile(outputPath.data(), result);
+        std::string outputFile = outputPath.data();
+        std::string displayFilePath = path;
+        Utf8::replaceAll(displayFilePath, plugin->packagePath(), "");
+
+        bool shouldWrite = true;
+        if ( m_d->config.m_fileOutputOnlyOnModified && Path::exists(outputFile) ){
+            DateTime sourceModifiedStamp = Path::lastModified(path);
+            DateTime outputModifiedStamp = Path::lastModified(outputFile);
+            shouldWrite = outputModifiedStamp < sourceModifiedStamp;
+        }
+
+        if ( shouldWrite ){
+            m_d->config.m_fileIO->writeToFile(outputPath.data(), result);
+            vlog("lvcompiler").v() << "Compiler: Compiled file: " << displayFilePath;
+        } else {
+            vlog("lvcompiler").v() << "Compiler: Skipped file: " << displayFilePath;
+        }
     }
 
     return result;
@@ -304,6 +320,7 @@ std::shared_ptr<ElementsModule> Compiler::findLoadedModuleByPath(const std::stri
 
 Compiler::Config::Config(bool fileOutput, const std::string &outputExtension, FileIOInterface *ioInterface)
     : m_fileOutput(fileOutput)
+    , m_fileOutputOnlyOnModified(true)
     , m_fileIO(ioInterface)
     , m_outputExtension(outputExtension)
     , m_enableJsImports(true)

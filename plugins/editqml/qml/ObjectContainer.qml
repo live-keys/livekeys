@@ -1,8 +1,8 @@
 import QtQuick 2.0
-import live 1.0
 import editor 1.0
 import editor.private 1.0
 import editqml 1.0 as EditQml
+//import workspace.builder 1.0 as Builder
 
 Item{
     id: root
@@ -143,6 +143,8 @@ Item{
     property alias propertiesOpened: objectContainerFrame.propertiesOpened
     property var sortChildren: paletteListContainer.sortChildren
 
+    property alias frame: objectContainerFrame
+
     property var parentObjectContainer: null
     property var isForProperty: false
     property QtObject theme: lk.layers.workspace.themes.current
@@ -266,15 +268,13 @@ Item{
 
             var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
 
-            for (var i=0; i < objects.length; ++i){
+            for (var i = 0; i < objects.length; ++i){
                 if ( !objects[i].visualParent ){
                     root.addChildObject(objects[i])
                 }
             }
 
             var expandDefaultPalette = options && options.expandDefaultPalette ? options.expandDefaultPalette : true
-            if ( expandDefaultPalette )
-                paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
 
             var codeHandler = root.editor.code.language
 
@@ -283,11 +283,13 @@ Item{
             for (var i = 0; i < properties.length; ++i){
                 if ( !properties[i].visualParent ){
                     var pc = addProperty(properties[i])
-
                     if ( expandDefaultPalette )
                         paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
                 }
             }
+
+            if ( expandDefaultPalette )
+                paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
 
             var id = editFragment.objectId()
             var check = (objectContainerFrame.title.indexOf('#') === -1)
@@ -363,6 +365,15 @@ Item{
                 }
             }
         }
+
+//        property Component builderArea: null//Builder.BuilderArea{} //TODO
+//        function initializeBuilderArea(target, items){
+//            var result = builderArea.createObject(target)
+//            result.anchors.fill = target
+//            result.items = items
+//            return result
+//        }
+
 
         Item{
             id: objectContainerTitleWrap
@@ -443,6 +454,39 @@ Item{
                         paletteList.x -= 70
                     }
                 }
+//                onToggleBuilder: {
+
+//                    var ef = objectContainer.editFragment
+//                    var items = []
+//                    var ch = ef.getChildFragments()
+//                    for ( var i = 0; i < ch.length; ++i ){
+//                        var chef = ch[i]
+//                        if ( chef.location === EditQml.QmlEditFragment.Object ){
+//                            var ob = chef.readObject()
+//                            if ( ob ){
+//                                items.push({item: ob, data: chef})
+//                            }
+//                        }
+//                    }
+
+//                    vlog.i(items)
+//                    var thisRoot = ef.readObject()
+
+//                    var rs = ef.language.bindingChannels.selectedChannelRunnable().runSpace()
+//                    var builderArea = objectContainerFrame.initializeBuilderArea(rs, items)
+//                    builderArea.onItemsLayoutChanged.connect(function(changes){
+////                        vlog.i(changes.items)
+
+////                        for ( var j = 0; j < changes.items.length; ++j ){
+////                            var changedItem = changes.items[j]
+////                            // This will write to the editing fragment that has changed
+////                            changedItem.data.writeProperties({
+////                                'x' : 200
+////                            })
+////                        }
+//                    })
+//                }
+
                 onCompose : {
                     paletteFunctions.userAddToObjectContainer(root)
                 }

@@ -108,6 +108,18 @@ bool QmlDir::rename(QJSValue old, QJSValue nu)
     return QDir(".").rename(old.toString(), nu.toString());
 }
 
+QmlStream *QmlDir::read(const QString &path, int flags){
+    if ( !QDir(path).exists() ){
+        Exception e = CREATE_EXCEPTION(lv::Exception, "Directory deosn't exist: " + path.toStdString(), Exception::toCode("~Directory"));
+        QmlError(engine(), e, this).jsThrow();
+        return nullptr;
+    }
+
+    auto provider = new QmlDirectoryToStream(engine(), path, flags);
+    QQmlEngine::setObjectOwnership(provider, QQmlEngine::CppOwnership);
+    return provider->stream();
+}
+
 ViewEngine *QmlDir::engine(){
     lv::ViewEngine* ve = lv::ViewEngine::grabFromQmlEngine(qobject_cast<QQmlEngine*>(parent()));
     if ( !ve )

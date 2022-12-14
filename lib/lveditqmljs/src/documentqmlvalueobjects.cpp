@@ -509,6 +509,16 @@ DocumentQmlValueObjects::RangeObject *DocumentQmlValueObjects::objectThatWrapsPo
                     return ro;
             }
         }
+
+        for ( int i = 0; i < root->properties.size(); ++i ){
+            if ( root->properties[i]->child ){
+                if ( root->properties[i]->child->begin <= position && root->properties[i]->child->end >= position ){
+                    DocumentQmlValueObjects::RangeObject* ro = objectThatWrapsPosition(position, root->properties[i]->child);
+                    if (ro)
+                        return ro;
+                }
+            }
+        }
     }
 
     return base;
@@ -566,17 +576,17 @@ QStringList DocumentQmlValueObjects::RangeProperty::name() const{
     if ( ast->kind == QQmlJS::AST::Node::Kind_UiScriptBinding ){
         QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiScriptBinding*>(ast)->qualifiedId;
         while ( qi != nullptr ){
-            base.append(qi->name.toString());
+            base.append(qi->name);
             qi = qi->next;
         }
     } else if ( ast->kind == QQmlJS::AST::Node::Kind_UiObjectBinding ){
         QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(ast)->qualifiedId;
         while ( qi != nullptr ){
-            base.append(qi->name.toString());
+            base.append(qi->name);
             qi = qi->next;
         }
     } else if ( ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember ){
-        base.append(static_cast<QQmlJS::AST::UiPublicMember*>(ast)->name.toString());
+        base.append(static_cast<QQmlJS::AST::UiPublicMember*>(ast)->name);
     }
 
 
@@ -595,13 +605,13 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
     if ( parent->getAst()->kind == QQmlJS::AST::Node::Kind_UiObjectBinding ){
         QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedTypeNameId;
         while ( qi != nullptr ){
-            base.append(qi->name.toString());
+            base.append(qi->name);
             qi = qi->next;
         }
     } else if ( parent->getAst()->kind == QQmlJS::AST::Node::Kind_UiObjectDefinition ){
         QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(parent->getAst())->qualifiedId;
         while ( qi != nullptr ){
-            base.append(qi->name.toString());
+            base.append(qi->name);
             qi = qi->next;
         }
     }
@@ -614,7 +624,7 @@ QStringList DocumentQmlValueObjects::RangeProperty::object() const{
  */
 QString DocumentQmlValueObjects::RangeProperty::type() const{
     if ( ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember ){
-        return static_cast<QQmlJS::AST::UiPublicMember*>(ast)->memberType->name.toString();
+        return static_cast<QQmlJS::AST::UiPublicMember*>(ast)->memberType->name;
     }
     return "";
 }
@@ -626,6 +636,26 @@ QString DocumentQmlValueObjects::RangeProperty::type() const{
  */
 bool DocumentQmlValueObjects::RangeProperty::hasType() const{
     return ast->kind == QQmlJS::AST::Node::Kind_UiPublicMember;
+}
+
+QStringList DocumentQmlValueObjects::RangeObject::name() const{
+    QStringList base;
+
+    if ( ast->kind == QQmlJS::AST::Node::Kind_UiObjectBinding ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(ast)->qualifiedTypeNameId;
+        while ( qi != nullptr ){
+            base.append(qi->name);
+            qi = qi->next;
+        }
+    } else if ( ast->kind == QQmlJS::AST::Node::Kind_UiObjectDefinition ){
+        QQmlJS::AST::UiQualifiedId* qi = static_cast<QQmlJS::AST::UiObjectBinding*>(ast)->qualifiedId;
+        while ( qi != nullptr ){
+            base.append(qi->name);
+            qi = qi->next;
+        }
+    }
+
+    return base;
 }
 
 }// namespace

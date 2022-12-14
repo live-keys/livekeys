@@ -101,29 +101,6 @@ Represents the rotation of the triangle i.e. whether it's pointing up, down, lef
 
 Returns the color of the triangle.
 
-{qmlType:StaticLoader}
-{qmlInherits:external.QtQuick#Item}
-{qmlBrief:Creates and stores a component statically. See {Static Items} for more information on statics in Livekeys.}
-
-An example is available at **samples\live\staticloader.qml**
-
-{qmlProperty:Component source}
-
-Component to load statically.
-
-{qmlProperty:object item}
-
-This property holds the top-level object that was loaded
-
-{qmlSignal:itemCreated()}
-
-This signal is emitted when the item is created. This is usually at the start of the application, or when
-the user calls the staticLoad function with a different state id than the previous compilation.
-
-{qmlMethod:staticLoad(string id)}
-
-Loads the StaticLoader state. `id` has to be unique for this component when used in context with other StaticLoaders.
-
 {qmlType:FileReader}
 {qmlInherits:external.QtCore#Object, external.QtQml#ParserStatus}
 {qmlBrief:Represents a file reader which extracts the data from a file and potentially monitors changes.}

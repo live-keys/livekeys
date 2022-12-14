@@ -18,7 +18,6 @@
 #include "live/visuallog.h"
 #include "live/exception.h"
 
-#include <QQmlEngine>
 #include <QCoreApplication>
 #include <QTemporaryDir>
 #include <QTemporaryFile>

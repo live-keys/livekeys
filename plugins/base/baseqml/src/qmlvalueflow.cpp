@@ -6,6 +6,7 @@ namespace lv{
 
 QmlValueFlow::QmlValueFlow(QObject *parent)
     : QObject(parent)
+    , m_componentComplete(false)
 {
 
 }
@@ -51,6 +52,25 @@ QObject *QmlValueFlow::childObject(QQmlListProperty<QObject> *list, int index){
 
 void QmlValueFlow::clearChildObjects(QQmlListProperty<QObject> *list){
     reinterpret_cast<QmlValueFlow*>(list->data)->clearChildObjects();
+}
+
+void QmlValueFlow::setValueType(const QString &valueType){
+    if (m_valueType == valueType)
+        return;
+
+    m_valueType = valueType;
+    emit valueTypeChanged();
+
+    m_value = ViewEngine::typeDefaultValue(m_valueType, ViewEngine::grab(this));
+}
+
+void QmlValueFlow::exec(){
+    emit valueChanged();
+}
+
+void QmlValueFlow::componentComplete(){
+    m_componentComplete = true;
+    emit complete();
 }
 
 }// namespace

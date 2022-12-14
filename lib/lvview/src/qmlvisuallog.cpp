@@ -152,9 +152,15 @@ void QmlVisualLog::v(const QJSValue &messageOrCategory, const QJSValue &message)
 
 /** Configures global vlog object from a given QJSValue object */
 void QmlVisualLog::configure(const QString &name, const QJSValue &options){
-    MLNode mlopt;
-    ml::fromQml(options, mlopt);
-    vlog().configure(name.toStdString(), mlopt);
+    try{
+        MLNode mlopt;
+        ml::fromQml(options, mlopt);
+        vlog().configure(name.toStdString(), mlopt);
+    } catch ( lv::Exception& e ){
+        auto en = qobject_cast<QQmlEngine*>(parent());
+        auto ve = ViewEngine::grabFromQmlEngine(en);
+        ve->throwError(&e, this);
+    }
 }
 
 }// namespace

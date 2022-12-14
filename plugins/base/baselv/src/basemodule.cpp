@@ -2,5 +2,5 @@
 
 #include "live/elements/modulelibrary.h"
 
-void BaseModuleLoader::load(lv::el::ModuleLibrary *library){
+void BaseModuleLoader::load(lv::el::ModuleLibrary *){
 }

@@ -1,6 +1,5 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import editor 1.0
 import editor.style 1.0
 import workspace 1.0
@@ -59,9 +58,10 @@ Theme{
     property string topOpenSettingsIcon: "qrc:/images/top-icon-opensettings.png"
     property string topOpenLicenseIcon: "qrc:/images/top-icon-openlicense.png"
 
-    property string topLiveModeIcon : "qrc:/images/top-icon-mode-live.png"
-    property string topOnSaveModeIcon : "qrc:/images/top-icon-mode-onsave.png"
-    property string topDisabledModeIcon: "qrc:/images/top-icon-mode-disabled.png"
+
+    property Component runLiveTriggerIcon: Image{ source: "qrc:/images/top-icon-mode-live.png" }
+    property Component runSaveTriggerIcon: Image{ source: "qrc:/images/top-icon-mode-onsave.png" }
+    property Component runDisabledTriggerIcon: Image{ source: "qrc:/images/top-icon-mode-disabled.png" }
 
     property Component stackIcon: StackIcon{}
     property Component fileIcon : Image{ source: "qrc:/images/palette-connection-file.png" }
@@ -111,32 +111,8 @@ Theme{
 
     // Scroll
 
-    property Component scrollStyle: Component{
-
-        ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#1f2227"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: 'transparent'
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Item{}
-            corner: Rectangle{color: 'transparent'}
-        }
-
+    property QtObject scrollStyle: QtObject{
+        property color handleColor: "#1f2227"
     }
 
     // Editor

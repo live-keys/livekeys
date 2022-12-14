@@ -217,10 +217,10 @@ protected:
     inline Value &sym(int index)
     { return sym_stack [tos + index - 1]; }
 
-    inline QStringRef &stringRef(int index)
+    inline QString &stringRef(int index)
     { return string_stack [tos + index - 1]; }
 
-    inline QStringRef &rawStringRef(int index)
+    inline QString &rawStringRef(int index)
     { return rawString_stack [tos + index - 1]; }
 
     inline AST::SourceLocation &loc(int index)
@@ -259,8 +259,8 @@ protected:
     Value *sym_stack = nullptr;
     int *state_stack = nullptr;
     AST::SourceLocation *location_stack = nullptr;
-    QVector<QStringRef> string_stack;
-    QVector<QStringRef> rawString_stack;
+    QVector<QString> string_stack;
+    QVector<QString> rawString_stack;
 
     AST::Node *program = nullptr;
 
@@ -271,14 +271,14 @@ protected:
        int token;
        double dval;
        AST::SourceLocation loc;
-       QStringRef spell;
-       QStringRef raw;
+       QString spell;
+       QString raw;
     };
 
     int yytoken = -1;
     double yylval = 0.;
-    QStringRef yytokenspell;
-    QStringRef yytokenraw;
+    QString yytokenspell;
+    QString yytokenraw;
     AST::SourceLocation yylloc;
     AST::SourceLocation yyprevlloc;
 

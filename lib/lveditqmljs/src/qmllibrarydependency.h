@@ -35,7 +35,7 @@ public:
 
     static QmlLibraryDependency parse(const QString& import);
 
-    static int parseInt(const QStringRef &str, bool *ok);
+    static int parseInt(const QString &str, bool *ok);
     static bool parseVersion(const QString &str, int *major, int *minor);
 
     bool isValid() const;

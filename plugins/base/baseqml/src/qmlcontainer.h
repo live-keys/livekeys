@@ -21,7 +21,7 @@ public:
     QQmlListProperty<QObject> childObjects();
     void appendChildObject(QObject* obj);
     int childObjectCount() const;
-    QObject *childObject(int) const;
+    QObject *childObject(qsizetype) const;
     void clearChildObjects();
 
 public slots:

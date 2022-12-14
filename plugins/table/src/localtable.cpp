@@ -129,7 +129,7 @@ void LocalTable::insertField(int index, TableField::Ptr field){
     }
 }
 
-void LocalTable::updateField(int index, const QJSValue &opt){
+void LocalTable::updateField(int /*index*/, const QJSValue &/*opt*/){
 
 }
 
@@ -141,7 +141,7 @@ void LocalTable::removeField(int /*index*/){
 }
 
 void LocalTable::serialize(ViewEngine *, const QObject *ob, MLNode &n){
-    LocalTable* lo = qobject_cast<LocalTable*>(ob);
+    const LocalTable* lo = qobject_cast<const LocalTable*>(ob);
     if ( !lo )
         return;
 

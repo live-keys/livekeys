@@ -123,8 +123,7 @@ ImportKey::ImportKey(const ImportInfo &info)
     , majorVersion(info.version().majorVersion())
     , minorVersion(info.version().minorVersion())
 {
-    splitPath = QFileInfo(info.path()).canonicalFilePath().split(QLatin1Char('/'),
-                                                                 QString::KeepEmptyParts);
+    splitPath = QFileInfo(info.path()).canonicalFilePath().split(QLatin1Char('/'), Qt::KeepEmptyParts);
 }
 
 ImportKey::ImportKey(ImportType::Enum type, const QString &path, int majorVersion, int minorVersion)
@@ -289,7 +288,7 @@ ImportMatchStrength ImportKey::matchImport(const ImportKey &o, const ViewerConte
         }
         if (!p1.startsWith(QLatin1Char('+')))
             return QList<int>();
-        QStringRef selectorAtt(&p1, 1, p1.size()-1);
+        QString selectorAtt = p1.mid(1, p1.size() - 1);
         while (iSelector < nSelectors) {
             if (selectorAtt == vContext.selectors.at(iSelector))
                 break;
@@ -525,7 +524,7 @@ QByteArray DependencyInfo::calculateFingerprint(const ImportDependencies &deps)
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
     rootImport.addToHash(hash);
-    QStringList coreImports = allCoreImports.toList();
+    QStringList coreImports = allCoreImports.values();
     coreImports.sort();
     foreach (const QString importId, coreImports) {
         hash.addData(reinterpret_cast<const char*>(importId.constData()), importId.size() * sizeof(QChar));
@@ -533,7 +532,7 @@ QByteArray DependencyInfo::calculateFingerprint(const ImportDependencies &deps)
         hash.addData(coreImportFingerprint);
     }
     hash.addData("/", 1);
-    QList<ImportKey> imports(allImports.toList());
+    QList<ImportKey> imports(allImports.values());
     std::sort(imports.begin(), imports.end());
     foreach (const ImportKey &k, imports)
         k.addToHash(hash);

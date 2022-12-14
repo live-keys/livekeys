@@ -65,11 +65,11 @@ public slots:
     void __aboutToDelete();
 
 private:
-    void suggestionsForImport(const el::CursorContext& ctx, QList<CodeCompletionSuggestion>& suggestions);
-    void suggestionsForListener(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
-    void suggestionsForLeftOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
-    void suggestionsForRightOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
-    void defaultSuggestions(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+//    void suggestionsForImport(const el::CursorContext& ctx, QList<CodeCompletionSuggestion>& suggestions);
+//    void suggestionsForListener(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+//    void suggestionsForLeftOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+//    void suggestionsForRightOfDeclaration(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
+//    void defaultSuggestions(const el::CursorContext& ctx, int position, QList<CodeCompletionSuggestion>& suggestions);
 
     LanguageLvExtension* m_extension;
 

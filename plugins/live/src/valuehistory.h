@@ -17,8 +17,8 @@
 #define LVVALUEHISTORY_H
 
 #include <QQuickItem>
-#include <QLinkedList>
 #include <QSGSimpleTextureNode>
+#include <list>
 #include <limits.h>
 
 class QPainter;
@@ -37,7 +37,7 @@ public:
     DrawValueHistoryNode(QQuickWindow* window);
     ~DrawValueHistoryNode();
 
-    void render(const QLinkedList<double>& values, double minVal, double maxVal, const QColor &color);
+    void render(const std::list<double>& values, double minVal, double maxVal, const QColor &color);
 
 private:
     QOpenGLFramebufferObject *m_fbo;
@@ -91,15 +91,15 @@ protected:
     QSGNode *updatePaintNode(QSGNode *oldNode, UpdatePaintNodeData *nodeData);
 
 private:
-    double m_maxDisplayValue;
-    double m_minDisplayValue;
-    int    m_maxHistory;
-    QColor m_displayColor;
-    QLinkedList<double> m_values;
+    double             m_maxDisplayValue;
+    double             m_minDisplayValue;
+    int                m_maxHistory;
+    QColor             m_displayColor;
+    std::list<double>* m_values;
 };
 
 inline double ValueHistory::currentValue() const{
-    return m_values.size() > 0 ? m_values.last() : -1;
+    return m_values->size() > 0 ? m_values->back() : -1;
 }
 
 inline double ValueHistory::maxDisplayValue() const{
@@ -119,9 +119,9 @@ inline const QColor &ValueHistory::renderColor() const{
 }
 
 inline void ValueHistory::setCurrentValue(double currentValue){
-    m_values.append(currentValue);
-    if ( m_values.size() > m_maxHistory )
-        m_values.pop_front();
+    m_values->push_back(currentValue);
+    if ( static_cast<int>(m_values->size()) > m_maxHistory )
+        m_values->pop_front();
     emit currentValueChanged();
 
     update();
@@ -148,8 +148,8 @@ inline void ValueHistory::setMaxHistory(int maxHistory){
         return;
 
     m_maxHistory = maxHistory;
-    while ( m_maxHistory > m_values.size() ){
-        m_values.pop_front();
+    while ( m_maxHistory > static_cast<int>(m_values->size()) ){
+        m_values->pop_front();
     }
 
     emit maxHistoryChanged();

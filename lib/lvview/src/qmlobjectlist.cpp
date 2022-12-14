@@ -163,8 +163,8 @@ QQmlListProperty<QObject> QmlObjectList::items(){
                  &QmlObjectList::clearItems);
     } else {
         return QQmlListProperty<QObject>(this, this,
-                 &QmlObjectList::itemCount,
-                 &QmlObjectList::itemAt);
+                &QmlObjectList::itemCount,
+                &QmlObjectList::itemAt);
     }
 }
 

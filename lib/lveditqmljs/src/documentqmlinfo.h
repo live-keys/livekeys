@@ -180,7 +180,6 @@ public:
             , text(ptext)
         {}
 
-
         Severity kind;
         int      position;
         int      line;
@@ -229,13 +228,14 @@ public:
     QStringList extractTypeName(const ValueReference& value) const;
     void extractTypeNameRange(const ValueReference& value, int& begin, int& end) const;
     void extractRange(const ValueReference& value, int& begin, int& end);
+    std::pair<int, int> extractDocumentPosition(const ValueReference& value);
 
     void createRanges();
     const ValueReference valueAtPosition(int position) const;
     const ValueReference valueAtPosition(int position, int& begin, int& end) const;
     const ASTReference astObjectAtPosition(int position);
 
-    QString propertySourceFromObjectId(const QString& componentId, const QString& propertyName);
+    QString propertySourceFromObjectValue(const ValueReference& valueReference, const QString& propertyName);
 
     bool isValueNull(const ValueReference &vr) const;
 
@@ -259,6 +259,8 @@ public:
             ProjectDocument* document,
             DocumentQmlValueObjects::RangeObject *object,
             QmlDeclaration::Ptr declaration);
+    static QStringList readConnection(const QString& content);
+    static int findClosingBrace(const QString& contents, int offset);
 
     ~DocumentQmlInfo();
 

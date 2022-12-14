@@ -16,14 +16,17 @@
 #ifndef QMAT_H
 #define QMAT_H
 
-#include <QQuickItem>
-#include "live/shared.h"
-#include "opencv2/core.hpp"
 #include "qlcvcoreglobal.h"
+#include "opencv2/core.hpp"
+
+#include <QQuickItem>
+
+#include "live/shared.h"
+#include "live/visuallog.h"
 
 namespace lv{ class Memory; }
 
-class Q_LCVCORE_EXPORT QMat : public lv::Shared{
+class Q_LCVCORE_EXPORT QMat : public lv::Shared, public lv::VisualLog::ViewObject{
 
     Q_OBJECT
     Q_ENUMS(Type)

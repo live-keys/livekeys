@@ -25,6 +25,7 @@
 
 #include "qmljs/qmljsdocument.h"
 #include "qmljs/qmljsbind.h"
+#include "qmljs/qmljsscanner.h"
 #include "qmlidvisitor_p.h"
 #include "documentqmlranges_p.h"
 
@@ -84,6 +85,12 @@ namespace{
 
                 if ( object->properties[i]->child ){
                     declaration->setValueObjectScopeOffset(object->properties[i]->child->identifierEnd - declaration->valuePosition());
+
+                    if ( object->properties[i]->child->isComponent() ){
+                        QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+                        currentParent->child = componentNode;
+                        componentNode->parent = currentParent;
+                    }
                 }
 
                 declaration->setValueLength(
@@ -126,8 +133,17 @@ namespace{
                     return TraversalNodeResult();
                 }
 
-                dpr.bindingNode->parent = currentParent;
-                currentParent->child = dpr.bindingNode;
+                if ( object->properties[i]->child->isComponent() ){
+                    QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+                    componentNode->child = dpr.bindingNode;
+                    dpr.bindingNode->parent = componentNode;
+
+                    currentParent->child = componentNode;
+                    componentNode->parent = currentParent;
+                } else {
+                    dpr.bindingNode->parent = currentParent;
+                    currentParent->child = dpr.bindingNode;
+                }
 
                 while ( dpr.bindingNode->parent != nullptr )
                     dpr.bindingNode = dpr.bindingNode->parent;
@@ -152,8 +168,17 @@ namespace{
                     return TraversalNodeResult();
                 }
 
-                indexNode->child = dpr.bindingNode;
-                dpr.bindingNode->parent = indexNode;
+                if ( object->children[i]->isComponent() ){
+                    QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+                    componentNode->child = dpr.bindingNode;
+                    dpr.bindingNode->parent = componentNode;
+
+                    indexNode->child = componentNode;
+                    componentNode->parent = indexNode;
+                } else {
+                    indexNode->child = dpr.bindingNode;
+                    dpr.bindingNode->parent = indexNode;
+                }
 
                 dpr.bindingNode = indexNode;
                 return dpr;
@@ -166,6 +191,12 @@ namespace{
 
                 QmlBindingPath::IndexNode* indexNode = new QmlBindingPath::IndexNode;
                 indexNode->index = i;
+
+                if ( object->children[i]->isComponent() ){
+                    QmlBindingPath::ComponentNode* componentNode = new QmlBindingPath::ComponentNode;
+                    indexNode->child = componentNode;
+                    componentNode->parent = indexNode;
+                }
 
                 TraversalNodeResult dpr;
                 dpr.bindingNode = indexNode;
@@ -368,7 +399,7 @@ lv::QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObject(
         }
 
         if ( vob->typeName() )
-            vodata->setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name.toString()));
+            vodata->setExportType(QmlTypeReference(QmlTypeReference::Qml, vob->typeName()->name));
     }
 
     return vodata;
@@ -391,7 +422,7 @@ QmlTypeInfo::Ptr DocumentQmlInfo::extractValueObjectWithExport(
         vodata->setExportType(QmlTypeReference(QmlTypeReference::Qml, componentName, libraryPath));
 
         if ( vob->typeName() )
-            vodata->setInheritanceType(QmlTypeReference(QmlTypeReference::Unknown, vob->typeName()->name.toString()));
+            vodata->setInheritanceType(QmlTypeReference(QmlTypeReference::Unknown, vob->typeName()->name));
     }
 
     return vodata;
@@ -407,10 +438,10 @@ QStringList DocumentQmlInfo::extractTypeName(const DocumentQmlInfo::ValueReferen
     QStringList result;
     if ( const QQmlJS::ASTObjectValue* vob = valueref.value->asAstObjectValue() ){
         if ( vob->typeName() ){
-            result << vob->typeName()->name.toString();
+            result << vob->typeName()->name;
 
             if ( vob->typeName()->next )
-                result << vob->typeName()->next->name.toString();
+                result << vob->typeName()->next->name;
         }
     }
 
@@ -455,6 +486,17 @@ void DocumentQmlInfo::extractRange(const DocumentQmlInfo::ValueReference &valuer
             end = static_cast<int>(vob->initializer()->lastSourceLocation().end());
         }
     }
+}
+
+std::pair<int, int> DocumentQmlInfo::extractDocumentPosition(const DocumentQmlInfo::ValueReference &valueref){
+    if ( isValueNull(valueref) || valueref.parent != this ){
+        return std::make_pair(-1, -1);
+    }
+
+    QString file;
+    int line, column;
+    valueref.value->getSourceLocation(&file, &line, &column);
+    return std::make_pair(line, column);
 }
 
 /**
@@ -520,10 +562,8 @@ const DocumentQmlInfo::ASTReference DocumentQmlInfo::astObjectAtPosition(int pos
     return DocumentQmlInfo::ASTReference(range.ast);
 }
 
-QString DocumentQmlInfo::propertySourceFromObjectId(const QString &componentId, const QString &propertyName){
+QString DocumentQmlInfo::propertySourceFromObjectValue(const DocumentQmlInfo::ValueReference &vr, const QString& propertyName){
     Q_D(const DocumentQmlInfo);
-
-    DocumentQmlInfo::ValueReference vr = valueForId(componentId);
 
     int begin, end;
     extractRange(vr, begin, end);
@@ -540,8 +580,8 @@ QString DocumentQmlInfo::propertySourceFromObjectId(const QString &componentId, 
         lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
         for ( auto pit = objects->root()->properties.begin(); pit != objects->root()->properties.end(); ++pit ){
             lv::DocumentQmlValueObjects::RangeProperty* p = *pit;
-            QString propertyName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
-            if ( propertyName == "run" ){
+            QString lookupName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
+            if ( lookupName == propertyName ){
                 QString propertyContent = sourceData.mid(p->valueBegin, p->end - p->valueBegin);
                 return propertyContent;
             }
@@ -683,7 +723,7 @@ void DocumentQmlInfo::tryExtractImports(){
                 continue;
             QStringList fragments = lines[i].split(';');
             for (auto fragment: fragments){
-                auto parts = fragment.split(' ',  QString::SkipEmptyParts);
+                auto parts = fragment.split(' ',  Qt::SkipEmptyParts);
 
                 if (parts.size() != 3 && parts.size() != 5)
                     return;
@@ -813,6 +853,60 @@ DocumentQmlInfo::TraversalResult DocumentQmlInfo::findDeclarationPath(
     tr.bindingPath = path;
 
     return tr;
+}
+
+QStringList DocumentQmlInfo::readConnection(const QString &content){
+    QQmlJS::Scanner scanner;
+    QList<QQmlJS::Token> tokens = scanner(content);
+    QStringList expression;
+
+    for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+        QQmlJS::Token token = *it;
+        if ( token.kind == QQmlJS::Token::Identifier ){
+            expression.append(content.mid(token.begin(), token.length));
+        } else if ( token.kind == QQmlJS::Token::Dot ){
+        } else {
+            return QStringList();
+        }
+    }
+    if ( expression.length() == 1 && expression[0] == "null" )
+        return QStringList();
+
+    return expression;
+
+}
+
+int DocumentQmlInfo::findClosingBrace(const QString &contents, int offset){
+    int startOfLinePos = offset;
+    int endOfLinePos = contents.indexOf('\n', startOfLinePos);
+    int nestedBrace = 0;
+
+    QQmlJS::Scanner scanner;
+    int scannerState = QQmlJS::Scanner::Normal;
+
+    while ( nestedBrace >= 0 ){
+        QString line = contents.mid(startOfLinePos, endOfLinePos - startOfLinePos);
+        if ( endOfLinePos < 0 )
+            break;
+
+        QList<QQmlJS::Token> tokens = scanner(line, scannerState);
+        scannerState = scanner.state();
+        for ( auto it = tokens.begin(); it != tokens.end(); ++it ){
+            QQmlJS::Token token = *it;
+            if ( token.kind == QQmlJS::Token::LeftBrace ){
+                nestedBrace++;
+            } else if ( token.kind == QQmlJS::Token::RightBrace ){
+                nestedBrace--;
+                if ( nestedBrace < 0 )
+                    return startOfLinePos + token.offset;
+            }
+        }
+
+        startOfLinePos = endOfLinePos + 1;
+        endOfLinePos = contents.indexOf('\n', startOfLinePos);
+    }
+
+    return contents.length();
 }
 
 /**

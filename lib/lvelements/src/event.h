@@ -271,6 +271,7 @@ public:
         Engine* eng = elementEngine(emitter);
         DISABLE_UNUSED_WARNING(eng);
         EventConnectionFunction<Args...>* ecf = new EventConnectionFunction<Args...>( emitter, eid, [emitter, eng, f](Args ...args){
+            DISABLE_UNUSED_WARNING(eng);
             f.call(emitter, Function::Parameters({ScopedValue::createValue<Args>(eng, args)...})); }
         );
         append(ecf);

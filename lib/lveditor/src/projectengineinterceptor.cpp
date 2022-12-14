@@ -19,8 +19,9 @@
 
 namespace lv{
 
-ProjectEngineInterceptor::ProjectEngineInterceptor(ViewEngine *, Project *project)
+ProjectEngineInterceptor::ProjectEngineInterceptor(ViewEngine *engine, Project *project)
     : ViewEngineInterceptor()
+    , m_engine(engine)
     , m_project(project)
 {
 }
@@ -29,9 +30,13 @@ ViewEngineInterceptor::ContentResult ProjectEngineInterceptor::interceptContent(
     if (url.scheme() == "memory"){
         QUrl urlCopy = url;
         urlCopy.setScheme("file");
-        return ViewEngineInterceptor::ContentResult(
-            true, m_project->openFile(urlCopy.toLocalFile(), "binary", Document::EditIfNotOpen)->content()
-        );
+        Document* doc = m_project->isOpened(urlCopy.toLocalFile());
+        if ( doc ){
+            return ViewEngineInterceptor::ContentResult(true, doc->content());
+        } else {
+            std::string s = m_engine->fileIO()->readFromFile(urlCopy.toLocalFile().toStdString());
+            return ViewEngineInterceptor::ContentResult(true, QByteArray::fromStdString(s));
+        }
     }
     return ViewEngineInterceptor::ContentResult(false);
 }

@@ -1,8 +1,5 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
 import editor 1.0
-import live 1.0
 import visual.input 1.0 as Input
 
 CodePalette{

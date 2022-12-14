@@ -1,8 +1,8 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import workspace 1.0 as Workspace
 import fs 1.0 as Fs
+import visual.input 1.0 as Input
 
 Rectangle{
     width: 1040
@@ -201,6 +201,7 @@ Rectangle{
             }
 
             ScrollView{
+                id: scrollViewRecent
                 anchors.top: parent.top
                 anchors.topMargin: 60
                 width: parent.width
@@ -208,34 +209,17 @@ Rectangle{
                         ? parent.height - anchors.topMargin
                         : recentView.count * recentView.delegateHeight
 
-                style: ScrollViewStyle {
-                    transientScrollBars: false
-                    handle: Item {
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle {
-                            color: "#3c3c3d"
-                            anchors.fill: parent
-                        }
-                    }
-                    scrollBarBackground: Item{
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle{
-                            anchors.left: parent.left
-                            anchors.leftMargin: 3
-                            width: 1
-                            height: parent.height
-                            color: "#3c3c3d"
-                        }
-                    }
-                    decrementControl: null
-                    incrementControl: null
-                    frame: Item{}
-                    corner: Rectangle{color: "#3c3c3d"}
+
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: scrollViewRecent.contentHeight > scrollViewRecent.height
                 }
-
-
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+                ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: scrollViewRecent.contentWidth > scrollViewRecent.width
+                }
 
                 ListView{
                     id: recentView
@@ -317,6 +301,7 @@ Rectangle{
             }
 
             ScrollView{
+                id: scrollViewLearn
                 anchors.top: parent.top
                 anchors.topMargin: 50
                 width: parent.width
@@ -324,34 +309,16 @@ Rectangle{
                         ? parent.height - anchors.topMargin
                         : learnView.count * learnView.delegateHeight + learnView.model.numberOfTitles * 15
 
-                style: ScrollViewStyle {
-                    transientScrollBars: false
-                    handle: Item {
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle {
-                            color: "#3c3c3d"
-                            anchors.fill: parent
-                        }
-                    }
-                    scrollBarBackground: Item{
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle{
-                            anchors.left: parent.left
-                            anchors.leftMargin: 3
-                            width: 1
-                            height: parent.height
-                            color: "#3c3c3d"
-                        }
-                    }
-                    decrementControl: null
-                    incrementControl: null
-                    frame: Item{}
-                    corner: Rectangle{color: "#3c3c3d"}
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: true
                 }
-
-
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+                ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: true
+                }
 
                 ListView{
                     id: learnView
@@ -421,6 +388,7 @@ Rectangle{
             }
 
             ScrollView{
+                id: scrollViewSamples
                 anchors.top: parent.top
                 anchors.topMargin: 50
                 width: parent.width
@@ -428,31 +396,15 @@ Rectangle{
                         ? parent.height - anchors.topMargin
                         : samplesView.count * samplesView.delegateHeight + samplesView.model.numberOfTitles * 15
 
-                style: ScrollViewStyle {
-                    transientScrollBars: false
-                    handle: Item {
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle {
-                            color: "#3c3c3d"
-                            anchors.fill: parent
-                        }
-                    }
-                    scrollBarBackground: Item{
-                        implicitWidth: 6
-                        implicitHeight: 6
-                        Rectangle{
-                            anchors.left: parent.left
-                            anchors.leftMargin: 3
-                            width: 1
-                            height: parent.height
-                            color: "#3c3c3d"
-                        }
-                    }
-                    decrementControl: null
-                    incrementControl: null
-                    frame: Item{}
-                    corner: Rectangle{color: "#3c3c3d"}
+                ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+                ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: true
+                }
+                ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+                ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+                    color: "#1f2227"
+                    visible: true
                 }
 
                 ListView{

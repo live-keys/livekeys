@@ -30,6 +30,8 @@
 #include <QThread>
 #include <QProcess>
 
+#include <list>
+
 #include "qmllanguageinfo_p.h"
 #include "plugintypesfacade.h"
 #include "qmllibrarydependency.h"
@@ -55,6 +57,7 @@ namespace lv{
 
 QmlLanguageScanner::QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList &importPaths, QObject *parent)
     : QObject(parent)
+    , m_plannedQueue(new std::list<QmlLibraryInfo::Ptr>)
     , m_defaultImportPaths(importPaths)
     , m_ioSession(lio)
     , m_isProcessing(false)
@@ -64,6 +67,7 @@ QmlLanguageScanner::QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStri
 }
 
 QmlLanguageScanner::~QmlLanguageScanner(){
+    delete m_plannedQueue;
 }
 
 /**
@@ -85,21 +89,21 @@ QmlLanguageScanner::~QmlLanguageScanner(){
 void QmlLanguageScanner::processQueue(){
     m_isProcessing = true;
 
-    QLinkedList<QmlLibraryInfo::Ptr> queue;
+    std::list<QmlLibraryInfo::Ptr> queue;
 
     m_plannedQueueMutex.lock();
-    for ( auto it = m_plannedQueue.begin(); it != m_plannedQueue.end(); ++it ){
-        queue.append(*it);
+    for ( auto it = m_plannedQueue->begin(); it != m_plannedQueue->end(); ++it ){
+        queue.push_back(*it);
     }
-    m_plannedQueue.clear();
+    m_plannedQueue->clear();
     m_plannedQueueMutex.unlock();
 
-    while ( !queue.isEmpty() && !m_stopRequest ){
+    while ( !queue.empty() && !m_stopRequest ){
         QmlLibraryInfo::Ptr lib = queue.front();
         if ( m_libraries.contains(lib->uri()) ){
             lib = m_libraries[lib->uri()];
         }
-        queue.removeFirst();
+        queue.pop_front();
 
         if ( lib->status() == QmlLibraryInfo::NotScanned ){
 
@@ -114,14 +118,14 @@ void QmlLanguageScanner::processQueue(){
                         QmlLibraryInfo::Ptr plib = QmlLibraryInfo::create(parentLib);
                         plib->setPath(dir.path());
                         insertNewLibrary(plib);
-                        queue.append(plib);
-                        queue.append(lib);
+                        queue.push_back(plib);
+                        queue.push_back(lib);
                         continue;
                     }
 
                 } else if ( foundLib.value()->status() == QmlLibraryInfo::NotScanned ){
-                    queue.append(foundLib.value());
-                    queue.append(lib);
+                    queue.push_back(foundLib.value());
+                    queue.push_back(lib);
                     continue;
                 }
             }
@@ -151,12 +155,12 @@ void QmlLanguageScanner::processQueue(){
 
             for ( auto it = lib->dependencies().begin(); it != lib->dependencies().end(); ++it ){
                 if ( m_libraries.contains(*it) ){
-                    queue.append(m_libraries[*it]);
+                    queue.push_back(m_libraries[*it]);
                 }
             }
             lib->setStatus(QmlLibraryInfo::NoPrototypeLink);
             insertNewLibrary(lib);
-            queue.append(lib);
+            queue.push_back(lib);
 
             if ( m_updateListener ){
                 m_updateListener(lib, queue.size());
@@ -228,7 +232,7 @@ void QmlLanguageScanner::queueLibrary(const QmlLibraryInfo::Ptr &lib){
 
     QmlLibraryInfo::Ptr copy = QmlLibraryInfo::create(lib->uri());
     copy->setPath(lib->path());
-    m_plannedQueue.append(copy);
+    m_plannedQueue->push_back(copy);
 
     m_plannedQueueMutex.unlock();
 }
@@ -240,7 +244,7 @@ void QmlLanguageScanner::onMessage(std::function<void(int, const QString &)> lis
 int QmlLanguageScanner::plannedQueueSize(){
     int result = 0;
     m_plannedQueueMutex.lock();
-    result = m_plannedQueue.size();
+    result = static_cast<int>(m_plannedQueue->size());
     m_plannedQueueMutex.unlock();
     return result;
 }
@@ -460,7 +464,7 @@ QmlTypeInfo::Ptr QmlLanguageScanner::scanObjectFile(
 }
 
 void QmlLanguageScanner::scanQmlDirForExports(const QmlDirParser &dirParser, const QmlLibraryInfo::Ptr &lib){
-    QHash<QString, QmlDirParser::Component> components = dirParser.components();
+    QMultiHash<QString, QmlDirParser::Component> components = dirParser.components();
 
     for ( auto it = components.begin(); it != components.end(); ++it ){
         if ( it.key() == "classname" )

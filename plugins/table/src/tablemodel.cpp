@@ -54,7 +54,7 @@ QVariant TableModel::data(const QModelIndex &index, int role) const{
     return QVariant();
 }
 
-bool TableModel::setData(const QModelIndex &index, const QVariant &value, int)
+bool TableModel::setData(const QModelIndex &/*index*/, const QVariant &/*value*/, int)
 {
 //    if ( index.row() < m_table->totalRows() && index.column() < columnCount() ){
 

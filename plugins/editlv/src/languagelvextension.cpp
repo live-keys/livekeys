@@ -45,7 +45,7 @@ void LanguageLvExtension::componentComplete(){
         Settings* settings = static_cast<Settings*>(lg->property("settings").value<QObject*>());
         if ( !settings ){ qWarning("Failed to find settings object."); return; }
 
-        Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
+        Project* project = Project::grabFromLayer(engine);
         if ( !project ){ qWarning("Failed to find project object."); return; }
 
         m_project = project;

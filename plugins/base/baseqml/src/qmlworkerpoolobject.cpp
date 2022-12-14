@@ -19,7 +19,7 @@ QmlWorkerPoolObject::QmlWorkerPoolObject(QObject *parent)
 {
     if ( !m_hasInitializedCacheReset ){
         QQmlEngine* engine = qobject_cast<QQmlEngine*>(parent);
-        Project* proj = qobject_cast<Project*>(engine->rootContext()->contextProperty("project").value<QObject*>());
+        Project* proj = Project::grabFromLayer(ViewEngine::grabFromQmlEngine(engine));
         if ( proj ){
             connect(proj->runnables(), &RunnableContainer::qmlBuild, m_workerPool, &QmlWorkerPool::clearThreadCache);
             m_hasInitializedCacheReset = true;

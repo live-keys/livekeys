@@ -1,6 +1,5 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import workspace.icons 1.0 as Icons
 import visual.input 1.0 as Input
 

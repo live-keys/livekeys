@@ -20,7 +20,6 @@
 #include "live/segment.h"
 #include "live/qmlstreamfilter.h"
 
-#include "qvideocapture.h"
 #include "videosurface.h"
 #include "videotrack.h"
 

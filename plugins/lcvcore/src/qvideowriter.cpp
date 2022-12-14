@@ -15,7 +15,6 @@
 
 #include "qvideowriter.h"
 #include "qvideowriterthread.h"
-#include "live/staticcontainer.h"
 #include <QJSValueIterator>
 #include <QQmlContext>
 #include "opencv2/highgui.hpp"

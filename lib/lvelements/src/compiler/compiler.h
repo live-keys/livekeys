@@ -60,6 +60,7 @@ public:
 
     private:
         bool                   m_fileOutput;
+        bool                   m_fileOutputOnlyOnModified;
         FileIOInterface*       m_fileIO;
         std::string            m_outputExtension;
         std::string            m_elementPath;

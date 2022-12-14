@@ -1,10 +1,9 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import editor 1.0
 import base 1.0
-import live 1.0
 import editor 1.0
+import visual.input 1.0 as Input
 import workspace 1.0 as Workspace
 
 Workspace.Pane{
@@ -201,7 +200,7 @@ Workspace.Pane{
             display: "log"
         }
 
-        InputBox{
+        Input.InputBox{
             id: prefixSearchBox
             anchors.left: parent.left
             anchors.leftMargin: 20
@@ -239,7 +238,7 @@ Workspace.Pane{
             }
         }
 
-        InputBox{
+        Input.InputBox{
             id: logSearchBox
             anchors.left: parent.left
             anchors.leftMargin: prefixSearchBox.visible ? root.prefixWidth + 5 : 20
@@ -255,7 +254,7 @@ Workspace.Pane{
             border.width: 0
         }
 
-        InputBox{
+        Input.InputBox{
             id: tagSearchBox
             anchors.right: parent.right
             anchors.rightMargin: 120
@@ -424,28 +423,15 @@ Workspace.Pane{
         anchors.margins: 5
         clip: true
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#1f2227"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: root.color
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: root.color}
-            corner: Rectangle{color: root.color}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: root.currentTheme.scrollStyle.handleColor
+            visible: logScroll.contentHeight > logScroll.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: root.currentTheme.scrollStyle.handleColor
+            visible: logScroll.contentWidth > logScroll.width
         }
 
         ListView{
@@ -460,8 +446,8 @@ Workspace.Pane{
             Connections{
                 target: lk.log
                 function onRowsInserted(){
-                    if ( root.visible && logScroll.flickableItem.contentHeight > logScroll.height )
-                        logScroll.flickableItem.contentY = logScroll.flickableItem.contentHeight - logScroll.height
+                    if ( root.visible && logScroll.contentHeight > logScroll.height )
+                        logScroll.ScrollBar.vertical.position = 1.0 - logScroll.ScrollBar.vertical.size
                     root.itemAdded()
                 }
             }

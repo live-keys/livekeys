@@ -17,6 +17,8 @@
 #include "qmatnode.h"
 #include "qmatshader.h"
 #include "live/shared.h"
+#include "live/visuallogqt.h"
+
 #include <QSGSimpleMaterial>
 
 QImageView::QImageView(QQuickItem *parent)

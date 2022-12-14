@@ -1,6 +1,8 @@
 #include "bytebuffer.h"
 #include "live/visuallog.h"
 
+#include "string.h"
+
 extern "C"{
 #include "b64/cencode.h"
 #include "b64/cdecode.h"

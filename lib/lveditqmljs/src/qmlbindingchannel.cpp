@@ -18,8 +18,8 @@
 #include "live/qmleditfragment.h"
 #include "live/runnable.h"
 #include "live/hookcontainer.h"
+#include "live/qmlcomponentsource.h"
 #include "documentqmlinfo.h"
-#include "qmlbuilder.h"
 #include "documentqmlchannels.h"
 
 #include <QQmlContext>
@@ -93,12 +93,12 @@ void QmlBindingChannel::rebuild(){
     }
 
     QString builderId = cn->name;
-    QList<QObject*> builders = hooks->entriesFor(file, builderId);
+    QList<QObject*> builders = hooks->entriesFor(cn->uri, builderId);
 
     for ( QObject* ob : builders ){
-        QmlBuilder* builder = qobject_cast<QmlBuilder*>(ob);
-        if ( builder ){
-            builder->rebuild();
+        QmlComponentSource* csource = qobject_cast<QmlComponentSource*>(ob);
+        if ( csource ){
+            csource->updateFromUrl();
         }
     }
 }
@@ -118,15 +118,17 @@ QObject *QmlBindingChannel::object() const{
 
     // create correct order for list reference
     QObjectList ordered;
-    for (auto child: parent->children())
-    {
-        bool found = false;
-        for (int i = 0; i < ppref.count(); ++i)
-            if (child == ppref.at(i)){
-                found = true;
-                break;
-            }
-        if (found) ordered.push_back(child);
+
+    if ( parent ){
+        for (auto child: parent->children()){
+            bool found = false;
+            for (int i = 0; i < ppref.count(); ++i)
+                if (child == ppref.at(i)){
+                    found = true;
+                    break;
+                }
+            if (found) ordered.push_back(child);
+        }
     }
 
     if ( listIndex() >= ordered.length() ){

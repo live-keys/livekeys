@@ -173,9 +173,9 @@ TextEdit {
     The corresponding handler is \c onLinkActivated.
 */
 
-// This is a pretty arbitrary figure. The idea is that we don't want to break down the document
+// The idea is that we don't want to break down the document
 // into text nodes corresponding to a text block each so that the glyph node grouping doesn't become pointless.
-static const int nodeBreakingSize = 300;
+//static const int nodeBreakingSize = 300;
 
 namespace {
     class ProtectedLayoutAccessor: public QAbstractTextDocumentLayout
@@ -3110,8 +3110,8 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
     Q_D(TextEdit);
 
 
-    const int editRange = pos + qMax(charsAdded, charsRemoved);
-    const int delta = charsAdded - charsRemoved;
+//    const int editRange = pos + qMax(charsAdded, charsRemoved);
+//    const int delta = charsAdded - charsRemoved;
 
 #ifdef LV_EDITOR_DEBUG
     QObject* livecv    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("livecv").value<QObject*>();
@@ -3547,7 +3547,7 @@ void TextEditPrivate::updateDefaultTextOption()
     bool oldUseDesignMetrics = opt.useDesignMetrics();
     opt.setUseDesignMetrics(renderType != TextEdit::NativeRendering);
 
-    if (oldWrapMode != opt.wrapMode() || oldAlignment != opt.alignment()
+    if (oldWrapMode != opt.wrapMode() || oldAlignment != static_cast<int>(opt.alignment())
         || oldTextDirection != opt.textDirection()
         || oldUseDesignMetrics != opt.useDesignMetrics()) {
         document->setDefaultTextOption(opt);

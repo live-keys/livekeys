@@ -76,12 +76,12 @@ private:
     QPointer<qan::Edge>    _edge;
 
 public:
-    Q_PROPERTY( qan::Graph* graph READ getGraph WRITE setGraph NOTIFY graphChanged )
+    Q_PROPERTY( QObject* graph READ getGraph WRITE setGraph NOTIFY graphChanged )
     //! Secure shortcut to getEdge().getGraph().
-    auto    getGraph() const noexcept -> const qan::Graph*;
+    auto    getGraph() const noexcept -> const QObject*;
     //! \copydoc getGraph()
-    auto    getGraph() noexcept -> qan::Graph*;
-    auto    setGraph(qan::Graph*) noexcept -> void;
+    auto    getGraph() noexcept -> QObject*;
+    auto    setGraph(QObject*) noexcept -> void;
 signals:
     void    graphChanged();
 private:

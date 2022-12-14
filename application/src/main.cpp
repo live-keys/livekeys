@@ -33,7 +33,10 @@ int main(int argc, char *argv[]){
 
     ApplicationContext::initialize(Livekeys::startupConfiguration());
 
+#if (QT_VERSION_MAJOR < 6)
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+#endif
+
     QGuiApplication::addLibraryPath(QString::fromStdString(lv::ApplicationContext::instance().librariesPath()));
 
 #if (QT_VERSION >= QT_VERSION_CHECK(5,12,0))

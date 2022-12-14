@@ -147,7 +147,7 @@ ObjectValue *Bind::bindObject(UiQualifiedId *qualifiedTypeNameId, UiObjectInitia
     // add the prototype name to the prototypes hash
     for (UiQualifiedId *it = qualifiedTypeNameId; it; it = it->next) {
         if (!it->next && !it->name.isEmpty())
-            _qmlObjectsByPrototypeName.insert(it->name.toString(), objectValue);
+            _qmlObjectsByPrototypeName.insert(it->name, objectValue);
     }
 
     parentObjectValue = switchObjectValue(objectValue);
@@ -207,7 +207,7 @@ bool Bind::visit(UiImport *ast)
             _diagnosticMessages->append(
                         errorMessage(ast, tr("package import requires a version number")));
         }
-        const QString importId = ast->importId.toString();
+        const QString importId = ast->importId;
         ImportInfo import = ImportInfo::moduleImport(toString(ast->importUri), version,
                                                      importId, ast);
         if (_doc->language() == Dialect::Qml) {
@@ -226,8 +226,8 @@ bool Bind::visit(UiImport *ast)
         }
         _imports += import;
     } else if (!ast->fileName.isEmpty()) {
-        _imports += ImportInfo::pathImport(_doc->path(), ast->fileName.toString(),
-                                           version, ast->importId.toString(), ast);
+        _imports += ImportInfo::pathImport(_doc->path(), ast->fileName,
+                                           version, ast->importId, ast);
     } else {
         _imports += ImportInfo::invalidImport(ast);
     }
@@ -287,7 +287,7 @@ bool Bind::visit(UiScriptBinding *ast)
         if (ExpressionStatement *e = cast<ExpressionStatement*>(ast->statement))
             if (IdentifierExpression *i = cast<IdentifierExpression*>(e->expression))
                 if (!i->name.isEmpty())
-                    _idEnvironment->setMember(i->name.toString(), _currentObjectValue);
+                    _idEnvironment->setMember(i->name, _currentObjectValue);
     }
     const Block *block = AST::cast<const Block*>(ast->statement);
     if (block) {
@@ -316,7 +316,7 @@ bool Bind::visit(PatternElement *ast)
 
     ASTVariableReference *ref = new ASTVariableReference(ast, _doc, &_valueOwner);
     if (_currentObjectValue)
-        _currentObjectValue->setMember(ast->bindingIdentifier.toString(), ref);
+        _currentObjectValue->setMember(ast->bindingIdentifier, ref);
     return true;
 }
 
@@ -328,7 +328,7 @@ bool Bind::visit(FunctionExpression *ast)
 
     ASTFunctionValue *function = new ASTFunctionValue(ast, _doc, &_valueOwner);
     if (_currentObjectValue && !ast->name.isEmpty() && cast<FunctionDeclaration *>(ast))
-        _currentObjectValue->setMember(ast->name.toString(), function);
+        _currentObjectValue->setMember(ast->name, function);
 
     // build function scope
     ObjectValue *functionScope = _valueOwner.newObject(/*prototype=*/0);
@@ -341,7 +341,7 @@ bool Bind::visit(FunctionExpression *ast)
     // 1. Function formal arguments
     for (FormalParameterList *it = ast->formals; it; it = it->next) {
         if (!it->element->bindingIdentifier.isEmpty())
-            functionScope->setMember(it->element->bindingIdentifier.toString(), _valueOwner.unknownValue());
+            functionScope->setMember(it->element->bindingIdentifier, _valueOwner.unknownValue());
     }
 
     // 2. Functions defined inside the function body

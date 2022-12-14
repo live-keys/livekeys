@@ -223,10 +223,10 @@ impl::GridLine* LineGrid::minorLinesAt(int index) const { return _minorLines.at(
 int             LineGrid::majorLinesCount() const { return _majorLines.size(); }
 impl::GridLine* LineGrid::majorLinesAt(int index) const { return _majorLines.at(index); }
 
-int             LineGrid::callMinorLinesCount(QQmlListProperty<impl::GridLine>* list) { return reinterpret_cast<LineGrid*>(list->data)->minorLinesCount(); }
+int       LineGrid::callMinorLinesCount(QQmlListProperty<impl::GridLine>* list) { return reinterpret_cast<LineGrid*>(list->data)->minorLinesCount(); }
 impl::GridLine* LineGrid::callMinorLinesAt(QQmlListProperty<impl::GridLine>* list, int index) { return reinterpret_cast<LineGrid*>(list->data)->minorLinesAt(index); }
 
-int             LineGrid::callMajorLinesCount(QQmlListProperty<impl::GridLine>* list) { return reinterpret_cast<LineGrid*>(list->data)->majorLinesCount(); }
+int       LineGrid::callMajorLinesCount(QQmlListProperty<impl::GridLine>* list) { return reinterpret_cast<LineGrid*>(list->data)->majorLinesCount(); }
 impl::GridLine* LineGrid::callMajorLinesAt(QQmlListProperty<impl::GridLine>* list, int index) { return reinterpret_cast<LineGrid*>(list->data)->majorLinesAt(index); }
 //-----------------------------------------------------------------------------
 

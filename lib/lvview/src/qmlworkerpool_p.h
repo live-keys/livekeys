@@ -3,6 +3,8 @@
 
 #include "qmlworkerpool.h"
 
+#include <list>
+
 namespace lv{
 
 class QmlWorkerPoolPrivate{
@@ -29,7 +31,7 @@ public:
     QWaitCondition taskReady;
     QSet<QmlWorkerPool::Thread*>   allThreads;
     QQueue<QmlWorkerPool::Thread*> expiredThreads;
-    QList< QPair<QmlWorkerPool::Task*,int> > queue;
+    std::list< std::pair<QmlWorkerPool::Task*,int> > queue;
     QWaitCondition noActiveThreads;
 
     bool isExiting;

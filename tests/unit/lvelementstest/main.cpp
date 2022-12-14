@@ -16,7 +16,6 @@
 
 #include <QCoreApplication>
 #include <QTest>
-#include <qqml.h>
 
 #include "live/applicationcontext.h"
 #include "live/elements/engine.h"
@@ -55,5 +54,6 @@ int main(int argc, char *argv[]){
 //    return lv::TestRunner::runTest(LvParseTest::testIndex, argc, argv);
 //    return lv::TestRunner::runTest(LvCompileTest::testIndex, argc, argv);
 //    return lv::TestRunner::runTest(LvImportsTest::testIndex, argc, argv);
+//    return lv::TestRunner::runTest(JsErrorHandlingTest::testIndex, argc, argv);
     return lv::TestRunner::runTests(argc, argv);
 }

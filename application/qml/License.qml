@@ -17,9 +17,8 @@
 
 import QtQuick 2.3
 import QtQuick.Window 2.1
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
-import QtQuick.Dialogs 1.2
+import QtQuick.Controls 2.2
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -109,30 +108,19 @@ Rectangle{
 
         // ListView
         ScrollView{
+            id: scrollView
+
             anchors.fill: parent
 
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#0b1f2e"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: "transparent"
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: "transparent"}
-                corner: Rectangle{color: "transparent"}
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+            ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+                color: "#1f2227"
+                visible: scrollView.contentHeight > scrollView.height
+            }
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+            ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+                color: "#1f2227"
+                visible: scrollView.contentWidth > scrollView.width
             }
 
             ListView{
@@ -208,33 +196,22 @@ Rectangle{
         color: root.containerBackgroundColor
 
         ScrollView{
+            id: boxScrollView
             anchors.fill: parent
             anchors.topMargin: 2
             anchors.leftMargin: 2
             anchors.rightMargin: 2
             anchors.bottomMargin: acceptButton.visible ? 60 : 2
-            style: ScrollViewStyle {
-                transientScrollBars: false
-                handle: Item {
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle {
-                        color: "#061724"
-                        anchors.fill: parent
-                    }
-                }
-                scrollBarBackground: Item{
-                    implicitWidth: 10
-                    implicitHeight: 10
-                    Rectangle{
-                        anchors.fill: parent
-                        color: root.licenseBackgroundColor
-                    }
-                }
-                decrementControl: null
-                incrementControl: null
-                frame: Rectangle{color: root.licenseBackgroundColor}
-                corner: Rectangle{color: root.licenseBackgroundColor}
+
+            ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+            ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+                color: "#1f2227"
+                visible: boxScrollView.contentHeight > boxScrollView.height
+            }
+            ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+            ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+                color: "#1f2227"
+                visible: boxScrollView.contentWidth > boxScrollView.width
             }
 
             Text{

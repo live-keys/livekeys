@@ -209,11 +209,13 @@ void Livekeys::loadLayer(const QString &name, std::function<void (Layer*)> onRea
 
     QByteArray contentBytes = f.readAll();
 
+
     QObject* layerObj = m_viewEngine->createObject(contentBytes, m_viewEngine->engine(), layerUrl);
-    if ( !layerObj && m_viewEngine->lastErrors().size() > 0 )
+    if ( !layerObj && m_viewEngine->lastErrors().size() > 0 ){
         THROW_EXCEPTION(
             Exception, ViewEngine::toErrorString(m_viewEngine->lastErrors()).toStdString(), Exception::toCode("~Component")
         );
+    }
 
     if ( !layerObj )
         THROW_EXCEPTION(Exception, "Null layer returned at: " + name.toStdString(), Exception::toCode("~Layer"));

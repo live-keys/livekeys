@@ -70,11 +70,11 @@ Node::~Node()
         _item->deleteLater();
 }
 
-qan::Graph* Node::getGraph() noexcept {
+QObject *Node::getGraph() noexcept {
     return qobject_cast< qan::Graph* >( gtpo::node< qan::Config >::get_graph() );
 }
 
-const qan::Graph* Node::getGraph() const noexcept {
+const QObject *Node::getGraph() const noexcept {
     return qobject_cast< const qan::Graph* >( gtpo::node< qan::Config >::get_graph() );
 }
 

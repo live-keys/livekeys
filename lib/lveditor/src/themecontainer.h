@@ -54,6 +54,8 @@ signals:
     void currentChanged();
 
 private:
+    QMap<QString, QString>::const_iterator iteratorAt(int index) const;
+
     QString                m_type;
     QHash<int, QByteArray> m_roles;
     QMap<QString, QString> m_themes;

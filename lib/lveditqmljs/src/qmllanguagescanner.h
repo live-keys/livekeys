@@ -18,9 +18,9 @@
 
 #include <QObject>
 #include <QMutex>
-#include <QLinkedList>
 
 #include <functional>
+#include <list>
 
 #include "live/lockedfileiosession.h"
 #include "live/qmllanguageinfo.h"
@@ -88,7 +88,7 @@ private:
     void insertNewLibrary(const QmlLibraryInfo::Ptr& lib);
 
     QMutex                           m_plannedQueueMutex;
-    QLinkedList<QmlLibraryInfo::Ptr> m_plannedQueue;
+    std::list<QmlLibraryInfo::Ptr>*  m_plannedQueue;
 
     std::function<void(QmlLibraryInfo::Ptr, int)> m_updateListener;
     std::function<void()>                         m_queueFinished;

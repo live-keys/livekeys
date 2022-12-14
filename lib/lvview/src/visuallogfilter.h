@@ -22,6 +22,7 @@
 #include <QQmlParserStatus>
 #include <QFutureWatcher>
 #include <QString>
+#include <QRegularExpression>
 
 #include "live/lvviewglobal.h"
 #include "live/visuallogbasemodel.h"
@@ -54,11 +55,11 @@ private:
         union SearchContainer{
 
             QString* searchString;
-            QRegExp* searchRegexp;
+            QRegularExpression* searchRegexp;
 
             SearchContainer() = default;
             SearchContainer(const QString& pSearchString) : searchString(new QString(pSearchString)){}
-            SearchContainer(const QRegExp& pSearchRegexp) : searchRegexp(new QRegExp(pSearchRegexp)){}
+            SearchContainer(const QRegularExpression& pSearchRegexp) : searchRegexp(new QRegularExpression(pSearchRegexp)){}
 
             ~SearchContainer(){}
         };

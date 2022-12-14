@@ -46,13 +46,12 @@ archive, and you're ready to go. Step by step instructions are also found in the
 
 ## Compiling
 
-To compile Livekeys, you need to have Qt and Open CV installed. You can then use `qmake` to generate the makefile,
-and run make or `nmake` to build:
+To compile Livekeys, you need to have Qt and Open CV installed. You can then use `cmake` to generate the makefile::
 
 ```
 cd <livekeys_path>/build
-qmake -r ..
-make (or nmake)
+cmake -r ..
+cmake --build .
 ```
 
 The executable and plugins will be found in the bin directory.

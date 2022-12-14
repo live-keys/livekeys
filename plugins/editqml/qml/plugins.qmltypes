@@ -351,18 +351,6 @@ Module {
         }
     }
     Component {
-        name: "lv::QmlBuilder"
-        defaultProperty: "data"
-        prototype: "QQuickItem"
-        exports: ["editqml/Builder 1.0"]
-        exportMetaObjectRevisions: [0]
-        Property { name: "sourceComponent"; type: "QQmlComponent"; isPointer: true }
-        Property { name: "source"; type: "QString" }
-        Property { name: "object"; type: "QObject"; isReadonly: true; isPointer: true }
-        Method { name: "__updateImplicitWidth" }
-        Method { name: "__updateImplicitHeight" }
-    }
-    Component {
         name: "lv::QmlDocumentSyntax"
         prototype: "QObject"
         exports: ["editqml/QmlDocumentSyntax 1.0"]

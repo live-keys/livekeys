@@ -376,8 +376,8 @@ void    Navigable::wheelEvent( QWheelEvent* event )
 {
     if ( getNavigable() ) {
         qreal zoomFactor = ( event->angleDelta().y() > 0. ? _zoomIncrement : -_zoomIncrement );
-        zoomOn( QPointF{ static_cast<qreal>(event->x()),
-                         static_cast<qreal>(event->y()) },
+        zoomOn( QPointF{ static_cast<qreal>(event->position().x()),
+                         static_cast<qreal>(event->position().y()) },
                 getZoom() + zoomFactor );
     } else {
         event->setAccepted(false);

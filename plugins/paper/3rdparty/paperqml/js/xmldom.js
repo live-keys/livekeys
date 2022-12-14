@@ -902,8 +902,8 @@ var XMLReader = function(){
 			//can not set prefix,because prefix !== ''
 			a.localName = localName ;
 			//prefix == null for no ns prefix attribute 
-			if(nsPrefix !== false){//hack!!
-				if(localNSMap == null){
+            if(nsPrefix !== false){
+                if(localNSMap === null){
 					localNSMap = {}
 					//console.log(currentNSMap,0)
 					_copy(currentNSMap,currentNSMap={})

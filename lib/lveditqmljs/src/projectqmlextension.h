@@ -58,8 +58,6 @@ public:
 
     static void registerTypes(const char* uri);
 
-    void setParams(Settings *settings, Project* project, ViewEngine* engine, Workspace* workspace);
-
     Project* project();
 
     static bool pluginTypesEnabled();

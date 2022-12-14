@@ -100,6 +100,9 @@ public:
         void appendProperty(RangeProperty *property){ properties.append(property); }
         QQmlJS::AST::Node* getAst(){ return ast; }
         RangeItem* getParent(){ return parent; }
+        QStringList name() const;
+
+        bool isComponent() const{ QStringList n = name(); return n.length() == 1 && ( n[0] == "Component" || n[0] == "ComponentSource"); }
 
     public:
         QQmlJS::AST::Node* ast;

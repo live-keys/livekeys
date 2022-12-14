@@ -25,8 +25,8 @@
 #include "live/runnablecontainer.h"
 #include "live/qmlbuild.h"
 
+#include "qmlcomponentsource.h"
 #include "qmlwatcher.h"
-#include "qmlbuilder.h"
 
 #include <QQmlContext>
 
@@ -84,19 +84,23 @@ void QmlBindingChannelsDispatcher::__qmlBuildReady(){
                     documentChannels->updateChannel(bpChannel);
                 }
 
-            } else if ( qobject_cast<QmlBuilder*>(first) ){
+            } else if ( qobject_cast<QmlComponentSource*>(first) ){
+                QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(first);
 
                 QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
-                builderBp->appendFile(filePath);
-                builderBp->appendComponent(objectId, objectId);
+                builderBp->appendFile(run->path());
+                builderBp->appendComponent(objectId, cs->url().toLocalFile());
                 QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
                 if ( builderC ){
+                    builderC->updateConnection(first);
                     builderC->setIsBuilder(true);
                     builderC->setEnabled(true);
                     documentChannels->updateChannel(builderC);
                 }
             }
         }
+
+        documentChannels->runnableBuildReady(run);
     }
 
     // For watchers that initialize after the build is ready, connect them later
@@ -120,13 +124,15 @@ void QmlBindingChannelsDispatcher::__hookEntryAdded(Runnable *runnable, const QS
                     documentChannels->updateChannel(bpChannel);
                 }
 
-            } else if ( qobject_cast<QmlBuilder*>(object) ){
+            } else if ( qobject_cast<QmlComponentSource*>(object) ){
+                QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(object);
 
                 QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
                 builderBp->appendFile(filePath);
-                builderBp->appendComponent(id, id);
+                builderBp->appendComponent(id, cs->url().toLocalFile());
                 QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, runnable);
                 if ( builderC ){
+                    builderC->updateConnection(object);
                     builderC->setIsBuilder(true);
                     builderC->setEnabled(true);
                     documentChannels->updateChannel(builderC);
@@ -141,10 +147,10 @@ void QmlBindingChannelsDispatcher::removeDocumentChannels(DocumentQmlChannels *d
         m_channeledDocuments.remove(documentChannels);
 }
 
-void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, DocumentQmlChannels *documentChannels){
+void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *languageHandler, DocumentQmlChannels *documentChannels){
     m_channeledDocuments.insert(documentChannels);
 
-    Runnable* r = m_project->runnables()->runnableAt(codeHandler->document()->path());
+    Runnable* r = m_project->runnables()->runnableAt(languageHandler->document()->path());
     if (r && r->type() != Runnable::LvFile ){
         QmlBindingPath::Ptr bp = QmlBindingPath::create();
         bp->appendFile(r->path());
@@ -154,8 +160,8 @@ void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, D
     }
 
 
-    QString fileName = codeHandler->document()->fileName();
-    QString filePath = codeHandler->document()->path();
+    QString fileName = languageHandler->document()->fileName();
+    QString filePath = languageHandler->document()->path();
     if ( fileName.length() && fileName.front().isUpper() ){ // if component
         RunnableContainer* rc = m_project->runnables();
         int totalRunnables = rc->rowCount();
@@ -185,12 +191,15 @@ void QmlBindingChannelsDispatcher::initialize(LanguageQmlHandler *codeHandler, D
                                 documentChannels->addChannel(bpChannel);
                             }
 
-                        } else if ( qobject_cast<QmlBuilder*>(first) ){
+                        } else if ( qobject_cast<QmlComponentSource*>(first) ){
+                            QmlComponentSource* cs = qobject_cast<QmlComponentSource*>(first);
+
                             QmlBindingPath::Ptr builderBp = QmlBindingPath::create();
                             builderBp->appendFile(filePath);
-                            builderBp->appendComponent(objectId, objectId);
+                            builderBp->appendComponent(objectId, cs->url().toLocalFile());
                             QmlBindingChannel::Ptr builderC = QmlBindingChannel::create(builderBp, run);
                             if ( builderC ){
+                                builderC->updateConnection(first);
                                 builderC->setIsBuilder(true);
                                 builderC->setEnabled(true);
                                 documentChannels->updateChannel(builderC);

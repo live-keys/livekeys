@@ -135,7 +135,7 @@ void CodeConverter::updateBindings(){
     }
 }
 
-void CodeConverter::suggestionsForExpression(const QString &expression, CodeCompletionModel *model){
+void CodeConverter::suggestionsForExpression(const QString &/*expression*/, CodeCompletionModel */*model*/){
     QObject* editParent = m_edit->parent();
     LanguageLvHandler* lvHandler = nullptr;
     while ( editParent ){
@@ -151,7 +151,7 @@ void CodeConverter::suggestionsForExpression(const QString &expression, CodeComp
     }
 }
 
-bool CodeConverter::bindExpression(const QString &expression){
+bool CodeConverter::bindExpression(const QString &/*expression*/){
     QObject* editParent = m_edit->parent();
     LanguageLvHandler* lvHandler = nullptr;
     while ( editParent ){

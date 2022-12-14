@@ -1,0 +1,7 @@
+module workspace.builder
+
+depends QtQuick 2.3
+
+BuilderArea       1.0 BuilderArea.qml
+BuilderGuides     1.0 BuilderGuides.qml
+BuilderHighlight  1.0 BuilderHighlight.qml

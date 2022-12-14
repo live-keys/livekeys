@@ -480,7 +480,7 @@ void TypeInfo::fromMLNode(const MLNode &node)
 
     MLNode prop = object.at("properties");
     MLNode::ArrayType prop_array = prop.asArray();
-    for (int i = 0; i < prop_array.size(); ++i)
+    for (int i = 0; i < static_cast<int>(prop_array.size()); ++i)
     {
         MLNode property = prop_array[i];
         PropertyInfo pi("");

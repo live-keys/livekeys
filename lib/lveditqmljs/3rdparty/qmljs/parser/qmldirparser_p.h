@@ -53,6 +53,7 @@
 
 #include <QtCore/QUrl>
 #include <QtCore/QHash>
+#include <QtCore/QMultiHash>
 #include <QtCore/QDebug>
 #include "qqmljsengine_p.h"
 #include "qqmljsdiagnosticmessage_p.h"
@@ -131,8 +132,8 @@ public:
         int minorVersion = 0;
     };
 
-    QHash<QString,Component> components() const;
-    QHash<QString,Component> dependencies() const;
+    QMultiHash<QString,Component> components() const;
+    QMultiHash<QString,Component> dependencies() const;
     QStringList imports() const;
     QList<Script> scripts() const;
     QList<Plugin> plugins() const;
@@ -158,8 +159,8 @@ private:
 private:
     QList<QQmlJS::DiagnosticMessage> _errors;
     QString _typeNamespace;
-    QHash<QString,Component> _components; // multi hash
-    QHash<QString,Component> _dependencies;
+    QMultiHash<QString,Component> _components; // multi hash
+    QMultiHash<QString,Component> _dependencies;
     QStringList _imports;
     QList<Script> _scripts;
     QList<Plugin> _plugins;

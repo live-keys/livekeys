@@ -33,7 +33,7 @@
 
 #include <qmljs/qmljs_global.h>
 
-#include <QRegExp>
+#include <QRegularExpression>
 #include <QTextBlock>
 
 namespace QQmlJS {
@@ -75,7 +75,7 @@ protected:
     bool matchBracelessControlStatement();
 
     Token lastToken() const;
-    QStringRef tokenText(const Token &token) const;
+    QString tokenText(const Token &token) const;
 
 protected:
     struct LinizerState
@@ -118,7 +118,7 @@ protected:
     const int *yyBraceDepth;
     const bool *yyLeftBraceFollows;
 
-    QRegExp braceX;
+    QRegularExpression braceX;
 };
 
 } // namespace QmlJS

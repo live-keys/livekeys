@@ -36,7 +36,7 @@ public:
 
     bool isModelSet() const;
     TableModel*  model();
-    TableSchema* schema();
+    TableSchema* schema() const;
 
 protected:
     void setSchema(TableSchema* schema);

@@ -116,7 +116,7 @@ bool ProjectFileModel::hasChildren(const QModelIndex &parent) const{
 
 Qt::ItemFlags ProjectFileModel::flags(const QModelIndex &index) const{
     if ( !index.isValid() )
-        return 0;
+        return Qt::ItemFlags();
     return QAbstractItemModel::flags(index);
 }
 

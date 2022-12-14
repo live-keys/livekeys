@@ -37,7 +37,7 @@ EditJsonObject::EditJsonObject(QQmlEngine* parent)
         return;
     }
 
-    Project* project = static_cast<Project*>(ctx->contextProperty("project").value<QObject*>());
+    Project* project = Project::grabFromLayer(m_engine);
     if ( !project ){
         qWarning("Failed to find project object.");
         return;

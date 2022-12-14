@@ -18,7 +18,6 @@
 
 #include <QObject>
 #include <QDateTime>
-#include <QLinkedList>
 #include <QAbstractUndoItem>
 #include <QTextBlockUserData>
 #include <QJSValue>

@@ -682,6 +682,10 @@ void ProjectDocument::__documentContentsChanged(int position, int charsRemoved, 
     d_ptr->contentStringDirty = true;
     emit contentsChange(position, charsRemoved, charsAdded);
 
+    if ( runTrigger() ){
+        runTrigger()->onContentChanged(position, charsRemoved, charsAdded, d_ptr->editingState);
+    }
+
     QString addedText = "";
     if ( charsAdded == 1 ){
         QChar c = d_ptr->textDocument->characterAt(position);

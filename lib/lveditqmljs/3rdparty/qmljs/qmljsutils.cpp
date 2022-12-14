@@ -86,7 +86,7 @@ QColor QQmlJS::toQColor(const QString &qmlColorString)
     QColor color;
     if (qmlColorString.size() == 9 && qmlColorString.at(0) == QLatin1Char('#')) {
         bool ok;
-        const int alpha = qmlColorString.midRef(1, 2).toInt(&ok, 16);
+        const int alpha = qmlColorString.mid(1, 2).toInt(&ok, 16);
         if (ok) {
             QString name(qmlColorString.at(0));
             name.append(qmlColorString.right(6));
@@ -167,7 +167,7 @@ QString QQmlJS::idOfObject(Node *object, UiScriptBinding **idBinding)
                 if (IdentifierExpression *idexp = cast<IdentifierExpression *>(expstmt->expression)) {
                     if (idBinding)
                         *idBinding = script;
-                    return idexp->name.toString();
+                    return idexp->name;
                 }
             }
         }
@@ -250,7 +250,7 @@ QString QQmlJS::modulePath(const QString &name, const QString &version,
         return QString();
 
     const QString sanitizedVersion = version == undefinedVersion ? QString() : version;
-    const QStringList parts = name.split(QLatin1Char('.'), QString::SkipEmptyParts);
+    const QStringList parts = name.split(QLatin1Char('.'), Qt::SkipEmptyParts);
     auto mkpath = [] (const QStringList &xs) -> QString { return xs.join(QLatin1Char('/')); };
 
     // Regular expression for building candidates by successively removing minor and major

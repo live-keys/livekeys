@@ -44,14 +44,12 @@
 #include "qqmljsdiagnosticmessage_p.h"
 #include "qqmljsmemorypool_p.h"
 
+#include "private/qlocale_tools_p.h"
+
 #include <QtCore/qcoreapplication.h>
 #include <QtCore/qvarlengtharray.h>
 #include <QtCore/qdebug.h>
 #include <QtCore/QScopedValueRollback>
-
-QT_BEGIN_NAMESPACE
-Q_CORE_EXPORT double qstrtod(const char *s00, char const **se, bool *ok);
-QT_END_NAMESPACE
 
 using namespace QQmlJS;
 
@@ -132,8 +130,8 @@ void Lexer::setCode(const QString &code, int lineno, bool qmlMode)
     _tokenText.clear();
     _tokenText.reserve(1024);
     _errorMessage.clear();
-    _tokenSpell = QStringRef();
-    _rawString = QStringRef();
+    _tokenSpell = QString();
+    _rawString = QString();
 
     _codePtr = code.unicode();
     _endPtr = _codePtr + code.length();
@@ -256,8 +254,8 @@ int Lexer::lex()
     const int previousTokenKind = _tokenKind;
 
   again:
-    _tokenSpell = QStringRef();
-    _rawString = QStringRef();
+    _tokenSpell = QString();
+    _rawString = QString();
     _tokenKind = scanToken();
     _tokenLength = _codePtr - _tokenStartPtr - 1;
 
@@ -955,7 +953,7 @@ int Lexer::scanString(ScanStringMode mode)
                     _tokenText += QChar(QChar::highSurrogate(codePoint));
                     u = QChar::lowSurrogate(codePoint);
                 } else {
-                    u = codePoint;
+                    u = QChar(codePoint);
                 }
             } break;
 
@@ -1156,7 +1154,7 @@ int Lexer::scanNumber(QChar ch)
     const char *end = nullptr;
     bool ok = false;
 
-    _tokenValue = qstrtod(begin, &end, &ok);
+    _tokenValue = qstrntod(begin, chars.size(), &end, &ok);
 
     if (end - begin != chars.size() - 1) {
         _errorCode = IllegalExponentIndicator;

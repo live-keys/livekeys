@@ -1,6 +1,6 @@
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -106,30 +106,8 @@ Rectangle{
         }
     }
 
-    /*Rectangle{
-        z: 300
-        anchors.fill: parent
-        anchors.topMargin: 30
-        color: "#030609"
-        opacity: root.visible ? 0.92 : 0
-        Behavior on opacity{ NumberAnimation{ duration: 250} }
-
-        MouseArea{
-            anchors.fill: parent
-            onClicked: {
-                root.visible = false
-                mouse.accepted = true;
-            }
-            onPressed: mouse.accepted = true;
-            onReleased: mouse.accepted = true
-            onDoubleClicked: mouse.accepted = true;
-            onPositionChanged: mouse.accepted = true;
-            onPressAndHold: mouse.accepted = true;
-            onWheel: wheel.accepted = true
-        }
-    }*/
-
     ScrollView{
+        id: scrollView
         z: 300
         width: parent.width
         height: commandsView.count * commandsView.delegateHeight > parent.height - commandsMenuInputBox.height ?
@@ -139,28 +117,15 @@ Rectangle{
         anchors.left: parent.left
         anchors.topMargin: commandsMenuInputBox.height
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#1f2227"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: "#000509"
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Item{}
-            corner: Rectangle{color: "#091823"}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentHeight > scrollView.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentWidth > scrollView.width
         }
 
         ListView{

@@ -78,7 +78,7 @@ private:
     QPointer<qan::NodeItem>    _targetItem{nullptr};
 
 protected:
-    inline qan::Graph*  getGraph() noexcept { return _target ? _target->getGraph() : nullptr; }
+    inline qan::Graph*  getGraph() noexcept { return _target ? qobject_cast<qan::Graph*>(_target->getGraph()) : nullptr; }
     //@}
     //-------------------------------------------------------------------------
 

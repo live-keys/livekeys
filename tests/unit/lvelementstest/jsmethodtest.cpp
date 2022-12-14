@@ -89,93 +89,90 @@ void JsMethodTest::typesTest(){
     Engine* engine = new Engine;
 
     engine->scope([engine](){
-        //TODO: ModuleLibrary will be loaded directly by the engine
-//        ElementsModule::Ptr epl = ElementsModule::create(Module::createEmpty("test"), engine);
+        ModuleLibrary* m = ModuleLibrary::create(engine, "");
+        m->addType<MethodStub>();
 
-//        ModuleLibrary* m = ModuleLibrary::create(engine, "");
-//        m->addType<MethodStub>();
-//        epl->addModuleLibrary(m);
+        el::Object ob = el::Object::create(engine);
+        engine->require(m, ob);
+        Object::Accessor lo(ob);
 
-//        Object o  = epl->collectExportsObject();
-//        Object::Accessor lo(o);
+        MethodStub* e = new MethodStub(engine);
+        e->ref();
 
-//        MethodStub* e = new MethodStub(engine);
-//        e->ref();
+        Object::Accessor globalObject(engine->currentContext());
+        globalObject.set(engine, "e", ScopedValue(engine, e));
 
-//        Object::Accessor globalObject(engine->currentContext());
-//        globalObject.set(engine, "e", ScopedValue(engine, e));
+        Value v = engine->compileJsEnclosed("return e.intReturnType(20);")->run();
+        QCOMPARE(v.asInt32(), 20);
 
-//        Value v = engine->compileJsEnclosed("return e.intReturnType(20);")->run();
-//        QCOMPARE(v.asInt32(), 20);
+        v = engine->compileJsEnclosed("return e.int64ReturnType(40);")->run();
+        QCOMPARE(v.asInt64(), 40);
 
-//        v = engine->compileJsEnclosed("return e.int64ReturnType(40);")->run();
-//        QCOMPARE(v.asInt64(), 40);
+        v = engine->compileJsEnclosed("return e.numberReturnType(20.2);")->run();
+        QCOMPARE(v.asNumber(), 20.2);
 
-//        v = engine->compileJsEnclosed("return e.numberReturnType(20.2);")->run();
-//        QCOMPARE(v.asNumber(), 20.2);
+        v = engine->compileJsEnclosed("return e.stringReturnType('123');")->run();
+        QVERIFY(v.asObject().toString() == "123");
 
-//        v = engine->compileJsEnclosed("return e.stringReturnType('123');")->run();
-//        QVERIFY(v.asObject().toString() == "123");
+        v = engine->compileJsEnclosed("return e.callableReturnType(function(){ return 2; });")->run();
+        QVERIFY(v.type() == Value::Stored::Callable);
+        QVERIFY(v.asCallable().call(engine, Function::Parameters(0)).toInt32(engine) == 2);
 
-//        v = engine->compileJsEnclosed("return e.callableReturnType(function(){ return 2; });")->run();
-//        QVERIFY(v.type() == Value::Stored::Callable);
-//        QVERIFY(v.asCallable().call(engine, Function::Parameters(0)).toInt32(engine) == 2);
+        v = engine->compileJsEnclosed("return e.objectReturnType({a: 2, b: 30});")->run();
+        QVERIFY(v.type() == Value::Stored::Object);
+        Object::Accessor vo(v.asObject());
+        QVERIFY(vo.get(engine, "a").toInt32(engine) == 2);
+        QVERIFY(vo.get(engine, "b").toInt32(engine) == 30);
 
-//        v = engine->compileJsEnclosed("return e.objectReturnType({a: 2, b: 30});")->run();
-//        QVERIFY(v.type() == Value::Stored::Object);
-//        Object::Accessor vo(v.asObject());
-//        QVERIFY(vo.get(engine, "a").toInt32(engine) == 2);
-//        QVERIFY(vo.get(engine, "b").toInt32(engine) == 30);
+        v = engine->compileJsEnclosed("return e.localValueReturnType(2);")->run();
+        QVERIFY(v.asInt32() == 2);
 
-//        v = engine->compileJsEnclosed("return e.localValueReturnType(2);")->run();
-//        QVERIFY(v.asInt32() == 2);
+        v = engine->compileJsEnclosed("return e.valueReturnType('123');")->run();
+        QVERIFY(v.asObject().toString() == "123");
 
-//        v = engine->compileJsEnclosed("return e.valueReturnType('123');")->run();
-//        QVERIFY(v.asObject().toString() == "123");
+        v = engine->compileJsEnclosed("return e.bufferReturnType(new ArrayBuffer(8));")->run();
+        QVERIFY(v.asObject().toBuffer().size() == 8);
 
-//        v = engine->compileJsEnclosed("return e.bufferReturnType(new ArrayBuffer(8));")->run();
-//        QVERIFY(v.asObject().toBuffer().size() == 8);
+        v = engine->compileJsEnclosed("return e.elementReturnType(e);")->run();
+        QVERIFY(v.asElement() == e);
 
-//        v = engine->compileJsEnclosed("return e.elementReturnType(e);")->run();
-//        QVERIFY(v.asElement() == e);
+        v = engine->compileJsEnclosed("return e.userElementReturnType(e);")->run();
+        QVERIFY(v.asElement() == e);
 
-//        v = engine->compileJsEnclosed("return e.userElementReturnType(e);")->run();
-//        QVERIFY(v.asElement() == e);
+        v = engine->compileJsEnclosed("return e.intNoParameterReturnType();")->run();
+        QVERIFY(v.asInt32() == 200);
 
-//        v = engine->compileJsEnclosed("return e.intNoParameterReturnType();")->run();
-//        QVERIFY(v.asInt32() == 200);
+        Value::Int32 intReturn     = 0;
+        Value::Number numberReturn = 0;
+        MethodStub::forwardCall() = [&intReturn, &numberReturn](Value::Int32 v1, Value::Number v2, const std::string&){
+            intReturn = v1;
+            numberReturn = v2;
+        };
+        engine->compileJsEnclosed("e.voidReturnType(2, 20.2);")->run();
+        QCOMPARE(intReturn, 2);
+        QCOMPARE(numberReturn, 20.2);
 
-//        Value::Int32 intReturn     = 0;
-//        Value::Number numberReturn = 0;
-//        MethodStub::forwardCall() = [&intReturn, &numberReturn](Value::Int32 v1, Value::Number v2, const std::string&){
-//            intReturn = v1;
-//            numberReturn = v2;
-//        };
-//        engine->compileJsEnclosed("e.voidReturnType(2, 20.2);")->run();
-//        QCOMPARE(intReturn, 2);
-//        QCOMPARE(numberReturn, 20.2);
+        Value::Int32 param0  = 0;
+        Value::Number param1 = 0;
+        std::string param2;
+        MethodStub::forwardCall() = [&param0, &param1, &param2](Value::Int32 v1, Value::Number v2, const std::string& v3){
+            param0 = v1;
+            param1 = v2;
+            param2 = v3;
+        };
+        v = engine->compileJsEnclosed("return e.variableParametersType(3, 30.3, '123');")->run();
+        QCOMPARE(v.asInt32(), 3);
+        QVERIFY(param0 == 3);
+        QVERIFY(param1 == 30.3);
+        QVERIFY(param2 == "123");
 
-//        Value::Int32 param0  = 0;
-//        Value::Number param1 = 0;
-//        std::string param2;
-//        MethodStub::forwardCall() = [&param0, &param1, &param2](Value::Int32 v1, Value::Number v2, const std::string& v3){
-//            param0 = v1;
-//            param1 = v2;
-//            param2 = v3;
-//        };
-//        v = engine->compileJsEnclosed("return e.variableParametersType(3, 30.3, '123');")->run();
-//        QCOMPARE(v.asInt32(), 3);
-//        QVERIFY(param0 == 3);
-//        QVERIFY(param1 == 30.3);
-//        QVERIFY(param2 == "123");
-
-//        v = engine->compileJsEnclosed("e.variableParametersVoidType(4, 40.4, '1234');")->run();
-//        QVERIFY(v.isNull());
-//        QVERIFY(param0 == 4);
-//        QVERIFY(param1 == 40.4);
-//        QVERIFY(param2 == "1234");
+        v = engine->compileJsEnclosed("e.variableParametersVoidType(4, 40.4, '1234');")->run();
+        QVERIFY(v.isNull());
+        QVERIFY(param0 == 4);
+        QVERIFY(param1 == 40.4);
+        QVERIFY(param2 == "1234");
 
 
-//        delete e;
+        delete e;
     });
 }

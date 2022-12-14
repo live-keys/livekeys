@@ -33,9 +33,6 @@
 
 #include "qmljs/qmljs_global.h"
 
-//HACK
-//#include <utils/fileutils.h>
-
 #include <QString>
 
 namespace QQmlJS {

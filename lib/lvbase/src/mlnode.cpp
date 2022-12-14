@@ -15,7 +15,9 @@
 
 #include "live/mlnode.h"
 #include "live/visuallog.h"
+
 #include "assert.h"
+#include <algorithm>
 
 namespace lv{
 

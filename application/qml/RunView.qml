@@ -2,7 +2,6 @@ import QtQuick 2.3
 import editor 1.0
 import editor.private 1.0
 import base 1.0
-import live 1.0
 import visual.shapes 1.0
 import workspace 1.0
 
@@ -132,51 +131,19 @@ Pane{
                 }
             }
 
-            Item{
-                width: 35
-                height: parent.height
-                anchors.right: parent.right
+            //TODO
+//            RunTriggerTypeSelector{
+//                id: runTypeTriggerSelector
+//                anchors.right: parent.right
+//                height: 30
+//                trigger: lk.layers.workspace.project.active ? lk.layers.workspace.project.active.runTrigger : Document.RunManual
 
-                Item{
-                    width: 25
-                    height: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: 20
-
-                    Image{
-                        id : modeImage
-                        anchors.centerIn: parent
-                        visible: root.currentRunnable ? true : false
-                        source: root.currentRunnable
-                            ? root.currentRunnable.runTrigger === Project.RunOnChange
-                              ? modeSelection.liveImage.source
-                              : root.currentRunnable.runTrigger === Project.RunOnSave
-                                  ? modeSelection.onSaveImage.source
-                                  : modeSelection.disabledImage.source
-                            : ''
-                    }
-                }
-
-                Triangle{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 7
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 9
-                    height: 5
-                    color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
-                    rotation: Triangle.Bottom
-                }
-
-                MouseArea{
-                    id : openStatesDropdown
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: {
-                        modeSelection.visible = !modeSelection.visible
-                    }
-                }
-            }
+//                onTriggerSelected: {
+//                    if ( lk.layers.workspace.project.active ){
+//                        lk.layers.workspace.project.active.runTrigger = trigger
+//                    }
+//                }
+//            }
 
         }
 
@@ -336,23 +303,6 @@ Pane{
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-    }
-
-    ModeContainer{
-        id: modeSelection
-
-        anchors.left: parent.left
-        anchors.leftMargin: 115
-        anchors.top: paneHeader.bottom
-
-        onRunTriggerSelected: {
-            if ( root.currentRunnable )
-                root.currentRunnable.runTrigger = trigger
-        }
-
-        liveImage.source: root.currentTheme ? root.currentTheme.topLiveModeIcon : ''
-        onSaveImage.source: root.currentTheme ? root.currentTheme.topOnSaveModeIcon : ''
-        disabledImage.source: root.currentTheme ? root.currentTheme.topDisabledModeIcon : ''
     }
 
     RunnablesMenu{

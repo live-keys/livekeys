@@ -1,9 +1,10 @@
-import QtQuick 2.0
-import live 1.0
+import QtQuick 2.3
+import QtQuick.Controls 2.2
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0 as Workspace
 import visual.shapes 1.0
+import visual.input 1.0 as Input
 
 Workspace.Pane{
     id : viewer
@@ -13,7 +14,6 @@ Workspace.Pane{
     property var runSpace: runSpace
     property var error: error
     property QtObject panes: null
-    property alias modeContainer: modeContainer
     property alias runnablesMenu: runnablesMenu
 
     property Theme currentTheme : lk.layers.workspace.themes.current
@@ -21,10 +21,12 @@ Workspace.Pane{
     Connections{
         target: lk
         function onLayerReady(layer){
-            if (!layer || layer.name !== 'workspace' ) return
-            modeContainer.liveImage.source = currentTheme.topLiveModeIcon
-            modeContainer.onSaveImage.source = currentTheme.topOnSaveModeIcon
-            modeContainer.disabledImage.source = currentTheme.topDisabledModeIcon
+            if (!layer || layer.name !== 'workspace' )
+                return
+            runTypeTriggerSelector.popupMenuStyle = currentTheme.popupMenuStyle
+            runTypeTriggerSelector.runLiveTriggerIcon = currentTheme.runLiveTriggerIcon
+            runTypeTriggerSelector.runSaveTriggerIcon = currentTheme.runSaveTriggerIcon
+            runTypeTriggerSelector.runDisabledTriggerIcon = currentTheme.runDisabledTriggerIcon
         }
     }
 
@@ -145,48 +147,18 @@ Workspace.Pane{
                 }
             }
 
-            Item{
-                width: modeImage.width + modeImage.anchors.rightMargin + 10
-                height: parent.height
+            RunTriggerTypeSelector{
+                id: runTypeTriggerSelector
                 anchors.right: parent.right
+                height: 30
+                trigger: lk.layers.workspace.project.active ? lk.layers.workspace.project.active.runTrigger : Document.RunManual
 
-                Item{
-                    width: 25
-                    height: 25
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.right: parent.right
-                    anchors.rightMargin: 20
-
-                    Image{
-                        id : modeImage
-                        anchors.centerIn: parent
-                        source: lk.layers.workspace.project.runTrigger === Project.RunOnChange
-                            ? modeContainer.liveImage.source
-                            : lk.layers.workspace.project.runTrigger === Project.RunOnSave
-                                ? modeContainer.onSaveImage.source
-                                : modeContainer.disabledImage.source
+                onTriggerSelected: {
+                    if ( lk.layers.workspace.project.active ){
+                        lk.layers.workspace.project.active.runTrigger = trigger
                     }
                 }
-
-
-                Triangle{
-                    anchors.right: parent.right
-                    anchors.rightMargin: 7
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 9
-                    height: 5
-                    color: openStatesDropdown.containsMouse ? "#9b6804" : "#bcbdc1"
-                    rotation: Triangle.Bottom
-                }
-
-                MouseArea{
-                    id : openStatesDropdown
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    onClicked: modeContainer.visible = !modeContainer.visible
-                }
             }
-
 
             Rectangle{
                 width: parent.width
@@ -194,8 +166,8 @@ Workspace.Pane{
                 color: "#1a1f25"
                 anchors.bottom: parent.bottom
             }
-
         }
+
 
         Item{
             anchors.right: parent.right
@@ -259,13 +231,6 @@ Workspace.Pane{
             lk.layers.workspace.project.setActive(path)
         }
         x: 130
-    }
-
-    ModeContainer {
-        id: modeContainer
-        onRunTriggerSelected: lk.layers.workspace.project.runTrigger = trigger
-        anchors.top: header.bottom
-        x: 200
     }
 
     Workspace.PaneMenu{

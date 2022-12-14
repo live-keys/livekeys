@@ -30,7 +30,7 @@ inline void serialize<QMat>(const QMat& v, MLNode& node){
         {"rows", v.internal().rows},
         {"channels", v.internal().channels()},
         {"depth", v.internal().depth()},
-        {"data", MLNode::BytesType(v.internal().data, v.internal().total() * v.internal().elemSize())}
+        {"data", MLNode::BytesType(reinterpret_cast<const MLNode::BytesType::Byte*>(v.internal().data), v.internal().total() * v.internal().elemSize())}
     };
 }
 
@@ -50,10 +50,35 @@ inline void deserialize<QMat>(const MLNode& node, QMat& v){
 class QmlObjectList;
 Q_LCVCORE_EXPORT QmlObjectList* createMatList();
 
+
+class QMatLogBehavior{
+public:
+    static std::string typeId(const QMat&){
+        return "lcvcore@QMat";
+    }
+    static std::string defaultViewDelegate(const QMat&){
+        return "lcvcore@MatLog";
+    }
+    static bool hasViewObject(){
+        return true;
+    }
+    static bool hasTransport(){
+        return true;
+    }
+    static lv::VisualLog::ViewObject* toView(const QMat& m){
+        return m.clone();
+    }
+    static bool toTransport(const QMat& m, lv::MLNode& output){
+        lv::ml::serialize<QMat>(m, output);
+        return true;
+    }
+    static void toStream(lv::VisualLog& vl, const QMat& v){
+        vl << "Mat[" << v.internal().cols << "x" << v.internal().rows << "," << v.internal().channels() << "]";
+    }
+};
+
 inline lv::VisualLog& operator << (lv::VisualLog& vl, const QMat& v){
-    vl.asObject("QMat", v);
-    vl.asView("lcvcore/MatLog.qml", [&v](){ return QVariant::fromValue(v.clone()); });
-    return vl << "Mat[" << v.internal().cols << "x" << v.internal().rows << "," << v.internal().channels() << "]";
+    return vl.behavior<QMatLogBehavior>(v);
 }
 
 } // namespace lv

@@ -15,11 +15,11 @@
 ****************************************************************************/
 
 import QtQuick 2.3
-import QtQuick.Controls 1.2
-import QtQuick.Controls.Styles 1.2
+import QtQuick.Controls 2.2
 import editor 1.0
 import editor.private 1.0
 import base 1.0
+import visual.input 1.0 as Input
 
 Rectangle{
     id: root
@@ -141,33 +141,21 @@ Rectangle{
     }
 
     ScrollView{
+        id: scrollView
         width: parent.width
         height: parent.height - 35
         anchors.top: parent.top
         anchors.topMargin: navigationInputBox.height
 
-        style: ScrollViewStyle {
-            transientScrollBars: false
-            handle: Item {
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle {
-                    color: "#0b1f2e"
-                    anchors.fill: parent
-                }
-            }
-            scrollBarBackground: Item{
-                implicitWidth: 10
-                implicitHeight: 10
-                Rectangle{
-                    anchors.fill: parent
-                    color: "#091823"
-                }
-            }
-            decrementControl: null
-            incrementControl: null
-            frame: Rectangle{color: "transparent"}
-            corner: Rectangle{color: "#091823"}
+        ScrollBar.vertical.policy: ScrollBar.AlwaysOn
+        ScrollBar.vertical.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentHeight > scrollView.height
+        }
+        ScrollBar.horizontal.policy: ScrollBar.AlwaysOn
+        ScrollBar.horizontal.contentItem: Input.ScrollbarHandle{
+            color: "#1f2227"
+            visible: scrollView.contentWidth > scrollView.width
         }
 
         ListView{

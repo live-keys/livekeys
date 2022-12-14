@@ -22,14 +22,15 @@ public:
 
     QJSValue value();
 
-protected:
-    void classBegin() override{}
-    void componentComplete() override;
-
 signals:
     void valueChanged();
 
+protected:
+    void classBegin() override;
+    void componentComplete() override;
+
 private:
+    void initializeVars();
     void initializeParent();
 
 private:

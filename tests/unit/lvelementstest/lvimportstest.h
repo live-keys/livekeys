@@ -12,8 +12,6 @@ class LvImportsTest : public QObject{
 public:
     explicit LvImportsTest(QObject *parent = nullptr);
 
-    void importAsTest();
-
 private slots:
     void initTestCase();
 
@@ -26,12 +24,13 @@ private slots:
     void moduleFileDependencyCycleTest();
     void pluginDependencyCycleTest();
     void packageImportTest();
-
     void packageDependencyCycleTest();
+    void importAsTest();
     void importMetaTest();
     void dashPackageImportTest();
     void rootPackageImportTest();
     void jsImportTest();
+
 
 private:
     std::string scriptPath(const std::string& scriptName);

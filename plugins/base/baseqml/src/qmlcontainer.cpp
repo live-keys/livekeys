@@ -26,7 +26,7 @@ int QmlContainer::childObjectCount() const{
     return m_childObjects.size();
 }
 
-QObject *QmlContainer::childObject(int index) const{
+QObject *QmlContainer::childObject(qsizetype index) const{
     return m_childObjects.at(index);
 }
 

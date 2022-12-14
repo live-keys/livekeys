@@ -72,10 +72,10 @@ public:
     Connector(Connector&&) = delete;
     Connector& operator=(Connector&&) = delete;
 public:
-    Q_PROPERTY( qan::Graph* graph READ getGraph WRITE setGraph NOTIFY graphChanged FINAL )
-    auto    setGraph(qan::Graph* graph) noexcept -> void;
+    Q_PROPERTY( QObject* graph READ getGraph WRITE setGraph NOTIFY graphChanged FINAL )
+    auto    setGraph(QObject* graph) noexcept -> void;
 protected:
-    auto    getGraph() const noexcept -> qan::Graph*;
+    auto    getGraph() const noexcept -> QObject*;
     QPointer<qan::Graph>    _graph;
 signals:
     void    graphChanged();

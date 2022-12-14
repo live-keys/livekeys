@@ -79,6 +79,8 @@ signals:
     void aboutToClose(lv::Document* document);
 
 private:
+    QHash<QString, Document*>::const_iterator iteratorAt(int index) const;
+
     QHash<int, QByteArray> m_roles;
 
     QHash<QString, Document*> m_openedFiles;

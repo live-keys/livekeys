@@ -152,6 +152,7 @@ auto    graph<config_t>::contains( weak_node_t node ) const noexcept -> bool
 {
     if ( node.expired() )   // Fast exit.
         return false;
+
     auto nodeIter = std::find_if( _nodes_search.cbegin(), _nodes_search.cend(),
                                             [=](const weak_node_t& n ) { return ( compare_weak_ptr<>( node, n ) ); } );
     return nodeIter != _nodes_search.cend();

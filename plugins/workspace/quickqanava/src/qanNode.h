@@ -72,11 +72,11 @@ public:
     Node( const Node& ) = delete;
 
 public:
-    Q_PROPERTY( qan::Graph* graph READ getGraph CONSTANT FINAL )
+    Q_PROPERTY( QObject* graph READ getGraph CONSTANT FINAL )
     //! Shortcut to gtpo::node<>::getGraph().
-    qan::Graph*         getGraph() noexcept;
+    QObject*         getGraph() noexcept;
     //! \copydoc getGraph()
-    const qan::Graph*   getGraph() const noexcept;
+    const QObject*   getGraph() const noexcept;
 
 public:
     /*!

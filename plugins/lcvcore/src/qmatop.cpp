@@ -76,6 +76,41 @@ template<typename T> QMatrix4x4 matrix4x4( cv::Mat& m ){
     );
 }
 
+void alphaMergeMask(const cv::Mat &input, cv::Mat &mask, cv::Mat &output){
+    if ( input.cols != mask.cols || input.rows != mask.rows ){
+        qWarning("Open CV Error: Different mask size.");
+        return;
+    }
+    output.create(input.size(), CV_8UC4);
+    const uchar* pi;
+    uchar *pm, *po;
+    if ( input.channels() == 1 ){
+        for ( int i = 0; i < input.rows; ++i ){
+            pi = input.ptr<uchar>(i);
+            pm = mask.ptr<uchar>(i);
+            po = output.ptr<uchar>(i);
+            for ( int j = 0; j < input.cols; ++j ){
+                po[j * 4 + 0] = pi[j];
+                po[j * 4 + 1] = pi[j];
+                po[j * 4 + 2] = pi[j];
+                po[j * 4 + 3] = pm[j];
+            }
+        }
+    } else {
+        for ( int i = 0; i < input.rows; ++i ){
+            pi = input.ptr<uchar>(i);
+            pm = mask.ptr<uchar>(i);
+            po = output.ptr<uchar>(i);
+            for ( int j = 0; j < input.cols; ++j ){
+                po[j * 4 + 0] = pi[j * 3 + 0];
+                po[j * 4 + 1] = pi[j * 3 + 1];
+                po[j * 4 + 2] = pi[j * 3 + 2];
+                po[j * 4 + 3] = pm[j];
+            }
+        }
+    }
+}
+
 } // namespace
 
 QMatOp::QMatOp(QObject *parent)
@@ -238,6 +273,26 @@ void QMatOp::fill(QMat *m, const QColor &color){
 
 void QMatOp::fillWithMask(QMat *m, const QColor &color, QMat *mask){
     m->internal().setTo(toScalar(color), mask->internal());
+}
+
+QMat *QMatOp::roi(QMat *m, int x, int y, int w, int h){
+    cv::Mat* r = new cv::Mat(m->internal()(cv::Rect(x, y, w, h)));
+    return new QMat(r);
+}
+
+QMat *QMatOp::overlap(QMat *in, QMat *in2, QMat* mask){
+    QMat* out = new QMat;
+    if ( in->internal().size() == mask->internal().size() && in->internal().size() == in2->internal().size() ){
+        in->internal().copyTo(out->internal());
+        in2->internal().copyTo(out->internal(), mask->internal());
+    }
+    return out;
+}
+
+QMat *QMatOp::alphaMerge(QMat *in, QMat *mask){
+    QMat* out = new QMat;
+    helpers::alphaMergeMask(in->internal(), mask->internal(), out->internal());
+    return out;
 }
 
 QMat *QMatOp::reloc(QMat *m){
@@ -415,6 +470,13 @@ QVariantList QMatOp::toArray(QMat *m){
     }
 
     return values;
+}
+
+QMat *QMatOp::absdiff(QMat *in1, QMat* in2){
+    QMat* out = new QMat;
+    if ( in1->internal().size() == in2->internalPtr()->size() )
+        cv::absdiff(in1->internal(), *in2->internalPtr(), out->internal());
+    return out;
 }
 
 QMat *QMatOp::bitwiseXor(QMat *arg1, QMat *arg2)

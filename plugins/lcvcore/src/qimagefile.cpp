@@ -19,6 +19,7 @@
 #include "live/viewcontext.h"
 #include "live/qmlworkerpool.h"
 #include "live/qmlerror.h"
+#include "live/visuallogqt.h"
 
 #include "opencv2/highgui.hpp"
 

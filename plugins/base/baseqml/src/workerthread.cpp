@@ -32,6 +32,7 @@ WorkerThread::WorkerThread(const QList<QString>& actSources, QObject *)
     , m_engine(nullptr)
     , m_thread(new QThread)
     , m_actFunctionsSource(actSources)
+    , m_toExecute(new std::list<QObject*>)
     , m_d(new WorkerThreadPrivate(this))
 {
     moveToThread(m_thread);
@@ -40,19 +41,25 @@ WorkerThread::WorkerThread(const QList<QString>& actSources, QObject *)
 WorkerThread::~WorkerThread(){
     m_thread->exit();
     if ( !m_thread->wait(1500) ){
-        qCritical("FilterWorker Thread failed to close, forcing quit. This may lead to inconsistent application state.");
+        qCritical("WorkerThread failed to close, forcing quit. This may lead to inconsistent application state.");
         m_thread->terminate();
         m_thread->wait();
     }
     delete m_thread;
     delete m_engine;
+    delete m_toExecute;
     delete m_d;
 }
 
 void WorkerThread::postWork(QmlStreamFilter *caller, const QmlWorkerPool::TransferArguments &arguments){
     if ( m_isWorking ){
-        m_toExecute.removeOne(caller);
-        m_toExecute.prepend(caller);
+        for ( auto it = m_toExecute->begin(); it != m_toExecute->end(); ++it ){
+            if ( *it == caller ){
+                m_toExecute->erase(it);
+                break;
+            }
+        }
+        m_toExecute->push_front(caller);
         return;
     }
 
@@ -69,8 +76,13 @@ void WorkerThread::postWork(QmlStreamFilter *caller, const QmlWorkerPool::Transf
 
 void WorkerThread::postWork(QmlAct *caller, const QmlWorkerPool::TransferArguments &arguments){
     if ( m_isWorking ){
-        m_toExecute.removeOne(caller);
-        m_toExecute.prepend(caller);
+        for ( auto it = m_toExecute->begin(); it != m_toExecute->end(); ++it ){
+            if ( *it == caller ){
+                m_toExecute->erase(it);
+                break;
+            }
+        }
+        m_toExecute->push_front(caller);
         return;
     }
 
@@ -82,15 +94,15 @@ void WorkerThread::postWork(QmlAct *caller, const QmlWorkerPool::TransferArgumen
 
     int index = m_calls.indexOf(caller);
 
-    if ( caller->run().isArray() ){
-        QJSValue obj = caller->run().property(0);
+    if ( caller->runFunction().isArray() ){
+        QJSValue obj = caller->runFunction().property(0);
         QObject* o = obj.toVariant().value<QObject*>();
 
         QObject* oclone = o->metaObject()->newInstance();
         oclone->moveToThread(m_thread);
         oclone->setParent(m_engine);
 
-        m_specialFunctions.insert(index, qMakePair(oclone, caller->run().property(1).toString()));
+        m_specialFunctions.insert(index, qMakePair(oclone, caller->runFunction().property(1).toString()));
     }
 
     QCoreApplication::postEvent(this, new WorkerThread::CallEvent(index, arguments.values));
@@ -154,9 +166,9 @@ bool WorkerThread::event(QEvent *ev){
 }
 
 void WorkerThread::postNextInProcessQueue(){
-    if ( !m_toExecute.isEmpty() ){
-        QObject* caller = m_toExecute.front();
-        m_toExecute.pop_front();
+    if ( !m_toExecute->empty() ){
+        QObject* caller = m_toExecute->front();
+        m_toExecute->pop_front();
 
         QmlAct* act = qobject_cast<QmlAct*>(caller);
         if ( act ){

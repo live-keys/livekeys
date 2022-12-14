@@ -24,8 +24,8 @@
 
 #include <QObject>
 #include <QEvent>
-#include <QLinkedList>
 
+#include <list>
 #include <functional>
 
 namespace lv{
@@ -85,7 +85,7 @@ private:
     QList<QString>       m_actFunctionsSource;
     QList<QJSValue>      m_actFunctions;
     QMap<int, QPair<QObject*, QString> > m_specialFunctions;
-    QLinkedList<QObject*> m_toExecute;
+    std::list<QObject*>* m_toExecute;
     WorkerThreadPrivate* m_d;
 };
 

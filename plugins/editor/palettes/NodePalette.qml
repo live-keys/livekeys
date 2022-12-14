@@ -3,7 +3,6 @@ import QtQuick.Controls 1.2
 import QtQuick.Controls.Styles 1.4
 import editor 1.0
 import live 1.0
-import lcvcore 1.0
 import workspace.nodeeditor 1.0
 import editqml 1.0
 

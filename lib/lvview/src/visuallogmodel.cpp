@@ -117,7 +117,7 @@ void VisualLogModel::onView(
         const VisualLog::Configuration *configuration,
         const VisualLog::MessageInfo &messageInfo,
         const std::string &viewName,
-        const QVariant &value)
+        VisualLog::ViewObject *vo)
 {
     QQmlComponent* comp = component(QString::fromStdString(viewName));
     if ( comp ){
@@ -128,16 +128,20 @@ void VisualLogModel::onView(
                 location = location.mid(8);
             }
         }
-        beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
-        m_entries.append(VisualLogEntry(
-            QString::fromStdString(messageInfo.tag(configuration)),
-            messageInfo.level(),
-            QString::fromStdString(messageInfo.prefix(configuration)),
-            location,
-            new QVariant(value),
-            comp
-        ));
-        endInsertRows();
+
+        QObject* ob = dynamic_cast<QObject*>(vo);
+        if ( ob ){
+            beginInsertRows(QModelIndex(), m_entries.size(), m_entries.size());
+            m_entries.append(VisualLogEntry(
+                QString::fromStdString(messageInfo.tag(configuration)),
+                messageInfo.level(),
+                QString::fromStdString(messageInfo.prefix(configuration)),
+                location,
+                new QVariant(QVariant::fromValue(ob)),
+                comp
+            ));
+            endInsertRows();
+        }
     }
 }
 
@@ -287,7 +291,9 @@ QQmlComponent *VisualLogModel::component(const QString &key){
 }
 
 QString VisualLogModel::componentPath(const QString &componentKey){
-    return QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + componentKey;
+    QString ck = componentKey + ".qml";
+    ck = ck.replace('@', '/');
+    return QString::fromStdString(ApplicationContext::instance().pluginPath()) + "/" + ck;
 }
 
 }// namespace

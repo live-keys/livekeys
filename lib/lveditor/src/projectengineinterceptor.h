@@ -33,6 +33,7 @@ public:
     ContentResult interceptContent(const QUrl& path) override;
 
 private:
+    ViewEngine* m_engine;
     Project*    m_project;
 };
 

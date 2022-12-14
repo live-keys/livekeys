@@ -1,12 +1,10 @@
 import QtQuick 2.3
-import QtQuick.Dialogs 1.2
-import QtQuick.Controls 1.2
+import QtQuick.Controls 2.2
 import QtQuick.Window 2.0
 import base 1.0
 import editor 1.0
 import editor.private 1.0
 import workspace 1.0
-import live 1.0
 
 EditorLayer{
     id: root
@@ -124,6 +122,12 @@ EditorLayer{
             }
         }
 
+        function createRunnableControl(editor, parent){
+            var rc = __runnableControl.createObject(parent)
+            rc.editor = editor
+            return rc
+        }
+
         property Component __loadingScreen : Item{
             anchors.fill: parent
             objectName: 'loadingAnimation'
@@ -166,6 +170,11 @@ EditorLayer{
                 Behavior on opacity {
                     NumberAnimation { duration: 150 }
                 }
+            }
+        }
+
+        property Component __runnableControl: Component{
+            RunnableControl{
             }
         }
 

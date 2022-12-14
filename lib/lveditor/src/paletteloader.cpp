@@ -52,7 +52,7 @@ public:
     ~PaletteComponent();
 
     CodePalette* getItem(QQmlEngine* engine);
-    QJSValue getContent(QQmlEngine* engine);
+    QJSValue getContent(ViewEngine *engine);
     const QString& path() const{ return m_path; }
     const QString& type() const{ return m_type; }
     const QString& name() const{ return m_name; }
@@ -118,16 +118,12 @@ CodePalette *PaletteComponent::getItem(QQmlEngine *engine){
     return palette;
 }
 
-QJSValue PaletteComponent::getContent(QQmlEngine *engine){
+QJSValue PaletteComponent::getContent(ViewEngine *viewEngine){
     if ( !m_configuresLayout )
         return QJSValue();
-
-    QObject* probject = engine->rootContext()->contextProperty("project").value<QObject*>();
-    Project* pr = qobject_cast<lv::Project*>(probject);
+    Project* pr = Project::grabFromLayer(viewEngine);
     if ( !pr )
         return QJSValue();
-
-    ViewEngine* viewEngine = ViewEngine::grabFromQmlEngine(engine);
 
     std::string content = viewEngine->fileIO()->readFromFile(m_path.toStdString());
 
@@ -135,7 +131,7 @@ QJSValue PaletteComponent::getContent(QQmlEngine *engine){
         MLNode result;
         QJSValue jsResult;
         ml::fromJson(content, result);
-        ml::toQml(result, jsResult, engine);
+        ml::toQml(result, jsResult, viewEngine->engine());
         return jsResult;
     } catch (Exception& e) {
         qWarning("Failed to parse '%s': %s", qPrintable(m_path), e.message().c_str());
@@ -259,7 +255,7 @@ QJSValue PaletteLoader::paletteContent(const PaletteContainer::PaletteInfo &pi){
     if  ( !paletteComponent )
         return QJSValue();
 
-    return paletteComponent->getContent(d->engine->engine());
+    return paletteComponent->getContent(d->engine);
 }
 
 bool PaletteLoader::configuresLayout(const PaletteContainer::PaletteInfo &pi){

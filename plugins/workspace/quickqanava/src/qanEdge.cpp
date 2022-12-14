@@ -58,11 +58,11 @@ Edge::~Edge()
         _item->deleteLater();
 }
 
-qan::Graph* Edge::getGraph() noexcept {
+QObject *Edge::getGraph() noexcept {
     return qobject_cast< qan::Graph* >( gtpo::edge< qan::Config >::get_graph() );
 }
 
-const qan::Graph* Edge::getGraph() const noexcept {
+const QObject *Edge::getGraph() const noexcept {
     return qobject_cast< const qan::Graph* >( gtpo::edge< qan::Config >::get_graph() );
 }
 

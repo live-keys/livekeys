@@ -15,7 +15,6 @@
 
 #include "qcalcopticalflowpyrlk.h"
 #include "opencv2/video/tracking.hpp"
-#include "live/staticcontainer.h"
 
 using namespace cv;
 
@@ -75,7 +74,7 @@ QCalcOpticalFlowPyrLKPrivate::~QCalcOpticalFlowPyrLKPrivate(){
 
 void QCalcOpticalFlowPyrLKPrivate::calculateFlow(const cv::Mat& input){
     if ( !pointState ){
-        qWarning("This item requires staticLoading.");
+        qWarning("Point state has not been initialized.");
         return;
     }
 
@@ -146,9 +145,10 @@ size_t QCalcOpticalFlowPyrLKPrivate::totalPoints() const{
  *\a parent
  */
 QCalcOpticalFlowPyrLK::QCalcOpticalFlowPyrLK(QQuickItem *parent)
-    : QMatFilter(parent)
-    , d_ptr(new QCalcOpticalFlowPyrLKPrivate){
-
+    : QObject(parent)
+    , d_ptr(new QCalcOpticalFlowPyrLKPrivate)
+{
+    d_ptr->pointState = new QCalcOpticalFlowPointState;
 }
 
 /**
@@ -192,17 +192,6 @@ QList<QPoint> QCalcOpticalFlowPyrLK::points(){
 int QCalcOpticalFlowPyrLK::totalPoints() const{
     Q_D(const QCalcOpticalFlowPyrLK);
     return (int)d->totalPoints();
-}
-
-void QCalcOpticalFlowPyrLK::staticLoad(const QString &id){
-    Q_D(QCalcOpticalFlowPyrLK);
-    lv::StaticContainer* container = lv::StaticContainer::grabFromContext(this);
-    d->pointState = container->get<QCalcOpticalFlowPointState>(id);
-    if ( !d->pointState ){
-        d->pointState = new QCalcOpticalFlowPointState;
-        container->set<QCalcOpticalFlowPointState>(id, d->pointState);
-    }
-    QMatFilter::transform();
 }
 
 /**
@@ -273,17 +262,15 @@ void QCalcOpticalFlowPyrLK::transform(const Mat& in, Mat&){
     d->calculateFlow(in);
 }
 
-/**
- *\fn virtual QSGNode *QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode *node, UpdatePaintNodeData *nodeData)
- *\brief Draws the points on the output matrix.
- *
- *Parameters :
- *\a node
- *\a nodeData
- */
-QSGNode* QCalcOpticalFlowPyrLK::updatePaintNode(QSGNode* node, QQuickItem::UpdatePaintNodeData*nodeData){
+QMat *QCalcOpticalFlowPyrLK::draw(QMat *input){
     Q_D(QCalcOpticalFlowPyrLK);
-    d->draw( *(inputMat()->internalPtr()), *(output()->internalPtr()) );
+    QMat* out = new QMat;
+    d->draw(input->internal(), out->internal());
+    return out;
+}
 
-    return QMatDisplay::updatePaintNode(node, nodeData);
+QMat *QCalcOpticalFlowPyrLK::transform(QMat *input){
+    QMat* out = new QMat;
+    transform(input->internal(), out->internal());
+    return out;
 }
