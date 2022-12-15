@@ -24,6 +24,9 @@ namespace lv{
 class LV_BASE_EXPORT FileIOInterface{
 
 public:
+    typedef std::shared_ptr<FileIOInterface> Ptr;
+
+public:
     FileIOInterface();
     virtual ~FileIOInterface();
 

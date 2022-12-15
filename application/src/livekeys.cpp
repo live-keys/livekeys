@@ -56,7 +56,7 @@ namespace lv{
 
 Livekeys::Livekeys(QObject *parent)
     : QObject(parent)
-    , m_lockedFileIO(LockedFileIOSession::createInstance())
+    , m_lockedFileIO(LockedFileIOSession::createInterfaceInstance())
     , m_viewEngine(new ViewEngine(new QQmlApplicationEngine, m_lockedFileIO))
     , m_arguments(new LivekeysArguments(header().toStdString()))
     , m_dir(QString::fromStdString(ApplicationContext::instance().applicationPath()))

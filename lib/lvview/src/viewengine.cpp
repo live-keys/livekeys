@@ -142,7 +142,7 @@ public:
 };
 
 /** Default constructor */
-ViewEngine::ViewEngine(QQmlEngine *engine, LockedFileIOSession::Ptr fileIO, QObject *parent)
+ViewEngine::ViewEngine(QQmlEngine *engine, FileIOInterface::Ptr fileIO, QObject *parent)
     : QObject(parent)
     , d_ptr(new ViewEnginePrivate)
     , m_engine(engine)

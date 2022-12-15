@@ -53,7 +53,7 @@ public:
 public:
     ~ProjectQmlScope();
 
-    static Ptr create(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine);
+    static Ptr create(FileIOInterface::Ptr ioSession, QQmlEngine* engine);
 
     static QmlLibraryInfo::Ptr findQmlLibraryInImports(
         const QStringList& importPaths,
@@ -107,7 +107,7 @@ signals:
     void libraryScanQueueCleared();
 
 private:
-    ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
+    ProjectQmlScope(FileIOInterface::Ptr ioSession, QQmlEngine* engine, QObject* parent = nullptr);
     void queueLibrary(const QmlLibraryInfo::Ptr& lib);
 
 private:

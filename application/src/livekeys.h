@@ -127,7 +127,7 @@ private:
     void parseArguments(const QStringList& arguments);
     void solveImportPaths();
 
-    LockedFileIOSession::Ptr m_lockedFileIO;
+    FileIOInterface::Ptr m_lockedFileIO;
 
     ViewEngine*        m_viewEngine;
     LivekeysArguments* m_arguments;
