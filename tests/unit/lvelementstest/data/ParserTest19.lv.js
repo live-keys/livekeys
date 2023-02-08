@@ -16,7 +16,7 @@ export class TodoListItem extends Li{
         var todoListItem = this
         this.ids["todoListItem"] = todoListItem
 
-        Element.addProperty(this, 'item', { type: "var", notify: "itemChanged" })
+        Element.addProperty(this, 'item', { type: 'var', notify: 'itemChanged' })
         Element.addEvent(this, 'remove', [])
         Element.addEvent(this, 'markDone', [])
         this.item = null

@@ -13,7 +13,7 @@ export class B extends Element{
         var C = this
         this.ids["C"] = C
 
-        Element.addProperty(this, 'not2', {type: "int", notify: 'not2Changed'})
+        Element.addProperty(this, 'not2', {type: 'int', notify: 'not2Changed'})
         this.not2 = 10
     }
 

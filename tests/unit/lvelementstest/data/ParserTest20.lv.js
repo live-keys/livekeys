@@ -15,7 +15,7 @@ export class TodoForm extends Form{
         var itemName = new Input()
         this.ids["itemName"] = itemName
 
-        Element.addEvent(this, 'addItem', [])
+        Element.addEvent(this, 'addItem', [['string', 'name']])
         this.on('submit', function(event){
             event.preventDefault();
             if(itemName.value) {

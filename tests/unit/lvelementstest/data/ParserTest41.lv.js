@@ -8,10 +8,10 @@ export class X extends Element{
     }
 
     __initialize(){
-        Element.addProperty(this, 'dExpr', { type: "var", notify: "dExprChanged" })
-        Element.addProperty(this, 'dBlk', { type: "var", notify: "dBlkChanged" })
-        Element.addProperty(this, 'dBindExpr', { type: "var", notify: "dBindExprChanged" })
-        Element.addProperty(this, 'dBindBlock', { type: "var", notify: "dBindBlockChanged" })
+        Element.addProperty(this, 'dExpr', { type: 'var', notify: 'dExprChanged' })
+        Element.addProperty(this, 'dBlk', { type: 'var', notify: 'dBlkChanged' })
+        Element.addProperty(this, 'dBindExpr', { type: 'var', notify: 'dBindExprChanged' })
+        Element.addProperty(this, 'dBindBlock', { type: 'var', notify: 'dBindBlockChanged' })
 
         this.dExpr = '10' + (function(parent){
             this.setParent(parent)

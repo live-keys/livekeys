@@ -115,17 +115,9 @@ extern void tree_sitter_parse_callback(
 );
 
 extern void tree_sitter_log_callback(
-  void *payload,
-  TSLogType log_type,
+  bool is_lex_message,
   const char *message
 );
-
-void ts_parser_new_wasm() {
-  TSParser *parser = ts_parser_new();
-  char *input_buffer = calloc(INPUT_BUFFER_SIZE, sizeof(char));
-  TRANSFER_BUFFER[0] = parser;
-  TRANSFER_BUFFER[1] = input_buffer;
-}
 
 static const char *call_parse_callback(
   void *payload,
@@ -148,8 +140,23 @@ static const char *call_parse_callback(
   return buffer;
 }
 
+static void call_log_callback(
+  void *payload,
+  TSLogType log_type,
+  const char *message
+) {
+  tree_sitter_log_callback(log_type == TSLogTypeLex, message);
+}
+
+void ts_parser_new_wasm() {
+  TSParser *parser = ts_parser_new();
+  char *input_buffer = calloc(INPUT_BUFFER_SIZE, sizeof(char));
+  TRANSFER_BUFFER[0] = parser;
+  TRANSFER_BUFFER[1] = input_buffer;
+}
+
 void ts_parser_enable_logger_wasm(TSParser *self, bool should_log) {
-  TSLogger logger = {self, should_log ? tree_sitter_log_callback : NULL};
+  TSLogger logger = {self, should_log ? call_log_callback : NULL};
   ts_parser_set_logger(self, logger);
 }
 
@@ -175,6 +182,20 @@ TSTree *ts_parser_parse_wasm(
     ts_parser_set_included_ranges(self, NULL, 0);
   }
   return ts_parser_parse(self, old_tree, input);
+}
+
+/**********************/
+/* Section - Language */
+/**********************/
+
+int ts_language_type_is_named_wasm(const TSLanguage *self, TSSymbol typeId) {
+  const TSSymbolType symbolType = ts_language_symbol_type(self, typeId);
+  return symbolType == TSSymbolTypeRegular;
+}
+
+int ts_language_type_is_visible_wasm(const TSLanguage *self, TSSymbol typeId) {
+  const TSSymbolType symbolType = ts_language_symbol_type(self, typeId);
+  return symbolType <= TSSymbolTypeAnonymous;
 }
 
 /******************/
@@ -573,9 +594,15 @@ void ts_query_matches_wasm(
   uint32_t start_row,
   uint32_t start_column,
   uint32_t end_row,
-  uint32_t end_column
+  uint32_t end_column,
+  uint32_t match_limit
 ) {
   if (!scratch_query_cursor) scratch_query_cursor = ts_query_cursor_new();
+  if (match_limit == 0) {
+    ts_query_cursor_set_match_limit(scratch_query_cursor, UINT32_MAX);
+  } else {
+    ts_query_cursor_set_match_limit(scratch_query_cursor, match_limit);
+  }
 
   TSNode node = unmarshal_node(tree);
   TSPoint start_point = {start_row, code_unit_to_byte(start_column)};
@@ -601,8 +628,11 @@ void ts_query_matches_wasm(
     }
   }
 
+  bool did_exceed_match_limit =
+    ts_query_cursor_did_exceed_match_limit(scratch_query_cursor);
   TRANSFER_BUFFER[0] = (const void *)(match_count);
   TRANSFER_BUFFER[1] = result.contents;
+  TRANSFER_BUFFER[2] = (const void *)(did_exceed_match_limit);
 }
 
 void ts_query_captures_wasm(
@@ -611,9 +641,15 @@ void ts_query_captures_wasm(
   uint32_t start_row,
   uint32_t start_column,
   uint32_t end_row,
-  uint32_t end_column
+  uint32_t end_column,
+  uint32_t match_limit
 ) {
   if (!scratch_query_cursor) scratch_query_cursor = ts_query_cursor_new();
+  if (match_limit == 0) {
+    ts_query_cursor_set_match_limit(scratch_query_cursor, UINT32_MAX);
+  } else {
+    ts_query_cursor_set_match_limit(scratch_query_cursor, match_limit);
+  }
 
   TSNode node = unmarshal_node(tree);
   TSPoint start_point = {start_row, code_unit_to_byte(start_column)};
@@ -646,6 +682,9 @@ void ts_query_captures_wasm(
     }
   }
 
+  bool did_exceed_match_limit =
+    ts_query_cursor_did_exceed_match_limit(scratch_query_cursor);
   TRANSFER_BUFFER[0] = (const void *)(capture_count);
   TRANSFER_BUFFER[1] = result.contents;
+  TRANSFER_BUFFER[2] = (const void *)(did_exceed_match_limit);
 }

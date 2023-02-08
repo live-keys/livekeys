@@ -1,5 +1,5 @@
 component TodoForm < Form{
-    event addItem(string name)
+    event addItem(name:string)
 
     on submit: (event) => {
         event.preventDefault();

@@ -1,5 +1,5 @@
 component FunctionComponent{
-    fn test(int param1, int param2){
+    fn test(param1:int, param2:int){
         console.log(param1, param2)
 
         component InsideComponent{
@@ -9,13 +9,11 @@ component FunctionComponent{
 }
 
 component FunctionCreatesComponent{
-    fn test(int param1, int param2){
-        console.log(param1, param2)
+    fn test(param1:int, param2:int){
+        console.log(param1, param2);
 
         Element{
             int x : 200
         }
     }
 }
-
-

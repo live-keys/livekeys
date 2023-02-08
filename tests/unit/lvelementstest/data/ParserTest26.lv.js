@@ -13,8 +13,8 @@ export class C extends Element{
         var test = new Test()
         this.ids["test"] = test
 
-        Element.addProperty(test, 'x', { type: "var", notify: "xChanged" })
-        Element.addProperty(this, 'x', { type: "var", notify: "xChanged" })
+        Element.addProperty(test, 'x', { type: 'var', notify: 'xChanged' })
+        Element.addProperty(this, 'x', { type: 'var', notify: 'xChanged' })
         this.x = (function(){
             var d = (function(parent){
                 this.setParent(parent)

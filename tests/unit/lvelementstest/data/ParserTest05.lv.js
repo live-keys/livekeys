@@ -9,13 +9,13 @@ export class ParserTest05 extends Container{
 
     __initialize(){
         // Declare all parent properties
-        Element.addProperty(this, "elemProp", {type: "Element", notify: "elemPropChanged"})
+        Element.addProperty(this, 'elemProp', {type: 'Element', notify: 'elemPropChanged'})
 
         // Assign parent properties
         this.elemProp = (function(parent){
             this.setParent(parent)
             // Declare all properties
-            Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
+            Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
             // Assign properties
             this.x = 20
             Element.complete(this)
@@ -27,7 +27,7 @@ export class ParserTest05 extends Container{
         Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
+                Element.addProperty(this, 'y', {type: 'int', notify: 'yChanged'})
 
                 this.y = 20
                 Element.complete(this)

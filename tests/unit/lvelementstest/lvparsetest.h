@@ -17,6 +17,7 @@ public:
 private slots:
     void initTestCase();
 
+
     void constructorParseTest();
     void functionParseTest();
     void nestingAndShortIdParseTest();
@@ -29,8 +30,8 @@ private slots:
     void namespaceInheritance();
     void testComplexPropertyAssignment();
     void testSimplePropertyAssignment();
-    void testScenarioTest();
     void nestedLanguageScannerTest();
+    void testScenarioTest();
     void nestedFunctionAssignment();
     void arrowFunctionElement();
     void todoListItemSmall();
@@ -62,6 +63,9 @@ private slots:
     void propertyAssignmentInBindingTest();
     void instanceIdsTest();
     void bindingChainTest();
+    void creationInMethodTest();
+    void propertyEqualsVsBinding();
+    void propertyNotation();
 
 private:
     void parseTestTemplate(std::string name);

@@ -1,0 +1,9 @@
+component X{
+    prop x:: 100
+    prop y:int: 150
+    prop z:Array<int>: this.y
+
+    prop a:= 100
+    prop b:int = 150
+    prop c:Array<int>= this.b
+}

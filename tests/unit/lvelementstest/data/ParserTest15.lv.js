@@ -6,7 +6,7 @@ export class ParserTest15 extends Element{
     }
 
     __initialize(){
-        Element.addProperty(this, 'c', { type: "int", notify: "cChanged" })
+        Element.addProperty(this, 'c', { type: 'int', notify: 'cChanged' })
         this.c = (function(){
             var newElement = (function(parent){
                 this.setParent(parent)

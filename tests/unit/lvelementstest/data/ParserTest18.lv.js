@@ -14,9 +14,9 @@ export class TodoList extends Ul{
         var todoList = this
         this.ids["todoList"] = todoList
 
-        Element.addProperty(this, 'items', { type: "list", notify: "itemsChanged" })
-        Element.addEvent(this, 'remove', [])
-        Element.addEvent(this, 'markTodoDone', [])
+        Element.addProperty(this, 'items', { type: 'list', notify: 'itemsChanged' })
+        Element.addEvent(this, 'remove', [['int','index']])
+        Element.addEvent(this, 'markTodoDone', [['int','index']])
         this.items = []
         this.classes = ['list-group']
         Element.assignPropertyExpression(this,

@@ -16,8 +16,8 @@ export class B extends Element{
             var extra = new Element()
             this.ids["extra"] = extra
 
-            Element.addProperty(test, 'x', { type: "var", notify: "xChanged" })
-            Element.addProperty(this, 'x', { type: "var", notify: "xChanged" })
+            Element.addProperty(test, 'x', { type: 'var', notify: 'xChanged' })
+            Element.addProperty(this, 'x', { type: 'var', notify: 'xChanged' })
             this.x = (function(){
                 var d = (function(parent){
                     this.setParent(parent)

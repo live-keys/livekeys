@@ -7,7 +7,7 @@ export class A extends Element{
     }
 
     __initialize(){
-        Element.addProperty(this, 'x', { type: "var", notify: "xChanged" })
+        Element.addProperty(this, 'x', { type: 'var', notify: 'xChanged' })
         this.x = (function(){
             var d = (function(parent){
                 this.setParent(parent)

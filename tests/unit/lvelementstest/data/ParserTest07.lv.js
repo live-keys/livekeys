@@ -9,9 +9,9 @@ export class ParserTest07 extends Container{
 
     __initialize(){
         // Declare all parent properties
-        Element.addProperty(this, "a", {type: "int", notify: "aChanged"})
-        Element.addProperty(this, "b", {type: "int", notify: "bChanged"})
-        Element.addProperty(this, "c", {type: "int", notify: "cChanged"})
+        Element.addProperty(this, 'a', {type: 'int', notify: 'aChanged'})
+        Element.addProperty(this, 'b', {type: 'int', notify: 'bChanged'})
+        Element.addProperty(this, 'c', {type: 'int', notify: 'cChanged'})
 
         this.a = 20
         this.b = 30
@@ -21,11 +21,11 @@ export class ParserTest07 extends Container{
 
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'x', {type: "int", notify: 'xChanged'})
+                Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
 
                 Element.assignPropertyExpression(
                     this,
-                    "x",
+                    'x',
                     function(){ return parent.a + parent.b }.bind(this),
                     [[parent, 'a', 'b']]
                 )
@@ -35,11 +35,11 @@ export class ParserTest07 extends Container{
 
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'y', {type: "int", notify: 'yChanged'})
+                Element.addProperty(this, 'y', {type: 'int', notify: 'yChanged'})
 
                 Element.assignPropertyExpression(
                     this,
-                    "y",
+                    'y',
                     function(){
                         function a(){
                             return parent.a
@@ -56,11 +56,11 @@ export class ParserTest07 extends Container{
 
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'z', {type: "int", notify: 'zChanged'})
+                Element.addProperty(this, 'z', {type: 'int', notify: 'zChanged'})
 
                 Element.assignPropertyExpression(
                     this,
-                    "z",
+                    'z',
                     function(){
                         var result = 0
                         for ( var i = 0; i < 3; ++i ){
@@ -81,7 +81,7 @@ export class ParserTest07 extends Container{
 
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'w', {type: "int", notify: 'wChanged'})
+                Element.addProperty(this, 'w', {type: 'int', notify: 'wChanged'})
 
                 this.w = (function(){
                     var result = 0;

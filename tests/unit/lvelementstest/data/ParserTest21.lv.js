@@ -17,7 +17,7 @@ export class TodoApp extends Div{
         var main = this
         this.ids["main"] = main
 
-        Element.addProperty(this, 'todoItems', { type: "var", notify: "todoItemsChanged" })
+        Element.addProperty(this, 'todoItems', { type: 'var', notify: 'todoItemsChanged' })
         this.todoItems = todoItems
 
 

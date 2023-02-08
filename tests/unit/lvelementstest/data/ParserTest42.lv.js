@@ -1,8 +1,8 @@
 
 export let elem = (function(parent){
     this.setParent(parent)
-    Element.addEvent(this, 'add', [])
-    Element.addEvent(this, 'remove', [])
+    Element.addEvent(this, 'add', [['Element', 'item']])
+    Element.addEvent(this, 'remove', [['Element', 'item']])
     this.on('remove', function(index){
         this.items.remove(index)
     }.bind(this));
@@ -23,8 +23,8 @@ export class X extends Element{
         X.prototype.__initialize.call(this)
     }
     __initialize(){
-        Element.addEvent(this, 'add', [])
-        Element.addEvent(this, 'remove', [])
+        Element.addEvent(this, 'add', [['Element', 'item']])
+        Element.addEvent(this, 'remove', [['Element', 'item']])
         this.on('remove', function(index){
             this.items.remove(index)
         }.bind(this));
