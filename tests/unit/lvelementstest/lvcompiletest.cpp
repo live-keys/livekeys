@@ -8,6 +8,7 @@
 #include "live/elements/object.h"
 #include "live/elements/compiler/modulefile.h"
 #include "live/applicationcontext.h"
+#include "testpack.h"
 
 Q_TEST_RUNNER_REGISTER(LvCompileTest);
 
@@ -21,6 +22,57 @@ LvCompileTest::LvCompileTest(QObject *parent)
 
 void LvCompileTest::initTestCase(){
 }
+
+std::string LvCompileTest::scriptPath(const std::string &scriptName){
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/data/" + scriptName;
+}
+
+std::string LvCompileTest::testPath(){
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/test";
+}
+
+void LvCompileTest::compileModule(){
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest01.lvep"));
+
+    Compiler::Config compilerConfig;
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    ElementsModule::Ptr em = Compiler::compileModule(compiler, tp.path() + "/plugin1");
+    ModuleFile* mfA = em->moduleFileBypath(tp.path() + "/plugin1/A.lv");
+    QVERIFY(mfA != nullptr);
+    QVERIFY(mfA->jsFilePath() == tp.path() + "/plugin1/A.lv.js");
+    ModuleFile* mfB = em->moduleFileBypath(tp.path() + "/plugin1/B.lv");
+    QVERIFY(mfB != nullptr);
+    QVERIFY(mfB->jsFilePath() == tp.path() + "/plugin1/B.lv.js");
+}
+
+void LvCompileTest::compilePackage(){
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest01.lvep"));
+
+    Compiler::Config compilerConfig;
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    auto ems = Compiler::compilePackage(compiler, tp.path());
+    QVERIFY(ems.size() == 2);
+    auto mainEm = ems.front()->module()->path() == tp.path() ? ems.front() : ems.back();
+    auto internalEm = ems.front()->module()->path() == tp.path() ? ems.back() : ems.front();
+
+    QVERIFY(mainEm->module()->path() == tp.path());
+    QVERIFY(internalEm->module()->path() == Path::join(tp.path(), "plugin1"));
+    ModuleFile* mfA = internalEm->moduleFileBypath(tp.path() + "/plugin1/A.lv");
+    QVERIFY(mfA != nullptr);
+    QVERIFY(mfA->jsFilePath() == tp.path() + "/plugin1/A.lv.js");
+    ModuleFile* mfB = internalEm->moduleFileBypath(tp.path() + "/plugin1/B.lv");
+    QVERIFY(mfB != nullptr);
+    QVERIFY(mfB->jsFilePath() == tp.path() + "/plugin1/B.lv.js");
+}
+
 
 void LvCompileTest::test1Lv(){
     lv::el::Engine* engine = new lv::el::Engine(Compiler::create(Compiler::Config(true, ".test.js")));

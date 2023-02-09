@@ -20,14 +20,14 @@
 #include <QObject>
 #include "testrunner.h"
 
-class EngineTest : public QObject{
+class ViewEngineTest : public QObject{
 
     Q_OBJECT
     Q_TEST_RUNNER_SUITE
 
 public:
-    EngineTest(QObject* parent = 0);
-    ~EngineTest(){}
+    ViewEngineTest(QObject* parent = 0);
+    ~ViewEngineTest(){}
 
 private slots:
     void initTestCase();

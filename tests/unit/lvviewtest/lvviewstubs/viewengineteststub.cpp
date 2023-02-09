@@ -14,21 +14,21 @@
 **
 ****************************************************************************/
 
-#include "engineteststub.h"
+#include "viewengineteststub.h"
 #include "live/exception.h"
 #include <QQmlContext>
 #include <QQmlEngine>
 
-EngineTestStub::EngineTestStub(QObject *parent)
+ViewEngineTestStub::ViewEngineTestStub(QObject *parent)
     : QObject(parent)
 {
 }
 
-void EngineTestStub::throwException(){
+void ViewEngineTestStub::throwException(){
     THROW_EXCEPTION(lv::Exception, "Exception stub.", 0);
 }
 
-void EngineTestStub::throwJsError(){
+void ViewEngineTestStub::throwJsError(){
     QObject* engineObj = qmlContext(this)->contextProperty("engine").value<QObject*>();
     lv::ViewEngine* engine = qobject_cast<lv::ViewEngine*>(engineObj);
     if ( !engine )

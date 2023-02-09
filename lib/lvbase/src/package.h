@@ -144,6 +144,7 @@ public:
     const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
     const std::vector<std::string> internalLibraries() const;
+    std::vector<std::string> allModules() const;
 
     void assignContext(PackageGraph* graph);
     PackageGraph* contextOwner();
@@ -155,6 +156,8 @@ public:
     const std::vector<ProjectEntry>& workspaceSamples();
 
 private:
+    static std::vector<std::string> findModules(const std::string& path);
+
     Package(const std::string& path, const std::string& filePath, const std::string& name, const Version& version);
 
     PackagePrivate* m_d;

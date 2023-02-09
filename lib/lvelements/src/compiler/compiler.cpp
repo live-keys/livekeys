@@ -215,7 +215,7 @@ std::string Compiler::moduleFileBuildPath(const Module::Ptr &plugin, const std::
 }
 
 std::string Compiler::moduleBuildPath(const Module::Ptr &module){
-    std::string buildDir = module->packagePath() + "/" + m_d->config.m_packageBuildPath;
+    std::string buildDir = Path::join( module->packagePath(), m_d->config.m_packageBuildPath);
     if ( !module->pathFromPackage().empty() ){
         buildDir += "/" + module->pathFromPackage();
     }
@@ -269,23 +269,60 @@ std::shared_ptr<ElementsModule> Compiler::compile(Ptr compiler, const std::strin
     std::string pluginPath = Path::parent(path);
     std::string fileName = Path::name(path);
 
-    Module::Ptr plugin(nullptr);
+    Module::Ptr module(nullptr);
     if ( Module::existsIn(pluginPath) ){
-        plugin = Module::createFromPath(pluginPath);
-        Package::Ptr package = Package::createFromPath(plugin->package());
-        compiler->m_d->packageGraph->loadRunningPackageAndModule(package, plugin);
+        module = Module::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(module->package());
+        compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
     } else {
-        plugin = compiler->m_d->packageGraph->createRunningModule(pluginPath);
+        module = compiler->m_d->packageGraph->createRunningModule(pluginPath);
     }
 
-    auto epl = engine ? ElementsModule::create(plugin, engine) : ElementsModule::create(plugin, compiler);
+    auto epl = engine ? ElementsModule::create(module, engine) : ElementsModule::create(module, compiler);
     ElementsModule::addModuleFile(epl, fileName);
     epl->compile();
 
     return epl;
 }
 
-std::shared_ptr<ElementsModule> Compiler::compileImport(Compiler::Ptr compiler, const std::string &importKey, const Module::Ptr& requestingModule, Engine *engine){
+std::shared_ptr<ElementsModule> Compiler::compileModule(Compiler::Ptr compiler, const std::string &path, Engine *engine){
+    if ( !Path::exists(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Path does not exist: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+    if ( !Module::existsIn(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Module not found in: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+
+    Module::Ptr module = Module::createFromPath(path);
+    Package::Ptr package = Package::createFromPath(module->package());
+    compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
+
+    auto epl = engine ? ElementsModule::create(module, engine) : ElementsModule::create(module, compiler);
+    epl->compile();
+    return epl;
+}
+
+std::vector<std::shared_ptr<ElementsModule> > Compiler::compilePackage(Compiler::Ptr compiler, const std::string &path, Engine *engine){
+    if ( !Path::exists(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Path does not exist: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+    if ( !Package::existsIn(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Package not found in %.").format(path), lv::Exception::toCode("~Path"));
+    }
+
+    Package::Ptr package = Package::createFromPath(path);
+    auto modules = package->allModules();
+
+    std::vector<std::shared_ptr<ElementsModule> > result;
+
+    for ( auto it = modules.begin(); it != modules.end(); ++it ){
+        result.push_back(Compiler::compileModule(compiler, *it, engine));
+    }
+
+    return result;
+}
+
+std::shared_ptr<ElementsModule> Compiler::compileImportedModule(Compiler::Ptr compiler, const std::string &importKey, const Module::Ptr& requestingModule, Engine *engine){
     auto foundEp = compiler->m_d->loadedModules.find(importKey);
     if ( foundEp == compiler->m_d->loadedModules.end() ){
         Module::Ptr plugin = compiler->m_d->packageGraph->loadModule(importKey, requestingModule);

@@ -143,13 +143,14 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
     auto mfImports = mf->imports();
     for ( auto it = mfImports.begin(); it != mfImports.end(); ++it ){
         ModuleFile::Import& imp = *it;
+
         if ( imp.isRelative ){
             if ( epl->module()->context()->package == nullptr ){
                 THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
             }
 
             std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
-            ElementsModule::Ptr ep = Compiler::compileImport(epl->m_d->compiler, importUri, epl->module(), epl->engine());
+            ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
             }
@@ -157,7 +158,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             mf->resolveImport(imp.uri, ep);
 
         } else {
-            ElementsModule::Ptr ep = Compiler::compileImport(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
+            ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
             }

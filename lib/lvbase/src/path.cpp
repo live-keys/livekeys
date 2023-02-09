@@ -101,6 +101,8 @@ void Path::copyRecursive(const std::string &from, const std::string &to, int opt
 }
 
 std::string Path::join(const std::string &p1, const std::string &p2){
+    if ( p2.empty() )
+        return p1;
     return (fs::path(p1) / fs::path(p2)).string();
 }
 

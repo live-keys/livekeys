@@ -20,6 +20,8 @@
 #include "live/exception.h"
 #include "live/visuallog.h"
 #include "live/library.h"
+#include "live/path.h"
+#include "live/directory.h"
 
 #include <list>
 #include <map>
@@ -224,6 +226,11 @@ const std::vector<std::string> Package::internalLibraries() const{
     return m_d->internalLibraries;
 }
 
+/** \brief Returns a list of all the module paths within this package */
+std::vector<std::string> Package::allModules() const{
+    return findModules(path());
+}
+
 /** \brief Assigns a new context to this package. */
 void Package::assignContext(PackageGraph *graph){
     if ( m_d->context ){
@@ -266,6 +273,24 @@ const std::vector<std::pair<std::string, std::string> > &Package::workspaceTutor
 
 const std::vector<Package::ProjectEntry> &Package::workspaceSamples(){
     return m_d->workspaceSamples;
+}
+
+std::vector<std::string> Package::findModules(const std::string &path){
+    std::vector<std::string> result;
+
+    if ( Module::existsIn(path) )
+        result.push_back(path);
+
+    Directory::Iterator dit = Directory::iterate(path);
+    while ( !dit.isEnd() ){
+        if ( Path::isDir(dit.path()) ){
+            auto scanResult = findModules(dit.path());
+            result.insert(result.end(), scanResult.begin(), scanResult.end());
+        }
+        dit.next();
+    }
+
+    return result;
 }
 
 Package::Package(const std::string &path, const std::string& filePath, const std::string &name, const Version &version)

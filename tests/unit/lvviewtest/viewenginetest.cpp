@@ -14,8 +14,8 @@
 **
 ****************************************************************************/
 
-#include "enginetest.h"
-#include "engineteststub.h"
+#include "viewenginetest.h"
+#include "viewengineteststub.h"
 #include "live/errorhandler.h"
 #include "live/exception.h"
 #include "live/viewengine.h"
@@ -23,21 +23,21 @@
 #include <QQmlEngine>
 #include <QQmlContext>
 
-Q_TEST_RUNNER_REGISTER(EngineTest);
+Q_TEST_RUNNER_REGISTER(ViewEngineTest);
 
 using namespace lv;
 
-EngineTest::EngineTest(QObject *parent)
+ViewEngineTest::ViewEngineTest(QObject *parent)
     : QObject(parent)
 {
 }
 
-void EngineTest::initTestCase(){
-    qmlRegisterType<EngineTestStub>("base", 1, 0, "EngineTestStub");
+void ViewEngineTest::initTestCase(){
+    qmlRegisterType<ViewEngineTestStub>("base", 1, 0, "EngineTestStub");
     qmlRegisterType<lv::ErrorHandler>("base", 1, 0, "ErrorHandler");
 }
 
-void EngineTest::cppExceptionInObbjectTest(){
+void ViewEngineTest::cppExceptionInObbjectTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     QObject* obj = engine.createObject(
@@ -59,7 +59,7 @@ void EngineTest::cppExceptionInObbjectTest(){
     QVERIFY(isException);
 }
 
-void EngineTest::engineExceptionTest(){
+void ViewEngineTest::engineExceptionTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     lv::Exception exception = lv::Exception::create<lv::Exception>(
@@ -84,7 +84,7 @@ void EngineTest::engineExceptionTest(){
     QVERIFY(isException);
 }
 
-void EngineTest::engineObjectExceptionTest(){
+void ViewEngineTest::engineObjectExceptionTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isException = false;
@@ -115,7 +115,7 @@ void EngineTest::engineObjectExceptionTest(){
     QVERIFY(isException);
 }
 
-void EngineTest::engineInternalWarningTest(){
+void ViewEngineTest::engineInternalWarningTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
@@ -143,7 +143,7 @@ void EngineTest::engineInternalWarningTest(){
     QVERIFY(isWarning);
 }
 
-void EngineTest::engineErrorHandlerTest(){
+void ViewEngineTest::engineErrorHandlerTest(){
     ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
@@ -192,7 +192,7 @@ void EngineTest::engineErrorHandlerTest(){
     QCOMPARE(obj->property("warningMessage").toString(), QString("JSTest"));
 }
 
-void EngineTest::engineErrorHandlerSkipTest(){
+void ViewEngineTest::engineErrorHandlerSkipTest(){
     ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 
     bool isWarning = false;
@@ -236,7 +236,7 @@ void EngineTest::engineErrorHandlerSkipTest(){
     QVERIFY(isError);
 }
 
-void EngineTest::jsThrownErrorTest(){
+void ViewEngineTest::jsThrownErrorTest(){
     ViewEngine engine(new QQmlEngine, nullptr);
 
     bool isError = false;
@@ -264,7 +264,7 @@ void EngineTest::jsThrownErrorTest(){
     QVERIFY(isError);
 }
 
-void EngineTest::jsThrownErrorHandlerTest(){
+void ViewEngineTest::jsThrownErrorHandlerTest(){
     //See how I can extend exception
     ViewEngine* engine = new ViewEngine(new QQmlEngine, nullptr);
 

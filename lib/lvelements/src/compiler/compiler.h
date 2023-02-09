@@ -102,7 +102,9 @@ public:
     void configureImplicitType(const std::string& type);
 
     static std::shared_ptr<ElementsModule> compile(Compiler::Ptr compiler, const std::string& path, Engine* engine = nullptr);
-    static std::shared_ptr<ElementsModule> compileImport(Compiler::Ptr compiler, const std::string& path, const Module::Ptr& requstingModule, Engine* engine = nullptr);
+    static std::shared_ptr<ElementsModule> compileModule(Compiler::Ptr compiler, const std::string& path, Engine* engine = nullptr);
+    static std::vector<std::shared_ptr<ElementsModule> > compilePackage(Compiler::Ptr compiler, const std::string& path, Engine* engine = nullptr);
+    static std::shared_ptr<ElementsModule> compileImportedModule(Compiler::Ptr compiler, const std::string& path, const Module::Ptr& requstingModule, Engine* engine = nullptr);
 
     const std::vector<std::string> &packageImportPaths() const;
     void setPackageImportPaths(const std::vector<std::string>& paths);

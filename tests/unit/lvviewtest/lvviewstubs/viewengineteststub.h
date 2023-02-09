@@ -20,12 +20,12 @@
 #include <QObject>
 #include "live/viewengine.h"
 
-class EngineTestStub : public QObject{
+class ViewEngineTestStub : public QObject{
 
     Q_OBJECT
 
 public:
-    explicit EngineTestStub(QObject *parent = 0);
+    explicit ViewEngineTestStub(QObject *parent = 0);
 
 public slots:
     void throwException();

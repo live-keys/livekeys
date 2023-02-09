@@ -22,11 +22,17 @@ public:
     void test2Lv();
     void test3Lv();
     void test4Lv();
+    void test5Lv();
 
 private slots:
     void initTestCase();
 
-    void test5Lv();
+    void compileModule();
+    void compilePackage();
+
+private:
+    std::string scriptPath(const std::string& scriptName);
+    std::string testPath();
 };
 
 #endif // LVCOMPILETEST_H
