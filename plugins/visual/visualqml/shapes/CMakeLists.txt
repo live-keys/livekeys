@@ -3,6 +3,7 @@ add_library(shapes SHARED)
 
 set_target_properties(shapes PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/visual/shapes"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/visual/shapes"
 )
 
 if(APPLE)

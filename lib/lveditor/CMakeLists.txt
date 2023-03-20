@@ -3,6 +3,7 @@ add_library(lveditor SHARED)
 
 set_target_properties(lveditor PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
 )
 
 target_sources(lveditor PRIVATE

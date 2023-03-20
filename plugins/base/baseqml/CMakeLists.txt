@@ -3,6 +3,7 @@ add_library(base SHARED)
 
 set_target_properties(base PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/base"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/base"
 )
 
 if(APPLE)

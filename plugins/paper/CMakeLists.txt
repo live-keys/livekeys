@@ -3,6 +3,7 @@ add_library(paper SHARED)
 
 set_target_properties(paper PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/paper"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/paper"
 )
 
 if(APPLE)

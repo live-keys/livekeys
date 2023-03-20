@@ -3,6 +3,7 @@ add_library(editqml SHARED)
 
 set_target_properties(editqml PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/editqml"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/editqml"
 )
 
 if(APPLE)

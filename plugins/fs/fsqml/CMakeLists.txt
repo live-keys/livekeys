@@ -3,6 +3,7 @@ add_library(fs SHARED)
 
 set_target_properties(fs PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/fs"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/fs"
 )
 
 if(APPLE)

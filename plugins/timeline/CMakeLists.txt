@@ -3,6 +3,7 @@ add_library(timeline SHARED)
 
 set_target_properties(timeline PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/timeline"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/timeline"
 )
 
 if(APPLE)

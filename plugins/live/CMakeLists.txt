@@ -3,6 +3,7 @@ add_library(live SHARED)
 
 set_target_properties(live PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/live"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/live"
 )
 
 if(APPLE)

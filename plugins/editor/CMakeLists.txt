@@ -3,6 +3,7 @@ add_library(editor SHARED)
 
 set_target_properties(editor PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/editor"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/editor"
 )
 
 if(APPLE)
