@@ -129,6 +129,10 @@ LockedFileIOSession::Ptr LockedFileIOSession::createInstance(){
     return LockedFileIOSession::Ptr(new LockedFileIOSession);
 }
 
+FileIOInterface::Ptr LockedFileIOSession::createInterfaceInstance(){
+    return FileIOInterface::Ptr(new LockedFileIOSession);
+}
+
 /**
  * \brief Locks the file (given by its path) for reading and loads up a buffer with its content.
  *

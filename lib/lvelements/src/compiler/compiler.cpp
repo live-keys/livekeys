@@ -90,7 +90,6 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
 
     std::string name = Path::baseName(path);
     ProgramNode* root = parseProgramNodes(path, name, ast);
-
     auto ctx = m_d->createConversionContext();
     root->collectImportTypes(contents, ctx);
     delete ctx;

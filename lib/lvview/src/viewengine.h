@@ -105,7 +105,7 @@ public:
     typedef std::function<void(ViewEngine*,QObject*)> ParserReadyHandler;
 
 public:
-    explicit ViewEngine(QQmlEngine* engine, LockedFileIOSession::Ptr fileIO, QObject *parent = nullptr);
+    explicit ViewEngine(QQmlEngine* engine, FileIOInterface::Ptr fileIO, QObject *parent = nullptr);
     ~ViewEngine();
 
     /** Shows if the engine is loading */
@@ -120,7 +120,7 @@ public:
 
     QQmlEngine* engine();
     QMutex* engineMutex();
-    const LockedFileIOSession::Ptr& fileIO() const;
+    const FileIOInterface::Ptr &fileIO() const;
 
     QJSValue evaluate(const QString& jsCode, const QString &fileName = QString(), int lineNumber = 1);
     void throwError(const lv::QmlError& error);
@@ -237,7 +237,7 @@ private:
     QJSValue              m_errorType;
     PackageGraph*         m_packageGraph;
 
-    LockedFileIOSession::Ptr m_fileIO;
+    FileIOInterface::Ptr  m_fileIO;
 
     QMap<QString, QByteArray>     m_componentSources;
 
@@ -292,7 +292,7 @@ inline QMutex *ViewEngine::engineMutex(){
 }
 
 /** FileIO getter */
-inline const LockedFileIOSession::Ptr &ViewEngine::fileIO() const{
+inline const FileIOInterface::Ptr &ViewEngine::fileIO() const{
     return m_fileIO;
 }
 

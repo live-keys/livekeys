@@ -55,7 +55,7 @@ namespace lv{
 
  */
 
-QmlLanguageScanner::QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList &importPaths, QObject *parent)
+QmlLanguageScanner::QmlLanguageScanner(FileIOInterface::Ptr lio, const QStringList &importPaths, QObject *parent)
     : QObject(parent)
     , m_plannedQueue(new std::list<QmlLibraryInfo::Ptr>)
     , m_defaultImportPaths(importPaths)

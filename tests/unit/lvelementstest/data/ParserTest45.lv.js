@@ -7,8 +7,8 @@ export class X extends Element{
         X.prototype.__initialize.call(this)
     }
     __initialize(){
-        Element.addProperty(this, 'x', { type: "var", notify: "xChanged" })
-        Element.addProperty(this, 'y', { type: "var", notify: "yChanged" })
+        Element.addProperty(this, 'x', { type: 'var', notify: 'xChanged' })
+        Element.addProperty(this, 'y', { type: 'var', notify: 'yChanged' })
         Element.assignPropertyExpression(this,
             'x',
             (function(){

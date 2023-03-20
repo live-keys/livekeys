@@ -1,5 +1,4 @@
-Tree-sitter Highlight
-=========================
+# `tree-sitter-highlight`
 
 [![Build Status](https://travis-ci.org/tree-sitter/tree-sitter.svg?branch=master)](https://travis-ci.org/tree-sitter/tree-sitter)
 [![Build status](https://ci.appveyor.com/api/projects/status/vtmbd6i92e97l55w/branch/master?svg=true)](https://ci.appveyor.com/project/maxbrunsfeld/tree-sitter/branch/master)
@@ -7,73 +6,75 @@ Tree-sitter Highlight
 
 ### Usage
 
-Compile some languages into your app, and declare them:
+Add this crate, and the language-specific crates for whichever languages you want to parse, to your `Cargo.toml`:
 
-```rust
-extern "C" tree_sitter_html();
-extern "C" tree_sitter_javascript();
+```toml
+[dependencies]
+tree-sitter-highlight = "0.19"
+tree-sitter-html = "0.19"
+tree-sitter-javascript = "0.19"
 ```
 
-Create a highlighter. You only need one of these:
+Define the list of highlight names that you will recognize:
+
+```rust
+let highlight_names = &[
+    "attribute",
+    "constant",
+    "function.builtin",
+    "function",
+    "keyword",
+    "operator",
+    "property",
+    "punctuation",
+    "punctuation.bracket",
+    "punctuation.delimiter",
+    "string",
+    "string.special",
+    "tag",
+    "type",
+    "type.builtin",
+    "variable",
+    "variable.builtin",
+    "variable.parameter",
+];
+```
+
+Create a highlighter. You need one of these for each thread that you're using for syntax highlighting:
 
 ```rust
 use tree_sitter_highlight::Highlighter;
 
-let highlighter = Highlighter::new(
-    [
-        "attribute",
-        "constant",
-        "function.builtin",
-        "function",
-        "keyword",
-        "operator",
-        "property",
-        "punctuation",
-        "punctuation.bracket",
-        "punctuation.delimiter",
-        "string",
-        "string.special",
-        "tag",
-        "type",
-        "type.builtin",
-        "variable",
-        "variable.builtin",
-        "variable.parameter",
-    ]
-    .iter()
-    .cloned()
-    .map(String::from)
-    .collect()
-);
-```
-
-Create a highlight context. You need one of these for each thread that you're using for syntax highlighting:
-
-```rust
-use tree_sitter_highlight::HighlightContext;
-
-let context = HighlightContext::new();
+let highlighter = Highlighter::new();
 ```
 
 Load some highlighting queries from the `queries` directory of some language repositories:
 
 ```rust
+use tree_sitter_highlight::HighlightConfiguration;
+
 let html_language = unsafe { tree_sitter_html() };
 let javascript_language = unsafe { tree_sitter_javascript() };
 
-let html_config = highlighter.load_configuration(
-    html_language,
-    &fs::read_to_string("./tree-sitter-html/queries/highlights.scm").unwrap(),
-    &fs::read_to_string("./tree-sitter-html/queries/injections.scm").unwrap(),
+let html_config = HighlightConfiguration::new(
+    tree_sitter_html::language(),
+    tree_sitter_html::HIGHLIGHTS_QUERY,
+    tree_sitter_html::INJECTIONS_QUERY,
     "",
-);
+).unwrap();
 
-let javascript_config = highlighter.load_configuration(
-    javascript_language,
-    &fs::read_to_string("./tree-sitter-javascript/queries/highlights.scm").unwrap(),
-    &fs::read_to_string("./tree-sitter-javascript/queries/injections.scm").unwrap(),
-    &fs::read_to_string("./tree-sitter-javascript/queries/locals.scm").unwrap(),
-);
+let javascript_config = HighlightConfiguration::new(
+    tree_sitter_javascript::language(),
+    tree_sitter_javascript::HIGHLIGHTS_QUERY,
+    tree_sitter_javascript::INJECTIONS_QUERY,
+    tree_sitter_javascript::LCOALS_QUERY,
+).unwrap();
+```
+
+Configure the recognized names:
+
+```rust
+javascript_config.configure(&highlight_names);
 ```
 
 Highlight some code:
@@ -82,23 +83,22 @@ Highlight some code:
 use tree_sitter_highlight::HighlightEvent;
 
 let highlights = highlighter.highlight(
-    &mut context,
-    javascript_config,
+    &javascript_config,
     b"const x = new Y();",
     None,
-    &|_| None
+    |_| None
 ).unwrap();
 
 for event in highlights {
-    match event? {
-        HighlightEvent::Source(s) {
-            eprintln!("source: {:?}", s);
+    match event.unwrap() {
+        HighlightEvent::Source {start, end} => {
+            eprintln!("source: {}-{}", start, end);
         },
-        HighlightEvent::HighlightStart(s) {
+        HighlightEvent::HighlightStart(s) => {
             eprintln!("highlight style started: {:?}", s);
         },
-        HighlightEvent::HighlightEnd(s) {
-            eprintln!("highlight style ended: {:?}", s);
+        HighlightEvent::HighlightEnd => {
+            eprintln!("highlight style ended");
         },
     }
 }

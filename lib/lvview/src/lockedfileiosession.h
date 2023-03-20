@@ -16,7 +16,8 @@
 #ifndef LVLOCKEDFILEIOSESSION_H
 #define LVLOCKEDFILEIOSESSION_H
 
-#include "live/lvbaseglobal.h"
+#include "live/lvviewglobal.h"
+#include "live/fileio.h"
 #include <memory>
 #include <string>
 
@@ -25,7 +26,7 @@ namespace lv{
 class FileLock;
 
 class LockedFileIOSessionPrivate;
-class LV_BASE_EXPORT LockedFileIOSession{
+class LV_VIEW_EXPORT LockedFileIOSession : public FileIOInterface{
 
     DISABLE_COPY(LockedFileIOSession);
 
@@ -37,6 +38,7 @@ public:
     ~LockedFileIOSession();
 
     static LockedFileIOSession::Ptr createInstance();
+    static FileIOInterface::Ptr createInterfaceInstance();
 
     std::string readFromFile(const std::string& path);
     bool writeToFile(const std::string& path, const std::string& data);

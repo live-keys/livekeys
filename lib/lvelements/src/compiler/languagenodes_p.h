@@ -33,12 +33,14 @@ class PropertyBindingContainer;
 
 class BaseNode;
 class IdentifierNode;
+class TypeNode;
 class JsBlockNode;
 class ImportPathNode;
 class ImportNode;
 class JsImportNode;
 class PropertyDeclarationNode;
 class PropertyAssignmentNode;
+class ParameterNode;
 class ParameterListNode;
 class EventDeclarationNode;
 class ListenerDeclarationNode;
@@ -111,8 +113,15 @@ public:
     BaseNode* parent() const{ return m_parent; }
     void setParent(BaseNode* parent){ m_parent = parent; }
 
+    static TSNode nodeChildByFieldName(const TSNode& node, const std::string& name);
+    static std::vector<IdentifierNode*> fromNestedIdentifier(BaseNode* parent, const TSNode& node);
+    static ParameterListNode* scanFormalParameters(BaseNode* parent, const TSNode& formalParameters);
+    static ParameterListNode* scanFormalTypeParameters(BaseNode* parent, const TSNode& formalParameters);
+
     static void assertValid(BaseNode* from, const TSNode& node, const std::string& message);
     static void assertError(BaseNode* from, const TSNode& node, const std::string& message);
+    static void throwError(BaseNode* from, const TSNode& node, const std::string& message);
+
 
 protected:
     virtual void addChild(BaseNode *child);
@@ -270,6 +279,14 @@ public:
     IdentifierNode(const TSNode& node) : BaseNode(node, "Identifier"){}
 };
 
+class TypeNode : public BaseNode{
+    friend class BaseNode;
+public:
+    TypeNode(const TSNode& node) : BaseNode(node, "Type"){}
+
+    static std::string sliceWithoutAnnotation(const std::string &source, TypeNode* tn);
+};
+
 class VariableDeclaratorNode : public BaseNode{
     friend class BaseNode;
 public:
@@ -392,14 +409,6 @@ private:
     IdentifierNode* m_importAs;
 };
 
-class FormalParametersNode : public BaseNode{
-    friend class BaseNode;
-public:
-    FormalParametersNode(const TSNode& node) : BaseNode(node, "FormalParameters"){}
-    // virtual std::string toString(int indent = 0) const;
-    // virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments);
-};
-
 class ConstructorDefinitionNode : public BaseNode{
     friend class BaseNode;
     friend class ComponentDeclarationNode;
@@ -409,6 +418,7 @@ public:
         : BaseNode(node, "ConstructorDefinition")
         , m_body(nullptr)
         , m_superCall(nullptr)
+        , m_parameters(nullptr)
     {}
 
     virtual std::string toString(int indent = 0) const;
@@ -416,9 +426,9 @@ public:
     // virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments);
 
 private:
-    JsBlockNode*                 m_body;
-    CallExpressionNode*          m_superCall;
-    std::vector<IdentifierNode*> m_parameters;
+    JsBlockNode*        m_body;
+    CallExpressionNode* m_superCall;
+    ParameterListNode*  m_parameters;
 
 };
 
@@ -431,7 +441,7 @@ public:
     virtual ~PropertyDeclarationNode();
 
     virtual std::string toString(int indent = 0) const;
-    IdentifierNode* type() const{ return m_type; }
+    TypeNode* type() const{ return m_type; }
     IdentifierNode* name() const{ return m_name; }
     BindableExpressionNode* expression() const{ return m_expression; }
     JsBlockNode* statementBlock() const {return m_statementBlock; }
@@ -441,10 +451,12 @@ public:
     std::string bindingIdentifiersToJs(const std::string& source) const;
 
     bool hasAssignment(){ return m_expression != nullptr || m_statementBlock != nullptr; }
+    bool isBindingsAssignment(){ return m_isBindingAssignment; }
 
 private:
     IdentifierNode* m_name;
-    IdentifierNode* m_type;
+    TypeNode* m_type;
+    bool m_isBindingAssignment;
     BindableExpressionNode* m_expression;
     JsBlockNode* m_statementBlock;
     PropertyBindingContainer* m_bindingContainer;
@@ -496,9 +508,11 @@ public:
     void pushToBindings(BaseNode* bn);
     std::string bindingIdentifiersToString(const std::string& source) const;
     std::string bindingIdentifiersToJs(const std::string& source) const;
+    bool isBindingAssignment() const{ return m_isBindingAssignment; }
 
 private:
     std::vector<IdentifierNode*> m_property;
+    bool m_isBindingAssignment;
     BindableExpressionNode*   m_expression;
     JsBlockNode*              m_statementBlock;
     PropertyBindingContainer* m_bindingContainer;
@@ -660,14 +674,37 @@ public:
     SubscriptExpressionNode(const TSNode& node) : BaseNode(node, "SubscriptExpression"){}
 };
 
+class ParameterNode : public BaseNode{
+    friend class BaseNode;
+public:
+    ParameterNode(const TSNode& node, IdentifierNode* identifier, TypeNode* typen = nullptr, bool isOptional = false)
+        : BaseNode(node), m_identifier(identifier), m_type(typen), m_isOptional(isOptional)
+    {
+        if ( m_identifier )
+            addChild(m_identifier);
+        if ( m_type )
+            addChild(m_type);
+    }
+    IdentifierNode* identifier(){ return m_identifier; }
+    TypeNode* type(){ return m_type; }
+    bool isOptional(){ return m_isOptional; }
+
+private:
+    IdentifierNode* m_identifier;
+    TypeNode*       m_type;
+    bool            m_isOptional;
+};
+
 class ParameterListNode : public BaseNode{
     friend class BaseNode;
 public:
     ParameterListNode(const TSNode& node) : BaseNode(node, "ParameterList"){}
     virtual std::string toString(int indent = 0) const;
-    const std::vector<std::pair<IdentifierNode*, IdentifierNode*> >& parameters() const{ return m_parameters; }
+    const std::vector<ParameterNode*>& parameters() const{ return m_parameters; }
+
+    void addParameter(ParameterNode* node){ m_parameters.push_back(node); addChild(node); }
 private:
-    std::vector<std::pair<IdentifierNode*, IdentifierNode*> > m_parameters;
+    std::vector<ParameterNode*> m_parameters;
 };
 
 class EventDeclarationNode : public BaseNode{
@@ -734,15 +771,15 @@ public:
     FunctionNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
 
-    std::vector<IdentifierNode*> parameters() const{ return m_parameters; }
+    ParameterListNode* parameters() const{ return m_parameters; }
     JsBlockNode* body() const{ return m_body; }
 
 protected:
     FunctionNode(const TSNode& node, const std::string& nodeType);
 
 private:
-    std::vector<IdentifierNode*> m_parameters;
-    JsBlockNode*                 m_body;
+    ParameterListNode* m_parameters;
+    JsBlockNode*       m_body;
 };
 
 class FunctionDeclarationNode: public FunctionNode{

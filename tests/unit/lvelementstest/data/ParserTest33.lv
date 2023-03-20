@@ -1,5 +1,5 @@
 component X < Y{
-    constructor(x, y){
+    constructor(x:any, y:any){
         super(x, y)
         X.prototype.__initialize.call(this)
     }

@@ -12,7 +12,7 @@ export class ParserTest06 extends Container{
 
     __initialize(){
         // Declare all parent properties
-        Element.addProperty(this, "ElemProp", {type: "component", notify: "ElemPropChanged"})
+        Element.addProperty(this, 'ElemProp', {type: 'component', notify: 'ElemPropChanged'})
 
         // Assign parent properties
         this.ElemProp = class T extends Element{
@@ -28,7 +28,7 @@ export class ParserTest06 extends Container{
                 var twenty = this
                 this.ids['twenty'] = twenty
 
-                Element.addProperty(this, "x", {type: "int", notify: "xChanged"})
+                Element.addProperty(this, 'x', {type: 'int', notify: 'xChanged'})
                 this.x = 20
 
                 // Element.assignDefaultProperty(null)
@@ -40,7 +40,7 @@ export class ParserTest06 extends Container{
         Element.assignChildren(this, [
             (function(parent){
                 this.setParent(parent)
-                Element.addProperty(this, 'y', {type: "Element", notify: 'yChanged'})
+                Element.addProperty(this, 'y', {type: 'Element', notify: 'yChanged'})
 
                 Element.assignPropertyExpression(
                     this,

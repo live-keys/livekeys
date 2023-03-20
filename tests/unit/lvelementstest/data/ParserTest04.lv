@@ -3,7 +3,7 @@ import xmodule as A
 component B{
     id: C
 
-    fn not1(int d, int e){
+    fn not1(d:int, e:int){
 
         var f = 5
 

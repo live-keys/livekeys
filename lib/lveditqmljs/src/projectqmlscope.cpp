@@ -44,7 +44,7 @@ namespace lv{
  * lv::ProjectQmlScope::create function.
  */
 
-ProjectQmlScope::ProjectQmlScope(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine, QObject *parent)
+ProjectQmlScope::ProjectQmlScope(FileIOInterface::Ptr ioSession, QQmlEngine *engine, QObject *parent)
     : QObject(parent)
     , m_defaultImportPaths(engine->importPathList())
     , m_scanMonitor(new QmlLanguageScanMonitor(new QmlLanguageScanner(ioSession, engine->importPathList())))
@@ -113,7 +113,7 @@ ProjectQmlScope::~ProjectQmlScope(){
 /**
  * \brief Creates a new ProjectQmlScope object
  */
-ProjectQmlScope::Ptr ProjectQmlScope::create(LockedFileIOSession::Ptr ioSession, QQmlEngine *engine){
+ProjectQmlScope::Ptr ProjectQmlScope::create(FileIOInterface::Ptr ioSession, QQmlEngine *engine){
     return ProjectQmlScope::Ptr(new ProjectQmlScope(ioSession, engine));
 }
 

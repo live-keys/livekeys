@@ -1,10 +1,7 @@
+use super::FREE_FN;
 use std::os::raw::c_void;
 
-extern "C" {
-    #[link_name = "rust_tree_sitter_free"]
-    pub fn free_ptr(ptr: *mut c_void);
-}
-
+/// A raw pointer and a length, exposed as an iterator.
 pub struct CBufferIter<T> {
     ptr: *mut T,
     count: usize,
@@ -40,6 +37,6 @@ impl<T: Copy> ExactSizeIterator for CBufferIter<T> {}
 
 impl<T> Drop for CBufferIter<T> {
     fn drop(&mut self) {
-        unsafe { free_ptr(self.ptr as *mut c_void); }
+        unsafe { (FREE_FN)(self.ptr as *mut c_void) };
     }
 }

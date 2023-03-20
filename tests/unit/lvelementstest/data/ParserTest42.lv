@@ -5,10 +5,10 @@ instance elem Element{
     on add: (item) => {
         this.items.push(item)
     }
-    event add(Element item)
-    event remove(Element item)
+    event add(item:Element)
+    event remove(item:Element)
 
-    fn insert(Element item, int index){
+    fn insert(item:Element, index:int){
         this.items.insert(item, index)
     }
 }
@@ -20,10 +20,10 @@ component X < Element{
     on add: (item) => {
         this.items.push(item)
     }
-    event add(Element item)
-    event remove(Element item)
+    event add(item:Element)
+    event remove(item:Element)
 
-    fn insert(Element item, int index){
+    fn insert(item:Element, index:int){
         this.items.insert(item, index)
     }
 }

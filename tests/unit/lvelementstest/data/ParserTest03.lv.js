@@ -11,13 +11,13 @@ export class NestingTest extends Container{
 
         // initialize ids
         var e1 = new Element()
-        this.ids['e1'] = e1
+        this.ids["e1"] = e1
         
         var enested = new Element()
-        this.ids['enested'] = enested
+        this.ids["enested"] = enested
 
         var c1  = new Container()
-        this.ids['c1'] = c1
+        this.ids["c1"] = c1
 
         // declare properties for ids
         Element.addProperty(e1, 'x', {type: 'int', notify: 'xChanged'})
@@ -29,7 +29,7 @@ export class NestingTest extends Container{
                 Element.assignId(e1,"e1")
                 Element.assignPropertyExpression(
                     this,
-                    "x",
+                    'x',
                     function(){ return enested.y }.bind(this),
                     [[enested, 'y']]
                 )
@@ -63,7 +63,7 @@ export class ShortIdTest extends Container{
     __initialize(){
         this.ids = {}
         var e1 = new Element()
-        this.ids['e1'] = e1
+        this.ids["e1"] = e1
 
         Element.addProperty(e1, 'x', {type: 'int', notify: 'xChanged'})
 

@@ -43,7 +43,7 @@ public:
     };
 
 public:
-    explicit QmlLanguageScanner(LockedFileIOSession::Ptr lio, const QStringList& importPaths, QObject *parent = nullptr);
+    explicit QmlLanguageScanner(FileIOInterface::Ptr lio, const QStringList& importPaths, QObject *parent = nullptr);
     ~QmlLanguageScanner();
 
     void queueLibrary(const QmlLibraryInfo::Ptr& lib);
@@ -96,7 +96,7 @@ private:
 
     QHash<QString, QmlLibraryInfo::Ptr> m_libraries;
     QStringList                         m_defaultImportPaths;
-    LockedFileIOSession::Ptr            m_ioSession;
+    FileIOInterface::Ptr                m_ioSession;
 
     bool                                m_isProcessing;
     bool                                m_stopRequest;

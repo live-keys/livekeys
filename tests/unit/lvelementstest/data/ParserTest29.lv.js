@@ -9,8 +9,8 @@ export class C extends CustomElement{
 
     __initialize(){
 
-        CustomElement.addProperty(this, 'c1', { type: "int", notify: "c1Changed" })
-        CustomElement.addProperty(this, 'c2', { type: "int", notify: "c2Changed" })
+        CustomElement.addProperty(this, 'c1', { type: 'int', notify: 'c1Changed' })
+        CustomElement.addProperty(this, 'c2', { type: 'int', notify: 'c2Changed' })
 
         this.on('remove', function(index){
             vlog.i('remove triggered at: ' + index)

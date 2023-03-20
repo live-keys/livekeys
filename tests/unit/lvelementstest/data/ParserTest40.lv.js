@@ -7,14 +7,14 @@ export class A extends Element{
 
     __initialize(){
         Element.addProperty(this, 'x', {
-            type: "int",
-            notify: "xChanged" ,
+            type: 'int',
+            notify: 'xChanged' ,
             get: function(){ return Element.getProperty('x') },
             set: function(val){ Element.setProperty('x', val) }
         })
         Element.addProperty(this, 'z', {
-            type: "int",
-            notify: "zChanged" ,
+            type: 'int',
+            notify: 'zChanged' ,
             get: function(){
                 return (function(parent){
                     this.setParent(parent)

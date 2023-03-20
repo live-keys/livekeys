@@ -13,8 +13,8 @@ export class ParserTest27 extends mod.A{
     }
 
     __initialize(){
-        Element.addProperty(this, 'b', { type: "string", notify: "bChanged" })
-        Element.addProperty(this, 'c', { type: "string", notify: "cChanged" })
+        Element.addProperty(this, 'b', { type: 'string', notify: 'bChanged' })
+        Element.addProperty(this, 'c', { type: 'string', notify: 'cChanged' })
         Element.assignPropertyExpression(
             this,
             'b',

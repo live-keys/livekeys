@@ -41,8 +41,8 @@ export class C extends Element{
     }
 
     __initialize(){
-        Element.addProperty(this, 'c1', {type: "int", notify: "c1Changed" })
-        Element.addProperty(this, 'c2', {type: "int", notify: "c2Changed" })
+        Element.addProperty(this, 'c1', {type: 'int', notify: 'c1Changed' })
+        Element.addProperty(this, 'c2', {type: 'int', notify: 'c2Changed' })
 
         this.c1 = 200
         this.c2 = 300
@@ -75,3 +75,4 @@ export class D extends Container{
         ])
     }
 }
+

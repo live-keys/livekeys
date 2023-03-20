@@ -7,7 +7,7 @@ export class A extends Element{
     }
 
     __initialize(){
-        Element.addProperty(this, 'children', { type: "default", notify: "childrenChanged" })
+        Element.addProperty(this, 'children', { type: 'default', notify: 'childrenChanged' })
         this.children = []
 
         Element.assignChildren(this, [

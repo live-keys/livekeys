@@ -1,12 +1,19 @@
 declare module 'web-tree-sitter' {
   class Parser {
-    static init(): Promise<void>;
+    /**
+     * 
+     * @param moduleOptions Optional emscripten module-object, see https://emscripten.org/docs/api_reference/module.html
+     */
+    static init(moduleOptions?: object): Promise<void>;
     delete(): void;
     parse(input: string | Parser.Input, previousTree?: Parser.Tree, options?: Parser.Options): Parser.Tree;
-    getLanguage(): any;
-    setLanguage(language: any): void;
+    reset(): void;
+    getLanguage(): Parser.Language;
+    setLanguage(language?: Parser.Language | undefined | null): void;
     getLogger(): Parser.Logger;
-    setLogger(logFunc: Parser.Logger): void;
+    setLogger(logFunc?: Parser.Logger | undefined | null): void;
+    setTimeoutMicros(value: number): void;
+    getTimeoutMicros(): number;
   }
 
   namespace Parser {
@@ -37,7 +44,7 @@ declare module 'web-tree-sitter' {
 
     export type Logger = (
       message: string,
-      params: {[param: string]: string},
+      params: { [param: string]: string },
       type: "parse" | "lex"
     ) => void;
 
@@ -48,9 +55,9 @@ declare module 'web-tree-sitter' {
     ) => string | null;
 
     export interface SyntaxNode {
+      id: number;
       tree: Tree;
       type: string;
-      isNamed: boolean;
       text: string;
       startPosition: Point;
       endPosition: Point;
@@ -74,6 +81,7 @@ declare module 'web-tree-sitter' {
       hasError(): boolean;
       equals(other: SyntaxNode): boolean;
       isMissing(): boolean;
+      isNamed(): boolean;
       toString(): string;
       child(index: number): SyntaxNode | null;
       namedChild(index: number): SyntaxNode | null;
@@ -95,8 +103,11 @@ declare module 'web-tree-sitter' {
 
     export interface TreeCursor {
       nodeType: string;
+      nodeTypeId: number;
       nodeText: string;
+      nodeId: number;
       nodeIsNamed: boolean;
+      nodeIsMissing: boolean;
       startPosition: Point;
       endPosition: Point;
       startIndex: number;
@@ -122,17 +133,47 @@ declare module 'web-tree-sitter' {
       walk(): TreeCursor;
       getChangedRanges(other: Tree): Range[];
       getEditedRange(other: Tree): Range;
-      getLanguage(): any;
+      getLanguage(): Language;
     }
 
     class Language {
-      static load(path: string): Promise<Language>;
+      static load(input: string | Uint8Array): Promise<Language>;
 
       readonly version: number;
       readonly fieldCount: number;
+      readonly nodeTypeCount: number;
 
-      fieldNameForId(fieldId: number): string | null
-      fieldIdForName(fieldName: string): number | null
+      fieldNameForId(fieldId: number): string | null;
+      fieldIdForName(fieldName: string): number | null;
+      idForNodeType(type: string, named: boolean): number;
+      nodeTypeForId(typeId: number): string | null;
+      nodeTypeIsNamed(typeId: number): boolean;
+      nodeTypeIsVisible(typeId: number): boolean;
+      query(source: string): Query;
+    }
+
+    interface QueryCapture {
+      name: string;
+      node: SyntaxNode;
+    }
+
+    interface QueryMatch {
+      pattern: number;
+      captures: QueryCapture[];
+    }
+
+    interface PredicateResult {
+      operator: string;
+      operands: { name: string; type: string }[];
+    }
+
+    class Query {
+      captureNames: string[];
+
+      delete(): void;
+      matches(node: SyntaxNode, startPosition?: Point, endPosition?: Point): QueryMatch[];
+      captures(node: SyntaxNode, startPosition?: Point, endPosition?: Point): QueryCapture[];
+      predicatesForPattern(patternIndex: number): PredicateResult[];
     }
   }
 

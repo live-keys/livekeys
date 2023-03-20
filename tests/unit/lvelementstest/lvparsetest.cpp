@@ -225,25 +225,47 @@ void LvParseTest::bindingChainTest(){
     parseTestTemplate("ParserTest45");
 }
 
+void LvParseTest::creationInMethodTest(){
+    parseTestTemplate("ParserTest46");
+}
+
+void LvParseTest::propertyEqualsVsBinding(){
+    parseTestTemplate("ParserTest47");
+}
+
+void LvParseTest::propertyNotation(){
+    parseTestTemplate("ParserTest48");
+}
+
 void LvParseTest::parseTestTemplate(std::string name){
-    std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
-    std::string expect   = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv.js");
+    try{
+        std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
+        std::string expect   = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv.js");
 
-    Compiler::Config compilerConfig;
-    compilerConfig.allowUnresolvedTypes(true);
-    Compiler::Ptr compiler = Compiler::create(compilerConfig);
-    compiler->configureImplicitType("console");
-    compiler->configureImplicitType("vlog");
+        Compiler::Config compilerConfig(false);
+        compilerConfig.allowUnresolvedTypes(true);
+        Compiler::Ptr compiler = Compiler::create(compilerConfig);
+        compiler->configureImplicitType("console");
+        compiler->configureImplicitType("vlog");
 
-    std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
+        std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
 
-    el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
-    el::LanguageParser::AST* conversionAST = parser->parse(conversion);
-    el::LanguageParser::AST* expectedAST   = parser->parse(expect);
+        el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
+        el::LanguageParser::AST* conversionAST = parser->parse(conversion);
+        el::LanguageParser::AST* expectedAST   = parser->parse(expect);
 
-    el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
-    parser->destroy(conversionAST);
-    parser->destroy(expectedAST);
+        el::LanguageParser::ComparisonResult compare = parser->compare(expect, expectedAST, conversion, conversionAST);
+        parser->destroy(conversionAST);
+        parser->destroy(expectedAST);
 
-    QVERIFY(compare.isEqual());
+        if ( !compare.isEqual() ){
+            vlog() << compare.errorString();
+            vlog() << conversion;
+        }
+        QVERIFY(compare.isEqual());
+    } catch ( lv::el::SyntaxException& e ){
+        QFAIL(Utf8("SyntaxException: % at %:%").format(e.message(), e.parsedFile(), e.parsedLine()).data().c_str());
+    } catch ( lv::Exception& e ){
+        QFAIL(("Exception triggered: " + e.message()).c_str());
+    }
 }
