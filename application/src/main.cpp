@@ -19,7 +19,6 @@
 #include <QFileInfo>
 
 #include "livekeys.h"
-#include "livekeysarguments.h"
 #include "live/libraryloadpath.h"
 #include "live/visuallog.h"
 #include "live/applicationcontext.h"
@@ -66,8 +65,12 @@ int main(int argc, char *argv[]){
             return e.code();
         } else {
             vlog("main").e() << "Uncaught exception: " << e.message().c_str();
-            vlog("main").e() << *e.stackTrace();
+            if ( e.hasStackTrace() )
+                vlog("main").e() << *e.stackTrace();
             return e.code();
         }
+    } catch ( std::exception& e ){
+        vlog("main").e() << "Uncaught exception: " << e.what();
+        return -1;
     }
 }
