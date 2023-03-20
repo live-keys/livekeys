@@ -21,7 +21,7 @@
 namespace lv{
 
 class Program;
-class LV_BASE_EXPORT ProgramHolder{
+class ProgramHolder{
 
 public:
     virtual Program* main() = 0;
