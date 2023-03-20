@@ -22,7 +22,7 @@ if (APPLE)
     set(LIBRARY_DEPLOY_PATH  ${DEPLOY_PATH}/Frameworks/Live.framework/Libraries)
     set(MODULE_DEPLOY_PATH   ${DEPLOY_PATH}/PlugIns)
 else()
-    set(DEPLOY_PATH          ${BINARY_PATH}/bin)
+    set(DEPLOY_PATH          ${BINARY_PATH})
     set(LIBRARY_DEPLOY_PATH  ${DEPLOY_PATH})
     set(MODULE_DEPLOY_PATH   ${DEPLOY_PATH}/plugins)
 endif()
@@ -96,6 +96,11 @@ message("  * BUILD_TESTS:             ${BUILD_TESTS}")
 message("")
 
 include(${CMAKE_CURRENT_SOURCE_DIR}/project/functions.cmake)
+
+
+if(BUILD_TESTS)
+    set(CATCH2_AMALGAMATED_PATH "${CMAKE_CURRENT_SOURCE_DIR}/tests/3rdparty/catch2/extras")
+endif()
 
 add_subdirectory(lib)
 add_subdirectory(plugins)

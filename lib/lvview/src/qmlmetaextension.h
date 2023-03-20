@@ -36,7 +36,7 @@ public:
     typedef std::shared_ptr<QmlMetaExtension> Ptr;
     typedef std::function<QObject*()> TypeConstructor;
 
-    class I{
+    class LV_VIEW_EXPORT I{
     public:
         typedef std::uintptr_t Identifier;
         ~I();
@@ -132,7 +132,7 @@ template<typename T> QmlMetaExtension::Ptr QmlMetaExtension::create(QmlMetaExten
 
 namespace lv{
 
-class MetaSerializableI : public QmlMetaExtension::I{
+class LV_VIEW_EXPORT MetaSerializableI : public QmlMetaExtension::I{
 
     META_EXTENSION_INTERFACE(MetaSerializableI);
 

@@ -2,6 +2,7 @@ add_library(lvbase SHARED)
 
 set_target_properties(lvbase PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
 )
 
 target_sources(lvbase PRIVATE
@@ -37,14 +38,15 @@ target_compile_definitions(lvbase PRIVATE LV_BASE_LIB)
 target_compile_features(lvbase PRIVATE cxx_std_17)
 
 set(ENABLE_STACK_TRACE OFF)
+
 if(DEBUG_BUILD)
     set(ENABLE_STACK_TRACE ON)
 endif()
 
 if(ENABLE_STACK_TRACE)
     if (WIN32)
-        target_compile_definitions(lvbase PRIVATE ENABLE_STACK_TRACE)
-        target_link_libraries(lvbase -dbghelp)
+        target_compile_definitions(lvbase PUBLIC USE_STACK_TRACE)
+        target_link_libraries(lvbase dbghelp)
     elseif(UNIX AND NOT APPLE)
         if ( BUILD_UNIX_BFD_TRACE )
             target_compile_definitions(lvbase PRIVATE ENABLE_STACK_TRACE)
@@ -142,3 +144,6 @@ if(APPLE)
     )
 endif()
 
+if(BUILD_TESTS)
+    add_subdirectory(test)
+endif()
