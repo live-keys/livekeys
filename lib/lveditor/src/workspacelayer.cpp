@@ -63,7 +63,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
     , m_startup(nullptr)
     , m_viewRoot(nullptr)
     , m_runSpace(nullptr)
-    , m_messageStack(new lv::WorkspaceMessageStack(this))
+    , m_messageStack(nullptr)
     , m_commands(nullptr)
     , m_keymap(nullptr)
     , m_themes(new ThemeContainer("workspace", this))
@@ -87,6 +87,7 @@ WorkspaceLayer::WorkspaceLayer(QObject *parent)
 //    m_engine->engine()->rootContext()->setContextProperty("project", m_project);
 
     m_commands = new Commands(m_engine, this);
+    m_messageStack = new WorkspaceMessageStack(m_engine, this);
 
     m_tooltipTimer->setInterval(500);
     m_tooltipTimer->setSingleShot(true);

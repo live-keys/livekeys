@@ -17,8 +17,11 @@
 #define WORKSPACEMESSAGESTACK_H
 
 #include <QAbstractListModel>
+#include <QJSValue>
 
 namespace lv {
+
+class ViewEngine;
 
 class WorkspaceMessageStack : public QAbstractListModel{
 
@@ -39,7 +42,7 @@ public:
         MessageType
     };
 
-    WorkspaceMessageStack(QObject* parent = nullptr);
+    WorkspaceMessageStack(ViewEngine* engine, QObject* parent = nullptr);
     ~WorkspaceMessageStack(){}
 
     class WorkspaceMessage{
@@ -59,6 +62,7 @@ public slots:
     void pushInfo(const QString& message, int code);
     void pushWarning(const QString& message, int code);
     void pushError(const QString& message, int code);
+    void pushErrorObject(const QJSValue& e);
     void removeAt(int idx);
     void clear();
     int count();
@@ -66,10 +70,10 @@ signals:
     void messageAdded(int type, QString message, int code);
     void countChanged();
 private:
-
+    ViewEngine*             m_engine;
     QList<WorkspaceMessage> m_messages;
-    QHash<int, QByteArray> m_roles;
-
+    QHash<int, QByteArray>  m_roles;
+    bool                    m_logEnabled;
 
     Q_DISABLE_COPY(WorkspaceMessageStack)
 };
