@@ -31,11 +31,9 @@ CodePalette{
         editFragment.write(palette.value)
     }
 
-    item: Rectangle{
+    item: Item{
         width: 330
         height: 23
-        color: 'transparent'
-
 
         Input.InputBox{
             id: numberInput
