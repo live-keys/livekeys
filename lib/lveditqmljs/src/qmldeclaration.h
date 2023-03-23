@@ -21,6 +21,7 @@
 #include "live/lveditqmljsglobal.h"
 #include "live/projectdocument.h"
 #include "live/qmllanguageinfo.h"
+#include "live/visuallogqt.h"
 
 namespace lv{
 
@@ -220,6 +221,29 @@ inline ProjectDocumentSection::Ptr QmlDeclaration::section(){
 /// \brief Assigns the lv::ProjectDocument section.
 inline void QmlDeclaration::setSection(ProjectDocumentSection::Ptr section) {
     m_section = section;
+}
+
+inline lv::VisualLog& operator << (lv::VisualLog& vl, const QmlDeclaration& d){
+    std::string location = "";
+    if ( d.isForComponent() ){
+        location = "component";
+    } else if ( d.isForImports() ){
+        location = "imports";
+    } else if ( d.isForList() ){
+        location = "list";
+    } else if ( d.isForProperty() ){
+        location = "property";
+    } else if ( d.isForSlot() ){
+        location = "slot";
+    }
+    return vl << "QmlDeclaration["
+        "pos:" << d.position() <<
+        ",len:" << d.length() <<
+        ",type:" << d.type().join() <<
+        ",location:" << location <<
+        ",parentType:" << d.parentType().join() <<
+        ",hasObject:" << d.isForObject() <<
+    "]";
 }
 
 }// namespace
