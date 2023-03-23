@@ -115,6 +115,13 @@ template<typename T> QmlMetaExtension::Ptr QmlMetaExtension::create(QmlMetaExten
     return QmlMetaExtension::create(typeid (T).name(), tc);
 }
 
+class LV_VIEW_EXPORT QmlExtensionObjectI{
+public:
+    ~QmlExtensionObjectI();
+
+    virtual const lv::QmlMetaExtension::Ptr& typeMetaExtension() const = 0;
+};
+
 }// namespace
 
 #define META_EXTENSION_BASE(_class, _constructor) \
@@ -122,7 +129,7 @@ template<typename T> QmlMetaExtension::Ptr QmlMetaExtension::create(QmlMetaExten
     public: static lv::QmlMetaExtension::Ptr& metaExtension(){ static lv::QmlMetaExtension::Ptr mi = lv::QmlMetaExtension::create<_class>(_constructor); return mi; }
 
 #define META_EXTENSION(_class, _constructor) \
-    public: virtual const lv::QmlMetaExtension::Ptr& typeMetaExtension() const override{ return metaObjectInfo(); } \
+    public: virtual const lv::QmlMetaExtension::Ptr& typeMetaExtension() const override{ return metaExtension(); } \
     public: static lv::QmlMetaExtension::Ptr& metaExtension(){ static lv::QmlMetaExtension::Ptr mi = lv::QmlMetaExtension::create<_class>(_constructor); return mi; }
 
 #define META_EXTENSION_INTERFACE(_class) \
@@ -153,7 +160,6 @@ private:
     Deserialize m_deserialize;
 };
 
-
 inline void MetaSerializableI::serialize(ViewEngine *engine, const QObject *object, MLNode &node){
     m_serialize(engine, object, node);
 }
@@ -161,6 +167,32 @@ inline void MetaSerializableI::serialize(ViewEngine *engine, const QObject *obje
 inline QObject* MetaSerializableI::deserialize(ViewEngine* engine, const MLNode &node){
     return m_deserialize(engine, node);
 }
+
+
+
+class MetaLogI : public QmlMetaExtension::I{
+
+    META_EXTENSION_INTERFACE(MetaLogI);
+
+public:
+    typedef std::function<void(ViewEngine*, QObject*, VisualLog&)> Log;
+
+    MetaLogI(Log log) : m_log(log){}
+
+    void log(ViewEngine* ve, QObject* o, VisualLog& vl);
+
+    template<typename T> static MetaLogI* from(){return MetaLogI::from(T::metaExtension()); }
+    static MetaLogI* from(const QmlMetaExtension::Ptr& me){ return me->i<MetaLogI>(); }
+
+private:
+    Log m_log;
+};
+
+inline void MetaLogI::log(ViewEngine *ve, QObject *o, VisualLog &vl){
+    m_log(ve, o, vl);
+}
+
+
 
 }// namespace
 
