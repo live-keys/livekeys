@@ -18,6 +18,7 @@
 
 #include "live/lvbaseglobal.h"
 #include <string>
+#include <memory>
 
 namespace lv{
 

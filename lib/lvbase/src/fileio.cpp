@@ -34,6 +34,10 @@ FileIO::~FileIO(){
 }
 
 std::string FileIO::readFromFile(const std::string &path){
+    if ( !Path::isFile(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file for reading, path is not a file or does not exist: %").format(path), lv::Exception::toCode("~File"));
+    }
+
     std::ifstream instream(path, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
         THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file: %").format(path), lv::Exception::toCode("~File"));
