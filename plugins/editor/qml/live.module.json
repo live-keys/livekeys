@@ -14,7 +14,7 @@
         "palettes/SliderPalette.qml": "qml/double",
         "palettes/SpinBoxPalette.qml": "qml/var",
         "palettes/StringListPalette.qml": ["qml/QStringList", "qml/var"],
-        "palettes/DoubleHistoryPlotPalette.qml": "qml/double",
+        "palettes/NumberHistoryPlotPalette.qml": "qml/double",
         "palettes/ColorPalette.qml": "qml/color",
         "palettes/FilePathPalette.qml": "qml/string",
         "palettes/FolderPathPalette.qml": "qml/string",
