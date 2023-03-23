@@ -15,8 +15,9 @@ WorkspaceControl{
             project.setActive(winPath)
         }
          
-        var codeHandler = editor.documentHandler.codeHandler
-        var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        var codeHandler = editor.code.language
+        var rootDeclaration = codeHandler.rootDeclaration()
+        var rootPosition = rootDeclaration.position()
         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
