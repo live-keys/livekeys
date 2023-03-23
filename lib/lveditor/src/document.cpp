@@ -84,9 +84,13 @@ Document::~Document(){
  */
 void Document::readContent(){
     if ( isOnDisk() ){
-        m_content = QByteArray::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(m_path.toStdString()));
-        m_lastModified = QFileInfo(m_path).lastModified();
-        emit contentChanged();
+        try{
+            m_content = QByteArray::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(m_path.toStdString()));
+            m_lastModified = QFileInfo(m_path).lastModified();
+            emit contentChanged();
+        } catch ( lv::Exception& e ){
+            QmlError(parentAsProject()->viewEngine(), e, this).jsThrow();
+        }
     }
 }
 
@@ -102,18 +106,23 @@ int Document::contentLength(){
  */
 bool Document::save(){
     if ( isOnDisk() ){
-        QByteArray data = content();
-        if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
-                 path().toStdString(), data.constData(), static_cast<size_t>(data.length() )) )
-        {
-            setIsDirty(false);
-            setLastModified(QDateTime::currentDateTime());
-            emit saved();
-            if ( parentAsProject() )
-                parentAsProject()->documentSaved(this);
-            if ( m_runTrigger )
-                m_runTrigger->onContentSaved();
-            return true;
+        try{
+            QByteArray data = content();
+            if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
+                     path().toStdString(), data.constData(), static_cast<size_t>(data.length() )) )
+            {
+                setIsDirty(false);
+                setLastModified(QDateTime::currentDateTime());
+                emit saved();
+                if ( parentAsProject() )
+                    parentAsProject()->documentSaved(this);
+                if ( m_runTrigger )
+                    m_runTrigger->onContentSaved();
+                return true;
+            }
+        } catch ( Exception& e ){
+            QmlError(parentAsProject()->viewEngine(), e, this).jsThrow();
+            return false;
         }
     }
     return false;
@@ -125,18 +134,23 @@ bool Document::save(){
  */
 bool Document::saveAs(const QString& savePath){
     if ( path() == savePath ){
-        save();
+        return save();
     } else if ( savePath != "" ){
-        QByteArray data = content();
-        if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
-                 savePath.toStdString(), data, static_cast<size_t>(data.size())) )
-        {
-            parentAsProject()->relocateDocument(path(), savePath, this);
-            setIsDirty(false);
-            emit saved();
-            m_lastModified = QDateTime::currentDateTime();
-            parentAsProject()->documentSaved(this);
-            return true;
+        try{
+            QByteArray data = content();
+            if ( parentAsProject()->viewEngine()->fileIO()->writeToFile(
+                     savePath.toStdString(), data, static_cast<size_t>(data.size())) )
+            {
+                parentAsProject()->relocateDocument(path(), savePath, this);
+                setIsDirty(false);
+                emit saved();
+                m_lastModified = QDateTime::currentDateTime();
+                parentAsProject()->documentSaved(this);
+                return true;
+            }
+        } catch ( Exception& e ){
+            QmlError(parentAsProject()->viewEngine(), e, this).jsThrow();
+            return false;
         }
     }
     return false;
