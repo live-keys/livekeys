@@ -16,6 +16,7 @@
 #include "compiler.h"
 #include "live/visuallog.h"
 #include "live/packagegraph.h"
+#include "live/modulecontext.h"
 #include "languagenodes_p.h"
 #include "elementssections_p.h"
 #include "elementsmodule.h"
@@ -128,13 +129,13 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     return result;
 }
 
-std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std::string &path, const std::string &contents, BaseNode *node){
+std::string Compiler::compileModuleFileToJs(const Module::Ptr &module, const std::string &path, const std::string &contents, BaseNode *node){
     std::string result;
     el::JSSection* section = new el::JSSection;
     section->from = 0;
     section->to   = static_cast<int>(contents.size());
 
-    Utf8 outputPath = moduleFileBuildPath(plugin, path);
+    Utf8 outputPath = moduleFileBuildPath(module, path);
     Utf8 relativePathFromOutput;
 
     auto outputPathSegments = outputPath.split("/");
@@ -180,13 +181,23 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std
     if ( m_d->config.m_fileOutput ){
         std::string outputFile = outputPath.data();
         std::string displayFilePath = path;
-        Utf8::replaceAll(displayFilePath, plugin->packagePath(), "");
+        Utf8::replaceAll(displayFilePath, module->packagePath(), "");
 
         bool shouldWrite = true;
         if ( m_d->config.m_fileOutputOnlyOnModified && Path::exists(outputFile) ){
             DateTime sourceModifiedStamp = Path::lastModified(path);
             DateTime outputModifiedStamp = Path::lastModified(outputFile);
             shouldWrite = outputModifiedStamp < sourceModifiedStamp;
+        }
+        if ( shouldWrite && module->context() ){
+            auto package = module->context()->package;
+            if ( !package->release().empty() ){
+                shouldWrite = false;
+                if ( !Path::exists(outputPath.data()) ){
+                    Utf8 msg = Utf8("Released package '%' missing build file: %").format(package->name(), displayFilePath);
+                    THROW_EXCEPTION(lv::Exception, msg, Exception::toCode("~File"));
+                }
+            }
         }
 
         if ( shouldWrite ){

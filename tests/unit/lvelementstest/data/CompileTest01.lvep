@@ -1,0 +1,35 @@
+// This file creates a packages folder to test release
+
+////// packages/package1/live.module.json
+
+{
+    "name" : "package1",
+    "package": ".",
+    "modules": ["A"]
+}
+
+////// packages/package1/live.package.json
+
+{
+    "name" : "package1",
+    "version" : "1.0.0"
+}
+
+////// packages/package1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// main.lv
+
+import package1
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+}
+

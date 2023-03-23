@@ -24,11 +24,13 @@ public:
     void test4Lv();
     void test5Lv();
 
+    void compileModule();
+    void compilePackage();
+
 private slots:
     void initTestCase();
 
-    void compileModule();
-    void compilePackage();
+    void compilePackageWithRelease();
 
 private:
     std::string scriptPath(const std::string& scriptName);
