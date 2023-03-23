@@ -139,8 +139,8 @@ public:
     const std::string& path() const;
     const std::string& filePath() const;
     const std::string& documentation() const;
+    const std::string& release() const;
     const Version& version() const;
-    /** Returns a map of dependencies with string keys */
     const std::map<std::string, Package::Reference*>& dependencies() const;
     const std::map<std::string, Package::Library*>& libraries() const;
     const std::vector<std::string> internalLibraries() const;
