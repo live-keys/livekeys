@@ -496,6 +496,9 @@ Theme{
         property Component buildSection: Image{
             source: "qrc:/images/palette-integrate.png"
         }
+        property Component viewConnections: Image{
+            source: "qrc:/images/palette-connections.png"
+        }
         property Component openPalette: Image{
             source: "qrc:/images/palette-add.png"
         }

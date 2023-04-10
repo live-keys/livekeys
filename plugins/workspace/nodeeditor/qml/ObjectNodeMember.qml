@@ -11,184 +11,79 @@ import visual.input 1.0 as Input
 Item{
     id: root
     objectName: "objectNodeMember"
-
     anchors.left: parent.left
-    anchors.leftMargin: isAnObject ? 30 : 0
-    height: propertyTitle.height + paletteContainer.height
-    property int contentWidth: 355 - anchors.leftMargin
-    onWidthChanged: {
-        var maxWidth = 340
-        if ( !root.node || !root.node.propertyContainer)
-            return
+    anchors.leftMargin: root.control.isAnObject ? 30 : 0
 
-        for (var i=0; i < root.node.propertyContainer.children.length; ++i){
-            var child = root.node.propertyContainer.children[i]
-            if (child.width > maxWidth)
-                maxWidth = child.width
-        }
-
-        if (maxWidth !== node.width)
-            root.node.width = maxWidth
-    }
-
-    z: -1
-
-    property QtObject style: ObjectNodeMemberStyle{}
-
-    property string propertyName : ''
-    property string propertyType: ''
-    property alias propertyTitle: propertyTitle
-    property alias paletteListContainer: paletteContainer
-
-    property string title: ''
-    property string subtitle: ''
-    
     property Item inPort : null
     property Item outPort : null
-    property QtObject node : null
-    property var editFragment: null
 
-    property var isAnObject: false
-    property bool isMethod: false
+    property ObjectNodeMemberControl control: ObjectNodeMemberControl{}
+    property QtObject style: ObjectNodeMemberStyle{}
+    property var sizeInfo: ({minWidth: -1, minHeight: -1, maxWidth: -1, maxHeight: -1})
 
-    property QtObject childObjectContainer: null
-
-    signal updateContentWidth()
-    onUpdateContentWidth: paletteContainer.updateContentWidth()
+    width: 30
+    height: 30
+    z: -1
 
     function __initialize(node, style, editFragment){
+        root.control.__initialize(root, node, editFragment, paletteContainer, propertyTitle)
         root.style = style
-        root.propertyName = editFragment.identifier()
-        root.title = root.propertyName
-        root.subtitle = editFragment.typeName()
-        root.node = node
-        root.editFragment = editFragment
-
-        if ( editFragment ) {
-            if ( editFragment.location === QmlEditFragment.Object ){
-                root.isAnObject = true
-                root.title = editFragment.typeName()
-                root.subtitle = editFragment.objectId()
-            }
-            editFragment.incrementRefCount()
-        }
-        root.width = node.item.width - (root.isAnObject ? 30 : 0)
+        root.width = node.item.width - (root.control.isAnObject ? 30 : 0)
     }
 
     function __initializeFunction(node, style, name){
+        root.control.__initializeFunction(root, node, name, paletteContainer, propertyTitle)
         root.style = style
-        root.propertyName = name
-        root.title = root.propertyName
-        root.node = node
         root.width = node.item.width
-        root.isMethod = true
-    }
-
-    function addInPort(){
-        if ( root.inPort )
-            return
-
-        var port = root.node.item.objectGraph.insertPort(root.node, Qan.NodeItem.Left, Qan.Port.In);
-        port.label = root.propertyName + " In"
-        port.y = Qt.binding(
-            function(){
-                if (!root.node || !root.node.item)
-                    return 0
-                return root.node.item.paletteListContainer.height +
-                       root.y +
-                       (root.propertyTitle.height / 2) +
-                       42
-            }
-        )
-
-        root.inPort = port
-        port.objectProperty = root
-    }
-
-    function addOutPort(){
-        if (root.outPort )
-            return
-
-        var port = root.node.item.objectGraph.insertPort(root.node, Qan.NodeItem.Right, Qan.Port.Out);
-        port.label = root.propertyName + " Out"
-        port.y = Qt.binding(
-            function(){
-                if (!root.node || !root.node.item) return 0
-                return root.node.item.paletteListContainer.height +
-                       root.y +
-                       (root.propertyTitle.height / 2) +
-                       42
-            }
-        )
-        root.outPort = port
-        port.objectProperty = root
     }
 
     function clean(){
-        root.node.item.removeMemberByName(propertyName)
+        root.control.node.item.control.removeMemberByName(root.control.propertyName)
         aboutToRemoveConnection.enabled = false
 
-        var graph = root.node.graph
+        var graph = root.control.node.graph
         if (root.inPort) {
             if (root.inPort.inEdge)
                 graph.removeEdge(root.inPort.inEdge)
-            graph.removePort(node, root.inPort)
+            graph.removePort(root.control.node, root.inPort)
         }
         if (root.outPort) {
             for (var i=0; i< root.outPort.outEdges.length; ++i)
                 graph.removeEdge(root.outPort.outEdges[i])
-            graph.removePort(node, root.outPort)
+            graph.removePort(root.control.node, root.outPort)
         }
 
-        var children = root.paletteListContainer.children
+        var children = root.control.paletteGroup.children
         for (var idx = 0; idx < children.length; ++idx)
             children[idx].destroy()
 
         return root
     }
 
-    function paletteByName(name){
-        var pg = paletteContainer
-        for ( var i = 0; i < pg.children.length; ++i ){
-            if ( pg.children[i].name === name )
-                return pg.children[i]
+    function measureSizeInfo(){
+        var si = paletteContainer.sizeInfo
+
+        root.sizeInfo = {
+            minWidth: si.minWidth < 280 ? 280 : si.minWidth,
+            minHeight: si.minHeight > 30 ? si.minHeight : 30,
+            maxWidth: si.maxWidth > 280 ? si.maxWidth : -1,
+            maxHeight: si.maxHeight > 30 ? si.maxHeight : -1
         }
-        return null
+
+        if ( root.parent && root.parent.measureSizeInfo ){
+            root.parent.measureSizeInfo()
+        }
     }
 
-    function userAddPalette(){
-        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-
-        var palettes = root.editFragment.language.findPalettesForFragment(root.editFragment)
-        palettes.data = paletteFunctions.filterOutPalettes(palettes.data, paletteGroup().palettesOpened, true)
-        if (!palettes.data || palettes.data.length === 0)
-            return null
-
-        var paletteList = paletteFunctions.views.openPaletteList(paletteFunctions.theme.selectableListView, palettes.data, root.node.item,
-        {
-             onCancelled: function(){
-                 root.node.item.objectGraph.activateFocus()
-                 paletteList.destroy()
-             },
-             onSelected: function(index){
-                 var palette = root.editFragment.language.expand(root.editFragment, {
-                     "palettes" : [palettes.data[index].name]
-                 })
-                var paletteBox = paletteFunctions.__factories.createPaletteContainer(palette, root.paletteGroup(), {moveEnabled: false})
-                root.node.item.objectGraph.activateFocus()
-             }
-        })
-
-        paletteList.forceActiveFocus()
-        paletteList.width = root.width
-        paletteList.anchors.topMargin = root.y + 78
+    function adjustSize(){
+        var width = root.control.isAnObject
+                ? root.parent.sizeInfo.objectContentWidth
+                : root.parent.sizeInfo.contentWidth
+        this.width = width
+        this.sizeInfo.contentWidth = width
+        paletteContainer.adjustSize()
+        this.height = 30 + paletteContainer.height
     }
-
-    function paletteGroup(){
-        return paletteContainer
-    }
-
-    function expand(){}
 
     Rectangle {
         id: propertyTitle
@@ -202,7 +97,7 @@ Item{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: parent.left
             anchors.leftMargin: 10
-            text: root.title
+            text: root.control.title
             textStyle: root.style.textStyle
         }
 
@@ -211,7 +106,7 @@ Item{
             anchors.verticalCenter : parent.verticalCenter
             anchors.left: propertyLabel.right
             anchors.leftMargin: 5
-            text: root.subtitle
+            text: root.control.subtitle
             textStyle: Input.TextStyle {
                 font: root.style.textStyle.font
                 color: "gray"
@@ -233,7 +128,7 @@ Item{
 
         Item{
             id: paletteAddButton
-            visible:!isAnObject
+            visible:!root.control.isAnObject
             anchors.right: parent.right
             anchors.rightMargin: 25
             anchors.verticalCenter: parent.verticalCenter
@@ -246,13 +141,13 @@ Item{
             MouseArea{
                 id: paletteAddMouse
                 anchors.fill: parent
-                onClicked: root.userAddPalette()
+                onClicked: root.control.userAddPalette()
             }
         }
 
         Item{
             id: closeObjectItem
-            visible: !isAnObject
+            visible: !root.control.isAnObject
             anchors.right: parent.right
             anchors.rightMargin: 0
             anchors.top: parent.top
@@ -266,12 +161,11 @@ Item{
                 font.weight: Font.Light
             }
             MouseArea{
-                id: paletteCloseArea
+                id: propertyCloseArea
                 anchors.fill: parent
                 onClicked: {
-                    editFragment.language.removeConnection(editFragment)
-                    if (editFragment.refCount > 0)
-                    {
+                    root.control.editFragment.language.removeConnection(root.control.editFragment)
+                    if (root.control.editFragment.refCount > 0){
                         root.clean().destroy()
                     }
                 }
@@ -283,25 +177,13 @@ Item{
         id: paletteContainer
         anchors.top: parent.top
         anchors.topMargin: propertyTitle.height
-        function updateContentWidth(){
-            var max = 355
-            for (var i=0; i<children.length; ++i){
-                if (children[i].width + 10 > max)
-                    max = children[i].width + 10
-            }
-            root.contentWidth = max + root.anchors.leftMargin
-            if (node)
-                node.item.resizeNode()
-        }
-        onChildrenChanged: {
-            updateContentWidth()
-        }
-        editFragment: root.editFragment
+
+        editFragment: root.control.editFragment
     }
     
     Connections {
         id: aboutToRemoveConnection
-        target: editFragment
+        target: root.control.editFragment
         function onAboutToBeRemoved(){
             root.clean().destroy()
         }

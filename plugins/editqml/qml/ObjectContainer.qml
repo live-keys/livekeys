@@ -7,152 +7,136 @@ import editqml 1.0 as EditQml
 Item{
     id: root
     objectName: "objectContainer"
+    property ObjectContainerControl control: ObjectContainerControl{}
+    property var sizeInfo: ({minWidth: -1, minHeight: -1, maxWidth: -1, maxHeight: -1})
+    property bool fillEditorWidth: false
+    width: 0
+    height: 0
 
-    property alias paletteListContainer: container
-    property alias pane: objectContainerFrame.pane
-    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
-
-    //TODO: See if this should be private
-
-    function recalculateContentWidth(){
-        var max = 0
-        for (var i=0; i<paletteListContainer.children.length; ++i)
-        {
-            var child = paletteListContainer.children[i]
-            if (child.objectName === "objectContainer"){ // objectContainer
-                if (child.contentWidth + 30 > max) max = child.contentWidth + 30
-            } else if (child.objectName === "propertyContainer" && child.isAnObject){ // propertyContainer
-                if (child.childObjectContainer &&
-                    child.childObjectContainer.contentWidth + 140 > max)
-                    max = child.childObjectContainer.contentWidth + 140
-            } else {
-                if (child.width > max) // paletteGroup
-                    max = child.width
-            }
-        }
-
-        if (max < 300)
-            max = 300
-
-        if (max !== containerContentWidth){
-            containerContentWidth = max
-        }
+    property Connections editorConnections: Connections{
+        target: null
+        function onWidthChanged(){ root.measureSizeInfo() }
+        function onLineSurfaceWidthChanged(){ root.measureSizeInfo() }
     }
-
-    // interface functions
 
     function __initialize(editor, ef){
-        root.editor = editor
-        root.editFragment = ef
-        root.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-        ef.visualParent = root
-
-        var paletteBoxGroup = paletteFunctions.__factories.createPaletteGroup(root.paletteListContainer, ef)
-
-        paletteBoxGroup.leftPadding = 7
-        paletteBoxGroup.topPadding = 7
-        objectContainerFrame.paletteGroup = paletteBoxGroup
+        root.control.__initialize(editor, ef, root, container, objectContainerFrame)
     }
 
-    function addProperty(ef){
-        var pc = propertyByName(ef.identifier())
-        if ( pc )
-            return pc
-
-        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-        var propertyContainer = paletteFunctions.__factories.createPropertyContainer(root.editor, ef, root.paletteListContainer)
-
-        ef.incrementRefCount()
-
-        root.propertiesOpened.push(ef.identifier())
-        root.sortChildren()
-
-        return propertyContainer
+    function clean(){
+        root.control.clean()
+        return root
     }
 
-    function addFunctionProperty(name){
-        return null
+    function destroyObjectContainer(oc){
+        oc.clean()
+        oc.destroy()
     }
 
-    function propertyByName(name){
-        for (var i = 1; i < container.children.length; ++i){
-            if (!container.children[i])
-                continue
-            if (container.children[i].objectName === "propertyContainer"){
-                if ( container.children[i].editFragment.identifier() === name )
-                    return container.children[i]
+    function adjustSizeToEditor(){
+        fillEditorWidth = true
+        editorConnections.target = root.control.editor
+        root.measureSizeInfo()
+    }
+
+    function adjustSize(){
+        if ( !root.control.editor ){
+            return 0
+        }
+        if ( root.control.pane ){
+            var paneWidth = root.control.pane.width
+            var width = paneWidth > root.sizeInfo.minWidth ? paneWidth : root.sizeInfo.minWidth
+            root.width = width
+            root.sizeInfo.contentWidth = width
+            root.sizeInfo.objectContentWidth = width - 20
+        } else if ( fillEditorWidth ){
+            var editorWidth = root.control.editor.width - root.control.editor.lineSurfaceWidth - 20
+            var width = editorWidth > root.sizeInfo.minWidth ? editorWidth : root.sizeInfo.minWidth
+            root.width = width
+            root.sizeInfo.contentWidth = width
+            root.sizeInfo.objectContentWidth = width - 20
+        } else {
+            var w = 300
+            if ( parent.sizeInfo.objectContentWidth ){
+                w = parent.sizeInfo.objectContentWidth
+            } else if ( parent.sizeInfo.contentWidth ){
+                w = parent.sizeInfo.objectContentWidth
+            }
+            root.width = w
+            root.sizeInfo.contentWidth = w
+            root.sizeInfo.objectContentWidth = w - 20
+        }
+
+        for ( var i = 0; i < container.children.length; ++i ){
+            var c = container.children[i]
+            if ( c.adjustSize )
+                c.adjustSize()
+        }
+
+        var height = 30
+        if ( !root.control.compact ){
+            if ( children.length > 0 ){
+                for ( var i = 0; i < container.children.length; ++i ){
+                    height += container.children[i].height
+                }
+                if ( container.children.length > 1 )
+                    height += (container.children.length - 1) * container.spacing
             }
         }
-        return null
+
+        root.height = height
+        container.height = root.height - 30
+        container.width = root.width
     }
 
-    function addChildObject(ef){
-        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
+    function measureSizeInfo(){
+        var size = { minWidth: -1, minHeight: -1, maxWidth: -1, maxHeight: -1, contentWidth: -1 }
 
-        var childObjectContainer = paletteFunctions.__factories.createObjectContainer(root.editor, ef, root.paletteListContainer)
-        childObjectContainer.parentObjectContainer = root
-        childObjectContainer.x = 20
-        childObjectContainer.y = 10
+        for ( var i = 0; i < container.children.length; ++i ){
+            var si = container.children[i].sizeInfo
 
-        ef.incrementRefCount()
+            if ( container.children[i].objectName === 'objectContainer' ){
+                var minWidth = si.minWidth > 0 ? si.minWidth + 20 : 320
+                if ( minWidth > size.minWidth )
+                    size.minWidth = minWidth
+            } else {
+                if ( si.minWidth > 0 ){
+                    if ( size.minWidth < 0 )
+                        size.minWidth = si.minWidth
+                    else if ( size.minWidth < si.minWidth ){
+                        size.minWidth = si.minWidth
+                    }
+                }
+            }
 
-        return childObjectContainer
-    }
-
-    function paletteByName(name){
-        for ( var i = 0; i < objectContainerFrame.paletteGroup.children.length; ++i ){
-            if ( objectContainerFrame.paletteGroup.children[i].name === name )
-                return objectContainerFrame.paletteGroup.children[i]
+            if ( si.maxWidth > 0 ){
+                if ( size.maxWidth < 0 )
+                    size.maxWidth = si.maxWidth
+                else if ( size.maxWidth < si.maxWidth ){
+                    size.maxWidth = si.maxWidth
+                }
+            }
+            if ( si.minHeight > 0 ){
+                size.minHeight = size.minHeight < 0 ? si.minHeight : size.minHeight + si.minHeight
+            }
+            if ( si.maxHeight > 0 ){
+                size.maxHeight = size.maxHeight < 0 ? si.maxHeight : size.maxHeight + si.maxHeight
+            }
         }
-        return null
-    }
-
-    function paletteGroup(){
-        return objectContainerFrame.paletteGroup
-    }
-
-    function getPane(){
-        var pane = root.parent
-        while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
-            pane = pane.parent
+        if ( size.minWidth < 300 ){
+            size.minWidth = 300
         }
-        return pane
-    }
+        if ( size.minHeight < 30 ){
+            size.minHeight = 30
+        }
 
-    function getLayoutState(){
-        return { isCollapsed: root.compact }
-    }
-
-    property bool supportsFunctions: false
-
-    onContentWidthChanged: {
-        if (parentObjectContainer){
-            parentObjectContainer.recalculateContentWidth()
+        root.sizeInfo = size
+        if ( root.parent && root.parent.measureSizeInfo ){
+            root.parent.measureSizeInfo()
+        } else {
+            root.adjustSize()
         }
     }
-
-    property double containerContentWidth : 0
-    property double editorContentWidth: editor && !parentObjectContainer ? editor.width - editor.lineSurfaceWidth - 50 : 0
-
-    property alias editFragment : objectContainerFrame.editFragment
-    property alias editor : objectContainerFrame.editor
-    property alias title : objectContainerFrame.title
-    property alias titleHeight : objectContainerFrame.titleHeight
-    property alias compact: objectContainerFrame.compact
-    property alias topSpacing: objectContainerFrame.topSpacing
-    property alias propertiesOpened: objectContainerFrame.propertiesOpened
-    property var sortChildren: paletteListContainer.sortChildren
-
-    property alias frame: objectContainerFrame
-
-    property var parentObjectContainer: null
-    property var isForProperty: false
-    property QtObject theme: lk.layers.workspace.themes.current
-
-    width: objectContainerFrame.width
-    height: objectContainerFrame.pane ? 30 : objectContainerFrame.height
-
-    property int contentWidth: containerContentWidth
 
     property Rectangle placeHolder : Rectangle{
         height: 30
@@ -164,80 +148,21 @@ Item{
             anchors.leftMargin: 10
             width: parent.width - 20
             anchors.verticalCenter: parent.verticalCenter
-            text: objectContainerFrame.title
+            text: objectContainerFrame.control.title
             clip: true
             elide: Text.ElideRight
             color: '#82909b'
         }
     }
 
-    function expand(options){
-        objectContainerFrame.expand(options ? options : undefined)
-    }
-
-    function collapse(){
-        objectContainerFrame.collapse()
-    }
-
-    function __cleanExpandedMembers(){
-        editFragment.removePalettes()
-
-        var pg = objectContainerFrame.paletteGroup
-        for (var xi = 0; xi < pg.children.length; ++xi)
-            if (pg.children[xi].objectName === "paletteContainer")
-                pg.children[xi].destroy()
-        pg.children = []
-        pg.palettesOpened = []
-
-        for (var pi = 0; pi < paletteListContainer.children.length; ++pi){
-            var child = paletteListContainer.children[pi]
-            var ef = null
-            if (child.objectName === "propertyContainer"){
-                ef = child.editFragment
-                child.clean().destroy()
-            } else if (child.objectName === "objectContainer"){
-                ef = child.editFragment
-                child.clean().destroy()
-            }
-            if ( ef )
-                editor.code.language.removeConnection(ef)
-        }
-    }
-
-    function clean(){
-        __cleanExpandedMembers()
-        objectContainerFrame.paletteGroup.destroy()
-        return root
-    }
-
-    function destroyObjectContainer(oc){
-        oc.clean()
-        oc.destroy()
-    }
-
     Item{
         id: objectContainerFrame
         objectName: "objectContainerFrame"
 
-        property string title: "Object"
-
-        property Item paletteGroup : null
         property alias groupsContainer: container
-        property QtObject editFragment : null
-        property Item editor: null
-
         property alias objectContainerTitle: objectContainerTitle
-
-        property Item pane : null
         property Item wrapper : root
-
-        property int titleHeight: 30
-        property bool compact: true
-
-        property int topSpacing: 0
-
-        property var propertiesOpened: []
-
+        property ObjectContainerControl control: root.control
 
         Keys.onPressed: {
             var command = lk.layers.workspace.keymap.locateCommand(event.key, event.modifiers)
@@ -247,87 +172,33 @@ Item{
             event.accepted = true
         }
 
-        width: container.width < 260 ? 300 : container.width
-        height: compact ? 30 : objectContainerTitleWrap.height + topSpacing + container.height + 3
+        width: parent.width
+        height: control.compact ? 30 : objectContainerTitleWrap.height + control.topSpacing + container.height + 3
 
         function closeAsPane(){
             objectContainerTitle.parent = objectContainerTitleWrap
             objectContainerFrame.parent = objectContainerFrame.wrapper
-            objectContainerFrame.pane.removePane()
-            objectContainerFrame.pane = null
+            objectContainerFrame.control.pane.removePane()
+            objectContainerFrame.control.pane = null
             root.placeHolder.parent = null
         }
 
-        function expand(options){
-            if (!compact)
-                return
-
-            compact = false
-
-            var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-
-            var objects = root.editor.code.language.openNestedFragments(root.editFragment, ['objects'])
-
-            for (var i = 0; i < objects.length; ++i){
-                if ( !objects[i].visualParent ){
-                    root.addChildObject(objects[i])
-                }
-            }
-
-            var expandDefaultPalette = options && options.expandDefaultPalette ? options.expandDefaultPalette : true
-
-            var codeHandler = root.editor.code.language
-
-            var properties = codeHandler.openNestedFragments(root.editFragment, ['properties'])
-
-            for (var i = 0; i < properties.length; ++i){
-                if ( !properties[i].visualParent ){
-                    var pc = addProperty(properties[i])
-                    if ( expandDefaultPalette )
-                        paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
-                }
-            }
-
-            if ( expandDefaultPalette )
-                paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
-
-            var id = editFragment.objectId()
-            var check = (objectContainerFrame.title.indexOf('#') === -1)
-            if (id && check)
-                objectContainerFrame.title = objectContainerFrame.title + "#" + id
-
-            container.sortChildren()
-        }
-
-        function collapse(){
-            if (compact)
-                return
-            if ( root.editFragment.fragmentType() & EditQml.QmlEditFragment.Group ){
-                compact = true
-                return
-            }
-            root.__cleanExpandedMembers()
-
-            compact = true
-            propertiesOpened.length = 0
-        }
-
         property Connections editFragmentRemovals: Connections{
-            target: editFragment
+            target: control.editFragment
             function onConnectionChanged(){
-                objectContainerTitle.isBuilder = root.editFragment.isBuilder()
+                root.control.__whenEditFragmentConnectionChanged()
             }
             function onAboutToBeRemoved(){
-                if (isForProperty)
+                if (objectContainerFrame.control.isForProperty)
                     return
                 var p = root.parent
 
                 //TODO: Move to LanguageQmlHandler
-                var language = editFragment.language
-                var rootPosition = language.findRootPosition()
+                var language = root.control.editFragment.language
+                var rootDeclaration = language.rootDeclaration()
 
-                if (editFragment.position() === rootPosition)
-                    editFragment.language.rootFragment = null
+                if (root.control.editFragment.position() === rootDeclaration.position())
+                    root.control.editFragment.language.rootFragment = null
 
                 if (!p)
                     return
@@ -339,26 +210,31 @@ Item{
                     //TODO: Check if this is nested within a property container
                     if ( objectContainerFrame.pane )
                         objectContainerFrame.closeAsPane()
+                    if ( root.parent && root.parent.measureSizeInfo ){
+                        var p = root.parent
+                        root.parent = null
+                        p.measureSizeInfo()
+                    }
                     destroyObjectContainer(root)
                 }
             }
         }
 
         property Connections addFragmentToContainerConn: Connections{
-            target: editFragment
+            target: control.editFragment
             ignoreUnknownSignals: true
             function onChildAdded(ef, context){
                 var expandPalette = context && context.location === 'PaletteFunctions.ExpandLayout' ? false : true
 
                 if ( ef.location === EditQml.QmlEditFragment.Object ){
-                    if (compact)
-                        expand({expandDefaultPalette: expandPalette})
+                    if (control.compact)
+                        root.control.expand({expandDefaultPalette: expandPalette})
                     else
-                        addChildObject(ef)
+                        root.control.addChildObject(ef)
 
-                    container.sortChildren()
+                    root.control.__sortContainerChildren()
                 } else {
-                    var pc = root.addProperty(ef)
+                    var pc = root.control.addProperty(ef)
                     var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
                     if ( expandPalette )
                         paletteFunctions.openPaletteInPropertyContainer(pc, paletteFunctions.defaultPalette)
@@ -377,32 +253,36 @@ Item{
 
         Item{
             id: objectContainerTitleWrap
-            y: topSpacing
-            height: objectContainerFrame.pane ? 0 : titleHeight
+            y: root.control.topSpacing
+            height: objectContainerFrame.control.pane ? 0 : objectContainerFrame.control.titleHeight
             width: parent.width
 
             ObjectContainerTop{
                 id: objectContainerTitle
                 anchors.fill: parent
-                compact: objectContainerFrame.compact
+                compact: control.compact
+                y: objectContainerFrame.control.topSpacing
                 objectContainer: root
                 color: {
-                    return objectContainerFrame.pane ? objectContainerFrame.pane.topColor
+                    return objectContainerFrame.control.pane ? objectContainerFrame.control.pane.topColor
                                                 : objectContainerFrame.activeFocus
-                                                  ? theme.colorScheme.middlegroundOverlayDominant
-                                                  : theme.colorScheme.middlegroundOverlay
+                                                  ? objectContainerFrame.control.theme.colorScheme.middlegroundOverlayDominant
+                                                  : objectContainerFrame.control.theme.colorScheme.middlegroundOverlay
                 }
-                isBuilder: root.editFragment ? root.editFragment.isBuilder() : false
+                isBuilder: objectContainerFrame.control.editFragment ? objectContainerFrame.control.editFragment.isBuilder() : false
 
                 onToggleCompact: {
-                    if ( objectContainerFrame.compact )
-                        expand()
-                    else
-                        collapse()
+                    if ( objectContainerFrame.control.compact ){
+                        root.control.expand()
+                        root.adjustSize()
+                    } else {
+                        root.control.collapse()
+                        root.adjustSize()
+                    }
                 }
                 onErase: {
                     try{
-                        paletteFunctions.eraseObject(root)
+                        objectContainerFrame.control.paletteFunctions.eraseObject(root)
                     } catch ( e ){
                         var eunwrap = engine.unwrapError(e)
                         lk.layers.workspace.messages.pushError(eunwrap.message, eunwrap.code)
@@ -414,22 +294,22 @@ Item{
                         paletteConnection.editFragment = null
                     } else {
                         paletteConnection.forceActiveFocus()
-                        paletteConnection.model = editor.code.language.bindingChannels
-                        paletteConnection.editFragment = editFragment
+                        paletteConnection.model = objectContainerFrame.control.editor.code.language.bindingChannels
+                        paletteConnection.editFragment = objectContainerFrame.control.editFragment
                     }
                 }
                 onAssignFocus: {
-                    lk.layers.workspace.panes.activateItem(objectContainerFrame, objectContainerFrame.editor)
+                    lk.layers.workspace.panes.activateItem(objectContainerFrame, objectContainerFrame.control.editor)
                 }
 
                 onRebuild : {
-                    editFragment.rebuild()
+                    control.editFragment.rebuild()
                 }
                 onPaletteToPane : {
-                    paletteFunctions.objectContainerToPane(root)
+                    control.paletteFunctions.objectContainerToPane(root)
                 }
                 onClose : {
-                    paletteFunctions.closeObjectContainer(objectContainerFrame)
+                    control.paletteFunctions.closeObjectContainer(root)
                 }
                 onAddPalette: {
                     var pane = container.parent
@@ -443,9 +323,9 @@ Item{
                     if ( container.pane )
                         coords.y -= 30 // if this container is in the title of a pane
 
-                    var paletteList = paletteFunctions.views.openPaletetListBoxForContainer(
+                    var paletteList = root.control.paletteFunctions.views.openPaletetListBoxForContainer(
                         root,
-                        paletteGroup(),
+                        root.control.paletteGroup,
                         Qt.rect(coords.x + objectContainerTitle.width - (180 / 2), coords.y, 30, 30),
                         PaletteFunctions.PaletteListMode.ObjectContainer
                     )
@@ -488,13 +368,14 @@ Item{
 //                }
 
                 onCompose : {
-                    paletteFunctions.userAddToObjectContainer(root)
+                    objectContainerFrame.control.paletteFunctions.userAddToObjectContainer(root)
                 }
 
                 onCreateObject: {
-                    var codeHandler = objectContainerFrame.editor.code.language
-                    codeHandler.createObjectForProperty(editFragment)
-                    codeHandler.createObjectInRuntime(editFragment)
+                    var language = objectContainerFrame.control.editor.code.language
+                    var editFragment = objectContainerFrame.control.editFragment
+                    language.createObjectForProperty(editFragment)
+                    language.createObjectInRuntime(editFragment)
                 }
             }
         }
@@ -503,7 +384,7 @@ Item{
             id: paletteConnection
             visible: model ? true : false
             anchors.top: parent.top
-            anchors.topMargin: 25
+            anchors.topMargin: 30
             width: parent.width
             onFocusChanged : if ( !focus ) model = null
 
@@ -512,81 +393,22 @@ Item{
         }
 
 
-        Rectangle {
+        Rectangle{
             width: container.width
             height: container.height + 5
-            color: theme.colorScheme.middleground
+            color: control.theme.colorScheme.middleground
 
             anchors.top: parent.top
-            anchors.topMargin: objectContainerTitleWrap.height + topSpacing
-            visible: !compact
+            anchors.topMargin: objectContainerTitleWrap.height + control.topSpacing
+            visible: !control.compact
 
             Column{
                 id: container
-
                 spacing: 5
-                width: parentObjectContainer ? parentObjectContainer.width - (isForProperty? 140 : 20) : contentWidth + 20
 
-                onChildrenChanged: recalculateContentWidth()
-
-                property double heightSwap: -1
-
-                height: {
-                    if (compact)
-                        return 0
-                    if ( heightSwap !== -1 )
-                        return heightSwap
-                    var totalHeight = 0;
-                    if ( children.length > 0 ){
-                        for ( var i = 0; i < children.length; ++i ){
-                            totalHeight += children[i].height
-                        }
-                    }
-                    if ( children.length > 1 )
-                        return totalHeight + (children.length - 1) * spacing
-                    else
-                        return totalHeight
-                }
-
-                function sortChildren(){
-                    if (!objectContainerFrame.parent)
-                        return
-                    if (children.length === 0)
-                        return
-
-                    var childrenCopy = []
-                    childrenCopy.push(children[0])
-                    children[0].z = children.length
-
-                    for (var i=1; i<children.length; ++i)
-                    {
-                        if (!children[i]) continue
-                        if (children[i].objectName === "propertyContainer")
-                        {
-                            childrenCopy.push(children[i])
-                            children[i].z = children.length - childrenCopy.length
-                        }
-                    }
-
-                    for (var i=1; i<children.length; ++i)
-                    {
-                        if (!children[i]) continue
-                        if (children[i].objectName === "objectContainer"){
-                            children[i].topSpacing = 5
-                            children[i].z = children.length - childrenCopy.length
-                            childrenCopy.push(children[i])
-                        }
-                    }
-
-                    heightSwap = height
-                    children = childrenCopy
-                    heightSwap = -1
-                }
-
+                property alias sizeInfo: root.sizeInfo
+                function measureSizeInfo(){ root.measureSizeInfo() }
             }
         }
-
-
-
     }
 }

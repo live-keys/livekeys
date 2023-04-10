@@ -9,143 +9,95 @@ import visual.input 1.0 as Input
 
 Qan.NodeItem{
     id: root
-    
     width: 370
     height: wrapper.height
-    
-    property QtObject theme: lk.layers.workspace.themes.current
 
     objectName: "objectNode"
-    property string label: ''
+    resizable: false
 
-    property var members: []
-
-    property var propertiesOpened: []
+    property QtObject nodeStyle : ObjectNodeStyle{}
+    property ObjectNodeControl control: ObjectNodeControl{}
+    property var sizeInfo: ({minWidth: -1, minHeight: -1, maxWidth: -1, maxHeight: -1})
     property var outPort: null
-    property alias propertyContainer: nodeMemberContainer
-    property alias paletteListContainer: paletteContainer
 
-    property string id: ""
-    property var editFragment: null
-    property var nodeParent: null
-    property var editor: null
-    property var objectGraph: null
+    function __initialize(ef){
+        var editor = ef.language.code.textEdit().getEditor()
+        root.control.__initialize(editor, ef, root, nodeMemberContainer, paletteContainer)
+    }
 
-    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
+    function adjustSize(){
+        var w = root.sizeInfo.minWidth > 300 ? root.sizeInfo.minWidth : 300
+        root.width = w
+        root.sizeInfo.contentWidth = w
+        root.sizeInfo.objectContentWidth = w - 30
 
-    function resizeNode(){
-        var max = 350
-        if (paletteContainer.width +10 > max){
-            max = paletteContainer.width + 10
+        root.control.paletteGroup.adjustSize()
+        for ( var i = 0; i < nodeMemberContainer.children.length; ++i ){
+            var c = nodeMemberContainer.children[i]
+            if ( c.adjustSize )
+                c.adjustSize()
         }
 
-        for (var i = 0; i < nodeMemberContainer.children.length; ++i){
-            if (nodeMemberContainer.children[i].contentWidth > max){
-                max = nodeMemberContainer.children[i].contentWidth
+        var height = 70
+        height += root.control.paletteGroup.height
+        if ( nodeMemberContainer.children.length > 0 ){
+            for ( var i = 0; i < nodeMemberContainer.children.length; ++i ){
+                height += nodeMemberContainer.children[i].height
             }
         }
+        if ( nodeMemberContainer.children.length > 1 )
+            height += (nodeMemberContainer.children.length - 1) * nodeMemberContainer.spacing
 
+        root.height = height
+    }
 
-        if (max !== root.width){
-            root.width = max
-            for (var i = 0; i < nodeMemberContainer.children.length; ++i){
-                nodeMemberContainer.children[i].width = max - nodeMemberContainer.children[i].anchors.leftMargin
+    function measureSizeInfo(){
+        var si = paletteContainer.sizeInfo
+        var size = {
+            minWidth: si.minWidth < 300 ? 300 : si.minWidth,
+            minHeight: si.minHeight > 0 ? si.minHeight + 50 : 50,
+            maxWidth: si.maxWidth > 300 ? si.maxWidth : -1,
+            maxHeight: si.maxHeight > 70 ? si.maxHeight : -1,
+            contentWidth: -1
+        }
+
+        for ( var i = 0; i < nodeMemberContainer.children.length; ++i ){
+            var si = nodeMemberContainer.children[i].sizeInfo
+
+            if ( si.minWidth > 0 ){
+                if ( size.minWidth < 0 )
+                    size.minWidth = si.minWidth
+                else if ( size.minWidth < si.minWidth ){
+                    size.minWidth = si.minWidth
+                }
+            }
+
+            if ( si.maxWidth > 0 ){
+                if ( size.maxWidth < 0 )
+                    size.maxWidth = si.maxWidth
+                else if ( size.maxWidth < si.maxWidth ){
+                    size.maxWidth = si.maxWidth
+                }
+            }
+            if ( si.minHeight > 0 ){
+                size.minHeight = size.minHeight < 0 ? si.minHeight : size.minHeight + si.minHeight
+            }
+            if ( si.maxHeight > 0 ){
+                size.maxHeight = size.maxHeight < 0 ? si.maxHeight : size.maxHeight + si.maxHeight
             }
         }
-    }
-
-    function paletteByName(name){
-        var pg = paletteGroup()
-        for ( var i = 0; i < pg.children.length; ++i ){
-            if ( pg.children[i].name === name )
-                return pg.children[i]
+        if ( size.minWidth < 300 ){
+            size.minWidth = 300
         }
-        return null
-    }
-
-    function paletteGroup(){
-        return paletteContainer
-    }
-
-    function getPane(){
-        var pane = root.parent
-        while (pane && pane.objectName !== "editor" && pane.objectName !== "objectPalette"){
-            pane = pane.parent
-        }
-        return pane
-    }
-
-    function propertyByName(name){
-        for (var i = 0; i < nodeMemberContainer.children.length; ++i){
-            var child = nodeMemberContainer.children[i]
-            if ( !child.isAnObject && child.propertyName === name )
-                return child
-        }
-        return null
-    }
-
-    function addProperty(ef){
-        var name = ef.identifier()
-
-        var propMember = propertyByName(name)
-        if ( propMember )
-            return propMember
-
-        propertiesOpened.push(name)
-
-        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
-
-        //TODO: Rename  objectNodeProperty and propertyContainer
-        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
-        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
-        nodeMember.__initialize(nodeParent, nodeStyle, ef)
-
-        if ( ef.location === EditQml.QmlEditFragment.Slot ){
-            nodeMember.addOutPort()
-        } else {
-            if ( nodeParent.item.id !== "" ){
-                nodeMember.addOutPort()
-            }
-            if ( ef.isWritable )
-                nodeMember.addInPort()
+        if ( size.minHeight < 30 ){
+            size.minHeight = 30
         }
 
-        root.members.push(nodeMember)
+        root.sizeInfo = size
 
-        return nodeMember
+        root.adjustSize()
     }
 
-    function addFunctionProperty(name){
-        var propMember = propertyByName(name)
-        if ( propMember )
-            return propMember
-
-        //TODO: Rename  objectNodeProperty and propertyContainer
-        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
-        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
-        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
-        nodeMember.__initializeFunction(nodeParent, nodeStyle, name)
-
-        if ( nodeParent.item.id !== '' )
-            nodeMember.addInPort()
-
-        root.members.push(nodeMember)
-
-        return nodeMember
-    }
-
-    function addChildObject(ef){
-        var graphFn = lk.layers.workspace.extensions.workspace.objectGraphControls
-
-        var nodeMember = graphFn.objectNodeProperty.createObject(root.propertyContainer)
-        var nodeStyle = root.objectGraph.style.objectNodeMemberStyle
-        nodeMember.__initialize(nodeParent, nodeStyle, ef)
-
-        root.members.push(nodeMember)
-
-        if ( ef.objectId() )
-            nodeMember.addOutPort()
-    }
 
     function clean(){
         for (var xi = 0; xi < paletteContainer.children.length; ++xi){
@@ -153,63 +105,14 @@ Qan.NodeItem{
                 paletteContainer.children[xi].destroy()
         }
 
-        for ( var i = 0; i < root.members.length; ++i ){
-            root.members[i].clean().destroy()
+        for ( var i = 0; i < root.control.members.length; ++i ){
+            root.control.members[i].clean().destroy()
         }
-        root.members = []
+        root.control.members = []
 
         return root
     }
 
-    function userAddPalette(){
-        root.selected = false
-        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-
-        var palettes = root.editFragment.language.findPalettesForFragment(root.editFragment)
-        palettes.data = paletteFunctions.filterOutPalettes(palettes.data, root.paletteGroup().palettesOpened, true)
-        if (!palettes.data || palettes.data.length === 0)
-            return null
-
-        var paletteList = paletteFunctions.views.openPaletteList(paletteFunctions.theme.selectableListView, palettes.data, root,
-        {
-            onCancelled: function(){
-                root.objectGraph.activateFocus()
-                paletteList.destroy()
-            },
-            onSelected: function(index){
-                var palette = root.editFragment.language.expand(root.editFragment, {
-                    "palettes" : [palettes.data[index].name]
-                })
-                var paletteBox = paletteFunctions.__factories.createPaletteContainer(palette, paletteGroup(), {moveEnabled: false})
-                if ( palette.item ){ // send expand signal
-                    root.expand()
-                } else {
-                    paletteFunctions.expandObjectContainerLayout(root, palette, {expandChildren: false})
-                }
-                paletteList.destroy()
-            }
-        })
-
-        paletteList.forceActiveFocus()
-        paletteList.anchors.topMargin = nodeTitle.height
-        paletteList.width = root.width
-    }
-
-    function sortChildren(){}
-    function expand(){}
-
-    property bool supportsFunctions: true
-    resizable: false
-
-    function expandDefaultPalette(){
-        paletteFunctions.openPaletteInObjectContainer(root, paletteFunctions.defaultPalette)
-    }
-
-    function removeMemberByName(name){
-        propertiesOpened = propertiesOpened.filter(function(value, index, arr){
-            return value !== name
-        })
-    }
 
     onSelectedChanged: {
         objectGraph.numOfSelectedNodes += selected ? 1 : -1
@@ -217,7 +120,7 @@ Qan.NodeItem{
             objectGraph.activateFocus()
     }
     onActiveFocusChanged: {
-        if ( activeFocus ){
+        if ( root.activeFocus ){
             objectGraph.activeItem = this
         } else if ( objectGraph.activeItem === this ){
             objectGraph.activeItem = null
@@ -225,16 +128,17 @@ Qan.NodeItem{
         objectGraph.checkFocus()
     }
 
-    property QtObject nodeStyle : ObjectNodeStyle{}
-
     Rectangle{
         id: wrapper
         width: parent.width
-        height: nodeTitle.height + paletteContainer.height + nodeMemberContainer.height + 40
+        height: root.height
         color: root.nodeStyle.background
         radius: root.nodeStyle.radius
         border.color: root.nodeStyle.borderColor
         border.width: root.nodeStyle.borderWidth
+
+        property alias sizeInfo: root.sizeInfo
+        function measureSizeInfo(){ root.measureSizeInfo() }
         
         Rectangle{
             id: nodeTitle
@@ -250,7 +154,7 @@ Qan.NodeItem{
                 anchors.left: parent.left
                 anchors.leftMargin: 15
                 textStyle: root.nodeStyle.titleTextStyle
-                text: root.label
+                text: root.control.label
             }
 
             Item{
@@ -267,7 +171,7 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteFunctions.eraseObject(root)
+                        root.control.paletteFunctions.eraseObject(root)
                     }
                 }
             }
@@ -286,9 +190,9 @@ Qan.NodeItem{
                 MouseArea{
                     anchors.fill: parent
                     onClicked: {
-                        paletteFunctions.userAddToObjectContainer(root, {
-                            onCancelled: function(){ root.objectGraph.activateFocus() },
-                            onAccepted: function(){ root.objectGraph.activateFocus() }
+                        root.control.paletteFunctions.userAddToObjectContainer(root, {
+                            onCancelled: function(){ root.control.objectGraph.activateFocus() },
+                            onAccepted: function(){ root.control.objectGraph.activateFocus() }
                         })
                     }
                 }
@@ -308,7 +212,7 @@ Qan.NodeItem{
                 MouseArea{
                     id: paletteAddMouse
                     anchors.fill: parent
-                    onClicked: root.userAddPalette()
+                    onClicked: root.control.userAddPalette()
                 }
             }
         }
@@ -317,8 +221,7 @@ Qan.NodeItem{
             id: paletteContainer
             anchors.top: parent.top
             anchors.topMargin: nodeTitle.height
-            onChildrenChanged: resizeNode()
-            editFragment: root.editFragment
+            editFragment: root.control.editFragment
         }
         
         Column{
@@ -326,24 +229,28 @@ Qan.NodeItem{
             spacing: 10
             anchors.top: parent.top
             anchors.topMargin: 50 + paletteContainer.height
+            height: root.height - anchors.topMargin
+            width: root.width - 10
             anchors.left: parent.left
             anchors.leftMargin: 5
+            property alias sizeInfo: root.sizeInfo
+            function measureSizeInfo(){ root.measureSizeInfo() }
         }
     }
 
     Connections {
-        target: editFragment
+        target: control.editFragment
         ignoreUnknownSignals: true
         function onChildAdded(ef, context){
             if ( ef.location === EditQml.QmlEditFragment.Object ){
-                root.addChildObject(ef)
+                root.control.addChildObject(ef)
             } else {
-                root.addProperty(ef)
+                root.control.addProperty(ef)
             }
         }
         function onAboutToBeRemoved(){
             paletteContainer.closePalettes()
-            root.objectGraph.removeObjectNode(nodeParent)
+            root.control.objectGraph.removeObjectNode(control.nodeParent)
         }
     }
 }

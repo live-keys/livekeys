@@ -28,6 +28,8 @@ CodePalette{
         height: itemList.height + addImport.height + 5
         color: palette.theme.colorScheme.middleground
 
+        property var sizeInfo: ({ minWidth: 280, maxWidth: -1, minHeight: itemList.height + addImport.height + 5, maxHeight: -1 })
+
         property alias model: itemList.model
         property bool addImportVisible: false
         property var editor: null

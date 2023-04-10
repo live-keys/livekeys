@@ -3109,19 +3109,18 @@ void TextEdit::q_contentsChange(int pos, int charsRemoved, int charsAdded)
 {
     Q_D(TextEdit);
 
-
 //    const int editRange = pos + qMax(charsAdded, charsRemoved);
 //    const int delta = charsAdded - charsRemoved;
 
 #ifdef LV_EDITOR_DEBUG
-    QObject* livecv    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("livecv").value<QObject*>();
+    QObject* lk    = ViewContext::instance().engine()->engine()->rootContext()->contextProperty("lk").value<QObject*>();
     QObject* windowControls;
-    QMetaObject::invokeMethod(livecv, "windowControls", Qt::DirectConnection, Q_RETURN_ARG(QObject*, windowControls));
+    QMetaObject::invokeMethod(lk, "windowControls", Qt::DirectConnection, Q_RETURN_ARG(QObject*, windowControls));
     if (windowControls && !d->debugView){
         QVariant windowVariant;
         QMetaObject::invokeMethod(windowControls, "createNewWindow", Qt::DirectConnection, Q_RETURN_ARG(QVariant, windowVariant));
         QQuickWindow* window = qvariant_cast<QQuickWindow*>(windowVariant);
-        QString contents(LockedFileIOSession::createInstance()->readFromFile("C:\\Users\\NeRad\\Desktop\\Github\\livecv\\application\\qml\\TextEditNodeView.qml").c_str());
+        QString contents(LockedFileIOSession::createInstance()->readFromFile("application\\qml\\TextEditNodeView.qml").c_str());
         d->debugView = static_cast<QQuickItem*>(ViewContext::instance().engine()->createObject(
                     contents,
                     qvariant_cast<QQuickItem*>(window->property("item")),

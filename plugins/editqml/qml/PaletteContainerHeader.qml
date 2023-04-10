@@ -32,6 +32,7 @@ Rectangle{
 
     MouseArea{
         id: paletteBoxMoveArea
+
         anchors.fill: parent
 
         enabled: root.enableMove || root.canMoveToNewPane

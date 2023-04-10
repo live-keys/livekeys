@@ -15,3 +15,4 @@ PropertyContainer      1.0 PropertyContainer.qml
 PaletteContainerHeader 1.0 PaletteContainerHeader.qml
 PaletteContainerSide   1.0 PaletteContainerSide.qml
 PalettePlaceHolder     1.0 PalettePlaceHolder.qml
+HeadingButton          1.0 HeadingButton.qml

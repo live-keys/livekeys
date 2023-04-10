@@ -7,12 +7,12 @@ WorkspaceControl{
     run: function(workspace){
         var editor = lk.layers.workspace.panes.focusPane('editor')
         var codeHandler = editor.documentHandler.codeHandler
-        var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+        var rootDeclaration = codeHandler.rootDeclaration()
         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.documentHandler.codeHandler, function(){
             lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                 editor, 
-                rootPosition, 
+                rootDeclaration.position(),
                 {
                     "type": "qml/QtQuick#Grid",
                     "children": [

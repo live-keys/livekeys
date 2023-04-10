@@ -21,6 +21,8 @@ Rectangle{
     border.width: root.style.borderWidth
     border.color: root.isInteractive ? root.style.highlightBorderColor : root.style.borderColor
 
+    property alias resizeActive: resizeArea.resizeActive
+
     property QtObject style: ObjectGraphStyle{}
 
     function activateFocus(){
@@ -61,6 +63,7 @@ Rectangle{
     }
 
     function checkFocus(){
+
         var interac = false
         if ( activeFocus ){
             interac = true
@@ -73,6 +76,7 @@ Rectangle{
 
     property var insertPort: graph.insertPort
     property var isInteractive: false
+
     property var connections: []
 
     property Component propertyDelegate : ObjectNodeMember{
@@ -128,15 +132,15 @@ Rectangle{
                 n = root.addObjectNode(
                         cursorCoords.x,
                         cursorCoords.y,
-                        (objectName + (objectId ? ("#" + objectId) : ""))
+                        ef
                     )
             } else {
                 n = root.addObjectNode(graph.getNodeCount() * 420 + 50, 50, (objectName + (objectId ? ("#" + objectId) : "")))
             }
-            n.item.editFragment = ef
+            n.item.control.editFragment = ef
             ef.incrementRefCount()
 
-            n.item.expandDefaultPalette()
+            n.item.control.expandDefaultPalette()
         }
     }
 
@@ -174,12 +178,12 @@ Rectangle{
 
         }
 
-        var srcLocation = srcPort.objectProperty.editFragment.location
+        var srcLocation = srcPort.objectProperty.control.editFragment.location
 
         if (srcLocation === QmlEditFragment.Slot)
         {
             // source is event, different direction
-            var nodeId = dstPort.objectProperty.node.item.id
+            var nodeId = dstPort.objectProperty.node.item.control.nodeId
 
             if (nodeId === "") return
             // if (dstPort.objectProperty.editFragment) return
@@ -264,10 +268,23 @@ Rectangle{
                                 var ch = editFragment.language
                                 var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id }, propertiesToAdd)
                                 ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id }, propertiesToAdd)
-                                var ef = ch.openNestedConnection(editFragment, opos)
+
+                                var declaration = ch.findDeclaration(opos)
+                                var fragmentsResult = ch.openChildConnections(editFragment, [declaration])
+                                if ( fragmentsResult.hasReport() ){
+                                    for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                                        lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                                    }
+                                }
+
+                                var ef = fragmentsResult.value.length ? fragmentsResult.value[0] : null
+
                                 cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
-                                if (ef)
+                                if (ef){
                                     editFragment.signalChildAdded(ef, {location: 'ObjectGraph.AddObject', coords: cursorCoords })
+                                } else {
+                                    lk.layers.workspace.messages.pushError("Error: Failed to create object child: " + selection.name, 1)
+                                }
                             },
                             onCancelled: function(){}
                         })
@@ -277,7 +294,17 @@ Rectangle{
                         var ch = editFragment.language
                         var opos = ch.addObjectToCode(selection.position, { type: selection.name, id: selection.id } )
                         ch.createObjectInRuntime(editFragment, { type: selection.name, id: selection.id })
-                        var ef = ch.openNestedConnection(editFragment, opos)
+
+                        var declaration = ch.findDeclaration(opos)
+                        var fragmentsResult = ch.openChildConnections(editFragment, [declaration])
+                        if ( fragmentsResult.hasReport() ){
+                            for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                                lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                            }
+                        }
+
+                        var ef = fragmentsResult.value.length ? fragmentsResult.value[0] : null
+
                         cursorCoords = Qt.point((pos.x - graphView.containerItem.x ) / zoom, (pos.y - graphView.containerItem.y) / zoom)
                         if (ef)
                             editFragment.signalChildAdded(ef, {location: 'ObjectGraph.AddObject', coords: cursorCoords} )
@@ -289,8 +316,8 @@ Rectangle{
     }
 
     function bindPorts(src, dst){
-        var srcNode = src.objectProperty.node
-        var dstNode = dst.objectProperty.node
+        var srcNode = src.objectProperty.control.node
+        var dstNode = dst.objectProperty.control.node
         var edge = null
         if (srcNode === dstNode){
             edge = graph.insertEdge(srcNode, dstNode, graph.edgeDelegateCurved)
@@ -359,22 +386,18 @@ Rectangle{
         graph.removeNode(node)
     }
     
-    function addObjectNode(x, y, label){
+    function addObjectNode(x, y, editFragment){
         var node = graph.insertNode()
-        node.item.nodeParent = node
+        node.item.__initialize(editFragment)
+        node.item.control.nodeParent = node
         node.item.connectable = Qan.NodeItem.UnConnectable
         node.item.x = x
         node.item.y = y
-        node.item.label = label
-        node.label = label
+        node.label = node.item.control.label
 
-        node.item.editor = editor
-        node.item.objectGraph = root
+        node.item.control.objectGraph = root
 
-        var idx = label.indexOf('#')
-        if (idx !== -1){
-            node.item.id = label.substr(idx+1)
-
+        if (node.item.control.nodeId !== ''){
             var port = graph.insertPort(node, Qan.NodeItem.Right, Qan.Port.Out);
             node.item.outPort = port
             port.label = node.item.id + " Out"
@@ -426,9 +449,10 @@ Rectangle{
                 styleManager.styles.at(1).lineColor = root.style.connectorColor
             }
         }
-    }  // Qan.GraphView
+    }
 
     ResizeArea{
+        id: resizeArea
         minimumHeight: 200
         minimumWidth: 400
         onResizeFinished: { root.redrawGrid() }

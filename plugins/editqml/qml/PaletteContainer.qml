@@ -7,12 +7,6 @@ import editor.private 1.0
 Rectangle{
     id: paletteContainer
 
-    width: pane ? minimumWidth + 100 : ( (child && child.width > minimumWidth ? child.width : minimumWidth) + headerWidth )
-    height: pane
-            ? normalHeaderHeight
-            : (child
-                ? child.height + (compact ? 0 : normalHeaderHeight) +5
-                : 0)
     objectName: "paletteContainer"
 
     property QtObject theme: lk.layers.workspace.themes.current
@@ -36,6 +30,23 @@ Rectangle{
     property string type : palette ? palette.type : ''
     property string title : type + ' - ' + name
     property var editor: null
+    // sizeInfo is propagated from the palette to the root, the root then decides how to update
+    // itself and its children downwards
+    property var sizeInfo: calculateChildSizeInfo(child)
+    onChildChanged: {
+        sizeInfo = calculateChildSizeInfo(child)
+        if ( parent && parent.measureSizeInfo )
+            parent.measureSizeInfo()
+
+        if ( child && child.hasOwnProperty('sizeInfo') ){
+            child.onSizeInfoChanged.connect(function(){
+                sizeInfo = calculateChildSizeInfo(child)
+                if ( parent && parent.measureSizeInfo )
+                    parent.measureSizeInfo()
+            })
+        }
+    }
+
     property Item pane: null
     property Item dragPane: null
 
@@ -55,6 +66,92 @@ Rectangle{
     property double titleRightMargin : 50
 
     property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
+
+    function adjustSize(){
+        if ( child ){
+            var contentWidth = paletteContainer.parent.sizeInfo.contentWidth
+            if ( sizeInfo.maxWidth >= 0 && sizeInfo.maxWidth < contentWidth){
+                contentWidth = sizeInfo.maxWidth
+            }
+            paletteContainer.width = contentWidth
+            if ( paletteContainer.pane ){
+                paletteContainer.height = 30
+
+                var childWidth = paletteContainer.pane.width - 20
+                if ( childWidth < sizeInfo.minWidth ){
+                    childWidth = sizeInfo.minWidth
+                } else if ( sizeInfo.maxWidth > 0 && childWidth > sizeInfo.maxWidth ){
+                    childWidth = sizeInfo.maxWidth
+                }
+
+                var childHeight = paletteContainer.pane.height - 20
+                if ( childHeight < sizeInfo.minHeight ){
+                    childHeight = sizeInfo.minHeight
+                } else if ( sizeInfo.maxHeight > 0 && childHeight > sizeInfo.maxHeight ){
+                    childHeight = sizeInfo.maxHeight
+                }
+
+                child.width = childWidth
+                child.height = childHeight
+
+            } else {
+                paletteContainer.height = sizeInfo.minHeight
+
+                var childWidth = contentWidth - headerWidth
+                child.width = childWidth
+                child.height = sizeInfo.minHeight - (compact ? 0 : 30)
+            }
+        }
+    }
+
+    function calculateChildSizeInfo(child){
+        var info = child && child.sizeInfo ? child.sizeInfo : {}
+        var hasWidth = false
+        var hasHeight = false
+        var size = { maxWidth: -1, maxHeight: -1, minWidth: 0, minHeight: -1 }
+        if ( !child )
+            return size
+        if ( info.hasOwnProperty('maxWidth') ){
+            hasWidth = true
+            size.maxWidth = info.maxWidth
+        }
+        if ( info.hasOwnProperty('minWidth') ){
+            hasWidth = true
+            size.minWidth = info.minWidth
+        }
+        if ( info.hasOwnProperty('maxHeight') ){
+            hasHeight = true
+            size.maxHeight = info.maxHeight
+        }
+        if ( info.hasOwnProperty('minHeight') ){
+            hasHeight = true
+            size.minHeight = info.minHeight
+        }
+        if ( !hasWidth ){
+            size.maxWidth = child.width
+            size.minWidth = child.width
+        }
+        if ( !hasHeight ){
+            size.maxHeight = child.height
+            size.minHeight = child.height
+        }
+        size.minWidth += headerWidth
+        if ( size.maxWidth >= 0 )
+            size.maxWidth += headerWidth
+        if ( size.minWidth < 200 ){
+            size.minWidth = 200
+        }
+
+        if ( !compact ){
+            size.minHeight += 30
+            if ( size.maxHeight >= 0 )
+                size.maxHeight += 30
+        } else if ( size.minHeight < 30 ){
+            size.minHeight = 30
+        }
+        vlog.i(size)
+        return size
+    }
 
     function swapOrAddPalette(swap){
         var pane = editor.parent
@@ -105,6 +202,7 @@ Rectangle{
         paletteContainer.pane.removePane()
         paletteContainer.pane = null
         paletteChild.y = 35
+        paletteContainer.adjustSize()
     }
 
     function paletteToPane(){
@@ -125,6 +223,7 @@ Rectangle{
         palettePane.paletteContainer = paletteChild
         palettePane.title = paletteContainer.title
         paletteChild.y = 0
+        paletteContainer.adjustSize()
     }
 
     function closePalette(){
@@ -196,6 +295,10 @@ Rectangle{
 
                 item.expand.connect(function(){
                     paletteContainer.compact = false
+                    paletteContainer.sizeInfo = paletteContainer.calculateChildSizeInfo(paletteContainer.child)
+                    if ( paletteContainer.parent && paletteContainer.parent.measureSizeInfo ){
+                        paletteContainer.parent.measureSizeInfo()
+                    }
                 })
                 item.close.connect(function(){
                     paletteContainer.closePalette()
@@ -223,6 +326,10 @@ Rectangle{
                 }
                 item.collapse.connect(function(){
                     paletteContainer.compact = true
+                    paletteContainer.sizeInfo = paletteContainer.calculateChildSizeInfo(paletteContainer.child)
+                    if ( paletteContainer.parent && paletteContainer.parent.measureSizeInfo ){
+                        paletteContainer.parent.measureSizeInfo()
+                    }
                 })
                 item.close.connect(function(){
                     paletteContainer.closePalette()
@@ -275,18 +382,19 @@ Rectangle{
         height: paletteContainer.child ? paletteContainer.child.height: 0
         children: paletteContainer.child ? [paletteContainer.child] : []
 
+        property alias container: paletteContainer
+
         function closeAsPane(){
             paletteContainer.closeAsPane()
         }
     }
 
-
     PaletteConnection{
         id: paletteConnection
         visible: model ? true : false
         anchors.top: parent.top
-        anchors.topMargin: 24
-        width: parent.width
+        anchors.topMargin: 30
+        width: parent.width > 200 ? parent.width : 200
         onFocusChanged : if ( !focus ) model = null
 
         property var selectedHandler : function(){}

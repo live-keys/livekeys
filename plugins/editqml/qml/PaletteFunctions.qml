@@ -158,11 +158,8 @@ QtObject{
             editorBox.border.width = 1
             editorBox.border.color = "#141c25"
 
-            var rootPos = languageHandler.findRootPosition()
-            if (ef.position() === rootPos){
-                objectContainer.contentWidth = Qt.binding(function(){
-                    return objectContainer.containerContentWidth > objectContainer.editorContentWidth ? objectContainer.containerContentWidth : objectContainer.editorContentWidth
-                })
+            var rootDeclaration = languageHandler.rootDeclaration()
+            if (ef.position() === rootDeclaration.position()){
                 languageHandler.rootFragment = ef
             }
             return objectContainer
@@ -241,14 +238,14 @@ QtObject{
         }
 
         function openPaletetListBoxForContainer(container, paletteGroup, aroundBox, mode, swap){
-            var palettes = container.editFragment.language.findPalettesForFragment(container.editFragment)
-            palettes.data = filterOutPalettes(
-                palettes.data,
+            var palettes = container.control.editFragment.language.findPalettes(container.control.editFragment)
+            palettes = filterOutPalettes(
+                palettes,
                 paletteGroup.palettesOpened,
                 mode === PaletteFunctions.PaletteListMode.ObjectContainer
             )
 
-            if (!palettes.data || palettes.data.length === 0)
+            if (!palettes || palettes.length === 0)
                 return null
 
             var pane = container.parent
@@ -273,8 +270,8 @@ QtObject{
             }
 
             var selectedHandler = function(index, paletteListBox){
-                var palette = container.editor.code.language.expand(container.editFragment, {
-                    "palettes" : [palettes.data[index].name]
+                var palette = container.control.editor.code.language.expand(container.control.editFragment, {
+                    "palettes" : [palettes[index].name]
                 })
 
                 var objectRoot = mode === PaletteFunctions.PaletteListMode.ObjectContainer
@@ -283,8 +280,8 @@ QtObject{
                 var paletteBox = __factories.createPaletteContainer(palette, paletteGroup)
                 if ( container ){
                     if ( palette.item ){ // send expand signal
-                        if ( container.compact )
-                            container.expand()
+                        if ( container.control.compact )
+                            container.control.expand()
                     } else {
                         expandObjectContainerLayout(container, palette, {expandChildren: false})
                     }
@@ -320,7 +317,7 @@ QtObject{
 
             var paletteList = openPaletteListBox(
                 theme.selectableListView,
-                palettes.data,
+                palettes,
                 {
                     aroundRect: aroundBox,
                     panePosition: Qt.point(paneCoords.x, paneCoords.y - 35),
@@ -385,132 +382,162 @@ QtObject{
     // Public
 
     function userOpenPaletteAtPosition(editor, userPosition, callback){
-        var languageHandler = editor.code.language
-        var palettes = languageHandler.findPalettes(userPosition)
-        if ( !palettes )
-            return
+        try{
+            var languageHandler = editor.code.language
+            var declaration = languageHandler.findDeclaration(userPosition)
+            var palettes = languageHandler.findPalettes(declaration)
+            if ( !palettes )
+                return
 
-        var position = palettes.declaration.position
-        palettes.data = filterOutPalettes(palettes.data)
-        if ( !palettes.data || palettes.data.length === 0){
-            return
-        }
+            var position = declaration.position()
+            palettes = filterOutPalettes(palettes)
+            if ( !palettes || palettes.length === 0){
+                return
+            }
 
-        if ( palettes.data.length === 1 ){
-            openPaletteAtPosition(editor, palettes.data[0].name, position)
-        } else {
-            //Palette list box
-            editor.internalFocus = false
+            if ( palettes.length === 1 ){
+                openPaletteAtPosition(editor, palettes[0].name, position)
+            } else {
+                //Palette list box
+                editor.internalFocus = false
 
-            var paletteList = views.openPaletteListBox(
-                theme.selectableListView,
-                palettes.data,
-                {
-                    aroundRect: editor.getCursorRectangle(),
-                    panePosition: editor.getGlobalPosition(),
-                    relativePlacement: lk.layers.editor.environment.placement.bottom
-                },
-                {
-                    onCancelled: function(paletteListBox){
-                        editor.forceFocus()
-                        paletteListBox.destroy()
-                        if ( callback )
-                            callback(null)
+                var paletteList = views.openPaletteListBox(
+                    theme.selectableListView,
+                    palettes,
+                    {
+                        aroundRect: editor.getCursorRectangle(),
+                        panePosition: editor.getGlobalPosition(),
+                        relativePlacement: lk.layers.editor.environment.placement.bottom
                     },
-                    onSelected: function(index, paletteListBox){
-                        editor.forceFocus()
-                        paletteListBox.destroy()
-                        var newPalette = openPaletteAtPosition(editor, palettes.data[index].name, position, callback)
+                    {
+                        onCancelled: function(paletteListBox){
+                            editor.forceFocus()
+                            paletteListBox.destroy()
+                            if ( callback )
+                                callback(null)
+                        },
+                        onSelected: function(index, paletteListBox){
+                            editor.forceFocus()
+                            paletteListBox.destroy()
+                            var newPalette = openPaletteAtPosition(editor, palettes[index].name, position, callback)
+                        }
                     }
-                }
-            )
-            lk.layers.workspace.panes.setActiveItem(paletteList, editor)
+                )
+                lk.layers.workspace.panes.setActiveItem(paletteList, editor)
+            }
+        } catch (e){
+            lk.layers.workspace.messages.pushErrorObject(e)
         }
     }
 
     function openPaletteAtPosition(editor, paletteName, position, callback){
-        var languageHandler = editor.code.language
-        var ef = languageHandler.openConnection(position)
-        if (!ef){
-            lk.layers.workspace.messages.pushError("Error: Can't create a palette in a non-compiled program", 1)
-            return
+        try{
+            var languageHandler = editor.code.language
+            var declaration = languageHandler.findDeclaration(position)
+            if ( !declaration ){
+                throw new Error("QmlLanguage: Failed to find declaration at: " + position)
+            }
+
+            var ef = languageHandler.openConnection(declaration)
+            if (!ef){
+                throw new Error("QmLLanguage: Failed to create connection at: " + position)
+            }
+            ef.incrementRefCount()
+            var palette = editor.code.language.expand(ef, {
+                "palettes" : [paletteName]
+            })
+
+            var editorBox = ef.visualParent ? ef.visualParent.parent : null
+            var paletteBoxGroup = editorBox ? editorBox.child : null
+
+            if ( paletteBoxGroup === null ){
+                editorBox = __private.createEditorPaletteBoxForFragment(ef, false)
+                editorBox.color = "black"
+                paletteBoxGroup = ef.visualParent
+            }
+
+            var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup)
+
+            var rect = editor.getCursorRectangle()
+            var cursorCoords = editor.cursorWindowCoords()
+
+            paletteBoxGroup.measureSizeInfo()
+
+            // Update new placement so as to animate
+            editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+
+            if ( callback )
+                callback(ef, palette)
+        } catch ( e ){
+            lk.layers.workspace.messages.pushErrorObject(e)
         }
-        ef.incrementRefCount()
-        var palette = editor.code.language.expand(ef, {
-            "palettes" : [paletteName]
-        })
-
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-
-        if ( paletteBoxGroup === null ){
-            editorBox = __private.createEditorPaletteBoxForFragment(ef, false)
-            editorBox.color = "black"
-            paletteBoxGroup = ef.visualParent
-        }
-
-        var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup)
-
-        var rect = editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
-
-        // Update new placement so as to animate
-        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
-
-        if ( callback )
-            callback(ef, palette)
     }
 
     function openEditPaletteAtPosition(editor, position, callback){
-        var languageHandler = editor.code.language
+        try{
+            var languageHandler = editor.code.language
 
-        var rect = editor.getCursorRectangle()
-        var cursorCoords = editor.cursorWindowCoords()
+            var rect = editor.getCursorRectangle()
+            var cursorCoords = editor.cursorWindowCoords()
 
-        var ef = languageHandler.openConnection(editor.textEdit.cursorPosition)
-        var palette = languageHandler.edit(ef)
+            var declaration = languageHandler.findDeclaration(editor.textEdit.cursorPosition)
+            if ( !declaration ){
+                throw new Error("QmlLanguage: Failed to find declaration at: " + editor.textEdit.cursorPosition)
+            }
 
-        var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
-        var paletteGroup = __factories.createPaletteGroup(lk.layers.editor.environment.content, ef)
-        editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
-        paletteGroup.x = 2
-        editorBox.color = "black"
-        editorBox.border.width = 1
-        editorBox.border.color = "#141c25"
+            var ef = languageHandler.openConnection(declaration)
+            if (!ef){
+                throw new Error("QmLLanguage: Failed to create connection at: " + position)
+            }
+            var palette = languageHandler.edit(ef)
 
-        var paletteBox = __factories.createPaletteContainer(palette, paletteGroup)
-        palette.item.x = 5
-        palette.item.y = 7
-        if (paletteBox){
-            paletteBox.title = 'Edit'
-            paletteBox.titleLeftMargin = 10
-            paletteBox.paletteSwapVisible = false
-            paletteBox.paletteAddVisible = false
+            var editorBox = lk.layers.editor.environment.createEmptyEditorBox()
+            var paletteGroup = __factories.createPaletteGroup(lk.layers.editor.environment.content, ef)
+            editorBox.setChild(paletteGroup, rect, cursorCoords, lk.layers.editor.environment.placement.top)
+            paletteGroup.x = 2
+            editorBox.color = "black"
+            editorBox.border.width = 1
+            editorBox.border.color = "#141c25"
+
+            var paletteBox = __factories.createPaletteContainer(palette, paletteGroup)
+            palette.item.x = 5
+            palette.item.y = 7
+            if (paletteBox){
+                paletteBox.title = 'Edit'
+                paletteBox.titleLeftMargin = 10
+                paletteBox.paletteSwapVisible = false
+                paletteBox.paletteAddVisible = false
+            }
+            editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
+            ef.incrementRefCount()
+
+            if ( callback )
+                callback(ef, palette)
+        } catch ( e ){
+            lk.layers.workspace.messages.pushErrorObject(e)
         }
-        editorBox.updatePlacement(rect, cursorCoords, lk.layers.editor.environment.placement.top)
-        ef.incrementRefCount()
-
-        if ( callback )
-            callback(ef, palette)
     }
 
     function userShapePaletteAtPosition(editor, userPosition, callback){
         var languageHandler = editor.code.language
-        var palettes = languageHandler.findPalettes(userPosition)
+        var declaration = languageHandler.findDeclaration(userPosition)
+        if ( !declaration )
+            return
+        var palettes = languageHandler.findPalettes(declaration)
         if ( !palettes )
             return
 
-        var position = palettes.declaration.position
+        var position = declaration.position()
 
-        if ( !palettes.data || palettes.data.length === 0 ){
+        if ( !palettes || palettes.length === 0 ){
             shapePaletteAtPosition(editor, "", position, function(ef, palette){
                 if ( ef.visualParent.expand )
                     ef.visualParent.expand()
                 if ( callback )
                     callback(ef, palette)
             })
-        } else if ( palettes.data.length === 1 ){
-            shapePaletteAtPosition(editor, palettes.data[0].name, position, function(ef, palette){
+        } else if ( palettes.length === 1 ){
+            shapePaletteAtPosition(editor, palettes[0].name, position, function(ef, palette){
                 if ( ef.visualParent.expand )
                     ef.visualParent.expand()
                 if ( callback )
@@ -522,7 +549,7 @@ QtObject{
 
             var paletteList = views.openPaletteListBox(
                 theme.selectableListView,
-                palettes.data,
+                palettes,
                 {
                     aroundRect: editor.getCursorRectangle(),
                     panePosition: editor.getGlobalPosition(),
@@ -536,7 +563,7 @@ QtObject{
                     onSelected: function(index, paletteListBox){
                         editor.forceFocus()
                         paletteListBox.destroy()
-                        shapePaletteAtPosition(editor, palettes.data[index].name, position, function(ef, palette){
+                        shapePaletteAtPosition(editor, palettes[index].name, position, function(ef, palette){
                             if ( ef.visualParent.expand )
                                 ef.visualParent.expand()
                             if ( callback )
@@ -550,91 +577,88 @@ QtObject{
     }
 
     function shapePaletteAtPosition(editor, paletteName, position, callback){
-        var languageHandler = editor.code.language
-        var ef = languageHandler.openConnection(position)
+        try{
+            var languageHandler = editor.code.language
 
-        if (!ef){
-            lk.layers.workspace.panes.focusPane('viewer').error.text += "<br>Error: Can't shape palette"
-            throw linkError(new Error('Failed to find editing fragment for palette at: ' + position, 300))
-        }
+            var declaration = languageHandler.findDeclaration(position)
+            if ( !declaration ){
+                throw new Error(lang("QmlLanguage: Failed to find declaration at: %0").format(position))
+            }
+            var ef = languageHandler.openConnection(declaration)
+            if (!ef){
+                throw new Error(lang("QmlLanguage: Failed to create connection at: %0").format(position))
+            }
 
-        var forAnObject = ef.location === EditQml.QmlEditFragment.Object
-        var editorBox = ef.visualParent ? ef.visualParent.parent : null
+            var forAnObject = ef.location === EditQml.QmlEditFragment.Object
+            var editorBox = ef.visualParent ? ef.visualParent.parent : null
 
-        var objectContainer = null
-        var paletteBoxGroup = editorBox ? editorBox.child : null
-        if ( paletteBoxGroup === null ){
-            if (forAnObject){
-                objectContainer = __private.createEditorObjectContainerBoxForFragment(ef, editor.textEdit)
-                if (objectContainer.editFragment.position() === languageHandler.findRootPosition()){
-                    objectContainer.contentWidth = Qt.binding(function(){
-                        return objectContainer.containerContentWidth > objectContainer.editorContentWidth
-                                ? objectContainer.containerContentWidth
-                                : objectContainer.editorContentWidth
-                    })
+            var objectContainer = null
+            var paletteBoxGroup = editorBox ? editorBox.child : null
+
+            if ( paletteBoxGroup === null ){
+                if (forAnObject){
+                    objectContainer = __private.createEditorObjectContainerBoxForFragment(ef, editor.textEdit)
+                    objectContainer.adjustSizeToEditor()
+
+                    var rootDeclaration = languageHandler.rootDeclaration()
+
+                    paletteBoxGroup = objectContainer.control.paletteGroup
+                    editorBox = objectContainer.parent
+                } else {
+                    editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
+                    paletteBoxGroup = ef.visualParent
+                    paletteBoxGroup.adjustSizeToEditor()
                 }
-
-                //TOREMOVE
-                objectContainer.title = ef.typeName() + (ef.objectId() ? ("#" + ef.objectId()) : "")
-
-                paletteBoxGroup = objectContainer.paletteGroup()
-                editorBox = objectContainer.parent
             } else {
-                editorBox = __private.createEditorPaletteBoxForFragment(ef, editor.textEdit)
-                paletteBoxGroup = ef.visualParent
+                var p = paletteBoxGroup
+                while (p && p.objectName !== "objectContainer")
+                    p = p.parent
+                objectContainer = p
             }
-        } else {
-            var p = paletteBoxGroup
-            while (p && p.objectName !== "objectContainer") p = p.parent
-            objectContainer = p
-        }
 
-        var palette = null
-        if ( paletteName !== "" ){
-            palette = languageHandler.expand(ef, {
-                "palettes" : [paletteName]
-            })
-        }
-
-        var forImports = ef.location === EditQml.QmlEditFragment.Imports
-
-        if (palette){
-            if (forAnObject && !palette.item ){
-                expandObjectContainerLayout(objectContainer, palette, {expandChildren: false})
+            var palette = null
+            if ( paletteName !== "" ){
+                palette = languageHandler.expand(ef, {
+                    "palettes" : [paletteName]
+                })
             }
-            var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup, {moveEnabled: false})
+
+            var forImports = ef.location === EditQml.QmlEditFragment.Imports
+
+            if (palette){
+                if (forAnObject && !palette.item ){
+                    expandObjectContainerLayout(objectContainer, palette, {expandChildren: false})
+                }
+                var paletteBox = __factories.createPaletteContainer(palette, paletteBoxGroup, {moveEnabled: false})
+            }
+
+            var frameBoxPosition = ef.position()
+            if (forImports){
+                frameBoxPosition = languageHandler.checkPragma(ef.position())
+            }
+            editor.code.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
+
+            if (forImports)
+                editor.code.language.importsFragment = ef //TODO: Move to LanguageQmlHandler
+
+            ef.incrementRefCount()
+            if ( callback )
+                callback(ef, palette)
+        } catch ( e ){
+            lk.layers.workspace.messages.pushErrorObject(e)
         }
-
-        var frameBoxPosition = ef.position()
-        if (forImports){
-            frameBoxPosition = languageHandler.checkPragma(ef.position())
-        }
-        editor.code.frameBox(editorBox, frameBoxPosition, ef.length() + ef.position() - frameBoxPosition)
-
-        if (forImports)
-            editor.code.language.importsFragment = ef //TODO: Move to LanguageQmlHandler
-
-        ef.incrementRefCount()
-        if ( callback )
-            callback(ef, palette)
     }
 
     function shapeImports(editor, callback){
         var languageHandler = editor.code.language
-        var importsPosition = languageHandler.findImportsPosition()
-        var paletteImports = languageHandler.findPalettes(importsPosition)
+
+        var declaration = languageHandler.findImportsDeclaration()
+        var paletteImports = languageHandler.findPalettes(declaration)
         if (paletteImports) {
-            var position = paletteImports.declaration.position
-            paletteImports.data = filterOutPalettes(paletteImports.data)
+            var position = declaration.position()
+            paletteImports = filterOutPalettes(paletteImports)
 
-            shapePaletteAtPosition(editor, paletteImports.data[0].name, position, function(ef, palette){
-                palette.item.width = Qt.binding(function(){
-                    if (!palette.item.parent || !palette.item.parent.parent)
-                        return
-                    var editorSize = editor.width - editor.lineSurfaceWidth - 30 - palette.item.parent.parent.headerWidth
-                    return editorSize > 280 ? editorSize : 280
-                })
-
+            shapePaletteAtPosition(editor, paletteImports[0].name, position, function(ef, palette){
                 if ( callback ){
                     callback(ef, palette)
                 }
@@ -644,114 +668,133 @@ QtObject{
 
     function shapeRoot(editor, callback){
         var languageHandler = editor.code.language
-
         languageHandler.removeSyncImportsListeners()
         languageHandler.onImportsScanned(function(){
-
-            var rootPosition = languageHandler.findRootPosition()
-
-            shapePaletteAtPosition(editor, "", rootPosition, function(ef, palette){
+            var rootDeclaration = languageHandler.rootDeclaration()
+            shapePaletteAtPosition(editor, "", rootDeclaration.position(), function(ef, palette){
                 var oc = ef.visualParent
-
-                oc.contentWidth = Qt.binding(function(){
-                    return oc.containerContentWidth > oc.editorContentWidth ? oc.containerContentWidth : oc.editorContentWidth
-                })
-                languageHandler.rootFragment = oc.editFragment
+                languageHandler.rootFragment = oc.control.editFragment
                 if ( callback ){
                     callback(ef, palette)
                 }
             })
-
         })
     }
 
     function userBind(editor, userPosition, callback){
-        var languageHandler = editor.code.language
+        try{
+            var languageHandler = editor.code.language
+            var declaration = languageHandler.findDeclaration(userPosition)
+            if ( !declaration )
+                return
+            var palettes = languageHandler.findPalettes(declaration)
+            if ( !palettes )
+                return
 
-        var palettes = languageHandler.findPalettes(userPosition)
-        if ( !palettes )
-            return
+            var position = declaration.position()
+            palettes = filterOutPalettes(palettes)
 
-        var position = palettes.declaration.position
-        palettes.data = filterOutPalettes(palettes.data)
-
-        if ( palettes.data.length === 1 ){
-            var ef = languageHandler.openConnection(position)
-            ef.incrementRefCount()
-            languageHandler.openBinding(ef, palettes.data[0].name)
-        } else {
-            editor.internalFocus = false
-
-            var paletteList = views.openPaletteListBox(
-                theme.selectableListView,
-                palettes.data,
-                {
-                    aroundRect: editor.getCursorRectangle(),
-                    panePosition: editor.getGlobalPosition(),
-                    relativePlacement: lk.layers.editor.environment.placement.bottom
-                },
-                {
-                    onCancelled: function(paletteListBox){
-                        editor.forceFocus()
-                        paletteListBox.destroy()
-                    },
-                    onSelected: function(index, paletteListBox){
-                        editor.forceFocus()
-                        paletteListBox.destroy()
-                        var ef = languageHandler.openConnection(position)
-                        ef.incrementRefCount()
-                        languageHandler.openBinding(ef, palettes.data[index].name)
-                        if ( callback )
-                            callback(ef)
-                    }
+            if ( palettes.length === 1 ){
+                var ef = languageHandler.openConnection(declaration)
+                if ( !ef ){
+                    throw new Error(lang("QmlLanguage: Failed to create connection at: %0").format(position))
                 }
-            )
-            lk.layers.workspace.panes.setActiveItem(paletteList, editor)
+
+                ef.incrementRefCount()
+                languageHandler.openBinding(ef, palettes[0].name)
+            } else {
+                editor.internalFocus = false
+
+                var paletteList = views.openPaletteListBox(
+                    theme.selectableListView,
+                    palettes,
+                    {
+                        aroundRect: editor.getCursorRectangle(),
+                        panePosition: editor.getGlobalPosition(),
+                        relativePlacement: lk.layers.editor.environment.placement.bottom
+                    },
+                    {
+                        onCancelled: function(paletteListBox){
+                            editor.forceFocus()
+                            paletteListBox.destroy()
+                        },
+                        onSelected: function(index, paletteListBox){
+                            editor.forceFocus()
+                            paletteListBox.destroy()
+                            var ef = languageHandler.openConnection(declaration)
+                            if ( !ef ){
+                                throw new Error(lang("QmlLanguage: Failed to create connection at: %0").format(position))
+                            }
+
+                            ef.incrementRefCount()
+                            languageHandler.openBinding(ef, palettes[index].name)
+                            if ( callback )
+                                callback(ef)
+                        }
+                    }
+                )
+                lk.layers.workspace.panes.setActiveItem(paletteList, editor)
+            }
+        } catch( e ){
+            lk.layers.workspace.messages.pushErrorObject(e)
         }
     }
 
     function openPaletteInPropertyContainer(propertyContainer, paletteName){
-        var paletteItem = propertyContainer.paletteByName(paletteName)
+        var paletteItem = propertyContainer.control.paletteByName(paletteName)
         if ( paletteItem )
             return paletteItem
 
-        var ef = propertyContainer.editFragment
+        var ef = propertyContainer.control.editFragment
         if ( !ef )
             return
         var editor = ef.language.code.textEdit().getEditor()
 
         if ( paletteName === root.defaultPalette ){
-            paletteName = ef.language.defaultPalette(ef)
+            var palettes = ef.language.findPalettes(ef)
+            for ( var i = 0; i < palettes.length; ++i ){
+                if ( palettes[i].isDefault ){
+                    paletteName = palettes[i].name
+                    break
+                }
+            }
         }
-        if ( !paletteName.length )
+        if ( !paletteName.length || paletteName === '-' )
             return
 
         var palette = editor.code.language.expand(ef, {
             "palettes" : [paletteName]
         })
-        var paletteBox = __factories.createPaletteContainer(palette, propertyContainer.paletteGroup(), { moveEnabled: false })
+        var paletteBox = __factories.createPaletteContainer(palette, propertyContainer.control.activePaletteGroup(), { moveEnabled: false })
         return paletteBox
     }
 
     function openPaletteInObjectContainer(objectContainer, paletteName){
-        var ef = objectContainer.editFragment
-        var paletteBoxParent = objectContainer.paletteGroup()
+        var ef = objectContainer.control.editFragment
+        var paletteBoxParent = objectContainer.control.paletteGroup
         var editor = ef.language.code.textEdit().getEditor()
         var ch = ef.language
         if (!ef)
             return
 
         if ( paletteName === root.defaultPalette ){
-            paletteName = ch.defaultPalette(ef)
+            var palettes = ef.language.findPalettes(ef)
+            for ( var i = 0; i < palettes.length; ++i ){
+                if ( palettes[i].isDefault ){
+                    paletteName = palettes[i].name
+                    break
+                }
+            }
         }
-        if ( !paletteName.length )
+        if ( !paletteName.length || paletteName === '-' )
             return
         var palette = ch.expand(ef, { "palettes" : [paletteName] })
         var paletteBox = __factories.createPaletteContainer(palette, paletteBoxParent, { moveEnabled: false })
+        paletteBoxParent.measureSizeInfo()
 
         if ( palette.item ){ // send expand signal
-            if ( objectContainer.compact )
-                objectContainer.expand()
+            if ( objectContainer.control.compact )
+                objectContainer.control.expand()
         } else {
             expandObjectContainerLayout(objectContainer, palette, {expandChildren: false})
         }
@@ -760,18 +803,18 @@ QtObject{
     }
 
     function addPropertyToObjectContainer(objectContainer, name, readOnly, position, context){
-        var languageHandler = objectContainer.editFragment.language
+        var languageHandler = objectContainer.control.editFragment.language
 
-        var propContainer = objectContainer.propertyByName(name)
+        var propContainer = objectContainer.control.propertyByName(name)
 
         if ( propContainer ){
-            objectContainer.expand()
+            objectContainer.control.expand()
             return propContainer
         }
 
-        objectContainer.expand()
+        objectContainer.control.expand()
 
-        var metaTypeInfo = languageHandler.typeInfo(objectContainer.editFragment)
+        var metaTypeInfo = languageHandler.typeInfo(objectContainer.control.editFragment)
         var propertyInfo = metaTypeInfo.propertyInfo(name)
         if ( !propertyInfo ){
             lk.layers.workspace.messages.pushError("Error: Failed to get property info for '" + name +  "' from '" + objectContainer.editFragment.typeName() +  "'", 1)
@@ -784,13 +827,22 @@ QtObject{
         var isWritable = readOnly ? false : propertyInfo.isWritable
         if (isWritable){
             var defaultValue = EditQml.MetaInfo.defaultTypeValue(propertyInfo.type)
-            var groupParentFragment = (objectContainer.editFragment.fragmentType() & EditQml.QmlEditFragment.Group) ? objectContainer.editFragment : null
+            var groupParentFragment = (objectContainer.control.editFragment.fragmentType() & EditQml.QmlEditFragment.Group) ? objectContainer.editFragment : null
             var addedProperty = languageHandler.addPropertyToCode( position, name, defaultValue, groupParentFragment)
             if ( addedProperty.totalCharsAdded > 0 )
                 populateValueFromPalette = true
-            ef = languageHandler.openNestedConnection(objectContainer.editFragment, addedProperty.position)
+
+            var declaration = languageHandler.findDeclaration(addedProperty.position)
+            var fragmentsResult = languageHandler.openChildConnections(objectContainer.control.editFragment, [declaration])
+            if ( fragmentsResult.hasReport() ){
+                for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                    lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                }
+            }
+
+            ef = fragmentsResult.value.length ? fragmentsResult.value[0] : null
         } else {
-            ef = languageHandler.openReadOnlyPropertyConnection(objectContainer.editFragment, name)
+            ef = languageHandler.openReadOnlyPropertyConnection(objectContainer.control.editFragment, name)
         }
 
         if (!ef) {
@@ -798,7 +850,7 @@ QtObject{
             return null
         }
 
-        objectContainer.editFragment.signalChildAdded(ef, context)
+        objectContainer.control.editFragment.signalChildAdded(ef, context)
 
         if ( populateValueFromPalette ){
             var paletteList = ef.paletteList()
@@ -809,61 +861,80 @@ QtObject{
                 }
             }
         }
-
-
-        return objectContainer.propertyByName(name)
+        return objectContainer.control.propertyByName(name)
     }
 
     function addEventToObjectContainer(objectContainer, name, position, context){
         // check if event is opened already
-        var propContainer = objectContainer.propertyByName(name)
+        var propContainer = objectContainer.control.propertyByName(name)
         if ( propContainer ){
-            objectContainer.expand()
+            objectContainer.control.expand()
             return propContainer
         }
 
-        var languageHandler = objectContainer.editingFragment.language
+        var languageHandler = objectContainer.control.editFragment.language
         var ppos = languageHandler.addEventToCode(position, name)
-        var ef = languageHandler.openNestedConnection(objectContainer.editFragment, ppos)
-        if (ef){
-            objectContainer.editFragment.signalChildAdded(ef, context)
+
+        var declaration = languageHandler.findDeclaration(ppos)
+        var fragmentsResult = languageHandler.openChildConnections(objectContainer.control.editFragment, [declaration])
+        if ( fragmentsResult.hasReport() ){
+            for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+            }
         }
 
-        return objectContainer.propertyByName(name)
+        var ef = fragmentsResult.value.length ? fragmentsResult.value[0] : null
+
+        if (ef){
+            objectContainer.control.editFragment.signalChildAdded(ef, context)
+        }
+
+        return objectContainer.control.propertyByName(name)
     }
 
     //TODO: Add return type (last child)
     function addObjectToObjectContainer(container, typeOptions, extraProperties, position, context){
-        var languageHandler = container.editFragment.language
+        var languageHandler = container.control.editFragment.language
 
         var opos = languageHandler.addObjectToCode(position, typeOptions, extraProperties)
-        languageHandler.createObjectInRuntime(container.editFragment, typeOptions, extraProperties)
-        var ef = languageHandler.openNestedConnection(container.editFragment, opos)
-        if (!ef)
-            return null
+        languageHandler.createObjectInRuntime(container.control.editFragment, typeOptions, extraProperties)
 
-        container.editFragment.signalChildAdded(ef, context)
-        container.sortChildren()
+        var declaration = languageHandler.findDeclaration(opos)
+        var fragmentsResult = languageHandler.openChildConnections(container.control.editFragment, [declaration])
+        if ( fragmentsResult.hasReport() ){
+            for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+            }
+        }
+
+        var ef = fragmentsResult.value.length ? fragmentsResult.value[0] : null
+
+        if (!ef){
+            lk.layers.workspace.messages.pushError("Error: Failed to create object child: " + typeOptions, 1)
+            return null
+        }
+
+        container.control.editFragment.signalChildAdded(ef, context)
+        container.control.__sortContainerChildren()
     }
 
     function userAddToObjectContainer(container, handlers){
-        var languageHandler = container.editor.code.language
+        var languageHandler = container.control.editor.code.language
 
-        var isForNode = container.objectName === "objectNode"
-        var isGroup = container.editFragment.fragmentType() & EditQml.QmlEditFragment.Group
+        var isGroup = container.control.editFragment.fragmentType() & EditQml.QmlEditFragment.Group
 
-        var position = container.editFragment.position()
+        var position = container.control.editFragment.position()
         if (isGroup)
             position += 1
 
-        var addContainer = languageHandler.getAddOptions({ editFragment: container.editFragment, isReadOnly: isGroup })
+        var addContainer = languageHandler.getAddOptions({ editFragment: container.control.editFragment, isReadOnly: isGroup })
         if ( !addContainer )
             return
 
-        var pane = container.getPane()
-        var coords = container.mapToItem(pane, 0, 0)
+        var pane = container.control.getPane()
+        var coords = container.control.mapToPane(pane)
 
-        if ( container.parent.objectName !== 'objectContainer' )
+        if ( container.control.pane )
             coords.y = coords.y - 30 // if this container is in the title of a pane
 
         var paneCoords = pane.mapGlobalPosition()
@@ -872,7 +943,7 @@ QtObject{
         if (!isGroup && addContainer.model.supportsObjectNesting()){
             categories.push('objects')
         }
-        if (container.supportsFunctions){
+        if (container.control.supportsFunctions){
             categories.push('functions')
         }
 
@@ -931,62 +1002,64 @@ QtObject{
     }
 
     function eraseObject(objectContainer){
-        var rootDeleted = (objectContainer.editFragment.position() === objectContainer.editor.code.language.findRootPosition())
-        objectContainer.editor.code.language.eraseObject(objectContainer.editFragment, !objectContainer.isForProperty)
+        var rootDeclaration = objectContainer.control.editor.code.language.rootDeclaration()
+        var rootDeleted = (objectContainer.control.editFragment.position() === rootDeclaration.position())
+        objectContainer.control.editor.code.language.eraseObject(objectContainer.control.editFragment, !objectContainer.control.isForProperty)
 
         if (rootDeleted) {
-            objectContainer.editFragment.language.rootFragment = null
-            __private.createAddRootButton(objectContainer.editor)
+            objectContainer.control.editFragment.language.rootFragment = null
+            __private.createAddRootButton(objectContainer.control.editor)
         }
 
-        if ( objectContainer.isForProperty ) {
-            objectContainer.collapse()
+        if ( objectContainer.control.isForProperty ) {
+            objectContainer.control.collapse()
         }
     }
 
     function closeObjectContainer(objectContainer){
         if ( objectContainer.pane )
             objectContainer.closeAsPane()
-        var languageHandler = objectContainer.editor.code.language
-        objectContainer.collapse()
-        var rootPos = languageHandler.findRootPosition()
-        if (rootPos === objectContainer.editFragment.position())
+        var languageHandler = objectContainer.control.editor.code.language
+        objectContainer.control.collapse()
+
+        var rootDeclaration = languageHandler.rootDeclaration()
+        if (rootDeclaration.position() === objectContainer.control.editFragment.position())
             languageHandler.rootFragment = null
 
-        languageHandler.removeConnection(objectContainer.editFragment)
+        languageHandler.removeConnection(objectContainer.control.editFragment)
 
         var p = objectContainer.parent.parent
         if ( p.objectName === 'editorBox' ){ // if this is root for the editor box
             p.destroy()
         } else { // if this is nested
             //TODO: Check if this is nested within a property container
-            if ( objectContainer.pane )
-                objectContainer.closeAsPane()
+            if ( objectContainer.control.pane )
+                objectContainer.control.closeAsPane()
             objectContainer.parent.destroy()
         }
     }
 
     function objectContainerToPane(objectContainer){
-        if ( objectContainer.frame.pane ){
-            objectContainer.frame.closeAsPane()
+        if ( objectContainer.control.pane ){
+            objectContainer.control.closeAsPane()
             return
         }
 
-        objectContainer.expand()
+        objectContainer.control.expand()
 
         var objectPane = lk.layers.workspace.panes.createPane('objectPalette', {}, [400, 400])
         lk.layers.workspace.panes.splitPaneHorizontallyWith(
-            objectContainer.editor.parent.parentSplitView,
-            objectContainer.editor.parent.parentSplitViewIndex(),
+            objectContainer.control.editor.parent.parentSplitView,
+            objectContainer.control.editor.parent.parentSplitViewIndex(),
             objectPane
         )
 
         var root = objectContainer.parent
 
-        objectContainer.frame.objectContainerTitle.parent = objectPane.paneHeaderContent
-        objectPane.objectContainer = objectContainer.frame
-        objectPane.title = objectContainer.frame.title
-        objectContainer.frame.pane = objectPane
+        objectContainer.control.frame.objectContainerTitle.parent = objectPane.paneHeaderContent
+        objectPane.objectContainer = objectContainer.control.frame
+        objectPane.title = objectContainer.control.title
+        objectContainer.control.pane = objectPane
 
         objectContainer.placeHolder.parent = root
 
@@ -1011,9 +1084,9 @@ QtObject{
     }
 
     function expandObjectContainerLayout(objectContainer, layout, options){
-        var editor = objectContainer.editor
+        var editor = objectContainer.control.editor
 
-        if ( layout['type'] !== objectContainer.editFragment.type() )
+        if ( layout['type'] !== objectContainer.control.editFragment.type() )
             return
 
         if ('palettes' in layout){
@@ -1027,8 +1100,8 @@ QtObject{
             var properties = layout['properties']
             for (var i = 0; i < properties.length; ++i){
                 var prop = properties[i]
-                var position = objectContainer.editFragment.valuePosition() +
-                               objectContainer.editFragment.valueLength() - 1
+                var position = objectContainer.control.editFragment.valuePosition() +
+                               objectContainer.control.editFragment.valueLength() - 1
                 var readOnly = prop.hasOwnProperty('readOnly') ? prop.readOnly : false
 
                 var propertyContainer = addPropertyToObjectContainer(
@@ -1054,14 +1127,30 @@ QtObject{
 
         if ('children' in layout){
             var children = layout['children']
-            var childFragments = objectContainer.editFragment.language.openNestedFragments(objectContainer.editFragment, ['objects'])
+            var ef = objectContainer.control.editFragment
+
+            var declarationsResult = language.findDeclarations(ef.position() + 1, ef.length() - 2)
+            if ( declarationsResult.hasReport() ){
+                for ( var i = 0; i < declarationsResult.report.length; ++i ){
+                    lk.layers.workspace.messages.pushErrorObject(declarationsResult.report[i])
+                }
+            }
+            var fragmentsResult = language.openChildConnections(ef, declarationsResult.value)
+            if ( fragmentsResult.hasReport() ){
+                for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                    lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                }
+            }
+
+            var childFragments = fragmentsResult.value.filter(edf => edf.location === EditQml.QmlEditFragment.Object )
+
             if (children.length === childFragments.length){
                 for (var i = 0; i < childFragments.length; ++i){
                     var childObjectContainer = null
                     if ( childFragments[i].visualParent ){
                         childObjectContainer = childFragments[i].visualParent
                     } else {
-                        childObjectContainer = objectContainer.addChildObject(childFragments[i])
+                        childObjectContainer = objectContainer.control.addChildObject(childFragments[i])
                     }
 
                     expandObjectContainerLayout(childObjectContainer, children[i])
@@ -1129,7 +1218,7 @@ QtObject{
             result['palettes'] = nameList
 
         if ( editFragment.visualParent ){
-            result['container'] = editFragment.visualParent.getLayoutState()
+            result['container'] = editFragment.visualParent.control.getLayoutState()
         }
 
         var childFragments = editFragment.getChildFragments()
@@ -1241,53 +1330,6 @@ QtObject{
         )
 
         lk.layers.workspace.panes.setActiveItem(addEditorBox, editor.parent)
-    }
-
-
-    // TOMOVE
-    // -----------------------------------------------
-
-    function addPropertyByName(container, name){
-        if (container.propertiesOpened){
-            for (var i = 0; i < container.propertiesOpened.length; ++i){
-                if (container.propertiesOpened[i] === name){
-                    return
-                }
-            }
-        }
-
-        var languageHandler = container.editor.code.language
-        return addPropertyByFragment(container.editFragment, name)
-    }
-
-    function addPropertyByFragment(ef, name){
-
-        var languageHandler = ef.language
-        var position = ef.valuePosition() +
-                       ef.valueLength() - 1
-
-        var addContainer = languageHandler.getAddOptions(position)
-        if ( !addContainer )
-            return
-
-        addContainer.model.setCategoryFilter(1)
-        addContainer.model.setFilter(name)
-
-        if (addContainer.model.rowCount() === 0) return
-
-        var type = addContainer.model.data(addContainer.model.index(0, 0), 256 + 3/*QmlSuggestionModel.Type*/)
-
-        var ppos = languageHandler.addProperty(
-            addContainer.model.addPosition, addContainer.objectType, type, name, true
-        )
-
-        var propEf = languageHandler.openNestedConnection(ef, ppos)
-
-        if (propEf) {
-            ef.signalChildAdded(propEf, false)
-        }
-
-        return propEf
     }
 
 }
