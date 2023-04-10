@@ -26,7 +26,6 @@ class FunctionStub : public Element{
             .scriptFunction("objectReturnType", &FunctionStub::objectReturnType)
             .scriptFunction("localValueReturnType", &FunctionStub::localValueReturnType)
             .scriptFunction("valueReturnType", &FunctionStub::valueReturnType)
-            .scriptFunction("bufferReturnType", &FunctionStub::bufferReturnType)
             .scriptFunction("elementReturnType", &FunctionStub::elementReturnType)
             .scriptFunction("userElementReturnType", &FunctionStub::userElementReturnType)
             .scriptFunction("intNoParameterReturnType", &FunctionStub::intNoParameterReturnType)
@@ -45,7 +44,6 @@ class FunctionStub : public Element{
     static Object objectReturnType(const Object& value){ return value; }
     static ScopedValue localValueReturnType(ScopedValue value){ return value; }
     static Value valueReturnType(Value value){ return value; }
-    static Buffer bufferReturnType(Buffer value){ return value; }
     static Element* elementReturnType(Element* value){ return value;}
     static FunctionStub* userElementReturnType(FunctionStub* value){ return value; }
 

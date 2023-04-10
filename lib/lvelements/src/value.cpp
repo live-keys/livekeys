@@ -26,7 +26,7 @@
 namespace lv{ namespace el{
 
 
-// LocalValue implementation
+// ScopedValue implementation
 // ----------------------------------------------------------------------
 
 class ScopedValuePrivate{
@@ -97,10 +97,27 @@ ScopedValue::ScopedValue(Engine *, Object val)
     ++(*m_ref);
 }
 
-ScopedValue::ScopedValue(Engine *engine, const Buffer &val) //TODO
-    : m_d(new ScopedValuePrivate(v8::Undefined(engine->isolate())))/*v8::ArrayBuffer::New(engine->isolate(), val.data(), val.size()))*/
+ScopedValue::ScopedValue(Engine *engine, const Buffer::Initializer &bi)
+    : m_d(nullptr)
     , m_ref(new int)
 {
+    auto deleterObject = new Buffer::DeleterData;
+    deleterObject->callback = bi.deleter();
+    bi.use();
+
+    std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
+        bi.data(),
+        bi.size(),
+        [](void* data, size_t size, void* deleterObject){
+            Buffer::DeleterData* bcd = reinterpret_cast<Buffer::DeleterData*>(deleterObject);
+            if ( bcd->callback )
+                bcd->callback(data, size);
+            delete bcd;
+        },
+        deleterObject
+    );
+
+    m_d = new ScopedValuePrivate(v8::ArrayBuffer::New(engine->isolate(), std::move(backing)));
     ++(*m_ref);
 }
 
@@ -209,10 +226,6 @@ std::string ScopedValue::toStdString(Engine *engine) const{
 
 Callable ScopedValue::toCallable(Engine* engine) const{
     return Callable(engine, v8::Local<v8::Function>::Cast(m_d->data));
-}
-
-Buffer ScopedValue::toBuffer(Engine *) const{
-    return Buffer(v8::Local<v8::ArrayBuffer>::Cast(m_d->data));
 }
 
 Object ScopedValue::toObject(Engine *engine) const{
@@ -350,11 +363,6 @@ ScopedValue convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
 template<>
 Value convertFromV8(Engine *engine, const v8::Local<v8::Value> &value){
     return ScopedValue(engine, value).toValue(engine);
-}
-
-template<>
-Buffer convertFromV8(Engine *, const v8::Local<v8::Value> &value){
-    return Buffer(v8::Local<v8::ArrayBuffer>::Cast(value));
 }
 
 template<>

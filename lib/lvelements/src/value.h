@@ -18,7 +18,6 @@
 
 #include "live/elements/lvelementsglobal.h"
 #include "live/elements/object.h"
-#include "live/elements/buffer.h"
 
 #include <string>
 #include <memory>
@@ -155,7 +154,7 @@ public:
     ScopedValue(Engine* engine, const std::string& val);
     ScopedValue(Engine* engine, Callable val);
     ScopedValue(Engine* engine, Object val);
-    ScopedValue(Engine* engine, const Buffer& val);
+    ScopedValue(Engine* engine, const Buffer::Initializer &val);
     ScopedValue(Engine* engine, Element *val);
     ScopedValue(Engine* engine, const Value& value);
     ScopedValue(Engine* engine, const ScopedValue& other); // TODO: This can be eliminated through specialization
@@ -175,7 +174,6 @@ public:
     Value::Number toNumber(Engine* engine) const;
     std::string toStdString(Engine* engine) const;
     Callable toCallable(Engine* engine) const;
-    Buffer toBuffer(Engine* engine) const;
     Object toObject(Engine* engine) const;
     Element* toElement(Engine* engine) const;
 
@@ -239,7 +237,6 @@ template<> LV_ELEMENTS_EXPORT std::string convertFromV8(Engine* engine, const v8
 template<> LV_ELEMENTS_EXPORT Callable convertFromV8(Engine *engine, const v8::Local<v8::Value> &value);
 template<> LV_ELEMENTS_EXPORT Object convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Value convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
-template<> LV_ELEMENTS_EXPORT Buffer convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT ScopedValue convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 template<> LV_ELEMENTS_EXPORT Element* convertFromV8(Engine* engine, const v8::Local<v8::Value>& value);
 

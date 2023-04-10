@@ -51,11 +51,21 @@ void toJs(const MLNode &n, v8::Local<v8::Value>& v, el::Engine *engine){
         break;
     }
     case MLNode::Type::Bytes:{
-        v = v8::ArrayBuffer::New(engine->isolate(), n.asBytes().size());
+        // store a new ByteBuffer, and delete it once the ArrayBuffer is not using it
+        MLNode::BytesType* bb = new MLNode::BytesType;
+        *bb = n.asBytes();
 
-        //HERE
-//        v8::ArrayBuffer::NewBackingStore(
-//        v = v8::ArrayBuffer::New(engine->isolate(), n.asBytes().data(), n.asBytes().size());
+        std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
+            bb->data(),
+            bb->size(),
+            [](void*, size_t, void* byteBuffer){
+                MLNode::BytesType* bb = reinterpret_cast<MLNode::BytesType*>(byteBuffer);
+                delete bb;
+            },
+            bb
+        );
+
+        v = v8::ArrayBuffer::New(engine->isolate(), std::move(backing));
         break;
     }
     case MLNode::Type::String:{

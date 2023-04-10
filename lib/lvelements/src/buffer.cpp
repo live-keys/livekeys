@@ -14,22 +14,61 @@
 ****************************************************************************/
 
 #include "buffer.h"
+#include "live/elements/engine.h"
+#include "live/elements/object.h"
 #include "v8nowarnings.h"
 
 namespace lv{ namespace el{
 
-Buffer::Buffer(void *data, size_t size)
-    : m_data(data)
+class Buffer::AccessorPrivate{
+public:
+    AccessorPrivate(const v8::Local<v8::ArrayBuffer>& ab)
+        : data(ab)
+    {
+        backingStore = data->GetBackingStore();
+    }
+
+    v8::Local<v8::ArrayBuffer> data;
+    std::shared_ptr<v8::BackingStore> backingStore;
+};
+
+Buffer::Accessor::Accessor(const Object &o)
+    : m_d(nullptr)
+{
+    m_d = new Buffer::AccessorPrivate(v8::Local<v8::ArrayBuffer>::Cast(o.data()));
+}
+
+Buffer::Accessor::Accessor(const ScopedValue& sv)
+    : m_d(nullptr)
+{
+    m_d = new Buffer::AccessorPrivate(sv.data().As<v8::ArrayBuffer>());
+}
+
+Buffer::Accessor::~Accessor(){
+    delete m_d;
+}
+
+size_t Buffer::Accessor::size() const{
+    return m_d->backingStore->ByteLength();
+}
+
+void *Buffer::Accessor::data() const{
+    return m_d->backingStore->Data();
+}
+
+Buffer::Initializer::Initializer(void *data, size_t size, std::function<void (void *, size_t)> deleter)
+    : m_used(false)
+    , m_data(data)
     , m_size(size)
-    , m_externalized(true)
+    , m_deleter(deleter)
 {
 }
 
-Buffer::Buffer(const v8::Local<v8::ArrayBuffer> &value)
-    : m_data(/*value->GetContents().Data()*/) //HERE: Will need to use backing stores
-    , m_size(value->ByteLength())
-    , m_externalized(value->IsExternal())
-{
+void Buffer::Initializer::use() const{
+    if ( m_used ){
+        THROW_EXCEPTION(lv::Exception, "Buffer::Initializer has already been used for initialisation.", lv::Exception::toCode("~Initializer"));
+    }
+    m_used = true;
 }
 
 }} // namespace lv, el

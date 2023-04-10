@@ -116,6 +116,27 @@ Object Object::createArray(Engine *engine, int length){
     return Object(engine, v8::Array::New(engine->isolate(), length));
 }
 
+Object Object::createBuffer(Engine *engine, const Buffer::Initializer &bi){
+    bi.use();
+
+    auto deleterObject = new Buffer::DeleterData;
+    deleterObject->callback = bi.deleter();
+
+    std::unique_ptr<v8::BackingStore> backing = v8::ArrayBuffer::NewBackingStore(
+        bi.data(),
+        bi.size(),
+        [](void* data, size_t size, void* deleterObject){
+            Buffer::DeleterData* bcd = reinterpret_cast<Buffer::DeleterData*>(deleterObject);
+            if ( bcd->callback )
+                bcd->callback(data, size);
+            delete bcd;
+        },
+        deleterObject
+    );
+
+    return Object(engine, v8::ArrayBuffer::New(engine->isolate(), std::move(backing)));
+}
+
 std::string Object::toString() const{
     if ( m_d->data.IsEmpty() )
         return std::string();
@@ -124,14 +145,6 @@ std::string Object::toString() const{
     auto context = isolate->GetCurrentContext();
     v8::Local<v8::Object> s = m_d->data.Get(isolate);
     return *v8::String::Utf8Value(isolate, s->ToString(context).ToLocalChecked());
-}
-
-Buffer Object::toBuffer() const{
-    if ( m_d->data.IsEmpty() )
-        return Buffer(nullptr, 0);
-
-    v8::Local<v8::Object> b = m_d->data.Get(m_d->engine->isolate());
-    return Buffer(v8::Local<v8::ArrayBuffer>::Cast(b));
 }
 
 Object Object::create(ObjectPrivate *d, int *ref){

@@ -78,7 +78,7 @@ class PropertyTypesStub : public Element{
                                            &PropertyTypesStub::setValueProperty,
                                            "valuePropertyChanged")
 
-            .scriptProperty<lv::el::Buffer>("bufferProperty",
+            .scriptProperty<lv::el::Object>("bufferProperty",
                                             &PropertyTypesStub::bufferProperty,
                                             &PropertyTypesStub::setBufferProperty,
                                             "bufferPropertyChanged")
@@ -116,8 +116,7 @@ class PropertyTypesStub : public Element{
         , m_numberProperty(0)
         , m_callableProperty(engine)
         , m_objectProperty(engine)
-        , m_bufferProperty(0)
-        , m_bufferPropertySize(0)
+        , m_bufferProperty(engine)
         , m_elementProperty(nullptr)
         , m_userElementProperty(nullptr)
         , m_localValueProperty()
@@ -208,13 +207,12 @@ class PropertyTypesStub : public Element{
         valuePropertyChanged();
     }
 
-    Buffer bufferProperty() const{ return Buffer(m_bufferProperty, m_bufferPropertySize); }
-    void setBufferProperty(Buffer value){
-        if ( value.dataAs<int*>() == m_bufferProperty )
+    lv::el::Object bufferProperty() const{ return m_bufferProperty; }
+    void setBufferProperty(lv::el::Object value){
+        if ( m_valueProperty == value )
             return;
 
-        m_bufferProperty = value.dataAs<int*>();
-        m_bufferPropertySize  = value.size();
+        m_bufferProperty = value;
         bufferPropertyChanged();
     }
 
@@ -258,8 +256,7 @@ private:
     std::string           m_stdStringProperty;
     lv::el::Callable      m_callableProperty;
     lv::el::Object        m_objectProperty;
-    int*                  m_bufferProperty;
-    size_t                m_bufferPropertySize;
+    lv::el::Object        m_bufferProperty;
     lv::el::Element*      m_elementProperty;
     ReadOnlyPropertyStub* m_userElementProperty;
     lv::el::Value         m_localValueProperty;
@@ -427,17 +424,18 @@ void JsPropertyTest::propertyTypes(){
             for ( int i = 0; i < 5; ++i )
                 buffer[i] = i;
             size_t bufferSize = 5;
-            e->setBufferProperty(Buffer(buffer, bufferSize));
-            QVERIFY(e->bufferProperty().size() == 5);
-            QVERIFY(e->bufferProperty().data() == buffer);
-            QVERIFY(e->get("bufferProperty").toBuffer(engine).data() == buffer);
-            QVERIFY(e->get("bufferProperty").toBuffer(engine).size() == bufferSize);
-            QVERIFY(e->get("bufferProperty").toBuffer(engine).isExternal());
 
-            e->set("bufferProperty", ScopedValue(engine, Buffer(nullptr, 0)));
-            QVERIFY(e->bufferProperty().size() == 0);
-            QVERIFY(e->bufferProperty().data() == nullptr);
-            QVERIFY(e->get("bufferProperty").toBuffer(engine).size() == 0);
+            Object bufferOb = Object::createBuffer(engine, Buffer::Initializer(buffer, bufferSize, nullptr));
+            e->setBufferProperty(bufferOb);
+
+            Buffer::Accessor ba(e->bufferProperty());
+            QVERIFY(ba.size() == 5);
+            QVERIFY(ba.data() == buffer);
+
+            e->set("bufferProperty", ScopedValue(engine, Buffer::Initializer(nullptr, 0, nullptr)));
+            Buffer::Accessor ban(e->bufferProperty());
+            QVERIFY(ban.size() == 0);
+            QVERIFY(ban.data() == nullptr);
             delete []buffer;
 
             Element* elemProperty = new Element(engine);
@@ -488,7 +486,7 @@ void JsPropertyTest::propertyTypes(){
             QVERIFY(lop.get(engine, ScopedValue(engine, std::string("b"))).toInt32(engine) == 7);
             QVERIFY(e->localValueProperty().toStdString(engine) == "abcd");
             QVERIFY(ScopedValue(engine, e->valueProperty()).toStdString(engine) == "abcd");
-            QVERIFY(e->bufferProperty().size() == 8);
+            QVERIFY(Buffer::Accessor(e->bufferProperty()).size() == 8);
             QVERIFY(e->elementProperty() == e);
             QVERIFY(e->userElementProperty() == ps);
 

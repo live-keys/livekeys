@@ -25,7 +25,6 @@ class MethodStub : public Element{
             .scriptMethod("objectReturnType", &MethodStub::objectReturnType)
             .scriptMethod("localValueReturnType", &MethodStub::localValueReturnType)
             .scriptMethod("valueReturnType", &MethodStub::valueReturnType)
-            .scriptMethod("bufferReturnType", &MethodStub::bufferReturnType)
             .scriptMethod("elementReturnType", &MethodStub::elementReturnType)
             .scriptMethod("userElementReturnType", &MethodStub::userElementReturnType)
             .scriptMethod("intNoParameterReturnType", &MethodStub::intNoParameterReturnType)
@@ -44,7 +43,6 @@ class MethodStub : public Element{
     Object objectReturnType(const Object& value){ return value; }
     ScopedValue localValueReturnType(ScopedValue value){ return value; }
     Value valueReturnType(Value value){ return value; }
-    Buffer bufferReturnType(Buffer value){ return value; }
     Element* elementReturnType(Element* value){ return value;}
     MethodStub* userElementReturnType(MethodStub* value){ return value; }
 
@@ -129,9 +127,6 @@ void JsMethodTest::typesTest(){
 
         v = engine->compileJsEnclosed("return e.valueReturnType('123');")->run();
         QVERIFY(v.asObject().toString() == "123");
-
-        v = engine->compileJsEnclosed("return e.bufferReturnType(new ArrayBuffer(8));")->run();
-        QVERIFY(v.asObject().toBuffer().size() == 8);
 
         v = engine->compileJsEnclosed("return e.elementReturnType(e);")->run();
         QVERIFY(v.asElement() == e);
