@@ -141,11 +141,11 @@ std::string ModuleFile::jsFileName() const{
 }
 
 std::string ModuleFile::jsFilePath() const{
-    return m_d->elementsModule->compiler()->moduleBuildPath(m_d->elementsModule->module()) + "/" + jsFileName();
+    return Path::join(m_d->elementsModule->compiler()->moduleBuildPath(m_d->elementsModule->module()), jsFileName());
 }
 
 std::string ModuleFile::filePath() const{
-    return m_d->elementsModule->module()->path() + "/" + fileName();
+    return Path::join(m_d->elementsModule->module()->path(), fileName());
 }
 
 const ElementsModule::Ptr &ModuleFile::module() const{

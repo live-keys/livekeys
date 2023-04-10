@@ -33,6 +33,12 @@ template <typename TP> std::chrono::system_clock::time_point toTimePoint(TP tp){
 // class Path
 // ----------------------------------------------------------------------------
 
+#ifdef PLATFORM_OS_WIN
+const char Path::separator = '\\';
+#else
+const char Path::separator = '/';
+#endif
+
 std::string Path::temporaryDirectory(){
     return fs::temp_directory_path().string();
 }
@@ -101,6 +107,17 @@ void Path::copyRecursive(const std::string &from, const std::string &to, int opt
 }
 
 std::string Path::join(const std::string &p1, const std::string &p2){
+    if ( p1.empty() )
+        return p2;
+    if ( p2.empty() )
+        return p1;
+    if ( p1.back() == Path::separator || p2.front() == Path::separator ){
+        return p1 + p2;
+    }
+    return p1 + Path::separator + p2;
+}
+
+std::string Path::joinExisting(const std::string &p1, const std::string &p2){
     return (fs::path(p1) / fs::path(p2)).string();
 }
 
@@ -139,6 +156,15 @@ std::string Path::resolve(const std::string &p){
 
 std::string Path::rootPath(const std::string &p){
     return fs::path(p).root_path().string();
+}
+
+std::string Path::toUnixSeparator(const std::string &p){
+    if ( Path::separator == '/' )
+        return p;
+    std::string result = p;
+    std::string separator = std::string() + Path::separator;
+    Utf8::replaceAll(result, separator, "/");
+    return result;
 }
 
 bool Path::isRelative(const std::string &p){

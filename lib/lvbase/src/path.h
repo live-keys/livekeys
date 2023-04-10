@@ -18,6 +18,8 @@ public:
         UpdateExisting = 4
     };
 
+    static const char separator;
+
 public:
     static std::string temporaryDirectory();
     static bool exists(const std::string& s);
@@ -33,12 +35,14 @@ public:
     static void copyRecursive(const std::string& from, const std::string& to, int options = Path::OverwriteExisting);
 
     static std::string join(const std::string& p1, const std::string& p2);
+    static std::string joinExisting(const std::string& p1, const std::string& p2);
     static std::vector<std::string> split(const std::string p);
     static std::string name(const std::string& p);
     static std::string parent(const std::string& p);
     static std::string absolutePath(const std::string& p);
     static std::string resolve(const std::string& p);
     static std::string rootPath(const std::string& p);
+    static std::string toUnixSeparator(const std::string& p);
     static bool isRelative(const std::string& p);
     static bool isAbsolute(const std::string& p);
 
