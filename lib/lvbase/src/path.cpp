@@ -130,7 +130,13 @@ std::string Path::absolutePath(const std::string &p){
 }
 
 std::string Path::resolve(const std::string &p){
-    return fs::canonical(p).string();
+    try{
+        std::string res = fs::canonical(p).string();
+        return res;
+    } catch ( std::exception& e ){
+        THROW_EXCEPTION(lv::Exception, e.what(), Exception::toCode("~Path"));
+    }
+    return "";
 }
 
 std::string Path::rootPath(const std::string &p){

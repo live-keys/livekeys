@@ -48,7 +48,7 @@ Library::Table &Library::table(){
 
 
 Library::Ptr lv::Library::load(const std::string &path){
-    std::string fullPath = Path::resolve(path);
+    std::string fullPath = Path::absolutePath(path);
     Library::Ptr l = isLoaded(path);
     if ( l )
         return l;

@@ -48,7 +48,7 @@ public:
 class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
     /** Default contructor */
-    InvalidMLTypeException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
+    InvalidMLTypeException(const std::string& message = "", lv::Exception::Code code = 0) : lv::Exception(message, code){}
 };
 
 /**

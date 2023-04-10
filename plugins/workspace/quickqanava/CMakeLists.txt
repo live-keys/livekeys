@@ -3,6 +3,7 @@ add_library(quickqanava SHARED)
 
 set_target_properties(quickqanava PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/workspace/quickqanava"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/workspace/quickqanava"
 )
 
 add_output_files(quickqanava_qml        ${CMAKE_CURRENT_SOURCE_DIR}/qml        ${MODULE_DEPLOY_PATH}/workspace/quickqanava          workspace_quickqanava_qml_sources)

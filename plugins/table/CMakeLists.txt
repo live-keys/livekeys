@@ -3,6 +3,7 @@ add_library(table SHARED)
 
 set_target_properties(table PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/table"
+    RUNTIME_OUTPUT_DIRECTORY "${MODULE_DEPLOY_PATH}/table"
 )
 
 if(APPLE)

@@ -151,7 +151,8 @@ inline void Utf8::formatImpl(std::string::const_iterator sit, std::stringstream 
     while (sit != m_data->cend() ) {
         char ch = *sit;
         if (ch == '%') {
-            if (*(sit + 1) == '%') {
+            auto sitnext = sit + 1;
+            if (sitnext != m_data->cend() && *(sitnext) == '%') {
                 ++sit;
             } else {
                 throwFormatError("Missing arguments in Utf8.format");
@@ -166,8 +167,9 @@ template<typename T, typename... Args>
 void Utf8::formatImpl(std::string::const_iterator sit, std::stringstream &stream, const T &value, Args... args) const{
     while (sit != m_data->cend() ) {
         char ch = *sit;
-        if (*sit == '%') {
-            if (*(sit + 1) == '%') {
+        if (ch == '%') {
+            auto sitnext = sit + 1;
+            if (sitnext != m_data->cend() && *(sitnext) == '%') {
                 ++sit;
             } else {
                 stream << value;

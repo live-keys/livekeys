@@ -14,16 +14,10 @@
 **
 ****************************************************************************/
 
-#include <QCoreApplication>
-#include <QTest>
-
-#include "testrunner.h"
-#include "mlnodetest.h"
-#include "mlnodetojsontest.h"
-#include "visuallogtest.h"
+#include "catch_amalgamated.hpp"
+#include "live/visuallog.h"
 
 int main(int argc, char *argv[]){
-
-    QCoreApplication app(argc, argv);
-    return lv::TestRunner::runTests(argc, argv);
+    int result = Catch::Session().run( argc, argv );
+    return result;
 }

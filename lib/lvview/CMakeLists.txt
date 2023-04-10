@@ -3,6 +3,7 @@ add_library(lvview SHARED)
 
 set_target_properties(lvview PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
+    RUNTIME_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
 )
 
 target_sources(lvview PRIVATE
