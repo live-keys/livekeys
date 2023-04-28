@@ -731,7 +731,6 @@ void BaseNode::visitComponentInstanceStatement(BaseNode *parent, const TSNode &n
 void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
     PropertyDeclarationNode* enode = new PropertyDeclarationNode(node);
     parent->addChild(enode);
-    uint32_t count = ts_node_child_count(node);
 
     std::string paramKey = "name";
     TSNode propName = ts_node_child_by_field_name(node, paramKey.c_str(), paramKey.length());
@@ -745,6 +744,7 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
         enode->addChild(enode->m_type);
     }
 
+    uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
         if ( strcmp(ts_node_type(child), "property_assignment_expression") == 0 ){
@@ -774,22 +774,27 @@ void BaseNode::visitPropertyDeclaration(BaseNode *parent, const TSNode &node){
 void BaseNode::visitStaticPropertyDeclaration(BaseNode *parent, const TSNode &node){
     StaticPropertyDeclarationNode* enode = new StaticPropertyDeclarationNode(node);
     parent->addChild(enode);
+
+    TSNode propName = BaseNode::nodeChildByFieldName(node, "name");
+    assertValid(parent, propName, "Property name is null.");
+    enode->m_name = new IdentifierNode(propName);
+    enode->addChild(enode->m_name);
+    TSNode propType = BaseNode::nodeChildByFieldName(node, "type");
+    if ( !ts_node_is_null(propType) ){
+        enode->m_type = new TypeNode(propType);
+        enode->addChild(enode->m_type);
+    }
+
     uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
-        if ( strcmp(ts_node_type(child), "identifier") == 0 ){
-            enode->m_type = new IdentifierNode(child);
-            enode->addChild(enode->m_type);
-        } else if ( strcmp(ts_node_type(child), "property_declaration_name") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-            enode->addChild(enode->m_name);
-        } else if ( strcmp(ts_node_type(child), "property_expression_initializer" ) == 0 ){
+        if ( strcmp(ts_node_type(child), "property_expression_initializer" ) == 0 ){
             uint32_t initCount = ts_node_child_count(child);
             if ( initCount == 2 ){
                 TSNode initChild = ts_node_child(child, 1);
                 enode->m_expression = new BindableExpressionNode(initChild);
                 enode->addChild(enode->m_expression);
-                enode->m_expression->setParent(enode);
+                visitChildren(enode->m_expression, initChild);
             }
         }
     }
