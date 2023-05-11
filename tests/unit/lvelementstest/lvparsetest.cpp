@@ -237,6 +237,11 @@ void LvParseTest::propertyNotation(){
     parseTestTemplate("ParserTest48");
 }
 
+
+void LvParseTest::anonymousComponents(){
+    parseTestTemplate("ParserTest49");
+}
+
 void LvParseTest::parseTestTemplate(std::string name){
     try{
         std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");

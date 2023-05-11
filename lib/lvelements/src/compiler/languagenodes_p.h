@@ -549,7 +549,7 @@ class StaticPropertyDeclarationNode : public BaseNode{
 public:
     StaticPropertyDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
-    IdentifierNode* type() const{ return m_type; }
+    TypeNode* type() const{ return m_type; }
     IdentifierNode* name() const{ return m_name; }
     BaseNode* expression() const{ return m_expression; }
 
@@ -557,7 +557,7 @@ public:
 
 private:
     IdentifierNode* m_name;
-    IdentifierNode* m_type;
+    TypeNode*       m_type;
     BaseNode*       m_expression;
 };
 
@@ -635,6 +635,7 @@ public:
     PropertyAccessorDeclarationNode::PropertyAccess propertyAccessors(const std::string& source, const std::string& propertyName);
 
     std::string name(const std::string &source) const;
+    bool isAnonymous() const;
     const std::vector<IdentifierNode*> heritage() const{ return m_heritage; }
 
 private:

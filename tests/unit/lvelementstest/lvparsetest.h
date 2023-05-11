@@ -65,6 +65,7 @@ private slots:
     void creationInMethodTest();
     void propertyEqualsVsBinding();
     void propertyNotation();
+    void anonymousComponents();
 
 private:
     void parseTestTemplate(std::string name);
