@@ -212,8 +212,6 @@ LanguageParser::ComparisonResult LanguageParser::compare(
                 cr.m_source2Row = ts_node_start_point(node2).row;
                 cr.m_source2Offset = ts_node_start_byte(node2);
 
-
-
                 cr.m_errorString = "Different string values: " + value1 + " ("+ ts_node_type(node1)+ ") != " + value2 + " ("+ ts_node_type(node2)+ ")";
 
                 cr.m_errorString += "\n*";

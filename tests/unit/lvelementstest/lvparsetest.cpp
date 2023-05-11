@@ -250,6 +250,9 @@ void LvParseTest::parseTestTemplate(std::string name){
 
         std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
 
+
+        Utf8::replaceAll(conversion, "\\r", "");
+
         el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
         el::LanguageParser::AST* conversionAST = parser->parse(conversion);
         el::LanguageParser::AST* expectedAST   = parser->parse(expect);

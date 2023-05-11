@@ -8,10 +8,10 @@ export let ParserTest09 = (function(parent){
 
     Element.assignId(root, "root")
     var root = this
-    this.ids['root'] = root
+    this.ids["root"] = root
 
     var rootChild = new Element()
-    this.ids['rootChild'] = rootChild
+    this.ids["rootChild"] = rootChild
     
     Element.addProperty(root, 'x', { type: 'int', notify: 'xChanged' })
     Element.addProperty(rootChild, 'y', { type: 'int', notify: 'yChanged' })

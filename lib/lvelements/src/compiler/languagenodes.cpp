@@ -3444,6 +3444,7 @@ void NewTrippleTaggedComponentExpressionNode::convertToJs(const std::string &sou
     compose->from = startByte();
     compose->to = endByte();
     std::string name, value;
+
     for (auto child: children())
     {
         if (child->typeString() == "Identifier") {
@@ -3465,7 +3466,7 @@ void NewTrippleTaggedComponentExpressionNode::convertToJs(const std::string &sou
                 }
             }
 
-            Utf8::replaceAll(value, "\r", "\\r");
+            Utf8::replaceAll(value, "\r", "");
             Utf8::replaceAll(value, "\n", "\\n");
             Utf8::replaceAll(value, "\t", "\\t");
         }

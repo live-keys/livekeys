@@ -1,3 +1,4 @@
+
 if (WIN32)
     if(DEFINED ENV{V8_DIR})
         set(V8_INCLUDE_DIRS $ENV{V8_DIR}/include)
@@ -6,24 +7,27 @@ if (WIN32)
             set(V8_LIBRARY_DIR $ENV{V8_DIR}/lib/Debug)
         endif()
 
-        set(V8_LIBRARY_NAMES v8 v8_libplatform)
+        set(V8_LIB_NAMES v8 v8_libplatform)
 
-        FOREACH(LIB_NAME ${V8_LIB_NAMES})
-            FIND_LIBRARY(FOUND_LIB_${LIB_NAME} ${LIB_NAME} PATHS ${V8_LIBRARY_DIR})
 
-            IF(NOT FOUND_LIB_${LIB_NAME})
-                MESSAGE(FATAL_ERROR "LIBRARY: '${LIB_NAME}' NOT FOUND")
-            ENDIF()
+        FIND_LIBRARY(FOUND_LIB_V8 v8 PATHS ${V8_LIBRARY_DIR})
+        IF(NOT FOUND_LIB_V8)
+            MESSAGE(FATAL_ERROR "LIBRARY: v8 NOT FOUND")
+        ENDIF()
+        LIST(APPEND V8_LIBS ${FOUND_LIB_V8})
+        file(COPY ${V8_LIBRARY_DIR}/v8.dll DESTINATION ${DEPLOY_PATH})
 
-            LIST(APPEND V8_LIBS FOUND_LIB_${LIB_NAME})
-
-            file(COPY ${V8_LIBRARY_DIR}/${LIB_NAME}.dll DESTINATION ${DEPLOY_PATH})
-
-        ENDFOREACH(LIB_NAME)
+        FIND_LIBRARY(FOUND_LIB_V8PLATFORM v8_libplatform PATHS ${V8_LIBRARY_DIR})
+        IF(NOT FOUND_LIB_V8PLATFORM)
+            MESSAGE(FATAL_ERROR "LIBRARY: v8 NOT FOUND")
+        ENDIF()
+        LIST(APPEND V8_LIBS ${FOUND_LIB_V8PLATFORM})
+        file(COPY ${V8_LIBRARY_DIR}/v8_libplatform.dll DESTINATION ${DEPLOY_PATH})
 
         set(V8_FOUND TRUE)
     endif()
 endif()
+
 
 if(APPLE)
     execute_process(COMMAND which d8 OUTPUT_VARIABLE V8_OUTPUT RESULT_VARIABLE V8_RESULT)

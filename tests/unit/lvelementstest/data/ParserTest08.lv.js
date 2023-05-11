@@ -58,7 +58,7 @@ export let ParserTest08 = (function(parent){
                  }.bind(new B("bold text. \n And this will be an "))(this)),
                  (function(parent){
                      this.setParent(parent)
-                     this.href = "https://livekeys.io"
+                     this.href = 'https://livekeys.io'
 
                      Element.assignChildrenAndComplete(this, [
                         (function(parent){
