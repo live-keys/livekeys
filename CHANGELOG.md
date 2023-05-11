@@ -2,6 +2,49 @@
 
 This file summarises notable changes between Live Keys versions.
 
+## 1.9.0
+
+### Features
+
+   - Added vector editor
+   - Added layout files
+   - Added Support for read only properties
+   - Added Support for chain properties
+   - Added new color picker
+   - Fully Integrated Builders and Watchers
+   - Support for Drawing Gradients
+   - Support for connecting to singletons
+
+### Bug Fixes
+
+   - Fixed saving/restoring palettes
+   - Fixed TransformPalette in node editor
+   - Fixed blank DrawPalette crash
+   - Updated NodePalette connectors
+   - Fixed Ownership and deletion in palettes
+   - Fixed binding deletion when deleting an edge in NodePalette
+   - Fixed some cases where SuggestionBox was hidden
+
+## 1.8.0
+
+### Features
+
+   - Added timeline animation tracks
+   - Support for initializing documents through palettes
+   - Added messagebox for workspace
+   - Added new palettes: StringList, Boolean, Size
+
+### Bug Fixes
+
+   - Fixed Root item deletion and creation in some contexts
+   - Fixed reading files sample
+   - Fixed file explorer sample
+   - Fixed executable sample run problems on windows
+   - Fixed same property appearing twice in the node editor
+   - Fixed ownership on deleting edit fragments
+   - Fixed various node editor interactions
+   - Fixed binding connections between edit fragments
+
 ## 1.7.0
 
 ### Features
