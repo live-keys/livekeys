@@ -67,7 +67,7 @@ public:
 
     template<typename T, typename I, typename... Args> static void add(Args... args);
 
-    void store(QmlMetaExtension::I::Identifier identif, QmlMetaExtension::I* interface);
+    void store(QmlMetaExtension::I::Identifier identif, QmlMetaExtension::I* metaInterface);
 
 private:
     static Ptr create(const QByteArray& name, TypeConstructor tc);

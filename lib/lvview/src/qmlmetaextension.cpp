@@ -42,11 +42,11 @@ QmlMetaExtension::Ptr QmlMetaExtension::create(const QByteArray &name, QmlMetaEx
     return QmlMetaExtension::Ptr(new QmlMetaExtension(name, tc));
 }
 
-void QmlMetaExtension::store(QmlMetaExtension::I::Identifier identif, QmlMetaExtension::I *interface){
+void QmlMetaExtension::store(QmlMetaExtension::I::Identifier identif, QmlMetaExtension::I *metaInterface){
     if ( m_interfaces.find(identif) != m_interfaces.end() ){
         THROW_EXCEPTION(lv::Exception, Utf8("Interface already exists with identifier").format(identif), lv::Exception::toCode("Exists"));
     }
-    m_interfaces[identif] = interface;
+    m_interfaces[identif] = metaInterface;
 }
 
 
