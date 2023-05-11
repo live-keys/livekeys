@@ -1522,6 +1522,30 @@
           }
         ]
       },
+      "heritage": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "component_heritage",
+            "named": true
+          },
+          {
+            "type": "component_short_heritage",
+            "named": true
+          }
+        ]
+      },
+      "id": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "component_identifier",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
         "required": false,
@@ -1532,20 +1556,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "component_heritage",
-          "named": true
-        },
-        {
-          "type": "component_identifier",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -1632,9 +1642,33 @@
           }
         ]
       },
+      "heritage": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "component_heritage",
+            "named": true
+          },
+          {
+            "type": "component_short_heritage",
+            "named": true
+          }
+        ]
+      },
+      "id": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "component_identifier",
+            "named": true
+          }
+        ]
+      },
       "name": {
         "multiple": false,
-        "required": true,
+        "required": false,
         "types": [
           {
             "type": "identifier",
@@ -1642,20 +1676,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": true,
-      "required": false,
-      "types": [
-        {
-          "type": "component_heritage",
-          "named": true
-        },
-        {
-          "type": "component_identifier",
-          "named": true
-        }
-      ]
     }
   },
   {
@@ -1717,6 +1737,21 @@
         },
         {
           "type": "new_component_expression",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "component_short_heritage",
+    "named": true,
+    "fields": {},
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "identifier",
           "named": true
         }
       ]
@@ -7336,11 +7371,11 @@
   },
   {
     "type": "number",
-    "named": true
+    "named": false
   },
   {
     "type": "number",
-    "named": false
+    "named": true
   },
   {
     "type": "object",

@@ -635,6 +635,7 @@ public:
     PropertyAccessorDeclarationNode::PropertyAccess propertyAccessors(const std::string& source, const std::string& propertyName);
 
     std::string name(const std::string &source) const;
+    bool isAnonymous() const;
     const std::vector<IdentifierNode*> heritage() const{ return m_heritage; }
 
 private:

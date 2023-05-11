@@ -559,38 +559,64 @@ void BaseNode::visitComponentDeclaration(BaseNode *parent, const TSNode &node){
     ComponentDeclarationNode* enode = new ComponentDeclarationNode(node);
     parent->addChild(enode);
 
-    uint32_t count = ts_node_child_count(node);
-    for ( uint32_t i = 0; i < count; ++i ){
-        TSNode child = ts_node_child(node, i);
-        if ( strcmp(ts_node_type(child), "identifier") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-            enode->addChild(enode->m_name);
-            addToDeclarations(parent, enode->m_name);
-        } else if ( strcmp(ts_node_type(child), "component_heritage") == 0 ){
-            uint32_t heritageCount = ts_node_child_count(child);
+
+    TSNode name = nodeChildByFieldName(node, "name");
+    if ( !ts_node_is_null(name) ){
+        enode->m_name = new IdentifierNode(name);
+        enode->addChild(enode->m_name);
+        addToDeclarations(parent, enode->m_name);
+    }
+
+    TSNode heritage = nodeChildByFieldName(node, "heritage");
+    if ( !ts_node_is_null(heritage) ){
+        if ( strcmp(ts_node_type(heritage), "component_heritage") == 0 ){
+            uint32_t heritageCount = ts_node_child_count(heritage);
             for ( uint32_t j = 0; j < heritageCount; ++j ){
-                TSNode heritageSegment = ts_node_child(child, j);
+                TSNode heritageSegment = ts_node_child(heritage, j);
                 if ( strcmp(ts_node_type(heritageSegment), "identifier" ) == 0 ){
                     IdentifierNode* heritageSegmentNode = new IdentifierNode(heritageSegment);
                     enode->m_heritage.push_back(heritageSegmentNode);
                     enode->addChild(heritageSegmentNode);
                 }
             }
-            if ( enode->m_heritage.size() > 0 ){
-                addUsedIdentifier(enode, enode->m_heritage[0]);
+        } else if ( strcmp(ts_node_type(heritage), "component_short_heritage") == 0 ){
+            uint32_t heritageCount = ts_node_child_count(heritage);
+            for ( uint32_t j = 0; j < heritageCount; ++j ){
+                TSNode heritageSegment = ts_node_child(heritage, j);
+                if ( strcmp(ts_node_type(heritageSegment), "identifier" ) == 0 ){
+                    IdentifierNode* heritageSegmentNode = new IdentifierNode(heritageSegment);
+                    enode->m_heritage.push_back(heritageSegmentNode);
+                    enode->addChild(heritageSegmentNode);
+                }
             }
-        } else if ( strcmp(ts_node_type(child), "component_body") == 0 ){
-            enode->m_body = new ComponentBodyNode(child);
-            enode->addChild(enode->m_body);
-            visitChildren(enode->m_body, child);
-        } else if ( strcmp(ts_node_type(child), "component_identifier") == 0 ){
-            if ( ts_node_named_child_count(child) > 0 ){
-                TSNode idChild = ts_node_child(child, 1);
-                enode->m_id = new IdentifierNode(idChild);
-                enode->addChild(enode->m_id);
-                addToDeclarations(parent, enode->m_id);
-            }
-        } else if ( strcmp(ts_node_type(child), "ERROR") == 0 ){
+        }
+
+        if ( enode->m_heritage.size() > 0 ){
+            addUsedIdentifier(enode, enode->m_heritage[0]);
+        }
+    }
+
+
+    TSNode identifier = nodeChildByFieldName(node, "id");
+    if ( !ts_node_is_null(identifier) ){
+        if ( ts_node_named_child_count(identifier) > 0 ){
+            TSNode idChild = ts_node_child(identifier, 1);
+            enode->m_id = new IdentifierNode(idChild);
+            enode->addChild(enode->m_id);
+            addToDeclarations(parent, enode->m_id);
+        }
+    }
+
+    TSNode body = nodeChildByFieldName(node, "body");
+    assertValid(parent, body, "Component declaration body is null.");
+    enode->m_body = new ComponentBodyNode(body);
+    enode->addChild(enode->m_body);
+    visitChildren(enode->m_body, body);
+
+    uint32_t count = ts_node_child_count(node);
+    for ( uint32_t i = 0; i < count; ++i ){
+        TSNode child = ts_node_child(node, i);
+        if ( strcmp(ts_node_type(child), "ERROR") == 0 ){
             assertError(enode, child, "Unexpected component syntax.");
         }
     }
@@ -800,7 +826,12 @@ void BaseNode::visitStaticPropertyDeclaration(BaseNode *parent, const TSNode &no
     }
 
     if (parent->parent() && parent->parent()->typeString() == "ComponentDeclaration"){
-        parent->parent()->as<ComponentDeclarationNode>()->pushToStaticProperties(enode);
+        auto componentDeclaration = parent->parent()->as<ComponentDeclarationNode>();
+        if ( componentDeclaration->isAnonymous() ){
+            throwError(enode, node, "Cannot declare static members for an anonymous component.");
+        }
+
+        componentDeclaration->pushToStaticProperties(enode);
     }
 
     if (parent->parent() && (parent->parent()->typeString() == "NewComponentExpression" ||
@@ -1966,10 +1997,10 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
     if (parent() && parent()->typeString() == "Program"){
         *compose << "\n" << indent(indentValue) << "export class ";
     } else {
-        *compose << "\n" << indent(indentValue) << "class ";
+        *compose << "class ";
     }
 
-    *compose << (componentName + " extends " + heritage + "{\n\n");
+    *compose << (isAnonymous() ? "" : componentName + " ") << "extends " + heritage + "{\n\n";
 
     // handle constructor
     if (m_body->constructor()){
@@ -1993,7 +2024,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
     } else {
         *compose << indent(indentValue + 1) << "constructor(){\n"
                  << indent(indentValue + 2) << "super()\n"
-                 << indent(indentValue + 2) << componentName << ".prototype.__initialize.call(this)\n"
+                 << indent(indentValue + 2) << (isAnonymous() ? "new.target" : componentName) << ".prototype.__initialize.call(this)\n"
                  << indent(indentValue + 1) << "}\n";
     }
 
@@ -2223,7 +2254,7 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
                 exp->convertToJs(source, section->m_children, indentValue + 1, ctx);
                 std::vector<std::string> flat;
                 section->flatten(source, flat);
-                for (auto s: flat) {
+                for (auto s: flat){
                     comp += s;
                 }
                 delete section;
@@ -2340,7 +2371,6 @@ void ComponentDeclarationNode::convertToJs(const std::string &source, std::vecto
 
     for ( auto it = m_staticProperties.begin(); it != m_staticProperties.end(); ++it ){
         StaticPropertyDeclarationNode* spd = (*it)->as<StaticPropertyDeclarationNode>();
-
         *compose << indent(indentValue)  << componentName << "." << slice(source, spd->name());
         if ( spd->expression() ){
             *compose << " = ";
@@ -2377,6 +2407,9 @@ PropertyAccessorDeclarationNode::PropertyAccess ComponentDeclarationNode::proper
 }
 
 std::string ComponentDeclarationNode::name(const std::string& source) const{
+    if ( !m_name )
+        return "";
+
     std::string name = slice(source, m_name);
 
     if (name == "default"){
@@ -2393,6 +2426,9 @@ std::string ComponentDeclarationNode::name(const std::string& source) const{
     return name;
 }
 
+bool ComponentDeclarationNode::isAnonymous() const{
+    return !m_name;
+}
 
 void NewComponentExpressionNode::convertToJs(const std::string &source, std::vector<ElementsInsertion *> &fragments, int indt, ConversionContext* ctx){
     ElementsInsertion* compose = new ElementsInsertion;
