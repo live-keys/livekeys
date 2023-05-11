@@ -126,6 +126,18 @@ const char* prefProgram =
         "return new PropertyReference(path); "
     "})\n";
 
+const char* resultWithReportProgram =
+    "(function(){"
+        "function ResultWithReport(value, report){"
+            "this.value = value;"
+            "this.report = report;"
+        "}\n"
+        "ResultWithReport.prototype.hasReport = function(){"
+            "return this.report !== undefined ? true : false;"
+        "}\n"
+        "return ResultWithReport;"
+    "})\n";
+
 }// namespace
 
 class ViewEnginePrivate{
@@ -152,7 +164,7 @@ ViewEngine::ViewEngine(QQmlEngine *engine, FileIOInterface::Ptr fileIO, QObject 
     , m_packageGraph(nullptr)
     , m_fileIO(fileIO)
     , m_errorCounter(0)
-    , m_logger(new QmlVisualLog(engine))
+    , m_logger(new QmlVisualLog(this))
     , m_memory(new Memory(this))
 {
     Q_D(ViewEngine);
@@ -182,6 +194,9 @@ ViewEngine::ViewEngine(QQmlEngine *engine, FileIOInterface::Ptr fileIO, QObject 
 
     QJSValue prefFn = m_engine->evaluate(prefProgram);
     m_engine->globalObject().setProperty("pref", prefFn);
+
+    QJSValue resultWithReportFn = m_engine->evaluate(resultWithReportProgram);
+    m_engine->globalObject().setProperty("ResultWithReport", resultWithReportFn.call());
 
 //    connect(m_engine, &QQmlEngine::quit, QCoreApplication::instance(),
 //                      &QCoreApplication::quit, Qt::QueuedConnection);
@@ -413,6 +428,14 @@ QString ViewEngine::toErrorString(const QList<QQmlError> &errors){
     }
 
     return result;
+}
+
+QJSValue ViewEngine::createObject(const QString &typeName, const QJSValueList &args){
+    QJSValue obconstructor = m_engine->globalObject().property(typeName);
+    if ( obconstructor.isCallable() ){
+        return obconstructor.callAsConstructor(args);
+    }
+    return QJSValue();
 }
 
 /**

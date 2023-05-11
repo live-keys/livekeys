@@ -41,7 +41,6 @@ class JsEventTypes : public Element{
             .scriptEvent("objectEvent", &JsEventTypes::objectEvent)
             .scriptEvent("localValueEvent", &JsEventTypes::localValueEvent)
             .scriptEvent("valueEvent", &JsEventTypes::valueEvent)
-            .scriptEvent("bufferEvent", &JsEventTypes::bufferEvent)
             .scriptEvent("elementEvent", &JsEventTypes::elementEvent)
             .scriptEvent("userElementEvent", &JsEventTypes::userElementEvent)
         META_OBJECT_CLOSE
@@ -85,10 +84,6 @@ public:
     }
     Event valueEvent(Value value){
         static Event::Id eid = eventId(&JsEventTypes::valueEvent);
-        return notify(eid, value);
-    }
-    Event bufferEvent(Buffer value){
-        static Event::Id eid = eventId(&JsEventTypes::bufferEvent);
         return notify(eid, value);
     }
     Event elementEvent(Element* value){
@@ -408,13 +403,6 @@ void JsEventTest::eventTypesTest(){
             engine->compileJsEnclosed("jsEvent.callableEvent(function(){ return 20; });")->run();
             QVERIFY(!callableEventValue.isNull());
             QVERIFY(callableEventValue.call(engine, Function::Parameters(0)).toInt32(engine) == 20);
-
-            Buffer bufferEventValue(nullptr, 0);
-            jsEvent->on("bufferEvent", [&bufferEventValue, engine](const Function::Parameters& p){
-                bufferEventValue = p.at(engine, 0).toBuffer(engine);
-            });
-            engine->compileJsEnclosed("jsEvent.bufferEvent(new ArrayBuffer(8));")->run();
-            QVERIFY(bufferEventValue.size() == 8);
 
             Object objectEventValue(engine);
             QVERIFY(objectEventValue.isNull());

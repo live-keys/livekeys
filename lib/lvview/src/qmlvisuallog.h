@@ -24,16 +24,17 @@
 namespace lv{
 
 class VisualLog;
+class ViewEngine;
 
 class LV_VIEW_EXPORT QmlVisualLog : public QObject{
 
     Q_OBJECT
 
 public:
-    QmlVisualLog(QObject* parent = nullptr);
+    QmlVisualLog(ViewEngine* parent = nullptr);
     ~QmlVisualLog();
 
-    static void logValue(VisualLog& vl, const QJSValue& message);
+    static void logValue(VisualLog& vl, const QJSValue& message, ViewEngine* engine = nullptr);
 
 public slots:
     void f(const QJSValue& messageOrCategory, const QJSValue& message = QJSValue());
@@ -43,6 +44,9 @@ public slots:
     void d(const QJSValue& messageOrCategory, const QJSValue& message = QJSValue());
     void v(const QJSValue& messageOrCategory, const QJSValue& message = QJSValue());
     void configure(const QString& name, const QJSValue& options);
+
+private:
+    ViewEngine* m_engine;
 };
 
 }// namespace

@@ -59,11 +59,6 @@ Object Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value
 }
 
 template<>
-Buffer Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
-    return Buffer(v8::Local<v8::ArrayBuffer>::Cast((*info)[index]));
-}
-
-template<>
 Value Function::CallInfo::extractValue(const v8::FunctionCallbackInfo<v8::Value> *info, int index){
     Engine* engine = reinterpret_cast<Engine*>(info->GetIsolate()->GetData(0));
     return ScopedValue(engine, (*info)[index]).toValue(engine);
@@ -223,11 +218,6 @@ Callable Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::
 template<>
 Object Function::Parameters::extractValue(Engine *engine, const v8::Local<v8::Value> *args, int index){
     return Object(engine, v8::Local<v8::Object>::Cast(args[index]));
-}
-
-template<>
-Buffer Function::Parameters::extractValue(Engine *, const v8::Local<v8::Value> *args, int index){
-    return Buffer(v8::Local<v8::ArrayBuffer>::Cast(args[index]));
 }
 
 template<>

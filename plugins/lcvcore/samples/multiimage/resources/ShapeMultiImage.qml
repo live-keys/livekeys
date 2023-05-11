@@ -14,12 +14,12 @@ WorkspaceControl{
                 var editormulti = editor
 
                 var chmulti = editormulti.documentHandler.codeHandler
-                var rpmulti = lk.layers.workspace.extensions.editqml.rootPosition = chmulti.findRootPosition()
+                var rootDeclaration = chmulti.rootDeclaration()
 
                 lk.layers.workspace.extensions.editqml.shapeRootObject(editormulti, chmulti, function(){
                     lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                         editormulti,
-                        rpmulti,
+                        rootDeclaration,
                         {
                             "shapeImports": true,
                             "type": "qml/QtQuick#ListView",
@@ -43,13 +43,12 @@ WorkspaceControl{
                 var editorop = editor
 
                 var chop = editorop.documentHandler.codeHandler
-                var rpop = lk.layers.workspace.extensions.editqml.rootPosition = chop.findRootPosition()
+                var rootDeclaration = chop.rootDeclaration()
 
                 lk.layers.workspace.extensions.editqml.shapeRootObject(editorop, chop, function(){
                     lk.layers.workspace.extensions.editqml.paletteControls.shapeAtPositionWithInstructions(
                         editorop,
-                        rpop,
-
+                        rootDeclaration.position(),
                         {
                             "shapeImports": true,
                             "type": "qml/QtQuick#Item",

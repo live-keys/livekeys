@@ -16,6 +16,7 @@
 #include "compiler.h"
 #include "live/visuallog.h"
 #include "live/packagegraph.h"
+#include "live/modulecontext.h"
 #include "languagenodes_p.h"
 #include "elementssections_p.h"
 #include "elementsmodule.h"
@@ -128,13 +129,13 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     return result;
 }
 
-std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std::string &path, const std::string &contents, BaseNode *node){
+std::string Compiler::compileModuleFileToJs(const Module::Ptr &module, const std::string &path, const std::string &contents, BaseNode *node){
     std::string result;
     el::JSSection* section = new el::JSSection;
     section->from = 0;
     section->to   = static_cast<int>(contents.size());
 
-    Utf8 outputPath = moduleFileBuildPath(plugin, path);
+    Utf8 outputPath = moduleFileBuildPath(module, path);
     Utf8 relativePathFromOutput;
 
     auto outputPathSegments = outputPath.split("/");
@@ -180,13 +181,23 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &plugin, const std
     if ( m_d->config.m_fileOutput ){
         std::string outputFile = outputPath.data();
         std::string displayFilePath = path;
-        Utf8::replaceAll(displayFilePath, plugin->packagePath(), "");
+        Utf8::replaceAll(displayFilePath, module->packagePath(), "");
 
         bool shouldWrite = true;
         if ( m_d->config.m_fileOutputOnlyOnModified && Path::exists(outputFile) ){
             DateTime sourceModifiedStamp = Path::lastModified(path);
             DateTime outputModifiedStamp = Path::lastModified(outputFile);
             shouldWrite = outputModifiedStamp < sourceModifiedStamp;
+        }
+        if ( shouldWrite && module->context() ){
+            auto package = module->context()->package;
+            if ( !package->release().empty() ){
+                shouldWrite = false;
+                if ( !Path::exists(outputPath.data()) ){
+                    Utf8 msg = Utf8("Released package '%' missing build file: %").format(package->name(), displayFilePath);
+                    THROW_EXCEPTION(lv::Exception, msg, Exception::toCode("~File"));
+                }
+            }
         }
 
         if ( shouldWrite ){
@@ -215,7 +226,7 @@ std::string Compiler::moduleFileBuildPath(const Module::Ptr &plugin, const std::
 }
 
 std::string Compiler::moduleBuildPath(const Module::Ptr &module){
-    std::string buildDir = module->packagePath() + "/" + m_d->config.m_packageBuildPath;
+    std::string buildDir = Path::join( module->packagePath(), m_d->config.m_packageBuildPath);
     if ( !module->pathFromPackage().empty() ){
         buildDir += "/" + module->pathFromPackage();
     }
@@ -269,23 +280,60 @@ std::shared_ptr<ElementsModule> Compiler::compile(Ptr compiler, const std::strin
     std::string pluginPath = Path::parent(path);
     std::string fileName = Path::name(path);
 
-    Module::Ptr plugin(nullptr);
+    Module::Ptr module(nullptr);
     if ( Module::existsIn(pluginPath) ){
-        plugin = Module::createFromPath(pluginPath);
-        Package::Ptr package = Package::createFromPath(plugin->package());
-        compiler->m_d->packageGraph->loadRunningPackageAndModule(package, plugin);
+        module = Module::createFromPath(pluginPath);
+        Package::Ptr package = Package::createFromPath(module->package());
+        compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
     } else {
-        plugin = compiler->m_d->packageGraph->createRunningModule(pluginPath);
+        module = compiler->m_d->packageGraph->createRunningModule(pluginPath);
     }
 
-    auto epl = engine ? ElementsModule::create(plugin, engine) : ElementsModule::create(plugin, compiler);
+    auto epl = engine ? ElementsModule::create(module, engine) : ElementsModule::create(module, compiler);
     ElementsModule::addModuleFile(epl, fileName);
     epl->compile();
 
     return epl;
 }
 
-std::shared_ptr<ElementsModule> Compiler::compileImport(Compiler::Ptr compiler, const std::string &importKey, const Module::Ptr& requestingModule, Engine *engine){
+std::shared_ptr<ElementsModule> Compiler::compileModule(Compiler::Ptr compiler, const std::string &path, Engine *engine){
+    if ( !Path::exists(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Path does not exist: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+    if ( !Module::existsIn(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Module not found in: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+
+    Module::Ptr module = Module::createFromPath(path);
+    Package::Ptr package = Package::createFromPath(module->package());
+    compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
+
+    auto epl = engine ? ElementsModule::create(module, engine) : ElementsModule::create(module, compiler);
+    epl->compile();
+    return epl;
+}
+
+std::vector<std::shared_ptr<ElementsModule> > Compiler::compilePackage(Compiler::Ptr compiler, const std::string &path, Engine *engine){
+    if ( !Path::exists(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Path does not exist: %.").format(path), lv::Exception::toCode("~Path"));
+    }
+    if ( !Package::existsIn(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Package not found in %.").format(path), lv::Exception::toCode("~Path"));
+    }
+
+    Package::Ptr package = Package::createFromPath(path);
+    auto modules = package->allModules();
+
+    std::vector<std::shared_ptr<ElementsModule> > result;
+
+    for ( auto it = modules.begin(); it != modules.end(); ++it ){
+        result.push_back(Compiler::compileModule(compiler, *it, engine));
+    }
+
+    return result;
+}
+
+std::shared_ptr<ElementsModule> Compiler::compileImportedModule(Compiler::Ptr compiler, const std::string &importKey, const Module::Ptr& requestingModule, Engine *engine){
     auto foundEp = compiler->m_d->loadedModules.find(importKey);
     if ( foundEp == compiler->m_d->loadedModules.end() ){
         Module::Ptr plugin = compiler->m_d->packageGraph->loadModule(importKey, requestingModule);

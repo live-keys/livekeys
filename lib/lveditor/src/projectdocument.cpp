@@ -207,17 +207,21 @@ ProjectDocument::ProjectDocument(const QString& filePath, const QString& format,
 
 void ProjectDocument::readContent(){
     if ( isOnDisk() ){
-        addEditingState(ProjectDocument::Read);
-        d_ptr->textDocument->setPlainText(
-            QString::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(path().toStdString()))
-        );
-        removeEditingState(ProjectDocument::Read);
-        d_ptr->textDocument->setModified(false);
-        setLastModified(QFileInfo(path()).lastModified());
-        d_ptr->changes.clear();
-        d_ptr->lastChange = d_ptr->changes.end();
-        d_ptr->isSynced = true;
-        emit contentChanged();
+        try{
+            addEditingState(ProjectDocument::Read);
+            d_ptr->textDocument->setPlainText(
+                QString::fromStdString(parentAsProject()->viewEngine()->fileIO()->readFromFile(path().toStdString()))
+            );
+            removeEditingState(ProjectDocument::Read);
+            d_ptr->textDocument->setModified(false);
+            setLastModified(QFileInfo(path()).lastModified());
+            d_ptr->changes.clear();
+            d_ptr->lastChange = d_ptr->changes.end();
+            d_ptr->isSynced = true;
+            emit contentChanged();
+        } catch ( lv::Exception& e ){
+            QmlError(parentAsProject()->viewEngine(), e, this).jsThrow();
+        }
     }
 }
 

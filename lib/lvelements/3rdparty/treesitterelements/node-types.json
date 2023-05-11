@@ -3204,6 +3204,32 @@
   {
     "type": "import_path",
     "named": true,
+    "fields": {
+      "relative": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": ".",
+            "named": false
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": false,
+      "types": [
+        {
+          "type": "import_path_segment",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
+    "type": "import_path_segment",
+    "named": true,
     "fields": {},
     "children": {
       "multiple": true,
@@ -3211,6 +3237,10 @@
       "types": [
         {
           "type": "identifier",
+          "named": true
+        },
+        {
+          "type": "number",
           "named": true
         }
       ]

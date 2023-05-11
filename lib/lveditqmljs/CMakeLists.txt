@@ -37,6 +37,7 @@ target_sources(lveditqmljs PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmladdcontainer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmleditfragment.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmldeclaration.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/qmldeclarationobject.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmlimportsmodel.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmllanguagescanner.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/qmllanguagescanmonitor.cpp"

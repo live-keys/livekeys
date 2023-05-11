@@ -245,15 +245,16 @@ WorkspaceExtension{
 
                                         var editor = pane
                                         var codeHandler = editor.code.language
-                                        var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+                                        var rootDeclaration = codeHandler.rootDeclaration()
                                         lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                         lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
-                                            var palettesForRoot = codeHandler.findPalettes(rootPosition)
-                                            var pos = palettesForRoot.declaration.position
-                                            palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot.data)
+
+                                            var palettesForRoot = codeHandler.findPalettes(rootDeclaration)
+                                            var pos = rootDeclaration.position()
+                                            palettesForRoot = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot)
                                             var oc = lk.layers.workspace.extensions.editqml.paletteFunctions.shapePalette(
                                                 editor,
-                                                palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
+                                                palettesForRoot.length > 0 ? palettesForRoot[0].name: "",
                                                 pos
                                             )
                                             oc.contentWidth = Qt.binding(function(){
@@ -299,15 +300,15 @@ WorkspaceExtension{
 
                                 var editor = pane
                                 var codeHandler = editor.code.language
-                                var rootPosition = lk.layers.workspace.extensions.editqml.rootPosition = codeHandler.findRootPosition()
+                                var rootDeclaration = codeHandler.rootDeclaration()
                                 lk.layers.workspace.extensions.editqml.shapeImports(editor, codeHandler)
                                 lk.layers.workspace.extensions.editqml.shapeRootObject(editor, editor.code.language, function(){
-                                    var palettesForRoot = codeHandler.findPalettes(rootPosition)
-                                    var pos = palettesForRoot.declaration.position
-                                    palettesForRoot.data = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot.data)
+                                    var palettesForRoot = codeHandler.findPalettes(rootDeclaration)
+                                    var pos = rootDeclaration.position()
+                                    palettesForRoot = lk.layers.workspace.extensions.editqml.paletteFunctions.filterOutPalettes(palettesForRoot)
                                     var oc = lk.layers.workspace.extensions.editqml.paletteFunctions.shapePalette(
                                         editor,
-                                        palettesForRoot.data.length > 0 ? palettesForRoot.data[0].name: "",
+                                        palettesForRoot.length > 0 ? palettesForRoot[0].name: "",
                                         pos
                                     )
                                     oc.contentWidth = Qt.binding(function(){

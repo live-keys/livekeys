@@ -6,8 +6,9 @@ import visual.shapes 1.0
 
 Rectangle{
     id: objectContainerTitle
-    y: topSpacing
     radius: 3
+
+    property QtObject theme: lk.layers.workspace.themes.current
 
     property bool compact : true
     property bool isBuilder : false
@@ -31,41 +32,29 @@ Rectangle{
         onClicked: objectContainerTitle.assignFocus()
     }
 
-    Item{
+    HeadingButton{
+        anchors.verticalCenter: parent.verticalCenter
         anchors.left: parent.left
         anchors.leftMargin: 12
-        anchors.verticalCenter: parent.verticalCenter
-        width: 15
-        height: parent.height
         visible: !objectContainer.pane
-        Triangle{
-            width: 8
-            height: 8
-            color: '#9b9da0'
-            anchors.verticalCenter: parent.verticalCenter
-            rotation: compact ? Triangle.Right : Triangle.Bottom
-        }
-        MouseArea{
-            id: compactObjectButton
-            anchors.fill: parent
-            onClicked: {
-                objectContainerTitle.toggleCompact()
-            }
-        }
+        content: theme.icons.headingCollapseExpand
+        onContentItemChanged: contentItem.compact = Qt.binding(function(){ return objectContainerTitle.compact })
+        onClicked: objectContainerTitle.toggleCompact()
     }
 
     Text{
         anchors.left: parent.left
         anchors.leftMargin: 40
-        width: parent.width - 140 + (closeObjectItem.visible ? 0 : 18)
+        width: parent.width - editIcons.width - 50
         anchors.verticalCenter: parent.verticalCenter
-        text: objectContainer.title
+        text: objectContainer.control.title
         clip: true
         elide: Text.ElideRight
         color: '#82909b'
     }
 
     Row{
+        id: editIcons
         height: parent.height
         anchors.right: parent.right
         anchors.rightMargin: 5
@@ -99,220 +88,68 @@ Rectangle{
 //            }
 //        }
 
-
-        Item{
-            id: paletteToPane
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            Rectangle{
-                anchors.top: parent.top
-                anchors.topMargin: 5
-                width: 10
-                height: 10
-                color: "transparent"
-                border.color: "#9b9da0"
-                border.width: 1
-                radius: 2
-            }
-            Rectangle{
-                anchors.top: parent.top
-                anchors.topMargin: 2
-                anchors.left: parent.left
-                anchors.leftMargin: 3
-                width: 10
-                height: 10
-                radius: 2
-                color: "#9b9da0"
-            }
-            MouseArea{
-                id: paletteToPaneMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.paletteToPane()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: paletteToPaneMouseArea.containsMouse
-                text: "Move to new pane"
-            }
+            content: theme.icons.moveToNewPane
+            tooltip: "Move to new pane"
+            onClicked: objectContainerTitle.paletteToPane()
         }
 
-        Item {
-            id: createObjectButton
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            visible: objectContainer.isForProperty && objectContainer.editFragment && objectContainer.editFragment.isNull
-            width: 15
-            height: 15
-
-            Icons.CreateObjectIcon{
-                anchors.top: parent.top
-                anchors.topMargin: 1
-                anchors.left: parent.left
-                anchors.leftMargin: 2
-                width: 12
-                height: 12
-                color: '#9b9da0'
-            }
-
-            MouseArea{
-                id: createObjectButtonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.createObject()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: createObjectButtonMouseArea.containsMouse
-                text: "Create object"
-            }
+            visible: objectContainer.control.isForProperty && objectContainer.control.editFragment && objectContainer.control.editFragment.isNull
+            content: theme.icons.createObject
+            tooltip: "Create Object"
+            onClicked: objectContainerTitle.createObject()
         }
 
-        Item{
-            id: eraseButton
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: titleHeight
-            visible: objectContainer.editFragment && !(objectContainer.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-erase-object.png"
-            }
-            MouseArea{
-                id: eraseButtonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.erase()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: eraseButtonMouseArea.containsMouse
-                text: "Erase object"
-            }
+            visible: objectContainer.control.editFragment && !(objectContainer.control.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
+            content: theme.icons.eraseObject
+            tooltip: "Erase Object"
+            onClicked: objectContainerTitle.erase()
         }
 
-        Item{
-            id: rebuild
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
             visible: objectContainerTitle.isBuilder
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-integrate.png"
-            }
-            MouseArea{
-                id: rebuildMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.rebuild()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: rebuildMouseArea.containsMouse
-                text: "Rebuild section"
-            }
+            content: theme.icons.buildSection
+            tooltip: "Rebuild Section"
+            onClicked: objectContainerTitle.rebuild()
         }
 
-        Item{
-            id: connectionsButton
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            visible: objectContainer.editFragment
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-connections.png"
-            }
-            MouseArea{
-                id: connectionsButtonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.toggleConnections()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: connectionsButtonMouseArea.containsMouse
-                text: "View connections"
-            }
+            content: theme.icons.viewConnections
+            tooltip: "View Connections"
+            onClicked: objectContainerTitle.toggleConnections()
         }
 
-        Item{
-            id: paletteAddButton
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-add.png"
-            }
-            MouseArea{
-                id: paletteAddMouse
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.addPalette()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: paletteAddMouse.containsMouse
-                text: "Open palette"
-            }
+            content: theme.icons.openPalette
+            tooltip: "Open Palette"
+            onClicked: objectContainerTitle.addPalette()
         }
 
-        Item{
-            id: composeButton
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            visible: objectContainer.editFragment
-                  && objectContainer.editFragment.type() !== 'qml/QtQuick#Component'
-                  && !((objectContainer.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
-                  && ! (objectContainer.editFragment.fragmentType() & QmlEditFragment.Group))
-            Image{
-                anchors.centerIn: parent
-                source: "qrc:/images/palette-add-property.png"
-            }
-            MouseArea{
-                id: composeButtonMouseArea
-                anchors.fill: parent
-                hoverEnabled: true
-                onClicked: {
-                    objectContainerTitle.compose()
-                }
-            }
-            Workspace.Tooltip{
-                mouseOver: composeButtonMouseArea.containsMouse
-                text: "Add content"
-            }
+            visible: objectContainer.control.editFragment
+                  && objectContainer.control.editFragment.type() !== 'qml/QtQuick#Component'
+                  && !((objectContainer.control.editFragment.fragmentType() & QmlEditFragment.ReadOnly)
+                  && ! (objectContainer.control.editFragment.fragmentType() & QmlEditFragment.Group))
+            content: theme.icons.addContent
+            tooltip: "Add Content"
+            onClicked: objectContainerTitle.compose()
         }
 
-        Item{
-            id: closeObjectItem
+        HeadingButton{
             anchors.verticalCenter: parent.verticalCenter
-            width: 15
-            height: 20
-            visible: !(objectContainer.editFragment && objectContainer.editFragment.parentFragment()) && !objectContainer.pane
-            Icons.XIcon{
-                anchors.centerIn: parent
-                width: 8
-                height: 8
-                color: '#dbdede'
-                strokeWidth: 1
-            }
-
-            MouseArea{
-                id: paletteCloseArea
-                anchors.fill: parent
-                onClicked: {
-                    objectContainerTitle.close()
-                }
-            }
+            visible: !(objectContainer.control.editFragment && objectContainer.control.editFragment.parentFragment()) && !objectContainer.control.pane
+            content: theme.icons.closeObject
+            tooltip: "Close"
+            onClicked: objectContainerTitle.close()
         }
     }
 }

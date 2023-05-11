@@ -2,9 +2,8 @@ instance elem Element{
     on remove: (index) => {
         this.items.remove(index)
     }
-    on add: (item) => {
-        this.items.push(item)
-    }
+    on add: (item) => this.items.push(item)
+
     event add(item:Element)
     event remove(item:Element)
 
@@ -17,9 +16,7 @@ component X < Element{
     on remove: (index) => {
         this.items.remove(index)
     }
-    on add: (item) => {
-        this.items.push(item)
-    }
+    on add: (item) => this.items.push(item)
     event add(item:Element)
     event remove(item:Element)
 

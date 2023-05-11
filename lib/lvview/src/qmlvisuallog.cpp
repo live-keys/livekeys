@@ -34,12 +34,14 @@ namespace lv{
 
 namespace{
 
-void logJsValue(VisualLog& vl, const QJSValue& message){
+void logJsValue(VisualLog& vl, const QJSValue& message, ViewEngine* ve){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
+
         vl << "(" << messageObject->metaObject()->className() << " " <<
            (messageObject->objectName().isEmpty() ? "" : "\'" + messageObject->objectName() + "\' ") <<
             messageObject << ")";
+
     } else if ( message.isArray() ){
         vl << "[";
         bool first = true;
@@ -50,7 +52,7 @@ void logJsValue(VisualLog& vl, const QJSValue& message){
                     first = false;
                 else
                     vl << ",";
-                logJsValue(vl, vi.value());
+                logJsValue(vl, vi.value(), ve);
             }
         }
         vl << "]";
@@ -70,7 +72,7 @@ void logJsValue(VisualLog& vl, const QJSValue& message){
                     else
                         vl << ",";
                     vl << vi.name() << ":";
-                    logJsValue(vl, vi.value());
+                    logJsValue(vl, vi.value(), ve);
                 }
             }
             vl << "}";
@@ -80,22 +82,32 @@ void logJsValue(VisualLog& vl, const QJSValue& message){
     }
 }
 
-void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message){
+void logHelper(VisualLog::MessageInfo::Level level, const QJSValue& messageOrCategory, const QJSValue& message, ViewEngine* ve){
     if ( message.isUndefined() ){
         VisualLog vl(level);
-        QmlVisualLog::logValue(vl, messageOrCategory);
+        QmlVisualLog::logValue(vl, messageOrCategory, ve);
     } else {
         VisualLog vl(messageOrCategory.toString().toStdString(), level);
-        QmlVisualLog::logValue(vl, message);
+        QmlVisualLog::logValue(vl, message, ve);
     }
 }
 
 }// namespace
 
 
-void QmlVisualLog::logValue(VisualLog& vl, const QJSValue& message){
+void QmlVisualLog::logValue(VisualLog& vl, const QJSValue& message, ViewEngine *engine){
     if ( message.isQObject() ){
         QObject* messageObject = message.toQObject();
+        QmlExtensionObjectI* eo = dynamic_cast<QmlExtensionObjectI*>(messageObject);
+        bool userLog = false;
+        if ( eo && engine ){
+            MetaLogI* mli = eo->typeMetaExtension()->i<MetaLogI>();
+            if ( mli ){
+                userLog = true;
+                mli->log(engine, messageObject, vl);
+            }
+        }
+        if ( !userLog ){
         //TODO
 //        QmlMetaInfo::Ptr ti = ViewContext::instance().engine()->typeInfo(messageObject->metaObject());
 //        if ( !ti.isNull() && ti->isLoggable() ){
@@ -104,15 +116,16 @@ void QmlVisualLog::logValue(VisualLog& vl, const QJSValue& message){
             vl << "(" << messageObject->metaObject()->className() << " " <<
                (messageObject->objectName().isEmpty() ? "" : "\'" + messageObject->objectName() + "\' ") <<
                 messageObject << ")";
-//        }
+        }
     } else {
-        logJsValue(vl, message);
+        logJsValue(vl, message, engine);
     }
 }
 
 /** Default constructor */
-QmlVisualLog::QmlVisualLog(QObject *parent)
+QmlVisualLog::QmlVisualLog(ViewEngine *parent)
     : QObject(parent)
+    , m_engine(parent)
 {
 }
 
@@ -122,32 +135,32 @@ QmlVisualLog::~QmlVisualLog(){
 
 /** Fatal messages */
 void QmlVisualLog::f(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Fatal, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Fatal, messageOrCategory, message, m_engine);
 }
 
 /** Error messages */
 void QmlVisualLog::e(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Error, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Error, messageOrCategory, message, m_engine);
 }
 
 /** Warning messages */
 void QmlVisualLog::w(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Warning, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Warning, messageOrCategory, message, m_engine);
 }
 
 /** Info messages */
 void QmlVisualLog::i(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Info, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Info, messageOrCategory, message, m_engine);
 }
 
 /** Debug messages */
 void QmlVisualLog::d(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Debug, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Debug, messageOrCategory, message, m_engine);
 }
 
 /** Verbose messages */
 void QmlVisualLog::v(const QJSValue &messageOrCategory, const QJSValue &message){
-    logHelper(VisualLog::MessageInfo::Verbose, messageOrCategory, message);
+    logHelper(VisualLog::MessageInfo::Verbose, messageOrCategory, message, m_engine);
 }
 
 /** Configures global vlog object from a given QJSValue object */

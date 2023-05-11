@@ -44,7 +44,6 @@ public:
         std::is_same<ReturnType, Value::Number>::value ||
         std::is_same<ReturnType, std::string>::value ||
         std::is_same<ReturnType, Callable>::value ||
-        std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
         std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||

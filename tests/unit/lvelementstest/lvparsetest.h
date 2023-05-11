@@ -17,7 +17,6 @@ public:
 private slots:
     void initTestCase();
 
-
     void constructorParseTest();
     void functionParseTest();
     void nestingAndShortIdParseTest();

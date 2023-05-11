@@ -5,12 +5,12 @@ add_test(NAME lvviewtest COMMAND lvviewtest)
 
 target_sources(lvviewtest PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/main.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/enginetest.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/viewenginetest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/mlnodetoqmltest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/visuallogqttest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/linecapturetest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/memorytest.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lvviewstubs/engineteststub.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/lvviewstubs/viewengineteststub.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvviewstubs/visuallogteststub.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvviewstubs/shareddatateststub.cpp"
 )

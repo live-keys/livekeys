@@ -155,6 +155,8 @@ public:
     static QString toErrorString(const QQmlError& error);
     static QString toErrorString(const QList<QQmlError> &errors);
 
+    QJSValue createObject(const QString& typeName, const QJSValueList& args = QJSValueList());
+
     QObject* createObject(const QByteArray& qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
     QObject* createObject(const char* qmlCode, QObject* parent, const QUrl& file, bool clearCache = false);
 

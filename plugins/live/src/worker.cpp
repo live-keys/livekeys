@@ -115,45 +115,49 @@ void Worker::extractSource(){
         return;
     }
 
-    DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(thisPath);
-    QString code = QString::fromStdString(lv::ViewContext::instance().engine()->fileIO()->readFromFile(thisPath.toStdString()));
-    dqi->parse(code);
-    dqi->createRanges();
+    try{
+        DocumentQmlInfo::Ptr dqi = DocumentQmlInfo::create(thisPath);
+        QString code = QString::fromStdString(lv::ViewContext::instance().engine()->fileIO()->readFromFile(thisPath.toStdString()));
+        dqi->parse(code);
+        dqi->createRanges();
 
-    DocumentQmlInfo::ValueReference rootVr = dqi->rootObject();
-    int rootTypeBegin, rootTypeEnd;
-    dqi->extractTypeNameRange(rootVr, rootTypeBegin, rootTypeEnd);
+        DocumentQmlInfo::ValueReference rootVr = dqi->rootObject();
+        int rootTypeBegin, rootTypeEnd;
+        dqi->extractTypeNameRange(rootVr, rootTypeBegin, rootTypeEnd);
 
-    DocumentQmlInfo::ValueReference vr = dqi->valueForId(thisId);
+        DocumentQmlInfo::ValueReference vr = dqi->valueForId(thisId);
 
-    int begin, end;
-    dqi->extractRange(vr, begin, end);
-    if ( begin > -1 && end > 0){
+        int begin, end;
+        dqi->extractRange(vr, begin, end);
+        if ( begin > -1 && end > 0){
 
-        QString sourceData = "Worker" + code.mid(begin, end - begin);
+            QString sourceData = "Worker" + code.mid(begin, end - begin);
 
-        lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create("Worker.qml");
-        if ( !docinfo->parse(sourceData) )
-            return;
+            lv::DocumentQmlInfo::Ptr docinfo = lv::DocumentQmlInfo::create("Worker.qml");
+            if ( !docinfo->parse(sourceData) )
+                return;
 
-        lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
-        lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
+            lv::DocumentQmlValueObjects::Ptr objects = docinfo->createObjects();
+            lv::DocumentQmlValueObjects::RangeObject* root = objects->root();
 
-        for ( auto it = root->children.begin(); it != root->children.end(); ++it ){
-            lv::DocumentQmlValueObjects::RangeObject* actChild = *it;
-            for ( auto pit = actChild->properties.begin(); pit != actChild->properties.end(); ++pit ){
-                lv::DocumentQmlValueObjects::RangeProperty* p = *pit;
-                QString propertyName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
-                if ( propertyName == "run" ){
-                    QString propertyContent = sourceData.mid(p->valueBegin, p->end - p->valueBegin);
-                    m_actSource.append(propertyContent);
+            for ( auto it = root->children.begin(); it != root->children.end(); ++it ){
+                lv::DocumentQmlValueObjects::RangeObject* actChild = *it;
+                for ( auto pit = actChild->properties.begin(); pit != actChild->properties.end(); ++pit ){
+                    lv::DocumentQmlValueObjects::RangeProperty* p = *pit;
+                    QString propertyName = sourceData.mid(p->begin, p->propertyEnd - p->begin);
+                    if ( propertyName == "run" ){
+                        QString propertyContent = sourceData.mid(p->valueBegin, p->end - p->valueBegin);
+                        m_actSource.append(propertyContent);
+                    }
                 }
             }
         }
-    }
 
-    m_filterWorker = new WorkerThread(m_actSource);
-    m_filterWorker->start();
+        m_filterWorker = new WorkerThread(m_actSource);
+        m_filterWorker->start();
+    } catch ( lv::Exception& e ){
+        lv::ViewContext::instance().engine()->throwError(&e, this);
+    }
 }
 
 void Worker::appendAct(QQmlListProperty<QObject> *list, QObject *o){

@@ -19,21 +19,34 @@ WorkspaceExtension{
                 return
             }
 
-            lk.layers.editor.environment.addLoadingScreen(editor)
-            paletteFunctions.shapeImports(editor)
-            var rootPosition = codeHandler.findRootPosition()
+            try{
+                lk.layers.editor.environment.addLoadingScreen(editor)
+                paletteFunctions.shapeImports(editor)
 
-            if ( rootPosition >= 0){
-                paletteFunctions.shapeRoot(editor, function(ef, palette){
-                    lk.layers.editor.environment.removeLoadingScreen(editor)
-                    if ( callback )
-                        callback(ef, palette)
-                })
-            } else {
-                paletteControls.__private.createAddRootButton(editor)
-                if ( callback )
-                    callback(null, null)
+               codeHandler.onImportsScanned(() => {
+                    var rootDeclaration = codeHandler.rootDeclaration()
+
+                    if ( rootDeclaration ){
+                        paletteFunctions.shapeRoot(editor, function(ef, palette){
+                            lk.layers.editor.environment.removeLoadingScreen(editor)
+                            var oc = ef.visualParent
+                            if ( oc ){
+                                oc.control.expand()
+                            }
+                            if ( callback )
+                                callback(ef, palette)
+                        })
+                    } else {
+                        paletteFunctions.__private.createAddRootButton(editor)
+                        if ( callback )
+                            callback(null, null)
+                    }
+               })
+
+            } catch ( e ){
+                lk.layers.workspace.messages.pushErrorObject(e)
             }
+
         }
     }
     interceptLanguage : function(document, handler, ext){
@@ -193,32 +206,29 @@ WorkspaceExtension{
 
                     if ( canBeQml(item.document) ){
 
-                        var codeHandler = item.code.language
-                        var declarationInfo = codeHandler.declarationInfo(
-                            item.textEdit.selectionStart, item.textEdit.selectionEnd - item.textEdit.selectionStart
-                        );
+                        var declaration = item.code.language.findDeclaration(item.textEdit.selectionStart)
 
                         return [
                             {
                                 name : "Edit",
                                 action : root.commands['edit'][0],
-                                enabled : declarationInfo ? true : false
+                                enabled : declaration ? true : false
                             }, {
                                 name : "Palette",
                                 action : root.commands['palette'][0],
-                                enabled : declarationInfo ? true : false
+                                enabled : declaration ? true : false
                             }, {
                                 name : "Shape",
                                 action : root.commands['shape'][0],
-                                enabled : declarationInfo ? true : false
+                                enabled : declaration ? true : false
                             }, {
                                 name : "Bind",
                                 action : root.commands['bind'][0],
-                                enabled : declarationInfo ? true : false
+                                enabled : declaration ? true : false
                             }, {
                                 name : "Unbind",
                                 action : root.commands['unbind'][0],
-                                enabled : declarationInfo ? true : false
+                                enabled : declaration ? true : false
                             }, {
                                 name : "Add Property",
                                 action : root.commands['add_property'][0],

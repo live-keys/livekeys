@@ -17,6 +17,7 @@
 #include <fstream>
 #include <istream>
 #include <unordered_map>
+#include "live/exception.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -140,13 +141,15 @@ FileIOInterface::Ptr LockedFileIOSession::createInterfaceInstance(){
  * If not, an empty string is returned.
  */
 std::string LockedFileIOSession::readFromFile(const std::string &path){
-    m_d->getLock(path)->lockForRead();
+    if ( !Path::isFile(path) ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file for reading, path is not a file or does not exist: %").format(path), lv::Exception::toCode("~File"));
+    }
 
+    m_d->getLock(path)->lockForRead();
     std::ifstream instream(path, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
         m_d->releaseLock(path);
-        qCritical("Cannot open file: %s", path.c_str());
-        return "";
+        THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file: %").format(path), lv::Exception::toCode("~File"));
     }
 
     instream.seekg(0, std::ios::end);
@@ -176,8 +179,7 @@ bool LockedFileIOSession::writeToFile(const std::string &path, const char *data,
     QFile fileInput(path.c_str());
     if ( !fileInput.open(QIODevice::WriteOnly ) ){
         m_d->releaseLock(path);
-        qCritical("Can't open file for writing: %s", path.c_str());
-        return false;
+        THROW_EXCEPTION(lv::Exception, Utf8("Failed to open file for writing: %").format(path), lv::Exception::toCode("~File"));
     }
 
     fileInput.write(data, static_cast<int>(length));

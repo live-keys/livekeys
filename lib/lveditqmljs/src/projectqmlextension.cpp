@@ -22,7 +22,9 @@
 #include "live/editorsettings.h"
 #include "live/editorlayer.h"
 #include "live/qmlcomponentsource.h"
+#include "live/qmlmetaextension.h"
 
+#include "qmldeclarationobject.h"
 #include "qmlwatcher.h"
 #include "qmljssettings.h"
 #include "qmlprojectmonitor_p.h"
@@ -186,8 +188,12 @@ void ProjectQmlExtension::registerTypes(const char *uri){
         &lv::QmlComponentSource::parserPropertyHook,
         &lv::QmlComponentSource::parserDefaultPropertyHook);
 
+    lv::QmlMetaExtension::add<lv::QmlDeclarationObject, lv::MetaLogI>(lv::QmlDeclarationObject::log);
+
+    qmlRegisterUncreatableType<lv::QmlDeclarationObject>(
+        uri, 1, 0, "QmlDeclarationObject", "QmlDeclarationObject can be created through the Editor.code.language.");
     qmlRegisterUncreatableType<lv::QmlEditFragment>(
-        uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.code.language.");
+        uri, 1, 0, "QmlEditFragment", "QmlEditFragment can be created through the Editor.code.language.");    
     qmlRegisterUncreatableType<lv::LanguageQmlHandler>(
         uri, 1, 0, "LanguageQmlHandler", "LanguageQmlHandler can only be accessed through the Editor.code");
     qmlRegisterUncreatableType<lv::QmlEditFragmentContainer>(

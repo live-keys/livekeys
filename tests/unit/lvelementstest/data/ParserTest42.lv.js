@@ -1,4 +1,3 @@
-
 export let elem = (function(parent){
     this.setParent(parent)
     Element.addEvent(this, 'add', [['Element', 'item']])

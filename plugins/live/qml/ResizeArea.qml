@@ -15,9 +15,12 @@ Rectangle{
     property double minimumHeight: 50
     property double minimumWidth : 50
 
+    property alias resizeActive: mouseArea.drag.active
+
     signal resizeFinished()
 
     MouseArea {
+        id: mouseArea
         anchors.fill: parent
         drag{
             target: parent;

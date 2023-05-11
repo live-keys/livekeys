@@ -6,122 +6,86 @@ import workspace.icons 1.0 as Icons
 
 Item{
     id: propertyContainer
-
-    function __initialize(editor, ef){
-        propertyContainer.title = ef.identifier()
-        propertyContainer.editor = editor
-        propertyContainer.code = editor.code
-        propertyContainer.editFragment = ef
-
-        var codeHandler = ef.language
-        var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
-
-        if ( ef.valueLocation === EditQml.QmlEditFragment.Object ){
-            propertyContainer.isAnObject = true
-
-            var childObjectContainer = paletteFunctions.__factories.createObjectContainer(editor, ef, null)
-
-            var p = propertyContainer
-            while (p && p.objectName !== "objectContainer"){
-                p = p.parent
-            }
-            if (p)
-                childObjectContainer.parentObjectContainer = p
-            propertyContainer.childObjectContainer = childObjectContainer
-            propertyContainer.valueContainer = childObjectContainer
-            childObjectContainer.isForProperty = true
-
-        } else {
-            propertyContainer.isAnObject = false
-            propertyContainer.valueContainer = paletteFunctions.__factories.createPaletteGroup(null, ef)
-        }
-        ef.visualParent = propertyContainer
-    }
-
-    function expand(){
-        if ( childObjectContainer ){
-            childObjectContainer.expand()
-        }
-    }
-
-    function paletteByName(name){
-        if ( isAnObject )
-            return childObjectContainer.paletteByName(name)
-
-        for ( var i = 0; i < valueContainer.children.length; ++i ){
-            if ( valueContainer.children[i].name === name )
-                return valueContainer.children[i]
-        }
-
-        return null
-    }
-
-    function paletteGroup(){
-        if ( isAnObject )
-            return childObjectContainer.paletteGroup()
-
-        return valueContainer
-    }
-
-    function getLayoutState(){
-        return {}
-    }
-
-    function clean(){
-        if (valueContainer.objectName === "paletteGroup"){
-            var pg = valueContainer
-            for (var xi = 0; xi < pg.children.length; ++xi)
-                if (pg.children[xi].objectName === "paletteContainer")
-                    pg.children[xi].destroy()
-            pg.destroy()
-        }
-        if (valueContainer.objectName === "objectContainer"){
-            valueContainer.clean().destroy()
-        }
-        return propertyContainer
-    }
-
-    property string title: "Object"
     objectName: "propertyContainer"
+    width: 0
+    height: 0
+    property var sizeInfo: ({minWidth: -1, minHeight: -1, maxWidth: -1, maxHeight: -1})
+    z: 3000
 
-    property QtObject theme: lk.layers.workspace.themes.current
-
-//    property Item paletteGroup : null
-    property alias paletteListContainer: container
-    property QtObject editFragment : null
-
-    property QtObject code : null
-    property Item editor: null
-    property Item valueContainer : null
+    property PropertyContainerControl control: PropertyContainerControl{}
 
     property alias paletteAddButtonVisible: paletteAddButton.visible
 
-    property bool isAnObject: false
-    property var childObjectContainer: null
+    function __initialize(editor, ef){
+        propertyContainer.control.__initialize(editor, ef, container)
+        ef.visualParent = propertyContainer
+    }
 
-    property var paletteFunctions: lk.layers.workspace.extensions.editqml.paletteFunctions
+    function clean(){
+        propertyContainer.control.clean()
+        return propertyContainer
+    }
 
-    property Component methodIcon: Icons.MenuIcon{}
-    property Component eventIcon: Icons.EventIcon{ color: theme.colorScheme.middlegroundOverlayDominantBorder; width: 15; height: 15 }
+    function measureSizeInfo(){
+        var size = { minWidth: 0, minHeight: -1, maxWidth: -1, maxHeight: -1, contentWidth: -1 }
+        for ( var i = 0; i < container.children.length; ++i ){
+            var si = container.children[i].sizeInfo
+            if ( si.minWidth > 0 ){
+                if ( size.minWidth < 0 )
+                    size.minWidth = si.minWidth
+                else if ( size.minWidth < si.minWidth){
+                    size.minWidth = si.minWidth
+                }
+            }
+            if ( si.maxWidth > 0 ){
+                if ( size.maxWidth < 0 )
+                    size.maxWidth = si.maxWidth
+                else if ( size.maxWidth < si.maxWidth ){
+                    size.maxWidth = si.maxWidth
+                }
+            }
+            if ( si.minHeight > 0 ){
+                size.minHeight = size.minHeight < 0 ? si.minHeight : size.minHeight + si.minHeight
+            }
+            if ( si.maxHeight > 0 ){
+                size.maxHeight = size.maxHeight < 0 ? si.maxHeight : size.maxHeight + si.maxHeight
+            }
+        }
+        if ( size.minHeight < 35 )
+            size.minHeight = 35
 
-    property Connections editFragmentRemovals: Connections{
-        target: editFragment
-        function onAboutToBeRemoved(){
-            if (!isAnObject)
-                propertyContainer.destroy()
+        size.minWidth += 140
+
+        propertyContainer.sizeInfo = size
+
+        if ( propertyContainer.parent && propertyContainer.parent.measureSizeInfo ){
+            propertyContainer.parent.measureSizeInfo()
         }
     }
-    width: container.width + 120
-    height: container.height > 35 ? container.height : 35
-    z: 3000
 
-    onWidthChanged: {
-        if (!propertyContainer || !propertyContainer.parent || !propertyContainer.parent.parent ||
-                !propertyContainer.parent.parent.parent) return
-        var objectContainer = propertyContainer.parent.parent.parent
+    function adjustSize(){
+        this.width = propertyContainer.parent.width
+        this.sizeInfo.contentWidth = this.width - 140
 
-        if (objectContainer.objectName === "objectContainer")
-            objectContainer.recalculateContentWidth()
+        var height = 0
+        if ( control.valueContainer.adjustSize ){
+            control.valueContainer.adjustSize()
+            height += control.valueContainer.height
+        } else {
+            height = 30
+        }
+
+        this.height = height > 30 ? height : 30
+    }
+
+
+    property Connections editFragmentRemovals: Connections{
+        target: control.editFragment
+        function onAboutToBeRemoved(){
+            if (!propertyContainer.control.isAnObject){
+                propertyContainer.destroy()
+            }
+        }
     }
 
     Rectangle{
@@ -132,10 +96,10 @@ Item{
         anchors.topMargin: 5
         height: container.height > 30 ? container.height : 30
         width: 110
-        color: theme.colorScheme.middleground
+        color: propertyContainer.control.theme.colorScheme.middleground
         radius: 3
-        border.width: theme.inputStyle.borderThickness
-        border.color: theme.colorScheme.middlegroundBorder
+        border.width: propertyContainer.control.theme.inputStyle.borderThickness
+        border.color: propertyContainer.control.theme.colorScheme.middlegroundBorder
 
         Loader{
             id: iconLoader
@@ -159,7 +123,7 @@ Item{
             anchors.rightMargin: iconLoader.sourceComponent ? 38 : 20
             anchors.top: parent.top
             anchors.topMargin: 6
-            text: propertyContainer.title
+            text: propertyContainer.control.title
             clip: true
             color: '#82909b'
         }
@@ -188,9 +152,9 @@ Item{
                     }
                     var coords = paletteAddButton.mapToItem(pane, 0, 0)
 
-                    var paletteList = paletteFunctions.views.openPaletetListBoxForContainer(
+                    var paletteList = control.paletteFunctions.views.openPaletetListBoxForContainer(
                         propertyContainer,
-                        propertyContainer.valueContainer,
+                        propertyContainer.control.valueContainer,
                         Qt.rect(coords.x + 150, coords.y, 30, 30),
                         PaletteFunctions.PaletteListMode.PropertyContainer
                     )
@@ -214,7 +178,7 @@ Item{
                 width: 6
                 height: 6
                 strokeWidth: 1
-                color: propertyContainer.theme.colorScheme.foregroundFaded
+                color: propertyContainer.control.theme.colorScheme.foregroundFaded
             }
 
             MouseArea{
@@ -223,25 +187,30 @@ Item{
                 onClicked: {
                     var objectContainer = propertyContainer.parent.parent.parent
 
-                    propertyContainer.editFragment.decrementRefCount()
-                    if (propertyContainer.editFragment.refCount === 0)
-                        objectContainer.editFragment.removeChildFragment(propertyContainer.editFragment)
+                    propertyContainer.control.editFragment.decrementRefCount()
+                    if (propertyContainer.control.editFragment.refCount === 0)
+                        objectContainer.control.editFragment.removeChildFragment(propertyContainer.control.editFragment)
 
                     // remove name from objectContainer
-                    objectContainer.propertiesOpened =
-                            objectContainer.propertiesOpened.filter(
-                                function(value, index, arr){
-                                    return value !== propertyContainer.editFragment.identifier()
-                                }
-                            )
+                    objectContainer.control.propertiesOpened =
+                        objectContainer.control.propertiesOpened.filter(
+                            function(value){
+                                return value !== propertyContainer.control.editFragment.identifier()
+                            }
+                        )
+                    if ( propertyContainer.parent && propertyContainer.parent.measureSizeInfo ){
+                        var p = propertyContainer.parent
+                        propertyContainer.parent = null
+                        p.measureSizeInfo()
+                    }
+
                     propertyContainer.destroy()
                 }
             }
         }
-
     }
 
-    Rectangle{
+    Item{
         id: container
 
         anchors.top: parent.top
@@ -249,12 +218,16 @@ Item{
         anchors.left: parent.left
         anchors.leftMargin: 140
 
-        color: 'black'
+        function measureSizeInfo(){
+            propertyContainer.measureSizeInfo()
+        }
 
-        width: propertyContainer.valueContainer ? propertyContainer.valueContainer.width : 0
-        height: propertyContainer.valueContainer ? propertyContainer.valueContainer.height : 0
+        property alias sizeInfo: propertyContainer.sizeInfo
 
-        children: propertyContainer.valueContainer ? [propertyContainer.valueContainer] : []
+        width: propertyContainer.control.valueContainer ? propertyContainer.control.valueContainer.width : 0
+        height: propertyContainer.control.valueContainer ? propertyContainer.control.valueContainer.height : 0
+
+        children: propertyContainer.control.valueContainer ? [propertyContainer.control.valueContainer] : []
     }
 
 }

@@ -118,6 +118,8 @@ std::string Path::join(const std::string &p1, const std::string &p2){
 }
 
 std::string Path::joinExisting(const std::string &p1, const std::string &p2){
+    if ( p2.empty() )
+        return p1;
     return (fs::path(p1) / fs::path(p2)).string();
 }
 

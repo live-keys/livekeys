@@ -277,6 +277,7 @@ ModuleFile::ModuleFile(ElementsModule::Ptr plugin, const std::string &name, cons
     }
 
     std::vector<ImportNode*> imports = node->imports();
+
     for ( auto val : imports ){
         ModuleFile::Import imp;
         imp.uri = val->path(content);

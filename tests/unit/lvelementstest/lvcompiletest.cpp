@@ -7,7 +7,9 @@
 #include "live/elements/container.h"
 #include "live/elements/object.h"
 #include "live/elements/compiler/modulefile.h"
+#include "live/mlnodetojson.h"
 #include "live/applicationcontext.h"
+#include "testpack.h"
 
 Q_TEST_RUNNER_REGISTER(LvCompileTest);
 
@@ -21,6 +23,124 @@ LvCompileTest::LvCompileTest(QObject *parent)
 
 void LvCompileTest::initTestCase(){
 }
+
+std::string LvCompileTest::scriptPath(const std::string &scriptName){
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/data/" + scriptName;
+}
+
+std::string LvCompileTest::testPath(){
+    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/test";
+}
+
+void LvCompileTest::compileModule(){
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest01.lvep"));
+
+    Compiler::Config compilerConfig;
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    ElementsModule::Ptr em = Compiler::compileModule(compiler, tp.path() + "/plugin1");
+    ModuleFile* mfA = em->moduleFileBypath(tp.path() + "/plugin1/A.lv");
+    QVERIFY(mfA != nullptr);
+    QVERIFY(mfA->jsFilePath() == tp.path() + "/plugin1/A.lv.js");
+    ModuleFile* mfB = em->moduleFileBypath(tp.path() + "/plugin1/B.lv");
+    QVERIFY(mfB != nullptr);
+    QVERIFY(mfB->jsFilePath() == tp.path() + "/plugin1/B.lv.js");
+}
+
+void LvCompileTest::compilePackage(){
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("ImportTest01.lvep"));
+
+    Compiler::Config compilerConfig;
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+
+    auto ems = Compiler::compilePackage(compiler, tp.path());
+    QVERIFY(ems.size() == 2);
+    auto mainEm = ems.front()->module()->path() == tp.path() ? ems.front() : ems.back();
+    auto internalEm = ems.front()->module()->path() == tp.path() ? ems.back() : ems.front();
+
+    QVERIFY(mainEm->module()->path() == tp.path());
+    QVERIFY(internalEm->module()->path() == Path::join(tp.path(), "plugin1"));
+    ModuleFile* mfA = internalEm->moduleFileBypath(tp.path() + "/plugin1/A.lv");
+    QVERIFY(mfA != nullptr);
+    QVERIFY(mfA->jsFilePath() == tp.path() + "/plugin1/A.lv.js");
+    ModuleFile* mfB = internalEm->moduleFileBypath(tp.path() + "/plugin1/B.lv");
+    QVERIFY(mfB != nullptr);
+    QVERIFY(mfB->jsFilePath() == tp.path() + "/plugin1/B.lv.js");
+}
+
+void LvCompileTest::compilePackageWithRelease(){
+    TestPack tp(testPath(), true);
+    tp.unpack(scriptPath("CompileTest01.lvep"));
+
+    Compiler::Config compilerConfig;
+    compilerConfig.initialize({{"packageBuildPath", "build"}});
+    Compiler::Ptr compiler = Compiler::create(compilerConfig);
+    compiler->configureImplicitType("console");
+    compiler->configureImplicitType("vlog");
+    compiler->setPackageImportPaths({tp.path() + "/packages"});
+
+    std::string packagePath = Path::join(Path::join(tp.path(), "packages"), "package1");
+    std::string packageFilePath = Path::join(packagePath, Package::fileName);
+
+    FileIO fio;
+    std::string packageFileData = fio.readFromFile(packageFilePath);
+    MLNode packageData;
+    ml::fromJson(packageFileData, packageData);
+    packageData["release"] = "build";
+    ml::toJson(packageData, packageFileData);
+    QVERIFY(fio.writeToFile(packageFilePath, packageFileData));
+
+    // compile released without having anything build, should throw exception
+
+    bool hasException = false;
+    try{
+        Compiler::compileModule(compiler, packagePath);
+    } catch ( lv::Exception& e ){
+        QVERIFY(e.message().find("Released package") != std::string::npos );
+        QVERIFY(e.code() == Exception::toCode("~File"));
+        hasException = true;
+    }
+    QVERIFY(hasException);
+
+    hasException = false;
+    try{
+        Compiler::compile(compiler, packagePath + "/A.lv");
+    } catch ( lv::Exception& e ){
+        QVERIFY(e.message().find("Released package") != std::string::npos );
+        QVERIFY(e.code() == Exception::toCode("~File"));
+        hasException = true;
+    }
+    QVERIFY(hasException);
+
+    // build the module
+
+    packageData["release"] = "";
+    ml::toJson(packageData, packageFileData);
+    QVERIFY(fio.writeToFile(packageFilePath, packageFileData));
+    auto em = Compiler::compileModule(compiler, packagePath);
+
+    ModuleFile* mfA = em->moduleFileBypath(packagePath + "/A.lv");
+    QVERIFY(mfA != nullptr);
+    QVERIFY(mfA->jsFilePath() == packagePath + "/build/A.lv.js");
+
+    // compile released with the build folder ready
+
+    packageData["release"] = "build";
+    ml::toJson(packageData, packageFileData);
+    QVERIFY(fio.writeToFile(packageFilePath, packageFileData));
+    em = Compiler::compileModule(compiler, packagePath);
+
+    ModuleFile* mfcA = em->moduleFileBypath(packagePath + "/A.lv");
+    QVERIFY(mfcA != nullptr);
+    QVERIFY(mfcA->jsFilePath() == packagePath + "/build/A.lv.js");
+}
+
 
 void LvCompileTest::test1Lv(){
     lv::el::Engine* engine = new lv::el::Engine(Compiler::create(Compiler::Config(true, ".test.js")));

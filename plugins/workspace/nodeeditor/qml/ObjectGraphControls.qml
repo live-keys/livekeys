@@ -39,7 +39,6 @@ QtObject{
 
             var editor = fe.editor
             var codeHandler = editor.code.language
-            var rootPosition = codeHandler.findRootPosition()
 
             var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
 

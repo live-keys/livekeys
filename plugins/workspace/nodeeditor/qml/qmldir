@@ -2,15 +2,17 @@ module workspace.nodeeditor
 
 depends QtQuick 2.3
 
-Edge                  1.0 Edge.qml
-ObjectGraph           1.0 ObjectGraph.qml
-ObjectGraphStyle      1.0 ObjectGraphStyle.qml
-ObjectNode            1.0 ObjectNode.qml
-ObjectNodeStyle       1.0 ObjectNodeStyle.qml
-ObjectNodeMember      1.0 ObjectNodeMember.qml
-ObjectNodeMemberStyle 1.0 ObjectNodeMemberStyle.qml
-ObjectGraphControls   1.0 ObjectGraphControls.qml
-Port                  1.0 Port.qml
-PortConnector         1.0 PortConnector.qml
-VerticalDock          1.0 VerticalDock.qml
-Selection             1.0 Selection.qml
+Edge                    1.0 Edge.qml
+ObjectGraph             1.0 ObjectGraph.qml
+ObjectGraphStyle        1.0 ObjectGraphStyle.qml
+ObjectNode              1.0 ObjectNode.qml
+ObjectNodeControl       1.0 ObjectNodeControl.qml
+ObjectNodeStyle         1.0 ObjectNodeStyle.qml
+ObjectNodeMember        1.0 ObjectNodeMember.qml
+ObjectNodeMemberControl 1.0 ObjectNodeMemberControl.qml
+ObjectNodeMemberStyle   1.0 ObjectNodeMemberStyle.qml
+ObjectGraphControls     1.0 ObjectGraphControls.qml
+Port                    1.0 Port.qml
+PortConnector           1.0 PortConnector.qml
+VerticalDock            1.0 VerticalDock.qml
+Selection               1.0 Selection.qml

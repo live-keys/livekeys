@@ -20,15 +20,15 @@ CodePalette{
     function findObjectById(objectId){
         for ( var k = 0; k < allObjects.length; ++k ){
             var objectNode = allObjects[k].item
-            if ( objectNode.editFragment.objectId() === objectId ){
+            if ( objectNode.control.editFragment.objectId() === objectId ){
                 return allObjects[k]
             }
 
-            for ( var l = 0; l < objectNode.members.length; ++l ){
-                var objectNodeMember = objectNode.members[l]
+            for ( var l = 0; l < objectNode.control.members.length; ++l ){
+                var objectNodeMember = objectNode.control.members[l]
 
-                if(objectNodeMember.editFragment && objectNodeMember.editFragment.location === QmlEditFragment.Object ){
-                    if ( objectNodeMember.editFragment.objectId() === objectId )
+                if(objectNodeMember.control.editFragment && objectNodeMember.control.editFragment.location === QmlEditFragment.Object ){
+                    if ( objectNodeMember.control.editFragment.objectId() === objectId )
                         return objectNodeMember
                 }
             }
@@ -36,41 +36,42 @@ CodePalette{
         return null
     }
 
-    function addObject(object, cursorCoords){
-        var objectName = object.typeName()
-        var objectId = object.objectId()
-
+    function addObject(editFragment, cursorCoords){
         var n = null
         if (cursorCoords){
             n = objectGraph.addObjectNode(
-                    cursorCoords.x,
-                    cursorCoords.y,
-                    (objectName + (objectId ? ("#" + objectId) : ""))
-                )
+                cursorCoords.x,
+                cursorCoords.y,
+                editFragment
+            )
         } else {
-            n = objectGraph.addObjectNode(numOfObjects *420 + 50, 50, (objectName + (objectId ? ("#" + objectId) : "")))
+            n = objectGraph.addObjectNode(
+                numOfObjects *420 + 50,
+                50,
+                editFragment
+            )
         }
 
         ++numOfObjects
 
-        if (objectId){
-           objectsWithId[objectId] = n
+        if (n.item.control.objectId){
+           objectsWithId[n.item.control.objectId] = n
         }
 
         allObjects.push(n)
+        editFragment.incrementRefCount()
 
-        n.item.editFragment = object
-        object.incrementRefCount()
-
-        n.item.expandDefaultPalette()
+        n.item.control.expandDefaultPalette()
         return n
     }
 
     item: Item {
         id: nodeItem
 
-        width: objectGraph.width
-        height: objectGraph.height
+        width: 600
+        height: 300
+
+        property var sizeInfo: ({ minWidth: 300, maxWidth: -1, minHeight: 200, maxHeight: -1 })
 
         function resize(w, h){
             objectGraph.width = w
@@ -82,8 +83,23 @@ CodePalette{
 
             var propertyConnections = []
 
-            var codeHandler = editFragment.language
-            var childFragmentList = codeHandler.openNestedFragments(editFragment)
+            var language = editFragment.language
+
+            var declarationsResult = language.findDeclarations(editFragment.position() + 1, editFragment.length() - 2)
+            if ( declarationsResult.hasReport() ){
+                for ( var i = 0; i < declarationsResult.report.length; ++i ){
+                    lk.layers.workspace.messages.pushErrorObject(declarationsResult.report[i])
+                }
+            }
+            var fragmentsResult = language.openChildConnections(editFragment, declarationsResult.value)
+            if ( fragmentsResult.hasReport() ){
+                for ( var i = 0; i < fragmentsResult.report.length; ++i ){
+                    lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                }
+            }
+
+            var childFragmentList = fragmentsResult.value
+
             for ( var i = 0; i < childFragmentList.length; ++i ){
                 var childFragment = childFragmentList[i]
                 if ( childFragment.location !== QmlEditFragment.Object )
@@ -91,14 +107,27 @@ CodePalette{
 
                 var n = addObject(childFragment)
 
-                var currentChildNestedFragments = codeHandler.openNestedFragments(childFragment)
+                declarationsResult = language.findDeclarations(childFragment.position() + 1, childFragment.length() - 2)
+                if ( declarationsResult.hasReport() ){
+                    for ( var j = 0; j < declarationsResult.report.length; ++j ){
+                        lk.layers.workspace.messages.pushErrorObject(declarationsResult.report[i])
+                    }
+                }
+                fragmentsResult = language.openChildConnections(childFragment, declarationsResult.value)
+                if ( fragmentsResult.hasReport() ){
+                    for ( var j = 0; j < fragmentsResult.report.length; ++j ){
+                        lk.layers.workspace.messages.pushErrorObject(fragmentsResult.report[i])
+                    }
+                }
+
+                var currentChildNestedFragments = fragmentsResult.value
 
                 for (var j = 0; j < currentChildNestedFragments.length; ++j ){
                     var current = currentChildNestedFragments[j]
                     if ( current.location === QmlEditFragment.Object ){
-                        n.item.addChildObject(current)
+                        n.item.control.addChildObject(current)
                     } else {
-                        var p = n.item.addProperty(current)
+                        var p = n.item.control.addProperty(current)
                         p.z = 1000 - j
 
                         var currentConnection = current.readValueConnection()
@@ -150,14 +179,14 @@ CodePalette{
 
                 if (node){
                     if ( propertyConnection.right.property ){ // dealing with property of a node
-                        var nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                        var nodeProperty = node.item.control.propertyByName(propertyConnection.right.property)
                         if ( nodeProperty ){
                             propertyConnection.right.node = node
                             propertyConnection.right.outPort = nodeProperty.outPort
                             propertyConnection.right.inPort = nodeProperty.inPort
                         } else {
                             if ( propertyConnection.isFunction ){
-                                nodeProperty = node.item.addFunctionProperty(propertyConnection.right.property)
+                                nodeProperty = node.item.control.addFunctionProperty(propertyConnection.right.property)
                                 propertyConnection.right.node = node
                                 propertyConnection.right.inPort = nodeProperty.inPort
                                 propertyConnection.right.outPort = nodeProperty.outPort
@@ -167,7 +196,7 @@ CodePalette{
                                 var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
                                 paletteFunctions.addPropertyToObjectContainer(node.item, propertyConnection.right.property, false, position)
 
-                                nodeProperty = node.item.propertyByName(propertyConnection.right.property)
+                                nodeProperty = node.item.control.propertyByName(propertyConnection.right.property)
                                 if ( nodeProperty ){
                                     propertyConnection.right.node = node
                                     propertyConnection.right.outPort = nodeProperty.outPort
@@ -195,7 +224,7 @@ CodePalette{
 
             if (numOfObjects !== 0){
                 objectGraph.zoomOrigin = 0
-                objectGraph.zoom = 600.0/(numOfObjects*420.0 + 50)
+                objectGraph.zoom = 600.0 / (numOfObjects * 420.0 + 50)
                 objectGraph.zoomOrigin = 4
             }
         }
@@ -207,7 +236,7 @@ CodePalette{
 
                 var nodeItem = allObjects[i].item
                 nodeItem.clean()
-                editFragment.language.removeConnection(allObjects[i].item.editFragment)
+                editFragment.language.removeConnection(allObjects[i].item.control.editFragment)
             }
 
             allObjects = []
@@ -216,8 +245,24 @@ CodePalette{
 
         ObjectGraph {
             id: objectGraph
-            width: 600
-            height: 300
+            width: parent.width
+            height: parent.height
+            onWidthChanged: {
+                if ( objectGraph.resizeActive ){
+                    nodeItem.sizeInfo = {
+                        minWidth: objectGraph.width, maxWidth: objectGraph.width,
+                        minHeight: objectGraph.height, maxHeight: objectGraph.height
+                    }
+                }
+            }
+            onHeightChanged: {
+                if ( objectGraph.resizeActive ){
+                    nodeItem.sizeInfo = {
+                        minWidth: objectGraph.width, maxWidth: objectGraph.width,
+                        minHeight: objectGraph.height, maxHeight: objectGraph.height
+                    }
+                }
+            }
             palette: palette
             editor: palette.editor
             editFragment: palette.editFragment

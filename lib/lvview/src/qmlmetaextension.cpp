@@ -22,6 +22,9 @@
 
 namespace lv{
 
+QmlExtensionObjectI::~QmlExtensionObjectI(){
+}
+
 QmlMetaExtension::I::~I(){
 }
 
@@ -144,6 +147,5 @@ QVariant QmlMetaExtension::deserializeVariant(ViewEngine *engine, const MLNode &
     }
     return QVariant();
 }
-
 
 }// namespace

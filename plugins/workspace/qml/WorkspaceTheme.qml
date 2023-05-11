@@ -8,6 +8,7 @@ import workspace.nodeeditor 1.0
 import timeline 1.0
 import table 1.0
 import visual.input 1.0 as Input
+import visual.shapes 1.0 as Shapes
 
 Theme{
     id: root
@@ -440,6 +441,69 @@ Theme{
              }
 
             onClicked: parent.clicked()
+        }
+    }
+
+    // Icons
+
+    property QtObject icons: QtObject{
+        property Component headingCollapseExpand: Shapes.Triangle{
+            property bool compact: false
+            width: 8
+            height: 8
+            color: '#9b9da0'
+            rotation: compact ? Shapes.Triangle.Right : Shapes.Triangle.Bottom
+        }
+        property Component moveToNewPane: Item{
+            width: 15
+            height: 15
+            Rectangle{
+                anchors.top: parent.top
+                anchors.topMargin: 5
+                width: 10
+                height: 10
+                color: "transparent"
+                border.color: "#9b9da0"
+                border.width: 1
+                radius: 2
+            }
+            Rectangle{
+                anchors.top: parent.top
+                anchors.topMargin: 2
+                anchors.left: parent.left
+                anchors.leftMargin: 3
+                width: 10
+                height: 10
+                radius: 2
+                color: "#9b9da0"
+            }
+        }
+        property Component createObject: CreateObjectIcon{
+            width: 12
+            height: 12
+            color: '#9b9da0'
+        }
+        property Component eraseObject: Image{
+            source: "qrc:/images/palette-erase-object.png"
+        }
+        property Component closeObject: XIcon{
+            anchors.centerIn: parent
+            width: 8
+            height: 8
+            color: '#dbdede'
+            strokeWidth: 1
+        }
+        property Component buildSection: Image{
+            source: "qrc:/images/palette-integrate.png"
+        }
+        property Component viewConnections: Image{
+            source: "qrc:/images/palette-connections.png"
+        }
+        property Component openPalette: Image{
+            source: "qrc:/images/palette-add.png"
+        }
+        property Component addContent: Image{
+            source: "qrc:/images/palette-add-property.png"
         }
     }
 

@@ -471,7 +471,6 @@ Workspace.Pane{
                         return
                     }
 
-                    var rootPosition = editor.code.language.findRootPosition()
                     var paletteFunctions = lk.layers.workspace.extensions.editqml.paletteFunctions
                     paletteFunctions.expandLayout(root, layout)
                 })
@@ -515,7 +514,7 @@ Workspace.Pane{
 
         onDocumentChanged: {
             editorAddRemoveMenu.supportsShaping = code.has(DocumentHandler.LanguageLayout)
-            paneState = { document : document }
+            root.paneState = { document : document }
         }
     }
 

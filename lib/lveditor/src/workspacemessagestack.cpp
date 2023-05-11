@@ -14,12 +14,16 @@
 ****************************************************************************/
 
 #include "workspacemessagestack.h"
+#include "live/qmlerror.h"
+#include "live/visuallogqt.h"
 #include <QDebug>
 
 namespace lv {
 
-WorkspaceMessageStack::WorkspaceMessageStack(QObject* parent)
+WorkspaceMessageStack::WorkspaceMessageStack(ViewEngine *engine, QObject* parent)
     : QAbstractListModel(parent)
+    , m_engine(engine)
+    , m_logEnabled(true)
 {
     m_roles[Message]     = "message";
     m_roles[Code]        = "code";
@@ -54,6 +58,10 @@ void WorkspaceMessageStack::pushInfo(const QString &message, int code){
     m_messages.push_back(WorkspaceMessage(WorkspaceMessageStack::Info, message, code));
     endInsertRows();
 
+    if ( m_logEnabled ){
+        vlog("workspace").i() << message;
+    }
+
     emit messageAdded(WorkspaceMessageStack::Info, message, code);
     emit countChanged();
 
@@ -64,9 +72,12 @@ void WorkspaceMessageStack::pushWarning(const QString &message, int code){
     m_messages.push_back(WorkspaceMessage(WorkspaceMessageStack::Warning, message, code));
     endInsertRows();
 
+    if ( m_logEnabled ){
+        vlog("workspace").w() << message;
+    }
+
     emit messageAdded(WorkspaceMessageStack::Warning, message, code);
     emit countChanged();
-
 }
 
 void WorkspaceMessageStack::pushError(const QString &message, int code){
@@ -74,9 +85,18 @@ void WorkspaceMessageStack::pushError(const QString &message, int code){
     m_messages.push_back(WorkspaceMessage(WorkspaceMessageStack::Error, message, code));
     endInsertRows();
 
+    if ( m_logEnabled ){
+        vlog("workspace").e() << message;
+    }
+
     emit messageAdded(WorkspaceMessageStack::Error, message, code);
     emit countChanged();
 
+}
+
+void WorkspaceMessageStack::pushErrorObject(const QJSValue &e){
+    QmlError qe(m_engine, e);
+    pushError(qe.toString(), static_cast<int>(qe.code()));
 }
 
 void WorkspaceMessageStack::removeAt(int idx)
@@ -98,8 +118,7 @@ void WorkspaceMessageStack::clear()
 
 }
 
-int WorkspaceMessageStack::count()
-{
+int WorkspaceMessageStack::count(){
     return m_messages.size();
 }
 

@@ -18,6 +18,7 @@
 
 #include "live/elements/lvelementsglobal.h"
 #include <memory>
+#include <functional>
 
 namespace v8{
 class ArrayBuffer;
@@ -27,6 +28,8 @@ template<class T> class Local;
 namespace lv{ namespace el{
 
 class Engine;
+class Object;
+class ScopedValue;
 
 /**
  * @brief The Buffer class
@@ -34,35 +37,63 @@ class Engine;
  * The Buffer class handles transfer of raw data between c++ and js. The equivalent
  * in js is the ```ArrayBuffer```. It's important to note that the data is not owned
  * by the buffer, nor by js. It's meant for purely transfer purposes, i.e. function
- * calls and properties. If you want to keep raw data persistance, use an element subclass,
- * and a Buffer property.
+ * calls and properties. If you want to keep raw data persistance, use an Object to
+ * store the Buffer.
  *
  * @code
- * class BufferHolder : public Element{
- *      ...
- *      .scriptProperty<Buffer>("data", ...)
- *      ...
- * };
+ * auto obj = Object::createBuffer(Buffer::Initializer(data, size, deleter);
  * @endcode
  *
- * Then in js, you can hold a reference to BufferHolder while accesing it's raw data.
+ * When accessing an ArrayBuffer, use the Buffer::Accessor:
+ *
+ * @code
+ * Object bufferOb;
+ * Buffer::Accessor bufferAccess(bufferObject);
+ * void* data = bufferAccess.data();
+ * size_t size = bufferAccess.size();
+ * @endcode
  */
 class LV_ELEMENTS_EXPORT Buffer{
 
 public:
-    Buffer(void* data, size_t size);
-    Buffer(const v8::Local<v8::ArrayBuffer>& value);
-    ~Buffer(){}
+    class AccessorPrivate;
 
-    void* data() const{ return m_data; }
-    template<typename T> T dataAs(){ return reinterpret_cast<T>(m_data); }
-    size_t size() const{ return m_size; }
-    bool isExternal() const{ return m_externalized; }
+    class LV_ELEMENTS_EXPORT Accessor{
+    public:
+        Accessor(const Object& o);
+        Accessor(const ScopedValue& sv);
+        ~Accessor();
 
-private:
-    void*  m_data;
-    size_t m_size;
-    bool   m_externalized;
+        size_t size() const;
+        void* data() const;
+
+    private:
+        DISABLE_COPY(Accessor);
+        Accessor(const v8::Local<v8::ArrayBuffer>& value);
+
+        AccessorPrivate* m_d;
+    };
+
+    class DeleterData{
+    public:
+        std::function<void(void*, size_t)> callback;
+    };
+
+    class LV_ELEMENTS_EXPORT Initializer{
+    public:
+        Initializer(void* data, size_t size, std::function<void (void *, size_t)> deleter);
+
+        size_t size() const{ return m_size; }
+        void* data() const{ return m_data; }
+        std::function<void(void*, size_t)> deleter() const{ return m_deleter; }
+        void use() const;
+
+    private:
+        mutable bool m_used;
+        void*  m_data;
+        size_t m_size;
+        std::function<void(void*,size_t)> m_deleter;
+    };
 };
 
 }} // namespace lv, el

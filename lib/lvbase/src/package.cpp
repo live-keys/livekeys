@@ -20,6 +20,8 @@
 #include "live/exception.h"
 #include "live/visuallog.h"
 #include "live/library.h"
+#include "live/path.h"
+#include "live/directory.h"
 
 #include <list>
 #include <map>
@@ -45,6 +47,7 @@ public:
     std::string path;
     std::string filePath;
     std::string documentation;
+    std::string release;
     Version     version;
     std::map<std::string, Package::Reference*> dependencies;
     std::map<std::string, Package::Library*>   libraries;
@@ -147,6 +150,10 @@ Package::Ptr Package::createFromNode(const std::string& path, const std::string 
         pt->m_d->documentation = m["documentation"].asString();
     }
 
+    if ( m.hasKey("release") ){
+        pt->m_d->release = m["release"].asString();
+    }
+
     if ( m.hasKey("workspace") ){
         const MLNode& workspace = m["workspace"];
         if ( workspace.hasKey("label") )
@@ -205,11 +212,17 @@ const std::string &Package::documentation() const{
     return m_d->documentation;
 }
 
+/** \brief Returns the package release */
+const std::string &Package::release() const{
+    return m_d->release;
+}
+
 /** \brief Returns the package version */
 const Version &Package::version() const{
     return m_d->version;
 }
 
+/** \brief Returns a map of dependencies with string keys */
 const std::map<std::string, Package::Reference*>& Package::dependencies() const{
     return m_d->dependencies;
 }
@@ -222,6 +235,11 @@ const std::map<std::string, Package::Library *>& Package::libraries() const{
 
 const std::vector<std::string> Package::internalLibraries() const{
     return m_d->internalLibraries;
+}
+
+/** \brief Returns a list of all the module paths within this package */
+std::vector<std::string> Package::allModules() const{
+    return findModules(path());
 }
 
 /** \brief Assigns a new context to this package. */
@@ -266,6 +284,24 @@ const std::vector<std::pair<std::string, std::string> > &Package::workspaceTutor
 
 const std::vector<Package::ProjectEntry> &Package::workspaceSamples(){
     return m_d->workspaceSamples;
+}
+
+std::vector<std::string> Package::findModules(const std::string &path){
+    std::vector<std::string> result;
+
+    if ( Module::existsIn(path) )
+        result.push_back(path);
+
+    Directory::Iterator dit = Directory::iterate(path);
+    while ( !dit.isEnd() ){
+        if ( Path::isDir(dit.path()) ){
+            auto scanResult = findModules(dit.path());
+            result.insert(result.end(), scanResult.begin(), scanResult.end());
+        }
+        dit.next();
+    }
+
+    return result;
 }
 
 Package::Package(const std::string &path, const std::string& filePath, const std::string &name, const Version &version)

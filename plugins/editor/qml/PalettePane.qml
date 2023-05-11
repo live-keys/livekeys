@@ -26,6 +26,12 @@ Workspace.Pane{
         lk.layers.workspace.panes.removePane(root)
     }
 
+    onWidthChanged: {
+        if ( root.paletteContainer ){
+            root.paletteContainer.container.adjustSize()
+        }
+    }
+
     Rectangle{
         id: paneHeader
         anchors.left: parent.left

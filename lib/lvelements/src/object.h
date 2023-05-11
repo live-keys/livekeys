@@ -121,8 +121,8 @@ public:
 
     static Object create(Engine* engine);
     static Object createArray(Engine* engine, int length = 0);
+    static Object createBuffer(Engine* engine, const Buffer::Initializer& bufferInitializer);
     std::string toString() const;
-    Buffer toBuffer() const;
 
     v8::Local<v8::Object> data() const;
 

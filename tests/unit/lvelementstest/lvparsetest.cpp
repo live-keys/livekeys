@@ -259,8 +259,8 @@ void LvParseTest::parseTestTemplate(std::string name){
         parser->destroy(expectedAST);
 
         if ( !compare.isEqual() ){
-            vlog() << compare.errorString();
-            vlog() << conversion;
+            vlog().e() << compare.errorString();
+            vlog().e() << conversion;
         }
         QVERIFY(compare.isEqual());
     } catch ( lv::el::SyntaxException& e ){

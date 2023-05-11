@@ -228,7 +228,6 @@ template<> LV_ELEMENTS_EXPORT Value::Number Function::CallInfo::extractValue(v8:
 template<> LV_ELEMENTS_EXPORT std::string Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Callable Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Object Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
-template<> LV_ELEMENTS_EXPORT Buffer Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Value Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT ScopedValue Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
 template<> LV_ELEMENTS_EXPORT Element* Function::CallInfo::extractValue(v8::FunctionCallbackInfo<v8::Value> const* info, int index);
@@ -245,7 +244,6 @@ template<> LV_ELEMENTS_EXPORT Value::Number Function::Parameters::extractValue(E
 template<> LV_ELEMENTS_EXPORT std::string Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Callable Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Object Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
-template<> LV_ELEMENTS_EXPORT Buffer Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Value Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT ScopedValue Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
 template<> LV_ELEMENTS_EXPORT Element* Function::Parameters::extractValue(Engine* engine, v8::Local<v8::Value> const* args, int index);
@@ -265,7 +263,6 @@ public:
         std::is_same<ReturnType, Value::Number>::value ||
         std::is_same<ReturnType, std::string>::value ||
         std::is_same<ReturnType, Callable>::value ||
-        std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
         std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
@@ -339,7 +336,6 @@ public:
         std::is_same<ReturnType, Value::Number>::value ||
         std::is_same<ReturnType, std::string>::value ||
         std::is_same<ReturnType, Callable>::value ||
-        std::is_same<ReturnType, Buffer>::value ||
         std::is_same<ReturnType, Object>::value ||
         std::is_same<ReturnType, ScopedValue>::value ||
         std::is_same<ReturnType, Value>::value ||
