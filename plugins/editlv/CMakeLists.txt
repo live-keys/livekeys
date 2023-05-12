@@ -49,4 +49,4 @@ target_compile_definitions(editlv PRIVATE LV_EDITLV_PLUGIN)
 target_link_libraries(editlv
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick )
 
-target_link_libraries(editlv PRIVATE lvbase lvview lveditor lvelements)
+target_link_libraries(editlv PRIVATE lvbase lvview lveditor lvelementscompiler lvelementsengine)

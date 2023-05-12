@@ -1,5 +1,5 @@
 #include "lvellanguageinfoserializationtest.h"
-#include "live/elements/languageinfo.h"
+#include "live/elements/compiler/languageinfo.h"
 #include <set>
 #include "live/mlnodetojson.h"
 #include "live/visuallog.h"

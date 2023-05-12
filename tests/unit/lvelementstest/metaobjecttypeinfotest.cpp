@@ -8,7 +8,8 @@ Q_TEST_RUNNER_REGISTER(MetaObjectTypeInfoTest);
 #include "live/elements/element.h"
 #include "live/elements/metaobject.h"
 #include "live/elements/container.h"
-#include "live/elements/languageinfo.h"
+#include "live/elements/metaobjecttypeinfo.h"
+#include "live/elements/compiler/languageinfo.h"
 #include "live/visuallog.h"
 #include "live/typename.h"
 
@@ -24,7 +25,7 @@ void MetaObjectTypeInfoTest::initTestCase(){
 }
 
 void MetaObjectTypeInfoTest::elementTest(){
-    TypeInfo::Ptr ti = TypeInfo::extract(Element::metaObject(), "base");
+    TypeInfo::Ptr ti = MetaObjectTypeInfo::extract(Element::metaObject(), "base");
     QVERIFY(ti->className() == "cpp/lv::el::Element");
     QVERIFY(ti->typeName() == "lv/base#Element");
     QVERIFY(ti->inheritsName() == "");
@@ -37,7 +38,7 @@ void MetaObjectTypeInfoTest::elementTest(){
 }
 
 void MetaObjectTypeInfoTest::containerTest(){
-    TypeInfo::Ptr ti = TypeInfo::extract(Container::metaObject(), "base");
+    TypeInfo::Ptr ti = MetaObjectTypeInfo::extract(Container::metaObject(), "base");
     QVERIFY(ti->className() == "cpp/lv::el::Container");
     QVERIFY(ti->typeName() == "lv/base#Container");
     QVERIFY(ti->inheritsName() == "cpp/lv::el::Element");

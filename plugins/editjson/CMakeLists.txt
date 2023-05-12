@@ -38,4 +38,4 @@ target_compile_definitions(editjson PRIVATE LV_EDITJSON_PLUGIN)
 target_link_libraries(editjson
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick )
 
-target_link_libraries(editjson PRIVATE lvbase lvview lveditor lvelements)
+target_link_libraries(editjson PRIVATE lvbase lvview lveditor lvelementscompiler)

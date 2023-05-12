@@ -9,7 +9,7 @@
 #include "live/mlnode.h"
 
 #include "live/elements/compiler/languageparser.h"
-#include "live/elements/languagequery.h"
+#include "live/elements/compiler/languagequery.h"
 
 #include "qmllanguageobject.h"
 #include "live/textdocumentdata.h"

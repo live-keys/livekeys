@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QJSValue>
 #include <QVariant>
-#include "live/elements/parseddocument.h"
+#include "live/elements/compiler/parseddocument.h"
 
 namespace lv{
 

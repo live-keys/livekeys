@@ -59,5 +59,5 @@ target_link_libraries(livekeys PRIVATE lvbase lvview lveditor)
 
 if(SHOULD_BUILD_ELEMENTS_ENGINE)
     target_compile_definitions(livekeys PRIVATE BUILD_ELEMENTS BUILD_ELEMENTS_ENGINE)
-    target_link_libraries(livekeys PRIVATE lvelements)
+    target_link_libraries(livekeys PRIVATE lvelementscompiler lvelementsengine)
 endif()

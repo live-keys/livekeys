@@ -1,6 +1,6 @@
 #include "queryhighlighter.h"
 
-#include "live/elements/parseddocument.h"
+#include "live/elements/compiler/parseddocument.h"
 #include "live/visuallog.h"
 
 #include <math.h>

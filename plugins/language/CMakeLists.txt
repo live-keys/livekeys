@@ -35,4 +35,4 @@ target_compile_definitions(language PRIVATE LV_LANGUAGE_MODULE)
 target_link_libraries(language
   PRIVATE Qt${QT_VERSION_MAJOR}::Core Qt${QT_VERSION_MAJOR}::Quick )
 
-target_link_libraries(language PRIVATE lvbase lvview lvelements)
+target_link_libraries(language PRIVATE lvbase lvview lvelementscompiler lvelementsengine)

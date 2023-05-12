@@ -38,10 +38,11 @@ target_include_directories(lvelementstest PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 target_link_libraries(lvelementstest PRIVATE
     Qt${QT_VERSION_MAJOR}::Test
     lvbase
-    lvelements
+    lvelementscompiler
+    lvelementsengine
 )
 
 
 if (WIN32)
-    copy_file_list(LVELEMENTS_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll;${LIBRARY_DEPLOY_PATH}/lvelements.dll" ${CMAKE_CURRENT_BINARY_DIR})
+    copy_file_list(LVELEMENTS_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll;${LIBRARY_DEPLOY_PATH}/lvelementscompiler.dll;${LIBRARY_DEPLOY_PATH}/lvelementsengine.dll" ${CMAKE_CURRENT_BINARY_DIR})
 endif()

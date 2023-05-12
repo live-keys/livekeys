@@ -14,11 +14,11 @@
 **
 ****************************************************************************/
 
-#ifndef LVDeclaration_H
-#define LVDeclaration_H
+#ifndef LVDECLARATION_H
+#define LVDECLARATION_H
 
 #include <memory>
-#include "live/elements/languageinfo.h"
+#include "live/elements/compiler/languageinfo.h"
 #include "live/projectdocument.h"
 
 namespace lv{ namespace el {
@@ -208,4 +208,5 @@ inline bool Declaration::isListDeclaration() const{
 
 }// namespace
 }// namespace
-#endif // LVDeclaration_H
+
+#endif // LVDECLARATION_H

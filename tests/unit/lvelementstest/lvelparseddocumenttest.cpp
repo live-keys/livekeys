@@ -1,7 +1,7 @@
 #include "lvelparseddocumenttest.h"
 #include <QDebug>
-#include "live/elements/parseddocument.h"
-#include "live/elements/languageinfo.h"
+#include "live/elements/compiler/parseddocument.h"
+#include "live/elements/compiler/languageinfo.h"
 #include "live/utf8.h"
 #include <vector>
 

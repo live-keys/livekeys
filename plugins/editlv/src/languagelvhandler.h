@@ -14,7 +14,7 @@
 
 #include "editlvsettings.h"
 #include "documenttree.h"
-#include "live/elements/cursorcontext.h"
+#include "live/elements/compiler/cursorcontext.h"
 
 namespace lv{
 

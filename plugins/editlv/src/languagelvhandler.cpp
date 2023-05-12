@@ -3,13 +3,14 @@
 
 #include "live/codehandler.h"
 #include "live/projectdocument.h"
+#include "live/elements/compiler/cursorcontext.h"
+#include "live/elements/compiler/parseddocument.h"
 
 #include "languagelvextension.h"
 #include "editlvsettings.h"
-#include "live/elements/cursorcontext.h"
-#include "live/elements/parseddocument.h"
-#include <QQmlEngine>
 #include "live/projectfile.h"
+
+#include <QQmlEngine>
 
 namespace lv{
 

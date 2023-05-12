@@ -3,7 +3,7 @@
 
 #include "live/elements/engine.h"
 #include "live/elements/element.h"
-#include "live/elements/languageinfo.h"
+#include "live/elements/compiler/languageinfo.h"
 #include "live/elements/languagescanner.h"
 #include "languagescannerwrap.h"
 
