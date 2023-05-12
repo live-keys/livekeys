@@ -237,15 +237,14 @@ void LvParseTest::propertyNotation(){
     parseTestTemplate("ParserTest48");
 }
 
-
 void LvParseTest::anonymousComponents(){
     parseTestTemplate("ParserTest49");
 }
 
 void LvParseTest::parseTestTemplate(std::string name){
     try{
-        std::string contents = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv");
-        std::string expect   = m_fileIO->readFromFile(m_scriptPath + "/" + name + ".lv.js");
+        std::string contents = m_fileIO->readFromFile(Path::join(m_scriptPath, name + ".lv"));
+        std::string expect   = m_fileIO->readFromFile(Path::join(m_scriptPath, name + ".lv.js"));
 
         Compiler::Config compilerConfig(false);
         compilerConfig.allowUnresolvedTypes(true);
@@ -253,10 +252,7 @@ void LvParseTest::parseTestTemplate(std::string name){
         compiler->configureImplicitType("console");
         compiler->configureImplicitType("vlog");
 
-        std::string conversion = compiler->compileToJs(m_scriptPath + "/" + name + ".lv", contents);
-
-
-        Utf8::replaceAll(conversion, "\\r", "");
+        std::string conversion = compiler->compileToJs(Path::join(m_scriptPath, name + ".lv"), contents);
 
         el::LanguageParser::Ptr parser = el::LanguageParser::createForElements();
         el::LanguageParser::AST* conversionAST = parser->parse(conversion);
@@ -267,6 +263,7 @@ void LvParseTest::parseTestTemplate(std::string name){
         parser->destroy(expectedAST);
 
         if ( !compare.isEqual() ){
+            vlog().e() << "File: " << name;
             vlog().e() << compare.errorString();
             vlog().e() << conversion;
         }

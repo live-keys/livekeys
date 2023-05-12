@@ -97,7 +97,7 @@ std::vector<PropertyBindingContainer::Node *> PropertyBindingContainer::bindingI
 
     for (auto idx = m_bindings.begin(); idx != m_bindings.end(); ++idx){
         BaseNode* node = *idx;
-        if (node->typeString() == "MemberExpression"){
+        if (node->isNodeType<MemberExpressionNode>() ){
             MemberExpressionNode* men = node->as<MemberExpressionNode>();
             auto identifierChain = men->identifierChain(source);
 

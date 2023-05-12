@@ -18,6 +18,7 @@
 #include "live/packagegraph.h"
 #include "live/modulecontext.h"
 #include "languagenodes_p.h"
+#include "languagenodestojs_p.h"
 #include "elementssections_p.h"
 #include "elementsmodule.h"
 
@@ -109,7 +110,8 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     section->to   = static_cast<int>(contents.size());
 
     auto ctx = m_d->createConversionContext();
-    node->convertToJs(contents, section->m_children, 0, ctx);
+    LanguageNodesToJs lnt;
+    lnt.convert(node, contents, section->m_children, 0, ctx);
     delete ctx;
 
     std::vector<std::string> flatten;
@@ -166,7 +168,8 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &module, const std
     relativePathFromOutput = Utf8::join(relativePathFromOutputSegments, "/");
 
     auto ctx = m_d->createConversionContext(path, relativePathFromOutput.data());
-    node->convertToJs(contents, section->m_children, 0, ctx);
+    LanguageNodesToJs lnt;
+    lnt.convert(node, contents, section->m_children, 0, ctx);
     delete ctx;
 
     std::vector<std::string> flatten;

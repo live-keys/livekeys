@@ -27,17 +27,7 @@ target_link_libraries(lvbasetest PRIVATE lvbase)
 
 
 if (WIN32)
-    set(FILE_TO_ADD "${LIBRARY_DEPLOY_PATH}/lvbase.dll")
-    set(FILE_TO_ADD_OUTPUT "${CMAKE_CURRENT_BINARY_DIR}")
-
-    add_custom_command(
-        OUTPUT ${FILE_TO_ADD_OUTPUT}
-        DEPENDS ${FILE_TO_ADD}
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${FILE_TO_ADD} "${FILE_TO_ADD_OUTPUT}"
-    )
-    list(APPEND ADD_DEPENDENCIES_OUTPUT "${FILE_TO_ADD_OUTPUT}")
-
-    add_custom_target(LVBASE_TEST_COPY ALL DEPENDS ${ADD_DEPENDENCIES_OUTPUT})
+    copy_file_list(LVBASE_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll" ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
 

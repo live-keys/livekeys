@@ -12,9 +12,11 @@ target_sources(lvelements PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/elementsmodule.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/elementssections.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/languagenodes.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/languagenodestojs.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/languageparser.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/modulefile.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/sourcerange.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/languagenodeinfo.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/compiler/propertybindingcontainer.cpp"
 )
 

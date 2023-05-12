@@ -260,14 +260,14 @@ ModuleFile::ModuleFile(ElementsModule::Ptr plugin, const std::string &name, cons
     std::vector<BaseNode*> exports = m_d->elementsModule->compiler()->collectProgramExports(content, node);
 
     for ( auto val : exports ){
-        if ( val->typeString() == "ComponentInstanceStatement" ){
+        if ( val->isNodeType<ComponentInstanceStatementNode>() ){
             auto expression = val->as<ComponentInstanceStatementNode>();
             ModuleFile::Export expt;
             expt.type = ModuleFile::Export::Element;
             expt.name = expression->name(content);
             m_d->exports.push_back(expt);
 
-        } else if ( val->typeString() == "ComponentDeclaration"){
+        } else if ( val->isNodeType<ComponentDeclarationNode>() ){
             auto expression = val->as<ComponentDeclarationNode>();
             ModuleFile::Export expt;
             expt.type = ModuleFile::Export::Component;

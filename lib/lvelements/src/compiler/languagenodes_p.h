@@ -25,6 +25,7 @@
 #include "tree_sitter/api.h"
 #include "tree_sitter/parser.h"
 #include "elementssections_p.h"
+#include "languagenodeinfo_p.h"
 #include "languageparser.h"
 
 namespace lv{ namespace el{
@@ -58,7 +59,9 @@ class RootNewComponentExpressionNode;
 class PropertyAccessorDeclarationNode;
 
 class BaseNode{
+
     friend class JsBlockNode;
+    LANGUAGE_NODE_INFO(BaseNode);
 
 public:
     class ConversionContext{
@@ -79,7 +82,7 @@ public:
     };
 
 public:
-    BaseNode(const TSNode& node, const std::string& typeString = "Elements");
+    BaseNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni);
     virtual ~BaseNode();
 
     const TSNode& current() const{ return m_node; }
@@ -88,7 +91,6 @@ public:
 
     static BaseNode* visit(const std::string& filePath, const std::string& fileName, LanguageParser::AST* ast);
     static bool checkIdentifierDeclared(const std::string& source, BaseNode* node, std::string id, ConversionContext* ctx);
-    const std::string& typeString() const{ return m_typeString; }
 
     template <typename T> T* as(){ return static_cast<T*>(this); }
     template <typename T> bool canCast(){ return dynamic_cast<T*>(this) != nullptr; }
@@ -101,8 +103,11 @@ public:
     std::string rangeString() const;
     std::string pointRangeString() const;
 
+    int nodeType() const;
+    const std::string& nodeName() const;
+    template<typename T> bool isNodeType() const { return nodeType() == T::nodeInfoType(); }
+
     virtual void collectImports(const std::string& source, std::vector<IdentifierNode *> &identifiers, ConversionContext* ctx = nullptr);
-    virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& sections, int indent = 0, ConversionContext* ctx = nullptr);
 
     static std::string slice(const std::string& source, uint32_t start, uint32_t end);
     static std::string slice(const std::string& source, BaseNode* node);
@@ -172,41 +177,48 @@ private:
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
     static void visitObject(BaseNode* parent, const TSNode& node);
 
-    BaseNode*              m_parent;
-    TSNode                 m_node;
-    std::string            m_typeString;
-    std::vector<BaseNode*> m_children;
+    BaseNode*                  m_parent;
+    TSNode                     m_node;
+    LanguageNodeInfo::ConstPtr m_nodeInfo;
+    std::vector<BaseNode*>     m_children;
 };
 
 class NumberNode: public BaseNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(NumberNode);
 public:
-    NumberNode(const TSNode& node, const std::string& typeString = "Number") : BaseNode(node, typeString){}
+    NumberNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni = NumberNode::nodeInfo()) : BaseNode(node, ni){}
 };
 
 class ObjectNode: public BaseNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ObjectNode);
 public:
-    ObjectNode(const TSNode& node, const std::string& typeString = "Object") : BaseNode(node, typeString){}
+    ObjectNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni = ObjectNode::nodeInfo()) : BaseNode(node, ni){}
 };
 
 
 class ExpressionNode: public BaseNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ExpressionNode);
 public:
-    ExpressionNode(const TSNode& node, const std::string& typeString = "Expression") : BaseNode(node, typeString){}
+    ExpressionNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni = ExpressionNode::nodeInfo()) : BaseNode(node, ni){}
 };
 
 class ReturnStatementNode: public BaseNode {
     friend class BaseNode;
+
+    LANGUAGE_NODE_INFO(ReturnStatementNode);
+
 public:
-    ReturnStatementNode(const TSNode& node, const std::string& typeString = "ReturnStatement") : BaseNode(node, typeString){}
+    ReturnStatementNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni = ReturnStatementNode::nodeInfo()) : BaseNode(node, ni){}
 };
 
 class NewExpressionNode: public BaseNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(NewExpressionNode);
 public:
-    NewExpressionNode(const TSNode& node) : BaseNode(node, "NewExpression"){}
+    NewExpressionNode(const TSNode& node) : BaseNode(node, NewExpressionNode::nodeInfo()){}
 };
 
 class JsBlockNode : public BaseNode{
@@ -215,8 +227,10 @@ class JsBlockNode : public BaseNode{
     friend class ComponentDeclarationNode;
     friend class NewComponentExpressionNode;
 
+    LANGUAGE_NODE_INFO(JsBlockNode);
+
 public:
-    JsBlockNode(const TSNode& node, const std::string& typeString = "JSScope") : BaseNode(node, typeString){}
+    JsBlockNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni = JsBlockNode::nodeInfo()) : BaseNode(node, ni){}
     const std::vector<IdentifierNode*>& identifiers() const { return m_declarations; }
     const std::vector<IdentifierNode*>& usedIdentifiers() const{ return m_usedIdentifiers; }
 
@@ -233,6 +247,8 @@ class ProgramNode : public JsBlockNode {
 
     friend class BaseNode;
 
+    LANGUAGE_NODE_INFO(ProgramNode);
+
 public:
     class ImportType{
     public:
@@ -242,15 +258,16 @@ public:
     };
 
 public:
-    ProgramNode(const TSNode& node) : JsBlockNode(node, "Program"), m_importTypesCollected(false) {}
+    ProgramNode(const TSNode& node) : JsBlockNode(node, ProgramNode::nodeInfo()), m_importTypesCollected(false) {}
     void setFileName(std::string fn){ m_fileName = fn; }
     std::string fileName() const { return m_fileName; }
     void setFilePath(const std::string& fp){ m_filePath = fp; }
     const std::string& filePath() const{ return m_filePath; }
 
-    const std::vector<BaseNode*> exports(){ return m_exports; }
-    const std::vector<ImportNode*> imports(){ return m_imports; }
-    const std::vector<JsImportNode*> jsImports(){ return m_jsImports; }
+    const std::vector<BaseNode*>& exports(){ return m_exports; }
+    const std::vector<ImportNode*>& imports(){ return m_imports; }
+    const std::vector<JsImportNode*>& jsImports(){ return m_jsImports; }
+    const std::vector<NewComponentExpressionNode*>& idComponents() const{ return m_idComponents; }
     std::map<std::string, std::map<std::string, ImportType> >& importTypes() { return m_importTypes; }
 
     void collectImportTypes(const std::string& source, ConversionContext* ctx = nullptr);
@@ -259,14 +276,12 @@ public:
 
     std::string importTypesString() const;
 
+    void addImportType(const ImportType& t);
+
 protected:
     virtual void addChild(BaseNode *child);
     virtual std::string toString(int indent = 0) const;
-    virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0, ConversionContext* ctx = nullptr);
     virtual void collectImports(const std::string& source, std::vector<IdentifierNode *> &identifiers, ConversionContext* ctx = nullptr);
-
-private:
-    void addImportType(const ImportType& t);
 
 private:
     std::string m_fileName;
@@ -282,28 +297,32 @@ private:
 
 class IdentifierNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(IdentifierNode);
 public:
-    IdentifierNode(const TSNode& node) : BaseNode(node, "Identifier"){}
+    IdentifierNode(const TSNode& node) : BaseNode(node, IdentifierNode::nodeInfo()){}
 };
 
 class TypeNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(TypeNode);
 public:
-    TypeNode(const TSNode& node) : BaseNode(node, "Type"){}
+    TypeNode(const TSNode& node) : BaseNode(node, TypeNode::nodeInfo()){}
 
     static std::string sliceWithoutAnnotation(const std::string &source, TypeNode* tn);
 };
 
 class VariableDeclaratorNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(VariableDeclaratorNode);
 public:
-    VariableDeclaratorNode(const TSNode& node) : BaseNode(node, "VariableDeclarator"){}
+    VariableDeclaratorNode(const TSNode& node) : BaseNode(node, VariableDeclaratorNode::nodeInfo()){}
 };
 
 class VariableDeclarationNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(VariableDeclarationNode);
 public:
-    VariableDeclarationNode(const TSNode& node) : BaseNode(node, "VariableDeclaration"), m_hasSemicolon(false){}
+    VariableDeclarationNode(const TSNode& node) : BaseNode(node, VariableDeclarationNode::nodeInfo()), m_hasSemicolon(false){}
     virtual std::string toString(int indent = 0) const;
 
 private:
@@ -314,8 +333,9 @@ private:
 
 class CallExpressionNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(CallExpressionNode);
 public:
-    CallExpressionNode(const TSNode& node) : BaseNode(node, "CallExpression"), m_arguments(nullptr), isSuper(false){}
+    CallExpressionNode(const TSNode& node) : BaseNode(node, CallExpressionNode::nodeInfo()), m_arguments(nullptr), isSuper(false){}
     virtual std::string toString(int indent = 0) const;
 private:
     ArgumentsNode* m_arguments;
@@ -327,14 +347,16 @@ private:
 
 class ImportPathSegmentNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ImportPathSegmentNode);
 public:
-    ImportPathSegmentNode(const TSNode& node) : BaseNode(node, "ImportPathSegment"){}
+    ImportPathSegmentNode(const TSNode& node) : BaseNode(node, ImportPathSegmentNode::nodeInfo()){}
 };
 
 class ImportPathNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ImportPathNode);
 public:
-    ImportPathNode(const TSNode& node) : BaseNode(node, "ImportPath"), m_isRelative(false){}
+    ImportPathNode(const TSNode& node) : BaseNode(node, ImportPathNode::nodeInfo()), m_isRelative(false){}
 
     bool isRelative(){ return m_isRelative; }
     const std::vector<ImportPathSegmentNode*>& segments() const{ return m_segments; }
@@ -346,44 +368,46 @@ private:
 
 class NewTaggedComponentExpressionNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(NewTaggedComponentExpressionNode);
 public:
-    NewTaggedComponentExpressionNode(const TSNode& node) : BaseNode(node, "NewTaggedComponentExpression"){}
+    NewTaggedComponentExpressionNode(const TSNode& node) : BaseNode(node, NewTaggedComponentExpressionNode::nodeInfo()){}
     virtual std::string toString(int indent = 0) const override;
-    virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0, ConversionContext* ctx = nullptr) override;
 };
 
 class NewTrippleTaggedComponentExpressionNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(NewTrippleTaggedComponentExpressionNode);
 public:
-    NewTrippleTaggedComponentExpressionNode(const TSNode& node) : BaseNode(node, "NewTrippleTaggedComponentExpression"){}
+    NewTrippleTaggedComponentExpressionNode(const TSNode& node) : BaseNode(node, NewTrippleTaggedComponentExpressionNode::nodeInfo()){}
     virtual std::string toString(int indent = 0) const override;
-    virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments, int indent = 0, ConversionContext* ctx = nullptr) override;
 };
 
 class TrippleTaggedStringNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(TrippleTaggedStringNode);
 public:
-    TrippleTaggedStringNode(const TSNode& node) : BaseNode(node, "TrippleTaggedString"){}
+    TrippleTaggedStringNode(const TSNode& node) : BaseNode(node, TrippleTaggedStringNode::nodeInfo()){}
 };
 
 class TaggedStringNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(TaggedStringNode);
 public:
-    TaggedStringNode(const TSNode& node) : BaseNode(node, "TaggedString"){}
+    TaggedStringNode(const TSNode& node) : BaseNode(node, TaggedStringNode::nodeInfo()){}
 };
 
 class StringNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(StringNode);
 public:
-    StringNode(const TSNode& node) : BaseNode(node, "String"){}
+    StringNode(const TSNode& node) : BaseNode(node, StringNode::nodeInfo()){}
 };
 
 class JsImportNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(JsImportNode);
 public:
-    JsImportNode(const TSNode& node)
-        : BaseNode(node, "JsImport")
-        , m_importPath(nullptr)
+    JsImportNode(const TSNode& node) : BaseNode(node, JsImportNode::nodeInfo()) , m_importPath(nullptr)
     {}
     virtual std::string toString(int indent = 0) const;
 
@@ -397,9 +421,10 @@ private:
 
 class ImportNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ImportNode);
 public:
     ImportNode(const TSNode& node)
-        : BaseNode(node, "Import")
+        : BaseNode(node, ImportNode::nodeInfo())
         , m_importPath(nullptr)
         , m_importAs(nullptr){}
     virtual std::string toString(int indent = 0) const;
@@ -420,9 +445,11 @@ class ConstructorDefinitionNode : public BaseNode{
     friend class BaseNode;
     friend class ComponentDeclarationNode;
 
+    LANGUAGE_NODE_INFO(ConstructorDefinitionNode);
+
 public:
     ConstructorDefinitionNode(const TSNode& node)
-        : BaseNode(node, "ConstructorDefinition")
+        : BaseNode(node, ConstructorDefinitionNode::nodeInfo())
         , m_body(nullptr)
         , m_superCall(nullptr)
         , m_parameters(nullptr)
@@ -430,7 +457,10 @@ public:
 
     virtual std::string toString(int indent = 0) const;
     void setSuperCall(CallExpressionNode* super) { m_superCall = super; }
-    // virtual void convertToJs(const std::string& source, std::vector<ElementsInsertion*>& fragments);
+
+    JsBlockNode* body() const{ return m_body; }
+    CallExpressionNode* superCall() const{ return m_superCall; }
+    ParameterListNode* parameters() const{ return m_parameters; }
 
 private:
     JsBlockNode*        m_body;
@@ -441,6 +471,7 @@ private:
 
 class TypedMethodDeclarationNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(TypedMethodDeclarationNode);
 public:
     TypedMethodDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
@@ -456,7 +487,7 @@ public:
     bool isStatic() const{ return m_static; }
 
 protected:
-    TypedMethodDeclarationNode(const TSNode& node, const std::string& typeString);
+    TypedMethodDeclarationNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni);
 
 private:
     IdentifierNode*    m_name;
@@ -467,6 +498,8 @@ private:
 };
 
 class PropertyAccessorDeclarationNode : public TypedMethodDeclarationNode{
+
+    LANGUAGE_NODE_INFO(PropertyAccessorDeclarationNode);
 
 public:
     friend class BaseNode;
@@ -487,7 +520,7 @@ public:
 
 public:
     PropertyAccessorDeclarationNode(const TSNode& node)
-        : TypedMethodDeclarationNode(node, "PropertyAccessorDeclaration")
+        : TypedMethodDeclarationNode(node, PropertyAccessorDeclarationNode::nodeInfo())
         , m_access(PropertyAccessorDeclarationNode::Unknown)
         , m_isPropertyAttached(false)
     {}
@@ -505,6 +538,7 @@ private:
 class PropertyDeclarationNode : public JsBlockNode{
 
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(PropertyDeclarationNode);
 
 public:
     PropertyDeclarationNode(const TSNode& node);
@@ -523,15 +557,6 @@ public:
     bool hasAssignment(){ return m_expression != nullptr || m_statementBlock != nullptr; }
     bool isBindingsAssignment(){ return m_isBindingAssignment; }
 
-    void convertToJs(
-        const std::string& source,
-        const std::string& componentRef,
-        int indt,
-        ConversionContext* ctx,
-        const PropertyAccessorDeclarationNode::PropertyAccess& propertyAccess,
-        ElementsInsertion *compose
-    );
-
 private:
     IdentifierNode* m_name;
     TypeNode* m_type;
@@ -545,6 +570,7 @@ private:
 class StaticPropertyDeclarationNode : public BaseNode{
 
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(StaticPropertyDeclarationNode);
 
 public:
     StaticPropertyDeclarationNode(const TSNode& node);
@@ -563,14 +589,16 @@ private:
 
 class ArgumentsNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ArgumentsNode);
 public:
-    ArgumentsNode(const TSNode& node) : BaseNode(node, "Arguments"){}
+    ArgumentsNode(const TSNode& node) : BaseNode(node, ArgumentsNode::nodeInfo()){}
     virtual std::string toString(int indent = 0) const override;
 };
 
 class ClassDeclarationNode : public BaseNode{
+    LANGUAGE_NODE_INFO(ClassDeclarationNode);
 public:
-    ClassDeclarationNode(const TSNode& node) : BaseNode(node, "ClassDeclaration"){}
+    ClassDeclarationNode(const TSNode& node) : BaseNode(node, ClassDeclarationNode::nodeInfo()){}
 };
 
 class PropertyAssignmentNode : public JsBlockNode{
@@ -578,6 +606,8 @@ class PropertyAssignmentNode : public JsBlockNode{
     friend class BaseNode;
     friend class ComponentDeclarationNode;
     friend class NewComponentExpressionNode;
+
+    LANGUAGE_NODE_INFO(PropertyAssignmentNode);
 
 public:
     PropertyAssignmentNode(const TSNode& node);
@@ -589,9 +619,14 @@ public:
     std::string bindingIdentifiersToJs(const std::string& source) const;
     bool isBindingAssignment() const{ return m_isBindingAssignment; }
 
+    const std::vector<IdentifierNode*>& property() const{ return m_property; }
+    BindableExpressionNode* expression() const{ return m_expression; }
+    JsBlockNode* statementBlock() const{ return m_statementBlock; }
+    PropertyBindingContainer* bindingContainer() const{ return m_bindingContainer; }
+
 private:
     std::vector<IdentifierNode*> m_property;
-    bool m_isBindingAssignment;
+    bool                      m_isBindingAssignment;
     BindableExpressionNode*   m_expression;
     JsBlockNode*              m_statementBlock;
     PropertyBindingContainer* m_bindingContainer;
@@ -599,14 +634,16 @@ private:
 
 class PublicFieldDeclarationNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(PublicFieldDeclarationNode);
 public:
-    PublicFieldDeclarationNode(const TSNode& node) : BaseNode(node, "PublicFieldDeclaration"){}
+    PublicFieldDeclarationNode(const TSNode& node) : BaseNode(node, PublicFieldDeclarationNode::nodeInfo()){}
 };
 
 class ComponentBodyNode : public JsBlockNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ComponentBodyNode);
 public:
-    ComponentBodyNode(const TSNode& node) : JsBlockNode(node, "ComponentBody"), m_constructor(nullptr){}
+    ComponentBodyNode(const TSNode& node) : JsBlockNode(node, ComponentBodyNode::nodeInfo()), m_constructor(nullptr){}
     virtual std::string toString(int indent = 0) const;
     void setConstructor(ConstructorDefinitionNode* cons) { m_constructor = cons; }
     ConstructorDefinitionNode* constructor() { return m_constructor; }
@@ -618,10 +655,10 @@ private:
 
 class ComponentDeclarationNode : public JsBlockNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ComponentDeclarationNode);
 public:
     ComponentDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const override;
-    virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0, ConversionContext* ctx = nullptr) override;
 
     void pushToProperties(PropertyDeclarationNode* prop){ m_properties.push_back(prop); }
     void pushToStaticProperties(StaticPropertyDeclarationNode* prop){ m_staticProperties.push_back(prop); }
@@ -632,11 +669,24 @@ public:
     void pushToAssignments(PropertyAssignmentNode* pan) { m_assignments.push_back(pan); }
     std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 
+
+    const std::vector<PropertyDeclarationNode*>& properties() const{ return m_properties; }
+    const std::vector<PropertyAccessorDeclarationNode*>& propertyAccessors() const{ return m_propertyAccesors; }
+    const std::vector<StaticPropertyDeclarationNode*>& staticProperties() const{ return m_staticProperties; }
+    const std::vector<EventDeclarationNode*>& events() const{ return m_events; }
+    const std::vector<ListenerDeclarationNode*>& listeners() const{ return m_listeners; }
+    const std::vector<TypedMethodDeclarationNode*>& methods() const{ return m_methods; }
+    const std::vector<BaseNode*>& nestedComponents() const{ return m_nestedComponents; }
+    const std::vector<NewComponentExpressionNode*>& idComponents(){ return m_idComponents; }
+
     PropertyAccessorDeclarationNode::PropertyAccess propertyAccessors(const std::string& source, const std::string& propertyName);
 
     std::string name(const std::string &source) const;
     bool isAnonymous() const;
-    const std::vector<IdentifierNode*> heritage() const{ return m_heritage; }
+    const std::vector<IdentifierNode*>& heritage() const{ return m_heritage; }
+
+    IdentifierNode* componentId() const{ return m_id; }
+    ComponentBodyNode* componentBody() const{ return m_body; }
 
 private:
     IdentifierNode* m_name;
@@ -660,29 +710,33 @@ class NewComponentExpressionNode : public JsBlockNode{
     friend class ComponentBodyNode;
     friend class BaseNode;
 
+    LANGUAGE_NODE_INFO(NewComponentExpressionNode);
+
 public:
     NewComponentExpressionNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const override;
-    virtual void convertToJs(const std::string &source, std::vector<ElementsInsertion*> &fragments, int indent = 0, ConversionContext* ctx = nullptr) override;
 
     IdentifierNode* id() { return m_id; }
-    std::vector<IdentifierNode*> name() { return m_name; }
     ArgumentsNode* arguments() { return m_arguments; }
     void pushToProperties(PropertyDeclarationNode* prop){ m_properties.push_back(prop); }
-    std::vector<PropertyDeclarationNode*>& properties() { return m_properties; }
     void pushToAssignments(PropertyAssignmentNode* ass) { m_assignments.push_back(ass); }
-    std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
 
-    std::vector<EventDeclarationNode*> events(){ return m_events; }
-    std::vector<ListenerDeclarationNode*> listeners(){ return m_listeners; }
-    std::vector<TypedMethodDeclarationNode*> methods(){ return m_methods; }
+    const std::vector<IdentifierNode*>& name() { return m_name; }
+    std::vector<PropertyDeclarationNode*>& properties() { return m_properties; }
+    std::vector<PropertyAssignmentNode*>& assignments() { return m_assignments; }
+    const std::vector<EventDeclarationNode*>& events(){ return m_events; }
+    const std::vector<ListenerDeclarationNode*>& listeners(){ return m_listeners; }
+    const std::vector<TypedMethodDeclarationNode*>& methods(){ return m_methods; }
+    const std::vector<NewComponentExpressionNode*>& idComponents(){ return m_idComponents; }
+    const std::vector<BaseNode*>& nestedComponents() const{ return m_nestedComponents; }
+
 
     void pushToDefault(BaseNode* nce){ m_nestedComponents.push_back(nce); }
 
     std::string initializerName(const std::string& source);
 
 protected:
-    NewComponentExpressionNode(const TSNode& node, const std::string& typeString);
+    NewComponentExpressionNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni);
 
 private:
     std::vector<IdentifierNode*> m_name;
@@ -701,14 +755,18 @@ private:
 
 class RootNewComponentExpressionNode: public NewComponentExpressionNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(RootNewComponentExpressionNode);
 public:
-    RootNewComponentExpressionNode(const TSNode& node) : NewComponentExpressionNode(node, "RootNewComponentExpression"){}
+    RootNewComponentExpressionNode(const TSNode& node)
+        : NewComponentExpressionNode(node, RootNewComponentExpressionNode::nodeInfo())
+    {}
 };
 
 class ComponentInstanceStatementNode: public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(RootNewComponentExpressionNode);
 public:
-    ComponentInstanceStatementNode(const TSNode& node) : BaseNode(node, "ComponentInstanceStatement"), m_name(nullptr){}
+    ComponentInstanceStatementNode(const TSNode& node) : BaseNode(node, ComponentInstanceStatementNode::nodeInfo()), m_name(nullptr){}
 
     std::string name(const std::string &source) const;
 
@@ -717,14 +775,16 @@ private:
 };
 
 class ExpressionStatementNode : public BaseNode{
+    LANGUAGE_NODE_INFO(ExpressionStatementNode);
 public:
-    ExpressionStatementNode(const TSNode& node) : BaseNode(node, "ExpressionStatement"){}
+    ExpressionStatementNode(const TSNode& node) : BaseNode(node, ExpressionStatementNode::nodeInfo()){}
     virtual std::string toString(int indent = 0) const;
 };
 
 class AssignmentExpressionNode : public BaseNode{
+    LANGUAGE_NODE_INFO(AssignmentExpressionNode);
 public:
-    AssignmentExpressionNode(const TSNode& node) : BaseNode(node, "AssignmentExpression"), m_left(nullptr), m_right(nullptr){}
+    AssignmentExpressionNode(const TSNode& node) : BaseNode(node, AssignmentExpressionNode::nodeInfo()), m_left(nullptr), m_right(nullptr){}
     virtual std::string toString(int indent = 0) const;
 
     BaseNode* left() const{ return m_left; }
@@ -739,27 +799,31 @@ private:
 };
 
 class BindableExpressionNode : public BaseNode{
+    LANGUAGE_NODE_INFO(BindableExpressionNode);
 public:
-    BindableExpressionNode(const TSNode& node) : BaseNode(node, "BindableExpression"){}
+    BindableExpressionNode(const TSNode& node) : BaseNode(node, BindableExpressionNode::nodeInfo()){}
 };
 
 class MemberExpressionNode : public BaseNode{
+    LANGUAGE_NODE_INFO(MemberExpressionNode);
 public:
-    MemberExpressionNode(const TSNode& node) : BaseNode(node, "MemberExpression"){}
+    MemberExpressionNode(const TSNode& node) : BaseNode(node, MemberExpressionNode::nodeInfo()){}
 
     std::vector<std::string> identifierChain(const std::string& source) const;
 };
 
 class SubscriptExpressionNode : public BaseNode{
+    LANGUAGE_NODE_INFO(SubscriptExpressionNode);
 public:
-    SubscriptExpressionNode(const TSNode& node) : BaseNode(node, "SubscriptExpression"){}
+    SubscriptExpressionNode(const TSNode& node) : BaseNode(node, SubscriptExpressionNode::nodeInfo()){}
 };
 
 class ParameterNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ParameterNode);
 public:
     ParameterNode(const TSNode& node, IdentifierNode* identifier, TypeNode* typen = nullptr, bool isOptional = false)
-        : BaseNode(node), m_identifier(identifier), m_type(typen), m_isOptional(isOptional)
+        : BaseNode(node, ParameterNode::nodeInfo()), m_identifier(identifier), m_type(typen), m_isOptional(isOptional)
     {
         if ( m_identifier )
             addChild(m_identifier);
@@ -778,8 +842,9 @@ private:
 
 class ParameterListNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ParameterListNode);
 public:
-    ParameterListNode(const TSNode& node) : BaseNode(node, "ParameterList"){}
+    ParameterListNode(const TSNode& node) : BaseNode(node, ParameterListNode::nodeInfo()){}
     virtual std::string toString(int indent = 0) const;
     const std::vector<ParameterNode*>& parameters() const{ return m_parameters; }
 
@@ -790,6 +855,7 @@ private:
 
 class EventDeclarationNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(EventDeclarationNode);
 public:
     EventDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
@@ -802,6 +868,7 @@ private:
 
 class ListenerDeclarationNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ListenerDeclarationNode);
 public:
     ListenerDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
@@ -818,6 +885,7 @@ private:
 
 class MethodDefinitionNode : public BaseNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(MethodDefinitionNode);
 public:
     MethodDefinitionNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
@@ -834,6 +902,7 @@ private:
 
 class ArrowFunctionNode: public JsBlockNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(ArrowFunctionNode);
 public:
     ArrowFunctionNode(const TSNode& node);
 
@@ -850,6 +919,7 @@ private:
 
 class FunctionNode: public BaseNode {
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(FunctionNode);
 public:
     FunctionNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;
@@ -858,7 +928,7 @@ public:
     JsBlockNode* body() const{ return m_body; }
 
 protected:
-    FunctionNode(const TSNode& node, const std::string& nodeType);
+    FunctionNode(const TSNode& node, const LanguageNodeInfo::ConstPtr& ni);
 
 private:
     ParameterListNode* m_parameters;
@@ -867,6 +937,7 @@ private:
 
 class FunctionDeclarationNode: public FunctionNode{
     friend class BaseNode;
+    LANGUAGE_NODE_INFO(FunctionDeclarationNode);
 public:
     FunctionDeclarationNode(const TSNode& node);
     virtual std::string toString(int indent = 0) const;

@@ -42,3 +42,6 @@ target_link_libraries(lvelementstest PRIVATE
 )
 
 
+if (WIN32)
+    copy_file_list(LVELEMENTS_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll;${LIBRARY_DEPLOY_PATH}/lvelements.dll" ${CMAKE_CURRENT_BINARY_DIR})
+endif()
