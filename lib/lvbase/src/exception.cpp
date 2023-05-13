@@ -186,10 +186,12 @@ std::string Exception::fromCode(Exception::Code code){
 
     while (code > 0) {
         unsigned long long remainder = code % 28;
-        char digit = static_cast<char>(remainder + 97);
-        if ( digit == 27 )
-          digit = '~';
-        result = (--digit) + result;
+        if ( remainder == 27 ){
+            result = "~" + result;
+        } else {
+            char digit = static_cast<char>(remainder + 97);
+            result = (--digit) + result;
+        }
         code = (code - remainder) / 28;
     }
 
