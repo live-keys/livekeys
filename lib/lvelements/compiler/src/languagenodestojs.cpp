@@ -11,9 +11,7 @@ std::string LanguageNodesToJs::indent(int i){
     return res;
 }
 
-LanguageNodesToJs::LanguageNodesToJs()
-{
-
+LanguageNodesToJs::LanguageNodesToJs(){
 }
 
 std::string LanguageNodesToJs::slice(const std::string &source, uint32_t start, uint32_t end){

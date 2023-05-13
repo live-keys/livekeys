@@ -25,12 +25,10 @@ target_sources(lvelementstest PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/testpack.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/jstupletest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/jsinheritancetest.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lvparsetest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/metaobjecttypeinfotest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvimportstest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvelparseddocumenttest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvellanguageinfoserializationtest.cpp"
-    "${CMAKE_CURRENT_SOURCE_DIR}/lvparseerrortest.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/lvelementsstubs/pointstub.cpp"
 )
 

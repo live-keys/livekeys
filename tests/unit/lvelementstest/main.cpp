@@ -36,8 +36,6 @@
 #include "lvcompiletest.h"
 #include "jstupletest.h"
 #include "lvimportstest.h"
-#include "lvparsetest.h"
-#include "lvparseerrortest.h"
 #include "metaobjecttypeinfotest.h"
 #include "lvelparseddocumenttest.h"
 #include "lvellanguageinfoserializationtest.h"

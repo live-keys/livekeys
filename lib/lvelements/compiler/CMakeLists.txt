@@ -54,3 +54,6 @@ target_include_directories(lvelementscompiler
     PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/treesitterelements"
 )
 
+if(BUILD_TESTS)
+    add_subdirectory(test/unit)
+endif()

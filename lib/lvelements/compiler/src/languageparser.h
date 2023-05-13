@@ -36,7 +36,7 @@ class BaseNode;
 class LV_ELEMENTS_COMPILER_EXPORT SyntaxException: public lv::Exception{
 public:
     /** Default contructor */
-    SyntaxException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
+    SyntaxException(const std::string& message = "", Exception::Code code = 0) : lv::Exception(message, code){}
 
     int parsedLine() const;
     int parsedColumn() const;

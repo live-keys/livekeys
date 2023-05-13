@@ -199,7 +199,7 @@ JsBlockNode *BaseNode::addUsedIdentifier(BaseNode *parent, IdentifierNode *idNod
 
 void BaseNode::assertValid(BaseNode *from, const TSNode &node, const std::string& message){
     if ( ts_node_is_null(node) ){
-        SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error: " + message, Exception::toCode("~LanguageNodes"));
+        SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error: " + message, Exception::toCode("~Language"));
         BaseNode* p = from;
         while (p && p->nodeType() != ProgramNode::nodeInfoType())
             p = p->parent();
@@ -217,7 +217,7 @@ void BaseNode::assertValid(BaseNode *from, const TSNode &node, const std::string
 
 void BaseNode::assertError(BaseNode *from, const TSNode &node, const std::string &message){
     if ( strcmp(ts_node_type(node), "ERROR") == 0 ){
-        SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error: " + message, Exception::toCode("~LanguageNodes"));
+        SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error: " + message, Exception::toCode("~Language"));
         BaseNode* p = from;
         while (p && !p->isNodeType<ProgramNode>() )
             p = p->parent();
@@ -731,6 +731,7 @@ void BaseNode::visitComponentInstanceStatement(BaseNode *parent, const TSNode &n
     uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
+        assertError(parent, child, "Unexpected token.");
         if ( strcmp(ts_node_type(child), "component_instance") == 0 ){
             TSNode id = ts_node_child(child, 1);
             if (strcmp(ts_node_type(id), "identifier") != 0)
