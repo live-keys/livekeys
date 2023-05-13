@@ -1,4 +1,8 @@
-add_library(lvelementscompiler SHARED)
+if(BUILD_LVELEMENTSCOMPILER_STATIC)
+    add_library(lvelementscompiler STATIC)
+else()
+    add_library(lvelementscompiler SHARED)
+endif()
 
 set_target_properties(lvelementscompiler PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
@@ -31,6 +35,13 @@ target_include_directories(lvelementscompiler
 target_compile_definitions(lvelementscompiler PRIVATE LV_ELEMENTS_COMPILER_LIB)
 
 target_link_libraries(lvelementscompiler PRIVATE lvbase)
+
+if(BUILD_LVBASE_STATIC)
+    target_compile_definitions(lvelementscompiler PRIVATE LV_BASE_STATIC)
+endif()
+if(BUILD_LVELEMENTSCOMPILER_STATIC)
+    target_compile_definitions(lvelementscompiler PRIVATE LV_ELEMENTS_COMPILER_STATIC)
+endif()
 
 # Include 3rdparty library - treesitter
 

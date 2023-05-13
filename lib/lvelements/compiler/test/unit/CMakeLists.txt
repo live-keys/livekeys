@@ -23,8 +23,19 @@ target_sources(lvelementscompilertest PRIVATE
 
 target_link_libraries(lvelementscompilertest PRIVATE lvbase lvelementscompiler)
 
+if(MSVC)
+    set_target_properties(lvelementscompilertest PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/$<0:>) 
+endif()
 
-if (WIN32)
+
+if(BUILD_LVBASE_STATIC)
+    target_compile_definitions(lvelementscompilertest PRIVATE LV_BASE_STATIC)
+endif()
+if(BUILD_LVELEMENTSCOMPILER_STATIC)
+    target_compile_definitions(lvelementscompilertest PRIVATE LV_ELEMENTS_COMPILER_STATIC)
+endif()
+
+if (WIN32 AND (NOT BUILD_LVBASE_STATIC) AND (NOT BUILD_LVELEMENTSCOMPILER_STATIC))
     copy_file_list(LVELEMENTSCOMPILER_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll;${LIBRARY_DEPLOY_PATH}/lvelementscompiler.dll" ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 

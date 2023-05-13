@@ -1,4 +1,8 @@
-add_library(lvbase SHARED)
+if(BUILD_LVBASE_STATIC)
+    add_library(lvbase STATIC)
+else()
+    add_library(lvbase SHARED)
+endif()
 
 set_target_properties(lvbase PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${LIBRARY_DEPLOY_PATH}"
@@ -36,6 +40,10 @@ target_include_directories(lvbase
 )
 target_compile_definitions(lvbase PRIVATE LV_BASE_LIB)
 target_compile_features(lvbase PRIVATE cxx_std_17)
+
+if(BUILD_LVBASE_STATIC)
+    target_compile_definitions(lvbase PRIVATE LV_BASE_STATIC)
+endif()
 
 set(ENABLE_STACK_TRACE OFF)
 

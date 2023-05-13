@@ -25,8 +25,16 @@ target_sources(lvbasetest PRIVATE
 
 target_link_libraries(lvbasetest PRIVATE lvbase)
 
+if(BUILD_LVBASE_STATIC)
+    target_compile_definitions(lvbasetest PRIVATE LV_BASE_STATIC)
+endif()
 
-if (WIN32)
+
+if(MSVC)
+    set_target_properties(lvbasetest PROPERTIES RUNTIME_OUTPUT_DIRECTORY  ${CMAKE_CURRENT_BINARY_DIR}/$<0:>) 
+endif()
+
+if (WIN32 AND (NOT BUILD_LVBASE_STATIC))
     copy_file_list(LVBASE_TEST_COPY "${LIBRARY_DEPLOY_PATH}/lvbase.dll" ${CMAKE_CURRENT_BINARY_DIR})
 endif()
 
