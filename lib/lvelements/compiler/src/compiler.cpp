@@ -110,6 +110,7 @@ std::string Compiler::compileToJs(const std::string &path, const std::string &co
     section->to   = static_cast<int>(contents.size());
 
     auto ctx = m_d->createConversionContext();
+
     LanguageNodesToJs lnt;
     lnt.convert(node, contents, section->m_children, 0, ctx);
     delete ctx;
@@ -140,9 +141,10 @@ std::string Compiler::compileModuleFileToJs(const Module::Ptr &module, const std
     Utf8 outputPath = moduleFileBuildPath(module, path);
     Utf8 relativePathFromOutput;
 
-    auto outputPathSegments = outputPath.split("/");
+    std::string pathSeparator(1, Path::separator);
+    auto outputPathSegments = outputPath.split(pathSeparator.c_str());
     outputPathSegments.pop_back();
-    auto filePathSegments = Utf8(path).split("/");
+    auto filePathSegments = Utf8(path).split(pathSeparator.c_str());
     filePathSegments.pop_back();
 
     std::vector<Utf8> relativePathFromOutputSegments;
@@ -225,13 +227,13 @@ std::string Compiler::moduleFileBuildPath(const Module::Ptr &plugin, const std::
 
     std::string buildPath = createModuleBuildPath(plugin);
     std::string fileName = Path::name(path);
-    return buildPath + "/" + fileName + m_d->config.m_outputExtension;
+    return Path::join(buildPath, fileName + m_d->config.m_outputExtension);
 }
 
 std::string Compiler::moduleBuildPath(const Module::Ptr &module){
     std::string buildDir = Path::join( module->packagePath(), m_d->config.m_packageBuildPath);
     if ( !module->pathFromPackage().empty() ){
-        buildDir += "/" + module->pathFromPackage();
+        buildDir = Path::join(buildDir, module->pathFromPackage());
     }
     return buildDir;
 }

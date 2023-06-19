@@ -573,7 +573,8 @@ void PackageGraph::loadRunningPackageAndModule(const Package::Ptr &package, cons
     package->context()->modules[module->name()] = module;
 
     std::string uriFromPackage = module->pathFromPackage();
-    Utf8::replaceAll(uriFromPackage, "/", ".");
+    Utf8::replaceAll(uriFromPackage, "/",  ".");
+    Utf8::replaceAll(uriFromPackage, "\\", ".");
     module->context()->importId = uriFromPackage.empty() ? package->name() : package->name() + "." + uriFromPackage;
 }
 
