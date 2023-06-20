@@ -194,7 +194,7 @@ std::string Module::packagePath() const{
 std::string Module::pathFromPackage() const{
     std::string thisPath = path();
     Utf8::replaceAll(thisPath, packagePath(), "");
-    return (thisPath.empty()) ? thisPath : (thisPath[0] == '/' ? thisPath.substr(1) : thisPath);
+    return (thisPath.empty()) ? thisPath : (thisPath[0] == '/' || thisPath[0] == '\\' ? thisPath.substr(1) : thisPath);
 }
 
 /** Configured package path getter */
