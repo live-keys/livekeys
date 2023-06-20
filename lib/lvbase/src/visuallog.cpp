@@ -103,7 +103,11 @@ void vLoggerConsole(const std::string& message){
 #include <windows.h>
 void vLoggerConsole(const std::string& message)
 {
-   OutputDebugStringA(message.c_str());
+#ifdef WIN_LOG_TO_CONSOLE
+    printf("%s", message.c_str());
+#else
+    OutputDebugStringA(message.c_str());
+#endif
 }
 #endif
 
