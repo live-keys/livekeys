@@ -78,7 +78,9 @@ void LanguageNodesToJs::convertProgram(ProgramNode *node, const std::string &sou
             }
         }
 
-        *importsCompose << "import {" << importsNames << "} from \'" << importPath << "\'\n";
+        *importsCompose << "import " << (node->isObjectImport() ? "{" : "") <<
+                           importsNames <<
+                           (node->isObjectImport() ? "}" : "") << " from \'" << importPath << "\'\n";
     }
 
     if ( ctx && !ctx->baseComponentImportUri.empty() && !ctx->baseComponent.empty() ){

@@ -407,16 +407,23 @@ class JsImportNode : public BaseNode{
     friend class BaseNode;
     LANGUAGE_NODE_INFO(JsImportNode);
 public:
-    JsImportNode(const TSNode& node) : BaseNode(node, JsImportNode::nodeInfo()) , m_importPath(nullptr)
+    JsImportNode(const TSNode& node)
+        : BaseNode(node, JsImportNode::nodeInfo())
+        , m_importPath(nullptr)
+        , m_isObjectImport(false)
     {}
     virtual std::string toString(int indent = 0) const;
 
     const std::vector<IdentifierNode*>& importNames() const{ return m_importNames; }
     BaseNode* importPath() const{ return m_importPath; }
 
+    void setIsObjectImport(bool value){ m_isObjectImport = value; }
+    bool isObjectImport() const{ return m_isObjectImport; }
+
 private:
     std::vector<IdentifierNode*> m_importNames;
     BaseNode*                    m_importPath;
+    bool                         m_isObjectImport;
 };
 
 class ImportNode : public BaseNode{

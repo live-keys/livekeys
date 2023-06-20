@@ -509,6 +509,10 @@ void BaseNode::visitJsImport(BaseNode *parent, const TSNode &node){
             StringNode* path = new StringNode(child);
             importNode->m_importPath = path;
             importNode->addChild(path);
+        } else if ( strcmp(ts_node_type(child), "{") == 0 ){
+            importNode->setIsObjectImport(true);
+        } else if ( strcmp(ts_node_type(child), "}") == 0 ){
+            importNode->setIsObjectImport(true);
         }
     }
 }
