@@ -866,7 +866,10 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
         jssection->from = tfdn->body()->startByte();
         jssection->to   = tfdn->body()->endByte();
         convert(tfdn, source, jssection->m_children, indt + 2, ctx);
-        *compose << indent(indt + 1) << "this." << slice(source, tfdn->name()) << " = function(" << paramList << ")" << jssection << "\n";
+        *compose << indent(indt + 1) <<
+                    "this." << slice(source, tfdn->name()) << " = " <<
+                    (tfdn->isAsync() ? "async " : "") <<
+                    "function(" << paramList << ")" << jssection << "\n";
     }
 
     if (!node->nestedComponents().empty()){
