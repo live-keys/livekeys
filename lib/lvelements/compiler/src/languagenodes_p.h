@@ -178,6 +178,7 @@ private:
     static void visitReturnStatement(BaseNode* parent, const TSNode& node);
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
     static void visitObject(BaseNode* parent, const TSNode& node);
+    static void visitTryCatchBlock(BaseNode* parent, const TSNode& node);
 
     BaseNode*                  m_parent;
     TSNode                     m_node;
@@ -957,6 +958,23 @@ private:
     IdentifierNode* m_name;
 };
 
+
+class TryCatchBlockNode: public BaseNode{
+    friend class BaseNode;
+    LANGUAGE_NODE_INFO(TryCatchBlockNode);
+public:
+    TryCatchBlockNode(const TSNode& node);
+
+    JsBlockNode* tryBody() const{ return m_tryBody; }
+    JsBlockNode* catchBody() const{ return m_catchBody; }
+    JsBlockNode* finalizerBody() const{ return m_finalizerBody; }
+
+private:
+    JsBlockNode*   m_tryBody;
+    JsBlockNode*   m_catchBody;
+    JsBlockNode*   m_finalizerBody;
+    ParameterNode* m_catchParameter;
+};
 
 }} // namespace lv, el
 

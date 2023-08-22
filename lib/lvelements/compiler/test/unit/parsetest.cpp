@@ -152,5 +152,6 @@ TEST_CASE( "Parse Test", "[Parse]" ) {
     SECTION("Property Equals vs Property Binding"){ testFileParse("ParserTest47"); }
     SECTION("Property Notation"){ testFileParse("ParserTest48"); }
     SECTION("Anonymous Components"){ testFileParse("ParserTest49"); }
+    SECTION("Additional Declarations"){ testFileParse("ParserTest50"); }
 }
 
