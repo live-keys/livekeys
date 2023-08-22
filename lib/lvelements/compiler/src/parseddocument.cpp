@@ -15,6 +15,7 @@
 
 #include "parseddocument.h"
 #include "live/visuallog.h"
+#include "string.h"
 
 #include "tree_sitter/parser.h"
 #include "tree_sitter/api.h"

@@ -645,8 +645,13 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
             return moduleIt->second;
         }
 
-        if ( !Module::existsIn(modulePath) )
-            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'").format(modulePath), 7);
+        if ( !Module::existsIn(modulePath) ){
+            if ( requestingModule && requestingModule->context() ){
+                THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'. Requested from module \'%\'.").format(modulePath, requestingModule->context()->importId), 7);
+            } else {
+                THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'.").format(modulePath), 7);
+            }
+        }
 
         Module::Ptr module = Module::createFromPath(modulePath);
         module->assignContext(this);
