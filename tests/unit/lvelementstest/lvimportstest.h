@@ -30,7 +30,7 @@ private slots:
     void dashPackageImportTest();
     void rootPackageImportTest();
     void jsImportTest();
-
+    void componentMetaTest();
 
 private:
     std::string scriptPath(const std::string& scriptName);

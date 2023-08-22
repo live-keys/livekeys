@@ -66,6 +66,20 @@ component D{
 }
 
 
+////// live.package.json
+
+{
+    "name" : "test",
+    "version" : "1.0.0"
+}
+
+////// live.module.json
+
+{
+    "name" : "test",
+    "package": ".",
+    "modules": ["main"]
+}
 
 ////// main.lv
 

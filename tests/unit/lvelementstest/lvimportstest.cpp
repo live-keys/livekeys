@@ -318,3 +318,51 @@ void LvImportsTest::jsImportTest(){
     delete engine;
 }
 
+void LvImportsTest::componentMetaTest(){
+    Engine* engine = new Engine;
+    engine->setModuleFileType(Engine::Lv);
+
+    TestPack tp(testPath(), false);
+    tp.unpack(scriptPath("ImportTest16.lvep"));
+
+    engine->scope([engine, &tp](){
+        engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
+        Element* main = engine->runFile(tp.path() + "/main.lv");
+        QVERIFY(main != nullptr);
+
+        QVERIFY(main->get("A").isObject());
+        Object::Accessor oaa(main->get("A"));
+        QVERIFY(oaa.get(engine, "Meta").isObject());
+        Object::Accessor oaaMeta(oaa.get(engine, "Meta"));
+
+        QVERIFY(oaaMeta.get(engine, "sourceFileName").toStdString(engine) == "A.lv");
+        QVERIFY(oaaMeta.get(engine, "module").toStdString(engine) == "package1");
+
+        QVERIFY(main->get("B").isObject());
+        Object::Accessor oab(main->get("B"));
+        QVERIFY(oab.get(engine, "Meta").isObject());
+        Object::Accessor oabMeta(oab.get(engine, "Meta"));
+
+        QVERIFY(oabMeta.get(engine, "sourceFileName").toStdString(engine) == "BC.lv");
+        QVERIFY(oabMeta.get(engine, "module").toStdString(engine) == "package1.submodule");
+
+        QVERIFY(main->get("C").isObject());
+        Object::Accessor oac(main->get("C"));
+        QVERIFY(oac.get(engine, "Meta").isObject());
+        Object::Accessor oacMeta(oab.get(engine, "Meta"));
+
+        QVERIFY(oacMeta.get(engine, "sourceFileName").toStdString(engine) == "BC.lv");
+        QVERIFY(oacMeta.get(engine, "module").toStdString(engine) == "package1.submodule");
+
+        QVERIFY(main->get("M").isObject());
+        Object::Accessor oam(main->get("M"));
+        QVERIFY(oam.get(engine, "Meta").isObject());
+        Object::Accessor oamMeta(oam.get(engine, "Meta"));
+
+        QVERIFY(oamMeta.get(engine, "sourceFileName").toStdString(engine) == "M.lv");
+        QVERIFY(oamMeta.get(engine, "module").toStdString(engine) == "test.submodule");
+    });
+
+    delete engine;
+}
+

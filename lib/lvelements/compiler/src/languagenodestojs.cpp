@@ -553,6 +553,15 @@ void LanguageNodesToJs::convertComponentDeclaration(ComponentDeclarationNode *no
         }
     }
 
+    if ( ctx->outputComponentMeta ){
+        *compose << indent(indentValue)  << componentName << ".Meta = {\n";
+        *compose << indent(indentValue + 1) << "get sourceFileName(){ return \'" << Path::name(ctx->componentPath) << "\' },\n";
+        if ( !ctx->currentImportUri.empty() ){
+            *compose << indent(indentValue + 1) << "get module(){ return \'" << ctx->currentImportUri << "\' }\n";
+        }
+        *compose << indent(indentValue) << "}";
+    }
+
     sections.push_back(compose);
 }
 

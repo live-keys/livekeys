@@ -57,7 +57,7 @@ public:
 public:
     ~ElementsModule();
 
-    static ElementsModule::Ptr create(Module::Ptr module, Engine* engine);
+    static ElementsModule::Ptr create(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
     static ElementsModule::Ptr create(Module::Ptr module, Compiler::Ptr compiler);
 
     static ModuleFile *addModuleFile(ElementsModule::Ptr& epl, const std::string& name);
@@ -80,7 +80,7 @@ public:
 private:
     void initializeLibraries(const std::list<std::string>& libs);
 
-    static ElementsModule::Ptr create(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
+    static ElementsModule::Ptr createImpl(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
     ElementsModule(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
 
     ElementsModulePrivate* m_d;
