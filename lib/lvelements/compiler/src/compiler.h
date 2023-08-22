@@ -52,6 +52,7 @@ public:
         );
 
         bool hasCustomBaseComponent();
+        bool componentMetaInfoEnabled();
         void addImplicitType(const std::string& typeName);
         void addImportPath(const std::string& path);
         void setBaseComponent(const std::string& name, const std::string& importUri);
@@ -71,6 +72,7 @@ public:
         std::string            m_importLocalPath;
         std::string            m_packageBuildPath;
         bool                   m_enableJsImports;
+        bool                   m_enableComponentMetaInfo;
         bool                   m_allowUnresolved;
     };
 

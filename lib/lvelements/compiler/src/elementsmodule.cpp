@@ -19,11 +19,7 @@
 #include "live/exception.h"
 #include "live/fileio.h"
 #include "live/path.h"
-
-#ifdef BUILD_ELEMENTS_ENGINE
-#include "live/elements/engine.h"
-#include "live/elements/modulelibrary.h"
-#endif
+#include "live/visuallog.h"
 
 namespace lv{ namespace el{
 
@@ -60,28 +56,28 @@ ElementsModule::ElementsModule(Module::Ptr plugin, Compiler::Ptr compiler, Engin
 
 ElementsModule::~ElementsModule(){
 #ifdef BUILD_ELEMENTS_ENGINE
-    for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
-        delete *it;
-    }
+//    for ( auto it = m_d->libraries.begin(); it != m_d->libraries.end(); ++it ){
+//        delete *it;
+//    }
 #endif
     delete m_d;
 }
 
 #ifdef BUILD_ELEMENTS_ENGINE
-ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Engine *engine){
-    return create(module, engine->compiler(), engine);
+ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr compiler, Engine *engine){
+    return createImpl(module, compiler, engine);
 }
 #else
-ElementsModule::Ptr ElementsModule::create(Module::Ptr, Engine *){
-    THROW_EXCEPTION(lv::Exception, "This build does not support the engine as a module loader.", lv::Exception::toCode("~Build"));
+ElementsModule::Ptr ElementsModule::create(Module::Ptr, Compiler::Ptr, Engine *){
+    THROW_EXCEPTION(lv::Exception, "This build does not support the engine. Rebuild with BUILD_ELEMENTS_ENGINE flag on.", lv::Exception::toCode("~Build"));
 }
 #endif
 
 ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr compiler){
-    return create(module, compiler, nullptr);
+    return createImpl(module, compiler, nullptr);
 }
 
-ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr compiler, Engine *engine){
+ElementsModule::Ptr ElementsModule::createImpl(Module::Ptr module, Compiler::Ptr compiler, Engine *engine){
     ElementsModule::Ptr epl(new ElementsModule(module, compiler, engine));
 
     for ( auto it = module->fileModules().begin(); it != module->fileModules().end(); ++it ){
@@ -96,11 +92,11 @@ ElementsModule::Ptr ElementsModule::create(Module::Ptr module, Compiler::Ptr com
 
 void ElementsModule::initializeLibraries(const std::list<std::string> &libs){
 #ifdef BUILD_ELEMENTS_ENGINE
-    for ( auto it = libs.begin(); it != libs.end(); ++it ){
-        ModuleLibrary* lib = ModuleLibrary::load(m_d->engine, *it);
-        //TODO: Load library exports (instances and types)
-        m_d->libraries.push_back(lib);
-    }
+//    for ( auto it = libs.begin(); it != libs.end(); ++it ){
+//        ModuleLibrary* lib = ModuleLibrary::load(m_d->engine, *it);
+//        //TODO: Load library exports (instances and types)
+//        m_d->libraries.push_back(lib);
+//    }
 #else
     if ( !libs.empty() )
         THROW_EXCEPTION(lv::Exception, "Module contains libraries that cannot be loaded in this build", lv::Exception::toCode("~Build"));
@@ -148,8 +144,12 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             if ( epl->module()->context()->package == nullptr ){
                 THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
             }
+            if ( epl->module()->context()->package->name() == "." ){
+                THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
+            }
 
             std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
+
             ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
             if ( !ep ){
                 THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));

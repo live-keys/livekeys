@@ -454,6 +454,8 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitReturnStatement(parent, node);
     } else if ( strcmp(ts_node_type(node), "object") == 0 ){
         visitObject(parent, node);
+    } else if ( strcmp(ts_node_type(node), "try_statement") == 0 ){
+        visitTryCatchBlock(parent, node);
     } else if ( strcmp(ts_node_type(node), "ERROR") == 0 ){
         SyntaxException se = CREATE_EXCEPTION(SyntaxException, "Syntax error.", Exception::toCode("~LanguageNodes"));
         BaseNode* p = parent;
@@ -1620,6 +1622,41 @@ void BaseNode::visitObject(BaseNode *parent, const TSNode &node)
     visitChildren(onode, node);
 }
 
+void BaseNode::visitTryCatchBlock(BaseNode *parent, const TSNode &node){
+    TryCatchBlockNode* enode = new TryCatchBlockNode(node);
+    parent->addChild(enode);
+
+    uint32_t count = ts_node_child_count(node);
+    for ( uint32_t i = 0; i < count; ++i ){
+        TSNode child = ts_node_child(node, i);
+        if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
+            enode->m_tryBody = new JsBlockNode(child);
+            enode->addChild(enode->m_tryBody);
+            visitChildren(enode->m_tryBody, child);
+        } else if ( strcmp(ts_node_type(child), "catch_clause") == 0 ){
+            TSNode parameterNode = BaseNode::nodeChildByFieldName(child, "parameter");
+            TSNode parameterTypeNode = BaseNode::nodeChildByFieldName(child, "type");
+            if ( !ts_node_is_null(parameterNode) && strcmp(ts_node_type(parameterNode), "identifier") == 0 ){
+                auto typeNode = !ts_node_is_null(parameterTypeNode) ? new TypeNode(parameterTypeNode) : nullptr;
+                enode->m_catchParameter = new ParameterNode(parameterNode, new IdentifierNode(parameterNode), typeNode);
+            }
+            TSNode catchBody = BaseNode::nodeChildByFieldName(child, "body");
+            if ( !ts_node_is_null(catchBody) ){
+                enode->m_catchBody = new JsBlockNode(catchBody);
+                enode->addChild(enode->m_catchBody);
+                if ( enode->m_catchParameter ){
+                    addToDeclarations(enode->m_catchBody, enode->m_catchParameter->identifier());
+                }
+                visitChildren(enode->m_catchBody, catchBody);
+            }
+        } else if ( strcmp(ts_node_type(child), "finally_clause") == 0 ){
+            enode->m_finalizerBody = new JsBlockNode(child);
+            enode->addChild(enode->m_finalizerBody);
+            visitChildren(enode->m_finalizerBody, child);
+        }
+    }
+}
+
 std::string JsImportNode::toString(int indent) const{
     std::string result;
     if ( indent > 0 )
@@ -2211,6 +2248,16 @@ MethodDefinitionNode::MethodDefinitionNode(const TSNode &node)
     , m_name(nullptr)
     , m_parameters(nullptr)
     , m_body(nullptr)
+{
+}
+
+
+TryCatchBlockNode::TryCatchBlockNode(const TSNode &node)
+    : BaseNode(node, TryCatchBlockNode::nodeInfo())
+    , m_tryBody(nullptr)
+    , m_catchBody(nullptr)
+    , m_finalizerBody(nullptr)
+    , m_catchParameter(nullptr)
 {
 }
 

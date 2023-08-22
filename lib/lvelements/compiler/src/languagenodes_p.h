@@ -66,7 +66,7 @@ class BaseNode{
 public:
     class ConversionContext{
     public:
-        ConversionContext() : jsImportsEnabled(true), allowUnresolved(true){}
+        ConversionContext() : jsImportsEnabled(true), allowUnresolved(true), outputComponentMeta(false){}
 
         std::string baseComponent;
         std::string baseComponentImportUri;
@@ -75,6 +75,8 @@ public:
         std::list<std::string> implicitTypes;
         std::string componentPath;
         std::string relativePathFromBuild;
+        std::string currentImportUri;
+        bool        outputComponentMeta;
 
         static std::string baseComponentName(ConversionContext* ctx);
         static std::string baseComponentImport(ConversionContext* ctx);
@@ -176,6 +178,7 @@ private:
     static void visitReturnStatement(BaseNode* parent, const TSNode& node);
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
     static void visitObject(BaseNode* parent, const TSNode& node);
+    static void visitTryCatchBlock(BaseNode* parent, const TSNode& node);
 
     BaseNode*                  m_parent;
     TSNode                     m_node;
@@ -955,6 +958,23 @@ private:
     IdentifierNode* m_name;
 };
 
+
+class TryCatchBlockNode: public BaseNode{
+    friend class BaseNode;
+    LANGUAGE_NODE_INFO(TryCatchBlockNode);
+public:
+    TryCatchBlockNode(const TSNode& node);
+
+    JsBlockNode* tryBody() const{ return m_tryBody; }
+    JsBlockNode* catchBody() const{ return m_catchBody; }
+    JsBlockNode* finalizerBody() const{ return m_finalizerBody; }
+
+private:
+    JsBlockNode*   m_tryBody;
+    JsBlockNode*   m_catchBody;
+    JsBlockNode*   m_finalizerBody;
+    ParameterNode* m_catchParameter;
+};
 
 }} // namespace lv, el
 

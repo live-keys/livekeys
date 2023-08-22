@@ -1,0 +1,97 @@
+// This file creates a packages folder to test imports
+
+
+////// packages/package1/live.module.json
+
+{
+    "name" : "package1",
+    "package": ".",
+    "modules": ["A"]
+}
+
+////// packages/package1/live.package.json
+
+{
+    "name" : "package1",
+    "version" : "1.0.0"
+}
+
+
+////// packages/package1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// packages/package1/submodule/BC.lv
+
+component B < Element{
+    fn toString(){
+        return "class[B]"
+    }
+}
+
+component C < Element{
+    fn toString(){
+        return "class[C]"
+    }
+}
+
+////// packages/package1/submodule/live.module.json
+
+{
+    "name" : "submodule",
+    "package": "..",
+    "modules": ["BC"]
+}
+
+////// submodule/live.module.json
+
+{
+    "name" : "submodule",
+    "package": "..",
+    "modules": ["M"]
+}
+
+////// submodule/M.lv
+
+component M < Element{
+    fn toString(){
+        return "class[M]"
+    }
+}
+
+////// live.package.json
+
+{
+    "name" : "test",
+    "version" : "1.0.0"
+}
+
+////// live.module.json
+
+{
+    "name" : "test",
+    "package": ".",
+    "modules": ["main"]
+}
+
+////// main.lv
+
+import package1
+import package1.submodule
+
+import .submodule
+
+instance default Element{
+    string a : {
+        return (new A()).toString()
+    }
+    Object A: { return A }
+    Object B: { return B }
+    Object C: { return C }
+    Object M: { return M }
+}
+

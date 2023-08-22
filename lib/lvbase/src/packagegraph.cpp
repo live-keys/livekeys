@@ -550,11 +550,11 @@ PackageGraph *&PackageGraph::internalsContextOwner(){
     return pg;
 }
 
-Module::Ptr PackageGraph::createRunningModule(const std::string &pluginPath){
-    Module::Ptr module = Module::createFromNode(pluginPath, pluginPath + "/live.module.json", {
+Module::Ptr PackageGraph::createRunningModule(const std::string &modulePath){
+    Module::Ptr module = Module::createFromNode(modulePath, modulePath + "/live.module.json", {
         {"name", "main"}, {"package", "."}
     });
-    Package::Ptr package = Package::createFromNode(pluginPath, pluginPath + "/live.module.json", {
+    Package::Ptr package = Package::createFromNode(modulePath, modulePath + "/live.package.json", {
         {"name", "."}, {"version", "0.1.0"}
     });
 
@@ -573,6 +573,7 @@ void PackageGraph::loadRunningPackageAndModule(const Package::Ptr &package, cons
     package->context()->modules[module->name()] = module;
 
     std::string uriFromPackage = module->pathFromPackage();
+
     Utf8::replaceAll(uriFromPackage, "/",  ".");
     Utf8::replaceAll(uriFromPackage, "\\", ".");
     module->context()->importId = uriFromPackage.empty() ? package->name() : package->name() + "." + uriFromPackage;
@@ -638,7 +639,6 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
             modulePath += "/" + importSegments[i];
             importId += "." + importSegments[i];
         }
-
         auto moduleIt = foundPackage->context()->modules.find(importId);
         if ( moduleIt != foundPackage->context()->modules.end() ){
             addDependency(requestingModule, moduleIt->second);
