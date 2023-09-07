@@ -19,6 +19,8 @@
 #include "tree_sitter/parser.h"
 #include "tree_sitter/api.h"
 
+#include <cstring>
+
 namespace lv{ namespace el{
 
 std::string ParsedDocument::slice(const std::string &source, TSNode node)
