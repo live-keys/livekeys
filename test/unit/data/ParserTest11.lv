@@ -1,0 +1,5 @@
+import package
+
+instance default T{
+    a.b.c: 20
+}
