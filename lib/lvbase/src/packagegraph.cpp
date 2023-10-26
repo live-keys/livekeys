@@ -646,7 +646,7 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
         }
 
         if ( !Module::existsIn(modulePath) )
-            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'").format(modulePath), 7);
+            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'").format(modulePath), Exception::toCode("~module"));
 
         Module::Ptr module = Module::createFromPath(modulePath);
         module->assignContext(this);

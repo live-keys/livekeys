@@ -356,12 +356,16 @@ std::vector<std::shared_ptr<ElementsModule> > Compiler::compilePackage(Compiler:
 std::shared_ptr<ElementsModule> Compiler::compileImportedModule(Compiler::Ptr compiler, const std::string &importKey, const Module::Ptr& requestingModule, Engine *engine){
     auto foundEp = compiler->m_d->loadedModules.find(importKey);
     if ( foundEp == compiler->m_d->loadedModules.end() ){
-        Module::Ptr module = compiler->m_d->packageGraph->loadModule(importKey, requestingModule);
-        if ( module  ){
-            auto ep = engine ? ElementsModule::create(module , compiler, engine) : ElementsModule::create(module , compiler);
-            compiler->m_d->loadedModules[importKey] = ep;
-            compiler->m_d->loadedModulesByPath[ep->module()->path()] = ep;
-            return ep;
+        try{
+            Module::Ptr module = compiler->m_d->packageGraph->loadModule(importKey, requestingModule);
+            if ( module  ){
+                auto ep = engine ? ElementsModule::create(module , compiler, engine) : ElementsModule::create(module , compiler);
+                compiler->m_d->loadedModules[importKey] = ep;
+                compiler->m_d->loadedModulesByPath[ep->module()->path()] = ep;
+                return ep;
+            }
+        } catch ( lv::Exception& e ){
+            THROW_EXCEPTION(lv::Exception, e.message(), lv::Exception::toCode("Import"));
         }
     } else {
         return foundEp->second;

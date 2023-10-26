@@ -86,26 +86,31 @@ Module::Ptr Module::createFromPath(const std::string &path){
         THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: %").format(path), 1);
     }
 
-    instream.seekg(0, std::ios::end);
-    size_t size = static_cast<size_t>(instream.tellg());
-    std::string buffer(size, ' ');
-    instream.seekg(0);
-    instream.read(&buffer[0], static_cast<std::streamsize>(size));
+    try{
+        instream.seekg(0, std::ios::end);
+        size_t size = static_cast<size_t>(instream.tellg());
+        std::string buffer(size, ' ');
+        instream.seekg(0);
+        instream.read(&buffer[0], static_cast<std::streamsize>(size));
 
-    MLNode m;
-    ml::fromJson(buffer, m);
+        MLNode m;
+        ml::fromJson(buffer, m);
 
-    return createFromNode(moduleDirPath, modulePath, m);
+        return createFromNode(moduleDirPath, modulePath, m);
+    } catch ( lv::Exception& e ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.message()), lv::Exception::toCode("parse"));
+    } catch ( std::exception& e ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.what()), lv::Exception::toCode("parse"));
+    }
+    return nullptr;
 }
 
 /** Creates plugin from a given MLNode*/
 Module::Ptr Module::createFromNode(const std::string &path, const std::string &filePath, const MLNode &m){
-
-    if ( !m.hasKey("name") || !m.hasKey("package") ){
-        THROW_EXCEPTION(lv::Exception, "Failed to read plugin file at: " + path + ". Plugin requries 'name' and 'package' info.", Exception::toCode("~Keys"));
-    }
-
-    std::string package = m["package"].asString();
+    std::string name = m.hasKey("name") ? m["name"].asString() : Path::name(path);
+    std::string package = m.hasKey("package") ? m["package"].asString() : Module::findPackageFrom(path);
+    if ( package.empty() || !Path::exists(package))
+        THROW_EXCEPTION(lv::Exception, Utf8("Package not found for module: \'%\'.").format(filePath), Exception::toCode("~Keys"));
 
     if ( Path::isRelative(package) ){
         package = Path::resolve(Path::join(path, package));
@@ -115,7 +120,7 @@ Module::Ptr Module::createFromNode(const std::string &path, const std::string &f
         package = Path::join(package, Package::fileName);
     }
 
-    Module::Ptr pt(new Module(path, filePath, m["name"].asString(), package));
+    Module::Ptr pt(new Module(path, filePath, name, package));
 
     if ( m.hasKey("palettes") ){
         MLNode::ObjectType pal = m["palettes"].asObject();
@@ -255,6 +260,20 @@ Module::Module(const std::string &path, const std::string &filePath, const std::
     m_d->name     = name;
     m_d->package  = package;
     m_d->context  = nullptr;
+}
+
+std::string Module::findPackageFrom(const std::string& path){
+    auto current = path;
+    while ( Path::exists(current) ){
+        if ( Package::existsIn(current) ){
+            return current;
+        }
+        if ( Path::rootPath(current) == current ){
+            return "";
+        }
+        current = Path::parent(current);
+    }
+    return "";
 }
 
 void Module::addPalette(const std::string &type, const std::string &path){

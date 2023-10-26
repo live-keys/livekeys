@@ -84,7 +84,6 @@ private:
     ElementsModule(Module::Ptr module, Compiler::Ptr compiler, Engine* engine);
 
     ElementsModulePrivate* m_d;
-
 };
 
 }} // namespace lv, el

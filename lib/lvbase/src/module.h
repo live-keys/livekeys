@@ -71,6 +71,7 @@ public:
 private:
     Module(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);
 
+    static std::string findPackageFrom(const std::string& path);
     void addPalette(const std::string& type, const std::string& path);
 
     ModulePrivate* m_d;

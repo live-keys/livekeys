@@ -136,33 +136,50 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
         epl->m_d->exports.insert(std::make_pair(exp.name, exp));
     }
 
+    std::string currentUriName = epl->module()->context()->importId.data() + "." + name;
+
     auto mfImports = mf->imports();
     for ( auto it = mfImports.begin(); it != mfImports.end(); ++it ){
+
         ModuleFile::Import& imp = *it;
 
         if ( imp.isRelative ){
             if ( epl->module()->context()->package == nullptr ){
-                THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
+                THROW_EXCEPTION(lv::Exception, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
             }
             if ( epl->module()->context()->package->name() == "." ){
-                THROW_EXCEPTION(lv::Exception, "Cannot import relative path withouth package: " + imp.uri, Exception::toCode("~Import"));
+                THROW_EXCEPTION(lv::Exception, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
             }
 
             std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
 
-            ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
-            if ( !ep ){
-                THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
-            }
+            try{
+                ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
+                if ( !ep ){
+                    THROW_EXCEPTION(lv::Exception, Utf8("Failed to find module \'%\' imported in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
+                }
+                mf->resolveImport(imp.uri, ep);
 
-            mf->resolveImport(imp.uri, ep);
+            } catch ( lv::Exception& e ){
+                if ( e.code() == lv::Exception::toCode("import") )
+                    THROW_EXCEPTION(lv::Exception, Utf8("%\n - Imported \'%\' from \'%\'").format(e.message(), importUri, currentUriName), e.code());
+                else
+                    throw e;
+            }
 
         } else {
-            ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
-            if ( !ep ){
-                THROW_EXCEPTION(lv::Exception, "Failed to find module: " + imp.uri, Exception::toCode("~Import"));
+            try{
+                ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
+                if ( !ep ){
+                    THROW_EXCEPTION(lv::Exception, Utf8("Failed to find module \'%\' imported in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
+                }
+                mf->resolveImport(imp.uri, ep);
+            } catch ( lv::Exception& e ){
+                if ( e.code() == lv::Exception::toCode("import") )
+                    THROW_EXCEPTION(lv::Exception, Utf8("%\n - Imported \'%\' from \'%\'").format(e.message(), imp.uri, currentUriName), e.code());
+                else
+                    throw e;
             }
-            mf->resolveImport(imp.uri, ep);
         }
     }
     return mf;
@@ -208,7 +225,7 @@ void ElementsModule::compile(){
         auto mfImports = mf->imports();
         for ( auto mit = mfImports.begin(); mit != mfImports.end(); ++mit ){
             if ( mit->module == nullptr ){
-                THROW_EXCEPTION(lv::Exception, "Import not resolved: " + mit->uri, lv::Exception::toCode("~Import"));
+                THROW_EXCEPTION(lv::Exception, Utf8("Import not resolved \'%\' when compiling \'%\'").format(mit->uri, mf->filePath()), lv::Exception::toCode("~Import"));
             }
             mit->module->compile();
         }

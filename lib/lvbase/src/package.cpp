@@ -95,16 +95,24 @@ Package::Ptr Package::createFromPath(const std::string &path){
         THROW_EXCEPTION(lv::Exception, Utf8("Cannot open package file: %. The file might not exist or the path might be wrong.").format(path), 1);
     }
 
-    instream.seekg(0, std::ios::end);
-    size_t size = static_cast<size_t>(instream.tellg());
-    std::string buffer(size, ' ');
-    instream.seekg(0);
-    instream.read(&buffer[0], size);
+    try{
+        instream.seekg(0, std::ios::end);
+        size_t size = static_cast<size_t>(instream.tellg());
+        std::string buffer(size, ' ');
+        instream.seekg(0);
+        instream.read(&buffer[0], size);
 
-    MLNode m;
-    ml::fromJson(buffer, m);
+        MLNode m;
+        ml::fromJson(buffer, m);
+        return createFromNode(packageDirPath, packagePath, m);
 
-    return createFromNode(packageDirPath, packagePath, m);
+    } catch ( lv::Exception& e ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(packagePath, e.message()), lv::Exception::toCode("parse"));
+    } catch ( std::exception& e ){
+        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(packagePath, e.what()), lv::Exception::toCode("parse"));
+    }
+
+    return nullptr;
 }
 
 /** This function actually creates the path pointer that is returned to the above function */
