@@ -122,7 +122,7 @@ void recurseSerialize(const MLNode& n, rapidjson::Writer<rapidjson::StringBuffer
     }
     case MLNode::Bytes:{
         ByteBuffer bb = ByteBuffer::decodeBase64(n.asBytes(), true);
-        writer.String(bb.data(), bb.size());
+        writer.String(bb.data(), static_cast<rapidjson::SizeType>(bb.size()));
         break;
     }
     case MLNode::String:{

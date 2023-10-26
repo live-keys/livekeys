@@ -126,7 +126,7 @@ std::string Path::joinExisting(const std::string &p1, const std::string &p2){
 std::vector<std::string> Path::split(const std::string p){
     std::vector<std::string> result;
     fs::path path(p);
-    for( auto& part : path )
+    for( auto part : path )
         result.push_back(part.filename().string());
     return result;
 }
