@@ -42,6 +42,7 @@ public:
     {
         BaseNode::ConversionContext* ctx = new BaseNode::ConversionContext;
         ctx->implicitTypes = config.m_implicitTypes;
+        ctx->outputTypes = config.m_outputTypes;
         if ( config.hasCustomBaseComponent() ){
             ctx->baseComponent = config.m_baseComponent;
             ctx->baseComponentImportUri = config.m_baseComponentUri;

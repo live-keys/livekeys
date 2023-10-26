@@ -19,6 +19,7 @@
 #include <vector>
 #include "languageparser.h"
 #include "live/utf8.h"
+#include "live/visuallog.h"
 
 namespace lv{ namespace el{
 
@@ -122,10 +123,22 @@ inline void JSSection::flatten(const std::string &source, std::vector<std::strin
     for ( auto it = m_children.begin(); it != m_children.end(); ++it ){
         ElementsInsertion* ei = *it;
         if ( ei->from > lastSegmentStart ){
-            std::string midJs = source.substr(lastSegmentStart, ei->from - lastSegmentStart);;
+            std::string midJs = source.substr(lastSegmentStart, ei->from - lastSegmentStart);
+            bool newLineFollows = false;
+            for ( auto chIt = midJs.rbegin(); chIt != midJs.rend(); ++chIt ){
+                if ( *chIt == '\n' ){
+                    newLineFollows = true;
+                    break;
+                }
+                if ( !Utf8::isSpace(*chIt) )
+                    break;
+            }
             Utf8::trim(midJs);
-            if ( midJs.size() > 0 )
+            if ( midJs.size() > 0 ){
+                if ( newLineFollows )
+                    midJs += "\n";
                 parts.push_back(midJs);
+            }
         }
         ei->flatten(source, parts);
         lastSegmentStart = ei->to;

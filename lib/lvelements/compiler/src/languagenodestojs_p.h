@@ -12,6 +12,8 @@ public:
 
     static std::string slice(const std::string& source, uint32_t start, uint32_t end);
     static std::string slice(const std::string& source, BaseNode* node);
+    static bool newLineFollows(const std::string& source, size_t startPosition);
+    static bool newLinePrecedes(const std::string& source, size_t endPosition);
 
     void convert(
         BaseNode* node,
@@ -56,6 +58,22 @@ public:
 
     void convertNewTrippleTaggedComponentExpression(
         NewTrippleTaggedComponentExpressionNode* node,
+        const std::string &source,
+        std::vector<ElementsInsertion *> &sections,
+        int indentValue,
+        BaseNode::ConversionContext *ctx
+    );
+
+    void convertVariableDeclaration(
+        VariableDeclarationNode* node,
+        const std::string &source,
+        std::vector<ElementsInsertion *> &sections,
+        int indentValue,
+        BaseNode::ConversionContext *ctx
+    );
+
+    void convertFunctionDeclaration(
+        FunctionDeclarationNode* node,
         const std::string &source,
         std::vector<ElementsInsertion *> &sections,
         int indentValue,

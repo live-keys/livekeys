@@ -66,7 +66,7 @@ class BaseNode{
 public:
     class ConversionContext{
     public:
-        ConversionContext() : jsImportsEnabled(true), allowUnresolved(true), outputComponentMeta(false){}
+        ConversionContext() : jsImportsEnabled(true), allowUnresolved(true), outputComponentMeta(false), outputTypes(false){}
 
         std::string baseComponent;
         std::string baseComponentImportUri;
@@ -77,6 +77,7 @@ public:
         std::string relativePathFromBuild;
         std::string currentImportUri;
         bool        outputComponentMeta;
+        bool        outputTypes;
 
         static std::string baseComponentName(ConversionContext* ctx);
         static std::string baseComponentImport(ConversionContext* ctx);
@@ -179,6 +180,8 @@ private:
     static void visitArrowFunction(BaseNode* parent, const TSNode& node);
     static void visitObject(BaseNode* parent, const TSNode& node);
     static void visitTryCatchBlock(BaseNode* parent, const TSNode& node);
+
+    static void visitDeclarationForm(BaseNode * parent, const TSNode & node, int form);
 
     BaseNode*                  m_parent;
     TSNode                     m_node;
@@ -318,19 +321,50 @@ class VariableDeclaratorNode : public BaseNode{
     friend class BaseNode;
     LANGUAGE_NODE_INFO(VariableDeclaratorNode);
 public:
-    VariableDeclaratorNode(const TSNode& node) : BaseNode(node, VariableDeclaratorNode::nodeInfo()){}
+    VariableDeclaratorNode(const TSNode& node) : BaseNode(node, VariableDeclaratorNode::nodeInfo()), m_name(nullptr), m_type(nullptr), m_value(nullptr){}
+
+    IdentifierNode* name() const { return m_name; }
+    TypeNode* type() const { return m_type; }
+    BaseNode* value() const { return m_value; }
+
+private:
+    IdentifierNode* m_name;
+    TypeNode*       m_type;
+    ExpressionNode*       m_value;
 };
 
 class VariableDeclarationNode : public BaseNode{
     friend class BaseNode;
     LANGUAGE_NODE_INFO(VariableDeclarationNode);
 public:
-    VariableDeclarationNode(const TSNode& node) : BaseNode(node, VariableDeclarationNode::nodeInfo()), m_hasSemicolon(false){}
+    VariableDeclarationNode(const TSNode& node) : BaseNode(node, VariableDeclarationNode::nodeInfo()), m_hasSemicolon(false), m_declarationForm(Var) {}
     virtual std::string toString(int indent = 0) const;
+
+    enum DeclarationForm {
+        Var = 0,
+        Let,
+        Const
+    };
+    const DeclarationForm declarationForm() const {
+        return m_declarationForm;
+    }
+
+    const std::string declarationFormString() const {
+        switch(m_declarationForm) {
+            case Var: return "var";
+            case Let: return "let";
+            case Const: return "const";
+            default: return "";
+        }
+    }
+
+    const std::vector<VariableDeclaratorNode*>& declarators() const { return m_declarators; }
+    bool hasSemicolon() const{ return m_hasSemicolon; }
 
 private:
     std::vector<VariableDeclaratorNode*> m_declarators;
     bool m_hasSemicolon;
+    DeclarationForm m_declarationForm;
 };
 
 

@@ -58,7 +58,7 @@ public:
         void setBaseComponent(const std::string& name, const std::string& importUri);
         void initialize(const MLNode& config);
         void allowUnresolvedTypes(bool allow){ m_allowUnresolved = allow; }
-
+        void outputTypes(bool outputTypes) { m_outputTypes = outputTypes; }
     private:
         bool                   m_fileOutput;
         bool                   m_fileOutputOnlyOnModified;
@@ -74,6 +74,7 @@ public:
         bool                   m_enableJsImports;
         bool                   m_enableComponentMetaInfo;
         bool                   m_allowUnresolved;
+        bool                   m_outputTypes;
     };
 
 public:
