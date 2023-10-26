@@ -1,5 +1,0 @@
-instance b B{
-    fn completed(){
-        this.a = A{}
-    }
-}

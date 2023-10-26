@@ -1,8 +1,0 @@
-
-component C{
-    int c1: 100
-    int c2
-    int c3: 300
-    int c4
-    var c5: { return 10 }
-}

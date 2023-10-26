@@ -1,9 +1,0 @@
-component A{
-    var x : {
-        var d = Element{
-            id: did
-            int y: 10
-        }
-        return d.y
-    }
-}

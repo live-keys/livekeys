@@ -1,8 +1,0 @@
-component X{
-    int a1 : 100
-    int a2 = 200
-    int a3 : this.a1
-    int a4 = this.a2
-    b1 : this.a1
-    b2 = this.a2
-}

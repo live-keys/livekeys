@@ -1,4 +1,0 @@
-
-instance el Element{}
-instance el2 Element{}
-var el3 = Element{}

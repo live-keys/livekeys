@@ -1,7 +1,0 @@
-component A < Element{
-    default children: []
-
-    Element{}
-    Element{}
-}
-

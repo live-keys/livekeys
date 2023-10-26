@@ -1,5 +1,0 @@
-import package
-
-instance default T {
-    a: 20
-}

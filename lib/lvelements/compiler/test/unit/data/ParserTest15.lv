@@ -1,9 +1,0 @@
-component default {
-    int c: {
-        var newElement = Element {
-            int y: 20
-        }
-        return newElement.y
-    }
-}
-

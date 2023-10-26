@@ -1,7 +1,0 @@
-component A {
-    var x : this.y ? (function(x){
-            return x + 20
-        })(100) : 15
-    
-    bool y: true
-}
