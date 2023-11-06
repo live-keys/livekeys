@@ -64,7 +64,12 @@ void LanguageNodesToJs::convert(BaseNode* node, const std::string &source, std::
         convertVariableDeclaration(node->as<VariableDeclarationNode>(), source, sections, indentValue, ctx);
     } else if ( node->isNodeType<FunctionDeclarationNode>() ){
         convertFunctionDeclaration(node->as<FunctionDeclarationNode>(), source, sections, indentValue, ctx);
-    } else {
+    } else if (node->isNodeType<ArrowFunctionNode>()) {
+        convertArrowFunction(node->as<ArrowFunctionNode>(), source, sections, indentValue, ctx);
+    } else if (node->isNodeType<FunctionNode>()) {
+        convertFunction(node->as<FunctionNode>(), source, sections, indentValue, ctx);
+    }
+    else {
         for ( BaseNode* child : node->children() ){
             convert(child, source, sections, indentValue, ctx);
         }
@@ -734,14 +739,14 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
     }
 
     for (size_t i = 0; i < node->assignments().size(); ++i){
-        if ( node->assignments()[i]->property().size() == 0 )
+        const auto assignment = node->assignments()[i];
+        if ( assignment->property().size() == 0 )
             continue;
 
         std::string bindingsInJs = node->assignments()[i]->bindingIdentifiersToJs(source);
-
-        if ( bindingsInJs.length() > 0 ){ // has bindings
-            if (node->assignments()[i]->expression() ){
-                auto& property = node->assignments()[i]->property();
+        if ( bindingsInJs.length() > 0 && assignment->isBindingAssignment()){ // has bindings
+            if (assignment->expression() ){
+                auto& property = assignment->property();
                 std::string object = "this";
                 for (size_t x = 0; x < property.size() - 1; x++){
                     object += "." + slice(source, property[x]);
@@ -751,7 +756,7 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
                          << indent(indt + 2) << "function(){ return ";
 
                 el::JSSection* section = new el::JSSection;
-                auto expr = node->assignments()[i]->expression();
+                auto expr = assignment->expression();
                 section->from = expr->startByte();
                 section->to = expr->endByte();
                 convert(expr, source, section->m_children, indt + 2, ctx);
@@ -765,8 +770,8 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
                 *compose << "}.bind(" << object << "),\n"
                          << indent(indt + 2) << bindingsInJs << "\n"
                          << indent(indt + 1) << ")\n";
-            } else if ( node->assignments()[i]->statementBlock() ){
-                auto& property = node->assignments()[i]->property();
+            } else if ( assignment->statementBlock() ){
+                auto& property = assignment->property();
                 std::string object = "this";
                 for (size_t x = 0; x < property.size() - 1; x++){
                     object += "." + slice(source, property[x]);
@@ -776,7 +781,7 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
                          << indent(indt + 2) << "function()";
 
                 el::JSSection* section = new el::JSSection;
-                auto block = node->assignments()[i]->statementBlock();
+                auto block = assignment->statementBlock();
                 section->from = block->startByte();
                 section->to = block->endByte();
                 convert(block, source, section->m_children, indt + 2, ctx);
@@ -792,11 +797,11 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
                          << indent(indt + 1) << ")\n";
             }
         } else {
-            if (node->assignments()[i]->expression()){
+            if (assignment->expression()){
                 *compose << indent(indt + 1) << "this";
-                auto expr = node->assignments()[i]->expression();
-                for (size_t prop = 0; prop < node->assignments()[i]->property().size(); ++prop){
-                    *compose << "." << slice(source, node->assignments()[i]->property()[prop]);
+                auto expr = assignment->expression();
+                for (size_t prop = 0; prop < assignment->property().size(); ++prop){
+                    *compose << "." << slice(source, assignment->property()[prop]);
                 }
                 *compose << " = ";
 
@@ -812,15 +817,15 @@ void LanguageNodesToJs::convertNewComponentExpression(NewComponentExpressionNode
 
                 *compose << "\n";
 
-            } else if (node->assignments()[i]->statementBlock() ) {
+            } else if (assignment->statementBlock() ) {
                 std::string propName = "this";
-                for (size_t prop = 0; prop < node->assignments()[i]->property().size(); ++prop){
-                    propName += "." + slice(source, node->assignments()[i]->property()[prop]);
+                for (size_t prop = 0; prop <assignment->property().size(); ++prop){
+                    propName += "." + slice(source, assignment->property()[prop]);
                 }
                 *compose << indent(indt + 1) << propName << " = " << "(function()";
 
                 el::JSSection* section = new el::JSSection;
-                auto block = node->assignments()[i]->statementBlock();
+                auto block = assignment->statementBlock();
                 section->from = block->startByte();
                 section->to = block->endByte();
                 convert(block, source, section->m_children, indt + 2, ctx);
@@ -1156,7 +1161,12 @@ void LanguageNodesToJs::convertFunctionDeclaration(
         }
     }
 
-    *compose << "\n" << indent(indentValue + 2) << "function " << (funcNode->name() ? slice(source, funcNode->name()) : "") << "(" << paramList << ")";
+    std::string returnType = "";
+    if (ctx->outputTypes && funcNode->returnType() != nullptr) {
+        returnType = slice(source, funcNode->returnType());
+    }
+
+    *compose << "\n" << indent(indentValue + 2) << "function " << (funcNode->name() ? slice(source, funcNode->name()) : "") << "(" << paramList << ")" << returnType;
 
     if ( funcNode->body() ){
         JSSection* jssection = new JSSection;
@@ -1169,6 +1179,91 @@ void LanguageNodesToJs::convertFunctionDeclaration(
     
     sections.push_back(compose);
 }
+
+void LanguageNodesToJs::convertArrowFunction(
+    ArrowFunctionNode *arrowNode, 
+    const std::string &source, 
+    std::vector<ElementsInsertion *> &sections, 
+    int indentValue, 
+    BaseNode::ConversionContext *ctx)
+{
+    ElementsInsertion* compose = new ElementsInsertion;
+    compose->from = arrowNode->startByte();
+    compose->to = arrowNode->endByte();
+
+    std::string paramList = "";
+    
+    auto params = arrowNode->parameters();
+    for ( auto pit = params->parameters().begin(); pit != params->parameters().end(); ++pit ) {
+        if ( pit != params->parameters().begin() )
+            paramList += ",";
+        paramList += slice(source, (*pit)->identifier());
+        if (ctx->outputTypes && (*pit)->type()) {
+            paramList += slice(source, (*pit)->type());
+        }
+    }
+
+    std::string returnType = "";
+    if (ctx->outputTypes && arrowNode->returnType() != nullptr) {
+        returnType = slice(source, arrowNode->returnType());
+    }
+
+    *compose << "\n" << indent(indentValue + 2) << "(" << paramList << ")" << returnType << " => ";
+
+    if ( arrowNode->body() ){
+        JSSection* jssection = new JSSection;
+        jssection->from = arrowNode->body()->startByte();
+        jssection->to   = arrowNode->body()->endByte();
+        convert(arrowNode->body(), source, jssection->m_children, indentValue + 1, ctx);
+        *compose << jssection;
+    }
+    *compose << "\n";
+    
+    sections.push_back(compose);
+}
+
+void LanguageNodesToJs::convertFunction(
+    FunctionNode *funcNode, 
+    const std::string &source, 
+    std::vector<ElementsInsertion *> &sections, 
+    int indentValue, 
+    BaseNode::ConversionContext *ctx)
+{
+    ElementsInsertion* compose = new ElementsInsertion;
+    compose->from = funcNode->startByte();
+    compose->to = funcNode->endByte();
+
+    std::string paramList = "";
+    
+    auto params = funcNode->parameters();
+    for ( auto pit = params->parameters().begin(); pit != params->parameters().end(); ++pit ) {
+        if ( pit != params->parameters().begin() )
+            paramList += ",";
+        paramList += slice(source, (*pit)->identifier());
+        if (ctx->outputTypes && (*pit)->type()) {
+            paramList += slice(source, (*pit)->type());
+        }
+    }
+
+    std::string returnType = "";
+    if (ctx->outputTypes && funcNode->returnType() != nullptr) {
+        returnType = slice(source, funcNode->returnType());
+    }
+
+    *compose << "\n" << indent(indentValue + 2) << "function " << "(" << paramList << ")" << returnType;
+
+    if ( funcNode->body() ){
+        JSSection* jssection = new JSSection;
+        jssection->from = funcNode->body()->startByte();
+        jssection->to   = funcNode->body()->endByte();
+        convert(funcNode->body(), source, jssection->m_children, indentValue + 1, ctx);
+        *compose << jssection;
+    }
+    *compose << "\n";
+    
+    sections.push_back(compose);
+}
+
 
 void LanguageNodesToJs::convertPropertyDeclaration(PropertyDeclarationNode *node, const std::string &source, const std::string &componentReference, int indt, BaseNode::ConversionContext *ctx, const PropertyAccessorDeclarationNode::PropertyAccess &propertyAccess, ElementsInsertion *compose){
     *compose << indent(indt) << BaseNode::ConversionContext::baseComponentName(ctx) << ".addProperty(" + componentReference + ", '" << slice(source, node->name())

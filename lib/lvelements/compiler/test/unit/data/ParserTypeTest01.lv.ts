@@ -1,3 +1,4 @@
+import {Array} from '__UNRESOLVED__'
 export class X extends Element{
 
     constructor(){
@@ -12,6 +13,12 @@ export class X extends Element{
         let x:number = 100
         let y:string = 20
         let {m, n} = {m: 1, n: 2}
-        function test(c:number,d:number){}
+        const z:number = 100
+        function test(c:number,d:number): string{}
+        const test2 = (a:number, b:number): number => {}
+
+        const test3 = (s) => new Array(100)
+
+       const simple = function(a: number):number{}
    }
 }

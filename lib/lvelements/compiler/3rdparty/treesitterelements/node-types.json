@@ -5226,22 +5226,34 @@
     "named": true,
     "fields": {
       "assignment": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
             "type": "=",
             "named": false
+          },
+          {
+            "type": "property_assignment_expression",
+            "named": true
           }
         ]
       },
       "binding_assignemnt": {
-        "multiple": false,
+        "multiple": true,
         "required": false,
         "types": [
           {
             "type": ":",
             "named": false
+          },
+          {
+            "type": "property_assignment_expression",
+            "named": true
+          },
+          {
+            "type": "statement_block",
+            "named": true
           }
         ]
       },
@@ -5259,20 +5271,6 @@
           }
         ]
       }
-    },
-    "children": {
-      "multiple": false,
-      "required": true,
-      "types": [
-        {
-          "type": "property_assignment_expression",
-          "named": true
-        },
-        {
-          "type": "statement_block",
-          "named": true
-        }
-      ]
     }
   },
   {
