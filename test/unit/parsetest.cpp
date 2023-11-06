@@ -60,7 +60,7 @@ void testFileParse(const std::string& name){
             parser->destroy(expectedAST);
 
             if ( !compare.isEqual() ){
-                vlog().e() << "File: " << name;
+                vlog().e() << "File: " << name << ".lv" << expectation;
                 vlog().e() << compare.errorString();
                 vlog().e() << conversion;
             }

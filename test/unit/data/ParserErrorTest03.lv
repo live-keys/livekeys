@@ -1,0 +1,4 @@
+component X{
+  style = { fontSize: '12px' }
+  other = { return {clicks: 0 } }
+}

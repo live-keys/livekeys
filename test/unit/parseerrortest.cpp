@@ -80,5 +80,27 @@ TEST_CASE( "Parse Error Test", "[ParseError]" ) {
         }
         REQUIRE(hadException);
     }
+
+    SECTION("Return in assignment expression"){
+        std::string name = "ParserErrorTest03";
+        std::string filePath = scriptPath() + "/" + name + ".lv";
+        std::string contents = fileIO().readFromFile(scriptPath() + "/" + name + ".lv");
+
+        Compiler::Config compilerConfig;
+        compilerConfig.allowUnresolvedTypes(false);
+        Compiler::Ptr compiler = Compiler::create(compilerConfig);
+        compiler->configureImplicitType("console");
+        compiler->configureImplicitType("vlog");
+
+        bool hadException = false;
+
+        try {
+            compiler->compileToJs(filePath, contents);
+        } catch (lv::Exception& e) {
+            REQUIRE(e.code() == lv::Exception::toCode("~LanguageNodes"));
+            hadException = true;
+        }
+        REQUIRE(hadException);
+    }
 }
 

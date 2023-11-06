@@ -1343,17 +1343,25 @@ void BaseNode::visitTrippleTaggedString(BaseNode *parent, const TSNode &node){
 void BaseNode::visitFunction(BaseNode *parent, const TSNode &node){
     FunctionNode* enode = new FunctionNode(node);
     parent->addChild(enode);
-    uint32_t count = ts_node_child_count(node);
-    for ( uint32_t i = 0; i < count; ++i ){
-        TSNode child = ts_node_child(node, i);
-        if ( strcmp(ts_node_type(child), "formal_parameters") == 0 ){
-            enode->m_parameters = BaseNode::scanFormalParameters(parent, child);
-        } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
-            enode->m_body = new JsBlockNode(child);
-            enode->addChild(enode->m_body);
-            visitChildren(enode->m_body, child);
-        }
+
+    // Function parameters
+    const TSNode parameters = BaseNode::nodeChildByFieldName(node, "parameters");
+    assertValid(parent, parameters, "Function parameters are null.");
+    enode->m_parameters = BaseNode::scanFormalParameters(parent, parameters);
+
+    // Function return type
+    const TSNode returnType = BaseNode::nodeChildByFieldName(node, "return_type");
+    if (!ts_node_is_null(returnType)) {
+        enode->m_returnType = new TypeNode(returnType);
+        enode->addChild(enode->m_returnType);
     }
+
+    // Function body
+    const TSNode body = BaseNode::nodeChildByFieldName(node, "body");
+    assertValid(parent, body, "Function body is null.");
+    enode->m_body = new JsBlockNode(body);
+    enode->addChild(enode->m_body);
+    visitChildren(enode->m_body, body);
 
     if ( enode->m_parameters ){
         if (enode->m_body ){
@@ -1369,24 +1377,31 @@ void BaseNode::visitFunctionDeclaration(BaseNode *parent, const TSNode &node)
     FunctionDeclarationNode* enode = new FunctionDeclarationNode(node);
     parent->addChild(enode);
 
-    uint32_t count = ts_node_child_count(node);
-    for ( uint32_t i = 0; i < count; ++i ){
-        TSNode child = ts_node_child(node, i);
-        if ( strcmp(ts_node_type(child), "identifier") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-            enode->addChild(enode->m_name);
-            addToDeclarations(parent, enode->m_name);
-        } else if ( strcmp(ts_node_type(child), "property_identifier") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-            enode->addChild(enode->m_name);
-        } else if ( strcmp(ts_node_type(child), "formal_parameters") == 0 ){
-            enode->m_parameters = BaseNode::scanFormalParameters(parent, child);
-        } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
-            enode->m_body = new JsBlockNode(child);
-            enode->addChild(enode->m_body);
-            visitChildren(enode->m_body, child);
-        }
+    // Function name
+    const TSNode name = BaseNode::nodeChildByFieldName(node, "name");
+    assertValid(parent, name, "Function name is null.");
+    enode->m_name = new IdentifierNode(name);
+    enode->addChild(enode->m_name);
+    addToDeclarations(parent, enode->m_name);
+
+    // Function parameters
+    const TSNode parameters = BaseNode::nodeChildByFieldName(node, "parameters");
+    assertValid(parent, parameters, "Function parameters are null.");
+    enode->m_parameters = BaseNode::scanFormalParameters(parent, parameters);
+
+    // Function return type
+    const TSNode returnType = BaseNode::nodeChildByFieldName(node, "return_type");
+    if (!ts_node_is_null(returnType)) {
+        enode->m_returnType = new TypeNode(returnType);
+        enode->addChild(enode->m_returnType);
     }
+
+    // Function body
+    const TSNode body = BaseNode::nodeChildByFieldName(node, "body");
+    assertValid(parent, body, "Function body is null.");
+    enode->m_body = new JsBlockNode(body);
+    enode->addChild(enode->m_body);
+    visitChildren(enode->m_body, body);
 
     if ( enode->m_parameters ){
         if (enode->m_body ){
@@ -1422,7 +1437,13 @@ void BaseNode::visitVariableDeclaration(BaseNode *parent, const TSNode &node){
 }
 
 void BaseNode::visitLexicalDeclaration(BaseNode *parent, const TSNode &node){
-    visitDeclarationForm(parent, node, VariableDeclarationNode::Let);
+    TSNode kind = BaseNode::nodeChildByFieldName(node, "kind");
+    VariableDeclarationNode::DeclarationForm mode = VariableDeclarationNode::Let;
+    if (!ts_node_is_null(kind) && strcmp(ts_node_type(kind), "const") == 0) {
+        mode = VariableDeclarationNode::Const;
+    }
+
+    visitDeclarationForm(parent, node, mode);
 }
 
 
@@ -1430,6 +1451,7 @@ void BaseNode::visitDeclarationForm(BaseNode * parent, const TSNode & node, int 
     VariableDeclarationNode* vdn = new VariableDeclarationNode(node);
     vdn->m_declarationForm = static_cast<VariableDeclarationNode::DeclarationForm>(form);
     parent->addChild(vdn);
+
     uint32_t count = ts_node_child_count(node);
     for ( uint32_t i = 0; i < count; ++i ){
         TSNode child = ts_node_child(node, i);
@@ -1513,68 +1535,47 @@ void BaseNode::visitArrowFunction(BaseNode *parent, const TSNode &node){
     ArrowFunctionNode* enode = new ArrowFunctionNode(node);
     parent->addChild(enode);
 
-    bool arrowPassed = false;
-    uint32_t count = ts_node_child_count(node);
-    for ( uint32_t i = 0; i < count; ++i ){
-        TSNode child = ts_node_child(node, i);
+    // Function parameters
+    const TSNode parameters = BaseNode::nodeChildByFieldName(node, "parameters");
+    if (!ts_node_is_null(parameters)) {
+        enode->m_parameters = BaseNode::scanFormalParameters(parent, parameters);
+        enode->addChild(enode->m_parameters);
+    } else {
+        const TSNode parameter = BaseNode::nodeChildByFieldName(node, "parameter");
+        if (!ts_node_is_null(parameter)) {
+            enode->m_parameters = new ParameterListNode(parameter);
 
-        if ( strcmp(ts_node_type(child), "property_identifier") == 0 ){
-            enode->m_name = new IdentifierNode(child);
-        } else if ( strcmp(ts_node_type(child), "identifier") == 0 ){
-            auto nameNode = new IdentifierNode(child);
-            enode->m_parameters.push_back(nameNode);
-            enode->addChild(nameNode);
-        } else if ( strcmp(ts_node_type(child), "formal_parameters") == 0 ){
-            uint32_t paramterCount = ts_node_child_count(child);
-
-            for (uint32_t pc = 0; pc < paramterCount; ++pc){
-                TSNode ftpc = ts_node_child(child, pc);
-                if (strcmp(ts_node_type(ftpc), "identifier") == 0){
-                    auto nameNode = new IdentifierNode(ftpc);
-                    enode->m_parameters.push_back(nameNode);
-                    enode->addChild(nameNode);
-                } else if ( strcmp(ts_node_type(ftpc), "required_parameter") == 0 ){
-                    uint32_t paramterInteralCount = ts_node_child_count(ftpc);
-                    for (uint32_t pi = 0; pi < paramterInteralCount; ++pi){
-                        TSNode ftpci = ts_node_child(ftpc, pi);
-                        if (strcmp(ts_node_type(ftpci), "identifier") == 0){
-                            auto nameNode = new IdentifierNode(ftpci);
-                            enode->m_parameters.push_back(nameNode);
-                            enode->addChild(nameNode);
-                        }
-                    }
-                } else if ( strcmp(ts_node_type(ftpc), "optional_parameter") == 0 ){
-                    uint32_t paramterInteralCount = ts_node_child_count(ftpc);
-                    for (uint32_t pi = 0; pi < paramterInteralCount; ++pi){
-                        TSNode ftpci = ts_node_child(ftpc, pi);
-                        if (strcmp(ts_node_type(ftpci), "identifier") == 0){
-                            auto nameNode = new IdentifierNode(ftpci);
-                            enode->m_parameters.push_back(nameNode);
-                            enode->addChild(nameNode);
-                        }
-                    }
-                }
-            }
-        } else if ( strcmp(ts_node_type(child), "=>") == 0 ){
-            arrowPassed = true;
-        } else if ( strcmp(ts_node_type(child), "statement_block") == 0 ){
-            enode->m_body = new JsBlockNode(child);
-            enode->addChild(enode->m_body);
-            visitChildren(enode->m_body, child);
-        } else {
-            if ( arrowPassed ){
-                visit(enode, child);
-            }
+            auto nameNode = new IdentifierNode(parameter);
+            auto paramNode = new ParameterNode(parameter, nameNode);
+            enode->m_parameters->m_parameters.push_back(paramNode);
         }
     }
 
-    if (enode->m_body){
-        for (size_t i = 0; i != enode->m_parameters.size(); ++i){
-            addToDeclarations(enode->m_body, enode->m_parameters[i]);
-        }
-    } else {
-        for (size_t i = 0; i != enode->m_parameters.size(); ++i){
-            addToDeclarations(enode, enode->m_parameters[i]);
+    // Function return type
+    const TSNode returnType = BaseNode::nodeChildByFieldName(node, "return_type");
+    if (!ts_node_is_null(returnType)) {
+        enode->m_returnType = new TypeNode(returnType);
+        enode->addChild(enode->m_returnType);
+    }
+
+    // Function body
+    const TSNode body = BaseNode::nodeChildByFieldName(node, "body");
+    if (!ts_node_is_null(body)) {
+        enode->m_body = new JsBlockNode(body);
+        enode->addChild(enode->m_body);
+        visitChildren(enode->m_body, body);
+    }
+
+
+    if ( enode->m_parameters ){
+        if (enode->m_body ){
+            for (size_t i = 0; i != enode->m_parameters->m_parameters.size(); ++i){
+                addToDeclarations(enode->m_body, enode->m_parameters->m_parameters[i]->identifier());
+            }
+        } else {
+            for (size_t i = 0; i != enode->m_parameters->m_parameters.size(); ++i){
+                addToDeclarations(enode, enode->m_parameters->m_parameters[i]->identifier());
+            }
         }
     }
 }
@@ -2244,9 +2245,7 @@ std::string MethodDefinitionNode::toString(int indent) const{
 
 
 ArrowFunctionNode::ArrowFunctionNode(const TSNode &node)
-    : JsBlockNode(node, ArrowFunctionNode::nodeInfo() )
-    , m_name(nullptr)
-    , m_body(nullptr)
+    : FunctionNode(node, ArrowFunctionNode::nodeInfo() )
 {
 }
 
@@ -2254,17 +2253,15 @@ std::string ArrowFunctionNode::toString(int indent) const{
     std::string result;
     if ( indent > 0 )
         result.assign(indent * 2, ' ');
-    std::string name = "";
-    if ( m_name )
-        name = "(name " + m_name->rangeString() + ")";
 
-    result += "ArrowFunction " + rangeString() + name + "\n";
+    result += "ArrowFunction " + rangeString();
 
-    if ( m_parameters.size() > 0 ){
+    const std::size_t paramSize = m_parameters->parameters().size();
+    if ( paramSize > 0 ){
         std::string paramsResult;
         if ( indent > 0 )
             paramsResult.assign(indent * 2, ' ');
-        std::string parameters = "(no parameters: " + std::to_string(m_parameters.size()) + ")";
+        std::string parameters = "(no parameters: " + std::to_string(paramSize) + ")";
         result += paramsResult + "ParameterList " + rangeString() + parameters + "\n";
     }
 
@@ -2279,6 +2276,7 @@ FunctionNode::FunctionNode(const TSNode &node)
     : BaseNode(node, FunctionNode::nodeInfo())
     , m_parameters(nullptr)
     , m_body(nullptr)
+    , m_returnType(nullptr)
 {
 }
 
