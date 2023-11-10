@@ -35,7 +35,14 @@ public:
     static void copyRecursive(const std::string& from, const std::string& to, int options = Path::OverwriteExisting);
 
     static std::string join(const std::string& p1, const std::string& p2);
+    template <typename... Paths>
+    static std::string join(const std::string& p1, const std::string& p2, Paths... paths);
+
     static std::string joinExisting(const std::string& p1, const std::string& p2);
+    template <typename... Paths>
+    static std::string joinExisting(const std::string& p1, const std::string& p2, Paths... paths);
+
+
     static std::vector<std::string> split(const std::string p);
     static std::string name(const std::string& p);
     static std::string parent(const std::string& p);
@@ -67,6 +74,16 @@ public:
 private:
     Path();
 };
+
+template <typename... Paths>
+std::string Path::join(const std::string& p1, const std::string& p2, Paths... paths) {
+    return Path::join(Path::join(p1, p2), paths...);
+}
+
+template <typename... Paths>
+std::string Path::joinExisting(const std::string& p1, const std::string& p2, Paths... paths) {
+    return Path::join(Path::join(p1, p2), paths...);
+}
 
 }// namespace
 
