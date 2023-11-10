@@ -20,11 +20,11 @@ void LvImportsTest::initTestCase(){
 }
 
 std::string LvImportsTest::scriptPath(const std::string &scriptName){
-    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/data/" + scriptName;
+    return Path::join(Path::parent(lv::ApplicationContext::instance().applicationFilePath()), "data", scriptName);
 }
 
 std::string LvImportsTest::testPath(){
-    return Path::parent(lv::ApplicationContext::instance().applicationFilePath()) + "/test";
+    return Path::join(Path::parent(lv::ApplicationContext::instance().applicationFilePath()), "test");
 }
 
 ////////////////////////////////////////////////////
@@ -37,7 +37,7 @@ void LvImportsTest::singlePluginImportTest(){
     tp.unpack(scriptPath("ImportTest01.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -55,7 +55,7 @@ void LvImportsTest::samePathImportTest()
     tp.unpack(scriptPath("ImportTest02.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -74,7 +74,7 @@ void LvImportsTest::importPluginWithSamePathImportTest()
     tp.unpack(scriptPath("ImportTest03.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("b").toStdString(engine) == "class[A]");
     });
@@ -91,7 +91,7 @@ void LvImportsTest::importPluginThatImportsPlugin()
     tp.unpack(scriptPath("ImportTest04.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("c").toStdString(engine) == "class[B]");
     });
@@ -108,7 +108,7 @@ void LvImportsTest::samePathSingletonTest()
     tp.unpack(scriptPath("ImportTest05.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -126,7 +126,7 @@ void LvImportsTest::sameModuleDifferentNamespacesTest()
     tp.unpack(scriptPath("ImportTest06.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -147,7 +147,7 @@ void LvImportsTest::moduleFileDependencyCycleTest()
     engine->scope([engine, &tp](){
         bool hadException = false;
         try {
-            engine->runFile(tp.path() + "/main.lv");
+            engine->runFile(Path::join(tp.path(), "main.lv"));
         } catch (lv::Exception& e) {
             QVERIFY(e.code() == lv::Exception::toCode("Cycle"));
             hadException = true;
@@ -168,7 +168,7 @@ void LvImportsTest::pluginDependencyCycleTest(){
     engine->scope([engine, &tp](){
         bool hadException = false;
         try {
-            engine->runFile(tp.path() + "/main.lv");
+            engine->runFile(Path::join(tp.path(), "main.lv"));
         } catch (lv::Exception& e) {
             QVERIFY(e.code() == lv::Exception::toCode("Cycle"));
             hadException = true;
@@ -189,7 +189,7 @@ void LvImportsTest::packageImportTest()
 
     engine->scope([engine, &tp](){
         engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
     });
@@ -208,7 +208,7 @@ void LvImportsTest::packageDependencyCycleTest(){
         engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
         bool hadException = false;
         try {
-            engine->runFile(tp.path() + "/main.lv");
+            engine->runFile(Path::join(tp.path(), "main.lv"));
         } catch (lv::Exception& e) {
             QVERIFY(e.code() == lv::Exception::toCode("Cycle"));
             hadException = true;
@@ -228,7 +228,7 @@ void LvImportsTest::importAsTest()
     tp.unpack(scriptPath("ImportTest11.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -245,11 +245,11 @@ void LvImportsTest::importMetaTest(){
     tp.unpack(scriptPath("ImportTest12.lvep"));
 
     engine->scope([engine, &tp](){
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
-        QVERIFY(main->get("aUrl").toStdString(engine) == tp.path() + "/plugin1/A.lv");
+        QVERIFY(main->get("aUrl").toStdString(engine) == Path::join(tp.path(), "plugin1", "A.lv"));
         QVERIFY(main->get("aModule").toStdString(engine) == "main.plugin1");
-        QVERIFY(main->get("bUrl").toStdString(engine) == tp.path() + "/plugin1/subplugin/B.lv");
+        QVERIFY(main->get("bUrl").toStdString(engine) == Path::join(tp.path(), "plugin1", "subplugin", "B.lv"));
         QVERIFY(main->get("bModule").toStdString(engine) == "main.plugin1.subplugin");
     });
 
@@ -265,7 +265,7 @@ void LvImportsTest::dashPackageImportTest(){
 
     engine->scope([engine, &tp](){
         engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
     });
@@ -307,7 +307,7 @@ void LvImportsTest::jsImportTest(){
 
     engine->scope([engine, &tp](){
         engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
         QVERIFY(main->get("a").toStdString(engine) == "class[A]");
         QVERIFY(main->get("b").toStdString(engine) == "class[B]");
@@ -327,7 +327,7 @@ void LvImportsTest::componentMetaTest(){
 
     engine->scope([engine, &tp](){
         engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
-        Element* main = engine->runFile(tp.path() + "/main.lv");
+        Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
         QVERIFY(main != nullptr);
 
         QVERIFY(main->get("A").isObject());
