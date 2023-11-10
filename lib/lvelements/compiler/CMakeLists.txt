@@ -25,6 +25,7 @@ target_sources(lvelementscompiler PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/languagenodeinfo.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/propertybindingcontainer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/languagequery.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/tracepointexception.cpp"
 )
 
 target_include_directories(lvelementscompiler

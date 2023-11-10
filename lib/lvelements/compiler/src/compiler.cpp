@@ -21,6 +21,7 @@
 #include "languagenodestojs_p.h"
 #include "elementssections_p.h"
 #include "elementsmodule.h"
+#include "tracepointexception.h"
 
 namespace lv{ namespace el {
 
@@ -364,8 +365,10 @@ std::shared_ptr<ElementsModule> Compiler::compileImportedModule(Compiler::Ptr co
                 compiler->m_d->loadedModulesByPath[ep->module()->path()] = ep;
                 return ep;
             }
+        } catch ( TracePointException& e ){
+            throw e;
         } catch ( lv::Exception& e ){
-            THROW_EXCEPTION(lv::Exception, e.message(), lv::Exception::toCode("Import"));
+            throw TracePointException(e);
         }
     } else {
         return foundEp->second;

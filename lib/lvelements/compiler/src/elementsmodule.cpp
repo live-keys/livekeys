@@ -20,6 +20,7 @@
 #include "live/fileio.h"
 #include "live/path.h"
 #include "live/visuallog.h"
+#include "live/elements/compiler/tracepointexception.h"
 
 namespace lv{ namespace el{
 
@@ -145,10 +146,10 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
 
         if ( imp.isRelative ){
             if ( epl->module()->context()->package == nullptr ){
-                THROW_EXCEPTION(lv::Exception, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
+                THROW_EXCEPTION(TracePointException, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
             }
             if ( epl->module()->context()->package->name() == "." ){
-                THROW_EXCEPTION(lv::Exception, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
+                THROW_EXCEPTION(TracePointException, Utf8("Cannot import relative path withouth package: \'%\' in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
             }
 
             std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
@@ -156,15 +157,11 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             try{
                 ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
                 if ( !ep ){
-                    THROW_EXCEPTION(lv::Exception, Utf8("Failed to find module \'%\' imported in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
+                    THROW_EXCEPTION(TracePointException, Utf8("Failed to find module \'%\' imported in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
                 }
                 mf->resolveImport(imp.uri, ep);
-
-            } catch ( lv::Exception& e ){
-                if ( e.code() == lv::Exception::toCode("import") )
-                    THROW_EXCEPTION(lv::Exception, Utf8("%\n - Imported \'%\' from \'%\'").format(e.message(), importUri, currentUriName), e.code());
-                else
-                    throw e;
+            } catch ( TracePointException& e ){
+                throw TracePointException(e, Utf8(" - Imported \'%\' from \'%\'").format(importUri, currentUriName));
             }
 
         } else {
@@ -174,11 +171,8 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
                     THROW_EXCEPTION(lv::Exception, Utf8("Failed to find module \'%\' imported in \'%\'").format(imp.uri, currentUriName), Exception::toCode("~Import"));
                 }
                 mf->resolveImport(imp.uri, ep);
-            } catch ( lv::Exception& e ){
-                if ( e.code() == lv::Exception::toCode("import") )
-                    THROW_EXCEPTION(lv::Exception, Utf8("%\n - Imported \'%\' from \'%\'").format(e.message(), imp.uri, currentUriName), e.code());
-                else
-                    throw e;
+            } catch ( TracePointException& e ){
+                throw TracePointException(e, Utf8(" - Imported \'%\' from \'%\'").format(imp.uri, currentUriName));
             }
         }
     }
