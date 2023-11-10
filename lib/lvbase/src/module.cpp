@@ -65,6 +65,12 @@ Module::~Module(){
 
 /** Checks if live.module.json exists in the given path */
 bool Module::existsIn(const std::string &path){
+    if ( Module::fileExistsIn(path) )
+        return true;
+    return Module::lvFilesExistIn(path);
+}
+
+bool Module::fileExistsIn(const std::string &path){
     if ( !Path::exists(path) )
         return false;
     return Path::exists(Path::join(path, Module::fileName));
@@ -82,27 +88,47 @@ Module::Ptr Module::createFromPath(const std::string &path){
         moduleDirPath = Path::parent(modulePath);
     }
 
-    std::ifstream instream(modulePath, std::ifstream::in | std::ifstream::binary);
-    if ( !instream.is_open() ){
-        THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: %").format(path), lv::Exception::toCode("~file"));
+    if ( Path::exists(modulePath) ){
+        std::ifstream instream(modulePath, std::ifstream::in | std::ifstream::binary);
+        if ( !instream.is_open() ){
+            THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: '%'").format(path), lv::Exception::toCode("~file"));
+        }
+
+        try{
+            instream.seekg(0, std::ios::end);
+            size_t size = static_cast<size_t>(instream.tellg());
+            std::string buffer(size, ' ');
+            instream.seekg(0);
+            instream.read(&buffer[0], static_cast<std::streamsize>(size));
+
+            MLNode m;
+            ml::fromJson(buffer, m);
+
+            return createFromNode(moduleDirPath, modulePath, m);
+        } catch ( lv::Exception& e ){
+            THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.message()), lv::Exception::toCode("parse"));
+        } catch ( std::exception& e ){
+            THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.what()), lv::Exception::toCode("parse"));
+        }
+    } else {
+        std::string name = Path::name(moduleDirPath);
+        std::string package = Module::findPackageFrom(moduleDirPath);
+        if ( package.empty() || !Path::exists(package))
+            THROW_EXCEPTION(lv::Exception, Utf8("Package not found for module: \'%\'.").format(moduleDirPath), Exception::toCode("~Keys"));
+        if ( Path::isRelative(package) )
+            package = Path::resolve(Path::join(path, package));
+        if ( Path::isDir(package) )
+            package = Path::join(package, Package::fileName);
+
+        Module::Ptr pt(new Module(moduleDirPath, modulePath, name, package));
+
+        auto files = Module::scanLvFiles(path);
+        for ( auto it = files.begin(); it != files.end(); ++it )
+            pt->m_d->modules.push_back(*it);
+
+        return pt;
     }
 
-    try{
-        instream.seekg(0, std::ios::end);
-        size_t size = static_cast<size_t>(instream.tellg());
-        std::string buffer(size, ' ');
-        instream.seekg(0);
-        instream.read(&buffer[0], static_cast<std::streamsize>(size));
-
-        MLNode m;
-        ml::fromJson(buffer, m);
-
-        return createFromNode(moduleDirPath, modulePath, m);
-    } catch ( lv::Exception& e ){
-        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.message()), lv::Exception::toCode("parse"));
-    } catch ( std::exception& e ){
-        THROW_EXCEPTION(lv::Exception, Utf8("Error when parsing file %: %").format(modulePath, e.what()), lv::Exception::toCode("parse"));
-    }
     return nullptr;
 }
 
@@ -110,16 +136,14 @@ Module::Ptr Module::createFromPath(const std::string &path){
 Module::Ptr Module::createFromNode(const std::string &path, const std::string &filePath, const MLNode &m){
     std::string name = m.hasKey("name") ? m["name"].asString() : Path::name(path);
     std::string package = m.hasKey("package") ? m["package"].asString() : Module::findPackageFrom(path);
+
     if ( package.empty() || !Path::exists(package))
         THROW_EXCEPTION(lv::Exception, Utf8("Package not found for module: \'%\'.").format(filePath), Exception::toCode("~Keys"));
 
-    if ( Path::isRelative(package) ){
+    if ( Path::isRelative(package) )
         package = Path::resolve(Path::join(path, package));
-    }
-
-    if ( Path::isDir(package) ){
+    if ( Path::isDir(package) )
         package = Path::join(package, Package::fileName);
-    }
 
     Module::Ptr pt(new Module(path, filePath, name, package));
 

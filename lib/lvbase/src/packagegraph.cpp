@@ -551,10 +551,10 @@ PackageGraph *&PackageGraph::internalsContextOwner(){
 }
 
 Module::Ptr PackageGraph::createRunningModule(const std::string &modulePath){
-    Module::Ptr module = Module::createFromNode(modulePath, modulePath + "/live.module.json", {
-        {"name", "main"}, {"package", "."}
+    Module::Ptr module = Module::createFromNode(modulePath, Path::join(modulePath, "live.module.json"), {
+        {"name", "main"}, {"package", "."}, {"modules", "*"}
     });
-    Package::Ptr package = Package::createFromNode(modulePath, modulePath + "/live.package.json", {
+    Package::Ptr package = Package::createFromNode(modulePath, Path::join(modulePath, "live.package.json"), {
         {"name", "."}, {"version", "0.1.0"}
     });
 
@@ -646,7 +646,7 @@ Module::Ptr PackageGraph::loadModule(const std::vector<std::string> &importSegme
         }
 
         if ( !Module::existsIn(modulePath) )
-            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file has not been found in \'%\'").format(modulePath), Exception::toCode("~module"));
+            THROW_EXCEPTION(lv::Exception, Utf8("\'live.module.json\' file or .lv files have not been found in \'%\'").format(modulePath), Exception::toCode("~module"));
 
         Module::Ptr module = Module::createFromPath(modulePath);
         module->assignContext(this);

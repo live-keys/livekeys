@@ -47,9 +47,11 @@ public:
     ~Module();
 
     static bool existsIn(const std::string& path);
+    static bool fileExistsIn(const std::string& path);
     static Module::Ptr createFromPath(const std::string& path);
     static Module::Ptr createFromNode(const std::string &path, const std::string& filePath, const MLNode& m);
     static Module::Ptr createEmpty(const std::string& name);
+    static std::string findPackageFrom(const std::string& path);
 
     const std::string& name() const;
     const std::string& path() const;
@@ -73,7 +75,6 @@ private:
 
     static bool lvFilesExistIn(const std::string& dir);
     static std::list<std::string> scanLvFiles(const std::string& dir);
-    static std::string findPackageFrom(const std::string& path);
     void addPalette(const std::string& type, const std::string& path);
 
     ModulePrivate* m_d;

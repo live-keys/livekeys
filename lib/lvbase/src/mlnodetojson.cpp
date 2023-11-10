@@ -158,7 +158,16 @@ void fromJson(const std::string &data, MLNode &n){
 
     Reader reader;
     StringStream ss(data.c_str());
-    reader.Parse(ss, handler);
+
+    ParseResult pr = reader.Parse(ss, handler);
+    if ( !pr ){
+        std::string errorMessage = GetParseError_En(pr.Code());
+        THROW_EXCEPTION(
+            lv::Exception,
+            Utf8("Failed to parse json with error: '%' at offset %.").format(errorMessage, pr.Offset()),
+            Exception::toCode("json")
+        );
+    }
 }
 
 void fromJson(const char *data, MLNode &n){
@@ -170,8 +179,12 @@ void fromJson(const char *data, MLNode &n){
 
     ParseResult pr = reader.Parse(ss, handler);
     if ( !pr ){
-        THROW_EXCEPTION(lv::Exception,
-            "Failed to parse json: " + std::string(GetParseError_En(pr.Code())) + " at " + std::to_string(pr.Offset()), Exception::toCode("Json"));
+        std::string errorMessage = GetParseError_En(pr.Code());
+        THROW_EXCEPTION(
+            lv::Exception,
+            Utf8("Failed to parse json with error: '%' at offset %.").format(errorMessage, pr.Offset()),
+            Exception::toCode("json")
+        );
     }
 }
 
