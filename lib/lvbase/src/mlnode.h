@@ -36,7 +36,8 @@ class VisualLog;
 class LV_BASE_EXPORT MLOutOfRanceException: public lv::Exception{
 public:
     /** Default contructor */
-    MLOutOfRanceException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
+    MLOutOfRanceException(const Utf8& message = "", lv::Exception::Code code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+        : lv::Exception(message, code, st){}
 };
 
 /**
@@ -48,7 +49,8 @@ public:
 class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
     /** Default contructor */
-    InvalidMLTypeException(const std::string& message = "", lv::Exception::Code code = 0) : lv::Exception(message, code){}
+    InvalidMLTypeException(const Utf8& message = "", lv::Exception::Code code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+        : lv::Exception(message, code, st){}
 };
 
 /**
@@ -60,7 +62,8 @@ public:
 class LV_BASE_EXPORT TypeNotSerializableException: public lv::Exception{
 public:
     /** Default constructor */
-    TypeNotSerializableException(const std::string& message = "", int code = 0) : lv::Exception(message, code){}
+    TypeNotSerializableException(const Utf8& message = "", int code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+        : lv::Exception(message, code, st){}
 };
 
 // MLNode

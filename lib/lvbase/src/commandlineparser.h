@@ -34,7 +34,8 @@ public:
     /**
      * \brief Default constructor for this exception
      */
-    CommandLineParserException(const std::string& message, Exception::Code code = 0): Exception(message, code){}
+    CommandLineParserException(const std::string& message, Exception::Code code = 0, const Exception::SourceTrace& st = Exception::SourceTrace())
+        : Exception(message, code, st){}
 };
 
 class CommandLineParserPrivate;

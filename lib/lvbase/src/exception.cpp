@@ -15,6 +15,7 @@
 
 #include "live/exception.h"
 #include "live/utf8.h"
+#include "live/sourcelocation.h"
 #include <sstream>
 
 namespace lv{
@@ -55,26 +56,25 @@ public:
     ExceptionPrivate(const std::string& pmessage, Exception::Code pcode)
         : message(pmessage)
         , code(pcode)
-        , line(0)
+        , location()
         , stackTrace(nullptr)
     {
     }
 
     std::string     message;
     Exception::Code code;
-    int             line;
-    std::string     file;
-    std::string     functionName;
-
+    SourceLocation  location;
     StackTrace::Ptr stackTrace;
 };
 
 /**
  * \brief Standard exception constructor with message and code parameters
  */
-Exception::Exception(const std::string &message, lv::Exception::Code code)
-    : m_d(new ExceptionPrivate(message, code))
+Exception::Exception(const lv::Utf8 &message, Code code, const SourceTrace &st)
+    : m_d(new ExceptionPrivate(message.data(), code))
 {
+    m_d->location = st.location;
+    m_d->stackTrace = st.trace;
 }
 
 /**
@@ -83,9 +83,7 @@ Exception::Exception(const std::string &message, lv::Exception::Code code)
 Exception::Exception(const Exception &other)
     : m_d(new ExceptionPrivate(other.message(), other.code()))
 {
-    m_d->line         = other.line();
-    m_d->file         = other.file();
-    m_d->functionName = other.functionName();
+    m_d->location     = other.location();
     m_d->stackTrace   = other.stackTrace();
 }
 
@@ -94,10 +92,8 @@ Exception::Exception(const Exception &other)
  */
 Exception &Exception::operator =(const Exception &other){
     m_d->message      = other.message();
+    m_d->location     = other.location();
     m_d->code         = other.code();
-    m_d->line         = other.line();
-    m_d->file         = other.file();
-    m_d->functionName = other.functionName();
     m_d->stackTrace   = other.stackTrace();
     return *this;
 }
@@ -115,18 +111,7 @@ Exception::~Exception(){
  * \brief Extracts filename from given filepath and returns it
  */
 std::string Exception::fileName() const{
-    std::string::size_type pos = m_d->file.find('/');
-
-#ifdef Q_OS_WIN
-    if ( pos == std::string::npos ){
-        pos = m_d->file.find('\\');
-    }
-#endif
-
-    if ( pos != std::string::npos )
-        return m_d->file.substr(pos + 1);
-
-    return m_d->file;
+    return m_d->location.fileName();
 }
 
 /**
@@ -134,10 +119,8 @@ std::string Exception::fileName() const{
  *
  * Includes function name, file name, line number.
  */
-std::string Exception::location() const{
-    std::stringstream sstream;
-    sstream << m_d->functionName << "(" << fileName() << ":" << line() << ")";
-    return sstream.str();
+const SourceLocation& Exception::location() const{
+    return m_d->location;
 }
 
 /**
@@ -198,21 +181,11 @@ std::string Exception::fromCode(Exception::Code code){
     return result;
 }
 
-void Exception::assignSourceLocation(const std::string &file, int line, const std::string &functionName){
-    m_d->file = file;
-    m_d->line = line;
-    m_d->functionName = functionName;
-}
-
-void Exception::assignStackTrace(const StackTrace::Ptr &st){
-    m_d->stackTrace = st;
-}
-
 /**
  * \brief Returns an indicator if the exception contains a line number where the exception happened.
  */
 bool Exception::hasLocation() const{
-    return m_d->line != 0;
+    return m_d->location.point().hasLine();
 }
 
 
@@ -244,21 +217,21 @@ Exception::Code Exception::code() const{
  * \sa hasLocation()
  */
 int Exception::line() const{
-    return m_d->line;
+    return m_d->location.point().line();
 }
 
 /**
  * \brief Returns the filepath of the file where the exception was thrown.
  */
 const std::string &Exception::file() const{
-    return m_d->file;
+    return m_d->location.filePath();
 }
 
 /**
  * \brief Returns the function name where the exception was thrown
  */
 const std::string &Exception::functionName() const{
-    return m_d->functionName;
+    return m_d->location.functionName();
 }
 
 /**

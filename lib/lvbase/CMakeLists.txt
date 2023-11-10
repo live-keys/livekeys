@@ -27,6 +27,7 @@ target_sources(lvbase PRIVATE
     "${CMAKE_CURRENT_SOURCE_DIR}/src/palettecontainer.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/path.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/program.cpp"
+    "${CMAKE_CURRENT_SOURCE_DIR}/src/sourcelocation.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/stacktrace.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/typename.cpp"
     "${CMAKE_CURRENT_SOURCE_DIR}/src/utf8.cpp"
