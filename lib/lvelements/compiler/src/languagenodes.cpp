@@ -2280,6 +2280,14 @@ FunctionNode::FunctionNode(const TSNode &node)
 {
 }
 
+FunctionNode::FunctionNode(const TSNode &node, const LanguageNodeInfo::ConstPtr &ni)
+    : BaseNode(node, ni)
+    , m_parameters(nullptr)
+    , m_body(nullptr)
+    , m_returnType(nullptr)
+{
+}
+
 std::string FunctionNode::toString(int indent) const{
     std::string result;
     if ( indent > 0 )
@@ -2299,12 +2307,6 @@ std::string FunctionNode::toString(int indent) const{
         result += m_body->toString(indent >= 0 ? indent + 1 : indent);
 
     return result;
-}
-
-FunctionNode::FunctionNode(const TSNode &node, const LanguageNodeInfo::ConstPtr &ni)
-    : BaseNode(node, ni)
-    , m_body(nullptr)
-{
 }
 
 
