@@ -111,7 +111,7 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
 
     Compiler::Ptr compiler = epl->m_d->compiler;
 
-    std::string filePath = epl->module()->path() + "/" + name;
+    std::string filePath = Path::join(epl->module()->path(), name);
     std::string content = compiler->fileIO()->readFromFile(filePath);
     LanguageParser::AST* ast = compiler->parser()->parse(content);
 
@@ -194,9 +194,10 @@ ModuleFile *ElementsModule::findModuleFileByName(const std::string &name) const{
 }
 
 ModuleFile *ElementsModule::moduleFileBypath(const std::string &path) const{
+    std::string pathNormalized = Path::resolve(path);
     for ( auto it = m_d->fileModules.begin(); it != m_d->fileModules.end(); ++it ){
         ModuleFile* mf = it->second;
-        if ( mf->filePath() == path )
+        if ( mf->filePath() == pathNormalized )
             return mf;
     }
     return nullptr;
