@@ -26,7 +26,7 @@ namespace lv{
 namespace{
     static const int TRACE_MAX_FUNCTION_NAME_LENGTH = 1024;
     static const int TRACE_MAX_OBJECT_PATH_LENGTH = 1024;
-    static const int SLICE_FRAMES_START = 2;
+    static const int SLICE_FRAMES_START = 1;
 }
 
 StackTrace::Ptr StackTrace::capture(int maxFrames){
