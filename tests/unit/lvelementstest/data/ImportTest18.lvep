@@ -1,0 +1,59 @@
+// This file creates a packages folder to test imports
+
+
+////// packages/package1/live.package.json
+
+{
+    "name" : "package1",
+    "version" : "1.0.0"
+}
+
+////// packages/package1/A.lv
+
+component default < Element{
+    fn toString(){
+        return "class[A]"
+    }
+}
+
+////// live.package.json
+
+{
+    "name" : "test",
+    "version" : "1.0.0"
+}
+
+////// main.lv
+
+import .submodule
+import package1
+
+instance default Element{
+    string t : {
+        return (new T()).toString()
+    }
+    string m : {
+        return (new M()).toString()
+    }
+    string a : {
+        return (new A()).toString()
+    }
+}
+
+
+////// T.lv
+
+component T < Element{
+    fn toString(){
+        return "class[T]"
+    }
+}
+
+
+////// submodule/M.lv
+
+component M < Element{
+    fn toString(){
+        return "class[M]"
+    }
+}

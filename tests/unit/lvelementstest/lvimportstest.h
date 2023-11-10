@@ -12,7 +12,6 @@ class LvImportsTest : public QObject{
 public:
     explicit LvImportsTest(QObject *parent = nullptr);
 
-
 private slots:
     void initTestCase();
 
@@ -33,6 +32,7 @@ private slots:
     void jsImportTest();
     void componentMetaTest();
     void moduleWildcardFilesTest();
+    void optionalModuleDefinitionFile();
 
 private:
     std::string scriptPath(const std::string& scriptName);

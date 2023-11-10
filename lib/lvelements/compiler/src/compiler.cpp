@@ -301,17 +301,26 @@ std::shared_ptr<ElementsModule> Compiler::compile(Ptr compiler, const std::strin
     std::string fileName = Path::name(path);
 
     Module::Ptr module(nullptr);
-    if ( Module::existsIn(modulePath) ){
-        //HERE: When making module files optional, the package must be found in parent directories
+    if ( Module::fileExistsIn(modulePath) ){ // package is now relative to the module
         module = Module::createFromPath(modulePath);
         Package::Ptr package = Package::createFromPath(module->package());
         compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
     } else {
-        module = compiler->m_d->packageGraph->createRunningModule(modulePath);
+        // find package
+        std::string packagePath = Module::findPackageFrom(modulePath);
+        if ( !packagePath.empty() ){
+            // if there's a package, create module normally, it will scan the files and find the package
+            module = Module::createFromPath(modulePath);
+            Package::Ptr package = Package::createFromPath(module->package());
+            compiler->m_d->packageGraph->loadRunningPackageAndModule(package, module);
+        } else {
+            // if there's no package, create a running module
+            module = compiler->m_d->packageGraph->createRunningModule(modulePath);
+        }
     }
 
     auto epl = engine ? ElementsModule::create(module, compiler, engine) : ElementsModule::create(module, compiler);
-    ElementsModule::addModuleFile(epl, fileName);
+    ElementsModule::addModuleFile(epl, fileName); // add file if it's not there
     epl->compile();
 
     return epl;
