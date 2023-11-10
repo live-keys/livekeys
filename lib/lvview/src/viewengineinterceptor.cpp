@@ -56,7 +56,7 @@ QUrl QmlEngineInterceptor::UrlInterceptor::intercept(const QUrl &path, QQmlAbstr
                 }
 
                 try{
-                    if ( Module::existsIn(localPath.toStdString() ) ){
+                    if ( Module::fileExistsIn(localPath.toStdString() ) ){
                         Module::Ptr module = m_engine->packageGraph()->loadModule(partsConverted);
                         if ( module != nullptr ){
                             return QUrl::fromLocalFile(QString::fromStdString(module->path() + "/qmldir"));
