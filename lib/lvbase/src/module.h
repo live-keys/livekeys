@@ -71,6 +71,8 @@ public:
 private:
     Module(const std::string& path, const std::string& filePath, const std::string& name, const std::string& package);
 
+    static bool lvFilesExistIn(const std::string& dir);
+    static std::list<std::string> scanLvFiles(const std::string& dir);
     static std::string findPackageFrom(const std::string& path);
     void addPalette(const std::string& type, const std::string& path);
 

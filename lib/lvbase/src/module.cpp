@@ -23,6 +23,7 @@
 #include "live/palettecontainer.h"
 #include "live/visuallog.h"
 #include "live/path.h"
+#include "live/directory.h"
 #include <list>
 #include <map>
 
@@ -83,7 +84,7 @@ Module::Ptr Module::createFromPath(const std::string &path){
 
     std::ifstream instream(modulePath, std::ifstream::in | std::ifstream::binary);
     if ( !instream.is_open() ){
-        THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: %").format(path), 1);
+        THROW_EXCEPTION(lv::Exception, Utf8("Cannot open file: %").format(path), lv::Exception::toCode("~file"));
     }
 
     try{
@@ -146,10 +147,25 @@ Module::Ptr Module::createFromNode(const std::string &path, const std::string &f
     }
 
     if ( m.hasKey("modules") ){
-        MLNode::ArrayType mod = m["modules"].asArray();
-        for ( auto it = mod.begin(); it != mod.end(); ++it ){
-            pt->m_d->modules.push_back(it->asString());
+        MLNode moduleDef = m["modules"];
+        if ( moduleDef.type() == MLNode::Array ){
+            MLNode::ArrayType mod = m["modules"].asArray();
+            for ( auto it = mod.begin(); it != mod.end(); ++it ){
+                pt->m_d->modules.push_back(it->asString());
+            }
+        } else if ( moduleDef.type() == MLNode::String ){
+            std::string mod = moduleDef.asString();
+            if ( mod == "*" ){
+                auto files = Module::scanLvFiles(path);
+                for ( auto it = files.begin(); it != files.end(); ++it )
+                    pt->m_d->modules.push_back(*it);
+            } else {
+                pt->m_d->modules.push_back(mod);
+            }
+        } else {
+            THROW_EXCEPTION(lv::Exception, "'modules' key expected to be array or string.", lv::Exception::toCode("~Parse"));
         }
+
     }
 
     if ( m.hasKey("libraryModules") ){
@@ -260,6 +276,29 @@ Module::Module(const std::string &path, const std::string &filePath, const std::
     m_d->name     = name;
     m_d->package  = package;
     m_d->context  = nullptr;
+}
+
+bool Module::lvFilesExistIn(const std::string &dir){
+    auto it = Directory::iterate(dir);
+    while ( !it.isEnd() ){
+        std::string path = it.path();
+        if ( Path::extension(path) == ".lv" )
+            return true;
+        it.next();
+    }
+    return false;
+}
+
+std::list<std::string> Module::scanLvFiles(const std::string &dir){
+    auto it = Directory::iterate(dir);
+    std::list<std::string> result;
+    while ( !it.isEnd() ){
+        std::string path = it.path();
+        if ( Path::extension(path) == ".lv" )
+            result.push_back(Path::baseName(path));
+        it.next();
+    }
+    return result;
 }
 
 std::string Module::findPackageFrom(const std::string& path){
