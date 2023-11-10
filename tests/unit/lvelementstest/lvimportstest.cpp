@@ -366,3 +366,33 @@ void LvImportsTest::componentMetaTest(){
     delete engine;
 }
 
+void LvImportsTest::moduleWildcardFilesTest(){
+    Compiler::Config conf;
+    conf.allowUnresolvedTypes(false);
+    Compiler::Ptr compiler = Compiler::create(conf);
+
+    Engine* engine = new Engine(compiler);
+    engine->setModuleFileType(Engine::Lv);
+
+    TestPack tp(testPath(), false);
+    tp.unpack(scriptPath("ImportTest17.lvep"));
+
+    engine->scope([engine, &tp](){
+        try{
+            engine->compiler()->setPackageImportPaths({tp.path() + "/packages"});
+            Element* main = engine->runFile(Path::join(tp.path(), "main.lv"));
+            QVERIFY(main != nullptr);
+            QVERIFY(main->get("t").toStdString(engine) == "class[T]");
+            QVERIFY(main->get("m").toStdString(engine) == "class[M]");
+            QVERIFY(main->get("a").toStdString(engine) == "class[A]");
+        } catch ( lv::Exception& e ){
+            vlog() << e.message();
+            vlog() << e.location().filePath();
+            vlog() << *e.stackTrace();
+        }
+
+    });
+
+    delete engine;
+}
+

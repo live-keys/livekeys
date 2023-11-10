@@ -113,6 +113,13 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
     Compiler::Ptr compiler = epl->m_d->compiler;
 
     std::string filePath = Path::join(epl->module()->path(), name);
+    if ( !Path::exists(filePath) ){
+        THROW_EXCEPTION(
+            lv::Exception,
+            Utf8("Module file '%' does not exit. (Defined in '%')").format(filePath, epl->module()->filePath()),
+            lv::Exception::toCode("~Module")
+        );
+    }
     std::string content = compiler->fileIO()->readFromFile(filePath);
     LanguageParser::AST* ast = compiler->parser()->parse(content);
 
