@@ -121,6 +121,7 @@ public:
     BaseNode* parent() const{ return m_parent; }
     void setParent(BaseNode* parent){ m_parent = parent; }
 
+    static std::string nodeSourceFilePath(BaseNode* node);
     static TSNode nodeChildByFieldName(const TSNode& node, const std::string& name);
     static std::vector<IdentifierNode*> fromNestedIdentifier(BaseNode* parent, const TSNode& node);
     static ParameterListNode* scanFormalParameters(BaseNode* parent, const TSNode& formalParameters);
