@@ -395,6 +395,7 @@ Compiler::Config::Config(bool fileOutput, const std::string &outputExtension, Fi
     , m_fileIO(ioInterface)
     , m_outputExtension(outputExtension)
     , m_enableJsImports(true)
+    , m_enableComponentMetaInfo(true)
     , m_allowUnresolved(true)
 {
     if ( m_fileOutput && !m_fileIO ){
