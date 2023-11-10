@@ -30,7 +30,11 @@ namespace lv{ namespace el{
 class LV_ELEMENTS_COMPILER_EXPORT LanguageQueryException : public Exception{
 
 public:
-    LanguageQueryException(const std::string& message, uint32_t offset, lv::Exception::Code code = 0);
+    LanguageQueryException(
+            const Utf8& message,
+            uint32_t offset,
+            lv::Exception::Code code = 0,
+            lv::Exception::SourceTrace& st = lv::Exception::SourceTrace());
     uint32_t offset() const{ return m_offset; }
 
 private:

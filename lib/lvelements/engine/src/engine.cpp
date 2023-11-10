@@ -539,7 +539,7 @@ JsModule::Ptr Engine::loadJsModule(const std::string &path){
     }
 
     if (result.IsNothing()) {
-        THROW_EXCEPTION(lv::Exception, "Can't instantiate module: " + path, lv::Exception::toCode("~Module"));
+        THROW_EXCEPTION(lv::Exception, Utf8("Can't instantiate module: %").format(path), lv::Exception::toCode("~Module"));
     }
 
     return jsModule;
@@ -557,7 +557,7 @@ Element *Engine::runFile(const std::string &path){
 
     ScopedValue rootValue = oa.get(this, mf->name());
     if ( !rootValue.isElement() ){
-        THROW_EXCEPTION(lv::Exception, "File needs to have a single default root item: " + path, lv::Exception::toCode("~Root"));
+        THROW_EXCEPTION(lv::Exception, Utf8("File needs to have a single default root item: %").format(path), lv::Exception::toCode("~Root"));
     }
     Element* root = rootValue.toElement(this);
 

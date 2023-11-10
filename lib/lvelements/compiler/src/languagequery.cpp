@@ -22,8 +22,12 @@ namespace lv{ namespace el{
 // LanguageQueryException
 // -----------------------------------------------------------------------------
 
-LanguageQueryException::LanguageQueryException(const std::string &message, uint32_t offset, lv::Exception::Code code)
-    : Exception(message, code)
+LanguageQueryException::LanguageQueryException(
+        const Utf8& message,
+        uint32_t offset,
+        lv::Exception::Code code,
+        lv::Exception::SourceTrace& st)
+    : Exception(message, code, st)
     , m_offset(offset)
 {
 }
@@ -93,7 +97,7 @@ LanguageQuery::Ptr LanguageQuery::create(LanguageParser::Language* language, con
 
     if ( errorType != TSQueryErrorNone ){
         ts_query_delete(query);
-        THROW_EXCEPTION(lv::el::LanguageQueryException, "Language query error.", errorType);
+        throw LanguageQueryException("Language query error.", 0, errorType, SOURCE_TRACE());
     }
 
     return LanguageQuery::Ptr(new LanguageQuery(static_cast<void*>(query)));
