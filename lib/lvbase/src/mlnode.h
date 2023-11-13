@@ -36,7 +36,7 @@ class VisualLog;
 class LV_BASE_EXPORT MLOutOfRanceException: public lv::Exception{
 public:
     /** Default contructor */
-    MLOutOfRanceException(const Utf8& message = "", lv::Exception::Code code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+    MLOutOfRanceException(const Utf8& message = "", lv::Exception::Code code = 0, const lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
         : lv::Exception(message, code, st){}
 };
 
@@ -49,7 +49,7 @@ public:
 class LV_BASE_EXPORT InvalidMLTypeException: public lv::Exception{
 public:
     /** Default contructor */
-    InvalidMLTypeException(const Utf8& message = "", lv::Exception::Code code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+    InvalidMLTypeException(const Utf8& message = "", lv::Exception::Code code = 0, const lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
         : lv::Exception(message, code, st){}
 };
 
@@ -62,7 +62,7 @@ public:
 class LV_BASE_EXPORT TypeNotSerializableException: public lv::Exception{
 public:
     /** Default constructor */
-    TypeNotSerializableException(const Utf8& message = "", int code = 0, lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+    TypeNotSerializableException(const Utf8& message = "", int code = 0, const lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
         : lv::Exception(message, code, st){}
 };
 
