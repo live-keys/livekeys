@@ -26,7 +26,7 @@ LanguageQueryException::LanguageQueryException(
         const Utf8& message,
         uint32_t offset,
         lv::Exception::Code code,
-        lv::Exception::SourceTrace& st)
+        const SourceTrace &st)
     : Exception(message, code, st)
     , m_offset(offset)
 {

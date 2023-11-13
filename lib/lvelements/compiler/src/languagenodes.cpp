@@ -379,6 +379,8 @@ void BaseNode::visit(BaseNode *parent, const TSNode &node){
         visitComponentInstanceStatement(parent, node);
     } else if ( strcmp(ts_node_type(node), "new_component_expression") == 0 ){
         visitNewComponentExpression(parent, node);
+    } else if ( strcmp(ts_node_type(node), "nested_new_component_expression") == 0 ){
+        visitNewComponentExpression(parent, node);
     } else if ( strcmp(ts_node_type(node), "arrow_function") == 0 ){
         visitArrowFunction(parent, node);
     } else if ( strcmp(ts_node_type(node), "component_body") == 0 ){

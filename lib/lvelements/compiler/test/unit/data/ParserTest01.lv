@@ -14,7 +14,7 @@ component A < Element{
 
 component B{
     fn createA(){
-        return A{}(12, 13)
+        return A.(12, 13){}
     }
 }
 
@@ -36,7 +36,7 @@ component D < Container{
         D.prototype.__initialize.call(this)
     }
 
-    A{}(12, 13)
-    A{}(14, 15)
-    A{}(16, 17)
+    A.(12, 13){}
+    A.(14, 15){}
+    A.(16, 17){}
 }

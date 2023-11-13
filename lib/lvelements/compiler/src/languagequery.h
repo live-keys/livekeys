@@ -34,7 +34,7 @@ public:
             const Utf8& message,
             uint32_t offset,
             lv::Exception::Code code = 0,
-            lv::Exception::SourceTrace& st = lv::Exception::SourceTrace());
+            const lv::Exception::SourceTrace& st = lv::Exception::SourceTrace());
     uint32_t offset() const{ return m_offset; }
 
 private:

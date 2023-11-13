@@ -39,7 +39,7 @@ public:
     SyntaxException(
             const Utf8& message = "",
             Exception::Code code = 0,
-            lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
+            const lv::Exception::SourceTrace& st = lv::Exception::SourceTrace())
         : lv::Exception(message, code, st){}
 
     int parsedLine() const;

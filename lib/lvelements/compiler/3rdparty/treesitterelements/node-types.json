@@ -176,10 +176,6 @@
         "named": true
       },
       {
-        "type": "new_component_expression",
-        "named": true
-      },
-      {
         "type": "new_expression",
         "named": true
       },
@@ -309,6 +305,10 @@
       },
       {
         "type": "meta_property",
+        "named": true
+      },
+      {
+        "type": "new_component_expression",
         "named": true
       },
       {
@@ -1583,7 +1583,7 @@
             "named": true
           },
           {
-            "type": "new_component_expression",
+            "type": "nested_new_component_expression",
             "named": true
           },
           {
@@ -4414,6 +4414,50 @@
     }
   },
   {
+    "type": "nested_new_component_expression",
+    "named": true,
+    "fields": {
+      "arguments": {
+        "multiple": false,
+        "required": false,
+        "types": [
+          {
+            "type": "arguments",
+            "named": true
+          }
+        ]
+      },
+      "constructor": {
+        "multiple": false,
+        "required": true,
+        "types": [
+          {
+            "type": "identifier",
+            "named": true
+          },
+          {
+            "type": "nested_identifier",
+            "named": true
+          }
+        ]
+      }
+    },
+    "children": {
+      "multiple": true,
+      "required": true,
+      "types": [
+        {
+          "type": "component_identifier",
+          "named": true
+        },
+        {
+          "type": "new_component_body",
+          "named": true
+        }
+      ]
+    }
+  },
+  {
     "type": "nested_type_identifier",
     "named": true,
     "fields": {
@@ -4464,7 +4508,7 @@
             "named": true
           },
           {
-            "type": "new_component_expression",
+            "type": "nested_new_component_expression",
             "named": true
           },
           {
@@ -4505,16 +4549,16 @@
           }
         ]
       },
-      "name": {
+      "constructor": {
         "multiple": false,
         "required": true,
         "types": [
           {
-            "type": "identifier",
+            "type": "nested_identifier",
             "named": true
           },
           {
-            "type": "nested_identifier",
+            "type": "primary_expression",
             "named": true
           }
         ]
