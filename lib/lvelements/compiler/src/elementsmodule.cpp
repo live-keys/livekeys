@@ -160,6 +160,13 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             }
 
             std::string importUri = epl->module()->context()->package->name() + (imp.uri == "." ? "" : imp.uri);
+            if ( importUri == epl->module()->context()->importId.data() ){
+                THROW_EXCEPTION(
+                    TracePointException,
+                    Utf8("Cannot import own module ('import %') in file '%'.").format(imp.uri, filePath),
+                    Exception::toCode("Import")
+                );
+            }
 
             try{
                 ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, importUri, epl->module(), epl->engine());
@@ -172,6 +179,13 @@ ModuleFile *ElementsModule::addModuleFile(ElementsModule::Ptr &epl, const std::s
             }
 
         } else {
+            if ( imp.uri == epl->module()->context()->importId.data() ){
+                THROW_EXCEPTION(
+                    TracePointException,
+                    Utf8("Cannot import own module ('import %') in file '%'.").format(imp.uri, filePath),
+                    Exception::toCode("Import")
+                );
+            }
             try{
                 ElementsModule::Ptr ep = Compiler::compileImportedModule(epl->m_d->compiler, it->uri, epl->module(), epl->engine());
                 if ( !ep ){
